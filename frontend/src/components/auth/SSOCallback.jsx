@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { authErrorCopy } from '../../utils/authErrorCopy';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/auth/simpleAuthService';
 import SSOConflictModal from './SSOConflictModal';
@@ -62,6 +63,7 @@ const SSOCallback = () => {
   const { t } = useTranslation('auth');
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(null);
+  const [errorCode, setErrorCode] = useState(null);
   const [processing, setProcessing] = useState(true);
   const [processingTime, setProcessingTime] = useState(0);
   const [conflictData, setConflictData] = useState(null);
@@ -105,7 +107,10 @@ const SSOCallback = () => {
         errorDescription,
         category: 'sso_callback_component',
       });
-      setError(errorDescription || 'SSO authentication failed');
+      // error_description is a URL parameter, so it is caller-controlled rather than
+      // provider-authored - it goes to the log, never onto the page.
+      setErrorCode('sso_provider_rejected');
+      setError(t('errors.sso_provider_rejected'));
       setProcessing(false);
       return;
     }
@@ -135,15 +140,8 @@ const SSOCallback = () => {
           category: 'sso_callback_component',
         });
 
-        // Handle registration disabled error
-        if (
-          result.error.includes('registration is disabled') ||
-          result.error.includes('Registration is disabled')
-        ) {
-          setError(t('sso.callback.registrationDisabled'));
-        } else {
-          setError(result.error);
-        }
+        setErrorCode(result.errorCode || null);
+        setError(result.error);
         setProcessing(false);
         return;
       }
@@ -262,6 +260,7 @@ const SSOCallback = () => {
           { replace: true }
         );
       } else {
+        setErrorCode(result.errorCode || null);
         setError(result.error || 'Failed to resolve account conflict');
         setShowConflictModal(false);
       }
@@ -311,6 +310,7 @@ const SSOCallback = () => {
       error: error.message,
       category: 'sso_callback_component',
     });
+    setErrorCode(error.errorCode || null);
     setError(error.message || 'Failed to link GitHub account');
     setShowGithubLinkModal(false);
   };
@@ -416,7 +416,7 @@ const SSOCallback = () => {
               color: 'var(--color-danger-dark)',
             }}
           >
-            {error}
+            {authErrorCopy(t, errorCode, error)}
           </div>
           <div
             style={{

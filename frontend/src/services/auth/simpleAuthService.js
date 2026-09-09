@@ -7,6 +7,13 @@ import logger from '../logger';
 import { env } from '../../config/env';
 import { isAdminRole } from '../../utils/authUtils';
 
+/** The refusal shape every auth caller reads: our text plus the code that selects it. */
+const authFailure = (errorData, fallback) => ({
+  success: false,
+  error: errorData.message || fallback,
+  errorCode: errorData.error_code || null,
+});
+
 class SimpleAuthService {
   constructor() {
     // Try to use the proxy first, fallback to direct backend
@@ -231,10 +238,10 @@ class SimpleAuthService {
           errorData,
           category: 'auth_login_failure',
         });
-        return {
-          success: false,
-          error: errorData.detail || `HTTP ${response.status}: Login failed`,
-        };
+        return authFailure(
+          errorData,
+          `HTTP ${response.status}: Login failed`
+        );
       }
 
       const data = await response.json();
@@ -609,12 +616,12 @@ class SimpleAuthService {
           category: 'sso_callback',
         });
 
-        // Handle specific SSO errors
-        if (errorData.error_code === 'REGISTRATION_DISABLED') {
-          throw new Error(errorData.message || 'Registration is disabled');
-        }
-
-        throw new Error(errorData.message || 'SSO authentication failed');
+        const error = new Error(
+          errorData.message || 'SSO authentication failed'
+        );
+        error.status = response.status;
+        error.errorCode = errorData.error_code || null;
+        throw error;
       }
 
       const data = await response.json();
@@ -675,6 +682,7 @@ class SimpleAuthService {
       return {
         success: false,
         error: error.message,
+        errorCode: error.errorCode || null,
       };
     }
   }
@@ -743,13 +751,7 @@ class SimpleAuthService {
           category: 'sso_conflict',
         });
 
-        return {
-          success: false,
-          error:
-            errorData.detail?.message ||
-            errorData.detail ||
-            'Failed to resolve account conflict',
-        };
+        return authFailure(errorData, 'Failed to resolve account conflict');
       }
 
       const data = await response.json();

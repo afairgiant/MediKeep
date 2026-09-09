@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.activity_logging import safe_log_activity
 from app.api.deps import UnauthorizedException
+from app.core.http.auth_codes import AuthErrorCode
 from app.auth.sso.exceptions import *
 from app.core.config import settings
 from app.core.http.error_handling import MedicalRecordsAPIException
@@ -279,10 +280,10 @@ async def initiate_sso_login(
             ),
             headers={
                 **headers,
-                # X-Error-Code lets a client distinguish this from the generic SSO
-                # failures without matching on the message text. Nothing reads it
-                # yet - the frontend consumer arrives in a later PR.
-                "X-Error-Code": "sso_rate_limited",
+                # http_exception_handler copies this into the body's error_code,
+                # which is what clients branch on. Also exposed via CORS
+                # (main.py) so the header itself stays readable.
+                "X-Error-Code": AuthErrorCode.SSO_RATE_LIMITED,
             },
         )
 
@@ -316,7 +317,11 @@ async def initiate_sso_login(
             endpoint="/api/v1/auth/sso/initiate",
             return_url=return_url[:_LOGGED_RETURN_URL_CHARS],
         )
-        raise HTTPException(status_code=400, detail="Invalid return URL")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid return URL",
+            headers={"X-Error-Code": AuthErrorCode.SSO_INVALID_RETURN_URL},
+        )
 
     try:
         result = await sso_service.get_authorization_url(return_url)
@@ -325,7 +330,11 @@ async def initiate_sso_login(
         log_security_event(
             logger, "sso_config_error", request, "SSO configuration error", error=str(e)
         )
-        raise HTTPException(status_code=400, detail="SSO configuration error")
+        raise HTTPException(
+            status_code=400,
+            detail="SSO configuration error",
+            headers={"X-Error-Code": AuthErrorCode.SSO_CONFIGURATION_ERROR},
+        )
     except (MedicalRecordsAPIException, HTTPException):
         # Same guard the three login endpoints carry. This endpoint has no typed
         # raise inside the try today - the return_url check sits above it precisely
@@ -335,7 +344,9 @@ async def initiate_sso_login(
     except Exception as e:
         log_endpoint_error(logger, request, "Failed to initiate SSO", e)
         raise HTTPException(
-            status_code=500, detail="Failed to start SSO authentication"
+            status_code=500,
+            detail="Failed to start SSO authentication",
+            headers={"X-Error-Code": AuthErrorCode.SSO_INITIATE_FAILED},
         )
 
 
@@ -386,6 +397,9 @@ async def sso_callback(
         raise HTTPException(
             status_code=403,
             detail="Registration is currently disabled. Please contact an administrator.",
+            headers={
+                "X-Error-Code": e.error_code or AuthErrorCode.REGISTRATION_DISABLED
+            },
         )
     except SSOAuthenticationError as e:
         log_security_event(
@@ -395,7 +409,13 @@ async def sso_callback(
             "SSO authentication failed",
             error=str(e),
         )
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=e.message,
+            headers={
+                "X-Error-Code": e.error_code or AuthErrorCode.SSO_AUTHENTICATION_FAILED
+            },
+        )
     except (MedicalRecordsAPIException, HTTPException):
         # A typed response is a deliberate answer, not a failure. Without this the
         # broad handler below swallows it: _check_user_active raises
@@ -406,7 +426,11 @@ async def sso_callback(
         raise
     except Exception as e:
         log_endpoint_error(logger, req, "Unexpected error in SSO callback", e)
-        raise HTTPException(status_code=500, detail="SSO authentication failed")
+        raise HTTPException(
+            status_code=500,
+            detail="SSO authentication failed",
+            headers={"X-Error-Code": AuthErrorCode.SSO_AUTHENTICATION_FAILED},
+        )
 
 
 @router.post("/resolve-conflict")
@@ -437,7 +461,13 @@ async def resolve_account_conflict(
             "SSO conflict resolution failed",
             error=str(e),
         )
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=e.message,
+            headers={
+                "X-Error-Code": e.error_code or AuthErrorCode.SSO_AUTHENTICATION_FAILED
+            },
+        )
     except (MedicalRecordsAPIException, HTTPException):
         # See /callback - a deactivated user's 401 must not become a 500.
         raise
@@ -445,7 +475,11 @@ async def resolve_account_conflict(
         log_endpoint_error(
             logger, req, "Unexpected error in SSO conflict resolution", e
         )
-        raise HTTPException(status_code=500, detail="SSO conflict resolution failed")
+        raise HTTPException(
+            status_code=500,
+            detail="SSO conflict resolution failed",
+            headers={"X-Error-Code": AuthErrorCode.SSO_CONFLICT_RESOLUTION_FAILED},
+        )
 
 
 @router.post("/resolve-github-link")
@@ -483,7 +517,13 @@ async def resolve_github_manual_link(
             error=str(e),
             username=request.username,
         )
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=e.message,
+            headers={
+                "X-Error-Code": e.error_code or AuthErrorCode.SSO_AUTHENTICATION_FAILED
+            },
+        )
     except (MedicalRecordsAPIException, HTTPException):
         # See /callback - a deactivated user's 401 must not become a 500.
         raise
@@ -495,7 +535,11 @@ async def resolve_github_manual_link(
             e,
             username=request.username,
         )
-        raise HTTPException(status_code=500, detail="GitHub manual linking failed")
+        raise HTTPException(
+            status_code=500,
+            detail="GitHub manual linking failed",
+            headers={"X-Error-Code": AuthErrorCode.SSO_GITHUB_LINK_FAILED},
+        )
 
 
 @router.post("/test-connection")

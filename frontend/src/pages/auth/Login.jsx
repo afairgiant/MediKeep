@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { authErrorCopy } from '../../utils/authErrorCopy';
 import { useAuth } from '../../contexts/AuthContext';
 import { notifyError } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
@@ -41,11 +42,18 @@ const Login = () => {
   const [ssoLoading, setSSOLoading] = useState(false);
   const [configLoaded, setConfigLoaded] = useState(false);
   const [configError, setConfigError] = useState(false);
+  const [registrationMessageCode, setRegistrationMessageCode] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, error, clearError, isAuthenticated, sessionEndedReason } =
-    useAuth();
+  const {
+    login,
+    error,
+    errorCode,
+    clearError,
+    isAuthenticated,
+    sessionEndedReason,
+  } = useAuth();
   const { t } = useTranslation(['auth', 'common', 'shared']);
 
   // Where to go after signing in, and why the user is here at all.
@@ -213,6 +221,7 @@ const Login = () => {
         if (!failed) {
           setRegistrationEnabled(status.registration_enabled);
           setRegistrationMessage(status.message || '');
+          setRegistrationMessageCode(status.message_code || '');
           setSSOConfig(config);
           setConfigError(false);
           setConfigLoaded(true);
@@ -382,7 +391,11 @@ const Login = () => {
           </div>
         )}
 
-        {error && <div className={styles.errorMessage}>{error}</div>}
+        {error && (
+          <div className={styles.errorMessage}>
+            {authErrorCopy(t, errorCode, error)}
+          </div>
+        )}
 
         {passwordFormVisible && (
           <form onSubmit={handleSubmit}>
@@ -533,7 +546,11 @@ const Login = () => {
               </button>
             ) : (
               <div className={styles.registrationDisabledMessage}>
-                {registrationMessage || t('login.registrationDisabled')}
+                {authErrorCopy(
+                  t,
+                  registrationMessageCode,
+                  registrationMessage || t('login.registrationDisabled')
+                )}
               </div>
             )}
           </div>

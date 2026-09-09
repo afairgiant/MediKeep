@@ -6,6 +6,7 @@ from typing import Dict, Optional
 import httpx
 from sqlalchemy.orm import Session
 
+from app.core.http.auth_codes import AuthErrorCode
 from app.auth.sso.exceptions import *
 from app.auth.sso.providers import create_sso_provider
 from app.core.config import settings
@@ -149,7 +150,9 @@ class SSOService:
     ) -> Dict[str, str]:
         """Generate OAuth authorization URL"""
         if not settings.SSO_ENABLED:
-            raise SSOConfigurationError("SSO is not enabled")
+            raise SSOConfigurationError(
+                "SSO is not enabled", error_code=AuthErrorCode.SSO_NOT_ENABLED
+            )
 
         # Generate CSRF state token
         state = secrets.token_urlsafe(32)
@@ -163,7 +166,10 @@ class SSOService:
             auth_url = provider.get_auth_url(state)
         except Exception as e:
             logger.error(f"Failed to generate SSO auth URL: {str(e)}")
-            raise SSOAuthenticationError("Failed to start SSO authentication")
+            raise SSOAuthenticationError(
+                "Failed to start SSO authentication",
+                error_code=AuthErrorCode.SSO_INITIATE_FAILED,
+            )
 
         _store_state_entry(state, {"return_url": return_url})
 
@@ -194,7 +200,10 @@ class SSOService:
                     "error": str(e),
                 },
             )
-            raise SSOAuthenticationError("SSO provider configuration error")
+            raise SSOAuthenticationError(
+                "SSO provider configuration error",
+                error_code=AuthErrorCode.SSO_CONFIGURATION_ERROR,
+            )
 
         # Exchange code for token (OAuth codes are single-use, no retry!)
         try:
@@ -209,7 +218,10 @@ class SSOService:
                     "error": error_detail,
                 },
             )
-            raise SSOAuthenticationError(f"Token exchange failed: {error_detail}")
+            raise SSOAuthenticationError(
+                "Token exchange with the identity provider failed",
+                error_code=AuthErrorCode.SSO_TOKEN_EXCHANGE_FAILED,
+            )
 
         # Get user information from provider
         try:
@@ -220,7 +232,8 @@ class SSOService:
                 extra={"category": "sso", "event": "user_info_failed", "error": str(e)},
             )
             raise SSOAuthenticationError(
-                "Failed to retrieve user info from SSO provider"
+                "Failed to retrieve user info from SSO provider",
+                error_code=AuthErrorCode.SSO_USERINFO_FAILED,
             )
 
         # Validate email domain if configured
@@ -228,10 +241,12 @@ class SSOService:
             if not user_info.email:
                 raise SSOAuthenticationError(
                     "This provider account does not share an email address, and "
-                    "this instance only accepts specific email domains."
+                    "this instance only accepts specific email domains.",
+                    error_code=AuthErrorCode.SSO_NO_EMAIL_DOMAIN_RESTRICTED,
                 )
             raise SSOAuthenticationError(
-                f"Email domain not allowed: {user_info.email.split('@')[1]}"
+                f"Email domain not allowed: {user_info.email.split('@')[1]}",
+                error_code=AuthErrorCode.EMAIL_DOMAIN_NOT_ALLOWED,
             )
 
         # Find or create user
@@ -248,7 +263,10 @@ class SSOService:
                     "error": str(e),
                 },
             )
-            raise SSOAuthenticationError("Failed to create or link user account")
+            raise SSOAuthenticationError(
+                "Failed to create or link user account",
+                error_code=AuthErrorCode.SSO_ACCOUNT_LINK_FAILED,
+            )
 
         # Log success (handle regular, conflict and manual-link responses)
         if result.get("conflict"):
@@ -289,12 +307,17 @@ class SSOService:
         ``/auth/sso/initiate`` was given.
         """
         if state not in _state_storage:
-            raise SSOAuthenticationError("Invalid or expired state parameter")
+            raise SSOAuthenticationError(
+                "Invalid or expired state parameter",
+                error_code=AuthErrorCode.SSO_STATE_INVALID,
+            )
 
         state_data = _state_storage[state]
         if datetime.utcnow() > state_data["expires_at"]:
             del _state_storage[state]
-            raise SSOAuthenticationError("State parameter expired")
+            raise SSOAuthenticationError(
+                "State parameter expired", error_code=AuthErrorCode.SSO_STATE_EXPIRED
+            )
 
         del _state_storage[state]
         return state_data
@@ -480,7 +503,8 @@ class SSOService:
             )
             raise SSORegistrationBlockedError(
                 "New user registration is currently disabled. "
-                "Please contact an administrator to create an account."
+                "Please contact an administrator to create an account.",
+                error_code=AuthErrorCode.REGISTRATION_DISABLED,
             )
 
         # Create new user from SSO
@@ -604,19 +628,28 @@ class SSOService:
         # Retrieve conflict data
         conflict_key = f"sso_conflict_{temp_token}"
         if conflict_key not in _state_storage:
-            raise SSOAuthenticationError("Invalid or expired conflict resolution token")
+            raise SSOAuthenticationError(
+                "Invalid or expired conflict resolution token",
+                error_code=AuthErrorCode.SSO_CONFLICT_TOKEN_INVALID,
+            )
 
         conflict_data = _state_storage[conflict_key]
 
         # Check if token is expired
         if datetime.utcnow() > conflict_data["expires_at"]:
             del _state_storage[conflict_key]
-            raise SSOAuthenticationError("Conflict resolution token expired")
+            raise SSOAuthenticationError(
+                "Conflict resolution token expired",
+                error_code=AuthErrorCode.SSO_CONFLICT_TOKEN_EXPIRED,
+            )
 
         # Get existing user
         existing_user = user_crud.get(db, id=conflict_data["existing_user_id"])
         if not existing_user:
-            raise SSOAuthenticationError("Existing user not found")
+            raise SSOAuthenticationError(
+                "Existing user not found",
+                error_code=AuthErrorCode.SSO_CONFLICT_USER_NOT_FOUND,
+            )
 
         # Save user's preference for future logins
         existing_user.sso_linking_preference = preference
@@ -660,7 +693,8 @@ class SSOService:
             return result
 
         raise SSOAuthenticationError(
-            "Invalid action. Must be 'link' or 'create_separate'"
+            "Invalid action. Must be 'link' or 'create_separate'",
+            error_code=AuthErrorCode.SSO_CONFLICT_INVALID_ACTION,
         )
 
     def resolve_github_manual_link(
@@ -672,24 +706,36 @@ class SSOService:
         # Retrieve GitHub linking data
         github_key = f"github_manual_link_{temp_token}"
         if github_key not in _state_storage:
-            raise SSOAuthenticationError("Invalid or expired GitHub linking token")
+            raise SSOAuthenticationError(
+                "Invalid or expired GitHub linking token",
+                error_code=AuthErrorCode.SSO_GITHUB_TOKEN_INVALID,
+            )
 
         github_data = _state_storage[github_key]
 
         # Check if token is expired
         if datetime.utcnow() > github_data["expires_at"]:
             del _state_storage[github_key]
-            raise SSOAuthenticationError("GitHub linking token expired")
+            raise SSOAuthenticationError(
+                "GitHub linking token expired",
+                error_code=AuthErrorCode.SSO_GITHUB_TOKEN_EXPIRED,
+            )
 
         # Find user by username
         existing_user = user_crud.get_by_username(db, username=username)
         if not existing_user:
-            raise SSOAuthenticationError("Invalid username or password")
+            raise SSOAuthenticationError(
+                "Invalid username or password",
+                error_code=AuthErrorCode.INVALID_CREDENTIALS,
+            )
 
         # Verify password. The column is password_hash - User has no `password`
         # attribute, and reading one raised AttributeError on every manual link.
         if not verify_password(password, str(existing_user.password_hash)):
-            raise SSOAuthenticationError("Invalid username or password")
+            raise SSOAuthenticationError(
+                "Invalid username or password",
+                error_code=AuthErrorCode.INVALID_CREDENTIALS,
+            )
 
         # Link the GitHub account to the existing user
         sso_info = github_data["sso_user_info"]

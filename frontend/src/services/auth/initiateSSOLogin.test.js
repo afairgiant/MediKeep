@@ -25,19 +25,7 @@ import { authService } from './simpleAuthService';
  * password form to fall back to and an unhandled throttle is a blank page.
  */
 
-/** The envelope app/core/http/error_handling.py actually produces. */
-const errorResponse = (status, body = {}, headers = {}) => {
-  const lookup = new Map(
-    Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v])
-  );
-  return {
-    ok: false,
-    status,
-    statusText: 'Error',
-    headers: { get: name => lookup.get(name.toLowerCase()) ?? null },
-    json: async () => body,
-  };
-};
+import { errorResponse } from '../../test-utils/i18nKeyMock';
 
 const okResponse = body => ({
   ok: true,
