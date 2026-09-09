@@ -75,6 +75,7 @@ function authReducer(state, action) {
         isAuthenticated: true,
         isLoading: false,
         error: null,
+        errorCode: null,
         lastActivity: Date.now(),
         sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 120,
         mustChangePassword: action.payload.mustChangePassword || false,

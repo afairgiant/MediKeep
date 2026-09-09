@@ -114,9 +114,9 @@ the body: it is populated for every error, typed or not. The header is also expo
 CORS (`app/main.py`) and carries the code only for those bare-`HTTPException` sites.
 
 **Provider-supplied text is never one of these.** Text the identity provider wrote is
-logged server-side and never serialized into our `message`. Where it reaches the browser
-at all, it arrives as the OAuth `error_description` query parameter on `/sso/callback`,
-which the UI renders under its own attributed heading rather than as one of our sentences.
+logged server-side and never serialized into our `message`. It reaches the browser only as
+the OAuth `error_description` query parameter on `/sso/callback`, which anyone who can hand
+a user a link controls, so the UI logs it and renders `sso_provider_rejected` instead.
 
 ---
 

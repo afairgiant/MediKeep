@@ -11,9 +11,8 @@ import render from '../../test-utils/render';
  * German resource: a known code renders German, an unknown one falls back to the
  * server text rather than to a missing-key placeholder.
  *
- * The provider case is separate on purpose. Text the identity provider wrote cannot
- * be translated and must not be presented as one of our sentences, so it is shown
- * under its own attributed heading.
+ * error_description reaches this page as a URL parameter, so anyone who can hand a
+ * user a link controls it. It must never reach the rendered page.
  */
 
 const { KEYS } = vi.hoisted(() => ({
@@ -21,7 +20,6 @@ const { KEYS } = vi.hoisted(() => ({
     'errors.registration_disabled': 'Registrierung ist deaktiviert.',
     'errors.sso_state_expired': 'Diese Anmeldung ist abgelaufen.',
     'errors.sso_provider_rejected': 'Ihr Anbieter hat die Anmeldung abgelehnt.',
-    'errors.providerDetailLabel': 'Meldung von Ihrem Identitaetsanbieter',
   },
 }));
 
@@ -118,28 +116,23 @@ describe('SSO callback error copy', () => {
     expect(await screen.findByText('no code supplied')).toBeInTheDocument();
   });
 
-  test('provider text is attributed to the provider, not adopted as ours', async () => {
+  test('url-supplied error_description never reaches the page', async () => {
     searchParams = new URLSearchParams({
       error: 'access_denied',
-      error_description: 'The user denied the request',
+      error_description: 'Call 555-0100 to verify your account',
     });
 
     render(<SSOCallback />);
 
-    // Our explanation of what happened...
     expect(
       await screen.findByText(KEYS['errors.sso_provider_rejected'])
     ).toBeInTheDocument();
-    // ...and theirs, under a heading saying whose it is.
     expect(
-      screen.getByText(KEYS['errors.providerDetailLabel'])
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('The user denied the request')
-    ).toBeInTheDocument();
+      screen.queryByText('Call 555-0100 to verify your account')
+    ).not.toBeInTheDocument();
   });
 
-  test('no provider block renders when the provider said nothing', async () => {
+  test('provider rejection renders our copy with no description present', async () => {
     searchParams = new URLSearchParams({ error: 'access_denied' });
 
     render(<SSOCallback />);
@@ -147,8 +140,5 @@ describe('SSO callback error copy', () => {
     expect(
       await screen.findByText(KEYS['errors.sso_provider_rejected'])
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText(KEYS['errors.providerDetailLabel'])
-    ).not.toBeInTheDocument();
   });
 });
