@@ -11,7 +11,7 @@ from app.core.database.database import (
 from app.core.database.migrations import run_startup_data_migrations
 from app.core.events import get_event_registry, setup_event_system
 from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
+from app.core.logging.constants import LogFields, sanitize_log_input
 from app.core.utils.datetime_utils import set_application_startup_time
 from app.services.notification_handlers import create_notification_handler
 
@@ -29,6 +29,45 @@ def _emit_auth_mode_warnings(db=None):
             message,
             extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
         )
+
+
+def _log_client_ip_resolution():
+    """Log which peers this instance believes forwarded headers from.
+
+    The default trusts private ranges, so a directly exposed container whose callers
+    arrive as a Docker bridge address is trusting more than its operator may think.
+    Nothing else in the app would say so.
+    """
+    for entry in settings.TRUSTED_PROXY_PARSE_ERRORS:
+        # Echoed so the operator can see which entry was rejected, but bounded: a
+        # legitimate address or CIDR fits well inside this, and a value pasted here
+        # by mistake should not reach the log in full.
+        rejected = sanitize_log_input(entry, max_length=64)
+        logger.warning(
+            f"Ignoring unreadable TRUSTED_PROXY_IPS entry {rejected!r}. Expected an "
+            "address or CIDR (10.0.0.0/8, 192.168.1.5, fd00::/8). Requests from "
+            "that peer will key off its socket address.",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "trusted_proxy_entry_unreadable",
+            },
+        )
+
+    configured = bool(settings.TRUSTED_PROXY_IPS.strip())
+    source = "TRUSTED_PROXY_IPS" if configured else "private ranges (default)"
+    trusted = len(settings.TRUSTED_PROXY_NETWORKS)
+
+    logger.info(
+        f"Client IP resolution: forwarded headers honored from {source}, "
+        f"{trusted} network(s). Set TRUSTED_PROXY_IPS to pin your proxy, or "
+        "'none' to ignore these headers entirely.",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "client_ip_resolution_configured",
+            "trusted_proxy_source": source,
+            "trusted_proxies": trusted,
+        },
+    )
 
 
 def _log_effective_auth_mode():
@@ -131,6 +170,7 @@ async def startup_event():
         # override the env value, so the env value is the one in force.
         _emit_auth_mode_warnings()
         _log_effective_auth_mode()
+        _log_client_ip_resolution()
         logger.info("⏭️ Skipping database operations (test mode)")
         logger.info("Application startup completed (test mode)")
         return
@@ -208,6 +248,7 @@ async def startup_event():
     try:
         _emit_auth_mode_warnings(db)
         _log_effective_auth_mode()
+        _log_client_ip_resolution()
     finally:
         if db is not None:
             db.close()

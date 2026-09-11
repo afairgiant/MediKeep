@@ -7,6 +7,7 @@ from app.api import deps
 from app.api.activity_logging import log_delete, log_update
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_error, log_security_event
+from app.core.utils.client_ip import get_client_ip
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import EntityType
@@ -71,7 +72,7 @@ def delete_current_user_account(
     WARNING: This action cannot be undone!
     """
     deletion_service = UserDeletionService()
-    user_ip = request.client.host if request.client else "unknown"
+    user_ip = get_client_ip(request)
 
     try:
         # Get user info for logging before deletion

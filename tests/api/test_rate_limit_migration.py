@@ -62,7 +62,8 @@ class TestSystemLogLevelStillRateLimits:
 
         assert "rate_limit_info" in body
 
-    def test_limits_are_per_ip(self, client: TestClient, system_limit):
+    def test_limits_are_per_ip(self, behind_trusted_proxy, system_limit):
+        client = behind_trusted_proxy
         system_limit(1)
         client.get(LOG_LEVEL_URL, headers={"X-Forwarded-For": "198.51.100.30"})
 

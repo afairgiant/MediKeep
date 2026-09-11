@@ -2,6 +2,7 @@
 Shared fixtures for API tests.
 """
 
+import ipaddress
 import secrets
 from datetime import date, timedelta
 
@@ -9,6 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.crud.patient import patient as patient_crud
 from app.crud.user import user as user_crud
 from app.models.models import User
@@ -28,6 +30,22 @@ def clean_sso_state():
     _state_storage.clear()
     yield
     _state_storage.clear()
+
+
+@pytest.fixture
+def behind_trusted_proxy(client: TestClient, monkeypatch):
+    """Make the test client's peer a proxy the app trusts.
+
+    Rate limits key off the resolved address, and the resolver reads forwarded
+    headers only from a trusted peer - so a test that proves per-IP bucketing by
+    sending X-Forwarded-For has to say which peer is entitled to send it. The
+    address lives on the transport, which is what builds each request's scope.
+    """
+    monkeypatch.setattr(
+        settings, "TRUSTED_PROXY_NETWORKS", [ipaddress.ip_network("127.0.0.0/8")]
+    )
+    monkeypatch.setattr(client._transport, "client", ("127.0.0.1", 50000))
+    return client
 
 
 @pytest.fixture

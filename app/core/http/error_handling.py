@@ -39,6 +39,7 @@ from app.core.http.response_models import (
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_error, log_security_event
+from app.core.utils.client_ip import get_client_ip
 
 # Initialize logger for error handling
 logger = get_logger(__name__, "app")
@@ -182,7 +183,7 @@ class MedicalRecordsAPIException(APIException):
                 **extra_data,
             }
             if request and request.client:
-                log_extra[LogFields.IP] = request.client.host
+                log_extra[LogFields.IP] = get_client_ip(request)
             logger.info(f"Exception: {self.message}", extra=log_extra)
 
 
@@ -454,7 +455,7 @@ def create_enhanced_validation_error_handler():
         Enhanced handler for Pydantic validation errors (422) with detailed feedback.
         Maintains the same detailed error processing as the original handler.
         """
-        user_ip = request.client.host if request.client else "unknown"
+        user_ip = get_client_ip(request)
 
         # Log the validation error with structured logging
         logger.warning(
@@ -552,7 +553,7 @@ def create_fallback_exception_handler():
         """
         Fallback handler for unhandled exceptions with detailed logging.
         """
-        user_ip = request.client.host if request.client else "unknown"
+        user_ip = get_client_ip(request)
         tb = traceback.format_exc()
 
         # Log comprehensive error information
@@ -643,7 +644,7 @@ def setup_error_handling(app: FastAPI):
             extra={
                 LogFields.CATEGORY: "app",
                 LogFields.EVENT: "http_exception",
-                LogFields.IP: request.client.host if request.client else "unknown",
+                LogFields.IP: get_client_ip(request),
                 "url_path": str(request.url.path),
                 "method": request.method,
                 "status_code": exc.status_code,

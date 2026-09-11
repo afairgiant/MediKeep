@@ -19,8 +19,9 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
 )
+from app.core.utils.client_ip import get_client_ip
 from app.core.utils.cookie_auth import set_auth_cookie
-from app.core.utils.rate_limit import SlidingWindowRateLimiter, get_client_ip
+from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.core.utils.return_url import is_safe_return_url
 from app.core.utils.security import create_access_token
 from app.crud.user_preferences import user_preferences

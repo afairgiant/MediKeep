@@ -6,7 +6,6 @@ from jose import JWTError, jwt
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.system import get_client_ip
 from app.core.config import settings
 from app.core.database.database import get_db
 from app.core.http.error_handling import (
@@ -23,6 +22,7 @@ from app.core.http.error_handling import (
 from app.core.http.response_models import ExceptionCode
 from app.core.logging.config import get_logger, log_security_event
 from app.core.logging.constants import LogFields, sanitize_log_input
+from app.core.utils.client_ip import get_client_ip
 from app.core.utils.cookie_auth import get_token_from_cookie
 from app.crud.user import user
 from app.models.models import User

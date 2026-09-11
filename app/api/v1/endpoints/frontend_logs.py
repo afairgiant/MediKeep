@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
+from app.core.utils.client_ip import get_client_ip
 
 router = APIRouter()
 
@@ -78,9 +79,7 @@ def log_frontend_event(
     Accepts log entries from the React frontend and processes them
     through the appropriate logging channels.
     """
-    user_ip = (
-        getattr(request.client, "host", "unknown") if request.client else "unknown"
-    )
+    user_ip = get_client_ip(request)
 
     # Prepare log data with additional context
     log_context = {
@@ -165,9 +164,7 @@ def log_frontend_error(
 
     Specifically designed for React error boundaries and unhandled errors.
     """
-    user_ip = (
-        getattr(request.client, "host", "unknown") if request.client else "unknown"
-    )
+    user_ip = get_client_ip(request)
 
     error_context = {
         LogFields.CATEGORY: "frontend",
@@ -214,9 +211,7 @@ def log_user_action(
 
     Tracks user interactions with the medical records system.
     """
-    user_ip = (
-        getattr(request.client, "host", "unknown") if request.client else "unknown"
-    )
+    user_ip = get_client_ip(request)
 
     action_context = {
         LogFields.CATEGORY: "frontend",

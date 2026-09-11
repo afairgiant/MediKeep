@@ -108,7 +108,8 @@ class TestInitiateRateLimit:
         assert response.status_code == 429
         assert len(_state_storage) == 1
 
-    def test_limits_are_per_ip(self, client: TestClient, sso_working, limit_of):
+    def test_limits_are_per_ip(self, behind_trusted_proxy, sso_working, limit_of):
+        client = behind_trusted_proxy
         limit_of(1)
         client.post(INITIATE_URL, headers={"X-Forwarded-For": "198.51.100.1"})
 
@@ -121,6 +122,17 @@ class TestInitiateRateLimit:
 
         assert exhausted.status_code == 429
         assert other_ip.status_code == 200
+
+    def test_a_forged_ip_cannot_buy_a_fresh_bucket(
+        self, client: TestClient, sso_working, limit_of
+    ):
+        """The test client's peer is no proxy of ours, so the header is noise."""
+        limit_of(1)
+        client.post(INITIATE_URL, headers={"X-Forwarded-For": "198.51.100.1"})
+
+        forged = client.post(INITIATE_URL, headers={"X-Forwarded-For": "198.51.100.2"})
+
+        assert forged.status_code == 429
 
     def test_window_reset_allows_the_next_request(
         self, client: TestClient, sso_working, limit_of

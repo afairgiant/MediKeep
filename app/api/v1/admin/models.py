@@ -25,6 +25,7 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.core.utils.datetime_utils import convert_date_fields, convert_datetime_fields
+from app.core.utils.client_ip import get_client_ip
 from app.crud import (
     allergy,
     condition,
@@ -2074,7 +2075,7 @@ def admin_reset_password(
 
     Requires admin privileges.
     """
-    user_ip = request.client.host if request.client else "unknown"
+    user_ip = get_client_ip(request)
 
     # Get the target user
     target_user = user.get(db, id=user_id)

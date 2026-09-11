@@ -96,6 +96,9 @@
   <Config Name="SSO Rate Limit Window Minutes" Target="SSO_RATE_LIMIT_WINDOW_MINUTES" Default="10"
     Mode="" Description="Length of the rate limit window in minutes." Type="Variable"
     Display="advanced" Required="false" Mask="false">10</Config>
+  <Config Name="Trusted Proxy IPs" Target="TRUSTED_PROXY_IPS" Default="" Mode=""
+    Description="Peers whose X-Forwarded-For / X-Real-IP headers this container believes, comma-separated addresses or CIDRs. Leave empty for the default, which trusts the private ranges a reverse proxy connects from (Nginx Proxy Manager, SWAG, Traefik, Caddy) and ignores the header from anywhere else. Pin an address to trust only that proxy, or set none to ignore these headers entirely - the right choice if you publish this container's port directly to the internet."
+    Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
   <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID" Type="Variable"
     Display="advanced" Required="false" Mask="false">99</Config>
   <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID" Type="Variable"

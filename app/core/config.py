@@ -1,4 +1,5 @@
 import hashlib
+import ipaddress
 import json
 import logging
 import os
@@ -159,6 +160,81 @@ def _strict_bool(name: str, default: bool = False) -> bool:
 
     _AUTH_FLAG_PARSE_ERRORS[name] = raw
     return default
+
+
+# Edge addresses of CDNs that sit in front of a deployment's own reverse proxy.
+# These are *skipped* while walking a forwarded chain, so the visitor behind them
+# is found - never trusted as a peer, because a request arriving directly from one
+# is someone else's Cloudflare account pointed at this origin.
+#
+# Cloudflare, from cloudflare.com/ips-v4 and /ips-v6 (fetched 2026-09-11). A range
+# added upstream after that date is not recognized until this list is updated: the
+# symptom is a Cloudflare address in the logs instead of the visitor's, and the
+# operator's fix is to add it to TRUSTED_PROXY_IPS.
+_CDN_FORWARDERS = (
+    "173.245.48.0/20",
+    "103.21.244.0/22",
+    "103.22.200.0/22",
+    "103.31.4.0/22",
+    "141.101.64.0/18",
+    "108.162.192.0/18",
+    "190.93.240.0/20",
+    "188.114.96.0/20",
+    "197.234.240.0/22",
+    "198.41.128.0/17",
+    "162.158.0.0/15",
+    "104.16.0.0/13",
+    "104.24.0.0/14",
+    "172.64.0.0/13",
+    "131.0.72.0/22",
+    "2400:cb00::/32",
+    "2606:4700::/32",
+    "2803:f800::/32",
+    "2405:b500::/32",
+    "2405:8100::/32",
+    "2a06:98c0::/29",
+    "2c0f:f248::/32",
+)
+
+# Believed when TRUSTED_PROXY_IPS is unset: loopback, the RFC1918 ranges a Docker
+# network hands a reverse proxy, and IPv6 unique-local. A caller on the public
+# internet cannot arrive from one of these, so the addresses they claim are ignored.
+_DEFAULT_TRUSTED_PROXIES = (
+    "127.0.0.0/8",
+    "::1/128",
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16",
+    "fd00::/8",
+)
+
+
+def _parse_trusted_proxies(raw: str) -> tuple[list, list[str]]:
+    """Parse a comma-separated list of proxy IPs/CIDRs into networks and rejects.
+
+    Unset yields the private-range defaults; ``none`` trusts nothing. Returns
+    (networks, unparseable entries) and never raises: an entry this cannot read is
+    dropped rather than trusted, and startup reports it.
+    """
+    value = raw.strip()
+    if not value:
+        return [ipaddress.ip_network(net) for net in _DEFAULT_TRUSTED_PROXIES], []
+    if value.lower() == "none":
+        return [], []
+
+    networks = []
+    rejected = []
+
+    for entry in value.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(entry, strict=False))
+        except ValueError:
+            rejected.append(entry)
+
+    return networks, rejected
 
 
 class Settings:  # App Info
@@ -331,6 +407,25 @@ class Settings:  # App Info
     # than a module global so it is patchable like every other setting, and read
     # after them so the class body has finished populating it.
     AUTH_FLAG_PARSE_ERRORS: dict = dict(_AUTH_FLAG_PARSE_ERRORS)
+
+    # Peers whose X-Forwarded-For / X-Real-IP this app believes. Comma-separated
+    # addresses or CIDRs; a bare address is its own /32 or /128. Unset trusts the
+    # private ranges above; "none" trusts nothing.
+    #
+    # The default keeps a proxied deployment working as it always has while ignoring
+    # headers from anyone on the public internet - who could otherwise pick their own
+    # rate-limit bucket and write their own address into the security log. It does
+    # not help the one shape where the peer only looks private: a container exposed
+    # directly through Docker's userland proxy, where every caller arrives as the
+    # bridge gateway. Set this explicitly there. Startup says which is in force.
+    TRUSTED_PROXY_IPS: str = os.getenv("TRUSTED_PROXY_IPS", "")
+    TRUSTED_PROXY_NETWORKS, TRUSTED_PROXY_PARSE_ERRORS = _parse_trusted_proxies(
+        TRUSTED_PROXY_IPS
+    )
+
+    # Hops to skip while walking a chain - see _CDN_FORWARDERS. Not operator-facing:
+    # another CDN goes in TRUSTED_PROXY_IPS, which is the stronger grant of the two.
+    CDN_FORWARDER_NETWORKS = [ipaddress.ip_network(net) for net in _CDN_FORWARDERS]
 
     # Paperless-ngx Integration Configuration
     PAPERLESS_REQUEST_TIMEOUT: int = int(

@@ -504,9 +504,9 @@ reset when the container restarts.
 
 Two consequences worth knowing before tuning these:
 
-- Behind a reverse proxy that does not set `X-Forwarded-For` or `X-Real-IP`, every
-  request resolves to the proxy's address and shares a single bucket. Set those
-  headers on your proxy.
+- The limit is per client address, which behind a reverse proxy means the address
+  the proxy reports in `X-Forwarded-For` — believed by default only from a proxy on
+  a private network. See [Trusted Proxy Configuration](#trusted-proxy-configuration).
 - Each sign-in attempt is one attempt against the limit. With `SSO_AUTO_REDIRECT` on,
   an unauthenticated page load starts one without anyone clicking anything, so a
   household or CGNAT range sharing one address can plausibly reach the limit. The
@@ -625,6 +625,57 @@ SSO_CLIENT_ID=medikeep
 SSO_CLIENT_SECRET=your-secret
 SSO_ISSUER_URL=https://keycloak.example.com/realms/master
 SSO_REDIRECT_URI=https://medikeep.example.com/auth/sso/callback
+```
+
+### Trusted Proxy Configuration
+
+| Variable            | Type   | Default          | Required | Description                                                   |
+| ------------------- | ------ | ---------------- | -------- | ------------------------------------------------------------- |
+| `TRUSTED_PROXY_IPS` | string | private ranges   | No       | Peers whose `X-Forwarded-For` / `X-Real-IP` headers are believed |
+
+`X-Forwarded-For` and `X-Real-IP` are ordinary request headers — anything that can
+reach the app can send them, so the app reads them only from peers it trusts, and
+otherwise uses the socket address. That address is what rate limits bucket on and
+what the security log and activity trail record.
+
+Unset, the app trusts loopback and the private ranges (`10/8`, `172.16/12`,
+`192.168/16`, `fd00::/8`), which is where a reverse proxy on a Docker network or the
+same host connects from. A caller on the public internet cannot arrive from one of
+those, so their headers are ignored. Most deployments need nothing here.
+
+Set it explicitly in two cases:
+
+```bash
+# Pin one proxy, so no other private peer is believed
+TRUSTED_PROXY_IPS=172.18.0.5
+
+# Trust nothing: the container is exposed directly, and every caller arrives as a
+# Docker bridge address that only looks private
+TRUSTED_PROXY_IPS=none
+```
+
+**Your proxy must set both headers itself, not pass the client's along.** The nginx and
+Apache examples later in this guide do (`proxy_set_header X-Real-IP $remote_addr` and
+`X-Forwarded-For $proxy_add_x_forwarded_for`), as do Traefik, Caddy and Nginx Proxy
+Manager by default. It matters most for `X-Real-IP`: `X-Forwarded-For` is a chain your
+proxy appends to, so a value a visitor invents is discarded, while `X-Real-IP` is a
+single value with nothing to check it against. A proxy that forwards the visitor's copy
+of it lets that visitor choose the address this app records.
+
+**Cloudflare and other CDNs need nothing here.** When a CDN sits in front of your own
+reverse proxy, its edge addresses are recognised and stepped over so the visitor behind
+them is the address recorded. Cloudflare's published ranges ship with the app. Note the
+asymmetry: an edge is skipped *within* a chain your proxy vouched for, but a request
+arriving straight from one is not trusted — otherwise anyone could point their own
+Cloudflare account at your origin and choose their address. If you run a CDN straight to
+this app with no reverse proxy of your own, or one whose ranges are not bundled, add its
+ranges to `TRUSTED_PROXY_IPS`.
+
+An entry that cannot be parsed is logged as a warning and ignored rather than
+stopping the container. The startup log states which mode is in force:
+
+```
+Client IP resolution: forwarded headers honored from private ranges (default), 6 network(s).
 ```
 
 ### Paperless-ngx Integration
@@ -907,6 +958,11 @@ curl -k https://localhost:8000/health
 ## Reverse Proxy Configuration
 
 Using a reverse proxy is recommended for production to handle SSL termination and additional security.
+
+> **The `X-Forwarded-For` these examples set is believed by default** when the proxy
+> connects from a private address, which is the usual case. See
+> [Trusted Proxy Configuration](#trusted-proxy-configuration) for when to set
+> `TRUSTED_PROXY_IPS` explicitly.
 
 ### Nginx Configuration
 

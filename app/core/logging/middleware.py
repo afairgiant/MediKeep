@@ -18,6 +18,7 @@ from app.core.logging.config import (
     log_security_event,
     set_correlation_id,
 )
+from app.core.utils.client_ip import get_client_ip
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -69,7 +70,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Extract request information
         start_time = time.time()
         method = request.method
-        user_ip = self._get_user_ip(request)
+        user_ip = get_client_ip(request)
         user_agent = request.headers.get(
             "user-agent", "Unknown"
         )  # Extract user information if available
@@ -146,24 +147,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             )
             # Re-raise the exception
             raise
-
-    def _get_user_ip(self, request: Request) -> str:
-        """Extract the real client IP address from the request."""
-        # Check for forwarded headers (common in production behind proxies)
-        forwarded_for = request.headers.get("x-forwarded-for")
-        if forwarded_for:
-            # Take the first IP in case of multiple proxies
-            return forwarded_for.split(",")[0].strip()
-
-        real_ip = request.headers.get("x-real-ip")
-        if real_ip:
-            return real_ip
-
-        # Fallback to client IP
-        if request.client:
-            return request.client.host
-
-        return "unknown"
 
     def _log_request_start(
         self,

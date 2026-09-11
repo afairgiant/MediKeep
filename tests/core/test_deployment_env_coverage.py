@@ -1,4 +1,4 @@
-"""Every SSO setting the app reads must be reachable from a deployment artifact.
+"""Every tracked setting the app reads must be reachable from a deployment artifact.
 
 `SSO_RATE_LIMIT_ATTEMPTS` and `SSO_RATE_LIMIT_WINDOW_MINUTES` were read by
 config.py, listed in `.env.example`, and documented in the deployment guide --
@@ -13,7 +13,8 @@ A unit test cannot catch either: the settings parse correctly, and the code that
 reads them works. What was missing was the wiring, which lives in files no test
 had ever opened. Hence this one, which reads them.
 
-Scoped to the three tracked artifacts. `dev_docker/` and `docker/dev/` are
+Scoped to the SSO settings and `TRUSTED_PROXY_IPS`, across the three tracked
+artifacts. `dev_docker/` and `docker/dev/` are
 gitignored working files -- asserting on those would pass locally and error in
 CI, which is its own version of this bug.
 """
@@ -36,22 +37,29 @@ ENV_EXAMPLE = REPO_ROOT / "docker" / ".env.example"
 # The three ways config.py reads an environment variable. `get_secret` also
 # accepts a `<NAME>_FILE` companion, which is a separate mechanism with its own
 # commented-out block in the compose file; the plain name is what this checks.
+# TRUSTED_PROXY_IPS rides along with the SSO_* names: unset, the app ignores
+# forwarded headers, so an operator behind a proxy must be able to find it.
+TRACKED = r"SSO_[A-Z0-9_]+|TRUSTED_PROXY_IPS"
+
 ENV_READ = re.compile(
-    r"""(?:os\.getenv|get_secret|_strict_bool)\(\s*["'](SSO_[A-Z0-9_]+)["']"""
+    r"""(?:os\.getenv|get_secret|_strict_bool)\(\s*["'](""" + TRACKED + r""")["']"""
 )
 
 
 @pytest.fixture(scope="module")
-def sso_settings():
-    """Every SSO_* variable config.py reads from the environment."""
+def tracked_settings():
+    """Every tracked variable config.py reads from the environment."""
     names = set(ENV_READ.findall(CONFIG_PY.read_text(encoding="utf-8")))
     # A guard on the guard: if the extraction breaks, every assertion below
     # would pass vacuously against an empty set.
-    assert "SSO_ENABLED" in names, "env-var extraction found nothing recognizable"
+    assert {
+        "SSO_ENABLED",
+        "TRUSTED_PROXY_IPS",
+    } <= names, "env-var extraction found nothing recognizable"
     return names
 
 
-def test_compose_passes_every_sso_setting(sso_settings):
+def test_compose_passes_every_tracked_setting(tracked_settings):
     """Checked against the application service specifically.
 
     Not a union across services: the database service passing `SSO_ONLY_MODE` would
@@ -75,36 +83,37 @@ def test_compose_passes_every_sso_setting(sso_settings):
     else:
         passed = set()
 
-    missing = sorted(sso_settings - passed)
+    missing = sorted(tracked_settings - passed)
     assert not missing, (
         f"docker/docker-compose.yml does not pass {missing} to '{APP_SERVICE}'. "
         "The app reads these, so an operator setting one would see no effect."
     )
 
 
-def test_unraid_template_offers_every_sso_setting(sso_settings):
+def test_unraid_template_offers_every_tracked_setting(tracked_settings):
     targets = set(
         re.findall(
-            r'Target="(SSO_[A-Z0-9_]+)"', UNRAID_TEMPLATE.read_text(encoding="utf-8")
+            r'Target="(' + TRACKED + r')"',
+            UNRAID_TEMPLATE.read_text(encoding="utf-8"),
         )
     )
-    missing = sorted(sso_settings - targets)
+    missing = sorted(tracked_settings - targets)
     assert not missing, (
         f"unraid-template.xml has no Config entry for {missing}. Unraid users "
         "configure the container through this file only."
     )
 
 
-def test_env_example_names_every_sso_setting(sso_settings):
+def test_env_example_names_every_tracked_setting(tracked_settings):
     """Commented-out counts -- the point is that the name is discoverable."""
     documented = set(
         re.findall(
-            r"^#*\s*(SSO_[A-Z0-9_]+)=",
+            r"^#*\s*(" + TRACKED + r")=",
             ENV_EXAMPLE.read_text(encoding="utf-8"),
             re.MULTILINE,
         )
     )
-    missing = sorted(sso_settings - documented)
+    missing = sorted(tracked_settings - documented)
     assert not missing, (
         f".env.example never mentions {missing}. It is the file operators copy, "
         "so a setting absent from it is a setting most of them never learn about."
