@@ -14,7 +14,10 @@ so from the lifespan hook rather than as an import traceback.
 import asyncio
 import logging
 import os
+import subprocess
+import sys
 from contextlib import ExitStack, contextmanager
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -25,6 +28,8 @@ from app.core.auth_mode import no_local_password_warning
 from app.core.config import settings
 from app.main import app
 from app.models.user import User
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 STARTUP_LOGGER = "medical_records.app.core.startup"
 AUTH_MODE_LOGGER = "medical_records.app.core.auth_mode"
@@ -153,6 +158,44 @@ class TestFlagParsing:
         yield
         config._AUTH_FLAG_PARSE_ERRORS.clear()
         config._AUTH_FLAG_PARSE_ERRORS.update(original)
+
+    @pytest.mark.parametrize("raw", ["1", "yes", "on"])
+    def test_settings_reads_sso_enabled_through_the_strict_parser(self, raw):
+        """The wiring, not the helper - a test calling _strict_bool would pass either way.
+
+        SSO_ENABLED parsed loosely while SSO_ONLY_MODE parsed strictly meant
+        `SSO_ENABLED=1 SSO_ONLY_MODE=1` resolved to enabled=False, only=True, a
+        pairing validate_auth_mode_config() refuses - on an instance whose identity
+        provider was configured and working.
+
+        Run in a subprocess because the class body reads the environment once, at
+        import: reloading the module here would leave every other test in the suite
+        holding a different settings object.
+        """
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "from app.core.config import settings;"
+                "print(f'PARSED={settings.SSO_ENABLED}')",
+            ],
+            env={**os.environ, "SSO_ENABLED": raw},
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+
+        assert "PARSED=True" in result.stdout, result.stdout + result.stderr
+
+    def test_an_unreadable_sso_enabled_aborts_the_boot(self):
+        with configured(AUTH_FLAG_PARSE_ERRORS={"SSO_ENABLED": "tru"}):
+            with pytest.raises(RuntimeError) as excinfo:
+                with TestClient(app):
+                    pass
+
+        message = str(excinfo.value)
+        assert "SSO_ENABLED" in message
+        assert "tru" in message
 
     @pytest.mark.parametrize(
         "raw", ["true", "TRUE", "True", "1", "yes", "on", " true "]

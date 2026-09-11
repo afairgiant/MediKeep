@@ -550,13 +550,16 @@ the offending variable named. This is deliberate: booting with password login re
 and no working SSO means nobody can sign in, and that is far harder to diagnose after
 the fact.
 
-**These two flags are parsed strictly.** `true`/`false`, `1`/`0`, `yes`/`no`, and
-`on`/`off` are accepted in any case; an empty value means unset. Anything else fails
-the boot with an error naming the variable and showing what it was set to, rather
-than being read as `false`. Everywhere else `false` merely means "off", but for
-`SSO_ONLY_MODE` it means password login is still open, so a misread value would leave
-an instance accepting credentials its operator believes are refused — with nothing in
-the logs to say so.
+**These two flags and `SSO_ENABLED` are parsed strictly.** `true`/`false`, `1`/`0`,
+`yes`/`no`, and `on`/`off` are accepted in any case; an empty value means unset.
+Anything else fails the boot with an error naming the variable and showing what it was
+set to, rather than being read as `false`. Everywhere else `false` merely means "off",
+but for `SSO_ONLY_MODE` it means password login is still open, so a misread value would
+leave an instance accepting credentials its operator believes are refused — with
+nothing in the logs to say so. `SSO_ENABLED` is parsed the same way because it gates
+the other two: read loosely, `SSO_ENABLED=1` would resolve to `false` while
+`SSO_ONLY_MODE=1` resolved to `true`, and that pairing refuses the boot of an instance
+whose SSO is configured and working.
 
 Compose strips `#` comments from env files when the hash is unquoted and preceded by a
 space, and trims whitespace. That holds after a quoted value too, so `true # sso only`

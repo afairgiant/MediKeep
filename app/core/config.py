@@ -358,7 +358,12 @@ class Settings:  # App Info
     ADMIN_DEFAULT_PASSWORD: str = get_secret("ADMIN_DEFAULT_PASSWORD", "admin123")
 
     # SSO Configuration (Simple and Right-Sized)
-    SSO_ENABLED: bool = os.getenv("SSO_ENABLED", "False").lower() == "true"
+    #
+    # Parsed strictly, unlike the other booleans in this file, because it gates the
+    # two flags below that are parsed strictly already. Left loose, SSO_ENABLED=1
+    # reads False while SSO_ONLY_MODE=1 reads True, and the pairing check in
+    # validate_auth_mode_config() refuses the boot of an instance whose SSO works.
+    SSO_ENABLED: bool = _strict_bool("SSO_ENABLED")
     SSO_PROVIDER_TYPE: str = os.getenv("SSO_PROVIDER_TYPE", "oidc")
     SSO_CLIENT_ID: str = get_secret("SSO_CLIENT_ID", "")
     SSO_CLIENT_SECRET: str = get_secret("SSO_CLIENT_SECRET", "")

@@ -76,7 +76,7 @@
     Description="SSO Allowed Domains (JSON array)" Type="Variable" Display="advanced"
     Required="false" Mask="false">[]</Config>
   <Config Name="SSO Enabled" Target="SSO_ENABLED" Default="false" Mode=""
-    Description="Enable Single Sign-On" Type="Variable" Display="advanced" Required="false"
+    Description="Enable Single Sign-On. Accepted values are true/false, 1/0, yes/no, on/off - anything else stops the container with an error naming this variable." Type="Variable" Display="advanced" Required="false"
     Mask="false">false</Config>
   <Config Name="SSO Client ID" Target="SSO_CLIENT_ID" Default="" Mode=""
     Description="SSO Client ID (if SSO enabled)" Type="Variable" Display="advanced" Required="false"
