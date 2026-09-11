@@ -43,7 +43,7 @@ def _forwarded_client(request: Request, networks: List) -> Optional[str]:
     written by peers we trust - everything left of the first untrusted hop is
     whatever that hop chose to send. A CDN edge is skipped like a trusted proxy,
     since the deployment's own proxy appended it and the visitor sits to its left.
-    Falls back to X-Real-IP, which carries a single address and no chain.
+    Falls back to X-Real-IP, which the proxy must overwrite - see below.
     """
     skippable = list(networks) + settings.CDN_FORWARDER_NETWORKS
 
@@ -56,6 +56,10 @@ def _forwarded_client(request: Request, networks: List) -> Optional[str]:
             continue
         return str(address)
 
+    # Reached only when the peer sent no usable chain. Unlike X-Forwarded-For, this
+    # carries one value the proxy is required to overwrite (04-deployment.md) - there
+    # is no appended hop here to discard a forgery against, so a proxy that forwards
+    # the caller's copy lets the caller choose this value.
     real_ip = _parse_ip(request.headers.get("x-real-ip", ""))
     if real_ip is not None and not _is_trusted(real_ip, networks):
         return str(real_ip)

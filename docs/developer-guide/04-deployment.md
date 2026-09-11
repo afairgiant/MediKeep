@@ -654,6 +654,14 @@ TRUSTED_PROXY_IPS=172.18.0.5
 TRUSTED_PROXY_IPS=none
 ```
 
+**Your proxy must set both headers itself, not pass the client's along.** The nginx and
+Apache examples later in this guide do (`proxy_set_header X-Real-IP $remote_addr` and
+`X-Forwarded-For $proxy_add_x_forwarded_for`), as do Traefik, Caddy and Nginx Proxy
+Manager by default. It matters most for `X-Real-IP`: `X-Forwarded-For` is a chain your
+proxy appends to, so a value a visitor invents is discarded, while `X-Real-IP` is a
+single value with nothing to check it against. A proxy that forwards the visitor's copy
+of it lets that visitor choose the address this app records.
+
 **Cloudflare and other CDNs need nothing here.** When a CDN sits in front of your own
 reverse proxy, its edge addresses are recognised and stepped over so the visitor behind
 them is the address recorded. Cloudflare's published ranges ship with the app. Note the
