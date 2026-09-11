@@ -31,6 +31,41 @@ def _emit_auth_mode_warnings(db=None):
         )
 
 
+def _log_client_ip_resolution():
+    """Log which peers this instance believes forwarded headers from.
+
+    The default trusts private ranges, so a directly exposed container whose callers
+    arrive as a Docker bridge address is trusting more than its operator may think.
+    Nothing else in the app would say so.
+    """
+    for entry in settings.TRUSTED_PROXY_PARSE_ERRORS:
+        logger.warning(
+            f"Ignoring unreadable TRUSTED_PROXY_IPS entry {entry!r}. Expected an "
+            "address or CIDR (10.0.0.0/8, 192.168.1.5, fd00::/8). Requests from "
+            "that peer will key off its socket address.",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "trusted_proxy_entry_unreadable",
+            },
+        )
+
+    configured = bool(settings.TRUSTED_PROXY_IPS.strip())
+    source = "TRUSTED_PROXY_IPS" if configured else "private ranges (default)"
+    trusted = len(settings.TRUSTED_PROXY_NETWORKS)
+
+    logger.info(
+        f"Client IP resolution: forwarded headers honored from {source}, "
+        f"{trusted} network(s). Set TRUSTED_PROXY_IPS to pin your proxy, or "
+        "'none' to ignore these headers entirely.",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "client_ip_resolution_configured",
+            "trusted_proxy_source": source,
+            "trusted_proxies": trusted,
+        },
+    )
+
+
 def _log_effective_auth_mode():
     """Log the authentication configuration the instance actually came up with.
 
@@ -131,6 +166,7 @@ async def startup_event():
         # override the env value, so the env value is the one in force.
         _emit_auth_mode_warnings()
         _log_effective_auth_mode()
+        _log_client_ip_resolution()
         logger.info("⏭️ Skipping database operations (test mode)")
         logger.info("Application startup completed (test mode)")
         return
@@ -208,6 +244,7 @@ async def startup_event():
     try:
         _emit_auth_mode_warnings(db)
         _log_effective_auth_mode()
+        _log_client_ip_resolution()
     finally:
         if db is not None:
             db.close()

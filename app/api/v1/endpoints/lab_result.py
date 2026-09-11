@@ -37,6 +37,7 @@ from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
 )
+from app.core.utils.client_ip import get_client_ip
 from app.crud.condition import condition as condition_crud
 from app.crud.encounter import encounter as encounter_crud
 from app.crud.encounter import encounter_lab_result
@@ -2011,7 +2012,7 @@ async def parse_lab_pdf_with_ocr(
                 "confidence": result["confidence"],
                 "success": result["error"] is None,
             },
-            ip_address=request.client.host if request.client else None,
+            ip_address=get_client_ip(request) if request.client else None,
             user_agent=request.headers.get("user-agent"),
         )
 

@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import sanitize_log_input
+from app.core.utils.client_ip import get_client_ip
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, EntityType
 
@@ -248,7 +249,7 @@ def log_crud_activity(
         ip_address = None
         user_agent = None
         if request:
-            ip_address = request.client.host if request.client else None
+            ip_address = get_client_ip(request) if request.client else None
             raw_user_agent = request.headers.get("user-agent")
             user_agent = sanitize_log_input(raw_user_agent) if raw_user_agent else None
 

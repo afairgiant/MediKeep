@@ -15,6 +15,7 @@ from app.core.http.error_handling import (
     handle_database_errors,
 )
 from app.core.logging.config import get_logger
+from app.core.utils.client_ip import get_client_ip
 from app.core.utils.datetime_utils import get_timezone_info
 
 logger = get_logger(__name__, "app")
@@ -182,7 +183,7 @@ def handle_create_with_logging(
     Raises:
         HTTPException: If creation fails or user lacks permission
     """
-    user_ip = request.client.host if request and request.client else "unknown"
+    user_ip = get_client_ip(request) if request else "unknown"
 
     with handle_database_errors(request=request):
         # SECURITY: Verify user has permission to create records for this patient
@@ -259,7 +260,7 @@ def handle_update_with_logging(
     Raises:
         HTTPException: If entity not found, user lacks permission, or update fails
     """
-    user_ip = request.client.host if request and request.client else "unknown"
+    user_ip = get_client_ip(request) if request else "unknown"
 
     with handle_database_errors(request=request):
         # Get existing entity
@@ -337,7 +338,7 @@ def handle_delete_with_logging(
     Raises:
         HTTPException: If entity not found, user lacks permission, or deletion fails
     """
-    user_ip = request.client.host if request and request.client else "unknown"
+    user_ip = get_client_ip(request) if request else "unknown"
 
     # Get existing entity
     entity_obj = crud_obj.get(db=db, id=entity_id)

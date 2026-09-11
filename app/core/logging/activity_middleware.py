@@ -6,6 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.utils.client_ip import get_client_ip
 from app.core.utils.activity_tracker import (
     clear_current_user_context,
     set_current_user_context,
@@ -23,7 +24,7 @@ class ActivityTrackingMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Extract IP address
-        ip_address = request.client.host if request.client else None
+        ip_address = get_client_ip(request) if request.client else None
 
         # Extract user agent
         user_agent = request.headers.get("user-agent")

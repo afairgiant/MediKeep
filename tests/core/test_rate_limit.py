@@ -9,24 +9,12 @@ from unittest.mock import patch
 
 import pytest
 
-from app.core.utils.rate_limit import SlidingWindowRateLimiter, get_client_ip
+from app.core.utils.rate_limit import SlidingWindowRateLimiter
 
 
 @pytest.fixture
 def limiter():
     return SlidingWindowRateLimiter(max_requests=3, window_seconds=60)
-
-
-class FakeRequest:
-    """Minimal stand-in for a Request - get_client_ip reads headers and client."""
-
-    class _Client:
-        def __init__(self, host):
-            self.host = host
-
-    def __init__(self, headers=None, host="203.0.113.7"):
-        self.headers = headers or {}
-        self.client = self._Client(host) if host else None
 
 
 class TestLimitBoundary:
@@ -311,21 +299,3 @@ class TestThreadSafety:
         limiter.reset()
 
         assert limiter.is_allowed("k") is True
-
-
-class TestGetClientIp:
-    def test_prefers_x_forwarded_for(self):
-        request = FakeRequest({"x-forwarded-for": "198.51.100.4, 10.0.0.1"})
-
-        assert get_client_ip(request) == "198.51.100.4"
-
-    def test_falls_back_to_x_real_ip(self):
-        request = FakeRequest({"x-real-ip": "198.51.100.9"})
-
-        assert get_client_ip(request) == "198.51.100.9"
-
-    def test_falls_back_to_the_socket_address(self):
-        assert get_client_ip(FakeRequest()) == "203.0.113.7"
-
-    def test_returns_unknown_without_a_client(self):
-        assert get_client_ip(FakeRequest(host=None)) == "unknown"

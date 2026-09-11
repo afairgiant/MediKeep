@@ -16,10 +16,6 @@ from collections import deque
 from collections.abc import Hashable
 from typing import Deque, Dict, Optional
 
-from fastapi import Request
-
-from app.core.logging.constants import sanitize_log_input
-
 
 class SlidingWindowRateLimiter:
     """Allow at most ``max_requests`` per key within a rolling ``window_seconds``.
@@ -172,24 +168,3 @@ class SlidingWindowRateLimiter:
         with self._lock:
             self._requests.clear()
             self._last_sweep = 0.0
-
-
-def get_client_ip(request: Request) -> str:
-    """Safely extract the client IP, preferring proxy headers.
-
-    Shared so every IP-keyed limiter resolves addresses the same way. If a
-    deployment's reverse proxy does not set these headers, this resolves to the
-    proxy's own address and one limiter bucket covers every user behind it - a
-    pre-existing, app-wide property of this resolution, not of any one caller.
-    """
-    potential_ips = [
-        request.headers.get("x-forwarded-for", "").split(",")[0].strip(),
-        request.headers.get("x-real-ip", ""),
-        getattr(request.client, "host", "unknown") if request.client else "unknown",
-    ]
-
-    for ip in potential_ips:
-        if ip and ip != "unknown":
-            return sanitize_log_input(ip, max_length=45)  # IPv6 max length
-
-    return "unknown"

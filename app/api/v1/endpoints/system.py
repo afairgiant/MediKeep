@@ -23,7 +23,8 @@ from app.core.logging.constants import (
     validate_log_level,
 )
 from app.core.logging.helpers import log_security_event
-from app.core.utils.rate_limit import SlidingWindowRateLimiter, get_client_ip
+from app.core.utils.client_ip import get_client_ip
+from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.services.release_notes_service import get_release_notes_service
 
 # Constants

@@ -17,6 +17,7 @@ from typing import Any, Optional
 from fastapi import Request
 
 from app.core.logging.constants import LogFields
+from app.core.utils.client_ip import get_client_ip
 
 
 def log_endpoint_access(
@@ -54,7 +55,7 @@ def log_endpoint_access(
         LogFields.CATEGORY: "app",
         LogFields.EVENT: event,
         LogFields.USER_ID: user_id,
-        LogFields.IP: request.client.host if request.client else "unknown",
+        LogFields.IP: get_client_ip(request),
     }
 
     if patient_id:
@@ -108,7 +109,7 @@ def log_endpoint_error(
         LogFields.CATEGORY: "app",
         LogFields.EVENT: "endpoint_error",
         LogFields.ERROR: str(error),
-        LogFields.IP: request.client.host if request.client else "unknown",
+        LogFields.IP: get_client_ip(request),
     }
 
     if user_id:
@@ -162,7 +163,7 @@ def log_security_event(
     extra = {
         LogFields.CATEGORY: "security",
         LogFields.EVENT: event,
-        LogFields.IP: request.client.host if request.client else "unknown",
+        LogFields.IP: get_client_ip(request),
     }
 
     if user_id:
@@ -218,7 +219,7 @@ def log_data_access(
         LogFields.USER_ID: user_id,
         LogFields.OPERATION: operation,
         LogFields.MODEL: model,
-        LogFields.IP: request.client.host if request.client else "unknown",
+        LogFields.IP: get_client_ip(request),
     }
 
     if record_id:
@@ -327,7 +328,7 @@ def log_validation_error(
     extra = {
         LogFields.CATEGORY: "app",
         LogFields.EVENT: "validation_error",
-        LogFields.IP: request.client.host if request.client else "unknown",
+        LogFields.IP: get_client_ip(request),
         "method": request.method,
         "path": request.url.path,
     }
