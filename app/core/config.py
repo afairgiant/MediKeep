@@ -239,7 +239,7 @@ def _parse_trusted_proxies(raw: str) -> tuple[list, list[str]]:
 
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
-    VERSION: str = "0.69.0"
+    VERSION: str = "0.70.0"
 
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
 
