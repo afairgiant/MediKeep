@@ -1,6 +1,6 @@
 {
-  "version": "1.4.0",
-  "lastUpdated": "2026-06-09",
+  "version": "1.5.0",
+  "lastUpdated": "2026-09-11",
   "_source": "WHO PreQualVaccineType FHIR CodeSystem (https://smart.who.int/pcmt-vaxprequal/CodeSystem-PreQualVaccineType.html) plus curated entries for common US/Western vaccines not in WHO PCMT (Tdap booster, Shingles, MMRV, Twinrix, etc.).",
   "vaccines": [
     {
@@ -1068,6 +1068,32 @@
       "default_manufacturer": null,
       "is_common": false,
       "display_order": null
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Meningococcal B",
+      "short_name": "MenB",
+      "category": "Bacterial",
+      "common_names": ["MenB", "Meningococcal B", "Meningococcal group B", "Bexsero", "Trumenba", "4CMenB", "MenB-4C", "MenB-FHbp"],
+      "is_combined": false,
+      "components": null,
+      "disease_keys": ["Meningococcal"],
+      "default_manufacturer": null,
+      "is_common": true,
+      "display_order": 46
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Meningococcal ABCWY",
+      "short_name": "MenABCWY",
+      "category": "Bacterial",
+      "common_names": ["MenABCWY", "Meningococcal ABCWY", "Penbraya", "Penmenvy", "Pentavalent meningococcal ABCWY"],
+      "is_combined": true,
+      "components": ["Meningococcal A", "Meningococcal B", "Meningococcal C", "Meningococcal Y", "Meningococcal W-135"],
+      "disease_keys": ["Meningococcal"],
+      "default_manufacturer": null,
+      "is_common": true,
+      "display_order": 47
     }
   ]
 }

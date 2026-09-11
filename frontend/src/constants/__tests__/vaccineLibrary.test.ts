@@ -65,6 +65,21 @@ describe('searchVaccines', () => {
   test('returns empty array for nonsense query', () => {
     expect(searchVaccines('zzzz_no_such_vaccine')).toEqual([]);
   });
+
+  // Regression for issue #993: typing "Meningococcal B" only surfaced the
+  // ACWY entries, so the form showed "not linked to library" on save.
+  test.each([
+    ['Meningococcal B', 'MenB'],
+    ['MenB', 'MenB'],
+    ['Bexsero', 'MenB'],
+    ['Trumenba', 'MenB'],
+    ['Meningococcal ABCWY', 'MenABCWY'],
+    ['MenABCWY', 'MenABCWY'],
+    ['Penbraya', 'MenABCWY'],
+    ['Penmenvy', 'MenABCWY'],
+  ])('%s surfaces %s', (query, expected) => {
+    expect(searchVaccines(query).map(v => v.short_name)).toContain(expected);
+  });
 });
 
 describe('lookups', () => {
