@@ -86,6 +86,7 @@ def test_combined_vaccines_have_at_least_two_disease_keys(library):
         "Meningococcal ACYW-135 (conjugate vaccine)",
         "Meningococcal ACYW-135 Tetanus Toxoid (conjugate vaccine)",
         "Meningococcal A+C (Polysaccharide)",
+        "Meningococcal ABCWY",
         "Polio Vaccine - Oral (OPV) Bivalent Types 1 and 3",
         "Polio Vaccine - Oral (OPV) Trivalent",
     }
@@ -93,6 +94,29 @@ def test_combined_vaccines_have_at_least_two_disease_keys(library):
     assert not bad, (
         "Combined vaccines (is_combined=True) should cover ≥2 diseases:\n" f"{bad}"
     )
+
+
+@pytest.mark.parametrize(
+    "vaccine_name,brands",
+    [
+        ("Meningococcal B", ("bexsero", "trumenba", "menb")),
+        ("Meningococcal ABCWY", ("penbraya", "penmenvy", "menabcwy")),
+    ],
+)
+def test_serogroup_b_vaccines_are_present_and_findable(library, vaccine_name, brands):
+    """Regression for issue #993: the library covered the ACWY serogroups but
+    nothing containing B, so these names and their brands resolved to nothing
+    and the immunization form reported the record as unlinked."""
+    entry = next(
+        (v for v in library["vaccines"] if v["vaccine_name"] == vaccine_name), None
+    )
+    assert entry is not None, f"{vaccine_name} missing from the vaccine library"
+    assert entry["disease_keys"] == ["Meningococcal"]
+    searchable = {n.lower() for n in entry.get("common_names") or []}
+    for brand in brands:
+        assert (
+            brand in searchable
+        ), f"{brand!r} missing from {vaccine_name} common_names"
 
 
 def test_polio_vaccines_share_one_disease_key(library):
