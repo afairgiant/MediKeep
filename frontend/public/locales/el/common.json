@@ -533,6 +533,7 @@
     "noVisitsLinked": "Δεν υπάρχουν επισκέψεις συνδεδεμένες με αυτό το εργαστηριακό αποτέλεσμα",
     "ordered": "Παραγγέλθηκε",
     "phoneNumber": "Αριθμός Τηλεφώνου",
+    "pleaseTryAgain": "Παρακαλώ δοκιμάστε ξανά.",
     "ratingStars": "{{count}}/5 αστέρια",
     "ratingStars_one": "{{count}}/5 αστέρι",
     "ratingStars_other": "{{count}}/5 αστέρια",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Δημιουργία Ασθενή",
-        "saveChanges": "Αποθήκευση Αλλαγών"
+        "saveChanges": "Αποθήκευση Αλλαγών",
+        "updatePatient": "Ενημέρωση Ασθενή"
       },
       "createTitle": "Προσθήκη Νέου Ασθενή",
       "editTitle": "Επεξεργασία Ασθενή",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Προτιμώ να μην απαντήσω"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "π.χ., 70",
+          "metric": "π.χ., 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Επιλέξτε αυτό αν δημιουργείτε αρχείο για τον εαυτό σας",
         "label": "Αυτό είναι το δικό μου ιατρικό αρχείο"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "π.χ., 150",
+          "metric": "π.χ., 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF ή BMP -- Μέγιστο 15MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "Η συστολική πίεση πρέπει να είναι τουλάχιστον 50 mmHg",
         "temperatureMax": "Η θερμοκρασία δεν μπορεί να υπερβαίνει τους {{max}}{{unit}}",
         "temperatureMin": "Η θερμοκρασία πρέπει να είναι τουλάχιστον {{min}}{{unit}}",
+        "timeInFuture": "Η επιλεγμένη ώρα δεν μπορεί να είναι στο μέλλον",
         "weightMax": "Το βάρος δεν μπορεί να υπερβαίνει τα {{max}} {{unit}}",
         "weightMin": "Το βάρος πρέπει να είναι τουλάχιστον {{min}} {{unit}}"
       }

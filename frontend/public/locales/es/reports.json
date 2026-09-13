@@ -14,6 +14,7 @@
       "description": "Seleccione los registros médicos a incluir en su informe personalizado",
       "title": "Configuración del Informe"
     },
+    "icon": "📊",
     "loading": "Cargando generador de informes...",
     "noData": {
       "description": "Agregue algunos registros médicos primero para usar el generador de informes.",
@@ -159,6 +160,7 @@
       "singleExport": "Exportación Individual",
       "title": "Modo de Exportación"
     },
+    "icon": "📤",
     "information": {
       "bulk": {
         "description": "Crea un archivo ZIP que contiene varios tipos de datos en el formato elegido para un respaldo completo de datos.",

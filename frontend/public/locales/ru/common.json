@@ -533,6 +533,7 @@
     "noVisitsLinked": "Визиты не связаны с этим результатом анализа",
     "ordered": "Назначено",
     "phoneNumber": "Номер телефона",
+    "pleaseTryAgain": "Попробуйте снова.",
     "ratingStars": "{{count}}/5 звёзд",
     "ratingStars_one": "{{count}}/5 звезда",
     "ratingStars_other": "{{count}}/5 звёзд",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Создать пациента",
-        "saveChanges": "Сохранить изменения"
+        "saveChanges": "Сохранить изменения",
+        "updatePatient": "Обновить пациента"
       },
       "createTitle": "Добавить нового пациента",
       "editTitle": "Редактировать пациента",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Предпочитаю не указывать"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "например, 70",
+          "metric": "например, 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Отметьте, если вы создаёте запись для себя",
         "label": "Это моя собственная медицинская запись"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "например, 150",
+          "metric": "например, 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF или BMP -- Максимум 15МБ",
@@ -1437,6 +1451,7 @@
         "systolicMin": "Систолическое АД должно быть не менее 50 мм рт. ст.",
         "temperatureMax": "Температура не может превышать {{max}}{{unit}}",
         "temperatureMin": "Температура должна быть не менее {{min}}{{unit}}",
+        "timeInFuture": "Выбранное время не может быть в будущем",
         "weightMax": "Вес не может превышать {{max}} {{unit}}",
         "weightMin": "Вес должен быть не менее {{min}} {{unit}}"
       }

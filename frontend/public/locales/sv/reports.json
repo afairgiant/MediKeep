@@ -14,6 +14,7 @@
       "description": "Välj journalhandlingar att inkludera i din anpassade rapport",
       "title": "Rapportkonfiguration"
     },
+    "icon": "📊",
     "loading": "Laddar rapportbyggare...",
     "noData": {
       "description": "Lägg först till journalhandlingar för att använda rapportbyggaren.",
@@ -159,6 +160,7 @@
       "singleExport": "Enskild export",
       "title": "Exportläge"
     },
+    "icon": "📤",
     "information": {
       "bulk": {
         "description": "Skapar en ZIP-fil som innehåller flera datatyper i ditt valda format för omfattande datasäkerhetskopiering.",

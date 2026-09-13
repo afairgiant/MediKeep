@@ -383,6 +383,8 @@
       "cleanupComplete": "Limpeza concluída: {{cleaned}} arquivos limpos, {{deleted}} arquivos excluídos",
       "cleanupFailed": "Falha ao limpar arquivos. Por favor, tente novamente mais tarde.",
       "noOutOfSync": "Nenhum arquivo dessincronizado encontrado para limpar",
+      "saved": "Configurações salvas com sucesso",
+      "saveFailed": "Falha ao salvar as configurações",
       "sessionTimeoutUpdated": "Tempo limite da sessão atualizado para {{minutes}} minutos. Sua sessão foi renovada."
     },
     "sharing": {

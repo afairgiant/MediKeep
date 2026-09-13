@@ -383,6 +383,8 @@
       "cleanupComplete": "Opschoning voltooid: {{cleaned}} bestanden opgeschoond, {{deleted}} bestanden verwijderd",
       "cleanupFailed": "Bestanden opschonen mislukt. Probeer het later opnieuw.",
       "noOutOfSync": "Geen niet-gesynchroniseerde bestanden gevonden om op te schonen",
+      "saved": "Instellingen succesvol opgeslagen",
+      "saveFailed": "Opslaan van instellingen mislukt",
       "sessionTimeoutUpdated": "Sessietime-out bijgewerkt naar {{minutes}} minuten. Uw sessie is vernieuwd."
     },
     "sharing": {

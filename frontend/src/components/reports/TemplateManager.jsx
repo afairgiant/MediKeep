@@ -266,7 +266,7 @@ const TemplateManager = ({
       >
         <Stack gap="md">
           <TextInput
-            label={t('shared:fields.name')}
+            label={t('shared:labels.name')}
             placeholder={t('templates.namePlaceholder')}
             value={templateForm.name}
             onChange={event =>
@@ -280,7 +280,7 @@ const TemplateManager = ({
           />
 
           <Textarea
-            label={t('shared:fields.description')}
+            label={t('shared:labels.description')}
             placeholder={t('templates.descriptionPlaceholder')}
             value={templateForm.description}
             onChange={event =>
@@ -316,7 +316,7 @@ const TemplateManager = ({
       >
         <Stack gap="md">
           <TextInput
-            label={t('shared:fields.name')}
+            label={t('shared:labels.name')}
             placeholder={t('templates.namePlaceholder')}
             value={templateForm.name}
             onChange={event =>
@@ -329,7 +329,7 @@ const TemplateManager = ({
           />
 
           <Textarea
-            label={t('shared:fields.description')}
+            label={t('shared:labels.description')}
             placeholder={t('templates.descriptionPlaceholder')}
             value={templateForm.description}
             onChange={event =>

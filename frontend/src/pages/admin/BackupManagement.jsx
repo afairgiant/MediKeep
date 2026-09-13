@@ -1926,7 +1926,7 @@ const RestorePreviewAffectedData = ({
               {t('backup.preview.createdAt', 'Created: {{date}}', {
                 date:
                   affectedData.backup_manifest.created_at ||
-                  t('backup.existingBackups.unknown', 'Unknown'),
+                  t('shared:labels.unknown'),
               })}
             </Text>
           </div>

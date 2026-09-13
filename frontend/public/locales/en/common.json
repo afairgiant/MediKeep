@@ -533,6 +533,7 @@
     "noVisitsLinked": "No visits linked to this lab result",
     "ordered": "Ordered",
     "phoneNumber": "Phone Number",
+    "pleaseTryAgain": "Please try again.",
     "ratingStars": "{{count}}/5 stars",
     "ratingStars_one": "{{count}}/5 star",
     "ratingStars_other": "{{count}}/5 stars",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Create Patient",
-        "saveChanges": "Save Changes"
+        "saveChanges": "Save Changes",
+        "updatePatient": "Update Patient"
       },
       "createTitle": "Add New Patient",
       "editTitle": "Edit Patient",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Prefer not to say"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "e.g., 70",
+          "metric": "e.g., 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Check this if you're creating a record for yourself",
         "label": "This is my own medical record"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "e.g., 150",
+          "metric": "e.g., 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF, or BMP -- Max 15MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "Systolic BP must be at least 50 mmHg",
         "temperatureMax": "Temperature cannot exceed {{max}}{{unit}}",
         "temperatureMin": "Temperature must be at least {{min}}{{unit}}",
+        "timeInFuture": "Selected time cannot be in the future",
         "weightMax": "Weight cannot exceed {{max}} {{unit}}",
         "weightMin": "Weight must be at least {{min}} {{unit}}"
       }

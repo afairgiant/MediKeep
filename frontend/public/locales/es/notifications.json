@@ -383,6 +383,8 @@
       "cleanupComplete": "Limpieza completada: {{cleaned}} archivos limpiados, {{deleted}} archivos eliminados",
       "cleanupFailed": "Error al limpiar los archivos. Por favor, inténtelo de nuevo más tarde.",
       "noOutOfSync": "No se encontraron archivos desincronizados para limpiar",
+      "saved": "Configuración guardada correctamente",
+      "saveFailed": "No se pudo guardar la configuración",
       "sessionTimeoutUpdated": "Tiempo de expiración de sesión actualizado a {{minutes}} minutos. Su sesión ha sido renovada."
     },
     "sharing": {

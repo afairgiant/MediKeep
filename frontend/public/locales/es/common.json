@@ -533,6 +533,7 @@
     "noVisitsLinked": "No hay visitas vinculadas a este resultado de laboratorio",
     "ordered": "Ordenado",
     "phoneNumber": "Número de teléfono",
+    "pleaseTryAgain": "Por favor, inténtelo de nuevo.",
     "ratingStars": "{{count}}/5 estrellas",
     "ratingStars_one": "{{count}}/5 estrella",
     "ratingStars_other": "{{count}}/5 estrellas",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Crear paciente",
-        "saveChanges": "Guardar cambios"
+        "saveChanges": "Guardar cambios",
+        "updatePatient": "Actualizar paciente"
       },
       "createTitle": "Agregar nuevo paciente",
       "editTitle": "Editar paciente",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Prefiero no decir"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "p. ej., 70",
+          "metric": "p. ej., 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Marque esto si está creando un registro para usted mismo",
         "label": "Este es mi propio registro médico"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "p. ej., 150",
+          "metric": "p. ej., 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF o BMP -- Máx. 15 MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "La PA sistólica debe ser al menos 50 mmHg",
         "temperatureMax": "La temperatura no puede exceder {{max}}{{unit}}",
         "temperatureMin": "La temperatura debe ser al menos {{min}}{{unit}}",
+        "timeInFuture": "La hora seleccionada no puede ser en el futuro",
         "weightMax": "El peso no puede exceder {{max}} {{unit}}",
         "weightMin": "El peso debe ser al menos {{min}} {{unit}}"
       }

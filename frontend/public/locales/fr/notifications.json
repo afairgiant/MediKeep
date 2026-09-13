@@ -383,6 +383,8 @@
       "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
       "cleanupFailed": "Echec du nettoyage des fichiers. Veuillez réessayer ultérieurement.",
       "noOutOfSync": "Aucun fichier désynchronisé à nettoyer",
+      "saved": "Paramètres enregistrés avec succès",
+      "saveFailed": "Échec de l'enregistrement des paramètres",
       "sessionTimeoutUpdated": "Expiration de session mise à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie."
     },
     "sharing": {

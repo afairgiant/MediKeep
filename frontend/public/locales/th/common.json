@@ -511,6 +511,7 @@
     "noVisitsLinked": "ไม่มีการเยี่ยมที่เชื่อมโยงกับผลแลปนี้",
     "ordered": "สั่งแล้ว",
     "phoneNumber": "หมายเลขโทรศัพท์",
+    "pleaseTryAgain": "กรุณาลองใหม่อีกครั้ง",
     "ratingStars": "{{count}}/5 ดาว",
     "ratingStars_one": "{{count}}/5 ดาว",
     "ratingStars_other": "{{count}}/5 ดาว",
@@ -675,7 +676,8 @@
       },
       "buttons": {
         "createPatient": "สร้างผู้ป่วย",
-        "saveChanges": "บันทึกการเปลี่ยนแปลง"
+        "saveChanges": "บันทึกการเปลี่ยนแปลง",
+        "updatePatient": "อัปเดตผู้ป่วย"
       },
       "createTitle": "เพิ่มผู้ป่วยใหม่",
       "editTitle": "แก้ไขผู้ป่วย",
@@ -685,6 +687,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "ไม่ต้องการระบุ"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "เช่น 70",
+          "metric": "เช่น 175"
         }
       },
       "lastName": {
@@ -725,6 +733,12 @@
       "selfRecord": {
         "description": "เลือกถ้าคุณกำลังสร้างบันทึกสำหรับตัวเอง",
         "label": "นี่คือบันทึกการแพทย์ของฉันเอง"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "เช่น 150",
+          "metric": "เช่น 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF หรือ BMP -- สูงสุด 15MB",
@@ -1377,6 +1391,7 @@
         "systolicMin": "ความดันซิสโตลิคต้องอย่างน้อย 50 mmHg",
         "temperatureMax": "อุณหภูมิไม่สามารถเกิน {{max}}{{unit}}",
         "temperatureMin": "อุณหภูมิต้องอย่างน้อย {{min}}{{unit}}",
+        "timeInFuture": "เวลาที่เลือกไม่สามารถเป็นอนาคต",
         "weightMax": "น้ำหนักไม่สามารถเกิน {{max}} {{unit}}",
         "weightMin": "น้ำหนักต้องอย่างน้อย {{min}} {{unit}}"
       }

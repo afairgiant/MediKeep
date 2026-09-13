@@ -159,10 +159,24 @@ function FileUploader() {
 
 ### Available Namespaces
 
+- **admin** - Admin dashboard, backup management, system health
+- **auth** - Login, registration, SSO
 - **common** - Buttons, labels, messages, time, pagination
-- **medical** - All medical form fields (14 forms)
+- **documents** - Document manager, uploads, Paperless integration
 - **errors** - Error, success, and warning messages
+- **invitations** - Patient sharing invitations
+- **labresults** - Lab result forms, tables, trends
+- **medical** - All medical form fields (14 forms)
 - **navigation** - Menu items, page titles, sections
+- **notifications** - Toasts, notification channels and events
+- **reportPdf** - Generated PDF report text
+- **reports** - Custom report builder, export page
+- **settings** - User, notification, and Paperless settings
+- **shared** - Field and label definitions reused across namespaces
+- **vitals** - Vitals forms, stats, trends
+
+Check **shared** before adding a label or field name; most common ones already
+live there and are translated in all 13 locales.
 
 ### Key Naming Convention
 
@@ -453,14 +467,20 @@ function AllergyCard({ allergy }) {
 }
 ```
 
-### 5. Handle Missing Translations Gracefully
+### 5. Verify Keys Exist Before You Ship Them
 
-i18next will show the key if a translation is missing. In development, check console for warnings.
+`fallbackLng` is `en`, so a key missing from `public/locales/en` has nothing to
+fall back to and i18next renders the raw key into the UI.
 
-```jsx
-// i18next config has debug: true in development
-// Missing keys will log warnings to help you find them
+```bash
+npm run i18n:check     # parity of the other 12 locales against English
+node scripts/check-exposed-keys.js --locale en   # keys used in code but absent from English
 ```
+
+The two checks cover different gaps: `i18n:check` compares locales to English and
+cannot see a key that English itself is missing. `check-exposed-keys` reads the
+source, resolves each key's namespace, and reports the ones that would surface as
+raw strings. It runs in CI via `src/__tests__/localization/exposedKeys.test.js`.
 
 ---
 
@@ -468,47 +488,47 @@ i18next will show the key if a translation is missing. In development, check con
 
 ### Common Buttons
 ```jsx
-t('common:buttons.save')
-t('common:buttons.cancel')
-t('common:buttons.delete')
-t('common:buttons.edit')
-t('common:buttons.add')
-t('common:buttons.submit')
+t('shared:labels.save')
+t('shared:fields.cancel')
+t('shared:buttons.delete')
+t('shared:buttons.edit')
+t('common:buttons.addNew')
+t('common:buttons.create')
 ```
 
 ### Common Labels
 ```jsx
 t('common:labels.loading')
-t('common:labels.noData')
-t('common:labels.status')
-t('common:labels.active')
-t('common:labels.inactive')
+t('shared:labels.actions')
+t('shared:labels.category')
+t('shared:labels.active')
+t('common:filters.defaults.status.inactive')
 ```
 
 ### Common Messages
 ```jsx
-t('common:messages.saveSuccess')
-t('common:messages.deleteSuccess')
-t('common:messages.confirmDelete')
-t('common:messages.unsavedChanges')
+t('shared:labels.success')
+t('shared:labels.error')
+t('common:messages.updateSuccess')
+t('common:labels.pleaseTryAgain')
 ```
 
-### Shared Medical Fields
+### Shared Fields
 ```jsx
-t('medical:common.fields.notes.label')
-t('medical:common.fields.tags.label')
-t('medical:common.fields.status.label')
-t('medical:common.fields.severity.label')
-t('medical:common.fields.startDate.label')
-t('medical:common.fields.endDate.label')
+t('shared:fields.additionalNotes')
+t('shared:fields.status')
+t('shared:fields.severity')
+t('shared:fields.onsetDate')
+t('shared:labels.name')
+t('shared:labels.description')
 ```
 
 ### Navigation
 ```jsx
-t('navigation:menu.dashboard')
+t('shared:labels.dashboard')
 t('navigation:menu.patients')
-t('navigation:menu.medicalRecords')
-t('navigation:menu.settings')
+t('shared:labels.medicalRecords')
+t('shared:labels.settings')
 ```
 
 ---
@@ -566,7 +586,7 @@ function LabResultRelationships() {
 
       <Modal title={t('common:modals.linkConditionToLabResult')}>
         <Text>{t('common:modals.chooseConditionToLink')}</Text>
-        <Text>{t('medical:labResults.form.linkConditionsDescription')}</Text>
+        <Text>{t('labresults:form.linkConditionsDescription')}</Text>
       </Modal>
     </>
   );
@@ -726,7 +746,7 @@ function LabResultForm() {
 
       {/* Related Conditions Section */}
       <Divider label={t('labResults.form.relatedConditions')} />
-      <Text>{t('labResults.form.linkConditionsDescription')}</Text>
+      <Text>{t('labresults:form.linkConditionsDescription')}</Text>
     </>
   );
 }

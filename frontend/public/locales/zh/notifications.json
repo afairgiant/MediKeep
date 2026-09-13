@@ -383,6 +383,8 @@
       "cleanupComplete": "清理完成：{{cleaned}}个文件已清理，{{deleted}}个文件已删除",
       "cleanupFailed": "清理文件失败。请稍后重试。",
       "noOutOfSync": "未发现需要清理的不同步文件",
+      "saved": "设置保存成功",
+      "saveFailed": "设置保存失败",
       "sessionTimeoutUpdated": "会话超时已更新为{{minutes}}分钟。您的会话已刷新。"
     },
     "sharing": {

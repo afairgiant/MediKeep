@@ -383,6 +383,8 @@
       "cleanupComplete": "Bereinigung abgeschlossen: {{cleaned}} Dateien bereinigt, {{deleted}} Dateien gelöscht",
       "cleanupFailed": "Dateibereinigung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
       "noOutOfSync": "Keine nicht synchronisierten Dateien zur Bereinigung gefunden",
+      "saved": "Einstellungen erfolgreich gespeichert",
+      "saveFailed": "Einstellungen konnten nicht gespeichert werden",
       "sessionTimeoutUpdated": "Sitzungs-Timeout auf {{minutes}} Minuten aktualisiert. Ihre Sitzung wurde erneuert."
     },
     "sharing": {
