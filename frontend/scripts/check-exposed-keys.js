@@ -29,7 +29,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SRC_DIR = path.join(__dirname, '..', 'src');
+const DEFAULT_SRC_DIR = path.join(__dirname, '..', 'src');
 const LOCALES_DIR = path.join(__dirname, '..', 'public', 'locales');
 const ALL_LOCALES = ['en', 'de', 'el', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'sv', 'th', 'zh'];
 const ALL_NAMESPACES = ['admin', 'auth', 'common', 'documents', 'errors', 'invitations', 'labresults', 'medical', 'navigation', 'notifications', 'reportPdf', 'reports', 'settings', 'shared', 'vitals'];
@@ -46,6 +46,8 @@ const getArg = (flag) => {
 const hasFlag = (flag) => args.includes(flag);
 
 const filterLocale = getArg('--locale');
+// Tests point this at a fixture tree; everything else scans the real source.
+const SRC_DIR = getArg('--src') || DEFAULT_SRC_DIR;
 const jsonOutput = hasFlag('--json');
 const verbose = hasFlag('--verbose');
 const showAll = hasFlag('--all');
@@ -73,6 +75,7 @@ By default only EXPOSED keys are reported.
 Options:
   --all              Also show COVERED keys (have inline fallbacks)
   --locale <code>    Check against a specific locale (default: en)
+  --src <dir>        Scan this directory instead of src/
   --json             Output results as JSON
   --verbose          Show dynamic keys that can't be statically checked
   --unused           Also report locale keys not referenced in source code
@@ -285,14 +288,47 @@ function splitArgs(argText) {
   return args;
 }
 
-// A literal is a translation key if it is namespaced or a dotted path with no
-// spaces — the same test resolve() applies at runtime in notifyTranslated.
+// t() resolves any key its namespace holds, including a bare top-level one. The
+// notify*/resolve wrappers pass a dot-less string through as literal text, so for
+// those a literal is only a key when resolve() would treat it as one at runtime.
 const KEY_SHAPE = /^[A-Za-z_$][\w$-]*(?::[\w$.-]+)?(?:\.[\w$-]+)*$/;
-function looksLikeKey(literal) {
+function looksLikeKey(literal, requireNamespaceOrDots) {
   if (!literal || /\s/.test(literal)) return false;
-  if (!literal.includes(':') && !literal.includes('.')) return false;
+  if (requireNamespaceOrDots && !literal.includes(':')) {
+    const dots = literal.match(/\./g);
+    if (!dots || dots.length < 2) return false;
+  }
   return KEY_SHAPE.test(literal);
 }
+
+/**
+ * Drop a ternary's condition, keeping only the branches.
+ *
+ * `t(metric ? 'a.b' : 'a.c')` has string literals in the condition too
+ * (`unitSystem === 'imperial'`); those are values, not keys.
+ */
+function stripTernaryCondition(argText) {
+  let depth = 0;
+  let quote = null;
+  for (let i = 0; i < argText.length; i++) {
+    const ch = argText[i];
+    if (quote) {
+      if (ch === '\\') { i++; continue; }
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue; }
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    else if (ch === '?' && depth === 0) {
+      // Skip ?. optional chaining and ?? nullish coalescing.
+      if (argText[i + 1] === '.' || argText[i + 1] === '?') { i++; continue; }
+      return argText.slice(i + 1);
+    }
+  }
+  return argText;
+}
+
 
 /**
  * Every key literal in an argument expression.
@@ -301,7 +337,8 @@ function looksLikeKey(literal) {
  * `t(metric ? 'a.b.metric' : 'a.b.imperial')` — both branches reach the UI, so
  * both must exist in the locale files.
  */
-function extractKeyLiterals(argText) {
+function extractKeyLiterals(argText, requireNamespaceOrDots) {
+  argText = stripTernaryCondition(argText);
   const literals = [];
   const dynamic = [];
   const re = /(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
@@ -313,7 +350,7 @@ function extractKeyLiterals(argText) {
       dynamic.push('`' + raw + '`');
       continue;
     }
-    if (looksLikeKey(raw)) literals.push(raw);
+    if (looksLikeKey(raw, requireNamespaceOrDots)) literals.push(raw);
   }
   return { literals, dynamic };
 }
@@ -324,8 +361,8 @@ function extractKeyLiterals(argText) {
 function extractTranslationKeys(content, filePath) {
   const staticKeys = [];
   const dynamicKeys = [];
-  const fileNamespaces = getFileNamespaces(content);
   content = stripComments(content);
+  const fileNamespaces = getFileNamespaces(content);
 
   // Precompute newline offsets so a match index maps back to a line number.
   const lineStarts = [0];
@@ -357,7 +394,9 @@ function extractTranslationKeys(content, filePath) {
     const args = splitArgs(argText);
     const lineNum = lineOf(m.index);
 
-    const { literals, dynamic } = extractKeyLiterals(args[0] || '');
+    // Only t() takes a string fallback second; notify* takes an options object.
+    const isTCall = callerName.endsWith('t');
+    const { literals, dynamic } = extractKeyLiterals(args[0] || '', !isTCall);
     for (const expr of dynamic) {
       dynamicKeys.push({ expression: expr, line: lineNum, file: filePath });
     }
@@ -370,8 +409,6 @@ function extractTranslationKeys(content, filePath) {
       continue;
     }
 
-    // Only t() takes a string fallback second; notify* takes an options object.
-    const isTCall = callerName.endsWith('t');
     const hasFallback =
       isTCall && args.length > 1 && /^\s*['"`]/.test(args[1]);
 
@@ -399,7 +436,7 @@ function extractTranslationKeys(content, filePath) {
       const raw = km[2];
       const { namespace, key, candidates } = resolveKey(raw, fileNamespaces);
 
-      const siblingRegex = new RegExp(`(?:^|[,{\s])${propName}:\s*['"\`]`, 'm');
+      const siblingRegex = new RegExp(`(?:^|[,{\\s])${propName}:\\s*['"\`]`, 'm');
       const contextStart = Math.max(0, lineIdx - 10);
       const contextEnd = Math.min(lines.length, lineIdx + 10);
       const context = lines.slice(contextStart, contextEnd).join('\n');

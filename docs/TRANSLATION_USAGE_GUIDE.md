@@ -712,40 +712,40 @@ function SymptomsPage() {
 import { useTranslation } from 'react-i18next';
 
 function LabResultForm() {
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation('labresults');
 
   return (
     <>
       <Select
-        label={t('labResults.testStatus.label')}
+        label={t('testStatus.label')}
         data={[
-          { value: 'ordered', label: t('labResults.status.ordered') },
-          { value: 'inProgress', label: t('labResults.status.inProgress') },
-          { value: 'completed', label: t('labResults.status.completed') },
-          { value: 'cancelled', label: t('labResults.status.cancelled') },
+          { value: 'ordered', label: t('status.ordered') },
+          { value: 'inProgress', label: t('status.inProgress') },
+          { value: 'completed', label: t('status.completed') },
+          { value: 'cancelled', label: t('status.cancelled') },
         ]}
       />
 
       <Select
-        label={t('labResults.testCategory.label')}
+        label={t('testCategory.label')}
         data={[
-          { value: 'bloodWork', label: t('labResults.category.bloodWork') },
-          { value: 'imaging', label: t('labResults.category.imaging') },
-          { value: 'pathology', label: t('labResults.category.pathology') },
+          { value: 'bloodWork', label: t('category.bloodWork') },
+          { value: 'imaging', label: t('category.imaging') },
+          { value: 'pathology', label: t('category.pathology') },
         ]}
       />
 
       <Select
-        label={t('labResults.labResult.label')}
+        label={t('labResult.label')}
         data={[
-          { value: 'normal', label: t('labResults.result.normal') },
-          { value: 'abnormal', label: t('labResults.result.abnormal') },
-          { value: 'critical', label: t('labResults.result.critical') },
+          { value: 'normal', label: t('result.normal') },
+          { value: 'abnormal', label: t('result.abnormal') },
+          { value: 'critical', label: t('result.critical') },
         ]}
       />
 
       {/* Related Conditions Section */}
-      <Divider label={t('labResults.form.relatedConditions')} />
+      <Divider label={t('form.linkConditionsTitle')} />
       <Text>{t('labresults:form.linkConditionsDescription')}</Text>
     </>
   );

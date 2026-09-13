@@ -6,9 +6,10 @@
  * to and i18next renders the raw key string into the UI (issue #912).
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execFileSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -17,10 +18,12 @@ const __dirname = path.dirname(__filename);
 const FRONTEND_ROOT = path.join(__dirname, '../../..');
 const CHECKER = path.join(FRONTEND_ROOT, 'scripts', 'check-exposed-keys.js');
 
-const runChecker = () => {
+const runChecker = srcDir => {
+  const args = [CHECKER, '--locale', 'en', '--json'];
+  if (srcDir) args.push('--src', srcDir);
   let stdout;
   try {
-    stdout = execFileSync('node', [CHECKER, '--locale', 'en', '--json'], {
+    stdout = execFileSync('node', args, {
       cwd: FRONTEND_ROOT,
       encoding: 'utf8',
       maxBuffer: 20 * 1024 * 1024,
@@ -76,5 +79,94 @@ describe('Exposed translation keys', () => {
       'string'
     );
     expect(value.length).toBeGreaterThan(0);
+  });
+});
+
+describe('Exposed key detection', () => {
+  let fixtureDir;
+
+  beforeEach(() => {
+    fixtureDir = mkdtempSync(path.join(tmpdir(), 'i18n-fixture-'));
+  });
+
+  afterEach(() => {
+    rmSync(fixtureDir, { recursive: true, force: true });
+  });
+
+  const scan = source => {
+    writeFileSync(path.join(fixtureDir, 'Fixture.jsx'), source, 'utf8');
+    return runChecker(fixtureDir).exposed.map(e => e.key);
+  };
+
+  it('detects a bare key that its namespace does not define', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = () => <p>{t('missingKey')}</p>;
+    `);
+    expect(keys).toContain('common:missingKey');
+  });
+
+  it('accepts a bare key the namespace does define', () => {
+    const keys = scan(`
+      const { t } = useTranslation('labresults');
+      export const A = () => <p>{t('addNew')}</p>;
+    `);
+    expect(keys).toEqual([]);
+  });
+
+  it('reads both branches of a ternary but not its condition', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = ({ unitSystem }) => (
+        <p>{t(
+          unitSystem === 'imperial'
+            ? 'patients.form.height.placeholder.imperial'
+            : 'nope.not.a.real.key'
+        )}</p>
+      );
+    `);
+    expect(keys).toEqual(['common:nope.not.a.real.key']);
+  });
+
+  // No useTranslation() here, so the namespace half is unknowable; the key path
+  // is what matters.
+  it('treats a dot-less notify* argument as literal text, not a key', () => {
+    const keys = scan(`
+      notifySuccess('Saved');
+      notifyError('errors.missing.key.here');
+    `);
+    expect(keys.map(k => k.split(':')[1])).toEqual(['errors.missing.key.here']);
+  });
+
+  it('ignores keys that appear only inside comments', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      /** Usage: t('definitely.not.defined') */
+      export const A = () => <p>{t('labels.loading')}</p>;
+    `);
+    expect(keys).toEqual([]);
+  });
+
+  // 'addNew' exists in labresults but not common, so it only resolves if the
+  // commented-out useTranslation is wrongly treated as a candidate namespace.
+  it('ignores a commented-out useTranslation when resolving namespaces', () => {
+    const keys = scan(`
+      // const { t } = useTranslation('labresults');
+      const { t } = useTranslation('common');
+      export const A = () => <p>{t('addNew')}</p>;
+    `);
+    expect(keys).toEqual(['common:addNew']);
+  });
+
+  it('treats a sibling literal prop as a fallback for its *Key partner', () => {
+    const keys = scan(`
+      export const fields = [
+        {
+          nameKey: 'sidebarNav.items.nothingDefinedHere',
+          name: 'Patient Info',
+        },
+      ];
+    `);
+    expect(keys).toEqual([]);
   });
 });
