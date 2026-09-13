@@ -302,16 +302,13 @@ function looksLikeKey(literal, requireNamespaceOrDots) {
 }
 
 /**
- * Drop a ternary's condition, keeping only the branches.
- *
- * `t(metric ? 'a.b' : 'a.c')` has string literals in the condition too
- * (`unitSystem === 'imperial'`); those are values, not keys.
+ * Index of a top-level ternary `?` in `expr`, or -1.
  */
-function stripTernaryCondition(argText) {
+function findTernaryQuestion(expr) {
   let depth = 0;
   let quote = null;
-  for (let i = 0; i < argText.length; i++) {
-    const ch = argText[i];
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i];
     if (quote) {
       if (ch === '\\') { i++; continue; }
       if (ch === quote) quote = null;
@@ -322,11 +319,61 @@ function stripTernaryCondition(argText) {
     else if (')]}'.includes(ch)) depth--;
     else if (ch === '?' && depth === 0) {
       // Skip ?. optional chaining and ?? nullish coalescing.
-      if (argText[i + 1] === '.' || argText[i + 1] === '?') { i++; continue; }
-      return argText.slice(i + 1);
+      if (expr[i + 1] === '.' || expr[i + 1] === '?') { i++; continue; }
+      return i;
     }
   }
-  return argText;
+  return -1;
+}
+
+/**
+ * Index of the `:` matching the ternary `?` at `qIdx`, or -1.
+ */
+function findTernaryColon(expr, qIdx) {
+  let depth = 0;
+  let quote = null;
+  let pending = 1;
+  for (let i = qIdx + 1; i < expr.length; i++) {
+    const ch = expr[i];
+    if (quote) {
+      if (ch === '\\') { i++; continue; }
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue; }
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    else if (depth === 0 && ch === '?') {
+      if (expr[i + 1] === '.' || expr[i + 1] === '?') { i++; continue; }
+      pending++;
+    } else if (depth === 0 && ch === ':') {
+      pending--;
+      if (pending === 0) return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Value-position sub-expressions of `expr`, with every ternary condition dropped.
+ *
+ * A condition holds values, not keys: `t(unit === 'imperial' ? 'a.b' : 'a.c')`
+ * must yield the two branches and not `'imperial'`. Parentheses are unwrapped and
+ * branches recursed into, so nested and parenthesized ternaries drop theirs too.
+ */
+function valueExpressions(expr) {
+  expr = expr.trim();
+  while (expr.startsWith('(') && findClosingParen(expr, 0) === expr.length - 1) {
+    expr = expr.slice(1, -1).trim();
+  }
+  const qIdx = findTernaryQuestion(expr);
+  if (qIdx === -1) return [expr];
+  const colonIdx = findTernaryColon(expr, qIdx);
+  if (colonIdx === -1) return valueExpressions(expr.slice(qIdx + 1));
+  return [
+    ...valueExpressions(expr.slice(qIdx + 1, colonIdx)),
+    ...valueExpressions(expr.slice(colonIdx + 1)),
+  ];
 }
 
 
@@ -338,19 +385,21 @@ function stripTernaryCondition(argText) {
  * both must exist in the locale files.
  */
 function extractKeyLiterals(argText, requireNamespaceOrDots) {
-  argText = stripTernaryCondition(argText);
   const literals = [];
   const dynamic = [];
   const re = /(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
-  let m;
-  while ((m = re.exec(argText)) !== null) {
-    const quote = m[1];
-    const raw = m[2];
-    if (quote === '`' && raw.includes('${')) {
-      dynamic.push('`' + raw + '`');
-      continue;
+  for (const part of valueExpressions(argText)) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(part)) !== null) {
+      const quote = m[1];
+      const raw = m[2];
+      if (quote === '`' && raw.includes('${')) {
+        dynamic.push('`' + raw + '`');
+        continue;
+      }
+      if (looksLikeKey(raw, requireNamespaceOrDots)) literals.push(raw);
     }
-    if (looksLikeKey(raw, requireNamespaceOrDots)) literals.push(raw);
   }
   return { literals, dynamic };
 }

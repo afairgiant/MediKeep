@@ -114,6 +114,40 @@ describe('Exposed key detection', () => {
     expect(keys).toEqual([]);
   });
 
+  it('reads both branches of a parenthesized ternary but not its condition', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = ({ unitSystem }) => (
+        <p>{t((unitSystem === 'imperial' ? 'nope.one' : 'nope.two'))}</p>
+      );
+    `);
+    expect(keys).toEqual(['common:nope.one', 'common:nope.two']);
+  });
+
+  it('drops the condition of an inner ternary too', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = ({ a, mode }) => (
+        <p>{t(a ? 'nope.outer' : (mode === 'metric' ? 'nope.inner' : 'nope.last'))}</p>
+      );
+    `);
+    expect(keys).toEqual(['common:nope.outer', 'common:nope.inner', 'common:nope.last']);
+  });
+
+  it('drops the condition of each link in a chained ternary', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = ({ a, b }) => (
+        <p>{t(a ? 'nope.first' : b === 'raw' ? 'nope.second' : 'nope.third')}</p>
+      );
+    `);
+    expect(keys).toEqual([
+      'common:nope.first',
+      'common:nope.second',
+      'common:nope.third',
+    ]);
+  });
+
   it('reads both branches of a ternary but not its condition', () => {
     const keys = scan(`
       const { t } = useTranslation('common');
