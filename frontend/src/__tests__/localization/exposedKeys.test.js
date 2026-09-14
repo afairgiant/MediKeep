@@ -114,6 +114,40 @@ describe('Exposed key detection', () => {
     expect(keys).toEqual([]);
   });
 
+  it('reads past a regex literal whose character class holds quotes', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = ({ value }) => (
+        <p>{t(/['"]/.test(value) ? 'nope.regex.one' : 'nope.regex.two')}</p>
+      );
+    `);
+    expect(keys).toEqual(['common:nope.regex.one', 'common:nope.regex.two']);
+  });
+
+  it('drops a condition literal sitting next to a regex literal', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = ({ v, mode }) => (
+        <p>{t(
+          /["']/.test(v) && mode === 'imperial'
+            ? 'nope.cond.one'
+            : 'nope.cond.two'
+        )}</p>
+      );
+    `);
+    expect(keys).toEqual(['common:nope.cond.one', 'common:nope.cond.two']);
+  });
+
+  it('treats a slash after a value as division, not a regex', () => {
+    const keys = scan(`
+      const { t } = useTranslation('common');
+      export const A = ({ n }) => (
+        <p>{t(n / 2 > 1 ? 'nope.div.one' : 'nope.div.two')}</p>
+      );
+    `);
+    expect(keys).toEqual(['common:nope.div.one', 'common:nope.div.two']);
+  });
+
   it('reads both branches of a parenthesized ternary but not its condition', () => {
     const keys = scan(`
       const { t } = useTranslation('common');

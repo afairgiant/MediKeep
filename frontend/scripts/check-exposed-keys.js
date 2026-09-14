@@ -165,37 +165,86 @@ function getFileNamespaces(content) {
 }
 
 /**
+ * A `/` opens a regex literal only where an operand cannot appear; straight
+ * after a value (identifier, number, closing bracket) it is division instead.
+ */
+const REGEX_OK_AFTER = new Set([
+  '(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';', '+', '-', '*',
+  '%', '<', '>', '~', '^',
+]);
+const REGEX_OK_KEYWORDS = new Set([
+  'return', 'typeof', 'case', 'in', 'of', 'do', 'else', 'void', 'delete',
+  'instanceof', 'new', 'yield', 'await',
+]);
+
+function startsRegex(text, i) {
+  let j = i - 1;
+  while (j >= 0 && (text[j] === ' ' || text[j] === '\t')) j--;
+  if (j < 0) return true;
+  const prev = text[j];
+  if (prev === '\n' || prev === '\r') return true;
+  if (REGEX_OK_AFTER.has(prev)) return true;
+  const word = (text.slice(0, j + 1).match(/[A-Za-z_$][\w$]*$/) || [''])[0];
+  return REGEX_OK_KEYWORDS.has(word);
+}
+
+/**
+ * Span of the comment, regex literal, string or template starting at `i`, with
+ * `end` the index of its last character. Null when `text[i]` starts none.
+ *
+ * Every scanner below reads through this, so a regex literal such as
+ * /['"]/ can no longer be mistaken for an opening quote.
+ */
+function readAtom(text, i) {
+  const ch = text[i];
+  const next = text[i + 1];
+
+  if (ch === '/' && next === '*') {
+    const close = text.indexOf('*/', i + 2);
+    return { kind: 'comment', end: close === -1 ? text.length - 1 : close + 1 };
+  }
+  if (ch === '/' && next === '/') {
+    const nl = text.indexOf('\n', i);
+    return { kind: 'comment', end: (nl === -1 ? text.length : nl) - 1 };
+  }
+  if (ch === '/' && startsRegex(text, i)) {
+    let inClass = false;
+    for (let j = i + 1; j < text.length; j++) {
+      const c = text[j];
+      if (c === '\\') { j++; continue; }
+      if (c === '\n') break;
+      if (inClass) { if (c === ']') inClass = false; continue; }
+      if (c === '[') { inClass = true; continue; }
+      if (c === '/') return { kind: 'regex', end: j };
+    }
+    return null;
+  }
+  if (ch === "'" || ch === '"' || ch === '`') {
+    for (let j = i + 1; j < text.length; j++) {
+      const c = text[j];
+      if (c === '\\') { j++; continue; }
+      if (c === ch) {
+        return { kind: 'string', quote: ch, body: text.slice(i + 1, j), end: j };
+      }
+    }
+    return { kind: 'string', quote: ch, body: text.slice(i + 1), end: text.length - 1 };
+  }
+  return null;
+}
+
+
+/**
  * Blank comment bodies, preserving length and newlines so line numbers still map.
  */
 function stripComments(content) {
-  let out = content.split('');
-  let i = 0;
-  let quote = null;
-  while (i < content.length) {
-    const ch = content[i];
-    const next = content[i + 1];
-    if (quote) {
-      if (ch === '\\') { i += 2; continue; }
-      if (ch === quote) quote = null;
-      i++;
-      continue;
+  const out = content.split('');
+  for (let i = 0; i < content.length; i++) {
+    const atom = readAtom(content, i);
+    if (!atom) continue;
+    if (atom.kind === 'comment') {
+      for (let j = i; j <= atom.end; j++) if (out[j] !== '\n') out[j] = ' ';
     }
-    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; i++; continue; }
-    if (ch === '/' && next === '*') {
-      const end = content.indexOf('*/', i + 2);
-      const stop = end === -1 ? content.length : end + 2;
-      for (let j = i; j < stop; j++) if (out[j] !== '\n') out[j] = ' ';
-      i = stop;
-      continue;
-    }
-    if (ch === '/' && next === '/' && content[i - 1] !== ':') {
-      let end = content.indexOf('\n', i);
-      if (end === -1) end = content.length;
-      for (let j = i; j < end; j++) out[j] = ' ';
-      i = end;
-      continue;
-    }
-    i++;
+    i = atom.end;
   }
   return out.join('');
 }
@@ -243,17 +292,11 @@ const KEY_CALLERS = [
  */
 function findClosingParen(content, openIdx) {
   let depth = 0;
-  let quote = null;
   for (let i = openIdx; i < content.length; i++) {
-    const ch = content[i];
-    if (quote) {
-      if (ch === '\\') { i++; continue; }
-      if (ch === quote) quote = null;
-      continue;
-    }
-    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue; }
-    if (ch === '(') depth++;
-    else if (ch === ')') {
+    const atom = readAtom(content, i);
+    if (atom) { i = atom.end; continue; }
+    if (content[i] === '(') depth++;
+    else if (content[i] === ')') {
       depth--;
       if (depth === 0) return i;
     }
@@ -267,16 +310,11 @@ function findClosingParen(content, openIdx) {
 function splitArgs(argText) {
   const args = [];
   let depth = 0;
-  let quote = null;
   let start = 0;
   for (let i = 0; i < argText.length; i++) {
+    const atom = readAtom(argText, i);
+    if (atom) { i = atom.end; continue; }
     const ch = argText[i];
-    if (quote) {
-      if (ch === '\\') { i++; continue; }
-      if (ch === quote) quote = null;
-      continue;
-    }
-    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue; }
     if ('([{'.includes(ch)) depth++;
     else if (')]}'.includes(ch)) depth--;
     else if (ch === ',' && depth === 0) {
@@ -306,15 +344,10 @@ function looksLikeKey(literal, requireNamespaceOrDots) {
  */
 function findTernaryQuestion(expr) {
   let depth = 0;
-  let quote = null;
   for (let i = 0; i < expr.length; i++) {
+    const atom = readAtom(expr, i);
+    if (atom) { i = atom.end; continue; }
     const ch = expr[i];
-    if (quote) {
-      if (ch === '\\') { i++; continue; }
-      if (ch === quote) quote = null;
-      continue;
-    }
-    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue; }
     if ('([{'.includes(ch)) depth++;
     else if (')]}'.includes(ch)) depth--;
     else if (ch === '?' && depth === 0) {
@@ -331,16 +364,11 @@ function findTernaryQuestion(expr) {
  */
 function findTernaryColon(expr, qIdx) {
   let depth = 0;
-  let quote = null;
   let pending = 1;
   for (let i = qIdx + 1; i < expr.length; i++) {
+    const atom = readAtom(expr, i);
+    if (atom) { i = atom.end; continue; }
     const ch = expr[i];
-    if (quote) {
-      if (ch === '\\') { i++; continue; }
-      if (ch === quote) quote = null;
-      continue;
-    }
-    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue; }
     if ('([{'.includes(ch)) depth++;
     else if (')]}'.includes(ch)) depth--;
     else if (depth === 0 && ch === '?') {
@@ -387,18 +415,17 @@ function valueExpressions(expr) {
 function extractKeyLiterals(argText, requireNamespaceOrDots) {
   const literals = [];
   const dynamic = [];
-  const re = /(['"`])((?:\\.|(?!\1)[^\\])*)\1/g;
   for (const part of valueExpressions(argText)) {
-    re.lastIndex = 0;
-    let m;
-    while ((m = re.exec(part)) !== null) {
-      const quote = m[1];
-      const raw = m[2];
-      if (quote === '`' && raw.includes('${')) {
-        dynamic.push('`' + raw + '`');
-        continue;
+    for (let i = 0; i < part.length; i++) {
+      const atom = readAtom(part, i);
+      if (!atom) continue;
+      i = atom.end;
+      if (atom.kind !== 'string') continue;
+      if (atom.quote === '`' && atom.body.includes('${')) {
+        dynamic.push('`' + atom.body + '`');
+      } else if (looksLikeKey(atom.body, requireNamespaceOrDots)) {
+        literals.push(atom.body);
       }
-      if (looksLikeKey(raw, requireNamespaceOrDots)) literals.push(raw);
     }
   }
   return { literals, dynamic };
