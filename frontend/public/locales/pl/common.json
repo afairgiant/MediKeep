@@ -533,6 +533,7 @@
     "noVisitsLinked": "Brak wizyt połączonych z tym wynikiem badania",
     "ordered": "Zlecono",
     "phoneNumber": "Numer telefonu",
+    "pleaseTryAgain": "Spróbuj ponownie.",
     "ratingStars": "{{count}}/5 gwiazdek",
     "ratingStars_one": "{{count}}/5 gwiazdki",
     "ratingStars_other": "{{count}}/5 gwiazdek",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Utwórz pacjenta",
-        "saveChanges": "Zapisz zmiany"
+        "saveChanges": "Zapisz zmiany",
+        "updatePatient": "Zaktualizuj pacjenta"
       },
       "createTitle": "Dodaj nowego pacjenta",
       "editTitle": "Edytuj pacjenta",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Wolę nie podawać"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "np. 70",
+          "metric": "np. 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Zaznacz, jeśli tworzysz rekord dla siebie",
         "label": "To jest moja własna dokumentacja medyczna"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "np. 150",
+          "metric": "np. 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF lub BMP -- Maks. 15MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "Ciśnienie skurczowe musi wynosić co najmniej 50 mmHg",
         "temperatureMax": "Temperatura nie może przekraczać {{max}}{{unit}}",
         "temperatureMin": "Temperatura musi wynosić co najmniej {{min}}{{unit}}",
+        "timeInFuture": "Wybrana godzina nie może być przyszła",
         "weightMax": "Waga nie może przekraczać {{max}} {{unit}}",
         "weightMin": "Waga musi wynosić co najmniej {{min}} {{unit}}"
       }

@@ -533,6 +533,7 @@
     "noVisitsLinked": "Nessuna visita collegata a questo risultato di laboratorio",
     "ordered": "Richiesto",
     "phoneNumber": "Numero di telefono",
+    "pleaseTryAgain": "Riprovi.",
     "ratingStars": "{{count}}/5 stelle",
     "ratingStars_one": "{{count}}/5 stella",
     "ratingStars_other": "{{count}}/5 stelle",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Crea paziente",
-        "saveChanges": "Salva modifiche"
+        "saveChanges": "Salva modifiche",
+        "updatePatient": "Aggiorna paziente"
       },
       "createTitle": "Aggiungi nuovo paziente",
       "editTitle": "Modifica paziente",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Preferisco non dirlo"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "ad es., 70",
+          "metric": "ad es., 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Seleziona questo se stai creando una cartella per te stesso",
         "label": "Questa è la mia cartella clinica"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "ad es., 150",
+          "metric": "ad es., 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF o BMP -- Max 15 MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "La pressione sistolica deve essere almeno 50 mmHg",
         "temperatureMax": "La temperatura non può superare {{max}}{{unit}}",
         "temperatureMin": "La temperatura deve essere almeno {{min}}{{unit}}",
+        "timeInFuture": "L'ora selezionata non può essere nel futuro",
         "weightMax": "Il peso non può superare {{max}} {{unit}}",
         "weightMin": "Il peso deve essere almeno {{min}} {{unit}}"
       }

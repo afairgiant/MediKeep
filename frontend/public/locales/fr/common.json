@@ -533,6 +533,7 @@
     "noVisitsLinked": "Aucune visite connectée à ce résultat d'analyse",
     "ordered": "Prescrit",
     "phoneNumber": "Numéro de téléphone",
+    "pleaseTryAgain": "Veuillez réessayer.",
     "ratingStars": "{{count}}/5 étoiles",
     "ratingStars_one": "{{count}}/5 étoile",
     "ratingStars_other": "{{count}}/5 étoiles",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Créer un patient",
-        "saveChanges": "Sauvegarder les changements"
+        "saveChanges": "Sauvegarder les changements",
+        "updatePatient": "Mettre à jour le patient"
       },
       "createTitle": "Créer un nouveau patient",
       "editTitle": "Editer le patient",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Ne se prononce pas"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "p. ex. : 70",
+          "metric": "p. ex. : 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Cochez ceci si vous créez un dossier pour vous-même",
         "label": "Ceci est mon dossier médical"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "p. ex. : 150",
+          "metric": "p. ex. : 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF, ou BMP -- Max 15Mb",
@@ -1437,6 +1451,7 @@
         "systolicMin": "La PAS doit valoir au moins 50 mmHg",
         "temperatureMax": "La température ne peut pas dépasser {{max}}{{unit}}",
         "temperatureMin": "La température doit valoir au moins {{min}}{{unit}}",
+        "timeInFuture": "L'heure sélectionnée ne peut se situer dans le futur",
         "weightMax": "Le poids ne peut pas dépasser {{max}} {{unit}}",
         "weightMin": "Le poids doit valoir au moins {{min}} {{unit}}"
       }

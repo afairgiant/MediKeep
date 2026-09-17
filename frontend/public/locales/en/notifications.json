@@ -383,6 +383,8 @@
       "cleanupComplete": "Cleanup completed: {{cleaned}} files cleaned, {{deleted}} files deleted",
       "cleanupFailed": "Failed to cleanup files. Please try again later.",
       "noOutOfSync": "No out-of-sync files found to clean up",
+      "saved": "Settings saved successfully",
+      "saveFailed": "Failed to save settings",
       "sessionTimeoutUpdated": "Session timeout updated to {{minutes}} minutes. Your session has been refreshed."
     },
     "sharing": {

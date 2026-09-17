@@ -532,6 +532,7 @@
     "noVisitsLinked": "此化验结果未关联就诊记录",
     "ordered": "已开具",
     "phoneNumber": "电话号码",
+    "pleaseTryAgain": "请重试。",
     "ratingStars": "{{count}}/5星",
     "ratingStars_one": "{{count}}/5星",
     "ratingStars_other": "{{count}}/5星",
@@ -723,7 +724,8 @@
       },
       "buttons": {
         "createPatient": "创建患者",
-        "saveChanges": "保存更改"
+        "saveChanges": "保存更改",
+        "updatePatient": "更新患者"
       },
       "createTitle": "添加新患者",
       "editTitle": "编辑患者",
@@ -733,6 +735,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "不愿说明"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "如：70",
+          "metric": "如：175"
         }
       },
       "lastName": {
@@ -773,6 +781,12 @@
       "selfRecord": {
         "description": "如果您要为自己创建记录，请勾选此项",
         "label": "这是我自己的医疗记录"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "如：150",
+          "metric": "如：70"
+        }
       }
     },
     "photoFormat": "JPEG、PNG、GIF或BMP -- 最大15MB",
@@ -1436,6 +1450,7 @@
         "systolicMin": "收缩压必须至少为50 mmHg",
         "temperatureMax": "体温不能超过{{max}}{{unit}}",
         "temperatureMin": "体温必须至少为{{min}}{{unit}}",
+        "timeInFuture": "所选时间不能是未来时间",
         "weightMax": "体重不能超过{{max}} {{unit}}",
         "weightMin": "体重必须至少为{{min}} {{unit}}"
       }

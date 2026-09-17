@@ -533,6 +533,7 @@
     "noVisitsLinked": "Keine Termine mit diesem Laborergebnis verknüpft",
     "ordered": "Angeordnet",
     "phoneNumber": "Telefonnummer",
+    "pleaseTryAgain": "Bitte versuchen Sie es erneut.",
     "ratingStars": "{{count}}/5 Sterne",
     "ratingStars_one": "{{count}}/5 Stern",
     "ratingStars_other": "{{count}}/5 Sterne",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Patient erstellen",
-        "saveChanges": "Änderungen speichern"
+        "saveChanges": "Änderungen speichern",
+        "updatePatient": "Patient aktualisieren"
       },
       "createTitle": "Neuen Patienten hinzufügen",
       "editTitle": "Patient bearbeiten",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Keine Angabe"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "z.B. 70",
+          "metric": "z.B. 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Aktivieren Sie dies, wenn Sie eine Akte für sich selbst erstellen",
         "label": "Dies ist meine eigene Krankenakte"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "z.B. 150",
+          "metric": "z.B. 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF oder BMP – Max. 15 MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "Systolischer BD muss mindestens 50 mmHg betragen",
         "temperatureMax": "Temperatur darf {{max}}{{unit}} nicht überschreiten",
         "temperatureMin": "Temperatur muss mindestens {{min}}{{unit}} betragen",
+        "timeInFuture": "Ausgewählte Uhrzeit darf nicht in der Zukunft liegen",
         "weightMax": "Gewicht darf {{max}} {{unit}} nicht überschreiten",
         "weightMin": "Gewicht muss mindestens {{min}} {{unit}} betragen"
       }

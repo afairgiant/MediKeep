@@ -383,6 +383,8 @@
       "cleanupComplete": "Rensning slutförd: {{cleaned}} filer rensade, {{deleted}} filer borttagna",
       "cleanupFailed": "Kunde inte rensa filer. Vänligen försök igen senare.",
       "noOutOfSync": "Inga osynkroniserade filer hittades att rensa",
+      "saved": "Inställningarna har sparats",
+      "saveFailed": "Det gick inte att spara inställningarna",
       "sessionTimeoutUpdated": "Sessionstimeout uppdaterad till {{minutes}} minuter. Din session har uppdaterats."
     },
     "sharing": {

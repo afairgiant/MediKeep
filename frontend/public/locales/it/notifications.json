@@ -383,6 +383,8 @@
       "cleanupComplete": "Pulizia completata: {{cleaned}} file ripuliti, {{deleted}} file eliminati",
       "cleanupFailed": "Impossibile ripulire i file. Riprova più tardi.",
       "noOutOfSync": "Nessun file non sincronizzato trovato da ripulire",
+      "saved": "Impostazioni salvate con successo",
+      "saveFailed": "Salvataggio delle impostazioni non riuscito",
       "sessionTimeoutUpdated": "Timeout sessione aggiornato a {{minutes}} minuti. La sessione è stata aggiornata."
     },
     "sharing": {

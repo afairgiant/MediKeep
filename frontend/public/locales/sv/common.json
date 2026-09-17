@@ -533,6 +533,7 @@
     "noVisitsLinked": "Inga besök länkade till detta labbresultat",
     "ordered": "Beställt",
     "phoneNumber": "Telefonnummer",
+    "pleaseTryAgain": "Vänligen försök igen.",
     "ratingStars": "{{count}}/5 stjärnor",
     "ratingStars_one": "{{count}}/5 stjärna",
     "ratingStars_other": "{{count}}/5 stjärnor",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Skapa patient",
-        "saveChanges": "Spara ändringar"
+        "saveChanges": "Spara ändringar",
+        "updatePatient": "Uppdatera patient"
       },
       "createTitle": "Lägg till ny patient",
       "editTitle": "Redigera patient",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Vill inte ange"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "t.ex. 70",
+          "metric": "t.ex. 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Markera detta om du skapar en journal för dig själv",
         "label": "Detta är min egen medicinska journal"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "t.ex. 150",
+          "metric": "t.ex. 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF eller BMP -- Max 15MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "Systoliskt blodtryck måste vara minst 50 mmHg",
         "temperatureMax": "Temperatur kan inte överstiga {{max}}{{unit}}",
         "temperatureMin": "Temperatur måste vara minst {{min}}{{unit}}",
+        "timeInFuture": "Vald tid kan inte ligga i framtiden",
         "weightMax": "Vikt kan inte överstiga {{max}} {{unit}}",
         "weightMin": "Vikt måste vara minst {{min}} {{unit}}"
       }

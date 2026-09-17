@@ -29,11 +29,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const SRC_DIR = path.join(__dirname, '..', 'src');
+const DEFAULT_SRC_DIR = path.join(__dirname, '..', 'src');
 const LOCALES_DIR = path.join(__dirname, '..', 'public', 'locales');
-const ALL_LOCALES = ['en', 'de', 'es', 'fr', 'it', 'nl', 'pt', 'ru', 'sv', 'pl'];
-const ALL_NAMESPACES = ['common', 'medical', 'errors', 'navigation', 'notifications', 'admin', 'shared'];
+const ALL_LOCALES = ['en', 'de', 'el', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'sv', 'th', 'zh'];
+const ALL_NAMESPACES = ['admin', 'auth', 'common', 'documents', 'errors', 'invitations', 'labresults', 'medical', 'navigation', 'notifications', 'reportPdf', 'reports', 'settings', 'shared', 'vitals'];
 const DEFAULT_NS = 'common';
+const PLURAL_SUFFIXES = ['zero', 'one', 'two', 'few', 'many', 'other'];
 
 // ─── Argument Parsing ────────────────────────────────────────────────
 
@@ -45,6 +46,8 @@ const getArg = (flag) => {
 const hasFlag = (flag) => args.includes(flag);
 
 const filterLocale = getArg('--locale');
+// Tests point this at a fixture tree; everything else scans the real source.
+const SRC_DIR = getArg('--src') || DEFAULT_SRC_DIR;
 const jsonOutput = hasFlag('--json');
 const verbose = hasFlag('--verbose');
 const showAll = hasFlag('--all');
@@ -72,6 +75,7 @@ By default only EXPOSED keys are reported.
 Options:
   --all              Also show COVERED keys (have inline fallbacks)
   --locale <code>    Check against a specific locale (default: en)
+  --src <dir>        Scan this directory instead of src/
   --json             Output results as JSON
   --verbose          Show dynamic keys that can't be statically checked
   --unused           Also report locale keys not referenced in source code
@@ -135,7 +139,7 @@ function findSourceFiles(dir) {
 // ─── Key Extraction from Source ──────────────────────────────────────
 
 /**
- * Extracts the default namespace(s) from useTranslation() calls in the file.
+ * Namespaces a key in this file may resolve against, in i18next's search order.
  */
 function getFileNamespaces(content) {
   const namespaces = [];
@@ -156,41 +160,275 @@ function getFileNamespaces(content) {
     }
   }
 
-  return namespaces.length > 0 ? namespaces : [DEFAULT_NS];
+  // A file with no useTranslation() does not pick the namespace, its consumer does.
+  return namespaces.length > 0 ? namespaces : ALL_NAMESPACES;
 }
 
 /**
- * Resolve a raw key string into { namespace, key }.
+ * A `/` opens a regex literal only where an operand cannot appear; straight
+ * after a value (identifier, number, closing bracket) it is division instead.
  */
-function resolveKey(raw, defaultNs) {
+const REGEX_OK_AFTER = new Set([
+  '(', ',', '=', ':', '[', '!', '&', '|', '?', '{', '}', ';', '+', '-', '*',
+  '%', '<', '>', '~', '^',
+]);
+const REGEX_OK_KEYWORDS = new Set([
+  'return', 'typeof', 'case', 'in', 'of', 'do', 'else', 'void', 'delete',
+  'instanceof', 'new', 'yield', 'await',
+]);
+
+function startsRegex(text, i) {
+  let j = i - 1;
+  while (j >= 0 && (text[j] === ' ' || text[j] === '\t')) j--;
+  if (j < 0) return true;
+  const prev = text[j];
+  if (prev === '\n' || prev === '\r') return true;
+  if (REGEX_OK_AFTER.has(prev)) return true;
+  const word = (text.slice(0, j + 1).match(/[A-Za-z_$][\w$]*$/) || [''])[0];
+  return REGEX_OK_KEYWORDS.has(word);
+}
+
+/**
+ * Span of the comment, regex literal, string or template starting at `i`, with
+ * `end` the index of its last character. Null when `text[i]` starts none.
+ *
+ * Every scanner below reads through this, so a regex literal such as
+ * /['"]/ can no longer be mistaken for an opening quote.
+ */
+function readAtom(text, i) {
+  const ch = text[i];
+  const next = text[i + 1];
+
+  if (ch === '/' && next === '*') {
+    const close = text.indexOf('*/', i + 2);
+    return { kind: 'comment', end: close === -1 ? text.length - 1 : close + 1 };
+  }
+  if (ch === '/' && next === '/') {
+    const nl = text.indexOf('\n', i);
+    return { kind: 'comment', end: (nl === -1 ? text.length : nl) - 1 };
+  }
+  if (ch === '/' && startsRegex(text, i)) {
+    let inClass = false;
+    for (let j = i + 1; j < text.length; j++) {
+      const c = text[j];
+      if (c === '\\') { j++; continue; }
+      if (c === '\n') break;
+      if (inClass) { if (c === ']') inClass = false; continue; }
+      if (c === '[') { inClass = true; continue; }
+      if (c === '/') return { kind: 'regex', end: j };
+    }
+    return null;
+  }
+  if (ch === "'" || ch === '"' || ch === '`') {
+    for (let j = i + 1; j < text.length; j++) {
+      const c = text[j];
+      if (c === '\\') { j++; continue; }
+      if (c === ch) {
+        return { kind: 'string', quote: ch, body: text.slice(i + 1, j), end: j };
+      }
+    }
+    return { kind: 'string', quote: ch, body: text.slice(i + 1), end: text.length - 1 };
+  }
+  return null;
+}
+
+
+/**
+ * Blank comment bodies, preserving length and newlines so line numbers still map.
+ */
+function stripComments(content) {
+  const out = content.split('');
+  for (let i = 0; i < content.length; i++) {
+    const atom = readAtom(content, i);
+    if (!atom) continue;
+    if (atom.kind === 'comment') {
+      for (let j = i; j <= atom.end; j++) if (out[j] !== '\n') out[j] = ' ';
+    }
+    i = atom.end;
+  }
+  return out.join('');
+}
+
+/**
+ * Resolve a raw key string into { namespace, key, candidates }.
+ *
+ * `candidates` is every namespace i18next would search, in order: a single
+ * entry for an explicit `ns:key`, otherwise the file's whole useTranslation
+ * list, which i18next falls through before declaring a key missing.
+ */
+function resolveKey(raw, fileNamespaces) {
   if (raw.includes(':')) {
     const colonIdx = raw.indexOf(':');
     const possibleNs = raw.substring(0, colonIdx);
     if (ALL_NAMESPACES.includes(possibleNs)) {
-      return { namespace: possibleNs, key: raw.substring(colonIdx + 1) };
+      const key = raw.substring(colonIdx + 1);
+      return { namespace: possibleNs, key, candidates: [possibleNs] };
     }
   }
-  return { namespace: defaultNs, key: raw };
+  return { namespace: fileNamespaces[0], key: raw, candidates: fileNamespaces };
 }
 
 /**
- * Check if the character after a t('key' match indicates a string fallback.
+ * Callers whose first argument is a translation key.
  *
- * After the closing quote of the key, the line should contain either:
- *   )           → no fallback
- *   , 'text'    → string fallback (COVERED)
- *   , "text"    → string fallback (COVERED)
- *   , `text`    → template fallback (COVERED)
- *   , { ... }   → interpolation object only (no fallback, EXPOSED)
- *   , variable  → can't tell, treat as no fallback (EXPOSED)
+ * The notify* helpers in utils/notifyTranslated forward their first argument to
+ * i18n.t(), so a key only ever named there is still user-visible; `resolve` is
+ * that module's own internal forwarder.
  */
-function hasFallbackArg(line, afterIdx) {
-  const rest = line.substring(afterIdx).trimStart();
-  // After the closing quote, expect comma then second arg
-  if (!rest.startsWith(',')) return false;
-  const afterComma = rest.substring(1).trimStart();
-  // Second arg is a string literal → fallback
-  return /^['"`]/.test(afterComma);
+const KEY_CALLERS = [
+  't',
+  'i18n.t',
+  'i18next.t',
+  'notifySuccess',
+  'notifyError',
+  'notifyWarning',
+  'notifyInfo',
+  'resolve',
+];
+
+/**
+ * Index of the paren closing the one at `openIdx`, or -1 if unbalanced.
+ * Skips over string and template-literal contents so quoted parens don't count.
+ */
+function findClosingParen(content, openIdx) {
+  let depth = 0;
+  for (let i = openIdx; i < content.length; i++) {
+    const atom = readAtom(content, i);
+    if (atom) { i = atom.end; continue; }
+    if (content[i] === '(') depth++;
+    else if (content[i] === ')') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Split a call's argument text on top-level commas only.
+ */
+function splitArgs(argText) {
+  const args = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < argText.length; i++) {
+    const atom = readAtom(argText, i);
+    if (atom) { i = atom.end; continue; }
+    const ch = argText[i];
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    else if (ch === ',' && depth === 0) {
+      args.push(argText.slice(start, i));
+      start = i + 1;
+    }
+  }
+  args.push(argText.slice(start));
+  return args;
+}
+
+// t() resolves any key its namespace holds, including a bare top-level one. The
+// notify*/resolve wrappers pass a dot-less string through as literal text, so for
+// those a literal is only a key when resolve() would treat it as one at runtime.
+const KEY_SHAPE = /^[A-Za-z_$][\w$-]*(?::[\w$.-]+)?(?:\.[\w$-]+)*$/;
+function looksLikeKey(literal, requireNamespaceOrDots) {
+  if (!literal || /\s/.test(literal)) return false;
+  if (requireNamespaceOrDots && !literal.includes(':')) {
+    const dots = literal.match(/\./g);
+    if (!dots || dots.length < 2) return false;
+  }
+  return KEY_SHAPE.test(literal);
+}
+
+/**
+ * Index of a top-level ternary `?` in `expr`, or -1.
+ */
+function findTernaryQuestion(expr) {
+  let depth = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const atom = readAtom(expr, i);
+    if (atom) { i = atom.end; continue; }
+    const ch = expr[i];
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    else if (ch === '?' && depth === 0) {
+      // Skip ?. optional chaining and ?? nullish coalescing.
+      if (expr[i + 1] === '.' || expr[i + 1] === '?') { i++; continue; }
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Index of the `:` matching the ternary `?` at `qIdx`, or -1.
+ */
+function findTernaryColon(expr, qIdx) {
+  let depth = 0;
+  let pending = 1;
+  for (let i = qIdx + 1; i < expr.length; i++) {
+    const atom = readAtom(expr, i);
+    if (atom) { i = atom.end; continue; }
+    const ch = expr[i];
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    else if (depth === 0 && ch === '?') {
+      if (expr[i + 1] === '.' || expr[i + 1] === '?') { i++; continue; }
+      pending++;
+    } else if (depth === 0 && ch === ':') {
+      pending--;
+      if (pending === 0) return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Value-position sub-expressions of `expr`, with every ternary condition dropped.
+ *
+ * A condition holds values, not keys: `t(unit === 'imperial' ? 'a.b' : 'a.c')`
+ * must yield the two branches and not `'imperial'`. Parentheses are unwrapped and
+ * branches recursed into, so nested and parenthesized ternaries drop theirs too.
+ */
+function valueExpressions(expr) {
+  expr = expr.trim();
+  while (expr.startsWith('(') && findClosingParen(expr, 0) === expr.length - 1) {
+    expr = expr.slice(1, -1).trim();
+  }
+  const qIdx = findTernaryQuestion(expr);
+  if (qIdx === -1) return [expr];
+  const colonIdx = findTernaryColon(expr, qIdx);
+  if (colonIdx === -1) return valueExpressions(expr.slice(qIdx + 1));
+  return [
+    ...valueExpressions(expr.slice(qIdx + 1, colonIdx)),
+    ...valueExpressions(expr.slice(colonIdx + 1)),
+  ];
+}
+
+
+/**
+ * Every key literal in an argument expression.
+ *
+ * Returns more than one for a ternary such as
+ * `t(metric ? 'a.b.metric' : 'a.b.imperial')` — both branches reach the UI, so
+ * both must exist in the locale files.
+ */
+function extractKeyLiterals(argText, requireNamespaceOrDots) {
+  const literals = [];
+  const dynamic = [];
+  for (const part of valueExpressions(argText)) {
+    for (let i = 0; i < part.length; i++) {
+      const atom = readAtom(part, i);
+      if (!atom) continue;
+      i = atom.end;
+      if (atom.kind !== 'string') continue;
+      if (atom.quote === '`' && atom.body.includes('${')) {
+        dynamic.push('`' + atom.body + '`');
+      } else if (looksLikeKey(atom.body, requireNamespaceOrDots)) {
+        literals.push(atom.body);
+      }
+    }
+  }
+  return { literals, dynamic };
 }
 
 /**
@@ -199,62 +437,81 @@ function hasFallbackArg(line, afterIdx) {
 function extractTranslationKeys(content, filePath) {
   const staticKeys = [];
   const dynamicKeys = [];
+  content = stripComments(content);
   const fileNamespaces = getFileNamespaces(content);
-  const defaultNs = fileNamespaces[0];
 
-  const lines = content.split('\n');
+  // Precompute newline offsets so a match index maps back to a line number.
+  const lineStarts = [0];
+  for (let i = 0; i < content.length; i++) {
+    if (content[i] === '\n') lineStarts.push(i + 1);
+  }
+  const lineOf = idx => {
+    let lo = 0, hi = lineStarts.length - 1;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      if (lineStarts[mid] <= idx) lo = mid; else hi = mid - 1;
+    }
+    return lo + 1;
+  };
 
-  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-    const line = lines[lineIdx];
-    const lineNum = lineIdx + 1;
+  const callerRe = new RegExp(
+    `(?:^|[^.\\w$])(${KEY_CALLERS.map(c => c.replace('.', '\\.')).join('|')})\\s*\\(`,
+    'g'
+  );
 
-    // ── Direct t() calls ──────────────────────────────────────────
-    // Match t('key'), i18n.t('key'), i18next.t('key')
-    const tCallRegex = /(?:^|[^.\w])(?:i18n(?:ext)?\.)?t\(\s*(['"`])(.*?)\1/g;
-    let m;
-    while ((m = tCallRegex.exec(line)) !== null) {
-      const quote = m[1];
-      const raw = m[2];
-      const afterQuoteIdx = m.index + m[0].length;
+  let m;
+  while ((m = callerRe.exec(content)) !== null) {
+    const callerName = m[1];
+    const openIdx = m.index + m[0].length - 1;
+    const closeIdx = findClosingParen(content, openIdx);
+    if (closeIdx === -1) continue;
 
-      // Template literals with interpolation are dynamic
-      if (quote === '`' && raw.includes('${')) {
-        dynamicKeys.push({ expression: `\`${raw}\``, line: lineNum, file: filePath });
-        continue;
+    const argText = content.slice(openIdx + 1, closeIdx);
+    const args = splitArgs(argText);
+    const lineNum = lineOf(m.index);
+
+    // Only t() takes a string fallback second; notify* takes an options object.
+    const isTCall = callerName.endsWith('t');
+    const { literals, dynamic } = extractKeyLiterals(args[0] || '', !isTCall);
+    for (const expr of dynamic) {
+      dynamicKeys.push({ expression: expr, line: lineNum, file: filePath });
+    }
+    if (literals.length === 0) {
+      const firstArg = (args[0] || '').trim();
+      // A bare identifier as the key is only resolvable at runtime.
+      if (firstArg && !/^['"`]/.test(firstArg) && /^[a-zA-Z_$][\w$.]*$/.test(firstArg)) {
+        dynamicKeys.push({ expression: firstArg, line: lineNum, file: filePath });
       }
+      continue;
+    }
 
-      const { namespace, key } = resolveKey(raw, defaultNs);
+    const hasFallback =
+      isTCall && args.length > 1 && /^\s*['"`]/.test(args[1]);
+
+    for (const raw of literals) {
+      const { namespace, key, candidates } = resolveKey(raw, fileNamespaces);
       if (!key || key.trim() === '') continue;
-
-      const hasFallback = hasFallbackArg(line, afterQuoteIdx);
-
       staticKeys.push({
-        namespace, key, line: lineNum, raw, file: filePath,
+        namespace, key, candidates, line: lineNum, raw, file: filePath,
         hasFallback, source: 'tCall',
       });
     }
+  }
 
-    // ── Dynamic t(variable) calls ─────────────────────────────────
-    const dynamicTRegex = /(?:^|[^.\w])(?:i18n(?:ext)?\.)?t\(\s*([a-zA-Z_$][\w$.]*(?:\.\w+)*)\s*[,)]/g;
-    while ((m = dynamicTRegex.exec(line)) !== null) {
-      const varName = m[1];
-      if (/^['"`]/.test(varName)) continue;
-      if (['true', 'false', 'null', 'undefined', 'this', 'void'].includes(varName)) continue;
-      dynamicKeys.push({ expression: varName, line: lineNum, file: filePath });
-    }
-
-    // ── *Key property references ──────────────────────────────────
-    // e.g. labelKey: 'medical:visits.form.fields.reason.label'
-    // These go through translateField() which calls t(key) with NO fallback,
-    // UNLESS the object also has a sibling non-Key property (e.g., name alongside nameKey)
+  // ── *Key property references ──────────────────────────────────
+  // e.g. labelKey: 'medical:visits.form.fields.reason.label'
+  // These go through translateField() which calls t(key) with NO fallback,
+  // UNLESS the object also has a sibling non-Key property (e.g., name alongside nameKey)
+  const lines = content.split('\n');
+  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+    const line = lines[lineIdx];
     const keyPropRegex = /(label|placeholder|description|title|name)Key:\s*['"]([^'"]+)['"]/g;
-    while ((m = keyPropRegex.exec(line)) !== null) {
-      const propName = m[1]; // e.g. 'name', 'title', 'label'
-      const raw = m[2];
-      const { namespace, key } = resolveKey(raw, defaultNs);
+    let km;
+    while ((km = keyPropRegex.exec(line)) !== null) {
+      const propName = km[1];
+      const raw = km[2];
+      const { namespace, key, candidates } = resolveKey(raw, fileNamespaces);
 
-      // Check if a sibling non-Key property exists nearby (same object)
-      // e.g. nameKey: '...' + name: '...' means the name acts as fallback
       const siblingRegex = new RegExp(`(?:^|[,{\\s])${propName}:\\s*['"\`]`, 'm');
       const contextStart = Math.max(0, lineIdx - 10);
       const contextEnd = Math.min(lines.length, lineIdx + 10);
@@ -262,7 +519,7 @@ function extractTranslationKeys(content, filePath) {
       const hasSibling = siblingRegex.test(context);
 
       staticKeys.push({
-        namespace, key, line: lineNum, raw, file: filePath,
+        namespace, key, candidates, line: lineIdx + 1, raw, file: filePath,
         hasFallback: hasSibling, source: 'keyProp',
       });
     }
@@ -290,19 +547,26 @@ const coveredKeys = [];    // Missing + has fallback → hidden but should be in
 const validKeys = new Set();
 
 for (const entry of allStaticKeys) {
-  const nsKeys = localeKeyMap[entry.namespace];
-  if (!nsKeys) {
+  const candidates = entry.candidates || [entry.namespace];
+  const known = candidates.filter(ns => localeKeyMap[ns]);
+  if (known.length === 0) {
     exposedKeys.push({ ...entry, reason: `Unknown namespace "${entry.namespace}"` });
     continue;
   }
-  if (!nsKeys.has(entry.key)) {
+  // A counted key is stored only under its plural suffixes, never bare.
+  const resolvedNs = known.find(
+    ns =>
+      localeKeyMap[ns].has(entry.key) ||
+      PLURAL_SUFFIXES.some(sfx => localeKeyMap[ns].has(`${entry.key}_${sfx}`))
+  );
+  if (!resolvedNs) {
     if (entry.hasFallback) {
       coveredKeys.push({ ...entry, reason: 'Key missing but has inline fallback' });
     } else {
       exposedKeys.push({ ...entry, reason: 'Key not found — no fallback' });
     }
   } else {
-    validKeys.add(`${entry.namespace}:${entry.key}`);
+    validKeys.add(`${resolvedNs}:${entry.key}`);
   }
 }
 

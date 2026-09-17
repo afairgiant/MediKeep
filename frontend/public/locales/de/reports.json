@@ -14,6 +14,7 @@
       "description": "Wählen Sie medizinische Datensätze für Ihren individuellen Bericht aus",
       "title": "Berichtkonfiguration"
     },
+    "icon": "📊",
     "loading": "Berichtgenerator wird geladen...",
     "noData": {
       "description": "Fügen Sie zuerst medizinische Datensätze hinzu, um den Berichtgenerator zu verwenden.",
@@ -159,6 +160,7 @@
       "singleExport": "Einzelexport",
       "title": "Exportmodus"
     },
+    "icon": "📤",
     "information": {
       "bulk": {
         "description": "Erstellt eine ZIP-Datei mit mehreren Datentypen im gewählten Format für eine umfassende Datensicherung.",

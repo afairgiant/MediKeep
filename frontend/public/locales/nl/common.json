@@ -533,6 +533,7 @@
     "noVisitsLinked": "Geen bezoeken gekoppeld aan dit labresultaat",
     "ordered": "Aangevraagd",
     "phoneNumber": "Telefoonnummer",
+    "pleaseTryAgain": "Probeer het opnieuw.",
     "ratingStars": "{{count}}/5 sterren",
     "ratingStars_one": "{{count}}/5 ster",
     "ratingStars_other": "{{count}}/5 sterren",
@@ -724,7 +725,8 @@
       },
       "buttons": {
         "createPatient": "Patiënt aanmaken",
-        "saveChanges": "Wijzigingen opslaan"
+        "saveChanges": "Wijzigingen opslaan",
+        "updatePatient": "Patiënt bijwerken"
       },
       "createTitle": "Nieuwe patiënt toevoegen",
       "editTitle": "Patiënt bewerken",
@@ -734,6 +736,12 @@
       "gender": {
         "options": {
           "preferNotToSay": "Zeg ik liever niet"
+        }
+      },
+      "height": {
+        "placeholder": {
+          "imperial": "bv. 70",
+          "metric": "bv. 175"
         }
       },
       "lastName": {
@@ -774,6 +782,12 @@
       "selfRecord": {
         "description": "Vink dit aan als u een dossier voor uzelf aanmaakt",
         "label": "Dit is mijn eigen medisch dossier"
+      },
+      "weight": {
+        "placeholder": {
+          "imperial": "bv. 150",
+          "metric": "bv. 70"
+        }
       }
     },
     "photoFormat": "JPEG, PNG, GIF of BMP -- Max 15 MB",
@@ -1437,6 +1451,7 @@
         "systolicMin": "Systolische bloeddruk moet minimaal 50 mmHg zijn",
         "temperatureMax": "Temperatuur mag niet hoger zijn dan {{max}}{{unit}}",
         "temperatureMin": "Temperatuur moet minimaal {{min}}{{unit}} zijn",
+        "timeInFuture": "Geselecteerde tijd mag niet in de toekomst liggen",
         "weightMax": "Gewicht mag niet hoger zijn dan {{max}} {{unit}}",
         "weightMin": "Gewicht moet minimaal {{min}} {{unit}} zijn"
       }

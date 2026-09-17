@@ -14,6 +14,7 @@
       "description": "选择要包含在自定义报告中的医疗记录",
       "title": "报告配置"
     },
+    "icon": "📊",
     "loading": "正在加载报告生成器...",
     "noData": {
       "description": "请先添加一些医疗记录以使用报告生成器。",
@@ -159,6 +160,7 @@
       "singleExport": "单独导出",
       "title": "导出模式"
     },
+    "icon": "📤",
     "information": {
       "bulk": {
         "description": "创建包含多种数据类型的 ZIP 文件，采用您选择的格式进行全面数据备份。",
