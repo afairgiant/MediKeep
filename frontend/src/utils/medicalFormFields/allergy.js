@@ -23,6 +23,7 @@ export const allergyFormFields = [
     required: true,
     gridColumn: 6,
     options: [
+      { value: 'none', labelKey: 'common:severity.none' },
       { value: 'mild', labelKey: 'common:severity.mild' },
       { value: 'moderate', labelKey: 'common:severity.moderate' },
       { value: 'severe', labelKey: 'common:severity.severe' },

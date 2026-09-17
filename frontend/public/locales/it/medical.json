@@ -254,6 +254,7 @@
           "critical": "🚨 Critica - Pericolosa per la vita",
           "mild": "💛 Lieve - Impatto minimo",
           "moderate": "⚡ Moderata - Impatto evidente",
+          "none": "🚫 Nessuna - Nessun disagio",
           "severe": "⚠️ Grave - Impatto significativo"
         },
         "status": {
@@ -533,6 +534,7 @@
         "lifeThreatening": "Pericolosa per la vita - Cure di emergenza necessarie",
         "mild": "Lieve - Fastidio minore",
         "moderate": "Moderata - Impatto evidente",
+        "none": "Nessuna - Nessun disagio",
         "severe": "Grave - Impatto significativo"
       },
       "placeholder": "Seleziona la gravità"

@@ -94,6 +94,7 @@ const InjuryViewModal = ({
   // Format severity display
   const formatSeverity = severity => {
     const map = {
+      none: t('common:severity.none', 'None - No discomfort'),
       mild: t('common:severity.mild', 'Mild'),
       moderate: t('common:severity.moderate', 'Moderate'),
       severe: t('common:severity.severe', 'Severe'),
@@ -108,6 +109,7 @@ const InjuryViewModal = ({
   // Get severity color
   const getSeverityColor = severity => {
     const colors = {
+      none: 'gray',
       mild: 'blue',
       moderate: 'yellow',
       severe: 'orange',

@@ -82,6 +82,10 @@ export const familyConditionFormFields = [
     clearable: true,
     options: [
       {
+        value: 'none',
+        labelKey: 'medical:familyHistory.form.condition.severityOptions.none',
+      },
+      {
         value: 'mild',
         labelKey: 'medical:familyHistory.form.condition.severityOptions.mild',
       },

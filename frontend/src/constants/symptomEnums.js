@@ -3,6 +3,7 @@
  * MUST match backend SymptomSeverity enum exactly
  */
 export const SYMPTOM_SEVERITY = {
+  NONE: 'none',
   MILD: 'mild',
   MODERATE: 'moderate',
   SEVERE: 'severe',
@@ -23,6 +24,7 @@ export const SYMPTOM_STATUS = {
  * Display labels for symptom severity
  */
 export const SYMPTOM_SEVERITY_LABELS = {
+  [SYMPTOM_SEVERITY.NONE]: 'None - No discomfort',
   [SYMPTOM_SEVERITY.MILD]: 'Mild',
   [SYMPTOM_SEVERITY.MODERATE]: 'Moderate',
   [SYMPTOM_SEVERITY.SEVERE]: 'Severe',
@@ -42,6 +44,7 @@ export const SYMPTOM_STATUS_LABELS = {
  * Color mapping for symptom severity badges
  */
 export const SYMPTOM_SEVERITY_COLORS = {
+  [SYMPTOM_SEVERITY.NONE]: 'gray',
   [SYMPTOM_SEVERITY.MILD]: 'green',
   [SYMPTOM_SEVERITY.MODERATE]: 'yellow',
   [SYMPTOM_SEVERITY.SEVERE]: 'orange',
@@ -157,6 +160,7 @@ export const getImpactLevelOptions = () => {
  * Used for determining maximum severity across multiple occurrences
  */
 export const SYMPTOM_SEVERITY_ORDER = {
+  [SYMPTOM_SEVERITY.NONE]: 0,
   [SYMPTOM_SEVERITY.MILD]: 1,
   [SYMPTOM_SEVERITY.MODERATE]: 2,
   [SYMPTOM_SEVERITY.SEVERE]: 3,

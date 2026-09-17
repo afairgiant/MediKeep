@@ -58,6 +58,7 @@ export const TREATMENT_STATUS_OPTIONS = [
 
 // Severity Level Options
 export const SEVERITY_OPTIONS = [
+  { value: 'none', label: 'None - No discomfort' },
   { value: 'mild', label: 'Mild - Minor impact' },
   { value: 'moderate', label: 'Moderate - Noticeable impact' },
   { value: 'severe', label: 'Severe - Significant impact' },
@@ -195,6 +196,12 @@ export const STATUS_STYLES = {
 
 // Severity Badge Colors
 export const SEVERITY_STYLES = {
+  none: {
+    color: 'var(--mantine-color-gray-6)',
+    backgroundColor: 'var(--color-bg-secondary)',
+    borderColor: 'var(--mantine-color-gray-3)',
+    icon: '🚫',
+  },
   mild: {
     color: 'var(--mantine-color-green-8)',
     backgroundColor: 'var(--mantine-color-green-1)',

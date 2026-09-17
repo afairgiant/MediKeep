@@ -366,6 +366,7 @@ JUNCTION TABLES (Many-to-Many)
 - relapse
 
 **Severity Values** (SeverityLevel enum):
+- none
 - mild
 - moderate
 - severe
@@ -910,6 +911,7 @@ JUNCTION TABLES (Many-to-Many)
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 
 **Severity Values** (SymptomSeverity enum):
+- none
 - mild
 - moderate
 - severe
@@ -2855,13 +2857,13 @@ stmt = select(Patient)\
 - routine, urgent, emergency
 
 **SeverityLevel**:
-- mild, moderate, severe, life-threatening
+- none, mild, moderate, severe, life-threatening
 
 **SymptomStatus**:
 - active, resolved, recurring
 
 **SymptomSeverity**:
-- mild, moderate, severe, critical
+- none, mild, moderate, severe, critical
 
 **InjuryStatus**:
 - active (currently being treated)

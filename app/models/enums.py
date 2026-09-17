@@ -107,6 +107,7 @@ class EncounterPriority(Enum):
 class SeverityLevel(Enum):
     """Severity levels for conditions, allergies, etc."""
 
+    NONE = "none"
     MILD = "mild"
     MODERATE = "moderate"
     SEVERE = "severe"
@@ -188,6 +189,7 @@ class InsuranceStatus(Enum):
 class SymptomSeverity(Enum):
     """Severity levels for symptoms"""
 
+    NONE = "none"
     MILD = "mild"
     MODERATE = "moderate"
     SEVERE = "severe"

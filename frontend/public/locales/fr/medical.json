@@ -254,6 +254,7 @@
           "critical": "🚨 Critique — Danger de mort",
           "mild": "💛 Bénigne — Impact mineur",
           "moderate": "⚡ Modérée — Impact notable",
+          "none": "🚫 Aucune - Aucune gêne",
           "severe": "⚠️ Sévère — Impact significatif"
         },
         "status": {
@@ -533,6 +534,7 @@
         "lifeThreatening": "Critique — Soins urgents requis",
         "mild": "Bénigne — Léger inconfort",
         "moderate": "Modérée — Impact notable",
+        "none": "Aucune - Aucune gêne",
         "severe": "Sévère — Impact significatif"
       },
       "placeholder": "Sélectionnez la sévérité"
