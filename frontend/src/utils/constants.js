@@ -58,6 +58,7 @@ export const MEDICAL_CATEGORIES = {
     'nasal',
     'rectal',
     'sublingual',
+    'aural',
   ],
 };
 

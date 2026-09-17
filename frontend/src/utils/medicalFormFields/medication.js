@@ -113,6 +113,10 @@ export const medicationFormFields = [
         value: 'sublingual',
         labelKey: 'medical:medications.route.options.sublingual',
       },
+      {
+        value: 'aural',
+        labelKey: 'medical:medications.route.options.aural',
+      },
     ],
   },
   {

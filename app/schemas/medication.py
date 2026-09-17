@@ -185,6 +185,7 @@ class MedicationBase(TaggedEntityMixin):
             "nasal",
             "rectal",
             "sublingual",
+            "aural",
         ]
         if v and v.lower() not in valid_routes:
             raise ValueError(f"Route must be one of: {', '.join(valid_routes)}")
@@ -366,6 +367,7 @@ class MedicationUpdate(BaseModel):
                 "nasal",
                 "rectal",
                 "sublingual",
+                "aural",
             ]
             if v.lower() not in valid_routes:
                 raise ValueError(f"Route must be one of: {', '.join(valid_routes)}")

@@ -975,6 +975,7 @@
       "description": "Come viene somministrato il farmaco",
       "label": "Via di somministrazione",
       "options": {
+        "aural": "Auricolare",
         "inhalation": "Inalatoria",
         "injection": "Iniezione",
         "intramuscular": "Intramuscolare",

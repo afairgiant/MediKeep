@@ -971,6 +971,7 @@
       "description": "药物给药方式",
       "label": "给药途径",
       "options": {
+        "aural": "耳用",
         "inhalation": "吸入",
         "injection": "注射",
         "intramuscular": "肌肉注射",
