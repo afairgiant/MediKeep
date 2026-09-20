@@ -10,6 +10,9 @@ updates:
     labels:
       - "dependencies"
       - "python"
+    ignore:
+      # pydantic pins pydantic-core exactly; bumping it alone is unresolvable
+      - dependency-name: "pydantic-core"
     groups:
       minor-and-patch:
         update-types:
