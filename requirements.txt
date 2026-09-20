@@ -53,7 +53,7 @@ tzdata>=2024.1
 PyYAML==6.0.3
 reportlab==4.5.0
 matplotlib>=3.8.0,<3.11
-numpy>=1.26,<2.4
+numpy>=2.5.3,<2.6
 requests==2.34.2
 rsa==4.9.1
 six==1.17.0
