@@ -670,6 +670,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
         unit={trendUnit}
         patientId={patientId}
         onMutate={onRefresh}
+        readOnly={disableActions}
       />
     </Stack>
   );

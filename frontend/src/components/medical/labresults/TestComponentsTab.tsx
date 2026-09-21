@@ -620,6 +620,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           unit={selectedUnit}
           patientId={currentPatient.id}
           onMutate={handleRefresh}
+          readOnly={isViewMode}
         />
       )}
     </Stack>

@@ -179,7 +179,9 @@ def create_lab_test_component(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # Verify patient access
-        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
+        deps.verify_patient_access(
+            db_lab_result.patient_id, db, current_user, required_permission="edit"
+        )
 
         # Set the lab_result_id from the URL parameter
         lab_test_component_in.lab_result_id = lab_result_id
@@ -219,7 +221,9 @@ def create_lab_test_components_bulk(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # Verify patient access
-        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
+        deps.verify_patient_access(
+            db_lab_result.patient_id, db, current_user, required_permission="edit"
+        )
 
         # Set the lab_result_id from the URL parameter
         bulk_data.lab_result_id = lab_result_id
@@ -310,7 +314,9 @@ def update_lab_test_component(
 
         # Verify patient access through the lab result
         db_lab_result = lab_result.get(db, db_component.lab_result_id)
-        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
+        deps.verify_patient_access(
+            db_lab_result.patient_id, db, current_user, required_permission="edit"
+        )
 
         # Update the component
         db_component = handle_update_with_logging(
@@ -344,7 +350,9 @@ def delete_lab_test_component(
 
         # Verify patient access through the lab result
         db_lab_result = lab_result.get(db, db_component.lab_result_id)
-        deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
+        deps.verify_patient_access(
+            db_lab_result.patient_id, db, current_user, required_permission="edit"
+        )
 
         # Delete the component
         handle_delete_with_logging(

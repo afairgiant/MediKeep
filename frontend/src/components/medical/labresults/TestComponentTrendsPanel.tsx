@@ -61,6 +61,10 @@ interface TestComponentTrendsPanelProps {
   // (which this panel doesn't itself hold) can refresh — otherwise the
   // parent view keeps showing the old value/row until manually refreshed.
   onMutate?: () => void;
+  // When true, the caller has no edit access to this patient's records
+  // (view-only share, or an explicit view-only display mode) — hide the
+  // Edit/Delete actions entirely rather than relying on the backend alone.
+  readOnly?: boolean;
 }
 
 const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
@@ -70,6 +74,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   unit = null,
   patientId,
   onMutate,
+  readOnly = false,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
   const [trendData, setTrendData] = useState<TrendResponse | null>(null);
@@ -782,8 +787,8 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
             <Tabs.Panel value="table" pt="md">
               <TestComponentTrendTable
                 trendData={trendData}
-                onEdit={handleEditPoint}
-                onDelete={handleDeletePoint}
+                onEdit={readOnly ? undefined : handleEditPoint}
+                onDelete={readOnly ? undefined : handleDeletePoint}
                 actionLoadingId={actionLoadingId}
               />
             </Tabs.Panel>
