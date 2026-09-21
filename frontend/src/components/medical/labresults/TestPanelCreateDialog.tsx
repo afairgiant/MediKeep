@@ -20,6 +20,12 @@ import {
   PANEL_CATEGORY_TO_FORM_CATEGORY,
 } from '../../../constants/panelLibrary';
 import { getTemplateRowsForPanel } from '../../../constants/panelTemplateMap';
+import {
+  getAutocompleteOptions as getTestAutocompleteOptions,
+  getTestByName,
+  extractTestName,
+  TEST_CATEGORY_TO_FORM_CATEGORY,
+} from '../../../constants/testLibrary';
 import { IconAlertCircle, IconX } from '@tabler/icons-react';
 import { DateInput } from '../../adapters/DateInput';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
@@ -210,6 +216,13 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
     }
   }, [formData, currentPatient, onCreateSuccess, t]);
 
+  // Panels take priority; only fall back to individual tests when no panel matches,
+  // so the dropdown never mixes the two kinds of results.
+  const panelOptions = getPanelAutocompleteOptions(formData.test_name, 50);
+  const nameOptions = panelOptions.length > 0
+    ? panelOptions
+    : getTestAutocompleteOptions(formData.test_name, 50);
+
   return (
     <Modal
       opened={opened}
@@ -253,29 +266,62 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
           }}
           onOptionSubmit={value => {
             lastAutoPopulatedOptionRef.current = value;
-            const panelName = extractPanelName(value);
-            const panel = getPanelByOption(value);
-            const category = panel
-              ? (PANEL_CATEGORY_TO_FORM_CATEGORY[panel.category] ?? '')
-              : '';
-            setFormData(prev => ({
-              ...prev,
-              test_name: panelName,
-              test_category: category || prev.test_category,
-            }));
             const cleaned = removeUnfilledAutoRows(autoPopulatedRowIds);
-            const templateRows = getTemplateRowsForPanel(panelName);
-            if (templateRows) {
+            const panel = getPanelByOption(value);
+
+            if (panel) {
+              const panelName = extractPanelName(value);
+              const category = PANEL_CATEGORY_TO_FORM_CATEGORY[panel.category] ?? '';
+              setFormData(prev => ({
+                ...prev,
+                test_name: panelName,
+                test_category: category || prev.test_category,
+              }));
+              const templateRows = getTemplateRowsForPanel(panelName);
+              if (templateRows) {
+                const combined = [
+                  ...cleaned.filter(r => r.test_name.trim() !== ''),
+                  ...templateRows,
+                ];
+                inlineTestRef.current?.setComponents(combined.length > 0 ? combined : templateRows);
+                setAutoPopulatedRowIds(new Set(templateRows.map(r => r._rowId)));
+              } else {
+                inlineTestRef.current?.setComponents(cleaned);
+                setAutoPopulatedRowIds(new Set());
+              }
+              return;
+            }
+
+            const test = getTestByName(extractTestName(value));
+            if (test) {
+              const category = TEST_CATEGORY_TO_FORM_CATEGORY[test.category] ?? '';
+              setFormData(prev => ({
+                ...prev,
+                test_name: test.test_name,
+                test_category: category || prev.test_category,
+              }));
+              const testRow: ComponentRowData = {
+                ...createEmptyRow(1),
+                test_name: test.test_name,
+                canonical_test_name: test.test_name,
+                abbreviation: test.abbreviation || '',
+                test_code: test.test_code || '',
+                unit: test.default_unit,
+                category: test.category,
+                result_type: test.result_type || 'quantitative',
+              };
               const combined = [
                 ...cleaned.filter(r => r.test_name.trim() !== ''),
-                ...templateRows,
+                testRow,
               ];
-              inlineTestRef.current?.setComponents(combined.length > 0 ? combined : templateRows);
-              setAutoPopulatedRowIds(new Set(templateRows.map(r => r._rowId)));
-            } else {
-              inlineTestRef.current?.setComponents(cleaned);
-              setAutoPopulatedRowIds(new Set());
+              inlineTestRef.current?.setComponents(combined);
+              setAutoPopulatedRowIds(new Set([testRow._rowId]));
+              return;
             }
+
+            setFormData(prev => ({ ...prev, test_name: extractPanelName(value) }));
+            inlineTestRef.current?.setComponents(cleaned);
+            setAutoPopulatedRowIds(new Set());
           }}
           rightSection={
             formData.test_name ? (
@@ -296,7 +342,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
               </ActionIcon>
             ) : null
           }
-          data={getPanelAutocompleteOptions(formData.test_name)}
+          data={nameOptions}
           limit={50}
           filter={({ options, limit }) => options.slice(0, limit)}
           maxDropdownHeight={300}

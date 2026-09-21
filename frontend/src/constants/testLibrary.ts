@@ -169,6 +169,29 @@ export function isQualitativeTest(testName: string): boolean {
 }
 
 /**
+ * Maps individual test library categories to the lab result form's
+ * top-level test_category values (same target set as
+ * PANEL_CATEGORY_TO_FORM_CATEGORY in panelLibrary.ts).
+ */
+export const TEST_CATEGORY_TO_FORM_CATEGORY: Record<string, string> = {
+  cardiology: 'cardiology',
+  chemistry: 'chemistry',
+  endocrinology: 'blood work',
+  genetics: 'genetics',
+  hearing: 'hearing',
+  hematology: 'blood work',
+  hepatology: 'hepatology',
+  immunology: 'immunology',
+  lipids: 'blood work',
+  microbiology: 'microbiology',
+  molecular: 'other',
+  pathology: 'pathology',
+  stomatology: 'stomatology',
+  toxicology: 'blood work',
+  other: 'other',
+};
+
+/**
  * Returns the common_name that matched the query, but only when the match did
  * NOT also come from test_name or abbreviation. Used by autocomplete UIs to
  * show users why an unexpected-looking result appeared (e.g. searching
