@@ -289,9 +289,6 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
     }
-    for (const items of Object.values(groups)) {
-      items.sort((a, b) => a.test_name.localeCompare(b.test_name));
-    }
     const keys = Object.keys(groups).sort((a, b) => {
       if (sortMode === 'category') {
         return getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b));

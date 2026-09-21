@@ -266,6 +266,23 @@ describe('TestComponentCatalog', () => {
     expect(names).toEqual(['Albumin', 'Magnesium', 'Zinc']);
   });
 
+  it('keeps priority (status) ordering within a category instead of forcing alphabetical', () => {
+    // Default sort mode is 'priority': a critical result must outrank an
+    // alphabetically-earlier normal result in the same category (#1014 review fix —
+    // a blanket per-category name sort previously defeated this).
+    const components: LabTestComponentForStack[] = [
+      makeComponent({ id: 1, test_name: 'Albumin', canonical_test_name: 'Albumin', category: 'chemistry', status: 'normal' }),
+      makeComponent({ id: 2, test_name: 'Zinc', canonical_test_name: 'Zinc', category: 'chemistry', status: 'critical' }),
+    ];
+
+    render(<TestComponentCatalog {...defaultProps} components={components} />);
+
+    const names = screen
+      .getAllByTestId('catalog-card')
+      .map(card => card.getAttribute('data-test-name'));
+    expect(names).toEqual(['Zinc', 'Albumin']);
+  });
+
   it('category filter "Other Tests" includes legacy entries with no category set', () => {
     const components: LabTestComponentForStack[] = [
       makeComponent({ id: 1, test_name: 'Glucose', canonical_test_name: 'Glucose', category: 'chemistry' }),
