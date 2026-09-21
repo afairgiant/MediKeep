@@ -372,6 +372,7 @@
   "testComponents": {
     "addTestComponents": "Tests toevoegen",
     "addTests": "Tests toevoegen",
+    "confirmDelete": "Weet u zeker dat u dit testresultaat wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
     "categories": {
       "cardiology": "Cardiologie - Hart- en cardiale markers",
       "chemistry": "Chemie - Elektrolyten en mineralen",

@@ -217,7 +217,6 @@ describe('LabResultsComponentTable', () => {
     const components = [
       makeComponent({ id: 5, canonical_test_name: 'Glucose', completed_date: '2024-01-15', value: 95, lab_result_id: 99 }),
     ];
-    const onView = vi.fn();
     const onEdit = vi.fn();
     const onDelete = vi.fn();
 
@@ -226,7 +225,6 @@ describe('LabResultsComponentTable', () => {
         components={components}
         labResults={defaultLabResults}
         practitioners={defaultPractitioners}
-        onView={onView}
         onEdit={onEdit}
         onDelete={onDelete}
       />,
@@ -235,15 +233,13 @@ describe('LabResultsComponentTable', () => {
 
     fireEvent.click(screen.getByTestId('expand-btn-glucose'));
     const row = screen.getByTestId('history-row-5');
-    fireEvent.click(row.querySelector('[aria-label="View"]')!);
-    expect(onView).toHaveBeenCalledWith(expect.objectContaining({ id: 5, lab_result_id: 99 }));
     fireEvent.click(row.querySelector('[aria-label="Edit"]')!);
     expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 5, lab_result_id: 99 }));
     fireEvent.click(row.querySelector('[aria-label="Delete"]')!);
     expect(onDelete).toHaveBeenCalledWith(5); // comp.id, not comp.lab_result_id
   });
 
-  it('shows view/edit but hides delete for legacy (component-less) entries', () => {
+  it('shows edit but hides delete for legacy (component-less) entries', () => {
     const components = [
       makeComponent({
         id: -99,
@@ -254,7 +250,6 @@ describe('LabResultsComponentTable', () => {
         is_legacy: true,
       }),
     ];
-    const onView = vi.fn();
     const onEdit = vi.fn();
     const onDelete = vi.fn();
 
@@ -263,7 +258,6 @@ describe('LabResultsComponentTable', () => {
         components={components}
         labResults={defaultLabResults}
         practitioners={defaultPractitioners}
-        onView={onView}
         onEdit={onEdit}
         onDelete={onDelete}
       />,
@@ -272,7 +266,6 @@ describe('LabResultsComponentTable', () => {
 
     fireEvent.click(screen.getByTestId('expand-btn-ferritin'));
     const row = screen.getByTestId('history-row--99');
-    expect(row.querySelector('[aria-label="View"]')).not.toBeNull();
     fireEvent.click(row.querySelector('[aria-label="Edit"]')!);
     expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: -99, is_legacy: true }));
     expect(row.querySelector('[aria-label="Delete"]')).toBeNull();

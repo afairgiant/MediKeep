@@ -298,6 +298,7 @@
     "type": "Type",
     "unknown": "Onbekend",
     "unknownError": "Unknown error",
+    "updateFailed": "Bijwerken mislukt",
     "uploadFailed": "Upload mislukt",
     "user": "Gebruiker",
     "userManagement": "Gebruikersbeheer",

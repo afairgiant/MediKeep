@@ -298,6 +298,7 @@
     "type": "Tipo",
     "unknown": "Sconosciuto",
     "unknownError": "Unknown error",
+    "updateFailed": "Aggiornamento non riuscito",
     "uploadFailed": "Caricamento non riuscito",
     "user": "Utente",
     "userManagement": "Gestione utenti",

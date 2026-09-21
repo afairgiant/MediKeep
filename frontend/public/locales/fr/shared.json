@@ -298,6 +298,7 @@
     "type": "Type",
     "unknown": "Inconnu",
     "unknownError": "Unknown error",
+    "updateFailed": "Echec de la mise à jour",
     "uploadFailed": "Echec du téléversement",
     "user": "Utilisateur",
     "userManagement": "Gestion des utilisateurs",

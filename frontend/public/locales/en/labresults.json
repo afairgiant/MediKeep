@@ -379,6 +379,7 @@
   "testComponents": {
     "addTestComponents": "Add Tests",
     "addTests": "Add Tests",
+    "confirmDelete": "Are you sure you want to delete this test result? This action cannot be undone.",
     "categories": {
       "cardiology": "Cardiology - Heart & Cardiac Markers",
       "chemistry": "Chemistry - Electrolytes & Minerals",

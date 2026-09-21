@@ -298,6 +298,7 @@
     "type": "类型",
     "unknown": "未知",
     "unknownError": "Unknown error",
+    "updateFailed": "更新失败",
     "uploadFailed": "上传失败",
     "user": "用户",
     "userManagement": "用户管理",

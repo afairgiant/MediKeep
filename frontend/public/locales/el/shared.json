@@ -298,6 +298,7 @@
     "type": "Τύπος",
     "unknown": "Άγνωστο",
     "unknownError": "Άγνωστο σφάλμα",
+    "updateFailed": "Η ενημέρωση απέτυχε",
     "uploadFailed": "Η Μεταφόρτωση Απέτυχε",
     "user": "Χρήστης",
     "userManagement": "Διαχείριση Χρηστών",

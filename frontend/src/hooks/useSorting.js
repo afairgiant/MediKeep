@@ -51,10 +51,11 @@ export const useSorting = (data = [], config = {}) => {
       let aValue = getNestedValue(a, sortBy);
       let bValue = getNestedValue(b, sortBy);
 
-      // Handle null/undefined values
+      // Handle null/undefined values — always sort to the end, regardless
+      // of sort direction (a null date is neither "earliest" nor "latest").
       if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return sortOrder === 'asc' ? 1 : -1;
-      if (bValue == null) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue == null) return 1;
+      if (bValue == null) return -1;
 
       // Determine sort type
       const sortType = getSortType(sortBy, config.sortTypes);

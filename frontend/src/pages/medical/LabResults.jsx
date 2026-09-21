@@ -884,20 +884,6 @@ const LabResults = () => {
     [labResults, setViewingLabResult, setShowViewModal]
   );
 
-  const handleViewComponentFromTable = useCallback(
-    comp => {
-      // Legacy (component-less) results have no test-components tab content —
-      // their value lives on the lab result's own fields, shown on Overview (#1014).
-      setInitialViewTab(comp.is_legacy ? 'overview' : 'test-components');
-      const lr = labResults.find(r => r.id === comp.lab_result_id);
-      if (lr) {
-        setViewingLabResult(lr);
-        setShowViewModal(true);
-      }
-    },
-    [labResults, setViewingLabResult, setShowViewModal]
-  );
-
   const handleEditComponentFromTable = useCallback(
     comp => {
       // Legacy (component-less) results have no component record to edit —
@@ -941,6 +927,16 @@ const LabResults = () => {
 
   const handleDeleteComponent = useCallback(
     async compId => {
+      if (
+        !window.confirm(
+          t(
+            'labresults:testComponents.confirmDelete',
+            'Are you sure you want to delete this test result? This action cannot be undone.'
+          )
+        )
+      ) {
+        return;
+      }
       try {
         await labTestComponentApi.delete(compId, currentPatient?.id);
         refreshPatientComponents();
@@ -1417,9 +1413,9 @@ const LabResults = () => {
             labResults={labResults}
             practitioners={practitioners}
             patientId={currentPatient?.id}
-            onView={handleViewComponentFromTable}
             onEdit={handleEditComponentFromTable}
             onDelete={handleDeleteComponent}
+            onRefresh={refreshPatientComponents}
             disableActions={isViewOnly}
           />
         );

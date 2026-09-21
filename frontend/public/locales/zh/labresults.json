@@ -371,6 +371,7 @@
   "testComponents": {
     "addTestComponents": "添加检验项目",
     "addTests": "添加检验",
+    "confirmDelete": "确定要删除此检验结果吗？此操作无法撤销。",
     "categories": {
       "cardiology": "心脏病学 - 心脏和心肌标志物",
       "chemistry": "生化检验 - 电解质和矿物质",

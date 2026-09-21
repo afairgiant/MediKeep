@@ -13,11 +13,14 @@ import {
   Group,
   ScrollArea,
   Tooltip,
+  ActionIcon,
 } from '@mantine/core';
 import {
   IconArrowUp,
   IconArrowDown,
   IconArrowsSort,
+  IconEdit,
+  IconTrash,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -32,6 +35,9 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface TestComponentTrendTableProps {
   trendData: TrendResponse;
+  onEdit?: (_point: TrendDataPoint) => void;
+  onDelete?: (_point: TrendDataPoint) => void;
+  actionLoadingId?: number | null;
 }
 
 type SortField = 'date' | 'value' | 'status' | 'lab_result';
@@ -39,6 +45,9 @@ type SortOrder = 'asc' | 'desc';
 
 const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
   trendData,
+  onEdit,
+  onDelete,
+  actionLoadingId = null,
 }) => {
   const { t } = useTranslation(['labresults', 'shared']);
   const [sortField, setSortField] = useState<SortField>('date');
@@ -254,6 +263,13 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                     <SortIcon field="lab_result" />
                   </Group>
                 </Table.Th>
+                {(onEdit || onDelete) && (
+                  <Table.Th>
+                    <Text size="xs" fw={600}>
+                      {t('shared:labels.actions', 'Actions')}
+                    </Text>
+                  </Table.Th>
+                )}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -316,6 +332,39 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                       </Text>
                     </Tooltip>
                   </Table.Td>
+                  {(onEdit || onDelete) && (
+                    <Table.Td>
+                      <Group gap={4} wrap="nowrap">
+                        {onEdit && (
+                          <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
+                            <ActionIcon
+                              size="sm"
+                              variant="subtle"
+                              disabled={actionLoadingId !== null}
+                              onClick={() => onEdit(point)}
+                              aria-label={t('shared:labels.edit', 'Edit')}
+                            >
+                              <IconEdit size={14} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                        {onDelete && (
+                          <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
+                            <ActionIcon
+                              size="sm"
+                              variant="subtle"
+                              color="red"
+                              disabled={actionLoadingId !== null}
+                              onClick={() => onDelete(point)}
+                              aria-label={t('common:actions.delete', 'Delete')}
+                            >
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                      </Group>
+                    </Table.Td>
+                  )}
                 </Table.Tr>
               ))}
             </Table.Tbody>

@@ -224,6 +224,16 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
   const handleComponentDelete = useCallback(
     async (component: LabTestComponent) => {
+      if (
+        !window.confirm(
+          t(
+            'labresults:testComponents.confirmDelete',
+            'Are you sure you want to delete this test result? This action cannot be undone.'
+          )
+        )
+      ) {
+        return;
+      }
       try {
         await labTestComponentApi.delete(component.id!, currentPatient?.id);
 
@@ -609,6 +619,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           testName={selectedTestName}
           unit={selectedUnit}
           patientId={currentPatient.id}
+          onMutate={handleRefresh}
+          readOnly={isViewMode}
         />
       )}
     </Stack>
