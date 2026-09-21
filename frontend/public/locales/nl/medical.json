@@ -254,6 +254,7 @@
           "critical": "🚨 Kritiek - Levensbedreigend",
           "mild": "💛 Mild - Geringe impact",
           "moderate": "⚡ Matig - Merkbare impact",
+          "none": "🚫 Geen - Geen ongemak",
           "severe": "⚠️ Ernstig - Aanzienlijke impact"
         },
         "status": {
@@ -533,6 +534,7 @@
         "lifeThreatening": "Levensbedreigend - Spoedeisende hulp nodig",
         "mild": "Licht - Kleine ongemakken",
         "moderate": "Matig - Merkbare impact",
+        "none": "Geen - Geen ongemak",
         "severe": "Ernstig - Aanzienlijke impact"
       },
       "placeholder": "Selecteer ernst"

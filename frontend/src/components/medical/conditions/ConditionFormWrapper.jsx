@@ -237,6 +237,13 @@ const ConditionFormWrapper = ({
                       value={formData.severity || null}
                       data={[
                         {
+                          value: 'none',
+                          label: t(
+                            'conditions.form.severity.none',
+                            'None - No discomfort'
+                          ),
+                        },
+                        {
                           value: 'mild',
                           label: t('conditions.form.severity.mild', 'Mild'),
                         },

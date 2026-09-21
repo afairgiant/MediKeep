@@ -46,7 +46,7 @@ Document allergies and reactions:
 
 - **Allergen** - What you're allergic to
 - **Reaction** - What happens when exposed
-- **Severity** - Mild, Moderate, Severe, or Life-Threatening
+- **Severity** - None, Mild, Moderate, Severe, or Life-Threatening
 
 ### Conditions
 
@@ -152,7 +152,7 @@ Track injuries, their treatment, and recovery:
 - **Body Part** (required) - Affected body part
 - **Laterality** - Left, Right, Bilateral, or Not Applicable
 - **Date of Injury** - When the injury occurred
-- **Severity** - Mild, Moderate, Severe, or Life-Threatening
+- **Severity** - None, Mild, Moderate, Severe, or Life-Threatening
 - **Status** (required) - Active, Healing, Resolved, or Chronic
 - **Mechanism** - How the injury happened
 - **Treatment Received** - Description of treatment
@@ -178,7 +178,7 @@ Track symptoms with a two-level system: define a symptom once, then log individu
 Each time the symptom occurs, log an occurrence with:
 
 - **Date** (required) and **Time** - When the episode happened
-- **Severity** (required) - Mild, Moderate, Severe, or Critical
+- **Severity** (required) - None, Mild, Moderate, Severe, or Critical
 - **Pain Scale** - 0 to 10
 - **Duration** - How long the episode lasted
 - **Location** - Where on the body
@@ -189,6 +189,8 @@ Each time the symptom occurs, log an occurrence with:
 - **Resolution Notes** - How the episode resolved
 
 MediKeep automatically tracks the total occurrence count and the date of the last occurrence.
+
+If you set **Severity** to `None` and have not already filled them in, **Pain Scale** is set to `0` and **Impact Level** to `No Impact`, since those are almost always the values for an episode that caused no discomfort. Both remain editable, and anything you entered yourself is left alone. If you later change the severity to something else, only the values MediKeep filled in are cleared.
 
 ### Encounters
 

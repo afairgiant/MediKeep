@@ -235,6 +235,7 @@ const AllergyFormWrapper = ({
                       label={t('shared:fields.severity')}
                       value={formData.severity || null}
                       data={[
+                        { value: 'none', label: t('common:severity.none') },
                         { value: 'mild', label: t('common:severity.mild') },
                         {
                           value: 'moderate',

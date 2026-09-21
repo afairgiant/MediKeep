@@ -254,6 +254,7 @@
           "critical": "🚨 Kritiskt - Livshotande",
           "mild": "💛 Lindrig - Mindre påverkan",
           "moderate": "⚡ Måttlig - Märkbar påverkan",
+          "none": "🚫 Ingen - Inget obehag",
           "severe": "⚠️ Svår - Betydande påverkan"
         },
         "status": {
@@ -533,6 +534,7 @@
         "lifeThreatening": "Livshotande - Akutvård behövs",
         "mild": "Lindrig - Mindre obehag",
         "moderate": "Måttlig - Märkbar påverkan",
+        "none": "Ingen - Inget obehag",
         "severe": "Allvarlig - Betydande påverkan"
       },
       "placeholder": "Välj svårighetsgrad"
