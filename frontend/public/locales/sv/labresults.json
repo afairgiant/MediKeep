@@ -372,6 +372,7 @@
   "testComponents": {
     "addTestComponents": "Lägg till tester",
     "addTests": "Lägg till test",
+    "confirmDelete": "Är du säker på att du vill ta bort detta testresultat? Denna åtgärd kan inte ångras.",
     "categories": {
       "cardiology": "Kardiologi - Hjärt- & hjärtmarkörer",
       "chemistry": "Klinisk kemi - Elektrolyter & mineraler",

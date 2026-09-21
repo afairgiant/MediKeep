@@ -20,7 +20,6 @@ import {
   IconChevronUp,
   IconSearch,
   IconX,
-  IconEye,
   IconEdit,
   IconTrash,
   IconFilter,
@@ -55,7 +54,6 @@ interface Props {
   labResults: LabResultRef[];
   practitioners: PractitionerRef[];
   patientId: number;
-  onView?: (_component: LabTestComponentForStack) => void;
   onEdit?: (_component: LabTestComponentForStack) => void;
   onDelete?: (_componentId: number) => void;
   disableActions?: boolean;
@@ -126,7 +124,6 @@ const LabResultsComponentTable: React.FC<Props> = ({
   labResults,
   practitioners,
   patientId,
-  onView,
   onEdit,
   onDelete,
   disableActions = false,
@@ -616,18 +613,6 @@ const LabResultsComponentTable: React.FC<Props> = ({
                                 </Table.Td>
                                 <Table.Td>
                                   <Group gap={4} wrap="nowrap">
-                                    {onView && (
-                                      <ActionIcon
-                                        size="xs"
-                                        variant="subtle"
-                                        color="blue"
-                                        disabled={disableActions}
-                                        onClick={() => onView(comp)}
-                                        aria-label={t('shared:buttons.view', 'View')}
-                                      >
-                                        <IconEye size={13} />
-                                      </ActionIcon>
-                                    )}
                                     {onEdit && (
                                       <ActionIcon
                                         size="xs"

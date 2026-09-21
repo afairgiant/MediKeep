@@ -372,6 +372,7 @@
   "testComponents": {
     "addTestComponents": "Dodaj badania",
     "addTests": "Dodaj Badania",
+    "confirmDelete": "Czy na pewno chcesz usunąć ten wynik badania? Tej czynności nie można cofnąć.",
     "categories": {
       "cardiology": "Kardiologia - Serce i Markery Sercowe",
       "chemistry": "Chemia Kliniczna - Elektrolity i Minerały",

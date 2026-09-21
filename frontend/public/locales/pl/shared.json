@@ -298,6 +298,7 @@
     "type": "Typ",
     "unknown": "Nieznany",
     "unknownError": "Unknown error",
+    "updateFailed": "Aktualizacja nieudana",
     "uploadFailed": "Przesyłanie nieudane",
     "user": "Użytkownik",
     "userManagement": "Zarządzanie użytkownikami",

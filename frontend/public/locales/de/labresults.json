@@ -372,6 +372,7 @@
   "testComponents": {
     "addTestComponents": "Tests hinzufügen",
     "addTests": "Tests hinzufügen",
+    "confirmDelete": "Sind Sie sicher, dass Sie dieses Testergebnis löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "categories": {
       "cardiology": "Kardiologie - Herz- & Herzmarker",
       "chemistry": "Klinische Chemie - Elektrolyte & Mineralien",

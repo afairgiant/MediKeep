@@ -40,12 +40,15 @@ import { useTranslation } from 'react-i18next';
 import {
   labTestComponentApi,
   TrendResponse,
+  TrendDataPoint,
+  LabTestComponent,
 } from '../../../services/api/labTestComponentApi';
 import { getQualitativeDisplayName } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import TestComponentTrendChart from './TestComponentTrendChart';
 import TestComponentTrendTable from './TestComponentTrendTable';
+import TestComponentEditModal from './TestComponentEditModal';
 
 interface TestComponentTrendsPanelProps {
   opened: boolean;
@@ -69,6 +72,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('chart');
   const [timeRange, setTimeRange] = useState<string>('all');
+  const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [editingComponent, setEditingComponent] =
+    useState<LabTestComponent | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const { formatDate: formatPreferredDate } = useDateFormat();
 
   const getDateRangeFromSelection = (
@@ -174,6 +181,100 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
       return () => clearTimeout(timeoutId);
     }
   }, [opened, testName, loadTrendData]);
+
+  const handleEditPoint = useCallback(async (point: TrendDataPoint) => {
+    setActionLoadingId(point.id);
+    try {
+      const fullComponent = await labTestComponentApi.getComponent(point.id);
+      setEditingComponent(fullComponent);
+      setEditModalOpen(true);
+    } catch (error: any) {
+      notifications.show({
+        title: t('shared:labels.error', 'Error'),
+        message: t('labresults:testComponents.errorLoading', 'Error loading tests'),
+        color: 'red',
+      });
+      logger.error('test_component_trend_edit_load_error', {
+        message: 'Error loading test component for edit',
+        componentId: point.id,
+        error: error?.message,
+        component: 'TestComponentTrendsPanel',
+      });
+    } finally {
+      setActionLoadingId(null);
+    }
+  }, [t]);
+
+  const handleEditSubmit = useCallback(
+    async (updatedData: Partial<LabTestComponent>) => {
+      if (!editingComponent?.id) return;
+      try {
+        await labTestComponentApi.update(
+          editingComponent.id,
+          updatedData,
+          patientId
+        );
+        notifications.show({
+          title: t('shared:labels.success', 'Success'),
+          message: t('common:messages.updateSuccess', 'Updated successfully'),
+          color: 'green',
+        });
+        setEditModalOpen(false);
+        setEditingComponent(null);
+        loadTrendData();
+      } catch (error: any) {
+        notifications.show({
+          title: t('shared:labels.error', 'Error'),
+          message: t('shared:labels.updateFailed', 'Update Failed'),
+          color: 'red',
+        });
+        logger.error('test_component_trend_edit_save_error', {
+          message: 'Error updating test component from trend panel',
+          componentId: editingComponent.id,
+          error: error?.message,
+          component: 'TestComponentTrendsPanel',
+        });
+      }
+    },
+    [editingComponent, patientId, loadTrendData, t]
+  );
+
+  const handleDeletePoint = useCallback(async (point: TrendDataPoint) => {
+    if (
+      !window.confirm(
+        t(
+          'labresults:testComponents.confirmDelete',
+          'Are you sure you want to delete this test result? This action cannot be undone.'
+        )
+      )
+    ) {
+      return;
+    }
+    setActionLoadingId(point.id);
+    try {
+      await labTestComponentApi.delete(point.id, patientId);
+      notifications.show({
+        title: t('shared:labels.success', 'Success'),
+        message: t('labresults:testComponents.notifications.componentDeleted', 'Component deleted'),
+        color: 'green',
+      });
+      loadTrendData();
+    } catch (error: any) {
+      notifications.show({
+        title: t('shared:labels.error', 'Error'),
+        message: t('shared:labels.deleteFailed', 'Delete Failed'),
+        color: 'red',
+      });
+      logger.error('test_component_trend_delete_error', {
+        message: 'Error deleting test component from trend panel',
+        componentId: point.id,
+        error: error?.message,
+        component: 'TestComponentTrendsPanel',
+      });
+    } finally {
+      setActionLoadingId(null);
+    }
+  }, [patientId, loadTrendData, t]);
 
   const getTrendIcon = () => {
     if (!trendData) return <IconMinus size={18} />;
@@ -383,6 +484,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   };
 
   return (
+    <>
     <Drawer
       opened={opened}
       onClose={onClose}
@@ -671,7 +773,12 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
             </Tabs.Panel>
 
             <Tabs.Panel value="table" pt="md">
-              <TestComponentTrendTable trendData={trendData} />
+              <TestComponentTrendTable
+                trendData={trendData}
+                onEdit={handleEditPoint}
+                onDelete={handleDeletePoint}
+                actionLoadingId={actionLoadingId}
+              />
             </Tabs.Panel>
           </Tabs>
         )}
@@ -700,6 +807,17 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         )}
       </Stack>
     </Drawer>
+
+    <TestComponentEditModal
+      component={editingComponent}
+      opened={editModalOpen}
+      onClose={() => {
+        setEditModalOpen(false);
+        setEditingComponent(null);
+      }}
+      onSubmit={handleEditSubmit}
+    />
+    </>
   );
 };
 

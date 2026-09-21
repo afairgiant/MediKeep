@@ -372,6 +372,7 @@
   "testComponents": {
     "addTestComponents": "Adicionar exames",
     "addTests": "Adicionar Exames",
+    "confirmDelete": "Tem certeza de que deseja excluir este resultado de teste? Esta ação não pode ser desfeita.",
     "categories": {
       "cardiology": "Cardiologia - Coração e Marcadores Cardíacos",
       "chemistry": "Química - Eletrólitos e Minerais",

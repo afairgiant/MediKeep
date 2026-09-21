@@ -372,6 +372,7 @@
   "testComponents": {
     "addTestComponents": "Ajouter des analyses",
     "addTests": "Ajouter des analyses",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce résultat de test ? Cette action est irréversible.",
     "categories": {
       "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
       "chemistry": "Chimie - Electrolytes et minéraux",

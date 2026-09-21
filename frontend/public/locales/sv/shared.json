@@ -298,6 +298,7 @@
     "type": "Typ",
     "unknown": "Okänd",
     "unknownError": "Unknown error",
+    "updateFailed": "Uppdatering misslyckades",
     "uploadFailed": "Uppladdning misslyckades",
     "user": "Användare",
     "userManagement": "Användarhantering",

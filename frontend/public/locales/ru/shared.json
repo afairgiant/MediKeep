@@ -298,6 +298,7 @@
     "type": "Тип",
     "unknown": "Неизвестно",
     "unknownError": "Unknown error",
+    "updateFailed": "Ошибка обновления",
     "uploadFailed": "Ошибка загрузки",
     "user": "Пользователь",
     "userManagement": "Управление пользователями",
