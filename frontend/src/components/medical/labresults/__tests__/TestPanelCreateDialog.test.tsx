@@ -65,7 +65,7 @@ vi.mock('@mantine/core', () => ({
       />
     </div>
   ),
-  Autocomplete: ({ label, placeholder, value, onChange, onOptionSubmit }: any) => (
+  Autocomplete: ({ label, placeholder, value, onChange, onOptionSubmit, data }: any) => (
     <div>
       {label && <label>{label}</label>}
       <input
@@ -74,6 +74,11 @@ vi.mock('@mantine/core', () => ({
         onChange={e => onChange(e.target.value)}
         aria-label={label}
       />
+      <ul data-testid={`autocomplete-options-${placeholder}`}>
+        {(data || []).map((option: string) => (
+          <li key={option}>{option}</li>
+        ))}
+      </ul>
       {onOptionSubmit && (
         <button
           type="button"
@@ -203,11 +208,29 @@ vi.mock('@tabler/icons-react', () => ({
   IconX: () => <span />,
 }));
 
+const TESTOSTERONE_TEST = {
+  test_name: 'Testosterone',
+  abbreviation: 'TEST',
+  test_code: '2986-8',
+  default_unit: 'ng/dL',
+  category: 'endocrinology',
+  is_common: true,
+  result_type: 'quantitative' as const,
+};
+
 vi.mock('../../../../constants/testLibrary', () => ({
-  getAutocompleteOptions: () => [],
-  extractTestName: (v: string) => v,
-  getTestByName: () => null,
+  getAutocompleteOptions: (query: string = '') => {
+    const q = query.toLowerCase().trim();
+    if (!q || !TESTOSTERONE_TEST.test_name.toLowerCase().includes(q)) return [];
+    return [`${TESTOSTERONE_TEST.test_name} (${TESTOSTERONE_TEST.abbreviation})`];
+  },
+  extractTestName: (v: string) => v.replace(/\s*\([^)]*\)$/, '').trim(),
+  getTestByName: (name: string) =>
+    name.toLowerCase() === TESTOSTERONE_TEST.test_name.toLowerCase()
+      ? TESTOSTERONE_TEST
+      : null,
   getMatchedCommonName: () => null,
+  TEST_CATEGORY_TO_FORM_CATEGORY: { endocrinology: 'blood work' },
 }));
 
 vi.mock('../../../../constants/labCategories', () => ({
@@ -485,6 +508,55 @@ describe('TestPanelCreateDialog', () => {
     await waitFor(() => {
       // Auto-populated CBC rows should be gone (no values were entered)
       expect(screen.queryByDisplayValue('White Blood Cell Count')).toBeNull();
+    });
+  });
+
+  it('falls back to individual test suggestions when no panel matches the typed text', async () => {
+    render(<TestPanelCreateDialog {...defaultProps} />);
+
+    const panelInput = screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork');
+    await userEvent.type(panelInput, 'Testosterone');
+
+    await waitFor(() => {
+      const options = screen.getByTestId(
+        'autocomplete-options-e.g. CBC Panel, Annual Bloodwork'
+      );
+      // No panel matches "Testosterone", so the individual test suggestion is shown...
+      expect(options.textContent).toContain('Testosterone (TEST)');
+      // ...and the dropdown is never a mix of panels and tests.
+      expect(options.textContent).not.toContain('Panel');
+    });
+  });
+
+  it('does not suggest individual tests while a panel still matches the typed text', async () => {
+    render(<TestPanelCreateDialog {...defaultProps} />);
+
+    const panelInput = screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork');
+    await userEvent.type(panelInput, 'Complete Blood Count');
+
+    await waitFor(() => {
+      const options = screen.getByTestId(
+        'autocomplete-options-e.g. CBC Panel, Annual Bloodwork'
+      );
+      expect(options.textContent).toContain('Complete Blood Count');
+      expect(options.textContent).not.toContain('Testosterone');
+    });
+  });
+
+  it('auto-populates a test row when an individual test (not a panel) is selected', async () => {
+    render(<TestPanelCreateDialog {...defaultProps} />);
+
+    const panelInput = screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork');
+    await userEvent.type(panelInput, 'Testosterone');
+    await userEvent.click(
+      screen.getByTestId('autocomplete-submit-e.g. CBC Panel, Annual Bloodwork')
+    );
+
+    await waitFor(() => {
+      // The panel/type field takes the selected test's name, and a matching
+      // component row is auto-populated below — both show "Testosterone".
+      expect(panelInput).toHaveValue('Testosterone');
+      expect(screen.getAllByDisplayValue('Testosterone')).toHaveLength(2);
     });
   });
 });
