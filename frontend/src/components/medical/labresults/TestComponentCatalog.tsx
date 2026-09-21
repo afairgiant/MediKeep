@@ -521,6 +521,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
           catalogItems.length > 0 &&
           groupedByCategory.map(({ category: cat, items: catItems }) => {
             const isCollapsed = !!collapsedGroups[cat];
+            const catColor = getCategoryColor(cat);
             return (
               <Stack key={cat} gap="xs">
                 <UnstyledButton
@@ -539,12 +540,18 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
                         color="var(--mantine-color-dimmed)"
                       />
                     )}
-                    <Text size="sm" fw={600} c={getCategoryColor(cat)}>
+                    <Text
+                      size="sm"
+                      fw={600}
+                      style={{
+                        color: `light-dark(var(--mantine-color-${catColor}-7), var(--mantine-color-${catColor}-4))`,
+                      }}
+                    >
                       {getCategoryDisplayName(cat)}
                     </Text>
                     <Badge
                       variant="light"
-                      color={getCategoryColor(cat)}
+                      color={catColor}
                       size="sm"
                     >
                       {catItems.length}

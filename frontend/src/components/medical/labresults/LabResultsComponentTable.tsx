@@ -504,18 +504,18 @@ const LabResultsComponentTable: React.FC<Props> = ({
                   <React.Fragment key={category}>
                     {/* Category header row */}
                     <Table.Tr
-                      style={{ cursor: 'pointer', backgroundColor: `var(--mantine-color-${catColor}-0)` }}
+                      style={{ cursor: 'pointer', backgroundColor: `var(--mantine-color-${catColor}-light)` }}
                       onClick={() => handleToggleCategory(category)}
                       data-testid={`category-row-${category}`}
                     >
                       <Table.Td colSpan={7} py={6} px="sm">
                         <Group gap="xs">
                           {isCategoryCollapsed ? (
-                            <IconChevronRight size={14} color={`var(--mantine-color-${catColor}-6)`} />
+                            <IconChevronRight size={14} color={`var(--mantine-color-${catColor}-light-color)`} />
                           ) : (
-                            <IconChevronDown size={14} color={`var(--mantine-color-${catColor}-6)`} />
+                            <IconChevronDown size={14} color={`var(--mantine-color-${catColor}-light-color)`} />
                           )}
-                          <Text size="sm" fw={600} c={catColor}>
+                          <Text size="sm" fw={600} style={{ color: `var(--mantine-color-${catColor}-light-color)` }}>
                             {getCategoryDisplayName(category)}
                           </Text>
                           <Badge variant="light" color={catColor} size="xs">
@@ -597,7 +597,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
                                 key={comp.id}
                                 data-testid={`history-row-${comp.id}`}
                                 className="lab-history-row"
-                                style={{ backgroundColor: 'var(--mantine-color-gray-0)' }}
+                                style={{ backgroundColor: 'var(--color-bg-secondary)' }}
                               >
                                 <Table.Td />
                                 <Table.Td />
