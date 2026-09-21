@@ -464,9 +464,14 @@ const LabResults = () => {
     return () => { controller.abort(); };
   }, [currentPatient?.id, refreshPatientComponents]);
 
-  // IDs of lab results that are "PDF masters" (have at least one test component)
+  // IDs of lab results that are "PDF masters" (have at least one real test component).
+  // Excludes synthesized `is_legacy` pseudo-components (#1014), whose lab_result_id
+  // points back at the component-less LabResult they were synthesized from - counting
+  // those would wrongly mark that result as a PDF master and hide it from the list.
   const parentIdsWithComponents = useMemo(
-    () => new Set(patientComponents.map(c => c.lab_result_id)),
+    () => new Set(
+      patientComponents.filter(c => !c.is_legacy).map(c => c.lab_result_id)
+    ),
     [patientComponents]
   );
 
@@ -550,6 +555,10 @@ const LabResults = () => {
     const groupName = currentSelectedGroup.test_name.toLowerCase().trim();
     const existingGroupKeys = new Set(groupedLabResults.map(g => g.key));
     const matchingComponents = patientComponents.filter(comp => {
+      // Legacy pseudo-components represent a component-less LabResult that is
+      // already present in currentSelectedGroup.results - including it here
+      // would duplicate that result in the drill-down.
+      if (comp.is_legacy) return false;
       const compCode = (comp.test_code || '').trim().toUpperCase();
       // If the component has a code, first try an exact code-group match.
       // If a different code-keyed group exists for this code, don't steal it (avoids double-counting).
@@ -614,6 +623,9 @@ const LabResults = () => {
       const groupName = group.test_name.toLowerCase().trim();
       let extra = 0;
       for (const comp of patientComponents) {
+        // Skip legacy pseudo-components: the component-less LabResult they were
+        // synthesized from is already counted in group.count.
+        if (comp.is_legacy) continue;
         const compCode = (comp.test_code || '').trim().toUpperCase();
         if (compCode) {
           if (`code:${compCode}` === groupKey) { extra++; continue; }
@@ -874,7 +886,9 @@ const LabResults = () => {
 
   const handleViewComponentFromTable = useCallback(
     comp => {
-      setInitialViewTab('test-components');
+      // Legacy (component-less) results have no test-components tab content —
+      // their value lives on the lab result's own fields, shown on Overview (#1014).
+      setInitialViewTab(comp.is_legacy ? 'overview' : 'test-components');
       const lr = labResults.find(r => r.id === comp.lab_result_id);
       if (lr) {
         setViewingLabResult(lr);
@@ -884,10 +898,35 @@ const LabResults = () => {
     [labResults, setViewingLabResult, setShowViewModal]
   );
 
-  const handleEditComponentFromTable = useCallback(comp => {
-    setEditingComponent(comp);
-    setEditComponentModalOpen(true);
-  }, []);
+  const handleEditComponentFromTable = useCallback(
+    comp => {
+      // Legacy (component-less) results have no component record to edit —
+      // editing means editing the lab result's own value/unit/range fields (#1014).
+      if (comp.is_legacy) {
+        const lr = labResults.find(r => r.id === comp.lab_result_id);
+        if (lr) {
+          handleEditLabResult(lr);
+        } else {
+          logger.warn('legacy_component_edit_lab_result_missing', {
+            component: 'LabResults',
+            labResultId: comp.lab_result_id,
+          });
+          notifications.show({
+            title: t('shared:labels.error', 'Error'),
+            message: t(
+              'labresults:testComponents.notifications.legacyResultNotFound',
+              'Could not find the lab result to edit'
+            ),
+            color: 'red',
+          });
+        }
+        return;
+      }
+      setEditingComponent(comp);
+      setEditComponentModalOpen(true);
+    },
+    [labResults, handleEditLabResult]
+  );
 
   const handleSaveComponent = useCallback(
     async updatedData => {

@@ -256,7 +256,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           ? ['Date', 'Result Text', 'Status', 'Lab Result']
           : ['Date', 'Value', 'Unit', 'Status', 'Reference Range', 'Lab Result'];
       const rows = trendData.data_points.map(point => {
-        const date = point.recorded_date || point.created_at.split('T')[0];
+        const date = point.recorded_date || point.created_at?.split('T')[0] || '';
 
         if (isQualitative) {
           return [

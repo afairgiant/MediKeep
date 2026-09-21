@@ -243,6 +243,41 @@ describe('LabResultsComponentTable', () => {
     expect(onDelete).toHaveBeenCalledWith(5); // comp.id, not comp.lab_result_id
   });
 
+  it('shows view/edit but hides delete for legacy (component-less) entries', () => {
+    const components = [
+      makeComponent({
+        id: -99,
+        canonical_test_name: 'Ferritin',
+        completed_date: '2024-01-15',
+        value: 50,
+        lab_result_id: 99,
+        is_legacy: true,
+      }),
+    ];
+    const onView = vi.fn();
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+
+    render(
+      <LabResultsComponentTable
+        components={components}
+        labResults={defaultLabResults}
+        practitioners={defaultPractitioners}
+        onView={onView}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />,
+      { skipRouter: true }
+    );
+
+    fireEvent.click(screen.getByTestId('expand-btn-ferritin'));
+    const row = screen.getByTestId('history-row--99');
+    expect(row.querySelector('[aria-label="View"]')).not.toBeNull();
+    fireEvent.click(row.querySelector('[aria-label="Edit"]')!);
+    expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: -99, is_legacy: true }));
+    expect(row.querySelector('[aria-label="Delete"]')).toBeNull();
+  });
+
   it('expands all tests via Expand All button', () => {
     const components = [
       makeComponent({ id: 1, canonical_test_name: 'Glucose', completed_date: '2024-01-15', value: 95 }),
@@ -338,6 +373,41 @@ describe('LabResultsComponentTable', () => {
 
     expect(screen.getByTestId('summary-row-glucose')).toBeInTheDocument();
     expect(screen.queryByTestId('summary-row-hemoglobin')).not.toBeInTheDocument();
+  });
+
+  it('category filter "Other Tests" includes legacy entries with no category set', () => {
+    const components = [
+      makeComponent({ id: 1, canonical_test_name: 'Glucose', category: 'chemistry', completed_date: '2024-01-15', value: 95 }),
+      makeComponent({
+        id: -2,
+        canonical_test_name: 'Ferritin',
+        category: null,
+        lab_result_id: 2,
+        completed_date: '2024-01-10',
+        value: 50,
+        is_legacy: true,
+      }),
+    ];
+
+    render(
+      <LabResultsComponentTable
+        components={components}
+        labResults={defaultLabResults}
+        practitioners={defaultPractitioners}
+      />,
+      { skipRouter: true }
+    );
+
+    expect(screen.getByTestId('summary-row-glucose')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-row-ferritin')).toBeInTheDocument();
+
+    const categoryInput = screen.getByPlaceholderText('Category');
+    fireEvent.click(categoryInput);
+    fireEvent.focus(categoryInput);
+    fireEvent.click(screen.getByRole('option', { name: 'Other Tests' }));
+
+    expect(screen.queryByTestId('summary-row-glucose')).not.toBeInTheDocument();
+    expect(screen.getByTestId('summary-row-ferritin')).toBeInTheDocument();
   });
 
   it('filters by facility — initial state shows all, filter inputs are rendered', () => {
@@ -446,6 +516,31 @@ describe('LabResultsComponentTable', () => {
     expect(screen.getByTestId('category-row-hematology')).toBeInTheDocument();
     expect(screen.getByTestId('summary-row-glucose')).toBeInTheDocument();
     expect(screen.getByTestId('summary-row-hemoglobin')).toBeInTheDocument();
+  });
+
+  it('sorts tests within a category alphabetically by name, not by date', () => {
+    const components = [
+      makeComponent({ id: 1, canonical_test_name: 'Zinc', category: 'chemistry', completed_date: '2024-03-01', value: 90, lab_result_id: 1 }),
+      makeComponent({ id: 2, canonical_test_name: 'Albumin', category: 'chemistry', completed_date: '2024-01-01', value: 4.2, lab_result_id: 1 }),
+      makeComponent({ id: 3, canonical_test_name: 'Magnesium', category: 'chemistry', completed_date: '2024-02-01', value: 2.0, lab_result_id: 1 }),
+    ];
+
+    render(
+      <LabResultsComponentTable
+        components={components}
+        labResults={defaultLabResults}
+        practitioners={defaultPractitioners}
+      />,
+      { skipRouter: true }
+    );
+
+    const summaryRows = screen.getAllByTestId(/^summary-row-/);
+    const order = summaryRows.map(row => row.getAttribute('data-testid'));
+    expect(order).toEqual([
+      'summary-row-albumin',
+      'summary-row-magnesium',
+      'summary-row-zinc',
+    ]);
   });
 
   it('collapses category group when category header is clicked', () => {

@@ -131,3 +131,17 @@ describe('TestComponentTrendTable — Lab Result sorting', () => {
     expect(labResultHeader.querySelector('[data-testid="icon-unsorted"]')).toBeTruthy();
   });
 });
+
+describe('TestComponentTrendTable — legacy points with no date', () => {
+  it('renders without crashing when a point has neither recorded_date nor created_at (#1014)', () => {
+    const undatedPoint = {
+      ...makePoint(1, 'Undated Legacy', 90),
+      recorded_date: null,
+      created_at: null,
+    };
+    const trendData = makeTrendData([undatedPoint, makePoint(2, 'Dated Panel', 80)]);
+    expect(() => render(<TestComponentTrendTable trendData={trendData} />)).not.toThrow();
+    const dateCells = screen.getAllByRole('cell').filter((_, i) => i % 6 === 0);
+    expect(dateCells.map(c => c.textContent)).toContain('');
+  });
+});

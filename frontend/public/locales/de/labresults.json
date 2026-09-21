@@ -431,7 +431,8 @@
     "noComponentsDescription": "Dieses Laborergebnis hat noch keine Tests.",
     "notifications": {
       "componentDeleted": "Komponente gelöscht",
-      "hasBeenDeleted": "{{name}} wurde gelöscht"
+      "hasBeenDeleted": "{{name}} wurde gelöscht",
+      "legacyResultNotFound": "Das zu bearbeitende Laborergebnis konnte nicht gefunden werden"
     },
     "refreshComponents": "Komponenten aktualisieren",
     "resultType": {

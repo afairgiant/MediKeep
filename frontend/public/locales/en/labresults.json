@@ -438,7 +438,8 @@
     "noComponentsDescription": "This lab result doesn't have any tests yet.",
     "notifications": {
       "componentDeleted": "Component deleted",
-      "hasBeenDeleted": "{{name}} has been deleted"
+      "hasBeenDeleted": "{{name}} has been deleted",
+      "legacyResultNotFound": "Could not find the lab result to edit"
     },
     "refreshComponents": "Refresh components",
     "resultType": {

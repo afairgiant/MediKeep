@@ -549,6 +549,7 @@ class LabTestComponentForStack(LabTestComponentResponse):
     completed_date: Optional[date] = None
     ordered_date: Optional[date] = None
     facility: Optional[str] = None
+    is_legacy: bool = False  # True for synthesized entries from component-less LabResults (#1014)
 
     model_config = {"from_attributes": True}
 
@@ -617,7 +618,7 @@ class LabTestComponentTrendDataPoint(BaseModel):
     ref_range_max: Optional[float] = None
     ref_range_text: Optional[str] = None
     recorded_date: Optional[date] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     lab_result: LabResultBasicForTrend
     result_type: Optional[str] = "quantitative"
     qualitative_value: Optional[str] = None

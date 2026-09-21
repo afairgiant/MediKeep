@@ -65,7 +65,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
   };
 
   const formatDate = (point: TrendDataPoint): string => {
-    const dateStr = point.recorded_date || point.created_at.split('T')[0];
+    const dateStr = point.recorded_date || point.created_at?.split('T')[0] || '';
     return formatPreferredDate(dateStr);
   };
 
@@ -99,8 +99,8 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
 
       switch (sortField) {
         case 'date': {
-          const dateA = a.recorded_date || a.created_at;
-          const dateB = b.recorded_date || b.created_at;
+          const dateA = a.recorded_date || a.created_at || '';
+          const dateB = b.recorded_date || b.created_at || '';
           comparison = dateA.localeCompare(dateB);
           break;
         }

@@ -431,7 +431,8 @@
     "noComponentsDescription": "Ce résultat ne possède pas encore d'analyses.",
     "notifications": {
       "componentDeleted": "Composant supprimé",
-      "hasBeenDeleted": "{{name}} a été supprimé"
+      "hasBeenDeleted": "{{name}} a été supprimé",
+      "legacyResultNotFound": "Impossible de trouver le résultat de laboratoire à modifier"
     },
     "refreshComponents": "Rafraîchir les composants",
     "resultType": {

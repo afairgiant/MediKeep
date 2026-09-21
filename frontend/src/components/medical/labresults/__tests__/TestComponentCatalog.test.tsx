@@ -14,8 +14,23 @@ vi.mock('@mantine/core', () => ({
   TextInput: ({ placeholder, ...props }: any) => (
     <input placeholder={placeholder} data-testid="search-input" {...props} />
   ),
-  Select: ({ placeholder, ...props }: any) => (
-    <select data-testid={`select-${placeholder}`} {...props} />
+  Select: ({ placeholder, data, value, onChange }: any) => (
+    <select
+      data-testid={`select-${placeholder}`}
+      value={value ?? ''}
+      onChange={e => onChange?.(e.target.value || null)}
+    >
+      <option value="">{placeholder}</option>
+      {(data || []).map((opt: any) => {
+        const optValue = typeof opt === 'string' ? opt : opt.value;
+        const optLabel = typeof opt === 'string' ? opt : opt.label;
+        return (
+          <option key={optValue} value={optValue}>
+            {optLabel}
+          </option>
+        );
+      })}
+    </select>
   ),
   Text: ({ children, ...props }: any) => <span {...props}>{children}</span>,
   Skeleton: ({ ...props }: any) => <div data-testid="skeleton" {...props} />,
@@ -100,6 +115,7 @@ vi.mock('../../../../constants/labCategories', () => ({
   CATEGORY_SELECT_OPTIONS: [
     { value: 'chemistry', label: 'Chemistry' },
     { value: 'hematology', label: 'Hematology' },
+    { value: 'other', label: 'Other Tests' },
   ],
   getCategoryDisplayName: (cat: string) => `Display ${cat}`,
   getCategoryColor: (cat: string) => `color-${cat}`,
@@ -233,6 +249,64 @@ describe('TestComponentCatalog', () => {
 
     expect(screen.getByText('Display chemistry')).toBeInTheDocument();
     expect(screen.getByText('Display hematology')).toBeInTheDocument();
+  });
+
+  it('sorts tests within a category alphabetically by name', () => {
+    const components: LabTestComponentForStack[] = [
+      makeComponent({ id: 1, test_name: 'Zinc', canonical_test_name: 'Zinc', category: 'chemistry', completed_date: '2024-03-01' }),
+      makeComponent({ id: 2, test_name: 'Albumin', canonical_test_name: 'Albumin', category: 'chemistry', completed_date: '2024-01-01' }),
+      makeComponent({ id: 3, test_name: 'Magnesium', canonical_test_name: 'Magnesium', category: 'chemistry', completed_date: '2024-02-01' }),
+    ];
+
+    render(<TestComponentCatalog {...defaultProps} components={components} />);
+
+    const names = screen
+      .getAllByTestId('catalog-card')
+      .map(card => card.getAttribute('data-test-name'));
+    expect(names).toEqual(['Albumin', 'Magnesium', 'Zinc']);
+  });
+
+  it('keeps priority (status) ordering within a category instead of forcing alphabetical', () => {
+    // Default sort mode is 'priority': a critical result must outrank an
+    // alphabetically-earlier normal result in the same category (#1014 review fix —
+    // a blanket per-category name sort previously defeated this).
+    const components: LabTestComponentForStack[] = [
+      makeComponent({ id: 1, test_name: 'Albumin', canonical_test_name: 'Albumin', category: 'chemistry', status: 'normal' }),
+      makeComponent({ id: 2, test_name: 'Zinc', canonical_test_name: 'Zinc', category: 'chemistry', status: 'critical' }),
+    ];
+
+    render(<TestComponentCatalog {...defaultProps} components={components} />);
+
+    const names = screen
+      .getAllByTestId('catalog-card')
+      .map(card => card.getAttribute('data-test-name'));
+    expect(names).toEqual(['Zinc', 'Albumin']);
+  });
+
+  it('category filter "Other Tests" includes legacy entries with no category set', () => {
+    const components: LabTestComponentForStack[] = [
+      makeComponent({ id: 1, test_name: 'Glucose', canonical_test_name: 'Glucose', category: 'chemistry' }),
+      makeComponent({
+        id: -2,
+        test_name: 'Ferritin',
+        canonical_test_name: 'Ferritin',
+        category: null as any,
+        lab_result_id: 11,
+        is_legacy: true,
+      }),
+    ];
+
+    render(<TestComponentCatalog {...defaultProps} components={components} />);
+
+    expect(screen.getAllByTestId('catalog-card')).toHaveLength(2);
+
+    fireEvent.change(screen.getByTestId('select-Category'), {
+      target: { value: 'other' },
+    });
+
+    const cards = screen.getAllByTestId('catalog-card');
+    expect(cards).toHaveLength(1);
+    expect(cards[0]).toHaveTextContent('Ferritin');
   });
 
   it('renders search input always visible', () => {

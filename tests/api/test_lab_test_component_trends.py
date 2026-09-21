@@ -115,3 +115,87 @@ class TestLabTestComponentTrendsAPI:
         )
 
         assert response.status_code == 400
+
+
+class TestLegacyLabResultsInComponentEndpoints:
+    """Regression coverage for #1014: component-less "legacy" LabResults (a
+    result value stored directly on the lab_results row, with no
+    LabTestComponent children) must appear in the /all and /trends
+    endpoints alongside real components, marked with is_legacy=True."""
+
+    @pytest.fixture
+    def user_with_patient(self, db_session: Session):
+        user_data = create_random_user(db_session)
+        patient_data = PatientCreate(
+            first_name="Lee",
+            last_name="Gacy",
+            birth_date=date(1985, 6, 15),
+            gender="F",
+            address="789 Legacy Ln",
+        )
+        patient = patient_crud.create_for_user(
+            db_session, user_id=user_data["user"].id, patient_data=patient_data
+        )
+        user_data["user"].active_patient_id = patient.id
+        db_session.commit()
+        db_session.refresh(user_data["user"])
+        return {**user_data, "patient": patient}
+
+    @pytest.fixture
+    def authenticated_headers(self, user_with_patient):
+        return create_user_token_headers(user_with_patient["user"].username)
+
+    def _create_legacy_result(self, client, headers, patient_id, test_name, value):
+        resp = client.post(
+            "/api/v1/lab-results/",
+            json={
+                "patient_id": patient_id,
+                "test_name": test_name,
+                "status": "completed",
+                "completed_date": "2024-06-01",
+                "value": value,
+                "unit": "ng/mL",
+            },
+            headers=headers,
+        )
+        assert resp.status_code == 201
+        return resp.json()["id"]
+
+    def test_all_endpoint_includes_legacy_result(
+        self, client, user_with_patient, authenticated_headers
+    ):
+        patient_id = user_with_patient["patient"].id
+        lab_result_id = self._create_legacy_result(
+            client, authenticated_headers, patient_id, "Ferritin", 50.0
+        )
+
+        response = client.get(
+            f"/api/v1/lab-test-components/patient/{patient_id}/all",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        entry = next(e for e in data if e["lab_result_id"] == lab_result_id)
+        assert entry["is_legacy"] is True
+        assert entry["value"] == 50.0
+        assert entry["test_name"] == "Ferritin"
+
+    def test_trends_endpoint_includes_legacy_result(
+        self, client, user_with_patient, authenticated_headers
+    ):
+        patient_id = user_with_patient["patient"].id
+        self._create_legacy_result(
+            client, authenticated_headers, patient_id, "Ferritin", 50.0
+        )
+
+        response = client.get(
+            f"/api/v1/lab-test-components/patient/{patient_id}/trends",
+            params={"test_name": "Ferritin"},
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["data_points"]) == 1
+        assert data["data_points"][0]["value"] == 50.0

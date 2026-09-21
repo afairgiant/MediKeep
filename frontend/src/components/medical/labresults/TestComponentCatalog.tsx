@@ -204,7 +204,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
         const panelName = (labResultById.get(c.lab_result_id)?.test_name || '').toLowerCase();
         if (!name.includes(searchLower) && !panelName.includes(searchLower)) return false;
       }
-      if (category != null && c.category !== category) return false;
+      if (category != null && (c.category || 'other') !== category) return false;
       if (status != null && c.status !== status) return false;
       if (practitionerId != null) {
         const pid = labResultById.get(c.lab_result_id)?.practitioner_id ?? null;
