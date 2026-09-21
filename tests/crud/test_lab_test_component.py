@@ -1095,6 +1095,35 @@ class TestGetAllForPatient:
         assert legacy.id != two_patients["c1"].id
         assert legacy.id != two_patients["c2"].id
 
+    def test_legacy_lab_result_with_no_dates_sorts_last_not_backfilled(
+        self, db_session: Session, two_patients
+    ):
+        """A legacy LabResult with neither completed_date nor created_at must keep
+        created_at as None (not backfilled to "now") and sort after dated results —
+        backfilling to the current time would make an old, date-less result look
+        like the most recent one (#1014 review fix)."""
+        legacy_lr = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=two_patients["p1"].id,
+                test_name="Undated Legacy",
+                status="completed",
+                value=1.5,
+                unit="x",
+            ),
+        )
+        assert legacy_lr.created_at is None
+        assert legacy_lr.completed_date is None
+
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        legacy = next(r for r in results if r.lab_result_id == legacy_lr.id)
+        assert legacy.created_at is None
+        # The dated component (lr1/c1, completed_date=2024-01-10) must sort before it
+        dated = next(r for r in results if r.id == two_patients["c1"].id)
+        assert results.index(dated) < results.index(legacy)
+
     def test_legacy_lab_result_without_value_is_excluded(
         self, db_session: Session, two_patients
     ):

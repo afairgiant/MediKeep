@@ -49,11 +49,11 @@ def _synthesize_legacy_component(lab_result) -> LegacyLabComponent:
     """Build a pseudo-component from a component-less LabResult's flat result fields.
 
     LabResult.created_at is nullable (unlike LabTestComponent.created_at, which has a
-    default), so it can be None for older rows; the trend schema requires a non-null
-    created_at, so fall back to get_utc_now() in that case.
+    default), so it can be None for older rows. That is passed through as-is rather
+    than backfilled with the current time: a fabricated "now" would make an old,
+    date-less legacy result sort as the most recent entry instead of the least
+    recent (see _component_sort_date's date.min fallback for missing dates).
     """
-    from app.models.base import get_utc_now
-
     return LegacyLabComponent(
         id=-lab_result.id,
         lab_result_id=lab_result.id,
@@ -67,7 +67,7 @@ def _synthesize_legacy_component(lab_result) -> LegacyLabComponent:
         ref_range_text=lab_result.ref_range_text,
         status=lab_result.labs_result,
         notes=lab_result.notes,
-        created_at=lab_result.created_at or get_utc_now(),
+        created_at=lab_result.created_at,
         updated_at=lab_result.updated_at,
     )
 

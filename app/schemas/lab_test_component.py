@@ -618,7 +618,7 @@ class LabTestComponentTrendDataPoint(BaseModel):
     ref_range_max: Optional[float] = None
     ref_range_text: Optional[str] = None
     recorded_date: Optional[date] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     lab_result: LabResultBasicForTrend
     result_type: Optional[str] = "quantitative"
     qualitative_value: Optional[str] = None
