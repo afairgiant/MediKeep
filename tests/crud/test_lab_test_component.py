@@ -764,6 +764,73 @@ class TestUnitScopedTrending:
         assert len(rows) == 1
         assert rows[0].unit in (None, "")
 
+    def test_get_by_patient_and_test_name_includes_legacy_results(
+        self, db_session: Session, test_patient
+    ):
+        """Legacy (component-less) LabResults matching by test_name appear in trend data (#1014)."""
+        lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Ferritin",
+                status="completed",
+                completed_date=date(2024, 1, 1),
+                value=50.0,
+                unit="ng/mL",
+            ),
+        )
+        newer_lr = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Ferritin",
+                status="completed",
+                completed_date=date(2024, 6, 1),
+            ),
+        )
+        lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=newer_lr.id, test_name="Ferritin", value=60.0, unit="ng/mL"
+            ),
+        )
+
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=test_patient.id,
+            test_name="Ferritin",
+        )
+        assert {r.value for r in rows} == {50.0, 60.0}
+        # Newest (real component) first
+        assert rows[0].value == 60.0
+        legacy_row = next(r for r in rows if r.value == 50.0)
+        assert legacy_row.is_legacy is True
+
+    def test_get_by_patient_and_test_name_trims_trailing_punctuation_on_query_param(
+        self, db_session: Session, test_patient
+    ):
+        """A query test_name with trailing punctuation/whitespace must still match a
+        legacy LabResult whose stored test_name has none (#1014 review fix): both
+        sides of the comparison need the same rtrim normalization, not just the column."""
+        lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Ferritin",
+                status="completed",
+                completed_date=date(2024, 1, 1),
+                value=50.0,
+                unit="ng/mL",
+            ),
+        )
+
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=test_patient.id,
+            test_name="Ferritin, ",
+        )
+        assert {r.value for r in rows} == {50.0}
+
     def test_component_catalog_splits_entries_by_unit(
         self, db_session: Session, seeded_calcium
     ):
@@ -997,3 +1064,78 @@ class TestGetAllForPatient:
         )
         assert component.lab_result is not None
         assert component.lab_result.id == two_patients["lr1"].id
+
+    def test_legacy_lab_result_with_value_is_synthesized(
+        self, db_session: Session, two_patients
+    ):
+        """A component-less LabResult with a value is included as a legacy pseudo-component (#1014)."""
+        legacy_lr = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=two_patients["p1"].id,
+                test_name="Vitamin D",
+                status="completed",
+                completed_date=date(2024, 3, 1),
+                value=32.0,
+                unit="ng/mL",
+            ),
+        )
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        legacy = next(r for r in results if r.lab_result_id == legacy_lr.id)
+        assert legacy.is_legacy is True
+        assert legacy.test_name == "Vitamin D"
+        assert legacy.value == 32.0
+        assert legacy.unit == "ng/mL"
+        # Real components remain unmarked
+        real = next(r for r in results if r.id == two_patients["c1"].id)
+        assert getattr(real, "is_legacy", False) is False
+        # Synthesized ids never collide with real component ids
+        assert legacy.id != two_patients["c1"].id
+        assert legacy.id != two_patients["c2"].id
+
+    def test_legacy_lab_result_without_value_is_excluded(
+        self, db_session: Session, two_patients
+    ):
+        """A component-less LabResult with no value has nothing to show and is excluded."""
+        lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=two_patients["p1"].id,
+                test_name="Pending Test",
+                status="ordered",
+            ),
+        )
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        assert all(r.test_name != "Pending Test" for r in results)
+
+    def test_legacy_result_with_components_is_not_duplicated(
+        self, db_session: Session, two_patients
+    ):
+        """A LabResult that has real components is not also synthesized as legacy,
+        even though it also carries a value on its own flat fields."""
+        lr = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=two_patients["p1"].id,
+                test_name="Mixed Panel",
+                status="completed",
+                value=1.0,
+                unit="x",
+            ),
+        )
+        lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lr.id, test_name="Component A", value=5.0, unit="x"
+            ),
+        )
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        matching = [r for r in results if r.lab_result_id == lr.id]
+        assert len(matching) == 1
+        assert matching[0].test_name == "Component A"

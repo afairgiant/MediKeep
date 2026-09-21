@@ -204,7 +204,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
         const panelName = (labResultById.get(c.lab_result_id)?.test_name || '').toLowerCase();
         if (!name.includes(searchLower) && !panelName.includes(searchLower)) return false;
       }
-      if (category != null && c.category !== category) return false;
+      if (category != null && (c.category || 'other') !== category) return false;
       if (status != null && c.status !== status) return false;
       if (practitionerId != null) {
         const pid = labResultById.get(c.lab_result_id)?.practitioner_id ?? null;
@@ -288,6 +288,9 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
       const cat = item.category || 'other';
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(item);
+    }
+    for (const items of Object.values(groups)) {
+      items.sort((a, b) => a.test_name.localeCompare(b.test_name));
     }
     const keys = Object.keys(groups).sort((a, b) => {
       if (sortMode === 'category') {

@@ -549,6 +549,7 @@ class LabTestComponentForStack(LabTestComponentResponse):
     completed_date: Optional[date] = None
     ordered_date: Optional[date] = None
     facility: Optional[str] = None
+    is_legacy: bool = False  # True for synthesized entries from component-less LabResults (#1014)
 
     model_config = {"from_attributes": True}
 

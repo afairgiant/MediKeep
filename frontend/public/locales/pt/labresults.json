@@ -431,7 +431,8 @@
     "noComponentsDescription": "Este resultado laboratorial ainda não possui exames.",
     "notifications": {
       "componentDeleted": "Componente excluído",
-      "hasBeenDeleted": "{{name}} foi excluído"
+      "hasBeenDeleted": "{{name}} foi excluído",
+      "legacyResultNotFound": "Não foi possível encontrar o resultado laboratorial para editar"
     },
     "refreshComponents": "Atualizar componentes",
     "resultType": {

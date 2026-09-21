@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_, func, or_
@@ -10,6 +12,74 @@ from app.schemas.lab_test_component import (
     LabTestComponentCreate,
     LabTestComponentUpdate,
 )
+
+
+@dataclass
+class LegacyLabComponent:
+    """Duck-typed stand-in for a LabTestComponent, synthesized from a
+    component-less LabResult so "legacy" results can flow through the same
+    response-building and trend-statistics code as real components (#1014).
+    """
+
+    id: int
+    lab_result_id: int
+    lab_result: Any
+    test_name: str
+    test_code: Optional[str]
+    value: Optional[float]
+    unit: Optional[str]
+    ref_range_min: Optional[float]
+    ref_range_max: Optional[float]
+    ref_range_text: Optional[str]
+    status: Optional[str]
+    notes: Optional[str]
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
+    abbreviation: Optional[str] = None
+    category: Optional[str] = None
+    display_order: Optional[int] = None
+    canonical_test_name: Optional[str] = None
+    result_type: str = "quantitative"
+    qualitative_value: Optional[str] = None
+    textual_value: Optional[str] = None
+    is_legacy: bool = True
+
+
+def _synthesize_legacy_component(lab_result) -> LegacyLabComponent:
+    """Build a pseudo-component from a component-less LabResult's flat result fields.
+
+    LabResult.created_at is nullable (unlike LabTestComponent.created_at, which has a
+    default), so it can be None for older rows; the trend schema requires a non-null
+    created_at, so fall back to get_utc_now() in that case.
+    """
+    from app.models.base import get_utc_now
+
+    return LegacyLabComponent(
+        id=-lab_result.id,
+        lab_result_id=lab_result.id,
+        lab_result=lab_result,
+        test_name=lab_result.test_name,
+        test_code=lab_result.test_code,
+        value=lab_result.value,
+        unit=lab_result.unit,
+        ref_range_min=lab_result.ref_range_min,
+        ref_range_max=lab_result.ref_range_max,
+        ref_range_text=lab_result.ref_range_text,
+        status=lab_result.labs_result,
+        notes=lab_result.notes,
+        created_at=lab_result.created_at or get_utc_now(),
+        updated_at=lab_result.updated_at,
+    )
+
+
+def _component_sort_date(component) -> date:
+    """Mirrors the SQL coalesce(completed_date, date(created_at)) ordering."""
+    completed_date = getattr(component.lab_result, "completed_date", None)
+    if completed_date:
+        return completed_date
+    if component.created_at:
+        return component.created_at.date()
+    return date.min
 
 
 def apply_unit_filter(query, unit_column, unit: Optional[str]):
@@ -206,7 +276,7 @@ class CRUDLabTestComponent(
         date_to: Optional[Any] = None,
         limit: Optional[int] = None,
         unit: Optional[str] = None,
-    ) -> List[LabTestComponent]:
+    ) -> List[Any]:
         """
         Get all test components for a patient by test name (case-insensitive).
 
@@ -247,7 +317,7 @@ class CRUDLabTestComponent(
                                 func.trim(self.model.canonical_test_name) == "",
                             ),
                             func.lower(func.rtrim(self.model.test_name, ",;: "))
-                            == func.lower(test_name),
+                            == func.lower(test_name.rstrip(",;: ")),
                         ),
                     ),
                 )
@@ -265,34 +335,95 @@ class CRUDLabTestComponent(
             if date_to:
                 query = query.filter(recorded_date_expr <= date_to)
 
-        query = query.order_by(
-            func.coalesce(
-                LabResult.completed_date, func.date(self.model.created_at)
-            ).desc()
+        recorded_date_sort_expr = func.coalesce(
+            LabResult.completed_date, func.date(self.model.created_at)
+        ).desc()
+        if limit:
+            query = query.order_by(recorded_date_sort_expr).limit(limit)
+        components = query.options(joinedload(self.model.lab_result)).all()
+
+        # Legacy (component-less) LabResults: matched by exact test_name only,
+        # since they have no canonical_test_name to match against (#1014).
+        legacy_query = db.query(LabResult).filter(
+            and_(
+                LabResult.patient_id == patient_id,
+                LabResult.value.isnot(None),
+                ~LabResult.test_components.any(),
+                func.lower(func.rtrim(LabResult.test_name, ",;: "))
+                == func.lower(test_name.rstrip(",;: ")),
+            )
         )
+        legacy_query = apply_unit_filter(legacy_query, LabResult.unit, unit)
+        if date_from or date_to:
+            recorded_date_expr = func.coalesce(
+                LabResult.completed_date, func.date(LabResult.created_at)
+            )
+            if date_from:
+                legacy_query = legacy_query.filter(recorded_date_expr >= date_from)
+            if date_to:
+                legacy_query = legacy_query.filter(recorded_date_expr <= date_to)
+
+        legacy_sort_expr = func.coalesce(
+            LabResult.completed_date, func.date(LabResult.created_at)
+        ).desc()
+        if limit:
+            legacy_query = legacy_query.order_by(legacy_sort_expr).limit(limit)
+
+        merged = list(components) + [
+            _synthesize_legacy_component(lr) for lr in legacy_query.all()
+        ]
+        merged.sort(key=_component_sort_date, reverse=True)
 
         if limit:
-            query = query.limit(limit)
+            merged = merged[:limit]
 
-        return query.options(joinedload(self.model.lab_result)).all()
+        return merged
 
     def get_all_for_patient(
         self, db: Session, *, patient_id: int, limit: int = 2000
-    ) -> List[LabTestComponent]:
-        """Get all test components for a patient with parent lab result loaded."""
+    ) -> List[Any]:
+        """Get all test components for a patient with parent lab result loaded.
+
+        Also synthesizes pseudo-components for "legacy" LabResults — orders with
+        no LabTestComponent children that carry a result directly on their own
+        flat value/unit/ref_range fields — so they appear in the same list (#1014).
+        """
         from app.models.labs import LabResult
 
-        return (
+        sort_expr = func.coalesce(
+            LabResult.completed_date, func.date(self.model.created_at)
+        ).desc()
+        components = (
             db.query(self.model)
             .join(self.model.lab_result)
             .filter(LabResult.patient_id == patient_id)
             .options(joinedload(self.model.lab_result))
-            .order_by(
-                func.coalesce(LabResult.completed_date, func.date(self.model.created_at)).desc()
-            )
+            .order_by(sort_expr)
             .limit(limit)
             .all()
         )
+
+        legacy_sort_expr = func.coalesce(
+            LabResult.completed_date, func.date(LabResult.created_at)
+        ).desc()
+        legacy_results = (
+            db.query(LabResult)
+            .filter(
+                LabResult.patient_id == patient_id,
+                LabResult.value.isnot(None),
+                ~LabResult.test_components.any(),
+            )
+            .order_by(legacy_sort_expr)
+            .limit(limit)
+            .all()
+        )
+
+        merged = list(components) + [
+            _synthesize_legacy_component(lr) for lr in legacy_results
+        ]
+        merged.sort(key=_component_sort_date, reverse=True)
+
+        return merged[:limit]
 
     def bulk_create(
         self, db: Session, *, obj_in: LabTestComponentBulkCreate

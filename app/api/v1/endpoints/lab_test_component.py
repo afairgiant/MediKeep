@@ -556,6 +556,7 @@ def get_all_components_for_patient(
                     completed_date=parent.completed_date if parent else None,
                     ordered_date=parent.ordered_date if parent else None,
                     facility=parent.facility if parent else None,
+                    is_legacy=getattr(comp, "is_legacy", False),
                 )
             )
 

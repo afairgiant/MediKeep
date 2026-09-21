@@ -874,7 +874,9 @@ const LabResults = () => {
 
   const handleViewComponentFromTable = useCallback(
     comp => {
-      setInitialViewTab('test-components');
+      // Legacy (component-less) results have no test-components tab content —
+      // their value lives on the lab result's own fields, shown on Overview (#1014).
+      setInitialViewTab(comp.is_legacy ? 'overview' : 'test-components');
       const lr = labResults.find(r => r.id === comp.lab_result_id);
       if (lr) {
         setViewingLabResult(lr);
@@ -884,10 +886,35 @@ const LabResults = () => {
     [labResults, setViewingLabResult, setShowViewModal]
   );
 
-  const handleEditComponentFromTable = useCallback(comp => {
-    setEditingComponent(comp);
-    setEditComponentModalOpen(true);
-  }, []);
+  const handleEditComponentFromTable = useCallback(
+    comp => {
+      // Legacy (component-less) results have no component record to edit —
+      // editing means editing the lab result's own value/unit/range fields (#1014).
+      if (comp.is_legacy) {
+        const lr = labResults.find(r => r.id === comp.lab_result_id);
+        if (lr) {
+          handleEditLabResult(lr);
+        } else {
+          logger.warn('legacy_component_edit_lab_result_missing', {
+            component: 'LabResults',
+            labResultId: comp.lab_result_id,
+          });
+          notifications.show({
+            title: t('shared:labels.error', 'Error'),
+            message: t(
+              'labresults:testComponents.notifications.legacyResultNotFound',
+              'Could not find the lab result to edit'
+            ),
+            color: 'red',
+          });
+        }
+        return;
+      }
+      setEditingComponent(comp);
+      setEditComponentModalOpen(true);
+    },
+    [labResults, handleEditLabResult]
+  );
 
   const handleSaveComponent = useCallback(
     async updatedData => {

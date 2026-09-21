@@ -211,6 +211,8 @@ export interface LabTestComponentForStack extends LabTestComponent {
   completed_date?: string | null;
   ordered_date?: string | null;
   facility?: string | null;
+  /** True for entries synthesized from a component-less "legacy" LabResult (#1014) */
+  is_legacy?: boolean;
 }
 
 class LabTestComponentApi {

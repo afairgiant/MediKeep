@@ -194,7 +194,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
         const panelName = (labResultById.get(c.lab_result_id)?.test_name || '').toLowerCase();
         if (!name.includes(searchLower) && !panelName.includes(searchLower)) return false;
       }
-      if (filters.category != null && c.category !== filters.category) return false;
+      if (filters.category != null && (c.category || 'other') !== filters.category) return false;
       if (filters.practitionerId != null) {
         const pid = labResultById.get(c.lab_result_id)?.practitioner_id ?? null;
         if (pid !== filters.practitionerId) return false;
@@ -242,6 +242,9 @@ const LabResultsComponentTable: React.FC<Props> = ({
       const cat = group.latest.category || 'other';
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat)!.push(group);
+    }
+    for (const tests of map.values()) {
+      tests.sort((a, b) => a.displayName.localeCompare(b.displayName));
     }
     const keys = [...map.keys()].sort((a, b) => {
       const aHasAbnormal = map.get(a)!.some(
@@ -636,7 +639,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
                                         <IconEdit size={13} />
                                       </ActionIcon>
                                     )}
-                                    {onDelete && (
+                                    {onDelete && !comp.is_legacy && (
                                       <ActionIcon
                                         size="xs"
                                         variant="subtle"
