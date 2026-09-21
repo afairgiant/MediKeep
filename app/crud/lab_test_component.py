@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func, nullslast, or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -69,6 +69,21 @@ def _synthesize_legacy_component(lab_result) -> LegacyLabComponent:
         notes=lab_result.notes,
         created_at=lab_result.created_at,
         updated_at=lab_result.updated_at,
+    )
+
+
+def _recorded_date_sort_expr(completed_date_col, created_at_col):
+    """coalesce(completed_date, date(created_at)) DESC, with explicit NULLS LAST.
+
+    ORDER BY ... DESC defaults to NULLS FIRST on PostgreSQL (the production DB)
+    but NULLS LAST on SQLite (the test DB) — without an explicit nullslast(), a
+    row missing both dates would sort as if newest in production while the test
+    suite (SQLite) shows it correctly sorting as oldest. This must match the
+    Python-side tiebreak in _component_sort_date, which treats a missing date as
+    the oldest possible date.
+    """
+    return nullslast(
+        func.coalesce(completed_date_col, func.date(created_at_col)).desc()
     )
 
 
@@ -335,9 +350,9 @@ class CRUDLabTestComponent(
             if date_to:
                 query = query.filter(recorded_date_expr <= date_to)
 
-        recorded_date_sort_expr = func.coalesce(
-            LabResult.completed_date, func.date(self.model.created_at)
-        ).desc()
+        recorded_date_sort_expr = _recorded_date_sort_expr(
+            LabResult.completed_date, self.model.created_at
+        )
         if limit:
             query = query.order_by(recorded_date_sort_expr).limit(limit)
         components = query.options(joinedload(self.model.lab_result)).all()
@@ -363,9 +378,9 @@ class CRUDLabTestComponent(
             if date_to:
                 legacy_query = legacy_query.filter(recorded_date_expr <= date_to)
 
-        legacy_sort_expr = func.coalesce(
-            LabResult.completed_date, func.date(LabResult.created_at)
-        ).desc()
+        legacy_sort_expr = _recorded_date_sort_expr(
+            LabResult.completed_date, LabResult.created_at
+        )
         if limit:
             legacy_query = legacy_query.order_by(legacy_sort_expr).limit(limit)
 
@@ -390,9 +405,9 @@ class CRUDLabTestComponent(
         """
         from app.models.labs import LabResult
 
-        sort_expr = func.coalesce(
-            LabResult.completed_date, func.date(self.model.created_at)
-        ).desc()
+        sort_expr = _recorded_date_sort_expr(
+            LabResult.completed_date, self.model.created_at
+        )
         components = (
             db.query(self.model)
             .join(self.model.lab_result)
@@ -403,9 +418,9 @@ class CRUDLabTestComponent(
             .all()
         )
 
-        legacy_sort_expr = func.coalesce(
-            LabResult.completed_date, func.date(LabResult.created_at)
-        ).desc()
+        legacy_sort_expr = _recorded_date_sort_expr(
+            LabResult.completed_date, LabResult.created_at
+        )
         legacy_results = (
             db.query(LabResult)
             .filter(
@@ -540,10 +555,7 @@ class CRUDLabTestComponent(
 
         # Order by completed_date desc so first item per group is the latest
         query = query.order_by(
-            func.coalesce(
-                LabResult.completed_date,
-                func.date(self.model.created_at),
-            ).desc()
+            _recorded_date_sort_expr(LabResult.completed_date, self.model.created_at)
         )
 
         components = query.all()

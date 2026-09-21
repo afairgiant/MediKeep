@@ -1168,3 +1168,21 @@ class TestGetAllForPatient:
         matching = [r for r in results if r.lab_result_id == lr.id]
         assert len(matching) == 1
         assert matching[0].test_name == "Component A"
+
+
+class TestRecordedDateSortExprNullsLast:
+    """ORDER BY ... DESC defaults to NULLS FIRST on PostgreSQL (production) but
+    NULLS LAST on SQLite (the test DB used everywhere else in this file) — a plain
+    behavioral test here would pass either way and couldn't catch a regression.
+    Compile against the postgresql dialect directly to pin the actual production
+    behavior (#1014 review fix)."""
+
+    def test_emits_explicit_nulls_last_for_postgresql(self):
+        from sqlalchemy.dialects import postgresql
+
+        from app.crud.lab_test_component import _recorded_date_sort_expr
+        from app.models.labs import LabResult
+
+        expr = _recorded_date_sort_expr(LabResult.completed_date, LabResult.created_at)
+        compiled = str(expr.compile(dialect=postgresql.dialect()))
+        assert "NULLS LAST" in compiled.upper()
