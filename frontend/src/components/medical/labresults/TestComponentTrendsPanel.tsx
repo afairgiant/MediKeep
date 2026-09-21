@@ -57,6 +57,10 @@ interface TestComponentTrendsPanelProps {
   // `null` falls through to the backend's legacy merged-across-units path.
   unit?: string | null;
   patientId: number;
+  // Called after a successful edit or delete so the owning component list
+  // (which this panel doesn't itself hold) can refresh — otherwise the
+  // parent view keeps showing the old value/row until manually refreshed.
+  onMutate?: () => void;
 }
 
 const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
@@ -65,6 +69,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   testName,
   unit = null,
   patientId,
+  onMutate,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
   const [trendData, setTrendData] = useState<TrendResponse | null>(null);
@@ -222,6 +227,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         setEditModalOpen(false);
         setEditingComponent(null);
         loadTrendData();
+        onMutate?.();
       } catch (error: any) {
         notifications.show({
           title: t('shared:labels.error', 'Error'),
@@ -236,7 +242,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         });
       }
     },
-    [editingComponent, patientId, loadTrendData, t]
+    [editingComponent, patientId, loadTrendData, onMutate, t]
   );
 
   const handleDeletePoint = useCallback(async (point: TrendDataPoint) => {
@@ -259,6 +265,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         color: 'green',
       });
       loadTrendData();
+      onMutate?.();
     } catch (error: any) {
       notifications.show({
         title: t('shared:labels.error', 'Error'),
@@ -274,7 +281,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
     } finally {
       setActionLoadingId(null);
     }
-  }, [patientId, loadTrendData, t]);
+  }, [patientId, loadTrendData, onMutate, t]);
 
   const getTrendIcon = () => {
     if (!trendData) return <IconMinus size={18} />;

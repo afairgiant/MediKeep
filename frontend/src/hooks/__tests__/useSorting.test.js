@@ -61,8 +61,6 @@ describe('useSorting', () => {
       })
     );
 
-    expect(result.current.sortedData.map(item => item.id).sort()).toEqual([
-      1, 2,
-    ]);
+    expect(result.current.sortedData.map(item => item.id)).toEqual([1, 2]);
   });
 });

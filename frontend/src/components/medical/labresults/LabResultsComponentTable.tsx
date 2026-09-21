@@ -56,6 +56,9 @@ interface Props {
   patientId: number;
   onEdit?: (_component: LabTestComponentForStack) => void;
   onDelete?: (_componentId: number) => void;
+  // Called after an edit/delete made from within the trends drill-down, so
+  // the caller can refresh the `components` list this table renders.
+  onRefresh?: () => void;
   disableActions?: boolean;
 }
 
@@ -126,6 +129,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
   patientId,
   onEdit,
   onDelete,
+  onRefresh,
   disableActions = false,
 }) => {
   const { t } = useTranslation(['labresults', 'shared', 'common']);
@@ -665,6 +669,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
         testName={trendTestName}
         unit={trendUnit}
         patientId={patientId}
+        onMutate={onRefresh}
       />
     </Stack>
   );

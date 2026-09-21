@@ -340,7 +340,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                             <ActionIcon
                               size="sm"
                               variant="subtle"
-                              disabled={actionLoadingId === point.id}
+                              disabled={actionLoadingId !== null}
                               onClick={() => onEdit(point)}
                               aria-label={t('shared:labels.edit', 'Edit')}
                             >
@@ -354,7 +354,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                               size="sm"
                               variant="subtle"
                               color="red"
-                              disabled={actionLoadingId === point.id}
+                              disabled={actionLoadingId !== null}
                               onClick={() => onDelete(point)}
                               aria-label={t('common:actions.delete', 'Delete')}
                             >

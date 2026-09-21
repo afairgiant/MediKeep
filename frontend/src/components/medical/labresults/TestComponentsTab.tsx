@@ -619,6 +619,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           testName={selectedTestName}
           unit={selectedUnit}
           patientId={currentPatient.id}
+          onMutate={handleRefresh}
         />
       )}
     </Stack>

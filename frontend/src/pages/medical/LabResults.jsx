@@ -1415,6 +1415,7 @@ const LabResults = () => {
             patientId={currentPatient?.id}
             onEdit={handleEditComponentFromTable}
             onDelete={handleDeleteComponent}
+            onRefresh={refreshPatientComponents}
             disableActions={isViewOnly}
           />
         );
