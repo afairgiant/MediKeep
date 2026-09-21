@@ -36,7 +36,7 @@ export const cssVariablesResolver = theme => ({
     '--input-section-color': '#f7fafc',
     '--input-bd': '#4a5568',
     '--mantine-color-body': '#1a202c',
-    '--mantine-color-default': '#2d3748',
+    '--mantine-color-default': '#3d4a61',
     '--mantine-color-default-border': '#718096',
     '--mantine-color-default-border-hover': '#a0aec0',
   },
