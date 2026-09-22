@@ -1229,6 +1229,7 @@
       "createFailed": "Kunde inte skapa tagg",
       "deleteFailed": "Kunde inte ta bort tagg",
       "editFailed": "Kunde inte uppdatera tagg",
+      "invalidCharacters": "Taggar får endast innehålla bokstäver, siffror och . - :",
       "loadFailed": "Kunde inte ladda taggar",
       "replaceFailed": "Kunde inte ersätta tagg"
     },

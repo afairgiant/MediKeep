@@ -4,7 +4,11 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 from app.schemas.validators import (
     validate_date_not_future,
     validate_positive_id,
@@ -129,7 +133,7 @@ class EncounterCreate(EncounterBase):
         return validate_positive_id(v, field_name="Condition ID")
 
 
-class EncounterUpdate(BaseModel):
+class EncounterUpdate(TaggedEntityUpdateMixin):
     """Schema for updating an existing encounter"""
 
     reason: Optional[str] = None
@@ -147,7 +151,6 @@ class EncounterUpdate(BaseModel):
     duration_minutes: Optional[int] = None
     location: Optional[str] = None
     priority: Optional[str] = None
-    tags: Optional[List[str]] = None
 
     @field_validator("reason")
     @classmethod
@@ -232,7 +235,7 @@ class EncounterUpdate(BaseModel):
         return validate_text_field(v, max_length=50, field_name="Priority")
 
 
-class EncounterResponse(EncounterBase):
+class EncounterResponse(TaggedEntityResponseMixin, EncounterBase):
     """Schema for encounter response"""
 
     id: int

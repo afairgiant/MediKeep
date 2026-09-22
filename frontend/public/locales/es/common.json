@@ -1229,6 +1229,7 @@
       "createFailed": "Error al crear la etiqueta",
       "deleteFailed": "Error al eliminar la etiqueta",
       "editFailed": "Error al actualizar la etiqueta",
+      "invalidCharacters": "Las etiquetas solo pueden contener letras, números y . - :",
       "loadFailed": "Error al cargar las etiquetas",
       "replaceFailed": "Error al reemplazar la etiqueta"
     },

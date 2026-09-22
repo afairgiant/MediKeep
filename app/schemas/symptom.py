@@ -4,6 +4,11 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 from app.models.enums import SymptomSeverity, SymptomStatus
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 from app.schemas.validators import (
     validate_date_not_future,
     validate_list_field,
@@ -49,7 +54,7 @@ def _validate_relevance_note(v: Optional[str]) -> Optional[str]:
 # ============================================================================
 
 
-class SymptomBase(BaseModel):
+class SymptomBase(TaggedEntityMixin):
     """Base schema for Symptom (parent definition)"""
 
     symptom_name: str
@@ -59,7 +64,6 @@ class SymptomBase(BaseModel):
     resolved_date: Optional[date] = None
     typical_triggers: Optional[List[str]] = None
     general_notes: Optional[str] = None
-    tags: Optional[List[str]] = None
 
     @field_validator("resolved_date")
     @classmethod
@@ -91,7 +95,7 @@ class SymptomBase(BaseModel):
     def validate_general_notes(cls, v):
         return validate_text_field(v, max_length=2000, field_name="General notes")
 
-    @field_validator("typical_triggers", "tags")
+    @field_validator("typical_triggers")
     @classmethod
     def validate_list_fields(cls, v):
         return validate_list_field(v, max_items=20, max_item_length=100)
@@ -109,7 +113,7 @@ class SymptomCreate(SymptomBase):
         return validate_date_not_future(v, field_name="First occurrence date")
 
 
-class SymptomUpdate(BaseModel):
+class SymptomUpdate(TaggedEntityUpdateMixin):
     """Schema for updating symptom definition"""
 
     symptom_name: Optional[str] = None
@@ -119,7 +123,6 @@ class SymptomUpdate(BaseModel):
     resolved_date: Optional[date] = None
     typical_triggers: Optional[List[str]] = None
     general_notes: Optional[str] = None
-    tags: Optional[List[str]] = None
 
     @field_validator("resolved_date")
     @classmethod
@@ -152,7 +155,7 @@ class SymptomUpdate(BaseModel):
     def validate_general_notes(cls, v):
         return validate_text_field(v, max_length=2000, field_name="General notes")
 
-    @field_validator("typical_triggers", "tags")
+    @field_validator("typical_triggers")
     @classmethod
     def validate_list_fields(cls, v):
         return validate_list_field(
@@ -160,7 +163,7 @@ class SymptomUpdate(BaseModel):
         )
 
 
-class SymptomResponse(SymptomBase):
+class SymptomResponse(TaggedEntityResponseMixin, SymptomBase):
     """Schema for symptom definition response"""
 
     id: int

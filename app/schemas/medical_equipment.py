@@ -1,7 +1,7 @@
 """Schemas for Medical Equipment."""
 
 from datetime import date, datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import (
     BaseModel,
@@ -11,7 +11,11 @@ from pydantic import (
     model_validator,
 )
 
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 
 # Valid equipment types
 EQUIPMENT_TYPES = [
@@ -98,7 +102,7 @@ class MedicalEquipmentCreate(MedicalEquipmentBase):
     """Schema for creating medical equipment."""
 
 
-class MedicalEquipmentUpdate(BaseModel):
+class MedicalEquipmentUpdate(TaggedEntityUpdateMixin):
     """Schema for updating medical equipment."""
 
     equipment_name: Optional[str] = Field(None, min_length=2, max_length=200)
@@ -114,7 +118,6 @@ class MedicalEquipmentUpdate(BaseModel):
     supplier: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=5000)
     practitioner_id: Optional[int] = Field(None, gt=0)
-    tags: Optional[List[str]] = None
 
     @field_validator("equipment_type")
     @classmethod
@@ -138,7 +141,7 @@ class MedicalEquipmentUpdate(BaseModel):
         return v
 
 
-class MedicalEquipmentResponse(MedicalEquipmentBase):
+class MedicalEquipmentResponse(TaggedEntityResponseMixin, MedicalEquipmentBase):
     """Schema for medical equipment response."""
 
     id: int

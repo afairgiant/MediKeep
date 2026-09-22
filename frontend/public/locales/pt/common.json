@@ -1229,6 +1229,7 @@
       "createFailed": "Falha ao criar tag",
       "deleteFailed": "Falha ao excluir tag",
       "editFailed": "Falha ao atualizar tag",
+      "invalidCharacters": "As tags só podem conter letras, números e . - :",
       "loadFailed": "Falha ao carregar tags",
       "replaceFailed": "Falha ao substituir tag"
     },
