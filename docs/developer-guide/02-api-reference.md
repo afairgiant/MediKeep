@@ -3322,6 +3322,9 @@ Base path: `/api/v1/insurances`
     records may instead carry a free-text PCP name inside
     `coverage_details.primary_care_physician`, preserved as a fallback and
     not auto-migrated.
+  - `tags` (array of strings, max 15): User-defined tags, same
+    normalization/validation as other medical entities (lowercased,
+    spaces replaced with `-`, deduplicated, 50 chars max each).
 
 ### 7.2 Emergency Contacts
 
