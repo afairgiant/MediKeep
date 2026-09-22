@@ -1,8 +1,10 @@
 import {
   generateInsurancePrint,
   generateFieldGridSection,
+  generatePrintHeader,
   escapeHtml,
   openPrintWindow,
+  PopupBlockedError,
 } from './printTemplateGenerator';
 
 const baseInsurance = {
@@ -202,6 +204,13 @@ describe('generateInsurancePrint - notes escaping (#1041)', () => {
 });
 
 describe('openPrintWindow - defense in depth (#1041)', () => {
+  afterEach(() => {
+    // clearAllMocks() (global afterEach) resets call state but does not
+    // restore spies, so a stubbed window.open would otherwise leak into
+    // any test added below this block.
+    vi.restoreAllMocks();
+  });
+
   test('severs window.opener on the print window without losing the handle used to write into it', () => {
     // Simulates a live opener link, as a real popup would have, so the test
     // fails if the assignment that's supposed to null it out is removed.
@@ -211,9 +220,7 @@ describe('openPrintWindow - defense in depth (#1041)', () => {
       print: vi.fn(),
       close: vi.fn(),
     };
-    const openSpy = vi
-      .spyOn(window, 'open')
-      .mockReturnValue(mockPrintWindow);
+    vi.spyOn(window, 'open').mockReturnValue(mockPrintWindow);
 
     openPrintWindow('<html></html>');
 
@@ -224,7 +231,30 @@ describe('openPrintWindow - defense in depth (#1041)', () => {
       '<html></html>'
     );
     expect(mockPrintWindow.print).toHaveBeenCalled();
+  });
 
-    openSpy.mockRestore();
+  test('throws a distinguishable PopupBlockedError instead of a raw TypeError when the popup is blocked', () => {
+    vi.spyOn(window, 'open').mockReturnValue(null);
+
+    expect(() => openPrintWindow('<html></html>')).toThrow(
+      PopupBlockedError
+    );
+  });
+});
+
+describe('generatePrintHeader - statusBadges lookup is not prototype-polluted (#1041)', () => {
+  test('falls back to the default class for a status matching an inherited Object property', () => {
+    // `statusBadges[status]` is a plain object property lookup, so a status
+    // of e.g. "constructor" would otherwise resolve to Object's constructor
+    // function rather than a CSS class string.
+    const html = generatePrintHeader({
+      title: 'Acme Health',
+      type: 'Medical Insurance',
+      status: 'constructor',
+      statusBadges: { active: 'status-active' },
+    });
+
+    expect(html).toContain('class="status-badge status-active"');
+    expect(html).not.toContain('[native code]');
   });
 });

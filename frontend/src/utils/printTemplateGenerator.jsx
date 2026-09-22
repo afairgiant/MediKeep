@@ -119,7 +119,12 @@ export const getMedicalPrintStyles = () => MEDICAL_PRINT_STYLES;
 export const generatePrintHeader = config => {
   const { title, type, status, isPrimary = false, statusBadges = {} } = config;
 
-  const statusClass = statusBadges[status] || 'status-active';
+  const statusClass = Object.prototype.hasOwnProperty.call(
+    statusBadges,
+    status
+  )
+    ? statusBadges[status]
+    : 'status-active';
   const primaryBadge = isPrimary
     ? '<span class="primary-badge">PRIMARY</span>'
     : '';
@@ -132,7 +137,7 @@ export const generatePrintHeader = config => {
         ${primaryBadge}
       </div>
       <div style="margin-top: 5px;">
-        <span class="status-badge ${statusClass}">${escapeHtml(status)}</span>
+        <span class="status-badge ${escapeHtml(statusClass)}">${escapeHtml(status)}</span>
       </div>
     </div>
   `;
@@ -390,20 +395,27 @@ export const generateInsurancePrint = (
 };
 
 /**
+ * Error thrown when the browser blocks the print popup (window.open returns null).
+ */
+export class PopupBlockedError extends Error {
+  constructor() {
+    super('Print window was blocked by the browser');
+    this.name = 'PopupBlockedError';
+  }
+}
+
+/**
  * Opens a print window with the generated HTML
  * @param {string} html - The HTML content to print
  * @param {string} windowTitle - Title for the print window
  */
 export const openPrintWindow = (html, _windowTitle = 'Medical Record') => {
   const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    // Sever the new window's back-reference to this one, same protection
-    // 'noopener' provides - but passing 'noopener' to window.open() makes it
-    // return null per spec, which breaks the document.write() below that
-    // needs the handle. Nulling `opener` on the child achieves the same
-    // isolation without losing the reference.
-    printWindow.opener = null;
+  if (!printWindow) {
+    throw new PopupBlockedError();
   }
+  // Null the child window's `opener` reference so it can't navigate this window.
+  printWindow.opener = null;
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.print();
