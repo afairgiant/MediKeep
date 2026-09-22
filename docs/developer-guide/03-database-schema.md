@@ -801,6 +801,7 @@ JUNCTION TABLES (Many-to-Many)
 |--------|------|-------------|-------------|
 | id | Integer | PRIMARY KEY | Unique insurance ID |
 | patient_id | Integer | FK(patients.id), NOT NULL | Associated patient |
+| practitioner_id | Integer | FK(practitioners.id), ON DELETE SET NULL | Linked Primary Care Physician (medical insurance) |
 | insurance_type | String | NOT NULL | InsuranceType enum value |
 | company_name | String | NOT NULL | Insurance company name |
 | employer_group | String | | Employer/group name |
@@ -834,11 +835,18 @@ JUNCTION TABLES (Many-to-Many)
 
 **Relationships**:
 - `patient`: Many-to-one with Patient
+- `practitioner_id`: Optional many-to-one with Practitioner (Primary Care Physician)
 
 **Business Rules**:
 - Insurance type, company, member name/ID, and effective date required
 - Only one is_primary insurance per insurance_type per patient
 - coverage_details stores type-specific data (BIN/PCN for prescription)
+- practitioner_id links the PCP to a real Practitioner record via the same
+  autocomplete/inline-create picker used elsewhere (e.g. lab result ordering
+  practitioner). Legacy records may still carry a free-text PCP name at
+  `coverage_details.primary_care_physician`; this is preserved (not
+  auto-migrated) and used as a display fallback only when practitioner_id
+  is unset.
 
 ## Symptom System Tables
 
