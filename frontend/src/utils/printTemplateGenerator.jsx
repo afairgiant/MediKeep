@@ -126,13 +126,13 @@ export const generatePrintHeader = config => {
 
   return `
     <div class="header">
-      <div class="record-title">${title}</div>
+      <div class="record-title">${escapeHtml(title)}</div>
       <div class="record-type">
-        ${type}
+        ${escapeHtml(type)}
         ${primaryBadge}
       </div>
       <div style="margin-top: 5px;">
-        <span class="status-badge ${statusClass}">${status}</span>
+        <span class="status-badge ${statusClass}">${escapeHtml(status)}</span>
       </div>
     </div>
   `;
@@ -194,7 +194,7 @@ export const generateFieldGridSection = (sectionTitle, data, options = {}) => {
 
   return `
     <div class="section">
-      <div class="section-title">${sectionTitle}</div>
+      <div class="section-title">${escapeHtml(sectionTitle)}</div>
       <div class="field-grid">
         ${fields.join('')}
       </div>
@@ -262,7 +262,7 @@ export const generateMedicalRecordPrint = (data, config) => {
   return `
     <html>
       <head>
-        <title>${title}</title>
+        <title>${escapeHtml(title)}</title>
         <style>${styles}</style>
       </head>
       <body>
@@ -368,7 +368,7 @@ export const generateInsurancePrint = (
           <div class="section">
             <div class="section-title">Notes</div>
             <div style="padding: 5px; background-color: #f8f9fa; border-radius: 3px;">
-              ${insurance.notes.replace(/\n/g, '<br>')}
+              ${escapeHtml(insurance.notes).replace(/\n/g, '<br>')}
             </div>
           </div>
         `,
@@ -396,6 +396,14 @@ export const generateInsurancePrint = (
  */
 export const openPrintWindow = (html, _windowTitle = 'Medical Record') => {
   const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    // Sever the new window's back-reference to this one, same protection
+    // 'noopener' provides - but passing 'noopener' to window.open() makes it
+    // return null per spec, which breaks the document.write() below that
+    // needs the handle. Nulling `opener` on the child achieves the same
+    // isolation without losing the reference.
+    printWindow.opener = null;
+  }
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.print();
