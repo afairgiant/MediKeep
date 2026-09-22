@@ -4,7 +4,11 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from app.models.enums import get_all_condition_statuses, get_all_severity_levels
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 from app.schemas.validators import validate_date_not_future, validate_text_field
 
 # Pre-fetch valid values for reuse
@@ -150,7 +154,7 @@ class ConditionUpdate(TaggedEntityUpdateMixin):
         return _validate_severity(v)
 
 
-class ConditionResponse(ConditionBase):
+class ConditionResponse(TaggedEntityResponseMixin, ConditionBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

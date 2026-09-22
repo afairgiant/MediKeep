@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import render, { screen, fireEvent, waitFor } from '../../test-utils/render';
+import render, { screen, fireEvent, waitFor, within } from '../../test-utils/render';
 import '@testing-library/jest-dom';
 
 // Regression coverage for a bypass reported after the #1040 tag-allowlist
@@ -11,17 +11,18 @@ import '@testing-library/jest-dom';
 // /tags/create with no client-side validation, and (before this fix) the
 // backend had none either - so a tag like `< &8 HTML > <p>` could be
 // created. This asserts the page now blocks the request before it's sent.
-const { mockPost, mockGet, mockPatch } = vi.hoisted(() => ({
+const { mockPost, mockGet, mockPatch, mockPut } = vi.hoisted(() => ({
   mockPost: vi.fn(),
   mockGet: vi.fn(() => Promise.resolve({ data: [] })),
   mockPatch: vi.fn(),
+  mockPut: vi.fn(),
 }));
 
 vi.mock('../../services/api', () => ({
   apiService: {
     get: mockGet,
     post: mockPost,
-    put: vi.fn(),
+    put: mockPut,
     patch: mockPatch,
     delete: vi.fn(),
   },
@@ -128,6 +129,50 @@ describe('TagManagement - Create Tag', () => {
       expect(mockPatch).toHaveBeenCalledWith('/tags/42/color', {
         color: '#228be6',
       });
+    });
+  });
+});
+
+describe('TagManagement - Edit (rename) Tag', () => {
+  it('sends the raw input to /tags/rename and reads the normalized new_tag back', async () => {
+    mockGet.mockResolvedValueOnce({
+      data: [
+        {
+          id: 7,
+          tag: 'diabetes',
+          color: null,
+          usage_count: 2,
+          entity_types: ['allergy'],
+        },
+      ],
+    });
+    mockPut.mockResolvedValueOnce({
+      message: "Successfully renamed 'diabetes' to 'pre-diabetes'",
+      records_updated: 2,
+      new_tag: 'pre-diabetes',
+    });
+
+    render(<TagManagement />);
+
+    const badge = await screen.findByText('diabetes');
+    const row = badge.closest('tr');
+    fireEvent.click(within(row).getByRole('button'));
+
+    fireEvent.click(await screen.findByText('shared:labels.edit'));
+
+    const nameInput = await screen.findByPlaceholderText(
+      'tagManagement.editModal.placeholder'
+    );
+    fireEvent.change(nameInput, { target: { value: 'Pre Diabetes' } });
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'tagManagement.editModal.submit' })
+    );
+
+    await waitFor(() => {
+      expect(mockPut).toHaveBeenCalledWith(
+        '/tags/rename?old_tag=diabetes&new_tag=Pre%20Diabetes'
+      );
     });
   });
 });

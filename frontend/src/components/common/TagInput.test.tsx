@@ -3,14 +3,18 @@ import { describe, it, expect, vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import render, { screen, fireEvent } from '../../test-utils/render';
+import render, { screen, fireEvent, waitFor } from '../../test-utils/render';
 import '@testing-library/jest-dom';
 
 // TagInput fetches popular/suggested tags on mount; stub the API so tests
 // don't depend on network behaviour.
+const { mockGet } = vi.hoisted(() => ({
+  mockGet: vi.fn(() => Promise.resolve({ data: [] })),
+}));
+
 vi.mock('../../services/api', () => ({
   default: {
-    get: vi.fn(() => Promise.resolve({ data: [] })),
+    get: mockGet,
   },
 }));
 
@@ -70,5 +74,23 @@ describe('TagInput', () => {
     const { onChange } = setup();
     typeAndEnter('"onmouseover=alert(1)');
     expect(onChange).not.toHaveBeenCalled();
+  });
+});
+
+// Regression: a tag written before the character allowlist existed (e.g.
+// "crohn's") would otherwise be offered as a suggestion and then rejected
+// the moment the user clicked it, with no way to reuse their own tag.
+describe('TagInput - legacy tag suggestions', () => {
+  it('filters invalid-character tags out of the popular-tag suggestions', async () => {
+    mockGet.mockResolvedValueOnce({ data: ["diabetes", "crohn's"] });
+    render(<TagInput value={[]} onChange={vi.fn()} />);
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalled());
+
+    const input = screen.getByPlaceholderText('Add tags...');
+    fireEvent.focus(input);
+
+    expect(await screen.findByText('diabetes')).toBeInTheDocument();
+    expect(screen.queryByText("crohn's")).not.toBeInTheDocument();
   });
 });

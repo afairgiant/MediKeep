@@ -10,7 +10,11 @@ from pydantic import (
 )
 
 from app.models.enums import InsuranceStatus, InsuranceType
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 
 
 class InsuranceBase(TaggedEntityMixin):
@@ -231,7 +235,7 @@ class InsuranceUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class Insurance(InsuranceBase):
+class Insurance(TaggedEntityResponseMixin, InsuranceBase):
     """Schema for reading insurance (includes database fields)"""
 
     id: int

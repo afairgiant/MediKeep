@@ -233,6 +233,7 @@ async def rename_tag(
     return {
         "message": f"Successfully renamed '{old_tag}' to '{new_tag}'",
         "records_updated": result,
+        "new_tag": new_tag,
     }
 
 
@@ -288,6 +289,7 @@ async def replace_tag(
     return {
         "message": f"Successfully replaced '{old_tag}' with '{new_tag}'",
         "records_updated": result,
+        "new_tag": new_tag,
     }
 
 

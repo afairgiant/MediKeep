@@ -4,7 +4,11 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.enums import get_all_severity_levels
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 
 VALID_SEVERITY_LEVELS = get_all_severity_levels()
 
@@ -96,7 +100,7 @@ class AllergyUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class AllergyResponse(AllergyBase):
+class AllergyResponse(TaggedEntityResponseMixin, AllergyBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

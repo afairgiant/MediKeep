@@ -4,7 +4,11 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 from app.schemas.validators import (
     validate_date_not_future,
     validate_positive_id,
@@ -231,7 +235,7 @@ class EncounterUpdate(TaggedEntityUpdateMixin):
         return validate_text_field(v, max_length=50, field_name="Priority")
 
 
-class EncounterResponse(EncounterBase):
+class EncounterResponse(TaggedEntityResponseMixin, EncounterBase):
     """Schema for encounter response"""
 
     id: int

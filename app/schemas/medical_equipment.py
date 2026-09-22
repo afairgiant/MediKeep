@@ -11,7 +11,11 @@ from pydantic import (
     model_validator,
 )
 
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 
 # Valid equipment types
 EQUIPMENT_TYPES = [
@@ -137,7 +141,7 @@ class MedicalEquipmentUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class MedicalEquipmentResponse(MedicalEquipmentBase):
+class MedicalEquipmentResponse(TaggedEntityResponseMixin, MedicalEquipmentBase):
     """Schema for medical equipment response."""
 
     id: int

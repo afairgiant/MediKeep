@@ -61,7 +61,11 @@ export function TagInput({
     const fetchPopularTags = async () => {
       try {
         const response = await apiService.get('/tags/suggestions?limit=20');
-        setPopularTags(response.data || response || []);
+        const tags = response.data || response || [];
+        // A legacy tag written before the character allowlist existed would
+        // otherwise be offered here and then rejected by addTag() the
+        // moment it's clicked, with no way for the user to reuse it.
+        setPopularTags(tags.filter(isValidTagName));
       } catch (error) {
         logger.error('Failed to fetch popular tags', {
           component: 'TagInput',
@@ -91,9 +95,12 @@ export function TagInput({
           `/tags/autocomplete?q=${encodeURIComponent(debouncedInput)}&limit=10`
         );
 
-        // Filter out already selected tags
+        // Filter out already-selected tags and any legacy tag that predates
+        // the character allowlist (see fetchPopularTags above).
         const tags = response.data || response || [];
-        const filtered = tags.filter((tag: string) => !value.includes(tag));
+        const filtered = tags.filter(
+          (tag: string) => !value.includes(tag) && isValidTagName(tag)
+        );
 
         setSuggestions(filtered);
         setShowSuggestions(filtered.length > 0);

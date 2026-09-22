@@ -33,4 +33,14 @@ describe('isValidTagName', () => {
   ])('rejects injection payload: %s', payload => {
     expect(isValidTagName(payload)).toBe(false);
   });
+
+  // A blank or punctuation-only tag would otherwise pass: "" is vacuously
+  // valid against a char-class pattern, and "." itself is allowed
+  // punctuation. Mirrors the backend's explicit rejection of both.
+  it.each(['', '   ', '...', '---', ':::', '.-:'])(
+    'rejects empty, whitespace-only, and punctuation-only input: %j',
+    payload => {
+      expect(isValidTagName(payload)).toBe(false);
+    }
+  );
 });

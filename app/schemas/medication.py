@@ -10,7 +10,11 @@ from pydantic import (
 
 from app.core.utils.datetime_utils import HHMM_24H_RE
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 from app.schemas.validators import validate_text_field
 
 if TYPE_CHECKING:
@@ -417,7 +421,7 @@ class MedicationUpdate(TaggedEntityUpdateMixin):
         return stripped or None
 
 
-class MedicationResponse(MedicationBase):
+class MedicationResponse(TaggedEntityResponseMixin, MedicationBase):
     """Schema for medication response"""
 
     id: int

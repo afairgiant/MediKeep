@@ -4,7 +4,11 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.enums import ProcedureStatus, get_all_procedure_outcomes
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 
 # Pre-fetch valid values for reuse
 VALID_PROCEDURE_STATUSES = [s.value for s in ProcedureStatus]
@@ -183,7 +187,7 @@ class ProcedureUpdate(TaggedEntityUpdateMixin):
         return _validate_procedure_outcome(v)
 
 
-class ProcedureResponse(ProcedureBase):
+class ProcedureResponse(TaggedEntityResponseMixin, ProcedureBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

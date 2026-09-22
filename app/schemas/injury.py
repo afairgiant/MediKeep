@@ -15,7 +15,11 @@ from app.models.enums import (
     get_all_laterality_values,
     get_all_severity_levels,
 )
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 from app.schemas.injury_type import InjuryTypeResponse
 from app.schemas.validators import validate_date_not_future, validate_text_field
 
@@ -213,7 +217,7 @@ class InjuryUpdate(TaggedEntityUpdateMixin):
         return validate_text_field(v, max_length=2000, field_name="Notes")
 
 
-class InjuryResponse(InjuryBase):
+class InjuryResponse(TaggedEntityResponseMixin, InjuryBase):
     """Schema for Injury response"""
 
     id: int
