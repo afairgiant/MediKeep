@@ -259,13 +259,12 @@ export const insuranceFormFields = [
 
   // Medical Insurance Fields
   {
-    name: 'primary_care_physician',
-    type: 'text',
+    name: 'practitioner_id',
+    type: 'practitionerSelect',
     labelKey: 'medical:insurance.form.primaryCarePhysician.label',
-    placeholderKey: 'medical:insurance.form.primaryCarePhysician.placeholder',
+    placeholderKey: 'shared:fields.selectPractitioner',
     descriptionKey: 'medical:insurance.form.primaryCarePhysician.description',
     gridColumn: 6,
-    maxLength: 255,
     showFor: ['medical'],
   },
   {

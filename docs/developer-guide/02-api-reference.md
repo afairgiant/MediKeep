@@ -3315,6 +3315,14 @@ Base path: `/api/v1/insurances`
 }
 ```
 
+- **Optional fields**:
+  - `practitioner_id` (integer): Links the record to a `Practitioner` as the
+    Primary Care Physician (medical insurance), resolved via the
+    practitioner autocomplete/inline-create picker on the frontend. Legacy
+    records may instead carry a free-text PCP name inside
+    `coverage_details.primary_care_physician`, preserved as a fallback and
+    not auto-migrated.
+
 ### 7.2 Emergency Contacts
 
 Base path: `/api/v1/emergency-contacts`

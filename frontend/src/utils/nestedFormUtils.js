@@ -130,6 +130,7 @@ export const insuranceFieldConfig = {
     'plan_name',
     'policy_holder_name',
     'relationship_to_holder',
+    'practitioner_id',
     'effective_date',
     'expiration_date',
     'status',

@@ -11,6 +11,7 @@ import {
 import { IconStarFilled } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { createCardClickHandler } from '../../../utils/helpers';
+import { resolveInsurancePcpDisplay } from '../../../utils/insurancePcpUtils';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { useTranslation } from 'react-i18next';
@@ -26,9 +27,12 @@ const InsuranceCard = ({
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
+  practitioners = [],
 }) => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['common', 'shared', 'medical']);
   const { formatLongDate } = useDateFormat();
+
+  const pcpDisplay = resolveInsurancePcpDisplay(insurance, practitioners);
 
   // Get type-specific styling
   const getTypeColor = type => {
@@ -214,6 +218,19 @@ const InsuranceCard = ({
                 {t('insurance.card.plan', 'Plan')}:
               </Text>
               <Text size="sm">{insurance.plan_name}</Text>
+            </Group>
+          )}
+
+          {insurance.insurance_type === 'medical' && pcpDisplay && (
+            <Group>
+              <Text size="sm" fw={500} c="dimmed" w={100}>
+                {t(
+                  'medical:insurance.form.primaryCarePhysician.label',
+                  'Primary Care Physician'
+                )}
+                :
+              </Text>
+              <Text size="sm">{pcpDisplay}</Text>
             </Group>
           )}
 

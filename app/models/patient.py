@@ -219,6 +219,9 @@ class Insurance(Base):
     __tablename__ = "insurances"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+    practitioner_id = Column(
+        Integer, ForeignKey("practitioners.id", ondelete="SET NULL"), nullable=True
+    )  # Primary care physician
 
     # Insurance type and basic info
     insurance_type = Column(
@@ -268,3 +271,5 @@ class Insurance(Base):
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="insurances")
+
+    __table_args__ = (Index("idx_insurances_practitioner_id", "practitioner_id"),)

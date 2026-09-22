@@ -5,6 +5,7 @@ import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import {
   initializeFormData as initFormData,
@@ -94,6 +95,9 @@ const Insurance = () => {
 
   // Get configuration for filtering and sorting
   const config = getMedicalPageConfig('insurances');
+
+  // Get practitioners data (for linking the Primary Care Physician field)
+  const { practitioners } = usePractitioners();
 
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
@@ -242,11 +246,17 @@ const Insurance = () => {
 
   // Initialize form data using utility
   const initializeFormData = (insurance = null) => {
-    return initFormData(
+    const data = initFormData(
       insurance,
       insuranceFieldConfig,
       insuranceDefaultValues
     );
+    return {
+      ...data,
+      practitioner_id: insurance?.practitioner_id
+        ? String(insurance.practitioner_id)
+        : '',
+    };
   };
 
   // Handle form input changes
@@ -276,6 +286,9 @@ const Insurance = () => {
     try {
       // Use utility to restructure form data
       const submitData = restructureFormData(formData, insuranceFieldConfig);
+      submitData.practitioner_id = formData.practitioner_id
+        ? parseInt(formData.practitioner_id)
+        : null;
 
       // Only add patient_id for new insurance (create), not for updates
       if (!editingInsurance) {
@@ -547,6 +560,7 @@ const Insurance = () => {
                     fileCountLoading={fileCountsLoading[insurance.id] || false}
                     disableActions={isViewOnly}
                     disableActionsTooltip={viewOnlyTooltip}
+                    practitioners={practitioners}
                   />
                 )}
               />
@@ -676,6 +690,7 @@ const Insurance = () => {
             refreshFileCount(editingInsurance.id);
           }
         }}
+        practitioners={practitioners}
       >
         {/* Form Loading Overlay */}
         <FormLoadingOverlay
@@ -719,6 +734,7 @@ const Insurance = () => {
             refreshFileCount(viewingInsurance.id);
           }
         }}
+        practitioners={practitioners}
       />
     </Container>
   );

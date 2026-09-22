@@ -39,6 +39,10 @@ export const DATE_FIELDS = [
 ];
 
 // Boolean fields (formatted as Yes/No)
+// Note: 'is_primary' is already matched by the 'is_' prefix below - a bare
+// 'primary' pattern was removed because `.includes()` matching also caught
+// unrelated fields like `primary_care_physician`, printing "Yes" instead of
+// the actual value.
 export const BOOLEAN_FIELDS = [
   'is_',
   'has_',
@@ -46,7 +50,6 @@ export const BOOLEAN_FIELDS = [
   'should_',
   'enabled',
   'active',
-  'primary',
 ];
 
 /**
