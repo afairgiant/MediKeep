@@ -25,7 +25,7 @@ MediKeep uses a multi-stage Docker build that combines:
 
 - **Frontend**: React application (built with Node.js 20)
 - **Backend**: FastAPI (Python 3.12)
-- **Database**: PostgreSQL 15.8
+- **Database**: PostgreSQL 15-18 (15.8 in the sample compose)
 - **File Storage**: Local filesystem with volume mounts
 
 ```
@@ -80,7 +80,7 @@ MediKeep uses a multi-stage Docker build that combines:
 
 - Docker 24.0 or later
 - Docker Compose v2 (not legacy `docker-compose`)
-- PostgreSQL 15+ (included in Docker setup)
+- PostgreSQL 15-18 (included in Docker setup)
 - SSL certificates (for HTTPS)
 
 ### Network Requirements
@@ -106,6 +106,7 @@ cd medikeep
 services:
   # PostgreSQL Database Service
   postgres:
+    # PostgreSQL 15-18 supported; changing this major on an existing volume requires pg_upgrade
     image: postgres:15.8-alpine
     container_name: medikeep-db
     environment:
@@ -810,6 +811,7 @@ chmod 600 secrets/*.txt
 ```yaml
 services:
   postgres:
+    # PostgreSQL 15-18 supported; changing this major on an existing volume requires pg_upgrade
     image: postgres:15.8-alpine
     environment:
       POSTGRES_DB: medical_records

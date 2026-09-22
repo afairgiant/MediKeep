@@ -148,7 +148,7 @@ All documentation has been validated against the actual codebase for accuracy.
 - **Language:** Python 3.12+
 - **Framework:** FastAPI 0.115+
 - **ORM:** SQLAlchemy 2.0+
-- **Database:** PostgreSQL 15+
+- **Database:** PostgreSQL 15-18
 - **Migrations:** Alembic
 - **Authentication:** JWT (python-jose) + SSO (Google, GitHub, OIDC)
 

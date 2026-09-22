@@ -154,23 +154,6 @@ class SecurityValidator:
             return False
 
     @staticmethod
-    def get_secure_docker_flags():
-        """Get standard Docker security flags."""
-        import os
-
-        flags = [
-            "--rm",
-            "--security-opt",
-            "no-new-privileges",
-        ]
-
-        # Add user mapping if available (Unix systems)
-        if hasattr(os, "getuid"):
-            flags.extend(["--user", f"{os.getuid()}:{os.getgid()}"])
-
-        return flags
-
-    @staticmethod
     def _is_safe_hostname(hostname: str) -> bool:
         """Validate hostname for basic safety."""
         if not hostname or len(hostname) > 253:
