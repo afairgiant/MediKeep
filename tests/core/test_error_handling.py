@@ -9,6 +9,7 @@ the handler and to_response_model logic are caught.
 import pytest
 from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 
 from app.core.http.error_handling import (
     APIException,
@@ -21,6 +22,7 @@ from app.core.http.error_handling import (
     DatabaseException,
     BusinessLogicException,
     ServiceUnavailableException,
+    handle_database_errors,
     setup_error_handling,
 )
 from app.core.http.response_models import (
@@ -28,7 +30,6 @@ from app.core.http.response_models import (
     ExceptionCodeDefinition,
     ExceptionStatus,
 )
-
 
 # --- Unit tests for APIException and to_response_model ---
 
@@ -256,3 +257,48 @@ class TestErrorHandlerIntegration:
             "detail",
         }
         assert required_fields == set(body.keys())
+
+
+# --- Unit tests for handle_database_errors dialect handling ---
+
+
+def _integrity_error(message: str) -> IntegrityError:
+    """Build an IntegrityError whose str(e.orig) matches a given DB message,
+    mirroring how SQLAlchemy wraps the underlying driver exception."""
+    return IntegrityError(statement="", params={}, orig=Exception(message))
+
+
+class TestHandleDatabaseErrorsForeignKeyDialects:
+    """Regression coverage for the FK-violation branch of
+    handle_database_errors: it must recognize both SQLite's and
+    PostgreSQL's wording, not just SQLite's. Tests run against SQLite,
+    so a PostgreSQL-only phrasing bug here would otherwise go unnoticed
+    until it produced a 500 in production."""
+
+    def test_sqlite_foreign_key_message_maps_to_business_logic_error(self):
+        with pytest.raises(BusinessLogicException) as exc_info:
+            with handle_database_errors():
+                raise _integrity_error("FOREIGN KEY constraint failed")
+
+        assert exc_info.value.http_status_code == 400
+        assert exc_info.value.message == "Invalid reference"
+
+    def test_postgres_foreign_key_message_maps_to_business_logic_error(self):
+        with pytest.raises(BusinessLogicException) as exc_info:
+            with handle_database_errors():
+                raise _integrity_error(
+                    'insert or update on table "insurances" violates foreign '
+                    'key constraint "fk_insurances_practitioner_id"'
+                )
+
+        assert exc_info.value.http_status_code == 400
+        assert exc_info.value.message == "Invalid reference"
+
+    def test_unrecognized_integrity_error_still_maps_to_database_exception(self):
+        """Anything that isn't a known unique/FK phrasing still degrades to
+        a 500, rather than silently being misclassified as a 400."""
+        with pytest.raises(DatabaseException) as exc_info:
+            with handle_database_errors():
+                raise _integrity_error("some unrelated constraint violation")
+
+        assert exc_info.value.http_status_code == 500

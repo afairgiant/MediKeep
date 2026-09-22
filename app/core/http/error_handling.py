@@ -400,7 +400,10 @@ def handle_database_errors(
                 request=request,
                 context=error_context,
             ) from e
-        elif "FOREIGN KEY constraint failed" in error_msg:
+        elif (
+            "FOREIGN KEY constraint failed" in error_msg
+            or "violates foreign key constraint" in error_msg
+        ):
             raise BusinessLogicException(
                 message="Invalid reference",
                 description="The operation references a non-existent record",

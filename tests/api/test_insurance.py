@@ -840,6 +840,53 @@ class TestInsuranceAPI:
         assert data["practitioner_id"] == general_practice_practitioner.id
         assert data["coverage_details"]["primary_care_physician"] == "Dr. Legacy Text"
 
+    def test_create_insurance_with_nonexistent_practitioner_id_returns_clean_error(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_insurance_data,
+    ):
+        """A practitioner_id that doesn't exist must fail the FK constraint
+        cleanly (400) rather than leaking a raw DB error (500). Relies on the
+        same generic IntegrityError -> BusinessLogicException handling used
+        by every other practitioner_id FK in the app (lab results,
+        medications, etc.) - no insurance-specific validation needed."""
+        sample_insurance_data["practitioner_id"] = 999999
+
+        response = client.post(
+            "/api/v1/insurances/",
+            json=sample_insurance_data,
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 400
+        assert response.json()["status"] == "FAIL"
+
+    def test_update_insurance_with_nonexistent_practitioner_id_returns_clean_error(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_insurance_data,
+    ):
+        """Same guarantee on the update path."""
+        create_response = client.post(
+            "/api/v1/insurances/",
+            json=sample_insurance_data,
+            headers=authenticated_headers,
+        )
+        insurance_id = create_response.json()["id"]
+
+        response = client.put(
+            f"/api/v1/insurances/{insurance_id}",
+            json={"practitioner_id": 999999},
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 400
+        assert response.json()["status"] == "FAIL"
+
     def test_insurance_date_format_validation(
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
