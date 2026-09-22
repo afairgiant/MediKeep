@@ -263,6 +263,9 @@ class Insurance(Base):
     # General notes
     notes = Column(Text, nullable=True)
 
+    # Tagging system
+    tags = Column(JSON, nullable=True, default=list)
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(

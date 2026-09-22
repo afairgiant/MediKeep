@@ -818,6 +818,7 @@ JUNCTION TABLES (Many-to-Many)
 | coverage_details | JSON | | Copays, deductibles, etc. |
 | contact_info | JSON | | Phone, address, website |
 | notes | Text | | Additional notes |
+| tags | JSON | | User-defined tags (list of strings, max 15) |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 

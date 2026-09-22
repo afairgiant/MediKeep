@@ -841,6 +841,11 @@
         "placeholder": "np. https://ubezpieczony.firma.com"
       }
     },
+    "print": {
+      "errorTitle": "Błąd drukowania",
+      "readyMessage": "Pełne dane ubezpieczenia wysłane do drukarki",
+      "readyTitle": "Gotowe do druku"
+    },
     "viewModal": {
       "coverageDetails": "Szczegóły pokrycia"
     }

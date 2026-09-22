@@ -841,6 +841,11 @@
         "placeholder": "bv. https://mijn.verzekering.nl"
       }
     },
+    "print": {
+      "errorTitle": "Afdrukfout",
+      "readyMessage": "Volledige verzekeringsgegevens naar de printer verzonden",
+      "readyTitle": "Klaar om af te drukken"
+    },
     "viewModal": {
       "coverageDetails": "Dekkingsdetails"
     }

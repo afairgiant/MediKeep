@@ -504,6 +504,47 @@ class TestInsuranceCRUD:
         assert updated.notes == "Policy changed"
         assert updated.member_id == "ORI001"  # Unchanged
 
+    def test_create_insurance_with_tags(self, db_session: Session, test_patient):
+        """Test that tags are persisted when creating an insurance record."""
+        insurance_data = InsuranceCreate(
+            patient_id=test_patient.id,
+            insurance_type="medical",
+            company_name="Tagged Insurance Co",
+            member_name="John Doe",
+            member_id="TAG001",
+            effective_date=date(2024, 1, 1),
+            status="active",
+            tags=["Family Plan", "hsa"],
+        )
+
+        insurance = insurance_crud.create(db_session, obj_in=insurance_data)
+
+        assert sorted(insurance.tags) == ["family-plan", "hsa"]
+
+    def test_update_insurance_tags(self, db_session: Session, test_patient):
+        """Regression: tags set via Update must actually persist (previously
+        silently dropped because the model/schema had no tags field)."""
+        insurance_data = InsuranceCreate(
+            patient_id=test_patient.id,
+            insurance_type="medical",
+            company_name="Original Company",
+            member_name="John Doe",
+            member_id="ORI002",
+            effective_date=date(2024, 1, 1),
+            status="active",
+        )
+        created = insurance_crud.create(db_session, obj_in=insurance_data)
+        assert created.tags in (None, [])
+
+        update_data = InsuranceUpdate(tags=["hsa", "family-plan"])
+        updated = insurance_crud.update(db_session, db_obj=created, obj_in=update_data)
+
+        assert updated.tags == ["hsa", "family-plan"]
+
+        # Persisted, not just held on the in-memory object.
+        refetched = insurance_crud.get(db_session, id=created.id)
+        assert refetched.tags == ["hsa", "family-plan"]
+
     def test_delete_insurance(self, db_session: Session, test_patient):
         """Test deleting an insurance record."""
         insurance_data = InsuranceCreate(

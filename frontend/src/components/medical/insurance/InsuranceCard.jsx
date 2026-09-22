@@ -8,10 +8,11 @@ import {
   Divider,
   Tooltip,
 } from '@mantine/core';
-import { IconStarFilled } from '@tabler/icons-react';
+import { IconStarFilled, IconPrinter } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { createCardClickHandler } from '../../../utils/helpers';
 import { resolveInsurancePcpDisplay } from '../../../utils/insurancePcpUtils';
+import { formatCurrencyDisplay } from '../../../utils/currency';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { useTranslation } from 'react-i18next';
@@ -23,13 +24,14 @@ const InsuranceCard = ({
   onDelete,
   onSetPrimary: _onSetPrimary,
   onView,
+  onPrint,
   fileCount = 0,
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
   practitioners = [],
 }) => {
-  const { t } = useTranslation(['common', 'shared', 'medical']);
+  const { t, i18n } = useTranslation(['common', 'shared', 'medical']);
   const { formatLongDate } = useDateFormat();
 
   const pcpDisplay = resolveInsurancePcpDisplay(insurance, practitioners);
@@ -61,33 +63,34 @@ const InsuranceCard = ({
     let priorityFields = [];
     switch (insurance.insurance_type) {
       case 'medical':
-        priorityFields = [
-          'deductible_individual',
-          'copay_primary_care',
-          'copay_specialist',
-        ];
-        break;
       case 'dental':
-        priorityFields = [
-          'annual_maximum',
-          'preventive_coverage',
-          'basic_coverage',
-        ];
-        break;
       case 'vision':
-        priorityFields = ['exam_copay', 'frame_allowance'];
-        break;
+        return [];
       case 'prescription':
-        priorityFields = ['bin_number', 'pcn_number'];
+        priorityFields = ['bin_number', 'pcn_number', 'rxgroup'];
         break;
       default:
         return entries.slice(0, 2);
     }
 
-    return entries.filter(([key]) => priorityFields.includes(key)).slice(0, 2);
+    // Preserve priorityFields' own order (BIN, then PCN, then RX Group)
+    // rather than whatever order the keys happen to sit in coverage_details.
+    return priorityFields
+      .filter(
+        field =>
+          coverageDetails[field] !== undefined &&
+          coverageDetails[field] !== null &&
+          coverageDetails[field] !== ''
+      )
+      .map(field => [field, coverageDetails[field]]);
   };
 
   // Format field values for display
+  // Note: no currently-displayed card field matches the currency patterns
+  // below (Deductible/Copay/Allowance/Maximum were removed from the card
+  // summary elsewhere), so this branch is dead in practice today - kept
+  // correct/consistent with Print/Edit/View in case a currency field is
+  // ever added back to the card's priority list.
   const formatFieldValue = (fieldName, value) => {
     if (!value) return 'N/A';
 
@@ -98,7 +101,7 @@ const InsuranceCard = ({
       fieldName.includes('allowance') ||
       fieldName.includes('maximum')
     ) {
-      return `$${value}`;
+      return formatCurrencyDisplay(value, i18n.language);
     }
 
     // Percentage fields
@@ -112,16 +115,9 @@ const InsuranceCard = ({
   // Format field labels for display
   const formatFieldLabel = fieldName => {
     const labelMap = {
-      deductible_individual: t('insurance.card.deductible', 'Deductible'),
-      copay_primary_care: t('insurance.card.pcpCopay', 'PCP Copay'),
-      copay_specialist: t('insurance.card.specialistCopay', 'Specialist Copay'),
-      annual_maximum: t('insurance.card.annualMax', 'Annual Max'),
-      preventive_coverage: t('insurance.card.preventive', 'Preventive'),
-      basic_coverage: t('insurance.card.basic', 'Basic'),
-      exam_copay: t('insurance.card.examCopay', 'Exam Copay'),
-      frame_allowance: t('insurance.card.frameAllowance', 'Frame Allowance'),
       bin_number: t('insurance.card.bin', 'BIN'),
       pcn_number: t('insurance.card.pcn', 'PCN'),
+      rxgroup: t('insurance.card.rxgroup', 'RX Group'),
     };
 
     return (
@@ -132,6 +128,23 @@ const InsuranceCard = ({
 
   const typeColor = getTypeColor(insurance.insurance_type);
   const displayCoverageDetails = getDisplayCoverageDetails();
+
+  const handlePrint = () => {
+    if (!onPrint) return;
+    // Bake the resolved PCP name into coverage_details for the print
+    // template, which only knows how to render that raw dict - it has no
+    // access to the practitioners list to resolve the id itself.
+    const printableInsurance = pcpDisplay
+      ? {
+          ...insurance,
+          coverage_details: {
+            ...(insurance.coverage_details || {}),
+            primary_care_physician: pcpDisplay,
+          },
+        }
+      : insurance;
+    onPrint(printableInsurance);
+  };
 
   return (
     <Card
@@ -221,19 +234,6 @@ const InsuranceCard = ({
             </Group>
           )}
 
-          {insurance.insurance_type === 'medical' && pcpDisplay && (
-            <Group>
-              <Text size="sm" fw={500} c="dimmed" w={100}>
-                {t(
-                  'medical:insurance.form.primaryCarePhysician.label',
-                  'Primary Care Physician'
-                )}
-                :
-              </Text>
-              <Text size="sm">{pcpDisplay}</Text>
-            </Group>
-          )}
-
           {/* Coverage Period */}
           <Group>
             <Text size="sm" fw={500} c="dimmed" w={100}>
@@ -261,61 +261,64 @@ const InsuranceCard = ({
                 <Text size="sm">{formatFieldValue(key, value)}</Text>
               </Group>
             ))}
-
-          {/* Policy Holder if different from member */}
-          {insurance.policy_holder_name &&
-            insurance.policy_holder_name !== insurance.member_name && (
-              <Group>
-                <Text size="sm" fw={500} c="dimmed" w={100}>
-                  {t('insurance.card.holder', 'Holder')}:
-                </Text>
-                <Text size="sm">
-                  {insurance.policy_holder_name} (
-                  {insurance.relationship_to_holder || 'Self'})
-                </Text>
-              </Group>
-            )}
         </Stack>
       </Stack>
 
       {/* Action Buttons */}
       <Stack gap={0} mt="auto">
         <Divider />
-        <Group justify="flex-end" gap="xs" pt="sm">
-          <Button variant="filled" size="xs" onClick={() => onView(insurance)}>
-            {t('buttons.view', 'View')}
+        <Group justify="space-between" gap="xs" pt="sm">
+          <Button
+            variant="outline"
+            size="xs"
+            leftSection={<IconPrinter size={14} />}
+            onClick={e => {
+              e.stopPropagation();
+              handlePrint();
+            }}
+          >
+            {t('insurance.viewModal.printCard', 'Print Card')}
           </Button>
-          <Tooltip
-            label={disableActionsTooltip}
-            disabled={!disableActions || !disableActionsTooltip}
-          >
-            <span onClick={e => e.stopPropagation()}>
-              <Button
-                variant="filled"
-                size="xs"
-                disabled={disableActions}
-                onClick={() => onEdit(insurance)}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-          <Tooltip
-            label={disableActionsTooltip}
-            disabled={!disableActions || !disableActionsTooltip}
-          >
-            <span onClick={e => e.stopPropagation()}>
-              <Button
-                variant="filled"
-                color="red"
-                size="xs"
-                disabled={disableActions}
-                onClick={() => onDelete(insurance)}
-              >
-                {t('buttons.delete', 'Delete')}
-              </Button>
-            </span>
-          </Tooltip>
+          <Group gap="xs">
+            <Button
+              variant="filled"
+              size="xs"
+              onClick={() => onView(insurance)}
+            >
+              {t('buttons.view', 'View')}
+            </Button>
+            <Tooltip
+              label={disableActionsTooltip}
+              disabled={!disableActions || !disableActionsTooltip}
+            >
+              <span onClick={e => e.stopPropagation()}>
+                <Button
+                  variant="filled"
+                  size="xs"
+                  disabled={disableActions}
+                  onClick={() => onEdit(insurance)}
+                >
+                  {t('shared:labels.edit', 'Edit')}
+                </Button>
+              </span>
+            </Tooltip>
+            <Tooltip
+              label={disableActionsTooltip}
+              disabled={!disableActions || !disableActionsTooltip}
+            >
+              <span onClick={e => e.stopPropagation()}>
+                <Button
+                  variant="filled"
+                  color="red"
+                  size="xs"
+                  disabled={disableActions}
+                  onClick={() => onDelete(insurance)}
+                >
+                  {t('buttons.delete', 'Delete')}
+                </Button>
+              </span>
+            </Tooltip>
+          </Group>
         </Group>
       </Stack>
     </Card>

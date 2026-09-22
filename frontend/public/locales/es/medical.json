@@ -841,6 +841,11 @@
         "placeholder": "p. ej., https://miembro.seguro.com"
       }
     },
+    "print": {
+      "errorTitle": "Error de impresión",
+      "readyMessage": "Detalles completos del seguro enviados a la impresora",
+      "readyTitle": "Listo para imprimir"
+    },
     "viewModal": {
       "coverageDetails": "Detalles de Cobertura"
     }

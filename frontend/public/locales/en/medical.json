@@ -841,6 +841,11 @@
         "placeholder": "e.g., https://member.insurance.com"
       }
     },
+    "print": {
+      "errorTitle": "Print Error",
+      "readyMessage": "Complete insurance details sent to printer",
+      "readyTitle": "Print Ready"
+    },
     "viewModal": {
       "coverageDetails": "Coverage Details"
     }

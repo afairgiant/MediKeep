@@ -841,6 +841,11 @@
         "placeholder": "t.ex. https://medlem.forsakring.se"
       }
     },
+    "print": {
+      "errorTitle": "Utskriftsfel",
+      "readyMessage": "Fullständiga försäkringsuppgifter skickade till skrivaren",
+      "readyTitle": "Klar för utskrift"
+    },
     "viewModal": {
       "coverageDetails": "Täckningsdetaljer"
     }

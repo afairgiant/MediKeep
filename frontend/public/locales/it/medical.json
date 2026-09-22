@@ -841,6 +841,11 @@
         "placeholder": "ad es., https://member.insurance.com"
       }
     },
+    "print": {
+      "errorTitle": "Errore di stampa",
+      "readyMessage": "Dettagli completi dell'assicurazione inviati alla stampante",
+      "readyTitle": "Pronto per la stampa"
+    },
     "viewModal": {
       "coverageDetails": "Dettagli copertura"
     }

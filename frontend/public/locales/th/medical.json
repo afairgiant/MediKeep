@@ -835,6 +835,11 @@
         "placeholder": "เช่น https://member.insurance.com"
       }
     },
+    "print": {
+      "errorTitle": "ข้อผิดพลาดในการพิมพ์",
+      "readyMessage": "ส่งรายละเอียดประกันฉบับสมบูรณ์ไปยังเครื่องพิมพ์แล้ว",
+      "readyTitle": "พร้อมพิมพ์"
+    },
     "viewModal": {
       "coverageDetails": "รายละเอียดความคุ้มครอง"
     }
