@@ -24,6 +24,7 @@ class InsuranceBase(BaseModel):
     plan_name: Optional[str] = None
     policy_holder_name: Optional[str] = None
     relationship_to_holder: Optional[str] = None
+    practitioner_id: Optional[int] = None
     effective_date: date
     expiration_date: Optional[date] = None
     status: str = "active"
@@ -181,6 +182,7 @@ class InsuranceUpdate(BaseModel):
     plan_name: Optional[str] = None
     policy_holder_name: Optional[str] = None
     relationship_to_holder: Optional[str] = None
+    practitioner_id: Optional[int] = None
     effective_date: Optional[date] = None
     expiration_date: Optional[date] = None
     status: Optional[str] = None

@@ -26,6 +26,7 @@ import {
 } from '@tabler/icons-react';
 import { getFormFields } from '../../../utils/medicalFormFields';
 import { isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
+import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import {
   formatDateInputChange,
   parseDateInput,
@@ -53,6 +54,7 @@ const InsuranceFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
+  practitioners = [],
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -448,6 +450,25 @@ const InsuranceFormWrapper = ({
                 target: { name: field.name, value: e.currentTarget.checked },
               })
             }
+          />
+        );
+
+      case 'practitionerSelect':
+        return (
+          <PractitionerSelectWithCreate
+            key={field.name}
+            value={
+              formData[field.name] ? String(formData[field.name]) : null
+            }
+            onChange={value => {
+              onInputChange({
+                target: { name: field.name, value: value || '' },
+              });
+            }}
+            practitioners={practitioners}
+            label={translatedField.label}
+            placeholder={translatedField.placeholder}
+            description={translatedField.description}
           />
         );
 

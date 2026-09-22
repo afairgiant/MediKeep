@@ -25,6 +25,7 @@ import {
   IconFileText,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { resolveInsurancePcpDisplay } from '../../../utils/insurancePcpUtils';
 
 
 import StatusBadge from '../StatusBadge';
@@ -41,8 +42,9 @@ const InsuranceViewModal = ({
   onFileUploadComplete,
   disableEdit = false,
   disableEditTooltip,
+  practitioners = [],
 }) => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['common', 'shared', 'medical']);
   const { formatDate } = useDateFormat();
 
   // Tab state management
@@ -80,6 +82,8 @@ const InsuranceViewModal = ({
   // Get relevant coverage and contact fields to display
   const coverageDetails = insurance.coverage_details || {};
   const contactInfo = insurance.contact_info || {};
+
+  const pcpDisplay = resolveInsurancePcpDisplay(insurance, practitioners);
 
   return (
     <Modal
@@ -238,6 +242,20 @@ const InsuranceViewModal = ({
                           )}
                         </Text>
                         <Text>{insurance.employer_group}</Text>
+                      </Stack>
+                    )}
+                    {insurance.insurance_type === 'medical' && (
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t(
+                            'medical:insurance.form.primaryCarePhysician.label',
+                            'Primary Care Physician'
+                          )}
+                        </Text>
+                        <Text c={pcpDisplay ? 'inherit' : 'dimmed'}>
+                          {pcpDisplay ||
+                            t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
                       </Stack>
                     )}
                   </SimpleGrid>
@@ -599,7 +617,22 @@ const InsuranceViewModal = ({
           <Button
             variant="outline"
             leftSection={<IconPrinter size={16} />}
-            onClick={() => onPrint && onPrint(insurance)}
+            onClick={() => {
+              if (!onPrint) return;
+              // Bake the resolved PCP name into coverage_details for the print
+              // template, which only knows how to render that raw dict - it
+              // has no access to the practitioners list to resolve the id itself.
+              const printableInsurance = pcpDisplay
+                ? {
+                    ...insurance,
+                    coverage_details: {
+                      ...(insurance.coverage_details || {}),
+                      primary_care_physician: pcpDisplay,
+                    },
+                  }
+                : insurance;
+              onPrint(printableInsurance);
+            }}
           >
             {t('insurance.viewModal.printCard', 'Print Card')}
           </Button>
