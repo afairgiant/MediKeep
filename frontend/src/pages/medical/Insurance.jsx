@@ -13,7 +13,10 @@ import {
   insuranceFieldConfig,
   insuranceDefaultValues,
 } from '../../utils/nestedFormUtils';
-import { printInsuranceRecord } from '../../utils/printTemplateGenerator';
+import {
+  printInsuranceRecord,
+  PopupBlockedError,
+} from '../../utils/printTemplateGenerator';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
 import {
@@ -493,7 +496,10 @@ const Insurance = () => {
       _error => {
         notifications.show({
           title: t('medical:insurance.print.errorTitle', 'Print Error'),
-          message: ERROR_MESSAGES.FILE_PROCESSING_FAILED,
+          message:
+            _error instanceof PopupBlockedError
+              ? ERROR_MESSAGES.POPUP_BLOCKED
+              : ERROR_MESSAGES.FILE_PROCESSING_FAILED,
           color: 'red',
         });
       },

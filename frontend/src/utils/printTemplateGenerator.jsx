@@ -119,20 +119,25 @@ export const getMedicalPrintStyles = () => MEDICAL_PRINT_STYLES;
 export const generatePrintHeader = config => {
   const { title, type, status, isPrimary = false, statusBadges = {} } = config;
 
-  const statusClass = statusBadges[status] || 'status-active';
+  const statusClass = Object.prototype.hasOwnProperty.call(
+    statusBadges,
+    status
+  )
+    ? statusBadges[status]
+    : 'status-active';
   const primaryBadge = isPrimary
     ? '<span class="primary-badge">PRIMARY</span>'
     : '';
 
   return `
     <div class="header">
-      <div class="record-title">${title}</div>
+      <div class="record-title">${escapeHtml(title)}</div>
       <div class="record-type">
-        ${type}
+        ${escapeHtml(type)}
         ${primaryBadge}
       </div>
       <div style="margin-top: 5px;">
-        <span class="status-badge ${statusClass}">${status}</span>
+        <span class="status-badge ${escapeHtml(statusClass)}">${escapeHtml(status)}</span>
       </div>
     </div>
   `;
@@ -194,7 +199,7 @@ export const generateFieldGridSection = (sectionTitle, data, options = {}) => {
 
   return `
     <div class="section">
-      <div class="section-title">${sectionTitle}</div>
+      <div class="section-title">${escapeHtml(sectionTitle)}</div>
       <div class="field-grid">
         ${fields.join('')}
       </div>
@@ -262,7 +267,7 @@ export const generateMedicalRecordPrint = (data, config) => {
   return `
     <html>
       <head>
-        <title>${title}</title>
+        <title>${escapeHtml(title)}</title>
         <style>${styles}</style>
       </head>
       <body>
@@ -368,7 +373,7 @@ export const generateInsurancePrint = (
           <div class="section">
             <div class="section-title">Notes</div>
             <div style="padding: 5px; background-color: #f8f9fa; border-radius: 3px;">
-              ${insurance.notes.replace(/\n/g, '<br>')}
+              ${escapeHtml(insurance.notes).replace(/\n/g, '<br>')}
             </div>
           </div>
         `,
@@ -390,12 +395,27 @@ export const generateInsurancePrint = (
 };
 
 /**
+ * Error thrown when the browser blocks the print popup (window.open returns null).
+ */
+export class PopupBlockedError extends Error {
+  constructor() {
+    super('Print window was blocked by the browser');
+    this.name = 'PopupBlockedError';
+  }
+}
+
+/**
  * Opens a print window with the generated HTML
  * @param {string} html - The HTML content to print
  * @param {string} windowTitle - Title for the print window
  */
 export const openPrintWindow = (html, _windowTitle = 'Medical Record') => {
   const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    throw new PopupBlockedError();
+  }
+  // Null the child window's `opener` reference so it can't navigate this window.
+  printWindow.opener = null;
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.print();
