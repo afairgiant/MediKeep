@@ -1,7 +1,10 @@
 import {
   generateInsurancePrint,
   generateFieldGridSection,
+  generatePrintHeader,
   escapeHtml,
+  openPrintWindow,
+  PopupBlockedError,
 } from './printTemplateGenerator';
 
 const baseInsurance = {
@@ -74,6 +77,15 @@ describe('generateFieldGridSection - output escaping (shared print boundary)', (
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
   });
 
+  test('escapes a malicious section title', () => {
+    const html = generateFieldGridSection('<script>alert(1)</script>', {
+      Field: 'value',
+    });
+
+    expect(html).not.toContain('<script>alert(1)</script>');
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+
   test('escapes a malicious field label (object key), not just the value', () => {
     // coverage_details/contact_info are untyped on the backend, so an
     // attacker-controlled key can reach here too, not just a value.
@@ -134,5 +146,115 @@ describe('generateInsurancePrint - output escaping applies beyond tags', () => {
 
     expect(html).not.toContain('<script>alert(1)</script>');
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+});
+
+// Regression coverage for public issue #1041: these interpolation points
+// (header title/type/status, the <title> tag, and the notes block) were
+// left unescaped when generateFieldGridSection was fixed for #1039, since
+// none of them go through that helper.
+describe('generateInsurancePrint - header, <title> tag, and status escaping (#1041)', () => {
+  test('escapes a malicious company_name in the header div and the <title> tag', () => {
+    const html = generateInsurancePrint(
+      { ...baseInsurance, company_name: '</title><script>alert(1)</script>' },
+      formatDate
+    );
+
+    expect(html).not.toContain('</title><script>alert(1)</script>');
+    expect(html).toContain(
+      '&lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt;'
+    );
+  });
+
+  test('escapes a malicious insurance_type in the record-type line', () => {
+    const html = generateInsurancePrint(
+      { ...baseInsurance, insurance_type: '<script>alert(1)</script>' },
+      formatDate
+    );
+
+    expect(html).not.toContain('<script>alert(1)</script>');
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt; Insurance');
+  });
+
+  test('escapes a malicious status value in the status badge', () => {
+    const html = generateInsurancePrint(
+      { ...baseInsurance, status: '"><script>alert(1)</script>' },
+      formatDate
+    );
+
+    expect(html).not.toContain('"><script>alert(1)</script>');
+    expect(html).toContain(
+      '&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;'
+    );
+  });
+});
+
+describe('generateInsurancePrint - notes escaping (#1041)', () => {
+  test('escapes a malicious notes value before converting newlines to <br>', () => {
+    const html = generateInsurancePrint(
+      { ...baseInsurance, notes: '<script>alert(1)</script>\nline two' },
+      formatDate
+    );
+
+    expect(html).not.toContain('<script>alert(1)</script>');
+    // Order matters: escape first, then convert \n to <br>, so the <br> we
+    // insert isn't itself escaped.
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;<br>line two');
+  });
+});
+
+describe('openPrintWindow - defense in depth (#1041)', () => {
+  afterEach(() => {
+    // clearAllMocks() (global afterEach) resets call state but does not
+    // restore spies, so a stubbed window.open would otherwise leak into
+    // any test added below this block.
+    vi.restoreAllMocks();
+  });
+
+  test('severs window.opener on the print window without losing the handle used to write into it', () => {
+    // Simulates a live opener link, as a real popup would have, so the test
+    // fails if the assignment that's supposed to null it out is removed.
+    const mockPrintWindow = {
+      opener: { location: { href: 'https://app.example' } },
+      document: { write: vi.fn(), close: vi.fn() },
+      print: vi.fn(),
+      close: vi.fn(),
+    };
+    vi.spyOn(window, 'open').mockReturnValue(mockPrintWindow);
+
+    openPrintWindow('<html></html>');
+
+    expect(mockPrintWindow.opener).toBeNull();
+    // Confirms severing the opener doesn't come at the cost of the handle
+    // openPrintWindow needs to actually write/print the document.
+    expect(mockPrintWindow.document.write).toHaveBeenCalledWith(
+      '<html></html>'
+    );
+    expect(mockPrintWindow.print).toHaveBeenCalled();
+  });
+
+  test('throws a distinguishable PopupBlockedError instead of a raw TypeError when the popup is blocked', () => {
+    vi.spyOn(window, 'open').mockReturnValue(null);
+
+    expect(() => openPrintWindow('<html></html>')).toThrow(
+      PopupBlockedError
+    );
+  });
+});
+
+describe('generatePrintHeader - statusBadges lookup is not prototype-polluted (#1041)', () => {
+  test('falls back to the default class for a status matching an inherited Object property', () => {
+    // `statusBadges[status]` is a plain object property lookup, so a status
+    // of e.g. "constructor" would otherwise resolve to Object's constructor
+    // function rather than a CSS class string.
+    const html = generatePrintHeader({
+      title: 'Acme Health',
+      type: 'Medical Insurance',
+      status: 'constructor',
+      statusBadges: { active: 'status-active' },
+    });
+
+    expect(html).toContain('class="status-badge status-active"');
+    expect(html).not.toContain('[native code]');
   });
 });

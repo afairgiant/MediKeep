@@ -36,6 +36,8 @@ export const ERROR_MESSAGES = {
   NETWORK_UNAVAILABLE: 'Network unavailable. Please check your connection.',
   FILE_PROCESSING_FAILED:
     'Failed to process file. Please try a different file.',
+  POPUP_BLOCKED:
+    'Print window was blocked by your browser. Please allow pop-ups for this site and try again.',
   DUPLICATE_FILE: 'This file has already been uploaded.',
   STORAGE_FULL: 'Storage limit reached. Please free up space and try again.',
 
@@ -124,6 +126,7 @@ export const ERROR_TYPE_MAPPING = {
 
   [ERROR_MESSAGES.UPLOAD_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_PROCESSING_FAILED]: ERROR_CATEGORIES.FILE,
+  [ERROR_MESSAGES.POPUP_BLOCKED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.DUPLICATE_FILE]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_DELETE_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_DOWNLOAD_FAILED]: ERROR_CATEGORIES.FILE,
