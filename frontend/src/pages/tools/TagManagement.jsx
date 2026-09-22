@@ -112,13 +112,20 @@ const TagManagement = () => {
     }
 
     try {
-      await apiService.post('/tags/create', { tag: newTagName });
+      const createResponse = await apiService.post('/tags/create', {
+        tag: newTagName,
+      });
 
       // If a color was selected, fetch tags to get the new tag's ID, then update color
       if (newTagColor) {
         const refreshed = await apiService.get('/tags/popular?limit=50');
         const tagList = refreshed.data || refreshed || [];
-        const created = tagList.find(t => t.tag === newTagName.trim());
+        // The backend normalizes the tag (lowercase, spaces -> hyphens), so
+        // match on its normalized value from the create response rather
+        // than the raw input - a raw match silently fails to find the tag
+        // whenever normalization actually changed it (e.g. "Pre Diabetes").
+        const normalizedTag = createResponse?.tag || newTagName.trim();
+        const created = tagList.find(t => t.tag === normalizedTag);
         if (created) {
           await apiService.patch(`/tags/${created.id}/color`, {
             color: newTagColor,
