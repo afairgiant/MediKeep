@@ -36,6 +36,7 @@ import { apiService } from '../../services/api';
 import logger from '../../services/logger';
 import { PageHeader } from '../../components';
 import { useTranslation } from 'react-i18next';
+import { isValidTagName } from '../../utils/tagValidation';
 
 const TagManagement = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -105,6 +106,11 @@ const TagManagement = () => {
   const handleCreateTag = async () => {
     if (!newTagName.trim()) return;
 
+    if (!isValidTagName(newTagName)) {
+      setError(t('tagManagement.errors.invalidCharacters'));
+      return;
+    }
+
     try {
       await apiService.post('/tags/create', { tag: newTagName });
 
@@ -153,6 +159,11 @@ const TagManagement = () => {
 
     if (!nameChanged && !colorChanged) {
       closeEditModal();
+      return;
+    }
+
+    if (nameChanged && !isValidTagName(editTagName)) {
+      setError(t('tagManagement.errors.invalidCharacters'));
       return;
     }
 
@@ -241,6 +252,11 @@ const TagManagement = () => {
   // Replace tag with another tag
   const handleReplaceTag = async () => {
     if (!replaceWithTag.trim() || !replacingTag) return;
+
+    if (!isValidTagName(replaceWithTag)) {
+      setError(t('tagManagement.errors.invalidCharacters'));
+      return;
+    }
 
     try {
       const response = await apiService.put(

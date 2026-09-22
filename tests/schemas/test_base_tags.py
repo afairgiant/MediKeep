@@ -17,13 +17,28 @@ instead of going through the mixin, so edits to an *existing* record could
 set an XSS payload with zero validation even after the Create-path fix.
 That is now closed by having every ``*Update`` schema inherit
 ``TaggedEntityUpdateMixin`` instead.
+
+TestNormalizeAndValidateTag covers a third bypass, reported after both of
+the above had already landed: the standalone tag-registry endpoints
+(app/api/v1/endpoints/tags.py - create/rename/replace) wrote tag values
+directly - rename/replace via raw SQL straight into every taggable entity's
+``tags`` column - with no validation of their own. A tag like
+``< &8 HTML > <p>`` could be created or used to rename/replace an existing
+tag across every record without ever touching TaggedEntityMixin. All three
+endpoints now route through the same ``normalize_and_validate_tag()``
+helper this module exports (see tests/api/test_tags.py for the endpoint-level
+regression tests).
 """
 
 import pytest
 from pydantic import ValidationError
 
 from app.schemas.allergy import AllergyUpdate
-from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityUpdateMixin,
+    normalize_and_validate_tag,
+)
 from app.schemas.condition import ConditionUpdate
 from app.schemas.encounter import EncounterUpdate
 from app.schemas.immunization import ImmunizationUpdate
@@ -147,3 +162,31 @@ class TestTaggedEntityUpdateMixinDirectly:
     def test_provided_list_goes_through_same_allowlist(self):
         with pytest.raises(ValidationError):
             _TaggedUpdateModel(tags=["<img/src=x/onerror=alert(1)>"])
+
+
+class TestNormalizeAndValidateTag:
+    """Direct coverage of the single-tag helper the tag-registry endpoints use."""
+
+    def test_rejects_reported_payload(self):
+        with pytest.raises(ValueError):
+            normalize_and_validate_tag("< &8 HTML > <p>")
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            "<script>alert(document.cookie)</script>",
+            "<img/src=x/onerror=alert(1)>",
+            "&lt;script&gt;",
+            'tag"onmouseover=alert(1)',
+        ],
+    )
+    def test_rejects_same_payloads_as_the_list_validator(self, payload):
+        with pytest.raises(ValueError):
+            normalize_and_validate_tag(payload)
+
+    def test_normalizes_valid_tag(self):
+        assert normalize_and_validate_tag("Pre Diabetes") == "pre-diabetes"
+
+    def test_rejects_non_string(self):
+        with pytest.raises(ValueError):
+            normalize_and_validate_tag(123)  # type: ignore[arg-type]

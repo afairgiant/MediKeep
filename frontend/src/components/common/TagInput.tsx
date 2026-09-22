@@ -13,11 +13,7 @@ import { useDebouncedValue } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import apiService from '../../services/api';
 import logger from '../../services/logger';
-
-// Mirrors the backend allowlist in app/schemas/base_tags.py:
-// letters, digits, and . - : only (spaces are normalized to '-' before this
-// check, matching backend normalization) so tags can never carry markup.
-const ALLOWED_TAG_PATTERN = /^[\p{L}\p{N}.:-]*$/u;
+import { isValidTagName } from '../../utils/tagValidation';
 
 interface TagInputProps {
   value: string[];
@@ -150,7 +146,7 @@ export function TagInput({
       return;
     }
 
-    if (!ALLOWED_TAG_PATTERN.test(trimmedTag.replace(/ /g, '-'))) {
+    if (!isValidTagName(trimmedTag)) {
       setValidationError(
         t(
           'tagManagement.errors.invalidCharacters',

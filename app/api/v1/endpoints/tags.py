@@ -9,8 +9,13 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.core.database.database import get_db
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_data_access, log_endpoint_access
+from app.core.logging.helpers import (
+    log_data_access,
+    log_endpoint_access,
+    log_validation_error,
+)
 from app.models.models import User
+from app.schemas.base_tags import normalize_and_validate_tag
 from app.services.tag_service import tag_service
 
 logger = get_logger(__name__, "app")
@@ -27,6 +32,11 @@ _SYNC_INTERVAL_SECONDS = 300  # 5 minutes
 
 class TagCreateRequest(BaseModel):
     tag: str
+
+    @field_validator("tag")
+    @classmethod
+    def validate_tag(cls, v):
+        return normalize_and_validate_tag(v)
 
 
 class TagColorUpdateRequest(BaseModel):
@@ -200,6 +210,12 @@ async def rename_tag(
 ):
     """Rename a tag across all entities owned by the current user"""
 
+    try:
+        new_tag = normalize_and_validate_tag(new_tag)
+    except ValueError as e:
+        log_validation_error(logger, request, str(e), user_id=current_user.id)
+        raise HTTPException(status_code=400, detail=str(e))
+
     log_data_access(
         logger,
         request,
@@ -247,6 +263,12 @@ async def replace_tag(
     current_user: User = Depends(deps.get_current_user),
 ):
     """Replace one tag with another across all entities owned by the current user"""
+
+    try:
+        new_tag = normalize_and_validate_tag(new_tag)
+    except ValueError as e:
+        log_validation_error(logger, request, str(e), user_id=current_user.id)
+        raise HTTPException(status_code=400, detail=str(e))
 
     log_data_access(
         logger,
