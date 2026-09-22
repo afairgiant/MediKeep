@@ -839,6 +839,11 @@
         "placeholder": "π.χ., https://member.insurance.com"
       }
     },
+    "print": {
+      "errorTitle": "Σφάλμα εκτύπωσης",
+      "readyMessage": "Τα πλήρη στοιχεία ασφάλισης στάλθηκαν στον εκτυπωτή",
+      "readyTitle": "Έτοιμο για εκτύπωση"
+    },
     "viewModal": {
       "coverageDetails": "Λεπτομέρειες Κάλυψης"
     }

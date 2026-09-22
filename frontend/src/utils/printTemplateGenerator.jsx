@@ -151,6 +151,7 @@ export const generateFieldGridSection = (sectionTitle, data, options = {}) => {
     excludeFields = [],
     includeEmpty = false,
     customFormatting = {},
+    locale,
   } = options;
 
   const fields = Object.entries(data)
@@ -163,7 +164,7 @@ export const generateFieldGridSection = (sectionTitle, data, options = {}) => {
       const label = formatFieldLabel(key, labelMappings);
       const formattedValue = customFormatting[key]
         ? customFormatting[key](value)
-        : formatFieldValue(key, value);
+        : formatFieldValue(key, value, undefined, locale);
 
       return `
         <div class="field">
@@ -271,11 +272,13 @@ const defaultFormatDate = value => {
  * Insurance-specific print template generator
  * @param {Object} insurance - Insurance data
  * @param {Function} formatDate - Date formatting function from useDateFormat hook (optional)
+ * @param {string} [locale] - BCP 47 locale for currency formatting, e.g. i18n.language
  * @returns {string} Complete HTML for insurance printing
  */
 export const generateInsurancePrint = (
   insurance,
-  formatDate = defaultFormatDate
+  formatDate = defaultFormatDate,
+  locale
 ) => {
   const coverageDetails = insurance.coverage_details || {};
   const contactInfo = insurance.contact_info || {};
@@ -297,9 +300,7 @@ export const generateInsurancePrint = (
         data: {
           'Member Name': insurance.member_name,
           'Member ID': insurance.member_id,
-          ...(insurance.group_number && {
-            'Group Number': insurance.group_number,
-          }),
+          'Group Number': insurance.group_number || 'N/A',
           ...(insurance.plan_name && { 'Plan Name': insurance.plan_name }),
           ...(insurance.employer_group && {
             'Employer/Group': insurance.employer_group,
@@ -327,6 +328,7 @@ export const generateInsurancePrint = (
               data: coverageDetails,
               options: {
                 labelMappings: insurancePrintLabelMappings,
+                locale,
               },
             },
           ]
@@ -357,6 +359,14 @@ export const generateInsurancePrint = (
             },
           ]
         : []),
+      ...(insurance.tags && insurance.tags.length > 0
+        ? [
+            {
+              title: 'Tags',
+              data: { Tags: insurance.tags.join(', ') },
+            },
+          ]
+        : []),
     ],
   };
 
@@ -382,15 +392,17 @@ export const openPrintWindow = (html, _windowTitle = 'Medical Record') => {
  * @param {Function} onSuccess - Success callback
  * @param {Function} onError - Error callback
  * @param {Function} formatDate - Date formatting function from useDateFormat hook (optional)
+ * @param {string} [locale] - BCP 47 locale for currency formatting, e.g. i18n.language
  */
 export const printInsuranceRecord = (
   insurance,
   onSuccess,
   onError,
-  formatDate = defaultFormatDate
+  formatDate = defaultFormatDate,
+  locale
 ) => {
   try {
-    const html = generateInsurancePrint(insurance, formatDate);
+    const html = generateInsurancePrint(insurance, formatDate, locale);
     openPrintWindow(html, `Insurance Details - ${insurance.company_name}`);
 
     if (onSuccess) {

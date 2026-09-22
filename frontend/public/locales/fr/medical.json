@@ -841,6 +841,11 @@
         "placeholder": "p. ex. : https://adherent.assurance.com"
       }
     },
+    "print": {
+      "errorTitle": "Erreur d'impression",
+      "readyMessage": "Détails complets de l'assurance envoyés à l'imprimante",
+      "readyTitle": "Prêt à imprimer"
+    },
     "viewModal": {
       "coverageDetails": "Détails de la prise en charge"
     }

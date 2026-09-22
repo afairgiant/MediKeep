@@ -24,8 +24,14 @@ import {
   IconPhone,
   IconFileText,
 } from '@tabler/icons-react';
-import { getFormFields } from '../../../utils/medicalFormFields';
+import {
+  getFilteredInsuranceFields,
+  getInsuranceFieldsBySection,
+  INSURANCE_COVERAGE_PERIOD_FIELD_NAMES,
+} from '../../../utils/insuranceFieldSections';
 import { isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
+import { isFieldType } from '../../../utils/fieldTypeConfig';
+import { getCurrencyInputDecoration } from '../../../utils/currency';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import {
   formatDateInputChange,
@@ -56,11 +62,8 @@ const InsuranceFormWrapper = ({
   onError,
   practitioners = [],
 }) => {
-  const { t } = useTranslation(['medical', 'common', 'shared']);
+  const { t, i18n } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
-
-  // Get insurance form fields
-  const fields = getFormFields('insurance');
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -156,7 +159,7 @@ const InsuranceFormWrapper = ({
       });
 
       // Phone validation using centralized detection
-      const filteredFields = getFilteredFields();
+      const filteredFields = getFilteredInsuranceFields(formData.insurance_type);
       Object.keys(formData).forEach(fieldName => {
         const fieldConfig = filteredFields.find(f => f.name === fieldName);
         const isPhoneFieldCheck = isPhoneField(fieldName, fieldConfig?.type);
@@ -230,115 +233,6 @@ const InsuranceFormWrapper = ({
       setIsSubmitting(false);
       throw error; // Re-throw to let parent handle UI feedback
     }
-  };
-
-  // Filter fields based on insurance type for dynamic rendering
-  const getFilteredFields = () => {
-    const selectedInsuranceType = formData.insurance_type;
-
-    // If no insurance type is selected, show basic fields up to insurance type
-    if (!selectedInsuranceType) {
-      return fields.filter(field => {
-        // Show fields without showFor property and insurance_type field
-        return !field.showFor || field.name === 'insurance_type';
-      });
-    }
-
-    // Filter fields based on showFor property
-    return fields
-      .filter(field => {
-        // Always show fields without showFor property (universal fields)
-        if (!field.showFor) {
-          return true;
-        }
-
-        // Show fields that are specified for the current insurance type
-        if (field.showFor.includes(selectedInsuranceType)) {
-          return true;
-        }
-
-        // Hide fields not meant for this insurance type
-        return false;
-      })
-      .map(field => {
-        // Handle conditional required fields
-        if (
-          field.requiredFor &&
-          field.requiredFor.includes(selectedInsuranceType)
-        ) {
-          return {
-            ...field,
-            required: true,
-          };
-        }
-        return field;
-      });
-  };
-
-  // Group fields by section for tabs
-  const getFieldsBySection = () => {
-    const filteredFields = getFilteredFields();
-
-    const basicFields = filteredFields.filter(
-      f =>
-        !f.type ||
-        f.type === 'divider' ||
-        [
-          'insurance_type',
-          'company_name',
-          'plan_name',
-          'employer_group',
-        ].includes(f.name)
-    );
-
-    const memberFields = filteredFields.filter(f =>
-      [
-        'member_name',
-        'member_id',
-        'policy_holder_name',
-        'relationship_to_holder',
-        'group_number',
-      ].includes(f.name)
-    );
-
-    const coverageFields = filteredFields.filter(
-      f =>
-        ['effective_date', 'expiration_date', 'status', 'is_primary'].includes(
-          f.name
-        ) ||
-        (f.showFor &&
-          ![
-            'customer_service_phone',
-            'preauth_phone',
-            'provider_services_phone',
-            'website_url',
-            'claims_address',
-            'pharmacy_network_info',
-          ].includes(f.name))
-    );
-
-    const contactFields = filteredFields.filter(f =>
-      [
-        'customer_service_phone',
-        'preauth_phone',
-        'provider_services_phone',
-        'website_url',
-        'claims_address',
-        'pharmacy_network_info',
-      ].includes(f.name)
-    );
-
-    const notesField = filteredFields.filter(
-      f => f.name === 'notes' || f.name === 'tags'
-    );
-
-    return {
-      basicFields,
-      memberFields,
-      coverageFields,
-      contactFields,
-      notesField,
-    };
   };
 
   // Render a single field
@@ -415,7 +309,10 @@ const InsuranceFormWrapper = ({
           />
         );
 
-      case 'number':
+      case 'number': {
+        const { prefix, suffix } = isFieldType(field.name, 'currency')
+          ? getCurrencyInputDecoration(i18n.language)
+          : {};
         return (
           <NumberInput
             {...commonProps}
@@ -425,8 +322,11 @@ const InsuranceFormWrapper = ({
             min={field.min}
             max={field.max}
             step={field.step}
+            prefix={prefix}
+            suffix={suffix}
           />
         );
+      }
 
       case 'textarea':
         return (
@@ -509,7 +409,7 @@ const InsuranceFormWrapper = ({
     coverageFields,
     contactFields,
     notesField,
-  } = getFieldsBySection();
+  } = getInsuranceFieldsBySection(formData.insurance_type);
 
   return (
     <Modal
@@ -619,12 +519,9 @@ const InsuranceFormWrapper = ({
                     <Grid>
                       {coverageFields
                         .filter(f =>
-                          [
-                            'effective_date',
-                            'expiration_date',
-                            'status',
-                            'is_primary',
-                          ].includes(f.name)
+                          INSURANCE_COVERAGE_PERIOD_FIELD_NAMES.includes(
+                            f.name
+                          )
                         )
                         .map(field => (
                           <Grid.Col
@@ -639,12 +536,7 @@ const InsuranceFormWrapper = ({
 
                   {coverageFields.filter(
                     f =>
-                      ![
-                        'effective_date',
-                        'expiration_date',
-                        'status',
-                        'is_primary',
-                      ].includes(f.name)
+                      !INSURANCE_COVERAGE_PERIOD_FIELD_NAMES.includes(f.name)
                   ).length > 0 && (
                     <div>
                       <Divider mt="md" mb="md" />
@@ -658,12 +550,9 @@ const InsuranceFormWrapper = ({
                         {coverageFields
                           .filter(
                             f =>
-                              ![
-                                'effective_date',
-                                'expiration_date',
-                                'status',
-                                'is_primary',
-                              ].includes(f.name)
+                              !INSURANCE_COVERAGE_PERIOD_FIELD_NAMES.includes(
+                                f.name
+                              )
                           )
                           .map(field => (
                             <Grid.Col

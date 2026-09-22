@@ -14,6 +14,7 @@ import {
   BOOLEAN_FIELDS,
 } from './fieldTypeConfig';
 import { isPhoneField } from './phoneUtils';
+import { formatCurrencyDisplay } from './currency';
 
 /**
  * Default label mappings for common medical record fields
@@ -110,7 +111,7 @@ export const formatFieldLabel = (fieldName, customMappings = {}) => {
 const defaultFormatRules = {
   currency: {
     fields: CURRENCY_FIELDS,
-    format: value => `$${value}`,
+    format: (value, locale) => formatCurrencyDisplay(value, locale),
   },
   percentage: {
     fields: PERCENTAGE_FIELDS,
@@ -138,9 +139,15 @@ const defaultFormatRules = {
  * @param {string} fieldName - The field name
  * @param {any} value - The value to format
  * @param {Object} customFormatRules - Optional custom formatting rules
+ * @param {string} [locale] - BCP 47 locale for currency formatting, e.g. i18n.language
  * @returns {string} Formatted value
  */
-export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
+export const formatFieldValue = (
+  fieldName,
+  value,
+  customFormatRules = {},
+  locale
+) => {
   if (value === null || value === undefined || value === '') {
     return 'Not specified';
   }
@@ -163,7 +170,7 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
 
     if (shouldApply && !shouldExclude) {
       try {
-        return rule.format(value);
+        return rule.format(value, locale);
       } catch (error) {
         logger.warn(
           `Error formatting ${fieldName} with rule ${ruleType}:`,

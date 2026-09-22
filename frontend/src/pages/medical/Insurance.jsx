@@ -50,7 +50,7 @@ import {
 } from '@mantine/core';
 
 const Insurance = () => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t, i18n } = useTranslation(['common', 'shared']);
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
@@ -256,6 +256,11 @@ const Insurance = () => {
       practitioner_id: insurance?.practitioner_id
         ? String(insurance.practitioner_id)
         : '',
+      // Legacy records created before tags existed have tags: null, which
+      // flattens to '' - a bare string fails InsuranceUpdate's
+      // Optional[List[str]] validation (422) if the user saves without
+      // touching the Tags field. Keep it an array either way.
+      tags: Array.isArray(data.tags) ? data.tags : [],
     };
   };
 
@@ -472,6 +477,31 @@ const Insurance = () => {
     }
   };
 
+  const handlePrintInsurance = insurance => {
+    printInsuranceRecord(
+      insurance,
+      () => {
+        notifications.show({
+          title: t('medical:insurance.print.readyTitle', 'Print Ready'),
+          message: t(
+            'medical:insurance.print.readyMessage',
+            'Complete insurance details sent to printer'
+          ),
+          color: 'blue',
+        });
+      },
+      _error => {
+        notifications.show({
+          title: t('medical:insurance.print.errorTitle', 'Print Error'),
+          message: ERROR_MESSAGES.FILE_PROCESSING_FAILED,
+          color: 'red',
+        });
+      },
+      undefined, // formatDate: keep printInsuranceRecord's own default
+      i18n.language
+    );
+  };
+
   // Handle add new
   const handleAddNew = () => {
     resetSubmission(); // Reset submission state
@@ -556,6 +586,7 @@ const Insurance = () => {
                     onDelete={handleDelete}
                     onSetPrimary={handleSetPrimary}
                     onView={handleViewInsurance}
+                    onPrint={handlePrintInsurance}
                     fileCount={fileCounts[insurance.id] || 0}
                     fileCountLoading={fileCountsLoading[insurance.id] || false}
                     disableActions={isViewOnly}
@@ -709,25 +740,6 @@ const Insurance = () => {
         onEdit={handleEdit}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onPrint={insurance => {
-          printInsuranceRecord(
-            insurance,
-            () => {
-              notifications.show({
-                title: 'Print Ready',
-                message: 'Complete insurance details sent to printer',
-                color: 'blue',
-              });
-            },
-            _error => {
-              notifications.show({
-                title: 'Print Error',
-                message: ERROR_MESSAGES.FILE_PROCESSING_FAILED,
-                color: 'red',
-              });
-            }
-          );
-        }}
         onSetPrimary={handleSetPrimary}
         onFileUploadComplete={success => {
           if (success && viewingInsurance) {

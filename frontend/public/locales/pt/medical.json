@@ -841,6 +841,11 @@
         "placeholder": "p. ex., https://beneficiario.seguradora.com.br"
       }
     },
+    "print": {
+      "errorTitle": "Erro de impressão",
+      "readyMessage": "Detalhes completos do seguro enviados para a impressora",
+      "readyTitle": "Pronto para imprimir"
+    },
     "viewModal": {
       "coverageDetails": "Detalhes da Cobertura"
     }

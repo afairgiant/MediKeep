@@ -841,6 +841,11 @@
         "placeholder": "например, https://lk.insurance.ru"
       }
     },
+    "print": {
+      "errorTitle": "Ошибка печати",
+      "readyMessage": "Полные сведения о страховке отправлены на принтер",
+      "readyTitle": "Готово к печати"
+    },
     "viewModal": {
       "coverageDetails": "Сведения о покрытии"
     }

@@ -841,6 +841,11 @@
         "placeholder": "z.B. https://mitglieder.versicherung.de"
       }
     },
+    "print": {
+      "errorTitle": "Druckfehler",
+      "readyMessage": "Vollständige Versicherungsdetails wurden an den Drucker gesendet",
+      "readyTitle": "Druck bereit"
+    },
     "viewModal": {
       "coverageDetails": "Leistungsdetails"
     }

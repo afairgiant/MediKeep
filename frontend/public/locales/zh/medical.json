@@ -838,6 +838,11 @@
         "placeholder": "如：https://member.insurance.com"
       }
     },
+    "print": {
+      "errorTitle": "打印错误",
+      "readyMessage": "完整的保险详情已发送至打印机",
+      "readyTitle": "打印就绪"
+    },
     "viewModal": {
       "coverageDetails": "保险详情"
     }

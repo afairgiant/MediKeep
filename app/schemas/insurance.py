@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import (
     BaseModel,
@@ -10,9 +10,10 @@ from pydantic import (
 )
 
 from app.models.enums import InsuranceStatus, InsuranceType
+from app.schemas.base_tags import TaggedEntityMixin
 
 
-class InsuranceBase(BaseModel):
+class InsuranceBase(TaggedEntityMixin):
     """Base schema for Insurance"""
 
     insurance_type: str
@@ -190,6 +191,7 @@ class InsuranceUpdate(BaseModel):
     coverage_details: Optional[Dict[str, Any]] = None
     contact_info: Optional[Dict[str, Any]] = None
     notes: Optional[str] = None
+    tags: Optional[List[str]] = None
 
     @model_validator(mode="before")
     @classmethod

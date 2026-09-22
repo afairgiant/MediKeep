@@ -13,22 +13,28 @@ import {
   Box,
   SimpleGrid,
   Paper,
+  Divider,
   Tooltip,
+  Anchor,
 } from '@mantine/core';
 import {
   IconEdit,
-  IconPrinter,
-  IconStar,
   IconInfoCircle,
+  IconUser,
   IconShield,
   IconPhone,
   IconFileText,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { resolveInsurancePcpDisplay } from '../../../utils/insurancePcpUtils';
+import { translateField } from '../../../utils/translateField';
+import { isFieldType } from '../../../utils/fieldTypeConfig';
+import { formatCurrencyDisplay } from '../../../utils/currency';
+import {
+  getInsuranceFieldsBySection,
+  INSURANCE_COVERAGE_PERIOD_FIELD_NAMES,
+} from '../../../utils/insuranceFieldSections';
 
-
-import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useTranslation } from 'react-i18next';
 
@@ -37,53 +43,210 @@ const InsuranceViewModal = ({
   onClose,
   insurance,
   onEdit,
-  onPrint,
   onSetPrimary: _onSetPrimary,
   onFileUploadComplete,
   disableEdit = false,
   disableEditTooltip,
   practitioners = [],
 }) => {
-  const { t } = useTranslation(['common', 'shared', 'medical']);
+  const { t, i18n } = useTranslation(['common', 'shared', 'medical']);
   const { formatDate } = useDateFormat();
 
   // Tab state management
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('basic');
 
   // Reset tab when modal opens with new insurance
   React.useEffect(() => {
     if (isOpen) {
-      setActiveTab('overview');
+      setActiveTab('basic');
     }
   }, [isOpen, insurance?.id]);
 
   if (!insurance) return null;
 
-  // Get type-specific styling
-  const getTypeColor = type => {
-    switch (type) {
-      case 'medical':
-        return 'blue';
-      case 'dental':
-        return 'green';
-      case 'vision':
-        return 'purple';
-      case 'prescription':
-        return 'orange';
-      default:
-        return 'gray';
-    }
+  const pcpDisplay = resolveInsurancePcpDisplay(insurance, practitioners);
+
+  // Flatten coverage_details/contact_info into the same flat shape the
+  // Add/Edit form works with, so field lookups below match field.name.
+  // A plain spread (not flattenNestedObject, which does `value || ''`)
+  // preserves falsy-but-real values like a $0 copay or is_primary: false.
+  const flatData = {
+    ...insurance,
+    ...(insurance.coverage_details || {}),
+    ...(insurance.contact_info || {}),
   };
 
-  // Using imported formatters from utilities
+  const {
+    basicFields,
+    memberFields,
+    coverageFields,
+    contactFields,
+    notesField,
+  } = getInsuranceFieldsBySection(insurance.insurance_type);
 
-  const typeColor = getTypeColor(insurance.insurance_type);
+  const coveragePeriodFields = coverageFields.filter(f =>
+    INSURANCE_COVERAGE_PERIOD_FIELD_NAMES.includes(f.name)
+  );
+  const coverageDetailFields = coverageFields.filter(
+    f => !INSURANCE_COVERAGE_PERIOD_FIELD_NAMES.includes(f.name)
+  );
 
-  // Get relevant coverage and contact fields to display
-  const coverageDetails = insurance.coverage_details || {};
-  const contactInfo = insurance.contact_info || {};
+  const notSpecifiedText = t('shared:labels.notSpecified', 'Not specified');
 
-  const pcpDisplay = resolveInsurancePcpDisplay(insurance, practitioners);
+  // Renders a single field as a read-only label/value pair, mirroring the
+  // field types the Add/Edit form supports for this same field config.
+  const renderFieldDisplay = field => {
+    if (field.type === 'divider') return null;
+
+    const translatedField = translateField(field, t);
+    const rawValue = flatData[field.name];
+    const hasValue =
+      rawValue !== undefined && rawValue !== null && rawValue !== '';
+
+    let valueNode;
+
+    switch (field.type) {
+      case 'select': {
+        const option = (translatedField.options || []).find(
+          o => o.value === rawValue
+        );
+        valueNode = (
+          <Text size="sm" c={hasValue ? 'inherit' : 'dimmed'}>
+            {hasValue ? option?.label || rawValue : notSpecifiedText}
+          </Text>
+        );
+        break;
+      }
+
+      case 'date': {
+        valueNode = (
+          <Text size="sm" c={rawValue ? 'inherit' : 'dimmed'}>
+            {rawValue
+              ? formatDate(rawValue)
+              : field.name === 'expiration_date'
+                ? t('shared:labels.ongoing', 'Ongoing')
+                : notSpecifiedText}
+          </Text>
+        );
+        break;
+      }
+
+      case 'checkbox': {
+        valueNode = (
+          <Text size="sm">
+            {rawValue
+              ? t('common:labels.yes', 'Yes')
+              : t('common:labels.no', 'No')}
+          </Text>
+        );
+        break;
+      }
+
+      case 'practitionerSelect': {
+        valueNode = (
+          <Text size="sm" c={pcpDisplay ? 'inherit' : 'dimmed'}>
+            {pcpDisplay || notSpecifiedText}
+          </Text>
+        );
+        break;
+      }
+
+      case 'textarea': {
+        valueNode = hasValue ? (
+          <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
+            <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+              {rawValue}
+            </Text>
+          </Paper>
+        ) : (
+          <Text size="sm" c="dimmed">
+            {notSpecifiedText}
+          </Text>
+        );
+        break;
+      }
+
+      case 'url': {
+        valueNode = hasValue ? (
+          <Anchor
+            href={rawValue}
+            target="_blank"
+            rel="noopener noreferrer"
+            size="sm"
+          >
+            {rawValue.replace(/^https?:\/\//, '')}
+          </Anchor>
+        ) : (
+          <Text size="sm" c="dimmed">
+            {notSpecifiedText}
+          </Text>
+        );
+        break;
+      }
+
+      case 'number': {
+        const isCurrency = isFieldType(field.name, 'currency');
+        valueNode = (
+          <Text size="sm" c={hasValue ? 'inherit' : 'dimmed'}>
+            {hasValue
+              ? isCurrency
+                ? formatCurrencyDisplay(rawValue, i18n.language)
+                : rawValue
+              : notSpecifiedText}
+          </Text>
+        );
+        break;
+      }
+
+      case 'custom': {
+        if (field.component !== 'TagInput') return null;
+
+        const tags = Array.isArray(rawValue) ? rawValue : [];
+        valueNode =
+          tags.length > 0 ? (
+            <Group gap="xs">
+              {tags.map(tag => (
+                <Badge key={tag} variant="light" size="sm">
+                  {tag}
+                </Badge>
+              ))}
+            </Group>
+          ) : (
+            <Text size="sm" c="dimmed">
+              {notSpecifiedText}
+            </Text>
+          );
+        break;
+      }
+
+      default: {
+        valueNode = (
+          <Text size="sm" c={hasValue ? 'inherit' : 'dimmed'}>
+            {hasValue ? rawValue : notSpecifiedText}
+          </Text>
+        );
+      }
+    }
+
+    return (
+      <Stack
+        gap="xs"
+        key={field.name}
+        style={field.gridColumn === 12 ? { gridColumn: '1 / -1' } : undefined}
+      >
+        <Text fw={500} size="sm" c="dimmed">
+          {translatedField.label}
+        </Text>
+        {valueNode}
+      </Stack>
+    );
+  };
+
+  const renderFieldGrid = fields => (
+    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+      {fields.map(renderFieldDisplay)}
+    </SimpleGrid>
+  );
 
   return (
     <Modal
@@ -101,484 +264,80 @@ const InsuranceViewModal = ({
       }}
     >
       <Stack gap="lg">
-        {/* Header Card */}
-        <Paper
-          withBorder
-          p="md"
-          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
-        >
-          <Group justify="space-between" align="center">
-            <div>
-              <Group mb="xs">
-                <Title order={3} color={typeColor}>
-                  {insurance.company_name}
-                </Title>
-                <Badge
-                  size="lg"
-                  variant="light"
-                  color={typeColor}
-                  style={{ textTransform: 'capitalize' }}
-                >
-                  {insurance.insurance_type}{' '}
-                  {t('shared:categories.insurance', 'Insurance')}
-                </Badge>
-              </Group>
-              <Group gap="xs">
-                <StatusBadge status={insurance.status} />
-                {insurance.insurance_type === 'medical' &&
-                  insurance.is_primary && (
-                    <Badge
-                      size="sm"
-                      variant="filled"
-                      color="yellow"
-                      leftSection={<IconStar size={12} />}
-                    >
-                      {t('insurance.card.primary', 'Primary')}
-                    </Badge>
-                  )}
-              </Group>
-              {insurance.plan_name && (
-                <Text size="sm" c="dimmed" mt="xs">
-                  {t('insurance.card.plan', 'Plan')}: {insurance.plan_name}
-                </Text>
-              )}
-            </div>
-          </Group>
-        </Paper>
-
-        {/* Tabbed Content */}
+        {/* Tabbed Content - mirrors InsuranceFormWrapper's tab structure */}
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
-            <Tabs.Tab
-              value="overview"
-              leftSection={<IconInfoCircle size={16} />}
-            >
-              {t('shared:tabs.overview', 'Overview')}
+            <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              {t('shared:tabs.basicInfo', 'Basic Info')}
+            </Tabs.Tab>
+            <Tabs.Tab value="member" leftSection={<IconUser size={16} />}>
+              {t('insurance.form.tabs.member', 'Member')}
             </Tabs.Tab>
             <Tabs.Tab value="coverage" leftSection={<IconShield size={16} />}>
-              {t('insurance.viewModal.tabs.coverage', 'Coverage')}
+              {t('insurance.form.tabs.coverage', 'Coverage')}
             </Tabs.Tab>
-            <Tabs.Tab value="contact" leftSection={<IconPhone size={16} />}>
-              {t('insurance.viewModal.tabs.contact', 'Contact')}
-            </Tabs.Tab>
+            {contactFields.length > 0 && (
+              <Tabs.Tab value="contact" leftSection={<IconPhone size={16} />}>
+                {t('insurance.form.tabs.contact', 'Contact')}
+              </Tabs.Tab>
+            )}
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}
             >
               {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconFileText size={16} />}>
+              {t('shared:tabs.notes', 'Notes')}
+            </Tabs.Tab>
           </Tabs.List>
 
-          {/* Overview Tab */}
-          <Tabs.Panel value="overview">
+          {/* Basic Info Tab */}
+          <Tabs.Panel value="basic">
+            <Box mt="md">{renderFieldGrid(basicFields)}</Box>
+          </Tabs.Panel>
+
+          {/* Member Info Tab */}
+          <Tabs.Panel value="member">
+            <Box mt="md">{renderFieldGrid(memberFields)}</Box>
+          </Tabs.Panel>
+
+          {/* Coverage Tab */}
+          <Tabs.Panel value="coverage">
             <Box mt="md">
-              <Stack gap="lg">
-                {/* Member Information Section */}
+              <Stack gap="md">
                 <div>
-                  <Title order={4} mb="sm">
-                    {t('insurance.viewModal.memberInfo', 'Member Information')}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('insurance.viewModal.memberName', 'Member Name')}
-                      </Text>
-                      <Text>{insurance.member_name}</Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('insurance.viewModal.policyHolder', 'Policy Holder')}
-                      </Text>
-                      <Text
-                        c={
-                          insurance.policy_holder_name &&
-                          insurance.policy_holder_name !== insurance.member_name
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {insurance.policy_holder_name &&
-                        insurance.policy_holder_name !== insurance.member_name
-                          ? insurance.policy_holder_name
-                          : t(
-                              'insurance.viewModal.sameAsMember',
-                              'Same as member'
-                            )}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('insurance.card.memberId', 'Member ID')}
-                      </Text>
-                      <Text>{insurance.member_id}</Text>
-                    </Stack>
-                    {insurance.policy_holder_name &&
-                      insurance.policy_holder_name !==
-                        insurance.member_name && (
-                        <Stack gap="xs">
-                          <Text fw={500} size="sm" c="dimmed">
-                            {t('shared:labels.relationship', 'Relationship')}
-                          </Text>
-                          <Text style={{ textTransform: 'capitalize' }}>
-                            {insurance.relationship_to_holder ||
-                              t('shared:fields.self', 'Self')}
-                          </Text>
-                        </Stack>
-                      )}
-                    {insurance.group_number && (
-                      <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">
-                          {t('shared:labels.groupNumber', 'Group Number')}
-                        </Text>
-                        <Text>{insurance.group_number}</Text>
-                      </Stack>
+                  <Text fw={600} size="sm" mb="sm">
+                    {t(
+                      'insurance.form.coveragePeriodStatus',
+                      'Coverage Period & Status'
                     )}
-                    {insurance.employer_group && (
-                      <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">
-                          {t(
-                            'insurance.viewModal.employerGroup',
-                            'Employer/Group Sponsor'
-                          )}
-                        </Text>
-                        <Text>{insurance.employer_group}</Text>
-                      </Stack>
-                    )}
-                    {insurance.insurance_type === 'medical' && (
-                      <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">
-                          {t(
-                            'medical:insurance.form.primaryCarePhysician.label',
-                            'Primary Care Physician'
-                          )}
-                        </Text>
-                        <Text c={pcpDisplay ? 'inherit' : 'dimmed'}>
-                          {pcpDisplay ||
-                            t('shared:labels.notSpecified', 'Not specified')}
-                        </Text>
-                      </Stack>
-                    )}
-                  </SimpleGrid>
+                  </Text>
+                  {renderFieldGrid(coveragePeriodFields)}
                 </div>
 
-                {/* Coverage Period Section */}
-                <div>
-                  <Title order={4} mb="sm">
-                    {t('insurance.viewModal.coveragePeriod', 'Coverage Period')}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.effectiveDate',
-                          'Effective Date'
-                        )}
-                      </Text>
-                      <Text>{formatDate(insurance.effective_date)}</Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('shared:fields.expirationDate', 'Expiration Date')}
-                      </Text>
-                      <Text
-                        c={insurance.expiration_date ? 'inherit' : 'dimmed'}
-                      >
-                        {insurance.expiration_date
-                          ? formatDate(insurance.expiration_date)
-                          : t('shared:labels.ongoing', 'Ongoing')}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-                </div>
-
-                {/* Notes Section */}
-                {insurance.notes && (
+                {coverageDetailFields.length > 0 && (
                   <div>
-                    <Title order={4} mb="sm">
-                      {t('shared:tabs.notes', 'Notes')}
-                    </Title>
-                    <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-                      <Text style={{ whiteSpace: 'pre-wrap' }}>
-                        {insurance.notes}
-                      </Text>
-                    </Paper>
+                    <Divider mt="md" mb="md" />
+                    <Text fw={600} size="sm" mb="sm">
+                      {t(
+                        'insurance.viewModal.coverageDetails',
+                        'Coverage Details'
+                      )}
+                    </Text>
+                    {renderFieldGrid(coverageDetailFields)}
                   </div>
                 )}
               </Stack>
             </Box>
           </Tabs.Panel>
 
-          {/* Coverage Tab */}
-          <Tabs.Panel value="coverage">
-            <Box mt="md">
-              <Stack gap="lg">
-                <div>
-                  <Title order={4} mb="sm">
-                    {t(
-                      'insurance.viewModal.coverageDetails',
-                      'Coverage Details'
-                    )}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('insurance.viewModal.deductible', 'Deductible')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={coverageDetails.deductible ? 'inherit' : 'dimmed'}
-                      >
-                        {coverageDetails.deductible ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.outOfPocketMax',
-                          'Out of Pocket Max'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          coverageDetails.out_of_pocket_max
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {coverageDetails.out_of_pocket_max ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('insurance.viewModal.copay', 'Copay')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={coverageDetails.copay ? 'inherit' : 'dimmed'}
-                      >
-                        {coverageDetails.copay ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('insurance.viewModal.coinsurance', 'Coinsurance')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={coverageDetails.coinsurance ? 'inherit' : 'dimmed'}
-                      >
-                        {coverageDetails.coinsurance ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.prescriptionCoverage',
-                          'Prescription Coverage'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          coverageDetails.prescription_coverage
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {coverageDetails.prescription_coverage ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.visionCoverage',
-                          'Vision Coverage'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          coverageDetails.vision_coverage ? 'inherit' : 'dimmed'
-                        }
-                      >
-                        {coverageDetails.vision_coverage ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.dentalCoverage',
-                          'Dental Coverage'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          coverageDetails.dental_coverage ? 'inherit' : 'dimmed'
-                        }
-                      >
-                        {coverageDetails.dental_coverage ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.mentalHealthCoverage',
-                          'Mental Health Coverage'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          coverageDetails.mental_health_coverage
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {coverageDetails.mental_health_coverage ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.additionalDetails',
-                          'Additional Coverage Details'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          coverageDetails.additional_details
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {coverageDetails.additional_details ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-                </div>
-              </Stack>
-            </Box>
-          </Tabs.Panel>
-
           {/* Contact Tab */}
-          <Tabs.Panel value="contact">
-            <Box mt="md">
-              <Stack gap="lg">
-                <div>
-                  <Title order={4} mb="sm">
-                    {t(
-                      'shared:fields.contactInformation',
-                      'Contact Information'
-                    )}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.customerServicePhone',
-                          'Customer Service Phone'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          contactInfo.customer_service_phone
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {contactInfo.customer_service_phone ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('insurance.viewModal.claimsPhone', 'Claims Phone')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={contactInfo.claims_phone ? 'inherit' : 'dimmed'}
-                      >
-                        {contactInfo.claims_phone ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('shared:labels.website', 'Website')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={contactInfo.website_url ? 'inherit' : 'dimmed'}
-                        style={{ wordBreak: 'break-all' }}
-                      >
-                        {contactInfo.website_url ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t('shared:labels.email', 'Email')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={contactInfo.email ? 'inherit' : 'dimmed'}
-                      >
-                        {contactInfo.email ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.claimsAddress',
-                          'Claims Address'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={contactInfo.claims_address ? 'inherit' : 'dimmed'}
-                      >
-                        {contactInfo.claims_address ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                      <Text fw={500} size="sm" c="dimmed">
-                        {t(
-                          'insurance.viewModal.pharmacyNetworkInfo',
-                          'Pharmacy Network Info'
-                        )}
-                      </Text>
-                      <Text
-                        size="sm"
-                        c={
-                          contactInfo.pharmacy_network_info
-                            ? 'inherit'
-                            : 'dimmed'
-                        }
-                      >
-                        {contactInfo.pharmacy_network_info ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-                </div>
-              </Stack>
-            </Box>
-          </Tabs.Panel>
+          {contactFields.length > 0 && (
+            <Tabs.Panel value="contact">
+              <Box mt="md">{renderFieldGrid(contactFields)}</Box>
+            </Tabs.Panel>
+          )}
 
           {/* Documents Tab */}
           <Tabs.Panel value="documents">
@@ -610,54 +369,37 @@ const InsuranceViewModal = ({
               </Stack>
             </Box>
           </Tabs.Panel>
+
+          {/* Notes Tab */}
+          <Tabs.Panel value="notes">
+            <Box mt="md">
+              <Stack gap="md">{notesField.map(renderFieldDisplay)}</Stack>
+            </Box>
+          </Tabs.Panel>
         </Tabs>
 
         {/* Action Buttons */}
-        <Group justify="space-between" mt="md">
-          <Button
-            variant="outline"
-            leftSection={<IconPrinter size={16} />}
-            onClick={() => {
-              if (!onPrint) return;
-              // Bake the resolved PCP name into coverage_details for the print
-              // template, which only knows how to render that raw dict - it
-              // has no access to the practitioners list to resolve the id itself.
-              const printableInsurance = pcpDisplay
-                ? {
-                    ...insurance,
-                    coverage_details: {
-                      ...(insurance.coverage_details || {}),
-                      primary_care_physician: pcpDisplay,
-                    },
-                  }
-                : insurance;
-              onPrint(printableInsurance);
-            }}
-          >
-            {t('insurance.viewModal.printCard', 'Print Card')}
+        <Group justify="flex-end" mt="md">
+          <Button variant="outline" onClick={onClose}>
+            {t('shared:labels.close', 'Close')}
           </Button>
-          <Group>
-            <Button variant="outline" onClick={onClose}>
-              {t('shared:labels.close', 'Close')}
-            </Button>
-            <Tooltip
-              label={disableEditTooltip}
-              disabled={!disableEdit || !disableEditTooltip}
-            >
-              <span>
-                <Button
-                  leftSection={<IconEdit size={16} />}
-                  onClick={() => {
-                    onClose();
-                    onEdit && onEdit(insurance);
-                  }}
-                  disabled={disableEdit}
-                >
-                  {t('shared:labels.edit', 'Edit')}
-                </Button>
-              </span>
-            </Tooltip>
-          </Group>
+          <Tooltip
+            label={disableEditTooltip}
+            disabled={!disableEdit || !disableEditTooltip}
+          >
+            <span>
+              <Button
+                leftSection={<IconEdit size={16} />}
+                onClick={() => {
+                  onClose();
+                  onEdit && onEdit(insurance);
+                }}
+                disabled={disableEdit}
+              >
+                {t('shared:labels.edit', 'Edit')}
+              </Button>
+            </span>
+          </Tooltip>
         </Group>
       </Stack>
     </Modal>

@@ -4,6 +4,16 @@
  */
 
 /**
+ * Defaults a missing/null/undefined value to '' for a controlled input,
+ * without coercing other falsy-but-real values (0, false, [], NaN). Using
+ * `value || ''` here would silently wipe a real $0 amount to '' (NumberInput
+ * then renders empty, not "0") and, for an array field like `tags`, would
+ * turn a legacy `null` into the string `''` - which a `List[str]` schema
+ * rejects outright on submit rather than treating as "no tags".
+ */
+const withEmptyStringFallback = value => (value == null ? '' : value);
+
+/**
  * Flattens nested object properties into a flat form data structure
  * @param {Object} item - The item containing nested data
  * @param {Object} nestedFieldConfig - Configuration defining which fields are nested
@@ -17,7 +27,7 @@ export const flattenNestedObject = (item, nestedFieldConfig) => {
   // Copy basic fields
   Object.keys(item).forEach(key => {
     if (!nestedFieldConfig.nestedFields?.includes(key)) {
-      flatData[key] = item[key] || '';
+      flatData[key] = withEmptyStringFallback(item[key]);
     }
   });
 
@@ -25,7 +35,7 @@ export const flattenNestedObject = (item, nestedFieldConfig) => {
   nestedFieldConfig.nestedFields?.forEach(nestedField => {
     const nestedData = item[nestedField] || {};
     Object.entries(nestedData).forEach(([key, value]) => {
-      flatData[key] = value || '';
+      flatData[key] = withEmptyStringFallback(value);
     });
   });
 
@@ -136,6 +146,7 @@ export const insuranceFieldConfig = {
     'status',
     'is_primary',
     'notes',
+    'tags',
   ],
   nestedFieldGroups: {
     coverage_details: [
@@ -194,4 +205,5 @@ export const insuranceDefaultValues = {
   status: 'active',
   is_primary: false,
   notes: '',
+  tags: [],
 };
