@@ -25,7 +25,7 @@
 ## Database Overview
 
 ### Technology Stack
-- **Database**: PostgreSQL 15+
+- **Database**: PostgreSQL 15-18
 - **ORM**: SQLAlchemy 2.0+
 - **Migration Tool**: Alembic
 - **Schema Location**: `app/models/models.py`

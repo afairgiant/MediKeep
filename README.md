@@ -58,6 +58,7 @@ Create a `docker-compose.yml` file with content:
 services:
   # PostgreSQL Database Service
   postgres:
+    # PostgreSQL 15-18 supported; changing this major on an existing volume requires pg_upgrade
     image: postgres:15.8-alpine
     container_name: medikeep-db
     environment:

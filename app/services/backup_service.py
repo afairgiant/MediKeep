@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.database.postgres_tools import pg_dump_binary
 from app.core.events import get_event_bus
 from app.core.logging.config import get_logger
 from app.core.utils.security import SecurityValidator
@@ -34,28 +35,6 @@ class BackupService:
     def __init__(self, db: Session):
         self.db = db
         self.backup_dir = settings.BACKUP_DIR
-
-    def _get_postgres_version(self) -> str:
-        """Get PostgreSQL major version from the database."""
-        try:
-            from sqlalchemy import text
-
-            result = self.db.execute(text("SELECT version()")).fetchone()
-            if result is None:
-                logger.warning(
-                    "PostgreSQL version query returned no results, defaulting to 17"
-                )
-                return "17"
-
-            version_string = result[0]
-            major_version = version_string.split()[1].split(".")[0]
-            logger.info(f"Detected PostgreSQL version: {major_version}")
-            return major_version
-        except Exception as e:
-            logger.warning(
-                f"Could not detect PostgreSQL version: {e}, defaulting to 17"
-            )
-            return "17"
 
     async def create_database_backup(
         self, description: Optional[str] = None
@@ -81,8 +60,6 @@ class BackupService:
                 settings.DATABASE_URL
             )
 
-            # Use native pg_dump from within container
-            logger.info("Using native pg_dump for database backup")
             await self._create_native_database_dump(backup_path, conn_params)
 
             # Verify backup file was created and has content
@@ -156,7 +133,7 @@ class BackupService:
         logger.info("Using native pg_dump for database backup")
 
         cmd = [
-            "pg_dump",
+            pg_dump_binary(self.db),
             "--file",
             str(backup_path),
             "--host",
@@ -187,6 +164,7 @@ class BackupService:
                 stderr=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 text=True,
+                timeout=1800,
             )
 
             if result.stderr:
@@ -202,73 +180,8 @@ class BackupService:
                 error_details += f". Standard output: {e.stdout}"
             logger.error(error_details)
             raise Exception(f"Database dump failed: {error_details}")
-
-    async def _create_docker_database_dump(
-        self, backup_path: Path, conn_params: Dict[str, str]
-    ) -> None:
-        """Create database dump using Docker pg_dump."""
-        logger.info("Using Docker pg_dump for database backup")
-
-        postgres_version = self._get_postgres_version()
-        backup_dir_host = self.backup_dir.resolve()
-        backup_filename = backup_path.name
-
-        cmd = [
-            "docker",
-            "run",
-            *SecurityValidator.get_secure_docker_flags(),
-            "--network",
-            "dev_docker_medical-records-network-dev",  # Use same network as app
-            "-v",
-            f"{backup_dir_host}:/backup",
-            "-e",
-            f"PGPASSWORD={conn_params['password']}",
-            f"postgres:{postgres_version}",
-            "pg_dump",
-            "--file",
-            f"/backup/{backup_filename}",
-            "--host",
-            conn_params["hostname"],
-            "--port",
-            conn_params["port"],
-            "--username",
-            conn_params["username"],
-            "--dbname",
-            conn_params["database"],
-            "--verbose",
-            "--no-password",
-            "--no-owner",
-            "--no-privileges",
-            "--exclude-table=backup_records",
-            "--exclude-table=backup_records_id_seq",
-        ]
-
-        logger.debug("Executing Docker pg_dump command")
-        try:
-            result = subprocess.run(
-                cmd,
-                check=True,
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-                timeout=1800,
-            )
-
-            if result.stderr:
-                logger.info(f"Docker pg_dump messages: {result.stderr}")
-            if result.stdout:
-                logger.debug(f"Docker pg_dump output: {result.stdout}")
-
-        except subprocess.CalledProcessError as e:
-            error_details = f"Docker pg_dump failed with exit code {e.returncode}"
-            if e.stderr:
-                error_details += f". Error output: {e.stderr}"
-            if e.stdout:
-                error_details += f". Standard output: {e.stdout}"
-            logger.error(error_details)
-            raise Exception(f"Database dump failed: {error_details}")
         except subprocess.TimeoutExpired:
-            logger.error("Docker pg_dump timed out after 30 minutes")
+            logger.error("pg_dump timed out after 30 minutes")
             raise Exception("Database dump timed out")
 
     async def _record_failed_backup(
@@ -979,8 +892,6 @@ class BackupService:
                 settings.DATABASE_URL
             )
 
-            # Use native pg_dump from within container
-            logger.info("Using native pg_dump for database backup")
             await self._create_native_database_dump(output_path, conn_params)
 
             logger.info(f"Database dump created successfully: {output_path}")
