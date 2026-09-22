@@ -139,6 +139,22 @@ export const generatePrintHeader = config => {
 };
 
 /**
+ * Escapes HTML-significant characters so a value can be safely interpolated
+ * into the print document's markup. `&` must be replaced first, otherwise
+ * the entities inserted by the later replacements would themselves get
+ * re-escaped.
+ * @param {*} value - Any value; coerced to a string before escaping.
+ * @returns {string} HTML-safe string
+ */
+export const escapeHtml = value =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+/**
  * Generates a field grid section for medical record prints
  * @param {string} sectionTitle - Title for the section
  * @param {Object} data - Data object containing fields
@@ -168,8 +184,8 @@ export const generateFieldGridSection = (sectionTitle, data, options = {}) => {
 
       return `
         <div class="field">
-          <span class="label">${label}:</span>
-          <span class="value">${formattedValue}</span>
+          <span class="label">${escapeHtml(label)}:</span>
+          <span class="value">${escapeHtml(formattedValue)}</span>
         </div>
       `;
     });

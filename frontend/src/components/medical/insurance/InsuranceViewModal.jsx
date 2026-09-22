@@ -167,14 +167,15 @@ const InsuranceViewModal = ({
       }
 
       case 'url': {
+        const normalizedUrl = hasValue ? String(rawValue) : '';
         valueNode = hasValue ? (
           <Anchor
-            href={rawValue}
+            href={normalizedUrl}
             target="_blank"
             rel="noopener noreferrer"
             size="sm"
           >
-            {rawValue.replace(/^https?:\/\//, '')}
+            {normalizedUrl.replace(/^https?:\/\//, '')}
           </Anchor>
         ) : (
           <Text size="sm" c="dimmed">

@@ -260,6 +260,35 @@ describe('InsuranceViewModal', () => {
 
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
+
+    test('does not crash when website_url is a non-string value (untyped contact_info from the API)', () => {
+      // Regression: contact_info is stored as an untyped Dict[str, Any] on
+      // the backend, so nothing guarantees website_url is actually a
+      // string. rawValue.replace(...) used to throw for a non-string
+      // truthy value (e.g. a number), crashing the whole dialog render.
+      const numericWebsiteInsurance = {
+        ...baseInsurance,
+        contact_info: {
+          ...baseInsurance.contact_info,
+          website_url: 12345,
+        },
+      };
+
+      expect(() =>
+        render(
+          <MantineWrapper>
+            <InsuranceViewModal
+              {...defaultProps}
+              insurance={numericWebsiteInsurance}
+            />
+          </MantineWrapper>
+        )
+      ).not.toThrow();
+
+      const link = screen.getByText('12345');
+      expect(link.tagName).toBe('A');
+      expect(link).toHaveAttribute('href', '12345');
+    });
   });
 
   describe('Notes tab', () => {
