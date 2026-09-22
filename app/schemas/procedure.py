@@ -1,10 +1,10 @@
 from datetime import date as DateType
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.models.enums import ProcedureStatus, get_all_procedure_outcomes
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
 
 # Pre-fetch valid values for reuse
 VALID_PROCEDURE_STATUSES = [s.value for s in ProcedureStatus]
@@ -144,7 +144,7 @@ class ProcedureCreate(ProcedureBase):
     pass
 
 
-class ProcedureUpdate(BaseModel):
+class ProcedureUpdate(TaggedEntityUpdateMixin):
     procedure_name: Optional[str] = Field(None, min_length=2, max_length=300)
     procedure_type: Optional[str] = Field(None, max_length=50)
     procedure_code: Optional[str] = Field(None, max_length=50)
@@ -160,7 +160,6 @@ class ProcedureUpdate(BaseModel):
     practitioner_id: Optional[int] = Field(None, gt=0)
     anesthesia_type: Optional[str] = Field(None, max_length=100)
     anesthesia_notes: Optional[str] = Field(None, max_length=5000)
-    tags: Optional[List[str]] = None
 
     @model_validator(mode="before")
     @classmethod

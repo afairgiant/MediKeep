@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
 
 if TYPE_CHECKING:
     pass
@@ -111,7 +111,7 @@ class ImmunizationCreate(ImmunizationBase):
     )
 
 
-class ImmunizationUpdate(BaseModel):
+class ImmunizationUpdate(TaggedEntityUpdateMixin):
     vaccine_name: Optional[str] = Field(None, min_length=2, max_length=200)
     vaccine_trade_name: Optional[str] = Field(None, max_length=200)
     date_administered: Optional[date] = None
@@ -125,7 +125,6 @@ class ImmunizationUpdate(BaseModel):
     location: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=5000)
     practitioner_id: Optional[int] = Field(None, gt=0)
-    tags: Optional[List[str]] = None
     standardized_vaccine_who_code: Optional[str] = Field(
         None,
         max_length=100,

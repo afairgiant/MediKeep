@@ -1229,6 +1229,7 @@
       "createFailed": "Tag kon niet worden aangemaakt",
       "deleteFailed": "Tag kon niet worden verwijderd",
       "editFailed": "Tag kon niet worden bijgewerkt",
+      "invalidCharacters": "Tags mogen alleen letters, cijfers en . - : bevatten",
       "loadFailed": "Tags konden niet worden geladen",
       "replaceFailed": "Tag kon niet worden vervangen"
     },

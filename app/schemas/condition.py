@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from app.models.enums import get_all_condition_statuses, get_all_severity_levels
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
 from app.schemas.validators import validate_date_not_future, validate_text_field
 
 # Pre-fetch valid values for reuse
@@ -108,7 +108,7 @@ class ConditionCreate(ConditionBase):
     pass
 
 
-class ConditionUpdate(BaseModel):
+class ConditionUpdate(TaggedEntityUpdateMixin):
     condition_name: Optional[str] = Field(None, max_length=500)
     diagnosis: Optional[str] = Field(None, min_length=2, max_length=500)
     notes: Optional[str] = Field(None, max_length=5000)
@@ -121,7 +121,6 @@ class ConditionUpdate(BaseModel):
     code_description: Optional[str] = Field(None, max_length=500)
     practitioner_id: Optional[int] = Field(None, gt=0)
     # Note: medication_id removed - use ConditionMedication junction table instead
-    tags: Optional[List[str]] = None
 
     @field_validator("status")
     @classmethod

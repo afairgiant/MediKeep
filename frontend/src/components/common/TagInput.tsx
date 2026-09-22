@@ -14,6 +14,11 @@ import { useTranslation } from 'react-i18next';
 import apiService from '../../services/api';
 import logger from '../../services/logger';
 
+// Mirrors the backend allowlist in app/schemas/base_tags.py:
+// letters, digits, and . - : only (spaces are normalized to '-' before this
+// check, matching backend normalization) so tags can never carry markup.
+const ALLOWED_TAG_PATTERN = /^[\p{L}\p{N}.:-]*$/u;
+
 interface TagInputProps {
   value: string[];
   onChange: (_tags: string[]) => void;
@@ -140,6 +145,20 @@ export function TagInput({
       logger.debug('Tag exceeds character limit', {
         tag: trimmedTag,
         length: trimmedTag.length,
+        component: 'TagInput',
+      });
+      return;
+    }
+
+    if (!ALLOWED_TAG_PATTERN.test(trimmedTag.replace(/ /g, '-'))) {
+      setValidationError(
+        t(
+          'tagManagement.errors.invalidCharacters',
+          'Tags may only contain letters, numbers, and . - :'
+        )
+      );
+      logger.debug('Tag contains invalid characters', {
+        tag: trimmedTag,
         component: 'TagInput',
       });
       return;

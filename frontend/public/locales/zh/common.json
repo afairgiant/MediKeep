@@ -1228,6 +1228,7 @@
       "createFailed": "创建标签失败",
       "deleteFailed": "删除标签失败",
       "editFailed": "更新标签失败",
+      "invalidCharacters": "标签只能包含字母、数字和 . - :",
       "loadFailed": "加载标签失败",
       "replaceFailed": "替换标签失败"
     },

@@ -1,10 +1,10 @@
 from datetime import date
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.enums import get_all_severity_levels
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
 
 VALID_SEVERITY_LEVELS = get_all_severity_levels()
 
@@ -58,7 +58,7 @@ class AllergyCreate(AllergyBase):
     pass
 
 
-class AllergyUpdate(BaseModel):
+class AllergyUpdate(TaggedEntityUpdateMixin):
     allergen: Optional[str] = Field(None, min_length=2, max_length=200)
     reaction: Optional[str] = Field(None, max_length=500)
     severity: Optional[str] = None
@@ -66,7 +66,6 @@ class AllergyUpdate(BaseModel):
     notes: Optional[str] = Field(None, max_length=5000)
     status: Optional[str] = None
     medication_id: Optional[int] = Field(None, gt=0)
-    tags: Optional[List[str]] = None
 
     @field_validator("severity")
     @classmethod

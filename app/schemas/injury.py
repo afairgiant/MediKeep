@@ -6,7 +6,7 @@ tracking injuries like sprains, fractures, burns, etc.
 """
 
 from datetime import date, datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -15,7 +15,7 @@ from app.models.enums import (
     get_all_laterality_values,
     get_all_severity_levels,
 )
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import TaggedEntityMixin, TaggedEntityUpdateMixin
 from app.schemas.injury_type import InjuryTypeResponse
 from app.schemas.validators import validate_date_not_future, validate_text_field
 
@@ -154,7 +154,7 @@ class InjuryCreate(InjuryBase):
     patient_id: int = Field(..., gt=0, description="ID of the patient")
 
 
-class InjuryUpdate(BaseModel):
+class InjuryUpdate(TaggedEntityUpdateMixin):
     """Schema for updating an existing Injury"""
 
     injury_name: Optional[str] = Field(None, min_length=2, max_length=300)
@@ -169,7 +169,6 @@ class InjuryUpdate(BaseModel):
     recovery_notes: Optional[str] = None
     practitioner_id: Optional[int] = Field(None, gt=0)
     notes: Optional[str] = None
-    tags: Optional[List[str]] = None
 
     @field_validator("date_of_injury")
     @classmethod
