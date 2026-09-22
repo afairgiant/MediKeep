@@ -5,7 +5,11 @@ from typing import List, Optional
 from pydantic import BaseModel, field_validator, model_validator
 
 from app.core.constants import LAB_TEST_COMPONENT_LIMITS
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 
 
 def _validate_relevance_note(v):
@@ -293,7 +297,7 @@ class LabResultCreate(LabResultBase):
         return v
 
 
-class LabResultUpdate(BaseModel):
+class LabResultUpdate(TaggedEntityUpdateMixin):
     """Schema for updating an existing lab result"""
 
     test_name: Optional[str] = None
@@ -307,7 +311,6 @@ class LabResultUpdate(BaseModel):
     completed_date: Optional[date] = None
     notes: Optional[str] = None
     practitioner_id: Optional[int] = None
-    tags: Optional[List[str]] = None
     value: Optional[float] = None
     unit: Optional[str] = None
     ref_range_min: Optional[float] = None
@@ -500,7 +503,7 @@ class LabResultUpdate(BaseModel):
         return self
 
 
-class LabResultResponse(LabResultBase):
+class LabResultResponse(TaggedEntityResponseMixin, LabResultBase):
     """Schema for lab result response"""
 
     id: int

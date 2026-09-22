@@ -11,7 +11,11 @@ from pydantic import (
 )
 
 from app.models.enums import TreatmentStatus
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 
 
 # Helper function for validating relevance notes
@@ -180,7 +184,7 @@ class TreatmentCreate(TreatmentBase):
     pass
 
 
-class TreatmentUpdate(BaseModel):
+class TreatmentUpdate(TaggedEntityUpdateMixin):
     treatment_name: Optional[str] = Field(None, min_length=2, max_length=300)
     treatment_type: Optional[str] = Field(
         None, max_length=300
@@ -198,7 +202,6 @@ class TreatmentUpdate(BaseModel):
     status: Optional[str] = None
     practitioner_id: Optional[int] = Field(None, gt=0)
     condition_id: Optional[int] = Field(None, gt=0)
-    tags: Optional[List[str]] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -294,7 +297,7 @@ class TreatmentUpdate(BaseModel):
         return v
 
 
-class TreatmentResponse(TreatmentBase):
+class TreatmentResponse(TaggedEntityResponseMixin, TreatmentBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

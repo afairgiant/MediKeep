@@ -1229,6 +1229,7 @@
       "createFailed": "Creazione tag non riuscita",
       "deleteFailed": "Eliminazione tag non riuscita",
       "editFailed": "Aggiornamento tag non riuscito",
+      "invalidCharacters": "I tag possono contenere solo lettere, numeri e . - :",
       "loadFailed": "Caricamento tag non riuscito",
       "replaceFailed": "Sostituzione tag non riuscita"
     },

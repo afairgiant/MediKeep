@@ -26,7 +26,7 @@ Ensure you have installed:
 
 - **Python 3.12+** - [Download](https://www.python.org/downloads/)
 - **Node.js 18+** - [Download](https://nodejs.org/)
-- **PostgreSQL 15+** OR **Docker** - [PostgreSQL Download](https://www.postgresql.org/download/) | [Docker Download](https://docs.docker.com/get-docker/)
+- **PostgreSQL 15-18** OR **Docker** - [PostgreSQL Download](https://www.postgresql.org/download/) | [Docker Download](https://docs.docker.com/get-docker/)
 - **Git** - [Download](https://git-scm.com/downloads)
 
 **Verify installations:**

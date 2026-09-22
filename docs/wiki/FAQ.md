@@ -35,7 +35,7 @@ Yes! MediKeep supports multiple patient profiles, so you can manage records for 
 **Minimum requirements:**
 - Docker and Docker Compose (recommended), OR
 - Python 3.12+ and Node.js 18+
-- PostgreSQL 15+
+- PostgreSQL 15-18
 - 2GB RAM, 2 CPU cores, 20GB disk space
 
 ### How do I install MediKeep?
@@ -148,6 +148,14 @@ Check:
 1. File size limit (default 15MB)
 2. Allowed file types (images, PDFs)
 3. Storage permissions on the server
+
+### My backup fails with "server version mismatch"
+
+```
+pg_dump: error: aborting because of server version mismatch
+```
+
+Older MediKeep images bundled only a PostgreSQL 15 client, and `pg_dump` refuses to dump a server newer than itself. Update MediKeep to a release that bundles clients for PostgreSQL 15-18, or run a PostgreSQL 15 server.
 
 ### I'm getting CORS errors
 

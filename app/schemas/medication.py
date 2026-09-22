@@ -2,7 +2,6 @@ from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import (
-    BaseModel,
     ConfigDict,
     ValidationInfo,
     field_validator,
@@ -11,7 +10,11 @@ from pydantic import (
 
 from app.core.utils.datetime_utils import HHMM_24H_RE
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
-from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.base_tags import (
+    TaggedEntityMixin,
+    TaggedEntityResponseMixin,
+    TaggedEntityUpdateMixin,
+)
 from app.schemas.validators import validate_text_field
 
 if TYPE_CHECKING:
@@ -256,7 +259,7 @@ class MedicationCreate(MedicationBase):
         return stripped or None
 
 
-class MedicationUpdate(BaseModel):
+class MedicationUpdate(TaggedEntityUpdateMixin):
     """Schema for updating an existing medication"""
 
     medication_name: Optional[str] = None
@@ -273,7 +276,6 @@ class MedicationUpdate(BaseModel):
     pharmacy_id: Optional[int] = None
     notes: Optional[str] = None
     side_effects: Optional[str] = None
-    tags: Optional[List[str]] = None
     reminder_enabled: Optional[bool] = None
     reminder_times: Optional[List[str]] = None
     reminder_message: Optional[str] = None
@@ -419,7 +421,7 @@ class MedicationUpdate(BaseModel):
         return stripped or None
 
 
-class MedicationResponse(MedicationBase):
+class MedicationResponse(TaggedEntityResponseMixin, MedicationBase):
     """Schema for medication response"""
 
     id: int

@@ -1229,6 +1229,7 @@
       "createFailed": "Nie udało się utworzyć tagu",
       "deleteFailed": "Nie udało się usunąć tagu",
       "editFailed": "Nie udało się zaktualizować tagu",
+      "invalidCharacters": "Tagi mogą zawierać tylko litery, cyfry oraz . - :",
       "loadFailed": "Nie udało się załadować tagów",
       "replaceFailed": "Nie udało się zastąpić tagu"
     },

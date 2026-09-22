@@ -23,7 +23,7 @@
   <DateInstalled></DateInstalled>
   <DonateText>If you find this application useful, please consider supporting the development.</DonateText>
   <DonateLink>https://github.com/sponsors/afairgiant</DonateLink>
-  <Requires>PostgreSQL database (can use postgresql container)</Requires>
+  <Requires>PostgreSQL 15-18 database (can use postgresql container)</Requires>
   <Config Name="WebUI Port" Target="8000" Default="8000" Mode="tcp"
     Description="Port for accessing the web interface" Type="Port" Display="always" Required="true"
     Mask="false">8000</Config>

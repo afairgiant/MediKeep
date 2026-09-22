@@ -36,6 +36,7 @@ import { apiService } from '../../services/api';
 import logger from '../../services/logger';
 import { PageHeader } from '../../components';
 import { useTranslation } from 'react-i18next';
+import { isValidTagName } from '../../utils/tagValidation';
 
 const TagManagement = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -105,14 +106,26 @@ const TagManagement = () => {
   const handleCreateTag = async () => {
     if (!newTagName.trim()) return;
 
+    if (!isValidTagName(newTagName)) {
+      setError(t('tagManagement.errors.invalidCharacters'));
+      return;
+    }
+
     try {
-      await apiService.post('/tags/create', { tag: newTagName });
+      const createResponse = await apiService.post('/tags/create', {
+        tag: newTagName,
+      });
+      // The backend normalizes the tag (lowercase, spaces -> hyphens), so
+      // use its normalized value from here on rather than the raw input -
+      // a raw match/display silently diverges from what was actually
+      // stored whenever normalization changed it (e.g. "Pre Diabetes").
+      const normalizedTag = createResponse?.tag || newTagName.trim();
 
       // If a color was selected, fetch tags to get the new tag's ID, then update color
       if (newTagColor) {
         const refreshed = await apiService.get('/tags/popular?limit=50');
         const tagList = refreshed.data || refreshed || [];
-        const created = tagList.find(t => t.tag === newTagName.trim());
+        const created = tagList.find(t => t.tag === normalizedTag);
         if (created) {
           await apiService.patch(`/tags/${created.id}/color`, {
             color: newTagColor,
@@ -124,7 +137,7 @@ const TagManagement = () => {
       }
 
       setSuccessMessage(
-        t('tagManagement.success.created', { tag: newTagName })
+        t('tagManagement.success.created', { tag: normalizedTag })
       );
       setNewTagName('');
       setNewTagColor('');
@@ -156,32 +169,35 @@ const TagManagement = () => {
       return;
     }
 
-    try {
-      const promises = [];
+    if (nameChanged && !isValidTagName(editTagName)) {
+      setError(t('tagManagement.errors.invalidCharacters'));
+      return;
+    }
 
-      if (nameChanged) {
-        promises.push(
-          apiService.put(
+    try {
+      const renamePromise = nameChanged
+        ? apiService.put(
             `/tags/rename?old_tag=${encodeURIComponent(editingTag.tag)}&new_tag=${encodeURIComponent(editTagName)}`
           )
-        );
-      }
+        : Promise.resolve(null);
 
-      if (colorChanged) {
-        promises.push(
-          apiService.patch(`/tags/${editingTag.id}/color`, {
+      const colorPromise = colorChanged
+        ? apiService.patch(`/tags/${editingTag.id}/color`, {
             color: editTagColor || null,
           })
-        );
-      }
+        : Promise.resolve(null);
 
-      await Promise.all(promises);
+      const [renameResponse] = await Promise.all([renamePromise, colorPromise]);
 
       if (nameChanged) {
+        // Use the backend's normalized new_tag so the toast names what was
+        // actually stored, not the raw (possibly differently-cased or
+        // space-containing) input.
+        const normalizedNewTag = renameResponse?.new_tag || editTagName.trim();
         setSuccessMessage(
           t('tagManagement.success.renamed', {
             oldTag: editingTag.tag,
-            newTag: editTagName,
+            newTag: normalizedNewTag,
           })
         );
       } else {
@@ -242,14 +258,22 @@ const TagManagement = () => {
   const handleReplaceTag = async () => {
     if (!replaceWithTag.trim() || !replacingTag) return;
 
+    if (!isValidTagName(replaceWithTag)) {
+      setError(t('tagManagement.errors.invalidCharacters'));
+      return;
+    }
+
     try {
       const response = await apiService.put(
         `/tags/replace?old_tag=${encodeURIComponent(replacingTag.tag)}&new_tag=${encodeURIComponent(replaceWithTag)}`
       );
+      // Use the backend's normalized new_tag so the toast names what was
+      // actually stored, matching the create/rename flows.
+      const normalizedNewTag = response?.new_tag || replaceWithTag.trim();
       setSuccessMessage(
         t('tagManagement.success.replaced', {
           oldTag: replacingTag.tag,
-          newTag: replaceWithTag,
+          newTag: normalizedNewTag,
         })
       );
       closeReplaceModal();
@@ -258,7 +282,7 @@ const TagManagement = () => {
       logger.info('tag_replaced', {
         message: 'Tag replaced successfully',
         oldTag: replacingTag.tag,
-        newTag: replaceWithTag,
+        newTag: normalizedNewTag,
         recordsUpdated: response.records_updated,
       });
     } catch (err) {

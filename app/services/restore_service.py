@@ -19,6 +19,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.database.postgres_tools import psql_binary
 from app.core.logging.config import get_logger
 from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
@@ -39,27 +40,6 @@ class RestoreService:
         """Print debug message only if DEBUG mode is enabled."""
         if settings.DEBUG:
             print(message)
-
-    def _get_postgres_version(self) -> str:
-        """Get PostgreSQL major version from the database."""
-        try:
-            result = self.db.execute(text("SELECT version()")).fetchone()
-            if result is None:
-                logger.warning(
-                    "PostgreSQL version query returned no results, defaulting to 17"
-                )
-                return "17"
-
-            version_string = result[0]
-            # Extract major version from "PostgreSQL 15.3 on ..." -> "15"
-            major_version = version_string.split()[1].split(".")[0]
-            logger.info(f"Detected PostgreSQL version: {major_version}")
-            return major_version
-        except Exception as e:
-            logger.warning(
-                f"Could not detect PostgreSQL version: {e}, defaulting to 17"
-            )
-            return "17"  # Safe default
 
     async def preview_restore(self, backup_id: int) -> Dict[str, Any]:
         """
@@ -443,10 +423,6 @@ class RestoreService:
             logger.info("Step 1: Dropping tables with CASCADE...")
             await self._drop_all_tables()
 
-            # Step 2: Restore using Docker psql
-            self._debug_print("RESTORE DEBUG: Step 2 - Restoring with Docker psql...")
-            logger.info("Step 2: Restoring with Docker psql...")
-
             # Use native psql from within container
             logger.info("Using native psql for database restore")
             await self._restore_with_native_psql(backup_path, conn_params)
@@ -569,7 +545,7 @@ class RestoreService:
         logger.info("Using native psql for database restore")
 
         cmd = [
-            "psql",
+            psql_binary(),
             "--host",
             conn_params["hostname"],
             "--port",
@@ -618,94 +594,6 @@ class RestoreService:
                 error_details += f". Standard output: {e.stdout}"
             logger.error(error_details)
             raise Exception(f"Database restore failed: {error_details}")
-
-    async def _restore_with_docker_psql(
-        self, backup_path: Path, conn_params: Dict[str, str]
-    ) -> None:
-        """Restore database using Docker psql command with enhanced security."""
-        logger.info("Using Docker psql for database restore")
-
-        postgres_version = self._get_postgres_version()
-
-        # Mount the backup file to allow access from container
-        backup_file_host = backup_path.resolve()
-        backup_filename = backup_path.name
-
-        # Create a temporary directory for safe mounting
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_backup_path = Path(temp_dir) / backup_filename
-            shutil.copy2(backup_file_host, temp_backup_path)
-
-            cmd = [
-                "docker",
-                "run",
-                "--rm",
-                "--interactive",
-                "--network",
-                "dev_docker_medical-records-network-dev",  # Use same network as app
-                "--user",
-                (
-                    f"{os.getuid()}:{os.getgid()}"
-                    if hasattr(os, "getuid")
-                    else "1000:1000"
-                ),  # Security: run as current user
-                "--security-opt",
-                "no-new-privileges",  # Security: prevent privilege escalation
-                "--read-only",  # Security: read-only container
-                "--tmpfs",
-                "/tmp:noexec,nosuid,size=100m",  # nosec B108
-                "-v",
-                f"{temp_dir}:/backup:ro",  # Read-only mount
-                "-e",
-                f"PGPASSWORD={conn_params['password']}",
-                f"postgres:{postgres_version}",
-                "psql",
-                "--host",
-                conn_params["hostname"],
-                "--port",
-                conn_params["port"],
-                "--username",
-                conn_params["username"],
-                "--dbname",
-                conn_params["database"],
-                "--file",
-                f"/backup/{backup_filename}",
-                "--single-transaction",  # All-or-nothing restore
-                "--echo-errors",  # Show errors
-                "--quiet",  # Reduce verbose output
-                "--no-password",
-                "--set",
-                "ON_ERROR_STOP=on",  # Stop on first error
-            ]
-
-            self._debug_print("RESTORE DEBUG: Running Docker psql command")
-            logger.debug("Executing Docker psql restore command")
-
-            # Execute Docker psql with the backup file
-            try:
-                result = subprocess.run(
-                    cmd,
-                    check=True,
-                    stderr=subprocess.PIPE,
-                    stdout=subprocess.PIPE,
-                    text=True,
-                    timeout=3600,  # 1 hour timeout for large restores
-                )
-
-                if result.stderr:
-                    logger.info(f"Docker psql messages: {result.stderr}")
-
-                if result.stdout:
-                    logger.debug(f"Docker psql output: {result.stdout}")
-
-            except subprocess.TimeoutExpired:
-                logger.error("Docker psql restore timed out after 1 hour")
-                raise Exception("Restore operation timed out")
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Docker psql failed with exit code {e.returncode}")
-                if e.stderr:
-                    logger.error(f"Docker psql error output: {e.stderr}")
-                raise Exception(f"Docker restore failed: {e.stderr}")
 
     async def _restore_files(self, backup_path: Path) -> Dict[str, Any]:
         """Restore files from ZIP archive."""

@@ -1229,6 +1229,7 @@
       "createFailed": "Fehler beim Erstellen des Tags",
       "deleteFailed": "Fehler beim Löschen des Tags",
       "editFailed": "Tag konnte nicht aktualisiert werden",
+      "invalidCharacters": "Tags dürfen nur Buchstaben, Zahlen sowie . - : enthalten",
       "loadFailed": "Fehler beim Laden der Tags",
       "replaceFailed": "Fehler beim Ersetzen des Tags"
     },

@@ -1229,6 +1229,7 @@
       "createFailed": "Echec de la création de l'étiquette",
       "deleteFailed": "Echec de la suppression de l'étiquette",
       "editFailed": "Echec de la mise à jour de l'étiquette",
+      "invalidCharacters": "Les tags ne peuvent contenir que des lettres, des chiffres et . - :",
       "loadFailed": "Echec du chargement des étiquettes",
       "replaceFailed": "Echec du remplacement de l'étiquette"
     },

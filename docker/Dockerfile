@@ -50,15 +50,27 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     LOG_ROTATION_METHOD=logrotate
 
 # Install system dependencies in a single layer
+# PGDG repo: Debian's own postgresql-client is 15, which cannot dump newer servers
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    ca-certificates \
     bash \
-    postgresql-client \
     gosu \
     logrotate \
     tesseract-ocr \
     tesseract-ocr-eng \
     poppler-utils \
+    && install -d /usr/share/postgresql-common/pgdg \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+        -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+    && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo $VERSION_CODENAME)-pgdg main" \
+        > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        postgresql-client-15 \
+        postgresql-client-16 \
+        postgresql-client-17 \
+        postgresql-client-18 \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
