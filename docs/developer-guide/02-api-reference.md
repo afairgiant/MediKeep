@@ -4468,7 +4468,7 @@ Base path: `/api/v1/tags`
 - **Purpose**: Get the calling user's tags, ordered by usage across their owned patients
 - **Authentication**: Yes
 - **Query Parameters**:
-  - `entity_types` (array, default: all types): Entity types to count usage in (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy, practice)
+  - `entity_types` (array, default: all types): Entity types to count usage in (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy)
   - `limit` (integer, default: 20, max: 50): Maximum number of tags
 - **Success Response** (200): Each tag name appears at most once.
 
