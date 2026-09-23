@@ -56,12 +56,9 @@ class TagService:
         *,
         entity_types: List[str] = None,
         limit: int = 20,
-        user_id: Optional[int] = None,
+        user_id: int,
     ) -> List[Dict[str, Any]]:
-        """Get all user tags with their usage counts across entities.
-
-        When user_id is provided, usage counts are scoped to that user's patients only.
-        """
+        """Get one user's tags with usage counts from that user's owned patients."""
 
         if not entity_types:
             entity_types = [
@@ -92,16 +89,11 @@ class TagService:
                 param_key = f"entity_type_{len(usage_subqueries)}"
                 query_params[param_key] = entity_type
 
-                # Scope usage counts to user's patients when user_id is provided
-                user_filter = ""
-                if user_id is not None:
-                    user_filter = f"AND {self._user_patient_filter()}"
-
                 usage_subqueries.append(
                     f"""
                     SELECT tag, COUNT(*) as usage_count, :{param_key} as entity_type
                     FROM "{table_name}", json_array_elements_text(tags) as tag
-                    WHERE tags IS NOT NULL {user_filter}
+                    WHERE tags IS NOT NULL AND {self._user_patient_filter()}
                     GROUP BY tag
                 """
                 )
@@ -117,6 +109,7 @@ class TagService:
             query = """
                 SELECT id, tag, color, 0 as usage_count, ARRAY[]::text[] as entity_types
                 FROM user_tags
+                WHERE user_id = :user_id
                 ORDER BY tag ASC
                 LIMIT :limit
             """
@@ -138,16 +131,18 @@ class TagService:
                     END as entity_types
                 FROM user_tags ut
                 LEFT JOIN usage_stats us ON ut.tag = us.tag
+                WHERE ut.user_id = :user_id
                 GROUP BY ut.id, ut.tag, ut.color
                 ORDER BY total_usage DESC, ut.tag ASC
                 LIMIT :limit
             """
 
         try:
-            # Combine limit parameter with entity type parameters
-            final_params: Dict[str, Any] = {"limit": limit, **query_params}
-            if user_id is not None:
-                final_params["user_id"] = user_id
+            final_params: Dict[str, Any] = {
+                "limit": limit,
+                "user_id": user_id,
+                **query_params,
+            }
             result = db.execute(text(query), final_params).fetchall()
 
             logger.info(
@@ -291,23 +286,23 @@ class TagService:
         return results
 
     def autocomplete_tags(
-        self, db: Session, *, query: str, limit: int = 10
+        self, db: Session, *, query: str, user_id: int, limit: int = 10
     ) -> List[str]:
-        """Get tag suggestions based on partial input from user tags"""
+        """Get tag names from one user's tags that start with the given prefix."""
 
         try:
 
-            # Search user tags that match the query
             query_sql = """
-                SELECT DISTINCT tag
+                SELECT tag
                 FROM user_tags
-                WHERE tag ILIKE :query || '%'
+                WHERE user_id = :user_id AND tag ILIKE :query || '%'
                 ORDER BY tag
                 LIMIT :limit
             """
 
             result = db.execute(
-                text(query_sql), {"query": query.lower(), "limit": limit}
+                text(query_sql),
+                {"query": query.lower(), "user_id": user_id, "limit": limit},
             ).fetchall()
 
             tags = [row[0] for row in result]

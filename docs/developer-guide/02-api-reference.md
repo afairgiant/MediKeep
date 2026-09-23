@@ -4459,27 +4459,33 @@ Base path: `/api/v1/tags`
 
 **Note**: Tags are stored directly on entities (medications, lab results, conditions, etc.) as arrays. The tags API provides cross-entity tag management, search, and autocomplete functionality.
 
+**Scoping**: Each user has their own tag registry (`user_tags`, unique per user and tag name). The read endpoints (`/popular`, `/autocomplete`, `/suggestions`) return only the calling user's tags, and usage counts include only records of patients that user owns. Two users can have the same tag name without seeing each other's tags.
+
 #### Get Popular Tags
 
 `GET /tags/popular`
 
-- **Purpose**: Get most popular tags across multiple entity types
+- **Purpose**: Get the calling user's tags, ordered by usage across their owned patients
 - **Authentication**: Yes
 - **Query Parameters**:
-  - `entity_types` (array, default: all types): Entity types to search (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy, practice)
+  - `entity_types` (array, default: all types): Entity types to count usage in (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy)
   - `limit` (integer, default: 20, max: 50): Maximum number of tags
-- **Success Response** (200):
+- **Success Response** (200): Each tag name appears at most once.
 
 ```json
 [
   {
+    "id": 12,
     "tag": "cardiology",
-    "count": 25,
+    "color": "#e03131",
+    "usage_count": 25,
     "entity_types": ["medication", "condition"]
   },
   {
+    "id": 7,
     "tag": "routine",
-    "count": 18,
+    "color": null,
+    "usage_count": 18,
     "entity_types": ["lab_result", "immunization"]
   }
 ]
@@ -4513,7 +4519,7 @@ Base path: `/api/v1/tags`
 
 `GET /tags/autocomplete`
 
-- **Purpose**: Get tag suggestions for autocomplete as user types
+- **Purpose**: Get the calling user's tags that start with the typed prefix (case-insensitive)
 - **Authentication**: Yes
 - **Query Parameters**:
   - `q` (string, required, min: 1, max: 50): Query string
@@ -4528,7 +4534,7 @@ Base path: `/api/v1/tags`
 
 `GET /tags/suggestions`
 
-- **Purpose**: Get tag suggestions based on what users have actually created
+- **Purpose**: Get the calling user's most-used tag names
 - **Authentication**: Yes
 - **Query Parameters**:
   - `entity_type` (string, optional): Suggest tags for specific entity type

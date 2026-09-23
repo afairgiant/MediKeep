@@ -12,12 +12,19 @@ endpoints now reject the same payloads TaggedEntityMixin does, and that the
 rename/replace bypass in particular can no longer poison an existing
 record's tags.
 
+It also covers that the tag read endpoints pass the caller's user ID to the
+service, so no user sees another user's tags (#1044).
+
 Uses shared fixtures from tests/api/conftest.py: user_with_patient,
 authenticated_headers.
 """
 
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
+
+from app.api.v1.endpoints import tags as tags_endpoint
 
 MALICIOUS_TAG = "< &8 HTML > <p>"
 
@@ -221,3 +228,42 @@ class TestTagReplaceEndpointRejectsInjection:
             f"/api/v1/allergies/{allergy['id']}", headers=authenticated_headers
         )
         assert check.json()["tags"] == ["diabetes"]
+
+
+class TestTagReadEndpointsScopedToCaller:
+    @pytest.fixture
+    def service(self, monkeypatch):
+        service = tags_endpoint.tag_service
+        monkeypatch.setattr(
+            service,
+            "get_popular_tags_across_entities",
+            MagicMock(return_value=[{"id": 1, "tag": "diabetes", "color": None}]),
+        )
+        monkeypatch.setattr(
+            service, "autocomplete_tags", MagicMock(return_value=["diabetes"])
+        )
+        monkeypatch.setattr(service, "sync_tags_from_records", MagicMock())
+        return service
+
+    @pytest.mark.parametrize(
+        "path, service_method",
+        [
+            ("/api/v1/tags/popular", "get_popular_tags_across_entities"),
+            ("/api/v1/tags/suggestions", "get_popular_tags_across_entities"),
+            ("/api/v1/tags/autocomplete?q=dia", "autocomplete_tags"),
+        ],
+    )
+    def test_endpoint_passes_caller_user_id(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        service,
+        path,
+        service_method,
+    ):
+        response = client.get(path, headers=authenticated_headers)
+
+        assert response.status_code == 200, response.text
+        call = getattr(service, service_method).call_args
+        assert call.kwargs["user_id"] == user_with_patient["user"].id
