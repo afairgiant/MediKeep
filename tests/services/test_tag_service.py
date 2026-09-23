@@ -288,3 +288,48 @@ class TestTagServiceExactMatching:
 
         assert med1.tags == ["sars-cov-2"]
         assert med2.tags == ["covid"]
+
+
+class TestTagReadsScopedToUser:
+    """Regression tests for #1044: two users sharing a tag name."""
+
+    SHARED_TAG = "diabetes"
+
+    @pytest.fixture
+    def shared_tag_setup(self, db_session: Session, test_user, test_recipient):
+        tag_service.create_tag(db_session, tag=self.SHARED_TAG, user_id=test_user.id)
+        tag_service.create_tag(
+            db_session, tag=self.SHARED_TAG, user_id=test_recipient.id
+        )
+        tag_service.create_tag(db_session, tag="other-only", user_id=test_recipient.id)
+
+    def test_popular_lists_shared_name_once(
+        self, db_session: Session, test_user, shared_tag_setup
+    ):
+        result = tag_service.get_popular_tags_across_entities(
+            db_session, user_id=test_user.id
+        )
+
+        assert [row["tag"] for row in result] == [self.SHARED_TAG]
+
+    def test_popular_empty_entity_fallback_lists_only_own_tags(
+        self, db_session: Session, test_user, shared_tag_setup
+    ):
+        result = tag_service.get_popular_tags_across_entities(
+            db_session, entity_types=["not_an_entity"], user_id=test_user.id
+        )
+
+        assert [row["tag"] for row in result] == [self.SHARED_TAG]
+
+    def test_autocomplete_excludes_other_users_tags(
+        self, db_session: Session, test_user, shared_tag_setup
+    ):
+        assert tag_service.autocomplete_tags(
+            db_session, query="", user_id=test_user.id
+        ) == [self.SHARED_TAG]
+        assert (
+            tag_service.autocomplete_tags(
+                db_session, query="other", user_id=test_user.id
+            )
+            == []
+        )

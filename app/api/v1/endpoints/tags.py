@@ -164,7 +164,9 @@ async def autocomplete_tags(
         limit=limit,
     )
 
-    return tag_service.autocomplete_tags(db, query=q, limit=limit)
+    return tag_service.autocomplete_tags(
+        db, query=q, user_id=current_user.id, limit=limit
+    )
 
 
 @router.get("/suggestions", response_model=List[str])
