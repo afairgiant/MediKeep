@@ -100,6 +100,24 @@ export const theme = createTheme({
       '#7f1d1d',
       '#6b1f1f',
     ],
+    // Purple - not one of Mantine's default color names (which stop at
+    // grape/violet/indigo for this hue range). Added specifically so
+    // labCategories.ts's CATEGORY_COLORS (endocrinology: 'purple') resolves
+    // to a real --mantine-color-purple-* token instead of an undefined CSS
+    // variable, which made that category's row background/text/icon fail to
+    // render with no visible error.
+    purple: [
+      '#faf5ff',
+      '#f3e8ff',
+      '#e9d5ff',
+      '#d8b4fe',
+      '#c084fc',
+      '#a855f7',
+      '#9333ea',
+      '#7e22ce',
+      '#6b21a8',
+      '#581c87',
+    ],
   },
 
   /** Set the primary color */

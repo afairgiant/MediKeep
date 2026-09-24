@@ -1,5 +1,9 @@
-import { describe, it, expect } from 'vitest';
-import { parseRefRangeText, calculateStatus } from './labTestComponentUtils';
+import { describe, it, expect, vi } from 'vitest';
+import {
+  parseRefRangeText,
+  calculateStatus,
+  makeLegacyResultHandler,
+} from './labTestComponentUtils';
 
 const NONE = { min: null, max: null, minExclusive: false, maxExclusive: false };
 
@@ -151,5 +155,48 @@ describe('calculateStatus', () => {
   it('regression (issue #883): fasting glucose above a text-only range is high', () => {
     // Reporter typed the range only into the Ref Text field, leaving min/max blank.
     expect(calculateStatus(126, '', '', '70-99')).toBe('high');
+  });
+});
+
+describe('makeLegacyResultHandler', () => {
+  const point = {
+    id: -42,
+    result_type: 'status_only' as const,
+    status: 'abnormal',
+    lab_result: { id: 42, test_name: 'A1C' },
+  };
+
+  it('returns undefined when no handler is provided, so canEditLegacy/canDeleteLegacy stay false', () => {
+    expect(makeLegacyResultHandler(undefined)).toBeUndefined();
+  });
+
+  it('builds the is_legacy shim from the trend point and calls the handler with it', () => {
+    const handler = vi.fn();
+    const wrapped = makeLegacyResultHandler(handler);
+
+    wrapped?.(point);
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: -42,
+        lab_result_id: 42,
+        test_name: 'A1C',
+        is_legacy: true,
+      })
+    );
+  });
+
+  it('passes through a synchronous return value unchanged', () => {
+    const handler = vi.fn().mockReturnValue(true);
+    const wrapped = makeLegacyResultHandler(handler);
+
+    expect(wrapped?.(point)).toBe(true);
+  });
+
+  it('passes through a resolved async return value unchanged (regression: TestComponentTrendsPanel awaits this to decide whether to reload after a legacy delete)', async () => {
+    const handler = vi.fn().mockResolvedValue(false);
+    const wrapped = makeLegacyResultHandler(handler);
+
+    await expect(wrapped?.(point)).resolves.toBe(false);
   });
 });

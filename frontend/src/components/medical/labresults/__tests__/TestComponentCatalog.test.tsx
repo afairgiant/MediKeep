@@ -153,13 +153,40 @@ vi.mock('../TestComponentCatalogCard', () => ({
 
 // Mock TestComponentTrendsPanel
 vi.mock('../TestComponentTrendsPanel', () => ({
-  default: ({ opened, testName, unit }: any) => (
+  default: ({ opened, testName, unit, readOnly, onEditLegacyResult, onDeleteLegacyResult, onMutate }: any) => (
     <div
       data-testid="trends-panel"
       data-opened={opened}
       data-test-name={testName}
       data-unit={unit ?? ''}
-    />
+      data-read-only={String(Boolean(readOnly))}
+    >
+      {/* #1025 follow-up: exposes the props under test below, without needing
+          to mock the panel's own real data-fetching to reach its Data Table. */}
+      <button
+        data-testid="fake-trends-panel-edit-trigger"
+        onClick={() =>
+          onEditLegacyResult?.({
+            id: -42,
+            result_type: 'status_only',
+            status: 'abnormal',
+            lab_result: { id: 42, test_name: 'A1C' },
+          })
+        }
+      />
+      <button
+        data-testid="fake-trends-panel-delete-trigger"
+        onClick={() =>
+          onDeleteLegacyResult?.({
+            id: -42,
+            result_type: 'status_only',
+            status: 'abnormal',
+            lab_result: { id: 42, test_name: 'A1C' },
+          })
+        }
+      />
+      <button data-testid="fake-trends-panel-mutate-trigger" onClick={() => onMutate?.()} />
+    </div>
   ),
 }));
 
@@ -369,5 +396,70 @@ describe('TestComponentCatalog', () => {
       expect(panel.getAttribute('data-test-name')).toBe('Calcium');
       expect(panel.getAttribute('data-unit')).toBe('mmol/L');
     });
+  });
+
+  it('wires onEdit through to the trend panel so editing a status_only point routes to the same handler as any other legacy component (#1025 follow-up)', () => {
+    const onEdit = vi.fn();
+    render(<TestComponentCatalog {...defaultProps} onEdit={onEdit} />);
+
+    fireEvent.click(screen.getByTestId('fake-trends-panel-edit-trigger'));
+
+    expect(onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: -42,
+        lab_result_id: 42,
+        test_name: 'A1C',
+        is_legacy: true,
+      })
+    );
+  });
+
+  it('does not wire the trend panel edit route when no onEdit is provided', () => {
+    render(<TestComponentCatalog {...defaultProps} />);
+
+    expect(() =>
+      fireEvent.click(screen.getByTestId('fake-trends-panel-edit-trigger'))
+    ).not.toThrow();
+  });
+
+  it('wires onRefresh through to the trend panel as onMutate, so an edit/delete made there refreshes the cards this catalog is built from', () => {
+    const onRefresh = vi.fn();
+    render(<TestComponentCatalog {...defaultProps} onRefresh={onRefresh} />);
+
+    fireEvent.click(screen.getByTestId('fake-trends-panel-mutate-trigger'));
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('wires the trend panel so deleting a legacy trend point routes to onDelete with the same shim shape as onEdit (#1025 follow-up)', () => {
+    const onDelete = vi.fn();
+    render(<TestComponentCatalog {...defaultProps} onDelete={onDelete} />);
+
+    fireEvent.click(screen.getByTestId('fake-trends-panel-delete-trigger'));
+
+    expect(onDelete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: -42,
+        lab_result_id: 42,
+        test_name: 'A1C',
+        is_legacy: true,
+      })
+    );
+  });
+
+  it('does not wire the trend panel delete route when no onDelete is provided', () => {
+    render(<TestComponentCatalog {...defaultProps} />);
+
+    expect(() =>
+      fireEvent.click(screen.getByTestId('fake-trends-panel-delete-trigger'))
+    ).not.toThrow();
+  });
+
+  it('passes readOnly through to the trend panel (#1025 follow-up: Card mode must hide Edit/Delete for a view-only share, same as Table mode already does via disableActions)', () => {
+    const { rerender } = render(<TestComponentCatalog {...defaultProps} readOnly={false} />);
+    expect(screen.getByTestId('trends-panel').getAttribute('data-read-only')).toBe('false');
+
+    rerender(<TestComponentCatalog {...defaultProps} readOnly />);
+    expect(screen.getByTestId('trends-panel').getAttribute('data-read-only')).toBe('true');
   });
 });

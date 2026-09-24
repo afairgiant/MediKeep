@@ -2,7 +2,7 @@ import { apiService } from './index';
 import logger from '../logger';
 
 // Types for Lab Test Components
-export type ResultType = 'quantitative' | 'qualitative' | 'textual';
+export type ResultType = 'quantitative' | 'qualitative' | 'textual' | 'status_only';
 export type QualitativeValue =
   | 'positive'
   | 'negative'
@@ -111,6 +111,11 @@ export interface TrendDataPoint {
   result_type?: ResultType | null;
   qualitative_value?: QualitativeValue | null;
   textual_value?: string | null;
+  /** True for a point synthesized from a component-less LabResult (#1014,
+   * #1025) - it has no LabTestComponent row, regardless of result_type. Use
+   * this, not result_type, to decide whether an action needs to target the
+   * parent LabResult instead of a component. */
+  is_legacy?: boolean;
 }
 
 export interface TrendStatistics {

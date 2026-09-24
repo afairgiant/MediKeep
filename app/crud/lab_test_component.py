@@ -53,6 +53,12 @@ def _synthesize_legacy_component(lab_result) -> LegacyLabComponent:
     than backfilled with the current time: a fabricated "now" would make an old,
     date-less legacy result sort as the most recent entry instead of the least
     recent (see _component_sort_date's date.min fallback for missing dates).
+
+    A legacy LabResult with no numeric value but a recorded interpretation
+    (labs_result: normal/abnormal/critical/...) is synthesized as "status_only" so
+    it still shows up in Test Result mode instead of being silently dropped (#1025
+    only handled the numeric case, which produced no rows for records that only
+    ever recorded normal/abnormal, not a value).
     """
     return LegacyLabComponent(
         id=-lab_result.id,
@@ -69,6 +75,7 @@ def _synthesize_legacy_component(lab_result) -> LegacyLabComponent:
         notes=lab_result.notes,
         created_at=lab_result.created_at,
         updated_at=lab_result.updated_at,
+        result_type="quantitative" if lab_result.value is not None else "status_only",
     )
 
 
@@ -95,6 +102,21 @@ def _component_sort_date(component) -> date:
     if component.created_at:
         return component.created_at.date()
     return date.min
+
+
+def _has_legacy_result(value_col, labs_result_col):
+    """True when a component-less LabResult has something to show: either a
+    numeric value, or a non-blank normal/abnormal/... interpretation (#1025).
+
+    labs_result must be checked for blank, not just NULL - at least one
+    pre-existing row stores "" rather than NULL for "no interpretation
+    recorded", and isnot(None) alone would treat that as eligible and
+    synthesize a content-free legacy row (no value, no status to show).
+    """
+    return or_(
+        value_col.isnot(None),
+        and_(labs_result_col.isnot(None), func.trim(labs_result_col) != ""),
+    )
 
 
 def apply_unit_filter(query, unit_column, unit: Optional[str]):
@@ -362,7 +384,7 @@ class CRUDLabTestComponent(
         legacy_query = db.query(LabResult).filter(
             and_(
                 LabResult.patient_id == patient_id,
-                LabResult.value.isnot(None),
+                _has_legacy_result(LabResult.value, LabResult.labs_result),
                 ~LabResult.test_components.any(),
                 func.lower(func.rtrim(LabResult.test_name, ",;: "))
                 == func.lower(test_name.rstrip(",;: ")),
@@ -401,7 +423,8 @@ class CRUDLabTestComponent(
 
         Also synthesizes pseudo-components for "legacy" LabResults — orders with
         no LabTestComponent children that carry a result directly on their own
-        flat value/unit/ref_range fields — so they appear in the same list (#1014).
+        flat value/unit/ref_range fields, or just a normal/abnormal interpretation
+        with no value — so they appear in the same list (#1014, #1025).
         """
         from app.models.labs import LabResult
 
@@ -425,7 +448,7 @@ class CRUDLabTestComponent(
             db.query(LabResult)
             .filter(
                 LabResult.patient_id == patient_id,
-                LabResult.value.isnot(None),
+                _has_legacy_result(LabResult.value, LabResult.labs_result),
                 ~LabResult.test_components.any(),
             )
             .order_by(legacy_sort_expr)

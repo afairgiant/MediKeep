@@ -1141,6 +1141,64 @@ class TestGetAllForPatient:
         )
         assert all(r.test_name != "Pending Test" for r in results)
 
+    def test_legacy_lab_result_with_status_but_no_value_is_synthesized_as_status_only(
+        self, db_session: Session, two_patients
+    ):
+        """A component-less LabResult with a normal/abnormal interpretation but no
+        numeric value is included as a "status_only" pseudo-component, instead of
+        being excluded like a truly empty result (#1025 follow-up: the original fix
+        only synthesized rows that had a numeric value, so a record that only ever
+        recorded normal/abnormal never appeared in Test Result mode)."""
+        legacy_lr = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=two_patients["p1"].id,
+                test_name="A1C",
+                status="completed",
+                completed_date=date(2024, 3, 1),
+                labs_result="abnormal",
+            ),
+        )
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        legacy = next(r for r in results if r.lab_result_id == legacy_lr.id)
+        assert legacy.is_legacy is True
+        assert legacy.value is None
+        assert legacy.status == "abnormal"
+        assert legacy.result_type == "status_only"
+
+    def test_legacy_lab_result_with_blank_labs_result_is_excluded(
+        self, db_session: Session, two_patients
+    ):
+        """A component-less LabResult with labs_result="" (blank, not NULL) has
+        nothing to show and must be excluded the same as a truly empty one.
+
+        LabResultCreate's own validator normalizes "" to None on write, so this
+        can only be reproduced with a raw UPDATE - the same technique the
+        canonical_test_name "" tests above use to simulate a pre-existing row
+        written before that normalization existed, or edited directly in the
+        database (found live on a production database during #1025 follow-up)."""
+        from app.models.labs import LabResult
+
+        blank_lr = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=two_patients["p1"].id,
+                test_name="Blank Result",
+                status="completed",
+            ),
+        )
+        db_session.query(LabResult).filter(LabResult.id == blank_lr.id).update(
+            {LabResult.labs_result: ""}
+        )
+        db_session.commit()
+
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        assert all(r.lab_result_id != blank_lr.id for r in results)
+
     def test_legacy_result_with_components_is_not_duplicated(
         self, db_session: Session, two_patients
     ):

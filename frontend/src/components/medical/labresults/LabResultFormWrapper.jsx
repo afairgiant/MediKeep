@@ -758,6 +758,23 @@ const LabResultFormWrapper = ({
   // The mode toggle itself only makes sense during a true create (not edit/post-create).
   const showAdvancedToggle = !editingItem && !!onAdvancedModeChange;
 
+  // A component-less result (!isGroupedResult) is either a legacy single-value
+  // result - one that has its one-and-only result recorded directly on value/
+  // labs_result, never as a component (#1025 follow-up) - or a new-style
+  // result whose components haven't been added yet, or were all deleted.
+  // isGroupedResult alone can't tell these apart (both currently have zero
+  // components); the flat fields can, since only a legacy result has them.
+  // Read from editingItem (the saved record), not formData (live, mutable
+  // form state): formData changes on every keystroke, so deriving this from
+  // it would flip the Tests section's visibility mid-edit - e.g. clearing
+  // the Lab Result field before entering a value would make it pop in
+  // unprompted. isGroupedResult is already stable for the same reason.
+  const hasFlatResultValue =
+    editingItem?.value !== '' && editingItem?.value !== null && editingItem?.value !== undefined;
+  const hasFlatLabsResult = !!(editingItem?.labs_result && editingItem.labs_result.trim());
+  const isLegacySingleResult =
+    !isGroupedResult && (hasFlatResultValue || hasFlatLabsResult);
+
   const statusOptions = [
     { value: 'ordered', label: t('labresults:status.ordered') },
     { value: 'in-progress', label: t('labresults:status.inProgress') },
@@ -1454,18 +1471,25 @@ const LabResultFormWrapper = ({
                           </Paper>
                         </Grid.Col>
                       )}
-                      {/* API-backed components editor. Shown regardless of isGroupedResult
-                          so a singleton result can have its first component added —
-                          isGroupedResult only becomes true once components exist, so
-                          gating on it here would make it unreachable for singletons. */}
-                      <Grid.Col span={12}>
-                        <TestComponentsTab
-                          key={`test-components-${editingItem.id}`}
-                          labResultId={editingItem.id}
-                          isViewMode={false}
-                          onError={onError}
-                        />
-                      </Grid.Col>
+                      {/* API-backed components editor. Hidden only for a legacy
+                          single-value result (isLegacySingleResult - #1025 follow-up):
+                          its one-and-only result already lives on value/labs_result
+                          above, so an "Add Test" block below it read as broken/
+                          extraneous rather than useful. Shown for every new-style
+                          result, including one with zero components right now -
+                          either because none have been added yet, or all were
+                          deleted - since for those, unlike a legacy result, Add Test
+                          is the only way to give the result any content at all. */}
+                      {!isLegacySingleResult && (
+                        <Grid.Col span={12}>
+                          <TestComponentsTab
+                            key={`test-components-${editingItem.id}`}
+                            labResultId={editingItem.id}
+                            isViewMode={false}
+                            onError={onError}
+                          />
+                        </Grid.Col>
+                      )}
                     </>
                   ) : (
                     /* New (create mode): stage components locally before the record exists */

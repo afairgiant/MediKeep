@@ -175,7 +175,13 @@ describe('TestComponentCatalogCard', () => {
     expect(onClick).toHaveBeenCalledWith('Glucose', 'mg/dL');
   });
 
-  it('passes null unit when the catalog entry has no unit', () => {
+  it('passes an empty-string unit (not null) when the catalog entry has no unit (#1025 follow-up)', () => {
+    // Regression: null told the /trends endpoint "no unit filter, merge every
+    // unit", which for a card with no unit (e.g. a status_only legacy test)
+    // silently pulled in real quantitative readings of the same test name
+    // that do have a unit. '' explicitly scopes the trend to unitless rows,
+    // matching how this card's own catalog grouping already keeps entries
+    // with different units (including no unit) separate.
     const onClick = vi.fn();
     const entry = {
       ...quantEntry,
@@ -187,7 +193,7 @@ describe('TestComponentCatalogCard', () => {
     render(<TestComponentCatalogCard entry={entry} onClick={onClick} />);
 
     fireEvent.click(screen.getByTestId('catalog-card'));
-    expect(onClick).toHaveBeenCalledWith('HIV Screen', null);
+    expect(onClick).toHaveBeenCalledWith('HIV Screen', '');
   });
 
   it('handles missing abbreviation gracefully', () => {

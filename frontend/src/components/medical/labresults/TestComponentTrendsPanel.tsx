@@ -65,6 +65,27 @@ interface TestComponentTrendsPanelProps {
   // (view-only share, or an explicit view-only display mode) — hide the
   // Edit/Delete actions entirely rather than relying on the backend alone.
   readOnly?: boolean;
+  // Legacy points (point.is_legacy - #1014, #1025) have no LabTestComponent
+  // row of their own to act on - the data is on the parent LabResult
+  // (test_name, dates, value, labs_result, notes, ...). Editing routes to the
+  // caller's existing full edit flow (LabResultFormWrapper, opened the same
+  // way Labs mode opens it for a legacy component via
+  // handleEditComponentFromTable); deleting routes to the caller's existing
+  // delete flow (handleDeleteComponentFromTable), which owns the confirm,
+  // the actual delete, and refreshing everything that needs to know about it
+  // (patientComponents, labResults, file counts) - this panel only refreshes
+  // its own trend data and patientComponents via onMutate, so it can't safely
+  // do a legacy delete on its own. Edit/Delete are hidden for legacy points
+  // when the matching callback isn't provided, rather than falling back to a
+  // second, smaller editor/deleter that only knows about one field.
+  onEditLegacyResult?: (_point: TrendDataPoint) => void;
+  // Resolves to whether the delete actually happened (false for a cancelled
+  // confirm or a failed request), so this panel knows whether to reload its
+  // own trend data - otherwise a successfully deleted legacy point would
+  // keep showing in the chart/table until the drawer is closed and reopened.
+  onDeleteLegacyResult?: (
+    _point: TrendDataPoint
+  ) => boolean | Promise<boolean>;
 }
 
 const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
@@ -75,6 +96,8 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   patientId,
   onMutate,
   readOnly = false,
+  onEditLegacyResult,
+  onDeleteLegacyResult,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
   const [trendData, setTrendData] = useState<TrendResponse | null>(null);
@@ -193,6 +216,19 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   }, [opened, testName, loadTrendData]);
 
   const handleEditPoint = useCallback(async (point: TrendDataPoint) => {
+    // Legacy points (any result_type - #1014, #1025) have no underlying
+    // LabTestComponent row - the data lives on the parent LabResult, so
+    // editing means opening the full lab result edit form rather than the
+    // component editor. The caller supplies that, the same way Labs mode
+    // already does for a legacy component. Close this drawer first: the full
+    // edit form is a separate flow this panel has no visibility into, so it
+    // can't reload trendData when that save completes - better to close than
+    // to risk showing stale data behind/under the edit modal.
+    if (point.is_legacy) {
+      onClose();
+      onEditLegacyResult?.(point);
+      return;
+    }
     setActionLoadingId(point.id);
     try {
       const fullComponent = await labTestComponentApi.getComponent(point.id);
@@ -213,7 +249,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
     } finally {
       setActionLoadingId(null);
     }
-  }, [t]);
+  }, [t, onEditLegacyResult, onClose]);
 
   const handleEditSubmit = useCallback(
     async (updatedData: Partial<LabTestComponent>) => {
@@ -251,6 +287,20 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   );
 
   const handleDeletePoint = useCallback(async (point: TrendDataPoint) => {
+    // Legacy points (#1014, #1025) have no underlying LabTestComponent row -
+    // the whole LabResult IS the data point. Deleting it needs to refresh
+    // more than this panel can see (patientComponents, labResults, file
+    // counts - see the prop doc above), so it's fully delegated to the
+    // caller's own delete flow, confirm included, rather than confirming
+    // here and only partially cleaning up.
+    if (point.is_legacy) {
+      const deleted = await onDeleteLegacyResult?.(point);
+      if (deleted) {
+        loadTrendData();
+        onMutate?.();
+      }
+      return;
+    }
     if (
       !window.confirm(
         t(
@@ -286,7 +336,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
     } finally {
       setActionLoadingId(null);
     }
-  }, [patientId, loadTrendData, onMutate, t]);
+  }, [patientId, loadTrendData, onMutate, t, onDeleteLegacyResult]);
 
   const getTrendIcon = () => {
     if (!trendData) return <IconMinus size={18} />;
@@ -363,7 +413,8 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
       // Create CSV content
       const isQualitative = trendData.result_type === 'qualitative';
       const isTextual = trendData.result_type === 'textual';
-      const headers = isQualitative
+      const isStatusOnly = trendData.result_type === 'status_only';
+      const headers = isQualitative || isStatusOnly
         ? ['Date', 'Result', 'Status', 'Lab Result']
         : isTextual
           ? ['Date', 'Result Text', 'Status', 'Lab Result']
@@ -371,10 +422,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
       const rows = trendData.data_points.map(point => {
         const date = point.recorded_date || point.created_at?.split('T')[0] || '';
 
-        if (isQualitative) {
+        if (isQualitative || isStatusOnly) {
           return [
             date,
-            point.qualitative_value || '',
+            (isStatusOnly ? point.status : point.qualitative_value) || '',
             point.status || '',
             point.lab_result.test_name,
           ];
@@ -417,7 +468,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         // Statistics
         ['Summary Statistics'],
         ['Count', trendData.statistics.count.toString()],
-        ...(isQualitative && trendData.statistics.qualitative_summary
+        ...((isQualitative || isStatusOnly) && trendData.statistics.qualitative_summary
           ? Object.entries(trendData.statistics.qualitative_summary).map(
               ([val, cnt]) => [val, String(cnt)]
             )
@@ -631,7 +682,8 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                     {t('labresults:trends.textualNoStats', 'Numeric statistics are not available for textual results.')}
                   </Text>
                 </Group>
-              ) : trendData.result_type === 'qualitative' &&
+              ) : (trendData.result_type === 'qualitative' ||
+                  trendData.result_type === 'status_only') &&
               trendData.statistics.qualitative_summary ? (
                 <Group gap="xl">
                   {Object.entries(trendData.statistics.qualitative_summary).map(
@@ -790,6 +842,8 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                 onEdit={readOnly ? undefined : handleEditPoint}
                 onDelete={readOnly ? undefined : handleDeletePoint}
                 actionLoadingId={actionLoadingId}
+                canEditLegacy={Boolean(onEditLegacyResult)}
+                canDeleteLegacy={Boolean(onDeleteLegacyResult)}
               />
             </Tabs.Panel>
           </Tabs>

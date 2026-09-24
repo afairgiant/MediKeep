@@ -43,6 +43,9 @@ vi.mock('../InlineTestComponentEntry', () => ({
     return <div data-testid="inline-test-component" />;
   },
 }));
+vi.mock('../TestComponentsTab', () => ({
+  default: () => <div data-testid="test-components-tab" />,
+}));
 vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
@@ -404,6 +407,93 @@ describe('LabResultFormWrapper', () => {
       );
       expect(submitButton).toBeDefined();
       expect(submitButton).not.toBeDisabled();
+    });
+  });
+
+  describe('Results & Status tab — components editor visibility (#1025 follow-up)', () => {
+    test('hides the Tests/components editor for a legacy result with a flat value and no components', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={{ id: 42, value: 50 }}
+          isGroupedResult={false}
+        />
+      );
+      // Previously always rendered here, even with zero components, as a full
+      // empty-state block (icon/title/description/Add Tests button) below the
+      // one flat value being edited - reads as broken/extraneous rather than
+      // useful for a legacy result reached via Test Results mode's trend panel.
+      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+    });
+
+    test('hides the Tests/components editor for a legacy result with a flat labs_result and no components', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={{ id: 42, labs_result: 'abnormal' }}
+          isGroupedResult={false}
+        />
+      );
+      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+    });
+
+    test('still shows the Tests/components editor for a new-style result with no components and no flat value yet (none added, or all deleted)', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={{ id: 42, value: null, labs_result: '' }}
+          isGroupedResult={false}
+        />
+      );
+      expect(screen.getByTestId('test-components-tab')).toBeInTheDocument();
+    });
+
+    test('still shows the Tests/components editor when editing a result that already has components', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={{ id: 42 }}
+          isGroupedResult
+        />
+      );
+      expect(screen.getByTestId('test-components-tab')).toBeInTheDocument();
+    });
+
+    test('stays hidden for a legacy result even after the user clears the labs_result field in the live form (regression: must read the saved record, not live formData)', () => {
+      // editingItem (the saved record) still has labs_result='abnormal', so
+      // this is a legacy result even though the in-progress edit has cleared
+      // the field and hasn't entered a value yet - the Tests section must not
+      // pop in mid-edit just because the field is momentarily empty.
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={{ id: 42, labs_result: 'abnormal' }}
+          isGroupedResult={false}
+          formData={{ ...defaultProps.formData, labs_result: '', value: '' }}
+        />
+      );
+      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+    });
+
+    test('stays visible for a new-style empty result even after the user types a value into the live form (regression: must read the saved record, not live formData)', () => {
+      // editingItem (the saved record) has neither value nor labs_result, so
+      // this is a new-style result with nothing added yet - typing a draft
+      // value into the form must not hide the Tests section mid-edit.
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={{ id: 42, value: null, labs_result: '' }}
+          isGroupedResult={false}
+          formData={{ ...defaultProps.formData, value: 50 }}
+        />
+      );
+      expect(screen.getByTestId('test-components-tab')).toBeInTheDocument();
     });
   });
 });

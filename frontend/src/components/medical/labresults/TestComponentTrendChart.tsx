@@ -28,12 +28,35 @@ import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
 import {
   getQualitativeDisplayName,
   getQualitativeColor,
+  getStatusChartColor,
+  getStatusBadgeColor,
+  STATUS_SEVERITY_ORDER,
 } from '../../../constants/labCategories';
 
 interface TestComponentTrendChartProps {
   trendData: TrendResponse;
 }
 
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/** Short, translated label for a lab result status - "Normal", "Abnormal",
+ * etc. - as opposed to the long descriptive labresults:result.* strings
+ * ("Normal - Within reference range") which are meant for the create/edit
+ * form, not a chart axis or legend chip. Falls back to a capitalized raw
+ * value for anything outside the translated set (e.g. a future status). */
+function shortStatusLabel(
+  t: (_key: string, _fallback: string) => string,
+  status: string
+): string {
+  return t(`medical:componentCatalog.status.${status}`, capitalize(status));
+}
+
+/**
+ * Binary two-value scatter chart for real qualitative component results
+ * (positive/negative, detected/undetected).
+ */
 const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
   trendData,
 }) => {
@@ -170,6 +193,166 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
   );
 };
 
+/**
+ * Multi-tier categorical scatter chart for "status_only" legacy results (#1025):
+ * component-less LabResults that only ever recorded a normal/abnormal/critical/...
+ * interpretation, with no numeric value to plot. Each distinct status present in
+ * the data gets its own row on the Y axis (worst at top), instead of collapsing
+ * everything to a normal/abnormal binary.
+ */
+const StatusChart: React.FC<{ trendData: TrendResponse }> = ({
+  trendData,
+}) => {
+  const { t } = useTranslation(['medical', 'shared']);
+
+  // Points with neither date can't be plotted at all (see chartData below) -
+  // exclude them here too, otherwise a status that only appears on an
+  // undated point gets its own Y-axis tier and legend badge with nothing
+  // ever plotted on it.
+  const datedPoints = useMemo(
+    () => trendData.data_points.filter(p => p.recorded_date || p.created_at),
+    [trendData.data_points]
+  );
+
+  const statusOrder = useMemo(() => {
+    const present = new Set(
+      datedPoints.map(p => (p.status || 'unknown').toLowerCase())
+    );
+    const known = STATUS_SEVERITY_ORDER.filter(s => present.has(s));
+    const other = [...present]
+      .filter(s => !(STATUS_SEVERITY_ORDER as string[]).includes(s))
+      .sort();
+    return [...known, ...other];
+  }, [datedPoints]);
+
+  const statusIndex = useMemo(
+    () => new Map(statusOrder.map((s, i) => [s, i])),
+    [statusOrder]
+  );
+
+  const chartData = useMemo(() => {
+    return datedPoints
+      .map(point => {
+        const dateStr = point.recorded_date || (point.created_at ? point.created_at.split('T')[0] : null);
+        if (!dateStr) return null;
+        const dateOnly = dateStr.split('T')[0];
+        const status = (point.status || 'unknown').toLowerCase();
+
+        return {
+          date: dateStr,
+          timestamp: dateOnly ? new Date(dateOnly + 'T00:00:00').getTime() : 0,
+          value: statusIndex.get(status) ?? 0,
+          status,
+          testName: point.lab_result.test_name,
+          id: point.id,
+        };
+      })
+      .filter((p): p is NonNullable<typeof p> => p !== null)
+      .reverse();
+  }, [datedPoints, statusIndex]);
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (!active || !payload || !payload.length) return null;
+    const data = payload[0].payload;
+    const resultKey = `labresults:result.${data.status}`;
+    const label = t(resultKey, { defaultValue: capitalize(data.status) });
+    return (
+      <Paper
+        withBorder
+        p="sm"
+        shadow="md"
+        radius="md"
+        bg="var(--mantine-color-body)"
+      >
+        <Stack gap="xs">
+          <Text size="sm" fw={600}>
+            {data.date}
+          </Text>
+          <Badge size="lg" variant="filled" color={getStatusBadgeColor(data.status)}>
+            {label}
+          </Badge>
+          <Text size="xs" c="dimmed">
+            {t('labresults:trendChart.labLabel', { name: data.testName })}
+          </Text>
+        </Stack>
+      </Paper>
+    );
+  };
+
+  if (chartData.length === 0) {
+    return (
+      <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
+        <Text size="sm" c="dimmed" ta="center">
+          {t('labresults:trendChart.noDataPoints')}
+        </Text>
+      </Paper>
+    );
+  }
+
+  const tierCount = statusOrder.length;
+
+  return (
+    <Stack gap="md">
+      <Paper withBorder p="md" radius="md">
+        <ResponsiveContainer width="100%" height={Math.max(300, tierCount * 60)}>
+          <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#dee2e6"
+            />
+            <XAxis
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={[
+                (dataMin: number) => dataMin - 86400000,
+                (dataMax: number) => dataMax + 86400000,
+              ]}
+              tick={{ fontSize: 12, fill: '#495057' }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+              stroke="#6c757d"
+              tickLine={{ stroke: '#6c757d' }}
+              tickFormatter={(ts: number) =>
+                new Date(ts).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: '2-digit',
+                })
+              }
+            />
+            <YAxis
+              dataKey="value"
+              type="number"
+              domain={[-0.5, tierCount - 0.5]}
+              ticks={statusOrder.map((_, i) => i)}
+              tickFormatter={(val: number) => shortStatusLabel(t, statusOrder[val] ?? '')}
+              tick={{ fontSize: 12, fill: '#495057' }}
+              stroke="#6c757d"
+              tickLine={{ stroke: '#6c757d' }}
+              width={90}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Scatter name={trendData.test_name} data={chartData} r={8} fill="#228be6">
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getStatusChartColor(entry.status)} />
+              ))}
+            </Scatter>
+          </ScatterChart>
+        </ResponsiveContainer>
+      </Paper>
+      <Group gap="sm" justify="center">
+        {statusOrder.map(status => (
+          <Badge key={status} size="sm" variant="filled" color={getStatusBadgeColor(status)}>
+            {shortStatusLabel(t, status)}
+          </Badge>
+        ))}
+      </Group>
+    </Stack>
+  );
+};
+
 const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
   trendData,
 }) => {
@@ -226,26 +409,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
   // Custom dot to show status colors
   const CustomDot = (props: any) => {
     const { cx, cy, payload } = props;
-
-    let fill = '#1971c2'; // Default blue (darker for contrast)
-
-    if (payload.status) {
-      switch (payload.status.toLowerCase()) {
-        case 'normal':
-          fill = '#2f9e44'; // Green
-          break;
-        case 'high':
-        case 'low':
-          fill = '#e8590c'; // Orange
-          break;
-        case 'critical':
-          fill = '#e03131'; // Red
-          break;
-        case 'abnormal':
-          fill = '#e67700'; // Amber
-          break;
-      }
-    }
+    const fill = payload.status ? getStatusChartColor(payload.status) : '#1971c2';
 
     return (
       <Dot cx={cx} cy={cy} r={6} fill={fill} stroke="#fff" strokeWidth={2} />
@@ -305,6 +469,10 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
 
   if (trendData.result_type === 'qualitative') {
     return <QualitativeChart trendData={trendData} />;
+  }
+
+  if (trendData.result_type === 'status_only') {
+    return <StatusChart trendData={trendData} />;
   }
 
   if (trendData.result_type === 'textual') {

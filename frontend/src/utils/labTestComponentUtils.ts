@@ -7,11 +7,43 @@ import sanitizeHtml from 'sanitize-html';
 import { notifications } from '@mantine/notifications';
 import {
   LabTestComponentCreate,
+  LabTestComponentForStack,
   QualitativeValue,
+  TrendDataPoint,
   labTestComponentApi,
 } from '../services/api/labTestComponentApi';
 import { ComponentCategory, ComponentStatus } from '../constants/labCategories';
 import logger from '../services/logger';
+
+/**
+ * Build the onEditLegacyResult/onDeleteLegacyResult callback for
+ * TestComponentTrendsPanel: a legacy trend point (point.is_legacy - #1014,
+ * #1025) has no LabTestComponent row of its own, so editing or deleting one
+ * routes through the caller's existing "act on a legacy component" handler
+ * (e.g. LabResults.jsx's handleEditComponentFromTable /
+ * handleDeleteComponentFromTable, which already branch on comp.is_legacy)
+ * via a shim object carrying just what those handlers read (is_legacy,
+ * lab_result_id). Shared by every place that renders TestComponentTrendsPanel
+ * (LabResultsComponentTable, TestComponentCatalog) so they stay in sync.
+ *
+ * Generic over the handler's return type and passes it through unchanged:
+ * handleDeleteComponentFromTable resolves to a success boolean the panel
+ * awaits (to know whether to refresh its own trend data), while
+ * handleEditComponentFromTable returns nothing and the panel doesn't wait on
+ * it either way.
+ */
+export function makeLegacyResultHandler<T>(
+  handler: ((_component: LabTestComponentForStack) => T) | undefined
+): ((_point: TrendDataPoint) => T) | undefined {
+  if (!handler) return undefined;
+  return (point: TrendDataPoint) =>
+    handler({
+      id: point.id,
+      lab_result_id: point.lab_result.id,
+      test_name: point.lab_result.test_name,
+      is_legacy: true,
+    } as LabTestComponentForStack);
+}
 
 /**
  * Maximum length for the alternative reference range text.

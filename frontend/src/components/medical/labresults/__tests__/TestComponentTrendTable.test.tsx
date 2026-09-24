@@ -23,12 +23,19 @@ vi.mock('@mantine/core', () => ({
   ),
   ScrollArea: ({ children }: any) => <div>{children}</div>,
   Tooltip: ({ children }: any) => <>{children}</>,
+  ActionIcon: ({ children, onClick, disabled, 'aria-label': ariaLabel }: any) => (
+    <button onClick={onClick} disabled={disabled} aria-label={ariaLabel}>
+      {children}
+    </button>
+  ),
 }));
 
 vi.mock('@tabler/icons-react', () => ({
   IconArrowUp: () => <span data-testid="icon-asc" />,
   IconArrowDown: () => <span data-testid="icon-desc" />,
   IconArrowsSort: () => <span data-testid="icon-unsorted" />,
+  IconEdit: () => <span data-testid="icon-edit" />,
+  IconTrash: () => <span data-testid="icon-trash" />,
 }));
 
 vi.mock('react-i18next', () => ({
@@ -42,6 +49,8 @@ vi.mock('react-i18next', () => ({
         'shared:labels.date': 'Date',
         'shared:labels.value': 'Value',
         'shared:fields.status': 'Status',
+        'shared:labels.edit': 'Edit',
+        'common:actions.delete': 'Delete',
         'labresults:testComponents.editModal.fields.unit': 'Unit',
         'labresults:testComponents.editModal.fields.referenceRange': 'Reference Range',
       };
@@ -54,9 +63,17 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({ formatDate: (d: string) => d }),
 }));
 
+const STATUS_SEVERITY_ORDER = ['low', 'normal', 'borderline', 'abnormal', 'high', 'critical'];
+
 vi.mock('../../../../constants/labCategories', () => ({
   getQualitativeDisplayName: (v: string) => v,
   getQualitativeColor: () => 'green',
+  getStatusBadgeColor: () => 'gray',
+  statusSeverityRank: (status: string | null | undefined) => {
+    if (!status) return Number.MAX_SAFE_INTEGER;
+    const idx = STATUS_SEVERITY_ORDER.indexOf(status.toLowerCase());
+    return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
+  },
 }));
 
 const makePoint = (id: number, labResultName: string, value: number) => ({
@@ -73,9 +90,27 @@ const makePoint = (id: number, labResultName: string, value: number) => ({
   result_type: 'quantitative' as const,
   qualitative_value: null,
   textual_value: null,
+  is_legacy: false,
 });
 
-const makeTrendData = (points: ReturnType<typeof makePoint>[]): TrendResponse => ({
+const makeStatusOnlyPoint = (id: number, status: string) => ({
+  id,
+  value: null,
+  unit: null,
+  status,
+  ref_range_min: null,
+  ref_range_max: null,
+  ref_range_text: null,
+  recorded_date: `2024-0${id}-01`,
+  created_at: `2024-0${id}-01T00:00:00`,
+  lab_result: { id, test_name: 'A1C' },
+  result_type: 'status_only' as const,
+  qualitative_value: null,
+  textual_value: null,
+  is_legacy: true,
+});
+
+const makeTrendData = (points: any[]): TrendResponse => ({
   test_name: 'Glucose',
   unit: 'mg/dL',
   category: 'chemistry',
@@ -143,5 +178,169 @@ describe('TestComponentTrendTable — legacy points with no date', () => {
     expect(() => render(<TestComponentTrendTable trendData={trendData} />)).not.toThrow();
     const dateCells = screen.getAllByRole('cell').filter((_, i) => i % 6 === 0);
     expect(dateCells.map(c => c.textContent)).toContain('');
+  });
+});
+
+describe('TestComponentTrendTable — Status column severity sort (#1025 follow-up)', () => {
+  // Deliberately out of both alphabetical and insertion order.
+  const points = [
+    makeStatusOnlyPoint(1, 'critical'),
+    makeStatusOnlyPoint(2, 'low'),
+    makeStatusOnlyPoint(3, 'normal'),
+    makeStatusOnlyPoint(4, 'abnormal'),
+    makeStatusOnlyPoint(5, 'high'),
+  ];
+  const trendData = makeTrendData(points);
+
+  const getStatusCells = () =>
+    screen.getAllByRole('cell').filter((_, i) => i % 6 === 3);
+
+  it('sorts ascending as Low -> Normal -> Abnormal -> High -> Critical, not alphabetically', () => {
+    render(<TestComponentTrendTable trendData={trendData} />);
+    const header = screen.getByText('Status').closest('div')!;
+    fireEvent.click(header); // first click -> desc (new field default)
+    fireEvent.click(header); // second click -> asc
+    const cells = getStatusCells();
+    expect(cells.map(c => c.textContent)).toEqual([
+      'low',
+      'normal',
+      'abnormal',
+      'high',
+      'critical',
+    ]);
+  });
+
+  it('descending click reverses the severity order, not the alphabetical one', () => {
+    render(<TestComponentTrendTable trendData={trendData} />);
+    const header = screen.getByText('Status').closest('div')!;
+    fireEvent.click(header); // desc
+    const cells = getStatusCells();
+    expect(cells.map(c => c.textContent)).toEqual([
+      'critical',
+      'high',
+      'abnormal',
+      'normal',
+      'low',
+    ]);
+  });
+});
+
+describe('TestComponentTrendTable — actions for legacy points (#1025 follow-up)', () => {
+  it('hides both Edit and Delete for legacy points when neither legacy route is wired', () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const trendData = makeTrendData([
+      makeStatusOnlyPoint(1, 'abnormal'),
+      makeStatusOnlyPoint(2, 'normal'),
+    ]);
+    render(
+      <TestComponentTrendTable
+        trendData={trendData}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    );
+    expect(screen.queryByText('shared:labels.actions')).toBeNull();
+    expect(screen.queryByLabelText('Edit')).toBeNull();
+    expect(screen.queryByLabelText('Delete')).toBeNull();
+  });
+
+  it('shows only Edit when canEditLegacy is set but canDeleteLegacy is not', () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const trendData = makeTrendData([
+      makeStatusOnlyPoint(1, 'abnormal'),
+      makeStatusOnlyPoint(2, 'normal'),
+    ]);
+    render(
+      <TestComponentTrendTable
+        trendData={trendData}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        canEditLegacy
+      />
+    );
+    expect(screen.getAllByLabelText('Edit')).toHaveLength(2);
+    expect(screen.queryByLabelText('Delete')).toBeNull();
+  });
+
+  it('shows only Delete when canDeleteLegacy is set but canEditLegacy is not', () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const trendData = makeTrendData([
+      makeStatusOnlyPoint(1, 'abnormal'),
+      makeStatusOnlyPoint(2, 'normal'),
+    ]);
+    render(
+      <TestComponentTrendTable
+        trendData={trendData}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        canDeleteLegacy
+      />
+    );
+    expect(screen.queryByLabelText('Edit')).toBeNull();
+    expect(screen.getAllByLabelText('Delete')).toHaveLength(2);
+    fireEvent.click(screen.getAllByLabelText('Delete')[0]);
+    expect(onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('still shows Edit/Delete for a real quantitative point with no legacy wiring at all', () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const trendData = makeTrendData([makePoint(1, 'Panel', 90)]);
+    render(
+      <TestComponentTrendTable
+        trendData={trendData}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    );
+    fireEvent.click(screen.getByLabelText('Edit'));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByLabelText('Delete'));
+    expect(onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('a series mixing legacy and real points gets actions on the real row regardless of legacy wiring', () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const trendData = makeTrendData([
+      makePoint(1, 'Panel', 90),
+      makeStatusOnlyPoint(2, 'abnormal'),
+    ]);
+    render(
+      <TestComponentTrendTable
+        trendData={trendData}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
+    );
+    expect(screen.getAllByLabelText('Edit')).toHaveLength(1);
+    expect(screen.getAllByLabelText('Delete')).toHaveLength(1);
+  });
+
+  it('with both canEditLegacy and canDeleteLegacy, an all-legacy series gets both actions on every row', () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+    const trendData = makeTrendData([
+      makeStatusOnlyPoint(1, 'abnormal'),
+      makeStatusOnlyPoint(2, 'normal'),
+    ]);
+    render(
+      <TestComponentTrendTable
+        trendData={trendData}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        canEditLegacy
+        canDeleteLegacy
+      />
+    );
+    expect(screen.getAllByLabelText('Edit')).toHaveLength(2);
+    expect(screen.getAllByLabelText('Delete')).toHaveLength(2);
+    fireEvent.click(screen.getAllByLabelText('Edit')[0]);
+    expect(onEdit).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getAllByLabelText('Delete')[0]);
+    expect(onDelete).toHaveBeenCalledTimes(1);
   });
 });

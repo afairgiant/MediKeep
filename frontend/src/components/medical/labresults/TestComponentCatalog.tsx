@@ -39,6 +39,7 @@ import {
   ComponentCatalogEntry,
   LabTestComponentForStack,
 } from '../../../services/api/labTestComponentApi';
+import { makeLegacyResultHandler } from '../../../utils/labTestComponentUtils';
 import {
   CATEGORY_SELECT_OPTIONS,
   getCategoryDisplayName,
@@ -69,6 +70,28 @@ interface TestComponentCatalogProps {
   practitioners: PractitionerRef[];
   loading?: boolean;
   patientId: number;
+  // Passed through to the trend panel: legacy points (#1014, #1025) have no
+  // LabTestComponent row of their own, so editing/deleting one routes here to
+  // the caller's full lab-result edit/delete flow instead (same as Labs
+  // mode's Table layout already does for a legacy row via
+  // handleEditComponentFromTable / handleDeleteComponentFromTable).
+  onEdit?: (_component: LabTestComponentForStack) => void;
+  // Resolves to whether the delete happened (false for cancelled/failed) -
+  // threaded through to TestComponentTrendsPanel's onDeleteLegacyResult via
+  // makeLegacyResultHandler so it knows whether to refresh after a legacy
+  // delete from within the trends drawer.
+  onDelete?: (
+    _component: LabTestComponentForStack
+  ) => boolean | Promise<boolean>;
+  // Called after an edit/delete made from within the trends drill-down, so
+  // the caller can refresh the `components` list these cards are built from.
+  // Without this, deleting the last point for a test leaves a stale card
+  // showing its old value/status until the page is reloaded.
+  onRefresh?: () => void;
+  // When true, the caller has no edit access to this patient's records
+  // (view-only share) - hide the trend panel's Edit/Delete actions entirely,
+  // matching what Labs mode's Table layout already does via disableActions.
+  readOnly?: boolean;
 }
 
 function getStatusOptions(t: (_key: string, _fallback: string) => string) {
@@ -137,6 +160,10 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
   practitioners,
   loading = false,
   patientId,
+  onEdit,
+  onDelete,
+  onRefresh,
+  readOnly = false,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared', 'labresults']);
 
@@ -585,6 +612,10 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
         testName={trendTestName}
         unit={trendUnit}
         patientId={patientId}
+        onMutate={onRefresh}
+        readOnly={readOnly}
+        onEditLegacyResult={makeLegacyResultHandler(onEdit)}
+        onDeleteLegacyResult={makeLegacyResultHandler(onDelete)}
       />
     </>
   );

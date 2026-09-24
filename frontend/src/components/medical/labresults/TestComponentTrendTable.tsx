@@ -30,6 +30,8 @@ import {
 import {
   getQualitativeDisplayName,
   getQualitativeColor,
+  getStatusBadgeColor,
+  statusSeverityRank,
 } from '../../../constants/labCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 
@@ -38,6 +40,12 @@ interface TestComponentTrendTableProps {
   onEdit?: (_point: TrendDataPoint) => void;
   onDelete?: (_point: TrendDataPoint) => void;
   actionLoadingId?: number | null;
+  // Legacy points (#1014, #1025 - point.is_legacy) have no LabTestComponent
+  // row to act on directly - onEdit/onDelete route them to the caller's full
+  // lab-result edit/delete flow instead, so the icons only show for those
+  // rows when the caller actually wired the matching callback through.
+  canEditLegacy?: boolean;
+  canDeleteLegacy?: boolean;
 }
 
 type SortField = 'date' | 'value' | 'status' | 'lab_result';
@@ -48,30 +56,14 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
   onEdit,
   onDelete,
   actionLoadingId = null,
+  canEditLegacy = false,
+  canDeleteLegacy = false,
 }) => {
   const { t } = useTranslation(['labresults', 'shared']);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc'); // Most recent first by default
   const { formatDate: formatPreferredDate } = useDateFormat();
 
-  const getStatusColor = (status: string | null | undefined): string => {
-    if (!status) return 'gray';
-
-    switch (status.toLowerCase()) {
-      case 'normal':
-        return 'green';
-      case 'high':
-      case 'low':
-        return 'orange';
-      case 'critical':
-        return 'red';
-      case 'abnormal':
-      case 'borderline':
-        return 'yellow';
-      default:
-        return 'gray';
-    }
-  };
 
   const formatDate = (point: TrendDataPoint): string => {
     const dateStr = point.recorded_date || point.created_at?.split('T')[0] || '';
@@ -128,14 +120,17 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
             const valA = a.textual_value || '';
             const valB = b.textual_value || '';
             comparison = valA.localeCompare(valB);
+          } else if (
+            a.result_type === 'status_only' ||
+            b.result_type === 'status_only'
+          ) {
+            comparison = statusSeverityRank(a.status) - statusSeverityRank(b.status);
           } else {
             comparison = (a.value ?? 0) - (b.value ?? 0);
           }
           break;
         case 'status': {
-          const statusA = a.status || '';
-          const statusB = b.status || '';
-          comparison = statusA.localeCompare(statusB);
+          comparison = statusSeverityRank(a.status) - statusSeverityRank(b.status);
           break;
         }
         case 'lab_result': {
@@ -151,6 +146,19 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
 
     return data;
   }, [trendData.data_points, sortField, sortOrder]);
+
+  // Legacy points (is_legacy - #1014, #1025) have no LabTestComponent row to
+  // edit/delete directly; both actions route to the caller's own lab-result
+  // edit/delete flow instead, gated on canEditLegacy/canDeleteLegacy. If
+  // nothing in this series is actionable, the whole Actions column would
+  // render with a header but nothing in any row - hide it entirely instead.
+  const hasEditableRow =
+    canEditLegacy || trendData.data_points.some(p => !p.is_legacy);
+  const hasDeletableRow =
+    canDeleteLegacy || trendData.data_points.some(p => !p.is_legacy);
+  const showActionsColumn = Boolean(
+    (onEdit && hasEditableRow) || (onDelete && hasDeletableRow)
+  );
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -263,7 +271,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                     <SortIcon field="lab_result" />
                   </Group>
                 </Table.Th>
-                {(onEdit || onDelete) && (
+                {showActionsColumn && (
                   <Table.Th>
                     <Text size="xs" fw={600}>
                       {t('shared:labels.actions', 'Actions')}
@@ -292,6 +300,10 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                       <Text size="sm" lineClamp={2}>
                         {point.textual_value || '—'}
                       </Text>
+                    ) : point.result_type === 'status_only' ? (
+                      <Text size="sm" c="dimmed">
+                        {'—'}
+                      </Text>
                     ) : (
                       <Text size="sm" fw={600}>
                         {point.value}
@@ -300,7 +312,11 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" c="dimmed">
-                      {point.result_type === 'qualitative' || point.result_type === 'textual' ? '-' : point.unit}
+                      {point.result_type === 'qualitative' ||
+                      point.result_type === 'textual' ||
+                      point.result_type === 'status_only'
+                        ? '-'
+                        : point.unit}
                     </Text>
                   </Table.Td>
                   <Table.Td>
@@ -308,7 +324,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                       <Badge
                         size="sm"
                         variant="light"
-                        color={getStatusColor(point.status)}
+                        color={getStatusBadgeColor(point.status)}
                       >
                         {point.status}
                       </Badge>
@@ -320,7 +336,9 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                   </Table.Td>
                   <Table.Td>
                     <Text size="xs" c="dimmed">
-                      {point.result_type === 'qualitative' || point.result_type === 'textual'
+                      {point.result_type === 'qualitative' ||
+                      point.result_type === 'textual' ||
+                      point.result_type === 'status_only'
                         ? '-'
                         : formatReferenceRange(point)}
                     </Text>
@@ -332,10 +350,10 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                       </Text>
                     </Tooltip>
                   </Table.Td>
-                  {(onEdit || onDelete) && (
+                  {showActionsColumn && (
                     <Table.Td>
                       <Group gap={4} wrap="nowrap">
-                        {onEdit && (
+                        {onEdit && (canEditLegacy || !point.is_legacy) && (
                           <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
                             <ActionIcon
                               size="sm"
@@ -348,7 +366,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                             </ActionIcon>
                           </Tooltip>
                         )}
-                        {onDelete && (
+                        {onDelete && (canDeleteLegacy || !point.is_legacy) && (
                           <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
                             <ActionIcon
                               size="sm"
