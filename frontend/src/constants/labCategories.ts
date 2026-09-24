@@ -111,6 +111,64 @@ export function getQualitativeColor(value: string): string {
   return QUALITATIVE_COLORS[value] ?? 'gray';
 }
 
+/**
+ * Canonical severity order for a lab result's normal/abnormal/... status
+ * (ComponentStatus), least to most concerning - the order requested for the
+ * status_only trend table's sort (#1025 follow-up). Shared here so the trend
+ * chart's Y-axis tiers, the table's sort, and every status color use the same
+ * one ranking instead of each screen inventing its own that can drift out of
+ * sync with the others. "borderline" sits between normal and abnormal (not
+ * part of the original request; placed at its closest neighbor). Any value
+ * outside this known set (e.g. "inconclusive", which only ever appears on
+ * legacy results copied from LabResult.labs_result) sorts after all of these.
+ */
+export const STATUS_SEVERITY_ORDER: ComponentStatus[] = [
+  'low',
+  'normal',
+  'borderline',
+  'abnormal',
+  'high',
+  'critical',
+];
+
+/** Rank of a status for sorting, ascending = least to most concerning.
+ * Unknown/missing statuses sort last. */
+export function statusSeverityRank(status: string | null | undefined): number {
+  if (!status) return Number.MAX_SAFE_INTEGER;
+  const idx = STATUS_SEVERITY_ORDER.indexOf(status.toLowerCase() as ComponentStatus);
+  return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
+}
+
+/** Mantine color token for a lab result status, e.g. for a Badge. */
+const STATUS_BADGE_COLORS: Record<string, string> = {
+  low: 'orange',
+  normal: 'green',
+  borderline: 'yellow',
+  abnormal: 'yellow',
+  high: 'orange',
+  critical: 'red',
+};
+
+export function getStatusBadgeColor(status: string | null | undefined): string {
+  if (!status) return 'gray';
+  return STATUS_BADGE_COLORS[status.toLowerCase()] ?? 'gray';
+}
+
+/** Hex fill for recharts dots/cells, keyed by the same status vocabulary. */
+const STATUS_CHART_COLORS: Record<string, string> = {
+  low: '#e8590c',
+  normal: '#2f9e44',
+  borderline: '#f08c00',
+  abnormal: '#e67700',
+  high: '#e8590c',
+  critical: '#e03131',
+};
+
+export function getStatusChartColor(status: string | null | undefined): string {
+  if (!status) return '#868e96';
+  return STATUS_CHART_COLORS[status.toLowerCase()] ?? '#868e96';
+}
+
 /** Options for qualitative value Select dropdowns. */
 export const QUALITATIVE_SELECT_OPTIONS: Array<{
   value: string;

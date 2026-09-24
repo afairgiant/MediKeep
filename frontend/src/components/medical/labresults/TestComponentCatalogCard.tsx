@@ -137,7 +137,14 @@ const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({
       radius="md"
       padding="md"
       style={{ cursor: 'pointer' }}
-      onClick={() => onClick(entry.trend_test_name, entry.unit ?? null)}
+      // entry.unit is null for a status_only card (legacy rows never set a
+      // unit). Pass '' rather than null: the /trends endpoint's apply_unit_
+      // filter treats null as "no filter, merge every unit" (used when the
+      // caller genuinely wants everything merged), but this card's own
+      // grouping already scoped this entry to unitless rows specifically -
+      // passing null here would silently pull in real quantitative readings
+      // of the same test name that do have a unit (#1025 follow-up).
+      onClick={() => onClick(entry.trend_test_name, entry.unit ?? '')}
       data-testid="catalog-card"
     >
       <Stack gap="xs">

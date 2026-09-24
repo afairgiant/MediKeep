@@ -742,7 +742,7 @@ def calculate_trend_statistics(
 
     result_type = result_types.pop()
 
-    if result_type in ("qualitative", "textual"):
+    if result_type in ("qualitative", "textual", "status_only"):
         return _calculate_qualitative_statistics(components, count)
 
     return _calculate_quantitative_statistics(components, count)
@@ -751,11 +751,19 @@ def calculate_trend_statistics(
 def _calculate_qualitative_statistics(
     components: List[Any], count: int
 ) -> LabTestComponentTrendStatistics:
-    """Calculate statistics for qualitative trend data."""
-    # Count occurrences of each qualitative value
+    """Calculate statistics for qualitative and status_only trend data.
+
+    "status_only" legacy components (#1025) have no qualitative_value - they only
+    ever carry a normal/abnormal/... interpretation on `status` - so the summary
+    falls back to status for those rather than bucketing them all as "unknown".
+    """
+    # Count occurrences of each qualitative value (or status, for status_only rows)
     qualitative_summary: dict = {}
     for c in components:
-        qv = getattr(c, "qualitative_value", None) or "unknown"
+        if getattr(c, "result_type", None) == "status_only":
+            qv = getattr(c, "status", None) or "unknown"
+        else:
+            qv = getattr(c, "qualitative_value", None) or "unknown"
         qualitative_summary[qv] = qualitative_summary.get(qv, 0) + 1
 
     normal_count = sum(1 for c in components if c.status == "normal")
@@ -971,6 +979,7 @@ def get_lab_test_component_trends(
                 result_type=component.result_type or "quantitative",
                 qualitative_value=component.qualitative_value,
                 textual_value=component.textual_value,
+                is_legacy=getattr(component, "is_legacy", False),
                 lab_result=LabResultBasicForTrend(
                     id=component.lab_result.id,
                     test_name=component.lab_result.test_name,

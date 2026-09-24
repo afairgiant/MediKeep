@@ -925,8 +925,8 @@ const LabResults = () => {
     [editingComponent, currentPatient?.id, refreshPatientComponents]
   );
 
-  const handleDeleteComponent = useCallback(
-    async compId => {
+  const handleDeleteComponentFromTable = useCallback(
+    async comp => {
       if (
         !window.confirm(
           t(
@@ -938,11 +938,26 @@ const LabResults = () => {
         return;
       }
       try {
-        await labTestComponentApi.delete(compId, currentPatient?.id);
+        // Legacy (component-less) results have no component record to delete —
+        // deleting means deleting the whole lab result they represent (#1025,
+        // mirrors handleEditComponentFromTable's is_legacy branch above). That
+        // also means refreshing labResults and cleaning up its file count, the
+        // same as handleDeleteLabResult does below — deleting only through
+        // patientComponents would leave a ghost entry in Panels/Stacked view
+        // that 404s when opened.
+        if (comp.is_legacy) {
+          await apiService.deleteLabResult(comp.lab_result_id);
+          await refreshData();
+          cleanupFileCount(comp.lab_result_id);
+        } else {
+          await labTestComponentApi.delete(comp.id, currentPatient?.id);
+        }
         refreshPatientComponents();
         notifications.show({
           title: t('shared:labels.success', 'Success'),
-          message: t('labresults:testComponents.notifications.componentDeleted', 'Component deleted'),
+          message: comp.is_legacy
+            ? t('labresults:labResultDeleted', 'Lab result deleted')
+            : t('labresults:testComponents.notifications.componentDeleted', 'Component deleted'),
           color: 'green',
         });
       } catch {
@@ -953,7 +968,7 @@ const LabResults = () => {
         });
       }
     },
-    [currentPatient?.id, refreshPatientComponents, t]
+    [currentPatient?.id, refreshPatientComponents, refreshData, cleanupFileCount, t]
   );
 
   const handleQuickImportSuccess = useCallback(
@@ -1414,7 +1429,7 @@ const LabResults = () => {
             practitioners={practitioners}
             patientId={currentPatient?.id}
             onEdit={handleEditComponentFromTable}
-            onDelete={handleDeleteComponent}
+            onDelete={handleDeleteComponentFromTable}
             onRefresh={refreshPatientComponents}
             disableActions={isViewOnly}
           />
@@ -1427,6 +1442,10 @@ const LabResults = () => {
           practitioners={practitioners || []}
           loading={patientComponentsLoading}
           patientId={currentPatient.id}
+          onEdit={isViewOnly ? undefined : handleEditComponentFromTable}
+          onDelete={isViewOnly ? undefined : handleDeleteComponentFromTable}
+          onRefresh={refreshPatientComponents}
+          readOnly={isViewOnly}
         />
       ) : null;
     }

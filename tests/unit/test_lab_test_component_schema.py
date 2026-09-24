@@ -439,6 +439,86 @@ class TestResponseSerializationRegression:
         )
         assert resp.textual_value == "findings"
 
+    def test_response_accepts_status_only_result_type(self):
+        """Regression: result_type="status_only" (#1025 follow-up) is synthesized
+        for legacy component-less LabResults with no value, only a normal/abnormal
+        interpretation. LabTestComponentBase's validator only allows quantitative/
+        qualitative/textual (real, user-writable types) and previously rejected it,
+        which crashed the whole /all response for any patient with such a record."""
+        resp = LabTestComponentResponse(
+            id=-10,
+            test_name="A1C",
+            lab_result_id=10,
+            result_type="status_only",
+            status="critical",
+            value=None,
+            unit=None,
+        )
+        assert resp.result_type == "status_only"
+        assert resp.status == "critical"
+
+    def test_response_accepts_inconclusive_status(self):
+        """Regression: a status_only pseudo-component's status is copied verbatim
+        from LabResult.labs_result, whose own validator allows "inconclusive" in
+        addition to the LAB_TEST_COMPONENT_STATUSES a real component can have.
+        Rejecting it here would crash the whole /all response."""
+        resp = LabTestComponentResponse(
+            id=-11,
+            test_name="Culture",
+            lab_result_id=11,
+            result_type="status_only",
+            status="inconclusive",
+            value=None,
+            unit=None,
+        )
+        assert resp.status == "inconclusive"
+
+    def test_response_tolerates_unknown_result_type(self):
+        """Regression: the response must serialize whatever result_type is
+        actually stored, not just the input-side allowlist plus "status_only".
+        labs_result-derived values aren't DB-constrained and the allowed set
+        has moved over the app's history — a hand-edited or pre-migration row
+        must not 500 the whole /all response for a patient who has one."""
+        resp = LabTestComponentResponse(
+            id=-12,
+            test_name="Glucose",
+            lab_result_id=12,
+            result_type="not_a_real_type",
+            value=None,
+            unit=None,
+        )
+        assert resp.result_type == "not_a_real_type"
+
+    def test_response_tolerates_unknown_status(self):
+        """Regression: same as above for status — labs_result's own allowed
+        values aren't DB-constrained either, so the response must not reject
+        one outside today's known set."""
+        resp = LabTestComponentResponse(
+            id=-13,
+            test_name="Glucose",
+            lab_result_id=13,
+            result_type="quantitative",
+            status="not_a_real_status",
+            value=100.0,
+            unit="mg/dL",
+        )
+        assert resp.status == "not_a_real_status"
+
+    def test_response_normalizes_status_and_result_type_case(self):
+        """The lenient override still normalizes case, matching the
+        auto_calculate_status/qualitative_value normalization used elsewhere."""
+        resp = LabTestComponentResponse(
+            id=-14,
+            test_name="Glucose",
+            lab_result_id=14,
+            result_type="QUANTITATIVE",
+            status="Normal",
+            value=100.0,
+            unit="mg/dL",
+        )
+        assert resp.result_type == "quantitative"
+        assert resp.status == "normal"
+
 
 class TestRefRangeTextLength:
     """Length validation for ref_range_text on the input paths (#894).

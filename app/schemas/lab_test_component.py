@@ -534,6 +534,41 @@ class LabTestComponentResponse(LabTestComponentBase):
         stripped = v.strip()
         return stripped if stripped else None
 
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v):
+        """Tolerate any stored value on read — normalize case only.
+
+        Overrides the allowlisting validator in LabTestComponentBase. That
+        validator is right for create/update (LAB_TEST_COMPONENT_STATUSES is
+        what a user can choose), but the response model must be able to
+        serialize whatever is actually in the database: a "status_only"
+        legacy pseudo-component's status is copied verbatim from
+        LabResult.labs_result (#1025), whose own allowed set has moved over
+        the app's history and isn't DB-constrained, so older or hand-edited
+        rows can hold values outside today's list. Rejecting any of those
+        would 500 the whole /all response for a patient with such a record —
+        the same failure mode ref_range_text/textual_value above are already
+        written to avoid (#894).
+        """
+        return v.strip().lower() if v and v.strip() else None
+
+    @field_validator("result_type")
+    @classmethod
+    def validate_result_type(cls, v):
+        """Tolerate any stored value on read — normalize case only.
+
+        Overrides the allowlisting validator in LabTestComponentBase for the
+        same reason as validate_status above: LAB_TEST_COMPONENT_RESULT_TYPES
+        is what a user can choose on create/update, but a response must be
+        able to represent "status_only" (synthesized for legacy
+        component-less LabResults with no value, #1025) or any other stored
+        value without raising.
+        """
+        if v is None or not v.strip():
+            return "quantitative"
+        return v.strip().lower()
+
 
 class LabTestComponentWithLabResult(LabTestComponentResponse):
     """Schema for lab test component with related lab result data"""
@@ -623,6 +658,12 @@ class LabTestComponentTrendDataPoint(BaseModel):
     result_type: Optional[str] = "quantitative"
     qualitative_value: Optional[str] = None
     textual_value: Optional[str] = None
+    # True for a point synthesized from a component-less LabResult (#1014,
+    # #1025) - it has no LabTestComponent row of its own, regardless of
+    # result_type (a legacy row can have a numeric value and still be
+    # "quantitative" but legacy). The frontend uses this, not result_type, to
+    # decide whether Edit/Delete need to act on the parent LabResult instead.
+    is_legacy: bool = False
 
     model_config = {"from_attributes": True}
 

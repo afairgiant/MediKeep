@@ -31,6 +31,7 @@ import StatusBadge from '../StatusBadge';
 import { type LabTestComponentForStack } from '../../../services/api/labTestComponentApi';
 import { CATEGORY_SELECT_OPTIONS, getCategoryDisplayName, getCategoryColor } from '../../../constants/labCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { makeLegacyResultHandler } from '../../../utils/labTestComponentUtils';
 import TestComponentTrendsPanel from './TestComponentTrendsPanel';
 
 interface DateFormatHook {
@@ -55,7 +56,10 @@ interface Props {
   practitioners: PractitionerRef[];
   patientId: number;
   onEdit?: (_component: LabTestComponentForStack) => void;
-  onDelete?: (_componentId: number) => void;
+  // Takes the whole component (not just an id) so the caller can branch on
+  // is_legacy the same way onEdit already does: a legacy row has no
+  // LabTestComponent to delete, only the LabResult it represents (#1025).
+  onDelete?: (_component: LabTestComponentForStack) => void;
   // Called after an edit/delete made from within the trends drill-down, so
   // the caller can refresh the `components` list this table renders.
   onRefresh?: () => void;
@@ -628,13 +632,13 @@ const LabResultsComponentTable: React.FC<Props> = ({
                                         <IconEdit size={13} />
                                       </ActionIcon>
                                     )}
-                                    {onDelete && !comp.is_legacy && (
+                                    {onDelete && (
                                       <ActionIcon
                                         size="xs"
                                         variant="subtle"
                                         color="red"
                                         disabled={disableActions}
-                                        onClick={() => onDelete(comp.id)}
+                                        onClick={() => onDelete(comp)}
                                         aria-label={t('shared:buttons.delete', 'Delete')}
                                       >
                                         <IconTrash size={13} />
@@ -671,6 +675,8 @@ const LabResultsComponentTable: React.FC<Props> = ({
         patientId={patientId}
         onMutate={onRefresh}
         readOnly={disableActions}
+        onEditLegacyResult={makeLegacyResultHandler(onEdit)}
+        onDeleteLegacyResult={makeLegacyResultHandler(onDelete)}
       />
     </Stack>
   );

@@ -43,6 +43,9 @@ vi.mock('../InlineTestComponentEntry', () => ({
     return <div data-testid="inline-test-component" />;
   },
 }));
+vi.mock('../TestComponentsTab', () => ({
+  default: () => <div data-testid="test-components-tab" />,
+}));
 vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
@@ -404,6 +407,65 @@ describe('LabResultFormWrapper', () => {
       );
       expect(submitButton).toBeDefined();
       expect(submitButton).not.toBeDisabled();
+    });
+  });
+
+  describe('Results & Status tab — components editor visibility (#1025 follow-up)', () => {
+    const editingItem = { id: 42 };
+
+    test('hides the Tests/components editor for a legacy result with a flat value and no components', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={editingItem}
+          isGroupedResult={false}
+          formData={{ ...defaultProps.formData, value: 50 }}
+        />
+      );
+      // Previously always rendered here, even with zero components, as a full
+      // empty-state block (icon/title/description/Add Tests button) below the
+      // one flat value being edited - reads as broken/extraneous rather than
+      // useful for a legacy result reached via Test Results mode's trend panel.
+      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+    });
+
+    test('hides the Tests/components editor for a legacy result with a flat labs_result and no components', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={editingItem}
+          isGroupedResult={false}
+          formData={{ ...defaultProps.formData, labs_result: 'abnormal' }}
+        />
+      );
+      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+    });
+
+    test('still shows the Tests/components editor for a new-style result with no components and no flat value yet (none added, or all deleted)', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={editingItem}
+          isGroupedResult={false}
+          formData={{ ...defaultProps.formData, value: '', labs_result: '' }}
+        />
+      );
+      expect(screen.getByTestId('test-components-tab')).toBeInTheDocument();
+    });
+
+    test('still shows the Tests/components editor when editing a result that already has components', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          title="Edit Lab Result"
+          editingItem={editingItem}
+          isGroupedResult
+        />
+      );
+      expect(screen.getByTestId('test-components-tab')).toBeInTheDocument();
     });
   });
 });

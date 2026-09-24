@@ -161,6 +161,23 @@ class TestLegacyLabResultsInComponentEndpoints:
         assert resp.status_code == 201
         return resp.json()["id"]
 
+    def _create_legacy_status_only_result(
+        self, client, headers, patient_id, test_name, labs_result
+    ):
+        resp = client.post(
+            "/api/v1/lab-results/",
+            json={
+                "patient_id": patient_id,
+                "test_name": test_name,
+                "status": "completed",
+                "completed_date": "2024-06-01",
+                "labs_result": labs_result,
+            },
+            headers=headers,
+        )
+        assert resp.status_code == 201
+        return resp.json()["id"]
+
     def test_all_endpoint_includes_legacy_result(
         self, client, user_with_patient, authenticated_headers
     ):
@@ -199,3 +216,89 @@ class TestLegacyLabResultsInComponentEndpoints:
         data = response.json()
         assert len(data["data_points"]) == 1
         assert data["data_points"][0]["value"] == 50.0
+        # Regression (#1025 follow-up): a legacy point WITH a value is still
+        # result_type "quantitative", not "status_only" - is_legacy is the
+        # only field that distinguishes it from a real component, and it's
+        # what the frontend trend panel keys Edit/Delete routing on.
+        assert data["data_points"][0]["result_type"] == "quantitative"
+        assert data["data_points"][0]["is_legacy"] is True
+
+    def test_all_endpoint_includes_status_only_legacy_result(
+        self, client, user_with_patient, authenticated_headers
+    ):
+        """A legacy LabResult with no value but a normal/abnormal interpretation
+        (#1025 gap) must still appear in Test Result mode, tagged status_only."""
+        patient_id = user_with_patient["patient"].id
+        lab_result_id = self._create_legacy_status_only_result(
+            client, authenticated_headers, patient_id, "A1C", "abnormal"
+        )
+
+        response = client.get(
+            f"/api/v1/lab-test-components/patient/{patient_id}/all",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        entry = next(e for e in data if e["lab_result_id"] == lab_result_id)
+        assert entry["is_legacy"] is True
+        assert entry["value"] is None
+        assert entry["status"] == "abnormal"
+        assert entry["result_type"] == "status_only"
+        assert entry["test_name"] == "A1C"
+
+    def test_trends_endpoint_includes_status_only_legacy_result(
+        self, client, user_with_patient, authenticated_headers
+    ):
+        patient_id = user_with_patient["patient"].id
+        self._create_legacy_status_only_result(
+            client, authenticated_headers, patient_id, "A1C", "abnormal"
+        )
+        self._create_legacy_status_only_result(
+            client, authenticated_headers, patient_id, "A1C", "normal"
+        )
+
+        response = client.get(
+            f"/api/v1/lab-test-components/patient/{patient_id}/trends",
+            params={"test_name": "A1C"},
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["result_type"] == "status_only"
+        assert all(p["is_legacy"] is True for p in data["data_points"])
+        assert len(data["data_points"]) == 2
+        assert all(p["value"] is None for p in data["data_points"])
+        assert data["statistics"]["normal_count"] == 1
+        assert data["statistics"]["abnormal_count"] == 1
+        assert data["statistics"]["qualitative_summary"] == {
+            "abnormal": 1,
+            "normal": 1,
+        }
+
+    def test_legacy_result_with_no_value_and_no_interpretation_still_excluded(
+        self, client, user_with_patient, authenticated_headers
+    ):
+        """A legacy LabResult with neither a value nor an interpretation has
+        nothing to show and must remain excluded (pre-#1025-followup behavior)."""
+        patient_id = user_with_patient["patient"].id
+        resp = client.post(
+            "/api/v1/lab-results/",
+            json={
+                "patient_id": patient_id,
+                "test_name": "Pending Test",
+                "status": "ordered",
+            },
+            headers=authenticated_headers,
+        )
+        assert resp.status_code == 201
+
+        response = client.get(
+            f"/api/v1/lab-test-components/patient/{patient_id}/all",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert all(e["test_name"] != "Pending Test" for e in data)

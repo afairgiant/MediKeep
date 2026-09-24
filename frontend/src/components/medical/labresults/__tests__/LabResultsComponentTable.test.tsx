@@ -52,6 +52,46 @@ vi.mock('../../../../services/logger', () => ({
   default: { info: vi.fn(), debug: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }));
 
+// TestComponentTrendsPanel fetches real trend data on open, which this file
+// doesn't mock. Stub it down to a button that invokes the one prop under
+// test here - onEditLegacyResult - so the panel's own behavior (covered by
+// TestComponentTrendTable.test.tsx) doesn't need to be re-exercised, while
+// still proving LabResultsComponentTable wires that prop correctly (#1025
+// follow-up: Edit on a status_only point in the trend panel's Data Table
+// must route to the same edit flow as a legacy row in the main table).
+vi.mock('../TestComponentTrendsPanel', () => ({
+  default: ({ onEditLegacyResult, onDeleteLegacyResult }: any) => (
+    <>
+      <button
+        data-testid="fake-trends-panel-edit-trigger"
+        onClick={() =>
+          onEditLegacyResult?.({
+            id: -42,
+            result_type: 'status_only',
+            status: 'abnormal',
+            lab_result: { id: 42, test_name: 'A1C' },
+          })
+        }
+      >
+        fake trends panel edit
+      </button>
+      <button
+        data-testid="fake-trends-panel-delete-trigger"
+        onClick={() =>
+          onDeleteLegacyResult?.({
+            id: -42,
+            result_type: 'status_only',
+            status: 'abnormal',
+            lab_result: { id: 42, test_name: 'A1C' },
+          })
+        }
+      >
+        fake trends panel delete
+      </button>
+    </>
+  ),
+}));
+
 const makeComponent = (overrides: Partial<LabTestComponentForStack> = {}): LabTestComponentForStack => ({
   id: Math.floor(Math.random() * 10000),
   lab_result_id: 1,
@@ -236,10 +276,12 @@ describe('LabResultsComponentTable', () => {
     fireEvent.click(row.querySelector('[aria-label="Edit"]')!);
     expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 5, lab_result_id: 99 }));
     fireEvent.click(row.querySelector('[aria-label="Delete"]')!);
-    expect(onDelete).toHaveBeenCalledWith(5); // comp.id, not comp.lab_result_id
+    // onDelete takes the whole component (not just an id) so the caller can
+    // branch on is_legacy the same way onEdit already does (#1025).
+    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 5, lab_result_id: 99 }));
   });
 
-  it('shows edit but hides delete for legacy (component-less) entries', () => {
+  it('shows both edit and delete for legacy (component-less) entries - delete routes through onDelete with is_legacy set, same as edit (#1025)', () => {
     const components = [
       makeComponent({
         id: -99,
@@ -268,7 +310,72 @@ describe('LabResultsComponentTable', () => {
     const row = screen.getByTestId('history-row--99');
     fireEvent.click(row.querySelector('[aria-label="Edit"]')!);
     expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: -99, is_legacy: true }));
-    expect(row.querySelector('[aria-label="Delete"]')).toBeNull();
+    fireEvent.click(row.querySelector('[aria-label="Delete"]')!);
+    expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: -99, lab_result_id: 99, is_legacy: true }));
+  });
+
+  it('wires the trends panel so editing a status_only trend point routes to the same onEdit as a legacy row in this table (#1025 follow-up)', () => {
+    const onEdit = vi.fn();
+    render(
+      <LabResultsComponentTable
+        components={[]}
+        labResults={[...defaultLabResults, { id: 42, test_name: 'A1C', practitioner_id: 10 }]}
+        practitioners={defaultPractitioners}
+        onEdit={onEdit}
+      />,
+      { skipRouter: true }
+    );
+
+    fireEvent.click(screen.getByTestId('fake-trends-panel-edit-trigger'));
+
+    expect(onEdit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: -42,
+        lab_result_id: 42,
+        test_name: 'A1C',
+        is_legacy: true,
+      })
+    );
+  });
+
+  it('wires the trends panel so deleting a legacy trend point routes to the same onDelete as a legacy row in this table (#1025 follow-up)', () => {
+    const onDelete = vi.fn();
+    render(
+      <LabResultsComponentTable
+        components={[]}
+        labResults={[...defaultLabResults, { id: 42, test_name: 'A1C', practitioner_id: 10 }]}
+        practitioners={defaultPractitioners}
+        onDelete={onDelete}
+      />,
+      { skipRouter: true }
+    );
+
+    fireEvent.click(screen.getByTestId('fake-trends-panel-delete-trigger'));
+
+    expect(onDelete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: -42,
+        lab_result_id: 42,
+        test_name: 'A1C',
+        is_legacy: true,
+      })
+    );
+  });
+
+  it('does not wire the trends panel edit route when no onEdit is provided', () => {
+    render(
+      <LabResultsComponentTable
+        components={[]}
+        labResults={defaultLabResults}
+        practitioners={defaultPractitioners}
+      />,
+      { skipRouter: true }
+    );
+
+    // Should not throw when clicked with no onEditLegacyResult wired through.
+    expect(() =>
+      fireEvent.click(screen.getByTestId('fake-trends-panel-edit-trigger'))
+    ).not.toThrow();
   });
 
   it('expands all tests via Expand All button', () => {
