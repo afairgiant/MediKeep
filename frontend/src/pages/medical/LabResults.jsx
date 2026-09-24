@@ -935,7 +935,7 @@ const LabResults = () => {
           )
         )
       ) {
-        return;
+        return false;
       }
       try {
         // Legacy (component-less) results have no component record to delete —
@@ -960,12 +960,14 @@ const LabResults = () => {
             : t('labresults:testComponents.notifications.componentDeleted', 'Component deleted'),
           color: 'green',
         });
+        return true;
       } catch {
         notifications.show({
           title: t('shared:labels.error', 'Error'),
           message: t('shared:labels.deleteFailed', 'Delete Failed'),
           color: 'red',
         });
+        return false;
       }
     },
     [currentPatient?.id, refreshPatientComponents, refreshData, cleanupFileCount, t]

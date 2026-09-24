@@ -764,9 +764,14 @@ const LabResultFormWrapper = ({
   // result whose components haven't been added yet, or were all deleted.
   // isGroupedResult alone can't tell these apart (both currently have zero
   // components); the flat fields can, since only a legacy result has them.
+  // Read from editingItem (the saved record), not formData (live, mutable
+  // form state): formData changes on every keystroke, so deriving this from
+  // it would flip the Tests section's visibility mid-edit - e.g. clearing
+  // the Lab Result field before entering a value would make it pop in
+  // unprompted. isGroupedResult is already stable for the same reason.
   const hasFlatResultValue =
-    formData.value !== '' && formData.value !== null && formData.value !== undefined;
-  const hasFlatLabsResult = !!(formData.labs_result && formData.labs_result.trim());
+    editingItem?.value !== '' && editingItem?.value !== null && editingItem?.value !== undefined;
+  const hasFlatLabsResult = !!(editingItem?.labs_result && editingItem.labs_result.trim());
   const isLegacySingleResult =
     !isGroupedResult && (hasFlatResultValue || hasFlatLabsResult);
 

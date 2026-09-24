@@ -79,7 +79,13 @@ interface TestComponentTrendsPanelProps {
   // when the matching callback isn't provided, rather than falling back to a
   // second, smaller editor/deleter that only knows about one field.
   onEditLegacyResult?: (_point: TrendDataPoint) => void;
-  onDeleteLegacyResult?: (_point: TrendDataPoint) => void;
+  // Resolves to whether the delete actually happened (false for a cancelled
+  // confirm or a failed request), so this panel knows whether to reload its
+  // own trend data - otherwise a successfully deleted legacy point would
+  // keep showing in the chart/table until the drawer is closed and reopened.
+  onDeleteLegacyResult?: (
+    _point: TrendDataPoint
+  ) => boolean | Promise<boolean>;
 }
 
 const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
@@ -288,7 +294,11 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
     // caller's own delete flow, confirm included, rather than confirming
     // here and only partially cleaning up.
     if (point.is_legacy) {
-      onDeleteLegacyResult?.(point);
+      const deleted = await onDeleteLegacyResult?.(point);
+      if (deleted) {
+        loadTrendData();
+        onMutate?.();
+      }
       return;
     }
     if (

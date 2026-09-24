@@ -25,10 +25,16 @@ import logger from '../services/logger';
  * via a shim object carrying just what those handlers read (is_legacy,
  * lab_result_id). Shared by every place that renders TestComponentTrendsPanel
  * (LabResultsComponentTable, TestComponentCatalog) so they stay in sync.
+ *
+ * Generic over the handler's return type and passes it through unchanged:
+ * handleDeleteComponentFromTable resolves to a success boolean the panel
+ * awaits (to know whether to refresh its own trend data), while
+ * handleEditComponentFromTable returns nothing and the panel doesn't wait on
+ * it either way.
  */
-export function makeLegacyResultHandler(
-  handler: ((_component: LabTestComponentForStack) => void) | undefined
-): ((_point: TrendDataPoint) => void) | undefined {
+export function makeLegacyResultHandler<T>(
+  handler: ((_component: LabTestComponentForStack) => T) | undefined
+): ((_point: TrendDataPoint) => T) | undefined {
   if (!handler) return undefined;
   return (point: TrendDataPoint) =>
     handler({

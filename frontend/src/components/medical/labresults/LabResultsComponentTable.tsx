@@ -59,7 +59,13 @@ interface Props {
   // Takes the whole component (not just an id) so the caller can branch on
   // is_legacy the same way onEdit already does: a legacy row has no
   // LabTestComponent to delete, only the LabResult it represents (#1025).
-  onDelete?: (_component: LabTestComponentForStack) => void;
+  // Resolves to whether the delete happened (false for cancelled/failed) -
+  // threaded through to TestComponentTrendsPanel's onDeleteLegacyResult via
+  // makeLegacyResultHandler so it knows whether to refresh after a legacy
+  // delete from within the trends drawer.
+  onDelete?: (
+    _component: LabTestComponentForStack
+  ) => boolean | Promise<boolean>;
   // Called after an edit/delete made from within the trends drill-down, so
   // the caller can refresh the `components` list this table renders.
   onRefresh?: () => void;
