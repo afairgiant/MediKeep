@@ -5,15 +5,20 @@ Tests for Entity File API endpoints.
 import io
 import pytest
 from datetime import date
+from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.api.v1.endpoints import entity_file as entity_file_endpoint
 from app.crud.patient import patient as patient_crud
 from app.crud.lab_result import lab_result as lab_result_crud
 from app.models.models import PatientShare
 from app.schemas.patient import PatientCreate
 from app.schemas.lab_result import LabResultCreate
 from tests.utils.user import create_random_user, create_user_token_headers
+
+NON_LATIN1_FILENAME = "ВитаминD.txt"
+NON_LATIN1_QUOTED_STEM = "%D0%92%D0%B8%D1%82%D0%B0%D0%BC%D0%B8%D0%BDD"
 
 
 class TestEntityFileAPI:
@@ -282,7 +287,104 @@ class TestEntityFileAPI:
         )
 
         assert response.status_code == 200
-        assert "inline" in response.headers.get("content-disposition", "")
+        assert (
+            response.headers["content-disposition"]
+            == 'inline; filename="view_test.txt"'
+        )
+        assert response.headers["x-content-type-options"] == "nosniff"
+
+    def _upload_non_latin1_file(self, client, headers, lab_result_id):
+        files = {
+            "file": (NON_LATIN1_FILENAME, io.BytesIO(b"Vitamin D panel"), "text/plain")
+        }
+        response = client.post(
+            f"/api/v1/entity-files/lab-result/{lab_result_id}/files",
+            headers=headers,
+            files=files,
+        )
+        assert response.status_code == 201
+        return response.json()["id"]
+
+    @pytest.mark.parametrize(
+        "endpoint, disposition", [("view", "inline"), ("download", "attachment")]
+    )
+    def test_local_storage_non_latin1_filename(
+        self,
+        client: TestClient,
+        authenticated_headers,
+        test_lab_result,
+        endpoint,
+        disposition,
+    ):
+        """Regression #1047: non-Latin-1 filenames must not 500."""
+        file_id = self._upload_non_latin1_file(
+            client, authenticated_headers, test_lab_result.id
+        )
+
+        response = client.get(
+            f"/api/v1/entity-files/files/{file_id}/{endpoint}",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        assert response.headers["content-disposition"] == (
+            f"{disposition}; filename*=utf-8''{NON_LATIN1_QUOTED_STEM}.txt"
+        )
+
+    @pytest.mark.parametrize(
+        "endpoint, service_method, disposition",
+        [
+            ("view", "get_file_view_info", "inline"),
+            ("download", "get_file_download_info", "attachment"),
+        ],
+    )
+    def test_remote_storage_non_latin1_filename(
+        self,
+        client: TestClient,
+        authenticated_headers,
+        test_lab_result,
+        endpoint,
+        service_method,
+        disposition,
+    ):
+        """Paperless/Papra content is served from bytes, not a FileResponse."""
+        file_id = self._upload_non_latin1_file(
+            client, authenticated_headers, test_lab_result.id
+        )
+        remote = AsyncMock(
+            return_value=(b"%PDF-1.4 test", NON_LATIN1_FILENAME, "application/pdf")
+        )
+
+        with patch.object(entity_file_endpoint.file_service, service_method, remote):
+            response = client.get(
+                f"/api/v1/entity-files/files/{file_id}/{endpoint}",
+                headers=authenticated_headers,
+            )
+
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/pdf"
+        assert response.headers["content-disposition"] == (
+            f"{disposition}; filename*=utf-8''{NON_LATIN1_QUOTED_STEM}.pdf"
+        )
+
+    def test_view_file_error_hides_internal_detail(
+        self, client: TestClient, authenticated_headers, test_lab_result
+    ):
+        file_id = self._upload_non_latin1_file(
+            client, authenticated_headers, test_lab_result.id
+        )
+        failing = AsyncMock(side_effect=RuntimeError("internal secret detail"))
+
+        with patch.object(
+            entity_file_endpoint.file_service, "get_file_view_info", failing
+        ):
+            response = client.get(
+                f"/api/v1/entity-files/files/{file_id}/view",
+                headers=authenticated_headers,
+            )
+
+        assert response.status_code == 500
+        assert "internal secret detail" not in response.text
 
     def test_batch_file_counts(
         self,

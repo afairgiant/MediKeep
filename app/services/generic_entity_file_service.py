@@ -770,7 +770,14 @@ class GenericEntityFileService:
             if not file_record:
                 raise HTTPException(status_code=404, detail="File not found")
 
-            logger.info(f"Retrieving file for viewing: {file_record.file_name}")
+            logger.debug(
+                "Retrieving file for viewing",
+                extra={
+                    "file_id": file_id,
+                    "storage_backend": file_record.storage_backend,
+                    "component": "generic_entity_file_service",
+                },
+            )
 
             if file_record.storage_backend == "paperless":
                 # Handle Paperless files
