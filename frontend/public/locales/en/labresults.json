@@ -99,7 +99,8 @@
   "completedDate": {
     "description": "Date the results were finalized",
     "label": "Completed Date",
-    "placeholder": "When results were available"
+    "placeholder": "When results were available",
+    "sameAsOrdered": "Same as ordered date"
   },
   "continueEditing": "Continue Editing",
   "createAndContinue": "Create & Upload PDF",

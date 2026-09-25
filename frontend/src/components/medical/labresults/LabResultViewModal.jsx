@@ -499,6 +499,7 @@ const LabResultViewModal = ({
                   onError={handleTestComponentsError}
                   onLabResultUpdated={onLabResultUpdated}
                   onHasComponents={setHasTestComponents}
+                  orderedDate={labResult.ordered_date}
                 />
               </Box>
             </Tabs.Panel>

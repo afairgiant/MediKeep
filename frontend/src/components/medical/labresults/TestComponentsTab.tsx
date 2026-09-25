@@ -52,6 +52,7 @@ interface TestComponentsTabProps {
   onError?: (_error: Error) => void;
   onLabResultUpdated?: () => void;
   onHasComponents?: (_has: boolean) => void;
+  orderedDate?: string | null;
 }
 
 const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
@@ -60,6 +61,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   onError,
   onLabResultUpdated,
   onHasComponents,
+  orderedDate,
 }) => {
   const { t } = useTranslation(['labresults', 'common', 'shared']);
   const [activeTab, setActiveTab] = useState<string>('display');
@@ -601,6 +603,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
               labResultId={labResultId}
               onComponentsAdded={handleComponentsAdded}
               onLabResultUpdated={onLabResultUpdated}
+              orderedDate={orderedDate}
               onError={(error: Error) => handleError(error, 'bulk')}
             />
           </Tabs.Panel>

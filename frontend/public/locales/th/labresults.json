@@ -97,7 +97,8 @@
   "completedDate": {
     "description": "วันที่ผลตรวจเสร็จสิ้น",
     "label": "วันที่เสร็จสิ้น",
-    "placeholder": "เมื่อไหร่ที่ผลตรวจพร้อม"
+    "placeholder": "เมื่อไหร่ที่ผลตรวจพร้อม",
+    "sameAsOrdered": "เหมือนวันที่สั่งตรวจ"
   },
   "continueEditing": "แก้ไขต่อ",
   "createAndContinue": "สร้างและอัพโหลด PDF",

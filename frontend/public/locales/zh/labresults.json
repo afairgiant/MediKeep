@@ -98,7 +98,8 @@
   "completedDate": {
     "description": "结果确定的日期",
     "label": "完成日期",
-    "placeholder": "结果可用时间"
+    "placeholder": "结果可用时间",
+    "sameAsOrdered": "与开单日期相同"
   },
   "continueEditing": "继续编辑",
   "createAndContinue": "创建并上传PDF",

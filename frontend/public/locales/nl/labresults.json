@@ -98,7 +98,8 @@
   "completedDate": {
     "description": "Datum waarop de resultaten zijn afgerond",
     "label": "Voltooiingsdatum",
-    "placeholder": "Wanneer resultaten beschikbaar waren"
+    "placeholder": "Wanneer resultaten beschikbaar waren",
+    "sameAsOrdered": "Zelfde als besteldatum"
   },
   "continueEditing": "Doorgaan met bewerken",
   "createAndContinue": "Aanmaken en PDF uploaden",

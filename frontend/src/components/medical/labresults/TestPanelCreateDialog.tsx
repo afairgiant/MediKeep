@@ -28,6 +28,7 @@ import {
 } from '../../../constants/testLibrary';
 import { IconAlertCircle, IconX } from '@tabler/icons-react';
 import { DateInput } from '../../adapters/DateInput';
+import SameAsOrderedLink from './SameAsOrderedLink';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
@@ -389,6 +390,15 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
               firstDayOfWeek={0}
               popoverProps={{ withinPortal: true, zIndex: 3000 }}
               disabled={isSubmitting}
+            />
+            <SameAsOrderedLink
+              onClick={() =>
+                setFormData(prev => ({
+                  ...prev,
+                  completed_date: prev.ordered_date,
+                }))
+              }
+              disabled={isSubmitting || !formData.ordered_date}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 6 }}>

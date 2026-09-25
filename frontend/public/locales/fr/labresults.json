@@ -98,7 +98,8 @@
   "completedDate": {
     "description": "Date à laquelle les résultats ont été finalisés",
     "label": "Date de réalisation",
-    "placeholder": "Quand les résultats sont disponibles"
+    "placeholder": "Quand les résultats sont disponibles",
+    "sameAsOrdered": "Identique à la date de prescription"
   },
   "continueEditing": "Continuer à éditer",
   "createAndContinue": "Créer & Téléverser PDF",

@@ -142,6 +142,50 @@ describe('LabResultFormWrapper', () => {
     });
   });
 
+  describe('Completed date same-as-ordered link', () => {
+    const label = 'labresults:completedDate.sameAsOrdered';
+
+    test('is shown but inert when there is no ordered date', () => {
+      const onInputChange = vi.fn();
+      render(
+        <LabResultFormWrapper {...defaultProps} onInputChange={onInputChange} />
+      );
+      fireEvent.click(screen.getByText(label));
+      expect(onInputChange).not.toHaveBeenCalled();
+    });
+
+    test('clicking copies the ordered date into completed date', () => {
+      const onInputChange = vi.fn();
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          onInputChange={onInputChange}
+          formData={{ ...defaultProps.formData, ordered_date: '2024-03-05' }}
+        />
+      );
+      fireEvent.click(screen.getByText(label));
+      expect(onInputChange).toHaveBeenCalledWith({
+        target: { name: 'completed_date', value: '2024-03-05' },
+      });
+    });
+
+    test('does not change completed date until clicked', () => {
+      const onInputChange = vi.fn();
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          onInputChange={onInputChange}
+          formData={{
+            ...defaultProps.formData,
+            ordered_date: '2024-03-05',
+            completed_date: '2024-03-09',
+          }}
+        />
+      );
+      expect(onInputChange).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Results & Status tab', () => {
     // Helper: find the Results & Status tab by its exact i18n key text
     function getResultsTab() {
