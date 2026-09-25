@@ -23,6 +23,7 @@ interface TagInputProps {
   disabled?: boolean;
   error?: string;
   disableSuggestions?: boolean;
+  id?: string;
 }
 
 export function TagInput({
@@ -33,6 +34,7 @@ export function TagInput({
   disabled = false,
   error,
   disableSuggestions = false,
+  id,
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -222,6 +224,7 @@ export function TagInput({
             {!disabled && value.length < maxTags && (
               <TextInput
                 ref={inputRef}
+                id={id}
                 value={inputValue}
                 onChange={e => {
                   setInputValue(e.target.value);
@@ -323,7 +326,10 @@ export function TagInput({
       <Text size="xs" c="dimmed" mt={4}>
         {/* eslint-disable-next-line i18next/no-literal-string -- tag count format */}
         {`${value.length}/${maxTags}`}{' '}
-        {t('tagManagement.pressEnterToAdd', 'Press Enter to add a tag')}
+        {t(
+          'tagManagement.pressEnterToAdd',
+          'Type tag and press Enter to create new tag'
+        )}
       </Text>
 
       {(validationError || error) && (

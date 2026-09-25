@@ -1241,7 +1241,7 @@
     "noTags": "Теги не найдены",
     "noTagsDescription": "Начните использовать теги в медицинских записях, чтобы увидеть их здесь.",
     "noTagsSearch": "Нет тегов, соответствующих поиску.",
-    "pressEnterToAdd": "Нажмите Enter, чтобы добавить тег",
+    "pressEnterToAdd": "Введите тег и нажмите Enter, чтобы создать новый тег",
     "replaceModal": {
       "description": "\"{{oldTag}}\" будет заменён на \"{{newTag}}\" во всех {{count}} записях.",
       "description_one": "\"{{oldTag}}\" будет заменён на \"{{newTag}}\" в {{count}} записи.",

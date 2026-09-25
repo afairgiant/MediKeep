@@ -89,7 +89,7 @@ const LabResultViewModal = ({
     if (!isOpen) return;
     const conditionalTabs = {
       notes: !!labResult?.notes,
-      tags: labResult?.tags?.length > 0,
+      tags: !isGroupedResult,
       'test-components': isGroupedResult || hasTestComponents !== false,
     };
     if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
@@ -100,7 +100,6 @@ const LabResultViewModal = ({
     activeTab,
     isGroupedResult,
     labResult?.notes,
-    labResult?.tags?.length,
     hasTestComponents,
   ]);
 
@@ -203,12 +202,14 @@ const LabResultViewModal = ({
                   {t('shared:tabs.notes', 'Notes')}
                 </Tabs.Tab>
               )}
-              {!isGroupedResult && labResult.tags && labResult.tags.length > 0 && (
+              {!isGroupedResult && (
                 <Tabs.Tab value="tags" leftSection={<IconTags size={16} />}>
                   {t('shared:labels.tags', 'Tags')}
-                  <Badge size="sm" color="blue" style={{ marginLeft: 8 }}>
-                    {labResult.tags.length}
-                  </Badge>
+                  {labResult.tags?.length > 0 && (
+                    <Badge size="sm" color="blue" style={{ marginLeft: 8 }}>
+                      {labResult.tags.length}
+                    </Badge>
+                  )}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="files" leftSection={<IconFileText size={16} />}>
@@ -251,12 +252,6 @@ const LabResultViewModal = ({
                           </Stack>
                           <Stack gap="xs">
                             <Text fw={600} size="sm" c="dimmed">
-                              {t('shared:fields.status', 'Status')}
-                            </Text>
-                            <StatusBadge status={labResult.status} />
-                          </Stack>
-                          <Stack gap="xs">
-                            <Text fw={600} size="sm" c="dimmed">
                               {t('shared:labels.orderedDate', 'Ordered Date')}
                             </Text>
                             <Text>{formatDate(labResult.ordered_date)}</Text>
@@ -270,6 +265,12 @@ const LabResultViewModal = ({
                                 ? formatDate(labResult.completed_date)
                                 : t('common:labels.notCompleted', 'Not completed')}
                             </Text>
+                          </Stack>
+                          <Stack gap="xs">
+                            <Text fw={600} size="sm" c="dimmed">
+                              {t('shared:fields.status', 'Status')}
+                            </Text>
+                            <StatusBadge status={labResult.status} />
                           </Stack>
                         </SimpleGrid>
                       </div>
@@ -302,11 +303,11 @@ const LabResultViewModal = ({
                           )}
                         </SimpleGrid>
                       </div>
-                      {labResult.tags && labResult.tags.length > 0 && (
-                        <div>
-                          <Title order={4} mb="sm">
-                            {t('shared:labels.tags', 'Tags')}
-                          </Title>
+                      <div>
+                        <Title order={4} mb="sm">
+                          {t('shared:labels.tags', 'Tags')}
+                        </Title>
+                        {labResult.tags && labResult.tags.length > 0 ? (
                           <Group gap="xs">
                             {labResult.tags.map((tag, index) => (
                               <ClickableTagBadge
@@ -316,8 +317,12 @@ const LabResultViewModal = ({
                               />
                             ))}
                           </Group>
-                        </div>
-                      )}
+                        ) : (
+                          <Text c="dimmed">
+                            {t('shared:labels.notSpecified', 'Not specified')}
+                          </Text>
+                        )}
+                      </div>
                     </>
                   ) : (
                     /* Individual test overview */
@@ -647,20 +652,26 @@ const LabResultViewModal = ({
             )}
 
             {/* Tags Tab — individual results only; panels show tags inline in overview */}
-            {!isGroupedResult && labResult.tags && labResult.tags.length > 0 && (
+            {!isGroupedResult && (
               <Tabs.Panel value="tags">
                 <Box mt="md">
                   <Stack gap="md">
                     <Title order={4}>{t('shared:labels.tags', 'Tags')}</Title>
-                    <Group gap="xs">
-                      {labResult.tags.map((tag, index) => (
-                        <ClickableTagBadge
-                          key={index}
-                          tag={tag}
-                          color={getTagColor(tag)}
-                        />
-                      ))}
-                    </Group>
+                    {labResult.tags && labResult.tags.length > 0 ? (
+                      <Group gap="xs">
+                        {labResult.tags.map((tag, index) => (
+                          <ClickableTagBadge
+                            key={index}
+                            tag={tag}
+                            color={getTagColor(tag)}
+                          />
+                        ))}
+                      </Group>
+                    ) : (
+                      <Text c="dimmed">
+                        {t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    )}
                   </Stack>
                 </Box>
               </Tabs.Panel>

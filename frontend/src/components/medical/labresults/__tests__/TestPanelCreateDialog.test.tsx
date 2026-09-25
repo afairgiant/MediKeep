@@ -173,9 +173,14 @@ vi.mock('../../practitioners/PractitionerSelectWithCreate', () => ({
   ),
 }));
 
-vi.mock('../../../common/TagInput', () => ({
-  TagInput: ({ label }: any) => <input aria-label={label} type="text" />,
+vi.mock('../LabResultTagsField', () => ({
+  default: ({ value, onChange }: any) => (
+    <button type="button" onClick={() => onChange([...value, 'fasting'])}>
+      add-tag
+    </button>
+  ),
 }));
+
 
 vi.mock('../../../shared/FormLoadingOverlay', () => ({
   default: ({ visible }: any) =>
@@ -365,6 +370,28 @@ describe('TestPanelCreateDialog', () => {
         42
       );
       expect(defaultProps.onCreateSuccess).toHaveBeenCalledWith(newLabResult);
+    });
+  });
+
+  it('sends the tags entered in the dialog when creating the panel', async () => {
+    mockCreateLabResult.mockResolvedValueOnce({ id: 99, test_name: 'CBC Panel' });
+    mockCreateBulkForLabResult.mockResolvedValueOnce({ created_count: 1, components: [], errors: [] });
+
+    render(<TestPanelCreateDialog {...defaultProps} />);
+
+    await userEvent.type(
+      screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
+      'CBC Panel'
+    );
+    await userEvent.click(screen.getByText('add-tag'));
+    await userEvent.type(screen.getByPlaceholderText('Type to search tests...'), 'Glucose');
+    await userEvent.type(screen.getByRole('spinbutton', { name: 'Value' }), '95');
+    await userEvent.click(screen.getByText('Save Results'));
+
+    await waitFor(() => {
+      expect(mockCreateLabResult).toHaveBeenCalledWith(
+        expect.objectContaining({ tags: ['fasting'] })
+      );
     });
   });
 

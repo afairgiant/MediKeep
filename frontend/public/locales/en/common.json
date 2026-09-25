@@ -1241,7 +1241,7 @@
     "noTags": "No tags found",
     "noTagsDescription": "Start using tags in your medical records to see them here.",
     "noTagsSearch": "No tags match your search.",
-    "pressEnterToAdd": "Press Enter to add a tag",
+    "pressEnterToAdd": "Type tag and press Enter to create new tag",
     "replaceModal": {
       "description": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across all {{count}} records.",
       "description_one": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across {{count}} record.",

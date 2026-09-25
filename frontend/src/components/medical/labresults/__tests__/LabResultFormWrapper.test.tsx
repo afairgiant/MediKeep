@@ -140,6 +140,27 @@ describe('LabResultFormWrapper', () => {
       const tagLabels = screen.getAllByText('shared:labels.tags');
       expect(tagLabels.length).toBeGreaterThan(0);
     });
+
+    test('reports a newly entered tag through onInputChange', async () => {
+      const onInputChange = vi.fn();
+      render(<LabResultFormWrapper {...defaultProps} onInputChange={onInputChange} />);
+      const input = screen.getByPlaceholderText('common:fields.tags.placeholder');
+      await userEvent.type(input, 'fasting{Enter}');
+      expect(onInputChange).toHaveBeenCalledWith({
+        target: { name: 'tags', value: ['fasting'] },
+      });
+    });
+
+    test('shows existing tags from formData', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          formData={{ ...defaultProps.formData, tags: ['fasting', 'annual'] }}
+        />
+      );
+      expect(screen.getByText('fasting')).toBeInTheDocument();
+      expect(screen.getByText('annual')).toBeInTheDocument();
+    });
   });
 
   describe('Completed date same-as-ordered link', () => {

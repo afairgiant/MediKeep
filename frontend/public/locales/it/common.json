@@ -1241,7 +1241,7 @@
     "noTags": "Nessun tag trovato",
     "noTagsDescription": "Inizia a usare i tag nei tuoi record medici per vederli qui.",
     "noTagsSearch": "Nessun tag corrisponde alla ricerca.",
-    "pressEnterToAdd": "Premi Invio per aggiungere un tag",
+    "pressEnterToAdd": "Digita il tag e premi Invio per crearne uno nuovo",
     "replaceModal": {
       "description": "Questo sostituirà \"{{oldTag}}\" con \"{{newTag}}\" in tutti i {{count}} record.",
       "description_one": "Questo sostituirà \"{{oldTag}}\" con \"{{newTag}}\" in {{count}} record.",
