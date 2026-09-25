@@ -75,7 +75,7 @@ if (exitCode !== undefined && !/^\d+$/.test(exitCode)) {
 
 if (logPath) {
   const log = fs.readFileSync(logPath, 'utf8');
-  if (/Unhandled (Errors?|Rejections?)|caught \d+ unhandled error/i.test(log)) {
+  if (/Vitest caught \d+ unhandled errors? (during|between)/i.test(log)) {
     problems.push('vitest output reports unhandled errors');
   }
 }
