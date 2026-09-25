@@ -61,7 +61,7 @@ import {
 import logger from '../../../services/logger';
 import { MAX_REF_RANGE_TEXT_LENGTH } from '../../../utils/labTestComponentUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { parseDateInput } from '../../../utils/dateUtils';
+import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import SameAsOrderedLink from './SameAsOrderedLink';
 
 /**
@@ -996,7 +996,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     setIsSubmitting(true);
     try {
       // Format date for API - validatedDate is guaranteed valid at this point
-      const formattedDate = validatedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const formattedDate = formatDateInputChange(validatedDate); // local YYYY-MM-DD
 
       logger.info('Updating lab result with completed_date', {
         component: 'TestComponentBulkEntry',
