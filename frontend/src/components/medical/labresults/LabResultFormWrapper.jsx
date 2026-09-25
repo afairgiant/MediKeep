@@ -49,6 +49,7 @@ import LabResultTreatmentRelationships from './LabResultTreatmentRelationships';
 import TestComponentsTab from './TestComponentsTab';
 import InlineTestComponentEntry from './InlineTestComponentEntry';
 import AdvancedModeSwitch from './AdvancedModeSwitch';
+import SameAsOrderedLink from './SameAsOrderedLink';
 import { PURPOSE_OPTIONS } from '../../../constants/encounterLabResultConstants';
 import {
   PURPOSE_OPTIONS as TREATMENT_PURPOSE_OPTIONS,
@@ -770,8 +771,12 @@ const LabResultFormWrapper = ({
   // the Lab Result field before entering a value would make it pop in
   // unprompted. isGroupedResult is already stable for the same reason.
   const hasFlatResultValue =
-    editingItem?.value !== '' && editingItem?.value !== null && editingItem?.value !== undefined;
-  const hasFlatLabsResult = !!(editingItem?.labs_result && editingItem.labs_result.trim());
+    editingItem?.value !== '' &&
+    editingItem?.value !== null &&
+    editingItem?.value !== undefined;
+  const hasFlatLabsResult = !!(
+    editingItem?.labs_result && editingItem.labs_result.trim()
+  );
   const isLegacySingleResult =
     !isGroupedResult && (hasFlatResultValue || hasFlatLabsResult);
 
@@ -848,6 +853,12 @@ const LabResultFormWrapper = ({
         {option.label}
       </Badge>
     );
+  };
+
+  const handleCompletedSameAsOrdered = () => {
+    onInputChange({
+      target: { name: 'completed_date', value: formData.ordered_date || '' },
+    });
   };
 
   const handleDocumentManagerRef = methods => {
@@ -1240,6 +1251,10 @@ const LabResultFormWrapper = ({
                       firstDayOfWeek={0}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
+                    <SameAsOrderedLink
+                      onClick={handleCompletedSameAsOrdered}
+                      disabled={!formData.ordered_date}
+                    />
                   </Grid.Col>
                 </Grid>
               </Box>
@@ -1486,6 +1501,7 @@ const LabResultFormWrapper = ({
                             key={`test-components-${editingItem.id}`}
                             labResultId={editingItem.id}
                             isViewMode={false}
+                            orderedDate={formData.ordered_date}
                             onError={onError}
                           />
                         </Grid.Col>

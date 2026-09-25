@@ -98,7 +98,8 @@
   "completedDate": {
     "description": "Data sfinalizowania wyników",
     "label": "Data Ukończenia",
-    "placeholder": "Kiedy wyniki były dostępne"
+    "placeholder": "Kiedy wyniki były dostępne",
+    "sameAsOrdered": "Taka sama jak data zlecenia"
   },
   "continueEditing": "Kontynuuj Edycję",
   "createAndContinue": "Utwórz i Prześlij PDF",

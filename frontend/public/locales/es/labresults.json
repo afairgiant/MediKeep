@@ -98,7 +98,8 @@
   "completedDate": {
     "description": "Fecha en que se finalizaron los resultados",
     "label": "Fecha de finalización",
-    "placeholder": "Cuándo estuvieron disponibles los resultados"
+    "placeholder": "Cuándo estuvieron disponibles los resultados",
+    "sameAsOrdered": "Igual que la fecha de solicitud"
   },
   "continueEditing": "Continuar editando",
   "createAndContinue": "Crear y cargar PDF",

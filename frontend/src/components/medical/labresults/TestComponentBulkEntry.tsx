@@ -61,6 +61,8 @@ import {
 import logger from '../../../services/logger';
 import { MAX_REF_RANGE_TEXT_LENGTH } from '../../../utils/labTestComponentUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import SameAsOrderedLink from './SameAsOrderedLink';
 
 /**
  * Validates and normalizes a date value from DateInput.
@@ -200,6 +202,7 @@ interface TestComponentBulkEntryProps {
   onComponentsAdded?: (_components: LabTestComponent[]) => void;
   onComponentsParsed?: (_componentCount: number) => void; // Callback when components are parsed but not yet added
   onLabResultUpdated?: () => void; // Callback to refresh lab result after updating completed_date
+  orderedDate?: string | null; // Lab result ordered date (YYYY-MM-DD), enables the same-as-ordered option
   onError?: (_error: Error) => void;
   disabled?: boolean;
 }
@@ -443,6 +446,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   onComponentsAdded,
   onComponentsParsed,
   onLabResultUpdated,
+  orderedDate,
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -474,7 +478,17 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   const [extractionMetadata, setExtractionMetadata] = useState<any>(null);
   const [extractionError, setExtractionError] = useState('');
   const [completedDate, setCompletedDate] = useState<Date | null>(null);
+  const parsedOrderedDate: Date | null = useMemo(
+    () => (orderedDate ? parseDateInput(orderedDate) : null),
+    [orderedDate]
+  );
   const [activeTab, setActiveTab] = useState<string>('input');
+
+  const handleCompletedSameAsOrdered = useCallback(() => {
+    if (parsedOrderedDate) {
+      setCompletedDate(parsedOrderedDate);
+    }
+  }, [parsedOrderedDate]);
 
   const handleError = useCallback(
     (error: Error, context: string) => {
@@ -982,7 +996,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     setIsSubmitting(true);
     try {
       // Format date for API - validatedDate is guaranteed valid at this point
-      const formattedDate = validatedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const formattedDate = formatDateInputChange(validatedDate); // local YYYY-MM-DD
 
       logger.info('Updating lab result with completed_date', {
         component: 'TestComponentBulkEntry',
@@ -1542,6 +1556,10 @@ SARS-CoV-2: Not Detected`,
                   maxDate={new Date()}
                   styles={{ input: { maxWidth: 250 } }}
                   popoverProps={{ withinPortal: true, zIndex: 3100 }}
+                />
+                <SameAsOrderedLink
+                  onClick={handleCompletedSameAsOrdered}
+                  disabled={!parsedOrderedDate}
                 />
               </Stack>
             </Alert>

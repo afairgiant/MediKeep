@@ -98,7 +98,8 @@
   "completedDate": {
     "description": "Datum då resultaten färdigställdes",
     "label": "Slutförandedatum",
-    "placeholder": "När resultaten blev tillgängliga"
+    "placeholder": "När resultaten blev tillgängliga",
+    "sameAsOrdered": "Samma som beställningsdatum"
   },
   "continueEditing": "Fortsätt redigera",
   "createAndContinue": "Skapa & ladda upp PDF",

@@ -51,8 +51,10 @@ vi.mock('@mantine/core', () => ({
   Paper: ({ children }: any) => <div>{children}</div>,
   Badge: ({ children }: any) => <span>{children}</span>,
   Collapse: ({ children, in: open }: any) => open ? <div>{children}</div> : null,
-  ActionIcon: ({ children, onClick, disabled }: any) => (
-    <button onClick={onClick} disabled={disabled}>{children}</button>
+  ActionIcon: ({ children, onClick, disabled, 'aria-label': ariaLabel }: any) => (
+    <button onClick={onClick} disabled={disabled} aria-label={ariaLabel}>
+      {children}
+    </button>
   ),
   NumberInput: ({ label, value, onChange }: any) => (
     <div>
@@ -206,6 +208,7 @@ vi.mock('@tabler/icons-react', () => ({
   IconChevronDown: () => <span />,
   IconChevronUp: () => <span />,
   IconX: () => <span />,
+  IconCopy: () => <span />,
 }));
 
 const TESTOSTERONE_TEST = {
@@ -272,6 +275,16 @@ describe('TestPanelCreateDialog', () => {
     expect(screen.getByText('Save Results')).toBeTruthy();
     expect(screen.getByText('Cancel')).toBeTruthy();
     expect(screen.getByText(/Add Tests/i)).toBeTruthy();
+  });
+
+  it('shows the same-as-ordered link under Completed Date, disabled until an ordered date is set', () => {
+    render(<TestPanelCreateDialog {...defaultProps} />);
+    expect(
+      screen.getByText('labresults:completedDate.sameAsOrdered')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('labresults:completedDate.sameAsOrdered')
+    ).toBeDisabled();
   });
 
   it('calls onAdvancedModeChange when the Advanced mode switch is toggled', async () => {
