@@ -323,7 +323,10 @@ export function TagInput({
       <Text size="xs" c="dimmed" mt={4}>
         {/* eslint-disable-next-line i18next/no-literal-string -- tag count format */}
         {`${value.length}/${maxTags}`}{' '}
-        {t('tagManagement.pressEnterToAdd', 'Press Enter to add a tag')}
+        {t(
+          'tagManagement.pressEnterToAdd',
+          'Type tag and press Enter to create new tag'
+        )}
       </Text>
 
       {(validationError || error) && (

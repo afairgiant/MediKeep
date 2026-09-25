@@ -1241,7 +1241,7 @@
     "noTags": "Aucune étiquette trouvée",
     "noTagsDescription": "Commencez à utiliser des étiquettes dans votre dossier médical pour les voir ici.",
     "noTagsSearch": "Aucune étiquette ne correspond à votre recherche.",
-    "pressEnterToAdd": "Appuyez sur Entrée pour ajouter une étiquette",
+    "pressEnterToAdd": "Saisissez l'étiquette et appuyez sur Entrée pour en créer une nouvelle",
     "replaceModal": {
       "description": "Ceci remplacera \"{{oldTag}}\" par \"{{newTag}}\" sur {{count}} entrée(s).",
       "description_one": "Ceci remplacera \"{{oldTag}}\" par \"{{newTag}}\" sur {{count}} entrée.",

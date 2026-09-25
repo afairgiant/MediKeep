@@ -41,6 +41,7 @@ import {
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
+import LabResultTagsField from './LabResultTagsField';
 import ConditionRelationships from '../ConditionRelationships';
 import LabResultEncounterRelationships from './LabResultEncounterRelationships';
 import LabResultMedicationRelationships from './LabResultMedicationRelationships';
@@ -1254,6 +1255,16 @@ const LabResultFormWrapper = ({
                     <SameAsOrderedLink
                       onClick={handleCompletedSameAsOrdered}
                       disabled={!formData.ordered_date}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <LabResultTagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
                     />
                   </Grid.Col>
                 </Grid>

@@ -14,8 +14,6 @@ jobs:
   frontend-tests:
     runs-on: ubuntu-latest
     name: Frontend Tests
-    # TODO: Remove continue-on-error once pre-existing test failures are fixed
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v7
@@ -34,14 +32,23 @@ jobs:
         run: npm run lint
         working-directory: frontend
 
+      # Blocking: a PR may not add a failing test. Failures already present on
+      # main are listed in frontend/known-test-failures.txt (see TECHNICAL_DEBT.md).
       - name: Run tests
-        run: npm run test:run
+        run: npx vitest run --reporter=default --reporter=json --outputFile.json=vitest-results.json
+        working-directory: frontend
+        continue-on-error: true
+
+      - name: Fail on unexpected test failures
+        run: node scripts/check-test-failures.js vitest-results.json
         working-directory: frontend
 
   backend-tests:
     runs-on: ubuntu-latest
     name: Backend Tests
-    # TODO: Remove continue-on-error once pre-existing test failures are fixed
+    # TODO: Remove continue-on-error once pre-existing test failures are fixed.
+    # Frontend already blocks on new failures (see known-test-failures.txt);
+    # backend needs the same treatment - see TECHNICAL_DEBT.md.
     continue-on-error: true
 
     steps:

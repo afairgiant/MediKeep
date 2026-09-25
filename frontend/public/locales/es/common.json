@@ -1241,7 +1241,7 @@
     "noTags": "No se encontraron etiquetas",
     "noTagsDescription": "Comience a usar etiquetas en sus registros médicos para verlas aquí.",
     "noTagsSearch": "Ninguna etiqueta coincide con su búsqueda.",
-    "pressEnterToAdd": "Presione Enter para añadir una etiqueta",
+    "pressEnterToAdd": "Escriba la etiqueta y pulse Enter para crear una nueva",
     "replaceModal": {
       "description": "Esto reemplazará \"{{oldTag}}\" con \"{{newTag}}\" en todos los {{count}} registros.",
       "description_one": "Esto reemplazará \"{{oldTag}}\" con \"{{newTag}}\" en {{count}} registro.",

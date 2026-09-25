@@ -1241,7 +1241,7 @@
     "noTags": "Geen tags gevonden",
     "noTagsDescription": "Begin tags te gebruiken in uw medische dossiers om ze hier te zien.",
     "noTagsSearch": "Geen tags komen overeen met uw zoekopdracht.",
-    "pressEnterToAdd": "Druk op Enter om een tag toe te voegen",
+    "pressEnterToAdd": "Typ de tag en druk op Enter om een nieuwe tag te maken",
     "replaceModal": {
       "description": "Dit vervangt \"{{oldTag}}\" door \"{{newTag}}\" in alle {{count}} dossiers.",
       "description_one": "Dit vervangt \"{{oldTag}}\" door \"{{newTag}}\" in {{count}} dossier.",

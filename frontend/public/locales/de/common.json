@@ -1241,7 +1241,7 @@
     "noTags": "Keine Tags gefunden",
     "noTagsDescription": "Verwenden Sie Tags in Ihren medizinischen Unterlagen, um sie hier zu sehen.",
     "noTagsSearch": "Keine Tags entsprechen Ihrer Suche.",
-    "pressEnterToAdd": "Eingabetaste drücken, um ein Tag hinzuzufügen",
+    "pressEnterToAdd": "Tag eingeben und Enter drücken, um ein neues Tag zu erstellen",
     "replaceModal": {
       "description": "Dies ersetzt \"{{oldTag}}\" durch \"{{newTag}}\" über alle {{count}} Datensätze.",
       "description_one": "Dies ersetzt \"{{oldTag}}\" durch \"{{newTag}}\" über {{count}} Datensatz.",

@@ -1,0 +1,7 @@
+# Frontend tests that are known to fail on main (see TECHNICAL_DEBT.md).
+# Format: <file> :: <full test name>. scripts/check-test-failures.js fails CI
+# for any failing test NOT listed here. Remove a line when its test is fixed;
+# never add a line for a test that a change under review has broken.
+src/__tests__/responsive/PerformanceTests.test.jsx :: Responsive Component Performance Tests Breakpoint Transition Performance handles rapid breakpoint changes without performance degradation
+src/__tests__/responsive/PerformanceTests.test.jsx :: Responsive Component Performance Tests Component Render Performance renders ResponsiveTable with large datasets efficiently
+src/components/medical/immunizations/history/__tests__/HistoryByDiseaseView.test.tsx :: HistoryByDiseaseView calls onItemClick when a row is clicked

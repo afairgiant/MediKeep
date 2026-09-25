@@ -1241,7 +1241,7 @@
     "noTags": "Inga taggar hittades",
     "noTagsDescription": "Börja använda taggar i dina medicinska journaler för att se dem här.",
     "noTagsSearch": "Inga taggar matchar din sökning.",
-    "pressEnterToAdd": "Tryck Enter för att lägga till en tagg",
+    "pressEnterToAdd": "Skriv taggen och tryck på Enter för att skapa en ny tagg",
     "replaceModal": {
       "description": "Detta kommer att ersätta \"{{oldTag}}\" med \"{{newTag}}\" i alla {{count}} poster.",
       "description_one": "Detta kommer att ersätta \"{{oldTag}}\" med \"{{newTag}}\" i {{count}} post.",

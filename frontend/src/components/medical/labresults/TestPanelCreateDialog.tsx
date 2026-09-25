@@ -28,6 +28,7 @@ import {
 } from '../../../constants/testLibrary';
 import { IconAlertCircle, IconX } from '@tabler/icons-react';
 import { DateInput } from '../../adapters/DateInput';
+import LabResultTagsField from './LabResultTagsField';
 import SameAsOrderedLink from './SameAsOrderedLink';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -74,6 +75,7 @@ interface FormData {
   completed_date: string;
   practitioner_id: string;
   facility: string;
+  tags: string[];
 }
 
 const EMPTY_FORM: FormData = {
@@ -83,6 +85,7 @@ const EMPTY_FORM: FormData = {
   completed_date: '',
   practitioner_id: '',
   facility: '',
+  tags: [],
 };
 
 const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
@@ -176,6 +179,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
           : null,
         test_category: formData.test_category || null,
         facility: formData.facility.trim() || null,
+        tags: formData.tags,
         patient_id: currentPatient.id,
         status: 'ordered',
         is_panel: true,
@@ -435,6 +439,13 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
               onChange={e =>
                 setFormData(prev => ({ ...prev, facility: e.target.value }))
               }
+              disabled={isSubmitting}
+            />
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <LabResultTagsField
+              value={formData.tags}
+              onChange={tags => setFormData(prev => ({ ...prev, tags }))}
               disabled={isSubmitting}
             />
           </Grid.Col>

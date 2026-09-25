@@ -1192,7 +1192,7 @@
     "noTags": "ไม่พบแท็ก",
     "noTagsDescription": "เริ่มใช้แท็กในบันทึกการแพทย์ของคุณเพื่อดูที่นี่",
     "noTagsSearch": "ไม่มีแท็กที่ตรงกับการค้นหาของคุณ",
-    "pressEnterToAdd": "กด Enter เพื่อเพิ่มแท็ก",
+    "pressEnterToAdd": "พิมพ์แท็กแล้วกด Enter เพื่อสร้างแท็กใหม่",
     "replaceModal": {
       "description": "การกระทำนี้จะแทนที่ \"{{oldTag}}\" ด้วย \"{{newTag}}\" ในบันทึกทั้งหมด {{count}} รายการ",
       "description_one": "การกระทำนี้จะแทนที่ \"{{oldTag}}\" ด้วย \"{{newTag}}\" ในบันทึก {{count}} รายการ",

@@ -1240,7 +1240,7 @@
     "noTags": "未找到标签",
     "noTagsDescription": "在您的医疗记录中开始使用标签，在这里查看它们。",
     "noTagsSearch": "没有标签匹配您的搜索。",
-    "pressEnterToAdd": "按回车键添加标签",
+    "pressEnterToAdd": "输入标签并按 Enter 键创建新标签",
     "replaceModal": {
       "description": "这将在所有{{count}}条记录中将\"{{oldTag}}\"替换为\"{{newTag}}\"。",
       "description_one": "这将在{{count}}条记录中将\"{{oldTag}}\"替换为\"{{newTag}}\"。",
