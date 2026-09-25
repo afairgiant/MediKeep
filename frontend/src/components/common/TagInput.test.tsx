@@ -48,6 +48,11 @@ describe('TagInput', () => {
     fireEvent.keyDown(input, { key: 'Enter' });
   };
 
+  it('sets the id on the text input so a label can target it', () => {
+    render(<TagInput value={[]} onChange={vi.fn()} disableSuggestions id="tags-field" />);
+    expect(screen.getByPlaceholderText('Add tags...')).toHaveAttribute('id', 'tags-field');
+  });
+
   it('accepts alphanumeric tags with allowed punctuation', () => {
     const { onChange } = setup();
     typeAndEnter('sars-cov-2');

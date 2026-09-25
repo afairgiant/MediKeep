@@ -34,13 +34,19 @@ jobs:
 
       # Blocking: a PR may not add a failing test. Failures already present on
       # main are listed in frontend/known-test-failures.txt (see TECHNICAL_DEBT.md).
+      # This step never fails itself; it records vitest's exit code and output so
+      # the checker below can fail on anything the JSON report does not explain
+      # (crashes, unhandled errors).
       - name: Run tests
-        run: npx vitest run --reporter=default --reporter=json --outputFile.json=vitest-results.json
+        run: |
+          set +e
+          npx vitest run --reporter=default --reporter=json --outputFile.json=vitest-results.json 2>&1 | tee vitest-output.log
+          echo "VITEST_EXIT_CODE=${PIPESTATUS[0]}" >> "$GITHUB_ENV"
+          exit 0
         working-directory: frontend
-        continue-on-error: true
 
       - name: Fail on unexpected test failures
-        run: node scripts/check-test-failures.js vitest-results.json
+        run: node scripts/check-test-failures.js vitest-results.json --exit-code "$VITEST_EXIT_CODE" --log vitest-output.log
         working-directory: frontend
 
   backend-tests:

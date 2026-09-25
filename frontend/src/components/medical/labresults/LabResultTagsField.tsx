@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { Input } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { TagInput } from '../../common/TagInput';
@@ -20,15 +20,18 @@ const LabResultTagsField: React.FC<LabResultTagsFieldProps> = ({
   disabled = false,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
+  const inputId = useId();
 
   return (
     <Input.Wrapper
+      id={inputId}
       label={t('shared:labels.tags')}
       styles={{
         label: { color: 'var(--color-text-primary)', fontWeight: 600 },
       }}
     >
       <TagInput
+        id={inputId}
         value={value}
         onChange={onChange}
         disabled={disabled}

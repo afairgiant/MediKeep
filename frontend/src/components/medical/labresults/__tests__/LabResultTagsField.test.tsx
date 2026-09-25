@@ -4,9 +4,10 @@ import '@testing-library/jest-dom';
 import LabResultTagsField from '../LabResultTagsField';
 
 vi.mock('../../../common/TagInput', () => ({
-  TagInput: ({ value, onChange, disabled, placeholder }: any) => (
+  TagInput: ({ value, onChange, disabled, placeholder, id }: any) => (
     <button
       type="button"
+      id={id}
       disabled={disabled}
       title={placeholder}
       onClick={() => onChange([...value, 'fasting'])}
@@ -40,5 +41,12 @@ describe('LabResultTagsField', () => {
     const label = screen.getByText('shared:labels.tags').closest('label');
     expect(label).not.toBeNull();
     expect(getComputedStyle(label as Element).fontWeight).toBe('600');
+  });
+
+  it('associates the label with the tag input', () => {
+    render(<LabResultTagsField value={[]} onChange={vi.fn()} />);
+    const label = screen.getByText('shared:labels.tags').closest('label');
+    expect(label).toHaveAttribute('for');
+    expect(screen.getByText('add-tag')).toHaveAttribute('id', label!.getAttribute('for'));
   });
 });

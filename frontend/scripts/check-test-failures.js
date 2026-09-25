@@ -5,17 +5,32 @@
  * in known-test-failures.txt, so pre-existing failures do not hide new ones.
  *
  * Usage: node scripts/check-test-failures.js <vitest-json-report>
- *   Generate the report with: vitest run --reporter=json --outputFile=<path>
+ *          [--exit-code <vitest exit code>] [--log <vitest console output>]
+ *   Generate the report with: vitest run --reporter=json --outputFile.json=<path>
+ *
+ * Vitest's exit code and console output are checked as well, because the JSON
+ * report omits unhandled errors and cannot exist at all if vitest crashes. The
+ * run fails if vitest exited nonzero without any failing test to explain it, or
+ * if its output reports unhandled errors.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const reportPath = process.argv[2];
+const args = process.argv.slice(2);
+const reportPath = args[0];
+const optionValue = name => {
+  const index = args.indexOf(name);
+  return index === -1 ? undefined : args[index + 1];
+};
 if (!reportPath) {
-  console.error('Usage: node scripts/check-test-failures.js <vitest-json-report>');
+  console.error(
+    'Usage: node scripts/check-test-failures.js <vitest-json-report> [--exit-code <n>] [--log <file>]'
+  );
   process.exit(2);
 }
+const exitCode = optionValue('--exit-code');
+const logPath = optionValue('--log');
 
 const knownPath = path.join(__dirname, '..', 'known-test-failures.txt');
 const known = new Set(
@@ -32,7 +47,11 @@ const failures = [];
 
 for (const file of report.testResults) {
   const relative = file.name.startsWith(cwd) ? file.name.slice(cwd.length) : file.name;
-  const fileFailed = file.status === 'failed' && file.assertionResults.length === 0;
+  // A file can fail without any failed assertion (import error, hook or teardown
+  // failure), even when other assertions in it passed.
+  const fileFailed =
+    file.status === 'failed' &&
+    !file.assertionResults.some(test => test.status === 'failed');
   if (fileFailed) {
     failures.push(`${relative} :: (file failed to run: ${file.message || 'unknown error'})`);
   }
@@ -44,6 +63,22 @@ for (const file of report.testResults) {
 }
 
 const unexpected = failures.filter(f => !known.has(f));
+const problems = [];
+
+if (exitCode !== undefined && !/^\d+$/.test(exitCode)) {
+  problems.push(`vitest exit code is missing or invalid: "${exitCode}"`);
+} else if (exitCode !== undefined && exitCode !== '0' && failures.length === 0) {
+  problems.push(
+    `vitest exited with code ${exitCode} but the report lists no failing test`
+  );
+}
+
+if (logPath) {
+  const log = fs.readFileSync(logPath, 'utf8');
+  if (/Unhandled (Errors?|Rejections?)|caught \d+ unhandled error/i.test(log)) {
+    problems.push('vitest output reports unhandled errors');
+  }
+}
 const fixed = [...known].filter(k => !failures.includes(k));
 
 if (fixed.length > 0) {
@@ -51,9 +86,17 @@ if (fixed.length > 0) {
   fixed.forEach(f => console.log(`  ${f}`));
 }
 
+if (problems.length > 0) {
+  console.error('\nTest run problem(s) not explained by the JSON report:');
+  problems.forEach(p => console.error(`  ${p}`));
+}
+
 if (unexpected.length > 0) {
   console.error(`\n${unexpected.length} unexpected test failure(s):`);
   unexpected.forEach(f => console.error(`  ${f}`));
+}
+
+if (unexpected.length > 0 || problems.length > 0) {
   process.exit(1);
 }
 

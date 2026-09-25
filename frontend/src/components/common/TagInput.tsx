@@ -23,6 +23,7 @@ interface TagInputProps {
   disabled?: boolean;
   error?: string;
   disableSuggestions?: boolean;
+  id?: string;
 }
 
 export function TagInput({
@@ -33,6 +34,7 @@ export function TagInput({
   disabled = false,
   error,
   disableSuggestions = false,
+  id,
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -222,6 +224,7 @@ export function TagInput({
             {!disabled && value.length < maxTags && (
               <TextInput
                 ref={inputRef}
+                id={id}
                 value={inputValue}
                 onChange={e => {
                   setInputValue(e.target.value);
