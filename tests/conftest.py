@@ -4,6 +4,7 @@ Pytest configuration and fixtures for Medical Records application tests.
 
 import asyncio
 import os
+import socket
 import tempfile
 from datetime import date
 from pathlib import Path
@@ -573,3 +574,28 @@ def cleanup_after_test():
     # Clear any global state
     # Reset singletons, clear caches, etc.
     pass
+
+
+@pytest.fixture
+def fake_dns(monkeypatch):
+    """Call with a {hostname: ip or [ips]} map; only those hosts resolve, the rest are NXDOMAIN."""
+
+    def install(hosts):
+        def fake_getaddrinfo(host, *args, **kwargs):
+            if host not in hosts:
+                raise socket.gaierror("not found")
+            ips = hosts[host] if isinstance(hosts[host], list) else [hosts[host]]
+            return [
+                (
+                    socket.AF_INET6 if ":" in ip else socket.AF_INET,
+                    socket.SOCK_STREAM,
+                    6,
+                    "",
+                    (ip, 0),
+                )
+                for ip in ips
+            ]
+
+        monkeypatch.setattr(socket, "getaddrinfo", fake_getaddrinfo)
+
+    return install

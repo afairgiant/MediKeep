@@ -12,7 +12,7 @@ import aiohttp
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.utils.url_security import validate_no_ssrf
+from app.core.utils.url_security import validate_integration_url
 
 logger = get_logger(__name__)
 
@@ -38,12 +38,9 @@ class PapraAuth:
         if not self.organization_id:
             raise ValueError("Organization ID is required for Papra")
 
-        # SSRF protection: reject targets that resolve to private/internal
-        # addresses unless the deployment has explicitly opted in. Wrap the
-        # validation error in the typed Papra connection error so endpoint
-        # handlers return a clear 4xx rather than a generic 500.
+        # Authoritative connection-time check; save-time validation tolerates unresolved hosts.
         try:
-            validate_no_ssrf(
+            validate_integration_url(
                 self.url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
             )
         except ValueError as exc:

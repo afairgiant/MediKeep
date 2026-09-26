@@ -19,7 +19,7 @@ import aiohttp
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.utils.url_security import validate_no_ssrf
+from app.core.utils.url_security import PinnedResolver, validate_integration_url
 from app.services.credential_encryption import credential_encryption
 from app.services.paperless_task_status import extract_task, parse_task
 
@@ -83,33 +83,9 @@ class PaperlessServiceBase(ABC):
         self.user_id = user_id
         self._lookup_cache: Dict[str, Dict[int, str]] = {}
 
-        # Enforce HTTPS for external URLs, allow HTTP for local development
-        parsed = urlparse(self.base_url)
-
-        is_local = parsed.hostname in ["localhost", "127.0.0.1"] or (
-            parsed.hostname
-            and (
-                parsed.hostname.startswith("192.168.")
-                or parsed.hostname.startswith("10.")
-                or (
-                    parsed.hostname.startswith("172.")
-                    and len(parsed.hostname.split(".")) >= 2
-                    and parsed.hostname.split(".")[1].isdigit()
-                    and 16 <= int(parsed.hostname.split(".")[1]) <= 31
-                )
-            )
-        )
-
-        if not is_local and not self.base_url.startswith("https://"):
-            raise PaperlessConnectionError(
-                "External paperless connections must use HTTPS for security"
-            )
-
-        # SSRF protection: reject targets that resolve to private/internal
-        # addresses unless the deployment has explicitly opted in. This is the
-        # authoritative connection-time boundary (also closes DNS rebinding).
+        # Authoritative connection-time check; save-time validation tolerates unresolved hosts.
         try:
-            validate_no_ssrf(
+            self._pinned_ips = validate_integration_url(
                 self.base_url,
                 allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
             )
@@ -153,6 +129,15 @@ class PaperlessServiceBase(ABC):
     @abstractmethod
     def get_auth_type(self) -> str:
         """Return authentication type for logging."""
+
+    def _make_connector(self) -> aiohttp.TCPConnector:
+        """TCP connector pinned to the addresses validated in ``__init__``."""
+        return aiohttp.TCPConnector(
+            ssl=self.ssl_context if self.base_url.startswith("https://") else False,
+            limit=10,
+            limit_per_host=5,
+            resolver=PinnedResolver(urlparse(self.base_url).hostname, self._pinned_ips),
+        )
 
     async def _close_session(self):
         """Close HTTP session."""
@@ -791,14 +776,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
             },
         )
 
-        # Use SSL context only for HTTPS connections
-        connector = aiohttp.TCPConnector(
-            ssl=self.ssl_context if self.base_url.startswith("https://") else False,
-            limit=10,
-            limit_per_host=5,
-            ttl_dns_cache=300,
-            use_dns_cache=True,
-        )
+        connector = self._make_connector()
 
         self.session = aiohttp.ClientSession(
             connector=connector, timeout=self.timeout, headers=auth_headers
@@ -1368,14 +1346,7 @@ class PaperlessService(PaperlessServiceBase):
 
     async def _create_session(self):
         """Create HTTP session with basic authentication."""
-        # Use SSL context only for HTTPS connections
-        connector = aiohttp.TCPConnector(
-            ssl=self.ssl_context if self.base_url.startswith("https://") else False,
-            limit=10,
-            limit_per_host=5,
-            ttl_dns_cache=300,
-            use_dns_cache=True,
-        )
+        connector = self._make_connector()
 
         # Create BasicAuth for username/password authentication
         auth = aiohttp.BasicAuth(self.username, self.password)
