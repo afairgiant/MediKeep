@@ -747,7 +747,7 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error getting download info for file {file_id}: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to get file download info: {str(e)}"
+                status_code=500, detail="Failed to get file download info"
             )
 
     async def get_file_view_info(
@@ -907,7 +907,7 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error retrieving file for viewing: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve file for viewing: {str(e)}"
+                status_code=500, detail="Failed to retrieve file for viewing"
             )
 
     def get_files_count_batch(
@@ -1376,7 +1376,7 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error downloading from Papra: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to download file from Papra: {str(e)}"
+                status_code=500, detail="Failed to download file from Papra"
             )
 
     async def _delete_from_papra(
@@ -1655,7 +1655,7 @@ class GenericEntityFileService:
             logger.error(f"Failed to download file from paperless: {str(e)}")
             raise HTTPException(
                 status_code=500,
-                detail=f"Failed to download file from paperless: {str(e)}",
+                detail="Failed to download file from paperless",
             )
 
     async def _handle_orphaned_paperless_records(
