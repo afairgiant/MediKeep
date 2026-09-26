@@ -17,7 +17,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 from cryptography.fernet import Fernet
 from sqlalchemy import and_, desc
@@ -74,7 +74,12 @@ def _build_email_url(config: Dict) -> str:
 
     # Apprise format: mailtos://user:password@host:port?from=sender&to=recipient
     protocol = "mailtos" if use_tls else "mailto"
-    return f"{protocol}://{smtp_user}:{smtp_password}@{smtp_host}:{smtp_port}?from={from_email}&to={to_email}"
+    # Usernames and passwords often contain @ : / which would otherwise split userinfo from host
+    return (
+        f"{protocol}://{quote(smtp_user, safe='')}:{quote(smtp_password, safe='')}"
+        f"@{smtp_host}:{smtp_port}"
+        f"?from={quote(from_email, safe='')}&to={quote(to_email, safe='')}"
+    )
 
 
 def _split_protocol(url: str) -> Tuple[str, str]:
