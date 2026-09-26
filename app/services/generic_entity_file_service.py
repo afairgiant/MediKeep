@@ -747,7 +747,7 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error getting download info for file {file_id}: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to get file download info: {str(e)}"
+                status_code=500, detail="Failed to get file download info"
             )
 
     async def get_file_view_info(
@@ -770,7 +770,14 @@ class GenericEntityFileService:
             if not file_record:
                 raise HTTPException(status_code=404, detail="File not found")
 
-            logger.info(f"Retrieving file for viewing: {file_record.file_name}")
+            logger.debug(
+                "Retrieving file for viewing",
+                extra={
+                    "file_id": file_id,
+                    "storage_backend": file_record.storage_backend,
+                    "component": "generic_entity_file_service",
+                },
+            )
 
             if file_record.storage_backend == "paperless":
                 # Handle Paperless files
@@ -900,7 +907,7 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error retrieving file for viewing: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve file for viewing: {str(e)}"
+                status_code=500, detail="Failed to retrieve file for viewing"
             )
 
     def get_files_count_batch(
@@ -1369,7 +1376,7 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error downloading from Papra: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to download file from Papra: {str(e)}"
+                status_code=500, detail="Failed to download file from Papra"
             )
 
     async def _delete_from_papra(
@@ -1648,7 +1655,7 @@ class GenericEntityFileService:
             logger.error(f"Failed to download file from paperless: {str(e)}")
             raise HTTPException(
                 status_code=500,
-                detail=f"Failed to download file from paperless: {str(e)}",
+                detail="Failed to download file from paperless",
             )
 
     async def _handle_orphaned_paperless_records(

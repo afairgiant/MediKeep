@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.api.v1.endpoints.utils import handle_not_found, verify_patient_ownership
+from app.core.http.content_disposition import content_disposition_header
 from app.core.http.error_handling import MedicalRecordsAPIException, NotFoundException
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -1160,7 +1161,9 @@ async def download_file(
 
             # Set proper headers for binary content
             headers = {
-                "Content-Disposition": f"attachment; filename={corrected_filename}",
+                "Content-Disposition": content_disposition_header(
+                    "attachment", corrected_filename
+                ),
                 "Content-Length": str(len(file_info)),
                 "Cache-Control": "no-cache",
             }
@@ -1176,9 +1179,17 @@ async def download_file(
     except HTTPException:
         raise
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            f"Failed to download file {file_id}",
+            e,
+            user_id=current_user.id,
+            file_id=file_id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to download file: {str(e)}",
+            detail="Failed to download file",
         )
 
 
@@ -1289,7 +1300,9 @@ async def view_file(
 
             # Set secure headers for inline file viewing with proper binary handling
             headers = {
-                "Content-Disposition": f"inline; filename={corrected_filename}",
+                "Content-Disposition": content_disposition_header(
+                    "inline", corrected_filename
+                ),
                 "Content-Length": str(len(file_info)),
                 "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
                 "X-Frame-Options": "SAMEORIGIN",  # Prevent embedding in frames from other domains
@@ -1303,7 +1316,6 @@ async def view_file(
             )
         # Local file - return as FileResponse with inline disposition and security headers
         headers = {
-            "Content-Disposition": f"inline; filename={filename}",
             "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
             "X-Frame-Options": "SAMEORIGIN",  # Prevent embedding in frames from other domains
         }
@@ -1313,6 +1325,7 @@ async def view_file(
             filename=filename,
             media_type=content_type,
             headers=headers,
+            content_disposition_type="inline",
         )
 
     except HTTPException:
@@ -1328,7 +1341,7 @@ async def view_file(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to view file: {str(e)}",
+            detail="Failed to view file",
         )
 
 

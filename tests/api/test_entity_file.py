@@ -5,15 +5,21 @@ Tests for Entity File API endpoints.
 import io
 import pytest
 from datetime import date
+from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.api.v1.endpoints import entity_file as entity_file_endpoint
 from app.crud.patient import patient as patient_crud
 from app.crud.lab_result import lab_result as lab_result_crud
-from app.models.models import PatientShare
+from app.models.models import EntityFile, PatientShare, UserPreferences
 from app.schemas.patient import PatientCreate
 from app.schemas.lab_result import LabResultCreate
 from tests.utils.user import create_random_user, create_user_token_headers
+
+NON_LATIN1_FILENAME = "ВитаминD.txt"
+NON_LATIN1_QUOTED_STEM = "%D0%92%D0%B8%D1%82%D0%B0%D0%BC%D0%B8%D0%BDD"
+INTERNAL_ERROR_TEXT = "internal secret detail"
 
 
 class TestEntityFileAPI:
@@ -282,7 +288,192 @@ class TestEntityFileAPI:
         )
 
         assert response.status_code == 200
-        assert "inline" in response.headers.get("content-disposition", "")
+        assert (
+            response.headers["content-disposition"]
+            == 'inline; filename="view_test.txt"'
+        )
+        assert response.headers["x-content-type-options"] == "nosniff"
+
+    def _upload_non_latin1_file(self, client, headers, lab_result_id):
+        files = {
+            "file": (NON_LATIN1_FILENAME, io.BytesIO(b"Vitamin D panel"), "text/plain")
+        }
+        response = client.post(
+            f"/api/v1/entity-files/lab-result/{lab_result_id}/files",
+            headers=headers,
+            files=files,
+        )
+        assert response.status_code == 201
+        return response.json()["id"]
+
+    @pytest.mark.parametrize(
+        "endpoint, disposition", [("view", "inline"), ("download", "attachment")]
+    )
+    def test_local_storage_non_latin1_filename(
+        self,
+        client: TestClient,
+        authenticated_headers,
+        test_lab_result,
+        endpoint,
+        disposition,
+    ):
+        """Regression #1047: non-Latin-1 filenames must not 500."""
+        file_id = self._upload_non_latin1_file(
+            client, authenticated_headers, test_lab_result.id
+        )
+
+        response = client.get(
+            f"/api/v1/entity-files/files/{file_id}/{endpoint}",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        assert response.headers["content-disposition"] == (
+            f"{disposition}; filename*=utf-8''{NON_LATIN1_QUOTED_STEM}.txt"
+        )
+
+    @pytest.mark.parametrize(
+        "endpoint, service_method, disposition",
+        [
+            ("view", "get_file_view_info", "inline"),
+            ("download", "get_file_download_info", "attachment"),
+        ],
+    )
+    def test_remote_storage_non_latin1_filename(
+        self,
+        client: TestClient,
+        authenticated_headers,
+        test_lab_result,
+        endpoint,
+        service_method,
+        disposition,
+    ):
+        """Paperless/Papra content is served from bytes, not a FileResponse."""
+        file_id = self._upload_non_latin1_file(
+            client, authenticated_headers, test_lab_result.id
+        )
+        remote = AsyncMock(
+            return_value=(b"%PDF-1.4 test", NON_LATIN1_FILENAME, "application/pdf")
+        )
+
+        with patch.object(entity_file_endpoint.file_service, service_method, remote):
+            response = client.get(
+                f"/api/v1/entity-files/files/{file_id}/{endpoint}",
+                headers=authenticated_headers,
+            )
+
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/pdf"
+        assert response.headers["content-disposition"] == (
+            f"{disposition}; filename*=utf-8''{NON_LATIN1_QUOTED_STEM}.pdf"
+        )
+
+    def test_view_file_error_hides_internal_detail(
+        self, client: TestClient, authenticated_headers, test_lab_result
+    ):
+        file_id = self._upload_non_latin1_file(
+            client, authenticated_headers, test_lab_result.id
+        )
+        failing = AsyncMock(side_effect=RuntimeError(INTERNAL_ERROR_TEXT))
+
+        with patch.object(
+            entity_file_endpoint.file_service, "get_file_view_info", failing
+        ):
+            response = client.get(
+                f"/api/v1/entity-files/files/{file_id}/view",
+                headers=authenticated_headers,
+            )
+
+        assert response.status_code == 500
+        assert INTERNAL_ERROR_TEXT not in response.text
+
+    def _move_file_to_remote_storage(self, db_session, user, file_id, backend):
+        file_record = db_session.get(EntityFile, file_id)
+        file_record.storage_backend = backend
+        if backend == "paperless":
+            file_record.paperless_document_id = "123"
+        else:
+            file_record.papra_document_id = "doc-123"
+
+        prefs = db_session.query(UserPreferences).filter_by(user_id=user.id).first()
+        if not prefs:
+            prefs = UserPreferences(user_id=user.id)
+            db_session.add(prefs)
+        setattr(prefs, f"{backend}_enabled", True)
+        setattr(prefs, f"{backend}_url", "https://storage.invalid")
+        db_session.commit()
+
+    @pytest.mark.parametrize(
+        "backend, endpoint, failing_target, expected_detail",
+        [
+            (
+                "local",
+                "view",
+                "app.services.generic_entity_file_service.os.path.exists",
+                "Failed to retrieve file for viewing",
+            ),
+            (
+                "local",
+                "download",
+                "app.services.generic_entity_file_service.os.path.exists",
+                "Failed to get file download info",
+            ),
+            (
+                "paperless",
+                "view",
+                "app.services.paperless_service.create_paperless_service",
+                "Failed to retrieve file for viewing",
+            ),
+            (
+                "paperless",
+                "download",
+                "app.services.generic_entity_file_service."
+                "GenericEntityFileService._create_paperless_client",
+                "Failed to download file from paperless",
+            ),
+            (
+                "papra",
+                "view",
+                "app.services.papra_client.create_papra_client",
+                "Failed to download file from Papra",
+            ),
+            (
+                "papra",
+                "download",
+                "app.services.papra_client.create_papra_client",
+                "Failed to download file from Papra",
+            ),
+        ],
+    )
+    def test_storage_failure_hides_internal_detail(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        test_lab_result,
+        backend,
+        endpoint,
+        failing_target,
+        expected_detail,
+    ):
+        file_id = self._upload_non_latin1_file(
+            client, authenticated_headers, test_lab_result.id
+        )
+        if backend != "local":
+            self._move_file_to_remote_storage(
+                db_session, user_with_patient["user"], file_id, backend
+            )
+
+        with patch(failing_target, side_effect=RuntimeError(INTERNAL_ERROR_TEXT)):
+            response = client.get(
+                f"/api/v1/entity-files/files/{file_id}/{endpoint}",
+                headers=authenticated_headers,
+            )
+
+        assert response.status_code == 500
+        assert response.json()["message"] == expected_detail
+        assert INTERNAL_ERROR_TEXT not in response.text
 
     def test_batch_file_counts(
         self,

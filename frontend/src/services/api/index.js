@@ -3,6 +3,7 @@ import { ENTITY_TYPES } from '../../utils/entityRelationships';
 import { extractErrorMessage } from '../../utils/errorUtils';
 import { getApiUrl, isDevelopment } from '../../config/env';
 import { handleUnauthorized } from '../../utils/loginRedirect';
+import { parseContentDispositionFilename } from '../../utils/contentDisposition';
 
 // Map entity types to their API endpoint paths
 const ENTITY_TO_API_PATH = {
@@ -1041,21 +1042,13 @@ class ApiService {
         );
       }
 
-      // Extract filename from Content-Disposition header
-      const contentDisposition = response.headers.get('content-disposition');
-      let correctedFileName = fileName || `file_${fileId}`;
-
-      if (contentDisposition) {
-        const fileNameMatch = contentDisposition.match(
-          /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
-        );
-        if (fileNameMatch && fileNameMatch[1]) {
-          correctedFileName = fileNameMatch[1].replace(/['"]/g, '');
-          logger.info(
-            `Using server-provided filename: ${correctedFileName} (original: ${fileName})`
-          );
-        }
-      }
+      // Server may correct the extension (e.g. Paperless converts images to PDF)
+      const correctedFileName =
+        parseContentDispositionFilename(
+          response.headers.get('content-disposition')
+        ) ||
+        fileName ||
+        `file_${fileId}`;
 
       const blob = await response.blob();
 
