@@ -55,8 +55,9 @@ class TestPaperlessService:
         assert service.user_id == self.user_id
         assert service.get_auth_type() == "token"
 
-    def test_init_invalid_url_basic_auth(self):
+    def test_init_invalid_url_basic_auth(self, fake_dns):
         """Test service initialization rejects HTTP URLs with basic auth."""
+        fake_dns({"insecure.example.com": "8.8.8.8"})
         with pytest.raises(PaperlessConnectionError, match="must use HTTPS"):
             PaperlessService(
                 "http://insecure.example.com",
@@ -65,11 +66,29 @@ class TestPaperlessService:
                 self.user_id,
             )
 
-    def test_init_invalid_url_token_auth(self):
+    def test_init_invalid_url_token_auth(self, fake_dns):
         """Test service initialization rejects HTTP URLs with token auth."""
+        fake_dns({"insecure.example.com": "8.8.8.8"})
         with pytest.raises(PaperlessConnectionError, match="must use HTTPS"):
             PaperlessServiceToken(
                 "http://insecure.example.com", self.api_token, self.user_id
+            )
+
+    def test_init_allows_http_to_private_hostname(self, monkeypatch, fake_dns):
+        monkeypatch.setattr(
+            "app.core.config.settings.ALLOW_PRIVATE_INTEGRATION_URLS", True
+        )
+        fake_dns({"paperless-container": "172.18.0.5"})
+        service = PaperlessServiceToken(
+            "http://paperless-container:8000", self.api_token, self.user_id
+        )
+        assert service.ssl_context is None
+
+    def test_init_unresolved_hostname_reports_resolution_error(self, fake_dns):
+        fake_dns({})
+        with pytest.raises(PaperlessConnectionError, match="could not be resolved"):
+            PaperlessServiceToken(
+                "http://paperless-container:8000", self.api_token, self.user_id
             )
 
     def test_safe_endpoint_validation(self):

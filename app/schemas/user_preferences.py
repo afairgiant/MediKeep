@@ -1,7 +1,6 @@
 import re
 from datetime import datetime
 from typing import Optional
-from urllib.parse import urlparse
 
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
@@ -51,36 +50,14 @@ def _validate_integration_url(v: Optional[str]) -> Optional[str]:
     if not v.startswith(("http://", "https://")):
         raise ValueError("URL must start with http:// or https://")
 
-    parsed = urlparse(v)
-
-    is_local = parsed.hostname in ["localhost", "127.0.0.1"] or (
-        parsed.hostname
-        and (
-            parsed.hostname.startswith("192.168.")
-            or parsed.hostname.startswith("10.")
-            or (
-                parsed.hostname.startswith("172.")
-                and len(parsed.hostname.split(".")) >= 2
-                and parsed.hostname.split(".")[1].isdigit()
-                and 16 <= int(parsed.hostname.split(".")[1]) <= 31
-            )
-        )
-    )
-
-    if not is_local and not v.startswith("https://"):
-        raise ValueError("External URLs must use HTTPS for security")
-
     if not _URL_PATTERN.match(v):
         raise ValueError("Invalid URL format")
 
-    # Reject URLs that resolve to private/internal addresses (SSRF protection),
-    # unless the deployment has explicitly opted in via config. Save-time
-    # validation permits hosts that are not currently resolvable; the strict
-    # unresolved-host check is enforced at connection time in the service layer.
+    # Unresolvable hosts are accepted here; the service layer re-checks strictly on connect.
     from app.core.config import settings
-    from app.core.utils.url_security import validate_no_ssrf
+    from app.core.utils.url_security import validate_integration_url
 
-    validate_no_ssrf(
+    validate_integration_url(
         v,
         allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
         allow_unresolved=True,

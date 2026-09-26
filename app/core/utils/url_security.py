@@ -24,6 +24,8 @@ the address space into two tiers:
 Resolution is done against the *resolved* IP address(es), not just the literal
 hostname text, which also closes the DNS-rebinding gap where a public-looking
 hostname resolves to an internal IP.
+
+Plain HTTP is only accepted for hosts that resolve to a private/loopback address.
 """
 
 import ipaddress
@@ -54,6 +56,9 @@ UNRESOLVED_URL_ERROR = (
     "This URL's host could not be resolved to an IP address, so it cannot be "
     "verified as safe. Check the hostname and that the server is reachable."
 )
+
+# Shown when a plain-HTTP URL does not resolve to a private/loopback address.
+INSECURE_URL_ERROR = "External URLs must use HTTPS for security"
 
 
 def _ip_always_blocked(ip: _IpAddress) -> bool:
@@ -129,23 +134,19 @@ def classify_url(url: str) -> str:
     return reason
 
 
-def validate_no_ssrf(
+def validate_integration_url(
     url: Optional[str], *, allow_private: bool, allow_unresolved: bool = False
 ) -> None:
-    """Raise ValueError if ``url`` targets a disallowed address.
+    """Raise ValueError if an integration URL targets a disallowed address.
 
     - Link-local / cloud-metadata addresses are always rejected.
     - Private/loopback addresses are rejected unless ``allow_private``.
+    - Plain ``http://`` is rejected unless the host resolves to a private/loopback
+      address.
     - Hosts that cannot be resolved are rejected unless ``allow_unresolved``.
-      This fails closed by default (an unresolvable host cannot be verified and
-      cannot be connected to anyway); save-time validators may pass
-      ``allow_unresolved=True`` so a config can be stored for a host that is not
-      currently resolvable, leaving the strict check to the connection-time
-      boundary.
+      Save-time validators may pass it; connection-time callers must not.
 
-    No-op for empty URLs. Callers in the service layer should catch ValueError
-    and re-raise as their own connection error type; Pydantic validators can let
-    it surface as a validation error.
+    No-op for empty URLs.
     """
     if not url:
         return
@@ -154,5 +155,9 @@ def validate_no_ssrf(
         raise ValueError(METADATA_URL_ERROR)
     if classification == "internal" and not allow_private:
         raise ValueError(PRIVATE_URL_ERROR)
-    if classification == "indeterminate" and not allow_unresolved:
+    if classification == "indeterminate":
+        if allow_unresolved:
+            return
         raise ValueError(UNRESOLVED_URL_ERROR)
+    if urlparse(url).scheme == "http" and classification == "public":
+        raise ValueError(INSECURE_URL_ERROR)

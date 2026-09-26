@@ -9,17 +9,6 @@ import {
   Alert,
 } from '@mantine/core';
 
-const isLocalHostname = hostname => {
-  if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
-  if (hostname.startsWith('192.168.') || hostname.startsWith('10.'))
-    return true;
-  if (hostname.startsWith('172.')) {
-    const second = parseInt(hostname.split('.')[1], 10);
-    if (second >= 16 && second <= 31) return true;
-  }
-  return false;
-};
-
 /**
  * IntegrationSettingsCard
  *
@@ -77,10 +66,11 @@ const IntegrationSettingsCard = ({
 
   const defaultValidateUrl = value => {
     if (!value) return 'URL is required';
+    // HTTPS-vs-private is decided by the backend, which resolves the host from its own network.
     try {
       const parsed = new URL(value);
-      if (!isLocalHostname(parsed.hostname) && parsed.protocol !== 'https:') {
-        return 'External URLs must use HTTPS';
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return 'URL must start with http:// or https://';
       }
     } catch {
       return 'Invalid URL format';
