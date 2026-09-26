@@ -11,6 +11,9 @@ Tiering:
 * public -> always allowed
 """
 
+import ipaddress
+import socket
+
 import pytest
 from pydantic import ValidationError
 
@@ -19,6 +22,7 @@ from app.core.utils.url_security import (
     METADATA_URL_ERROR,
     PRIVATE_URL_ERROR,
     UNRESOLVED_URL_ERROR,
+    PinnedResolver,
     classify_url,
     validate_integration_url,
 )
@@ -114,6 +118,8 @@ _FAKE_DNS = {
     "nas.lan": "192.168.1.2",
     "ts-host": "100.100.1.1",
     "public.example": "8.8.8.8",
+    "mixed.example": ["10.0.0.5", "8.8.8.8"],
+    "mixed-metadata.example": ["8.8.8.8", "169.254.169.254"],
 }
 
 
@@ -169,6 +175,52 @@ class TestHttpRule:
                 "http://paperless-container:8000", allow_private=False
             )
         assert str(exc.value) == PRIVATE_URL_ERROR
+
+
+@pytest.mark.usefixtures("dns")
+class TestMixedResolution:
+    def test_any_public_address_classifies_public(self):
+        assert classify_url("http://mixed.example") == "public"
+
+    def test_metadata_takes_precedence_over_public(self):
+        assert classify_url("https://mixed-metadata.example") == "metadata"
+
+    def test_http_rejected_when_any_address_is_public(self):
+        with pytest.raises(ValueError) as exc:
+            validate_integration_url("http://mixed.example", allow_private=True)
+        assert str(exc.value) == INSECURE_URL_ERROR
+
+    def test_lockdown_rejects_any_private_address(self):
+        with pytest.raises(ValueError) as exc:
+            validate_integration_url("https://mixed.example", allow_private=False)
+        assert str(exc.value) == PRIVATE_URL_ERROR
+
+    def test_returns_every_validated_address(self):
+        ips = validate_integration_url("https://mixed.example", allow_private=True)
+        assert [str(ip) for ip in ips] == ["10.0.0.5", "8.8.8.8"]
+
+
+class TestPinnedResolver:
+    @pytest.mark.asyncio
+    async def test_resolves_only_to_pinned_addresses(self):
+        resolver = PinnedResolver("Paperless", [ipaddress.ip_address("172.18.0.5")])
+        results = await resolver.resolve("paperless", 8000, socket.AF_UNSPEC)
+        assert [(r["host"], r["port"]) for r in results] == [("172.18.0.5", 8000)]
+
+    @pytest.mark.asyncio
+    async def test_refuses_other_hosts(self):
+        resolver = PinnedResolver("paperless", [ipaddress.ip_address("172.18.0.5")])
+        with pytest.raises(OSError):
+            await resolver.resolve("evil.example", 80, socket.AF_UNSPEC)
+
+    @pytest.mark.asyncio
+    async def test_filters_by_requested_family(self):
+        resolver = PinnedResolver(
+            "paperless",
+            [ipaddress.ip_address("172.18.0.5"), ipaddress.ip_address("fd00::5")],
+        )
+        results = await resolver.resolve("paperless", 80, socket.AF_INET6)
+        assert [r["host"] for r in results] == ["fd00::5"]
 
 
 class TestSchemaValidation:

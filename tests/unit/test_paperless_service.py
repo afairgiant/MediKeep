@@ -84,6 +84,33 @@ class TestPaperlessService:
         )
         assert service.ssl_context is None
 
+    @pytest.mark.asyncio
+    async def test_session_connects_to_validated_address_after_dns_changes(
+        self, monkeypatch, fake_dns
+    ):
+        monkeypatch.setattr(
+            "app.core.config.settings.ALLOW_PRIVATE_INTEGRATION_URLS", True
+        )
+        app = web.Application()
+        app.router.add_get("/api/", lambda request: web.json_response({"ok": True}))
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "127.0.0.1", 0)
+        await site.start()
+        port = runner.addresses[0][1]
+        try:
+            fake_dns({"paperless-container": "127.0.0.1"})
+            service = PaperlessServiceToken(
+                f"http://paperless-container:{port}", self.api_token, self.user_id
+            )
+            fake_dns({"paperless-container": "8.8.8.8"})
+            await service._create_session()
+            async with service.session.get(f"{service.base_url}/api/") as response:
+                assert await response.json() == {"ok": True}
+            await service._close_session()
+        finally:
+            await runner.cleanup()
+
     def test_init_unresolved_hostname_reports_resolution_error(self, fake_dns):
         fake_dns({})
         with pytest.raises(PaperlessConnectionError, match="could not be resolved"):

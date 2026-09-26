@@ -578,13 +578,23 @@ def cleanup_after_test():
 
 @pytest.fixture
 def fake_dns(monkeypatch):
-    """Call with a {hostname: ip} map; only those hosts resolve, the rest are NXDOMAIN."""
+    """Call with a {hostname: ip or [ips]} map; only those hosts resolve, the rest are NXDOMAIN."""
 
     def install(hosts):
         def fake_getaddrinfo(host, *args, **kwargs):
-            if host in hosts:
-                return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", (hosts[host], 0))]
-            raise socket.gaierror("not found")
+            if host not in hosts:
+                raise socket.gaierror("not found")
+            ips = hosts[host] if isinstance(hosts[host], list) else [hosts[host]]
+            return [
+                (
+                    socket.AF_INET6 if ":" in ip else socket.AF_INET,
+                    socket.SOCK_STREAM,
+                    6,
+                    "",
+                    (ip, 0),
+                )
+                for ip in ips
+            ]
 
         monkeypatch.setattr(socket, "getaddrinfo", fake_getaddrinfo)
 

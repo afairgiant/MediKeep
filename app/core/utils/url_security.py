@@ -30,8 +30,10 @@ Plain HTTP is only accepted for hosts that resolve to a private/loopback address
 
 import ipaddress
 import socket
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 from urllib.parse import urlparse
+
+from aiohttp.abc import AbstractResolver, ResolveResult
 
 _IpAddress = Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
 
@@ -109,55 +111,93 @@ def _resolve_ips(url: str) -> Optional[List[_IpAddress]]:
     return ips or None
 
 
+def _classify_ips(ips: Sequence[_IpAddress]) -> str:
+    if any(_ip_always_blocked(ip) for ip in ips):
+        return "metadata"
+    if any(not _ip_is_internal(ip) for ip in ips):
+        return "public"
+    return "internal"
+
+
 def classify_url(url: str) -> str:
     """Classify a URL's target by resolved IP.
 
     Returns one of:
-        "metadata"      - resolves to an always-blocked address (link-local /
+        "metadata"      - any address is always-blocked (link-local /
                           cloud-metadata / multicast / unspecified)
-        "internal"      - resolves to a private/loopback address
-        "public"        - resolves only to public addresses
+        "public"        - any address is public
+        "internal"      - every address is private/loopback
         "indeterminate" - host is missing or could not be resolved
-
-    "metadata" takes precedence over "internal" so the always-blocked case is
-    never masked by a co-resolved private address.
     """
     ips = _resolve_ips(url)
-    if not ips:
-        return "indeterminate"
-    reason = "public"
-    for ip in ips:
-        if _ip_always_blocked(ip):
-            return "metadata"
-        if _ip_is_internal(ip):
-            reason = "internal"
-    return reason
+    return _classify_ips(ips) if ips else "indeterminate"
 
 
 def validate_integration_url(
     url: Optional[str], *, allow_private: bool, allow_unresolved: bool = False
-) -> None:
-    """Raise ValueError if an integration URL targets a disallowed address.
+) -> List[_IpAddress]:
+    """Resolve an integration URL's host and return the addresses it may connect to.
 
-    - Link-local / cloud-metadata addresses are always rejected.
-    - Private/loopback addresses are rejected unless ``allow_private``.
-    - Plain ``http://`` is rejected unless the host resolves to a private/loopback
-      address.
-    - Hosts that cannot be resolved are rejected unless ``allow_unresolved``.
+    Raises ValueError when:
+    - any address is link-local / cloud-metadata (always);
+    - any address is private/loopback, unless ``allow_private``;
+    - the URL is plain ``http://`` and any address is public;
+    - the host cannot be resolved, unless ``allow_unresolved``.
       Save-time validators may pass it; connection-time callers must not.
 
-    No-op for empty URLs.
+    Returns an empty list for an empty URL or an accepted unresolved host.
+    Connections must be pinned to the returned addresses (see ``PinnedResolver``).
     """
     if not url:
-        return
-    classification = classify_url(url)
+        return []
+    ips = _resolve_ips(url)
+    if not ips:
+        if allow_unresolved:
+            return []
+        raise ValueError(UNRESOLVED_URL_ERROR)
+    classification = _classify_ips(ips)
     if classification == "metadata":
         raise ValueError(METADATA_URL_ERROR)
-    if classification == "internal" and not allow_private:
+    if not allow_private and any(_ip_is_internal(ip) for ip in ips):
         raise ValueError(PRIVATE_URL_ERROR)
-    if classification == "indeterminate":
-        if allow_unresolved:
-            return
-        raise ValueError(UNRESOLVED_URL_ERROR)
     if urlparse(url).scheme == "http" and classification == "public":
         raise ValueError(INSECURE_URL_ERROR)
+    return ips
+
+
+class PinnedResolver(AbstractResolver):
+    """aiohttp resolver that answers only for one host, with pre-validated addresses.
+
+    Any other host (e.g. a redirect target) fails to resolve.
+    """
+
+    def __init__(self, hostname: str, ips: Sequence[_IpAddress]):
+        self._hostname = hostname.lower()
+        self._ips = list(ips)
+
+    async def resolve(
+        self, host: str, port: int = 0, family: socket.AddressFamily = socket.AF_INET
+    ) -> List[ResolveResult]:
+        if host.lower() != self._hostname:
+            raise OSError(f"Refusing to resolve unvalidated host {host!r}")
+        results: List[ResolveResult] = []
+        for ip in self._ips:
+            ip_family = socket.AF_INET if ip.version == 4 else socket.AF_INET6
+            if family not in (socket.AF_UNSPEC, ip_family):
+                continue
+            results.append(
+                {
+                    "hostname": host,
+                    "host": str(ip),
+                    "port": port,
+                    "family": ip_family,
+                    "proto": 0,
+                    "flags": socket.AI_NUMERICHOST,
+                }
+            )
+        if not results:
+            raise OSError(f"No validated address for {host!r} in requested family")
+        return results
+
+    async def close(self) -> None:
+        return None
