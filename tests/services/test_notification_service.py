@@ -5,6 +5,8 @@ Tests for the notification service.
 import pytest
 from unittest.mock import patch
 
+import apprise
+
 from app.services.notification_service import (
     NotificationService,
     _build_discord_url,
@@ -105,7 +107,7 @@ class TestChannelURLBuilders:
         assert url == "discord://123/abc"
 
     def test_build_email_url_tls(self):
-        """Test email URL building with TLS."""
+        """Email-address usernames must not break host parsing (#1058)."""
         config = {
             "smtp_host": "smtp.gmail.com",
             "smtp_port": 587,
@@ -116,11 +118,16 @@ class TestChannelURLBuilders:
             "use_tls": True,
         }
         url = _build_email_url(config)
+        plugin = apprise.Apprise.instantiate(url)
 
         assert url.startswith("mailtos://")
-        assert "smtp.gmail.com:587" in url
-        assert "from=sender@gmail.com" in url
-        assert "to=recipient@example.com" in url
+        assert plugin is not None
+        assert plugin.user == "user@gmail.com"
+        assert plugin.password == "app_password"
+        assert plugin.host == "smtp.gmail.com"
+        assert plugin.port == 587
+        assert plugin.from_addr[1] == "sender@gmail.com"
+        assert [target[1] for target in plugin.targets] == ["recipient@example.com"]
 
     def test_build_email_url_no_tls(self):
         """Test email URL building without TLS."""
@@ -134,9 +141,39 @@ class TestChannelURLBuilders:
             "use_tls": False,
         }
         url = _build_email_url(config)
+        plugin = apprise.Apprise.instantiate(url)
 
         assert url.startswith("mailto://")
-        assert "localhost:25" in url
+        assert plugin is not None
+        assert plugin.user == "user"
+        assert plugin.password == "pass"
+        assert plugin.host == "localhost"
+        assert plugin.port == 25
+        assert [target[1] for target in plugin.targets] == ["to@example.com"]
+
+    @pytest.mark.parametrize(
+        "password",
+        ["abcd efgh ijkl mnop", "p@ss:w/rd#?&%+"],
+    )
+    def test_build_email_url_encodes_reserved_characters(self, password):
+        """Passwords with spaces and URL-reserved characters round-trip exactly."""
+        config = {
+            "smtp_host": "smtp.gmail.com",
+            "smtp_port": 587,
+            "smtp_user": "user@gmail.com",
+            "smtp_password": password,
+            "from_email": "sender@gmail.com",
+            "to_email": "recipient@example.com",
+            "use_tls": True,
+        }
+        plugin = apprise.Apprise.instantiate(_build_email_url(config))
+
+        assert plugin is not None
+        assert plugin.user == "user@gmail.com"
+        assert plugin.password == password
+        assert plugin.host == "smtp.gmail.com"
+        assert plugin.port == 587
+        assert [target[1] for target in plugin.targets] == ["recipient@example.com"]
 
     def test_build_gotify_url_https(self):
         """Test Gotify URL building with HTTPS."""
