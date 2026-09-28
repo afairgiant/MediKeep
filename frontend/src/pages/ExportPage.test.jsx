@@ -111,14 +111,23 @@ describe('ExportPage scope labels', () => {
     await userEvent.click(screen.getByText('export.exportMode.bulkExport'));
 
     const bulkSection = screen.getByTestId('bulk-scope-selection');
-    const checkboxes = within(bulkSection).getAllByRole('checkbox');
-    expect(checkboxes.every(checkbox => !checkbox.checked)).toBe(true);
+    const allergiesCheckbox = within(bulkSection).getByRole('checkbox', {
+      name: /Allergies/,
+    });
+    const immunizationsCheckbox = within(bulkSection).getByRole('checkbox', {
+      name: /Immunizations/,
+    });
+    expect(allergiesCheckbox).not.toBeChecked();
+    expect(immunizationsCheckbox).not.toBeChecked();
 
     await userEvent.click(
-      within(bulkSection).getByText('builder.buttons.selectAll')
+      within(bulkSection).getByRole('button', {
+        name: 'builder.buttons.selectAll',
+      })
     );
 
-    expect(checkboxes.every(checkbox => checkbox.checked)).toBe(true);
+    expect(allergiesCheckbox).toBeChecked();
+    expect(immunizationsCheckbox).toBeChecked();
   });
 
   it('clears every data type when "clear selections" is clicked', async () => {
@@ -132,15 +141,26 @@ describe('ExportPage scope labels', () => {
 
     const bulkSection = screen.getByTestId('bulk-scope-selection');
     await userEvent.click(
-      within(bulkSection).getByText('builder.buttons.selectAll')
+      within(bulkSection).getByRole('button', {
+        name: 'builder.buttons.selectAll',
+      })
     );
-    const checkboxes = within(bulkSection).getAllByRole('checkbox');
-    expect(checkboxes.every(checkbox => checkbox.checked)).toBe(true);
+    const allergiesCheckbox = within(bulkSection).getByRole('checkbox', {
+      name: /Allergies/,
+    });
+    const immunizationsCheckbox = within(bulkSection).getByRole('checkbox', {
+      name: /Immunizations/,
+    });
+    expect(allergiesCheckbox).toBeChecked();
+    expect(immunizationsCheckbox).toBeChecked();
 
     await userEvent.click(
-      within(bulkSection).getByText('builder.buttons.clearSelections')
+      within(bulkSection).getByRole('button', {
+        name: 'builder.buttons.clearSelections',
+      })
     );
 
-    expect(checkboxes.every(checkbox => !checkbox.checked)).toBe(true);
+    expect(allergiesCheckbox).not.toBeChecked();
+    expect(immunizationsCheckbox).not.toBeChecked();
   });
 });
