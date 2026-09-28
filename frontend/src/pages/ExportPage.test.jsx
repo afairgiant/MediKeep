@@ -91,9 +91,7 @@ describe('ExportPage scope labels', () => {
       screen.getByText('export.exportMode.bulkExport')
     );
 
-    const bulkSection = screen
-      .getByText('export.configuration.bulkSelection.label')
-      .closest('div');
+    const bulkSection = screen.getByTestId('bulk-scope-selection');
 
     expect(
       within(bulkSection).getByText(/Immunizations \(0\)/)
@@ -101,5 +99,48 @@ describe('ExportPage scope labels', () => {
     expect(
       within(bulkSection).queryByText(/exportPage\.scopes\./)
     ).not.toBeInTheDocument();
+  });
+
+  it('selects every data type when "select all" is clicked', async () => {
+    renderExportPage();
+
+    await waitFor(() =>
+      expect(exportService.getSupportedFormats).toHaveBeenCalled()
+    );
+
+    await userEvent.click(screen.getByText('export.exportMode.bulkExport'));
+
+    const bulkSection = screen.getByTestId('bulk-scope-selection');
+    const checkboxes = within(bulkSection).getAllByRole('checkbox');
+    expect(checkboxes.every(checkbox => !checkbox.checked)).toBe(true);
+
+    await userEvent.click(
+      within(bulkSection).getByText('builder.buttons.selectAll')
+    );
+
+    expect(checkboxes.every(checkbox => checkbox.checked)).toBe(true);
+  });
+
+  it('clears every data type when "clear selections" is clicked', async () => {
+    renderExportPage();
+
+    await waitFor(() =>
+      expect(exportService.getSupportedFormats).toHaveBeenCalled()
+    );
+
+    await userEvent.click(screen.getByText('export.exportMode.bulkExport'));
+
+    const bulkSection = screen.getByTestId('bulk-scope-selection');
+    await userEvent.click(
+      within(bulkSection).getByText('builder.buttons.selectAll')
+    );
+    const checkboxes = within(bulkSection).getAllByRole('checkbox');
+    expect(checkboxes.every(checkbox => checkbox.checked)).toBe(true);
+
+    await userEvent.click(
+      within(bulkSection).getByText('builder.buttons.clearSelections')
+    );
+
+    expect(checkboxes.every(checkbox => !checkbox.checked)).toBe(true);
   });
 });
