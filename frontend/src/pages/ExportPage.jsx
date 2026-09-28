@@ -17,25 +17,17 @@ import {
   Checkbox,
   Alert,
   Loader,
-  Grid,
-  Card,
-  Badge,
   Divider,
-  ActionIcon,
   Box,
-  Collapse,
 } from '@mantine/core';
 import MedicalPageLoading from '../components/shared/MedicalPageLoading';
 import {
   IconDownload,
-  IconChartBar,
   IconSettings,
   IconInfoCircle,
   IconAlertTriangle,
   IconCheck,
   IconArchive,
-  IconChevronDown,
-  IconChevronUp,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { exportService } from '../services/exportService';
@@ -52,7 +44,6 @@ const ExportPage = () => {
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   // Export configuration
   const [exportConfig, setExportConfig] = useState({
@@ -347,110 +338,6 @@ const ExportPage = () => {
             {success}
           </Alert>
         )}
-
-        {/* Data Summary - Compact Version */}
-        <Paper shadow="sm" p={{ base: 'md', sm: 'xl' }} radius="md" withBorder>
-          <Group justify="space-between" mb={{ base: 'xs', sm: 'lg' }}>
-            <Group gap="xs">
-              <IconChartBar size={20} />
-              <Title order={{ base: 3, sm: 2 }}>
-                {t('export.availableData.title')}
-              </Title>
-            </Group>
-            <ActionIcon
-              variant="subtle"
-              onClick={() => setSummaryExpanded(!summaryExpanded)}
-              size={{ base: 'sm', sm: 'md' }}
-            >
-              {summaryExpanded ? (
-                <IconChevronUp size={18} />
-              ) : (
-                <IconChevronDown size={18} />
-              )}
-            </ActionIcon>
-          </Group>
-
-          {/* Mobile: Show compact inline summary */}
-          <Box hiddenFrom="sm">
-            <Group gap="xs" wrap="wrap">
-              {formats.scopes
-                ?.filter(scope => scope.value !== 'all')
-                .slice(0, summaryExpanded ? undefined : 3)
-                .map(scope => (
-                  <Badge
-                    key={scope.value}
-                    size="lg"
-                    variant="light"
-                    leftSection={
-                      <Text size="sm" fw={700}>
-                        {getRecordCount(scope.value)}
-                      </Text>
-                    }
-                  >
-                    {scope.label}
-                  </Badge>
-                ))}
-              {!summaryExpanded &&
-                formats.scopes?.filter(scope => scope.value !== 'all').length >
-                  3 && (
-                  <Text size="xs" c="dimmed">
-                    {t('shared:labels.countMore', {
-                      count:
-                        formats.scopes.filter(scope => scope.value !== 'all')
-                          .length - 3,
-                    })}
-                  </Text>
-                )}
-            </Group>
-          </Box>
-
-          {/* Desktop: Show full grid or collapsed summary */}
-          <Box visibleFrom="sm">
-            <Collapse in={summaryExpanded}>
-              <Grid>
-                {formats.scopes
-                  ?.filter(scope => scope.value !== 'all')
-                  .map(scope => (
-                    <Grid.Col
-                      key={scope.value}
-                      span={{ base: 12, xs: 6, sm: 4, md: 3 }}
-                    >
-                      <Card withBorder p="md" radius="md">
-                        <Stack align="center" gap="xs">
-                          <Text size="xl" fw={700} c="primary">
-                            {getRecordCount(scope.value)}
-                          </Text>
-                          <Text size="sm" ta="center" c="dimmed">
-                            {scope.label}
-                          </Text>
-                        </Stack>
-                      </Card>
-                    </Grid.Col>
-                  ))}
-              </Grid>
-            </Collapse>
-            {!summaryExpanded && (
-              <Group gap="sm" wrap="wrap">
-                {formats.scopes
-                  ?.filter(scope => scope.value !== 'all')
-                  .map(scope => (
-                    <Badge
-                      key={scope.value}
-                      size="lg"
-                      variant="light"
-                      leftSection={
-                        <Text size="sm" fw={700}>
-                          {getRecordCount(scope.value)}
-                        </Text>
-                      }
-                    >
-                      {scope.label}
-                    </Badge>
-                  ))}
-              </Group>
-            )}
-          </Box>
-        </Paper>
 
         {/* Export Mode Toggle */}
         <Paper shadow="sm" p="xl" radius="md" withBorder>
