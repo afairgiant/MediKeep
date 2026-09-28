@@ -19,6 +19,7 @@ import {
   Loader,
   Divider,
   Box,
+  Input,
 } from '@mantine/core';
 import MedicalPageLoading from '../components/shared/MedicalPageLoading';
 import {
@@ -247,6 +248,17 @@ const ExportPage = () => {
     }
   };
 
+  const handleSelectAllScopes = () => {
+    const allScopeValues = (formats.scopes || [])
+      .filter(scope => scope.value !== 'all')
+      .map(scope => scope.value);
+    setSelectedScopes(allScopeValues);
+  };
+
+  const handleClearScopeSelections = () => {
+    setSelectedScopes([]);
+  };
+
   const getRecordCount = scopeValue => {
     if (!summary || !summary.counts) return 0;
     return summary.counts[scopeValue] || 0;
@@ -411,10 +423,40 @@ const ExportPage = () => {
                 }
               />
             ) : (
-              <Box>
-                <Text fw={500} size="sm" mb="xs">
+              <Box data-testid="bulk-scope-selection">
+                <Input.Label
+                  mb="xs"
+                  style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}
+                >
                   {t('export.configuration.bulkSelection.label')}
-                </Text>
+                </Input.Label>
+                <Group gap="xs" mb="xs">
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    onClick={handleSelectAllScopes}
+                    disabled={
+                      !formats.scopes?.length ||
+                      formats.scopes
+                        .filter(scope => scope.value !== 'all')
+                        .every(scope => selectedScopes.includes(scope.value))
+                    }
+                  >
+                    {t('builder.buttons.selectAll')}
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    color="red"
+                    onClick={handleClearScopeSelections}
+                    disabled={
+                      selectedScopes.filter(scope => scope !== 'all')
+                        .length === 0
+                    }
+                  >
+                    {t('builder.buttons.clearSelections')}
+                  </Button>
+                </Group>
                 <Stack gap="xs">
                   {formats.scopes
                     ?.filter(scope => scope.value !== 'all')
