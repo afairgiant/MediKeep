@@ -261,13 +261,6 @@ const ExportPage = () => {
     return summary.counts[scopeValue] || 0;
   };
 
-  // Translate scope labels from backend
-  const translateScopeLabel = scopeValue => {
-    // Try to get translation, fallback to original label if translation doesn't exist
-    const translationKey = `exportPage.scopes.${scopeValue}`;
-    return t(translationKey);
-  };
-
   const clearAlerts = () => {
     setError(null);
     setSuccess(null);
@@ -394,7 +387,7 @@ const ExportPage = () => {
                       </Text>
                     }
                   >
-                    {translateScopeLabel(scope.value)}
+                    {scope.label}
                   </Badge>
                 ))}
               {!summaryExpanded &&
@@ -428,7 +421,7 @@ const ExportPage = () => {
                             {getRecordCount(scope.value)}
                           </Text>
                           <Text size="sm" ta="center" c="dimmed">
-                            {translateScopeLabel(scope.value)}
+                            {scope.label}
                           </Text>
                         </Stack>
                       </Card>
@@ -451,7 +444,7 @@ const ExportPage = () => {
                         </Text>
                       }
                     >
-                      {translateScopeLabel(scope.value)}
+                      {scope.label}
                     </Badge>
                   ))}
               </Group>
@@ -526,7 +519,7 @@ const ExportPage = () => {
                     ?.filter(scope => scope.value !== 'all')
                     .map(scope => ({
                       value: scope.value,
-                      label: `${translateScopeLabel(scope.value)} (${getRecordCount(scope.value)} records)`,
+                      label: `${scope.label} (${getRecordCount(scope.value)} records)`,
                     })) || []
                 }
               />
@@ -541,7 +534,7 @@ const ExportPage = () => {
                     .map(scope => (
                       <Checkbox
                         key={scope.value}
-                        label={`${translateScopeLabel(scope.value)} (${getRecordCount(scope.value)})`}
+                        label={`${scope.label} (${getRecordCount(scope.value)})`}
                         checked={selectedScopes.includes(scope.value)}
                         onChange={() => handleScopeToggle(scope.value)}
                       />
