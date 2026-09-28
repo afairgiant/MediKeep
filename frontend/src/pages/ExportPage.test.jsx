@@ -58,17 +58,22 @@ describe('ExportPage scope labels', () => {
     });
   });
 
-  it('renders human-readable scope labels, not raw i18n keys', async () => {
+  it('renders human-readable scope labels in the single-export dropdown, not raw i18n keys', async () => {
     renderExportPage();
 
     await waitFor(() =>
       expect(exportService.getSupportedFormats).toHaveBeenCalled()
     );
 
-    expect((await screen.findAllByText('Immunizations')).length).toBeGreaterThan(
-      0
+    const scopeSelect = await screen.findByPlaceholderText(
+      'export.configuration.dataToExport.placeholder'
     );
-    expect(screen.getAllByText('Allergies').length).toBeGreaterThan(0);
+    await userEvent.click(scopeSelect);
+
+    expect(
+      await screen.findByText('Immunizations (0 records)')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Allergies (0 records)')).toBeInTheDocument();
 
     expect(
       screen.queryByText(/exportPage\.scopes\./)
