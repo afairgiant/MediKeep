@@ -76,6 +76,8 @@
     "noRecords": "Brak dostępnych rekordów",
     "recordCount": "{{count}} rekordów",
     "recordCount_one": "{{count}} rekord",
+    "recordCount_few": "{{count}} rekordy",
+    "recordCount_many": "{{count}} rekordów",
     "recordCount_other": "{{count}} rekordów",
     "selected": "{{count}} wybranych",
     "selected_one": "{{count}} wybrany",
