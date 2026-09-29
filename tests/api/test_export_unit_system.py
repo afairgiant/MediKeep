@@ -7,11 +7,16 @@ Tests cover:
 3. BulkExportRequest validation
 """
 
+from datetime import date
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
-from app.api.v1.endpoints.export import BulkExportRequest, ExportFormat
+from app.api.v1.endpoints.export import BulkExportRequest, ExportFormat, ExportScope
+from app.models.procedures import MedicalEquipment
+from app.services.export_service import ExportService
 
 
 class TestBulkExportRequestValidation:
@@ -118,6 +123,67 @@ class TestExportEndpointUnitSystemParameter:
         )
         # Should use imperial by default
         assert response.status_code in [200, 400]
+
+
+class TestExportFormatsScopesCoverage:
+    """Ensures the /export/formats scope list stays in sync with ExportScope.
+
+    Regression test for issue #1069: medical_equipment was fully supported by
+    ExportService (JSON/CSV/PDF) but missing from ExportScope and the /formats
+    scopes list, so it never appeared as an option in the export dialog.
+    """
+
+    def test_medical_equipment_is_a_valid_scope(self):
+        """medical_equipment must be a member of ExportScope."""
+        assert ExportScope.MEDICAL_EQUIPMENT == "medical_equipment"
+
+    def test_formats_scopes_match_export_scope_enum(self, client: TestClient):
+        """Every non-'all' ExportScope value must appear in /export/formats,
+        and vice versa, so the dialog never silently omits a supported scope."""
+        response = client.get("/api/v1/export/formats")
+        assert response.status_code == 200
+
+        data = response.json()
+        formats_scope_values = {
+            scope["value"] for scope in data["scopes"] if scope["value"] != "all"
+        }
+        enum_scope_values = {
+            scope.value for scope in ExportScope if scope != ExportScope.ALL
+        }
+
+        assert formats_scope_values == enum_scope_values
+
+    def test_medical_equipment_in_formats_scopes(self, client: TestClient):
+        """medical_equipment must be listed as a selectable export scope."""
+        response = client.get("/api/v1/export/formats")
+        assert response.status_code == 200
+
+        scopes = {scope["value"]: scope for scope in response.json()["scopes"]}
+        assert "medical_equipment" in scopes
+        assert scopes["medical_equipment"]["label"]
+        assert scopes["medical_equipment"]["description"]
+
+
+class TestApplyDateFilterMedicalEquipment:
+    """Regression test for issue #1069: medical equipment date-range exports
+    must filter by prescribed_date (the clinically relevant date), not fall
+    through to created_at (when the record was entered into the system)."""
+
+    def test_uses_prescribed_date_not_created_at(self, db_session):
+        export_service = ExportService(db_session)
+        query = MagicMock()
+        query.filter.return_value = query
+
+        export_service._apply_date_filter(
+            query, MedicalEquipment, date(2024, 1, 1), date(2024, 12, 31)
+        )
+
+        assert query.filter.call_count == 2
+        for call in query.filter.call_args_list:
+            (expr,) = call.args
+            compiled = str(expr)
+            assert "prescribed_date" in compiled
+            assert "created_at" not in compiled
 
 
 class TestExportDataStructure:
