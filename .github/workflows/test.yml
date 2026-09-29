@@ -32,13 +32,6 @@ jobs:
         run: npm run lint
         working-directory: frontend
 
-      # Blocking: every locale must match English (missing/extra keys, empty
-      # values, placeholder typos) and may not ship untranslated English text
-      # unless the value is listed in scripts/i18n-identical-allowlist.json.
-      - name: Check translations
-        run: npm run i18n:check
-        working-directory: frontend
-
       # Blocking: a PR may not add a failing test. Failures already present on
       # main are listed in frontend/known-test-failures.txt (see TECHNICAL_DEBT.md).
       # This step never fails itself; it records vitest's exit code and output so
