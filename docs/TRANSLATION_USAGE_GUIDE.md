@@ -1058,7 +1058,7 @@ The check compares every locale in `public/locales` with English and fails on:
 - **Missing keys.** Plural keys (`_one`, `_other`) are only required where the locale uses that form, so Thai and Chinese need `_other` only.
 - **Extra keys** that English does not have. Plural forms valid for the locale (for example Polish and Russian `_few` and `_many`) are allowed.
 - **Empty values.**
-- **Placeholder problems:** a `{{placeholder}}` English does not have, or unbalanced braces such as `{{type}`. Dropping a placeholder is allowed (for example `{{verb}}`).
+- **Placeholder problems:** a `{{placeholder}}` English does not have, or unbalanced braces such as `{{type}`. Dropping a placeholder is rejected by default. The only exceptions are `{{verb}}` (an English grammar slot), which may be dropped on any key, and `{{count}}`, which may be dropped only on the singular plural forms `_one`, `_zero` and `_two` (for example "one file" instead of "{{count}} file").
 - **Values identical to English.** URLs, emails, acronyms and single technical tokens are exempt automatically. Anything else must either be translated or be listed in `frontend/scripts/i18n-identical-allowlist.json`, keyed by locale (`"*"` applies to every locale). Only add a value after confirming the English word is correct in that language, for example "Status" in German.
 
 `npm run i18n:fix` copies missing keys from English as placeholders. Those copies fail the identical-to-English check until they are translated, so replace them before committing.
