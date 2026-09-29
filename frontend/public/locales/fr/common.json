@@ -1050,7 +1050,7 @@
     "popularTags": "Etiquettes populaires",
     "previewRecord": "Aperçu de la donnée",
     "recordTypes": "Types de données",
-    "removeTypeFilter": "Retirer le filtre : {{type}",
+    "removeTypeFilter": "Retirer le filtre : {{type}}",
     "resultCount": "{{count}} résultat(s)",
     "resultCount_one": "{{count}} résultat",
     "resultCount_other": "{{count}} résultats",
