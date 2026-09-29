@@ -132,9 +132,9 @@
     "linkConditionsDescription": "Koppel dit labresultaat aan relevante medische aandoeningen voor betere tracking en organisatie.",
     "linkConditionsTitle": "Medische aandoeningen koppelen",
     "linkedVisits": "Gekoppelde consulten",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "Koppelen aan medicatie",
+    "linkProceduresTitle": "Koppelen aan ingrepen",
+    "linkTreatmentsTitle": "Koppelen aan behandelingen",
     "linkVisitsDescription": "Koppel dit labresultaat aan consulten waarbij het is aangevraagd of beoordeeld.",
     "linkVisitsTitle": "Koppelen aan consulten",
     "matchedCommonName": "overeenkomst: {{name}}",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Als u van modus wisselt, gaat wat u tot nu toe hebt ingevoerd verloren. Doorgaan?",
     "noRelationshipsAvailable": "Geen medische aandoeningen of bezoeken geregistreerd. Voeg deze eerst toe om ze hier te koppelen.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "Er zijn geen aandoeningen, consulten, medicatie, ingrepen of behandelingen vastgelegd voor deze patiënt.",
     "relationshipsCreateInfo": "Koppelingen kunnen worden toegevoegd na het opslaan van het labresultaat.",
     "relationshipsSaveFirst": "Sla het labresultaat eerst op om koppelingen aan te maken.",
     "testComponentsEditInfo": "Testcomponenten kunnen na het opslaan worden beheerd via de weergavepagina."
@@ -220,7 +220,13 @@
     "addCondition": "Aandoening toevoegen",
     "addVisit": "Bezoek toevoegen",
     "removeCondition": "Aandoening verwijderen",
-    "removeVisit": "Bezoek verwijderen"
+    "removeVisit": "Bezoek verwijderen",
+    "addMedication": "Medicatie toevoegen",
+    "addProcedure": "Ingreep toevoegen",
+    "addTreatment": "Behandeling toevoegen",
+    "removeMedication": "Medicatie verwijderen",
+    "removeProcedure": "Ingreep verwijderen",
+    "removeTreatment": "Behandeling verwijderen"
   },
   "quickFormInstructions": "Voer een naam in voor dit labresultaat, daarna kunt u uw PDF uploaden en verwerken.",
   "quickImportModalTitle": "Snelle PDF-import - Stap {{step}} van 2",
@@ -433,7 +439,8 @@
     "noComponentsDescription": "Dit labresultaat heeft nog geen tests.",
     "notifications": {
       "componentDeleted": "Component verwijderd",
-      "hasBeenDeleted": "{{name}} is verwijderd"
+      "hasBeenDeleted": "{{name}} is verwijderd",
+      "legacyResultNotFound": "Kan het te bewerken labresultaat niet vinden"
     },
     "refreshComponents": "Componenten vernieuwen",
     "resultType": {
@@ -537,5 +544,6 @@
   "unsavedDataInstructions": "Klik op \"Componenten toevoegen\" in het tabblad Voorbeeld om uw verwerkte gegevens op te slaan voordat u sluit.",
   "unsavedDataMessage_one": "U heeft {{count}} verwerkt testcomponent dat nog niet is toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
   "unsavedDataMessage_other": "U heeft {{count}} verwerkte testcomponenten die nog niet zijn toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
-  "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens"
+  "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens",
+  "bulkImport": "Bulkimport"
 }

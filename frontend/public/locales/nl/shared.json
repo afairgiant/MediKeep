@@ -1,8 +1,8 @@
 {
   "buttons": {
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View"
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "view": "Bekijken"
   },
   "categories": {
     "admin_dashboard": "Beheerderspaneel",
@@ -77,7 +77,7 @@
     "procedureCode": "Procedurecode",
     "procedureName": "Procedurenaam",
     "procedureType": "Proceduretype",
-    "reset": "Reset",
+    "reset": "Resetten",
     "selectGender": "Selecteer geslacht",
     "selectPractitioner": "Selecteer zorgverlener",
     "selectRelationship": "Selecteer relatie",
@@ -250,13 +250,13 @@
     "relatedCondition": "Gerelateerde aandoening",
     "relatedConditions": "Gerelateerde aandoeningen",
     "relationship": "Relatie",
-    "remove": "Remove",
+    "remove": "Verwijderen",
     "resetPassword": "Wachtwoord herstellen",
     "resolved": "Opgelost",
     "retry": "Opnieuw proberen",
     "role": "Rol",
     "route": "Toedieningsweg",
-    "save": "Save",
+    "save": "Opslaan",
     "saving": "Opslaan...",
     "selectCategory": "Selecteer categorie",
     "selectPractitioner": "Selecteer zorgverlener",
@@ -273,11 +273,11 @@
     "showingCountUniqueTests_other": "{{count}} unieke tests weergegeven",
     "sideEffects": "Bijwerkingen",
     "size": "Grootte",
-    "sortBy": "Sort by",
+    "sortBy": "Sorteren op",
     "specialties": "Specialismen",
     "specialty": "Specialisme",
     "startDate": "Startdatum",
-    "state": "State",
+    "state": "Staat/provincie",
     "stateProvince": "Provincie",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Aantalbeveiliging:</strong> Bewaar altijd de {{count}} meest recente back-ups",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Aantalbeveiliging:</strong> Bewaar altijd de {{count}} meest recente back-up",
@@ -331,11 +331,11 @@
     "episodesCount_one": "Episode ({{count}})",
     "episodesCount_other": "Episoden ({{count}})",
     "labResults": "Laboratoriumresultaten",
-    "medications": "Medications",
+    "medications": "Medicatie",
     "notes": "Notities",
     "overview": "Overzicht",
-    "procedures": "Procedures",
-    "treatments": "Treatments",
+    "procedures": "Ingrepen",
+    "treatments": "Behandelingen",
     "visits": "Consulten"
   }
 }

@@ -1,8 +1,8 @@
 {
   "buttons": {
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View"
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "view": "Zobacz"
   },
   "categories": {
     "admin_dashboard": "Pulpit administratora",
@@ -77,7 +77,7 @@
     "procedureCode": "Kod procedury",
     "procedureName": "Nazwa procedury",
     "procedureType": "Typ procedury",
-    "reset": "Reset",
+    "reset": "Resetuj",
     "selectGender": "Wybierz płeć",
     "selectPractitioner": "Wybierz lekarza",
     "selectRelationship": "Wybierz pokrewieństwo",
@@ -250,13 +250,13 @@
     "relatedCondition": "Powiązane schorzenie",
     "relatedConditions": "Powiązane schorzenia",
     "relationship": "Pokrewieństwo",
-    "remove": "Remove",
+    "remove": "Usuń",
     "resetPassword": "Zresetuj hasło",
     "resolved": "Rozwiązane",
     "retry": "Spróbuj ponownie",
     "role": "Rola",
     "route": "Droga podania",
-    "save": "Save",
+    "save": "Zapisz",
     "saving": "Zapisywanie...",
     "selectCategory": "Wybierz kategorię",
     "selectPractitioner": "Wybierz lekarza",
@@ -273,11 +273,11 @@
     "showingCountUniqueTests_other": "Wyświetlanie {{count}} unikalnych badań",
     "sideEffects": "Skutki uboczne",
     "size": "Rozmiar",
-    "sortBy": "Sort by",
+    "sortBy": "Sortuj według",
     "specialties": "Specjalizacje",
     "specialty": "Specjalizacja",
     "startDate": "Data rozpoczęcia",
-    "state": "State",
+    "state": "Stan/województwo",
     "stateProvince": "Województwo/stan",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Ochrona ilościowa:</strong> Zawsze przechowuj {{count}} najnowszych kopii zapasowych",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Ochrona ilościowa:</strong> Zawsze przechowuj {{count}} najnowszą kopię zapasową",
@@ -331,11 +331,11 @@
     "episodesCount_one": "Epizody ({{count}})",
     "episodesCount_other": "Epizody ({{count}})",
     "labResults": "Wyniki laboratoryjne",
-    "medications": "Medications",
+    "medications": "Leki",
     "notes": "Notatki",
     "overview": "Przegląd",
-    "procedures": "Procedures",
-    "treatments": "Treatments",
+    "procedures": "Procedury",
+    "treatments": "Leczenie",
     "visits": "Wizyty"
   }
 }

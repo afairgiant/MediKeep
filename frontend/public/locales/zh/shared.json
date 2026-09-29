@@ -1,8 +1,8 @@
 {
   "buttons": {
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View"
+    "delete": "删除",
+    "edit": "编辑",
+    "view": "查看"
   },
   "categories": {
     "admin_dashboard": "管理员仪表板",
@@ -77,7 +77,7 @@
     "procedureCode": "程序编码",
     "procedureName": "程序名称",
     "procedureType": "程序类型",
-    "reset": "Reset",
+    "reset": "重置",
     "selectGender": "选择性别",
     "selectPractitioner": "选择医师",
     "selectRelationship": "选择关系",
@@ -250,13 +250,13 @@
     "relatedCondition": "相关疾病",
     "relatedConditions": "相关疾病",
     "relationship": "关系",
-    "remove": "Remove",
+    "remove": "移除",
     "resetPassword": "重置密码",
     "resolved": "已解决",
     "retry": "重试",
     "role": "角色",
     "route": "给药途径",
-    "save": "Save",
+    "save": "保存",
     "saving": "保存中...",
     "selectCategory": "选择分类",
     "selectPractitioner": "选择医师",
@@ -273,11 +273,11 @@
     "showingCountUniqueTests_other": "显示 {{count}} 项独特检测",
     "sideEffects": "副作用",
     "size": "大小",
-    "sortBy": "Sort by",
+    "sortBy": "排序方式",
     "specialties": "专科",
     "specialty": "专科",
     "startDate": "开始日期",
-    "state": "State",
+    "state": "州/省",
     "stateProvince": "州/省",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>数量保护：</strong>始终保留最近的 {{count}} 个备份",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>数量保护：</strong>始终保留最近的 {{count}} 个备份",
@@ -331,11 +331,11 @@
     "episodesCount_one": "病程（{{count}}）",
     "episodesCount_other": "病程（{{count}}）",
     "labResults": "化验结果",
-    "medications": "Medications",
+    "medications": "药物",
     "notes": "记录",
     "overview": "概览",
-    "procedures": "Procedures",
-    "treatments": "Treatments",
+    "procedures": "手术",
+    "treatments": "治疗",
     "visits": "就诊"
   }
 }

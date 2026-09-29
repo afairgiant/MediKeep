@@ -132,9 +132,9 @@
     "linkConditionsDescription": "Свяжите этот результат исследования с соответствующими медицинскими состояниями для лучшего отслеживания и организации.",
     "linkConditionsTitle": "Связать медицинские состояния",
     "linkedVisits": "Связанные визиты",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "Связать с лекарствами",
+    "linkProceduresTitle": "Связать с процедурами",
+    "linkTreatmentsTitle": "Связать с лечением",
     "linkVisitsDescription": "Свяжите этот результат исследования с визитами, во время которых он был назначен или рассмотрен.",
     "linkVisitsTitle": "Связать с визитами",
     "matchedCommonName": "совпадение: {{name}}",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "При переключении режима введённые данные будут потеряны. Продолжить?",
     "noRelationshipsAvailable": "Нет зарегистрированных заболеваний или визитов. Сначала добавьте их, чтобы создать связи здесь.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "Для этого пациента нет записей о заболеваниях, визитах, лекарствах, процедурах или лечении.",
     "relationshipsCreateInfo": "Связи можно добавить после сохранения результата исследования.",
     "relationshipsSaveFirst": "Сначала сохраните результат исследования, чтобы создать связи.",
     "testComponentsEditInfo": "Компонентами тестов можно управлять со страницы просмотра после сохранения."
@@ -220,7 +220,13 @@
     "addCondition": "Добавить заболевание",
     "addVisit": "Добавить визит",
     "removeCondition": "Удалить заболевание",
-    "removeVisit": "Удалить визит"
+    "removeVisit": "Удалить визит",
+    "addMedication": "Добавить лекарство",
+    "addProcedure": "Добавить процедуру",
+    "addTreatment": "Добавить лечение",
+    "removeMedication": "Удалить лекарство",
+    "removeProcedure": "Удалить процедуру",
+    "removeTreatment": "Удалить лечение"
   },
   "quickFormInstructions": "Введите название для этого результата исследования, затем вы сможете загрузить и обработать ваш PDF.",
   "quickImportModalTitle": "Быстрый импорт PDF - Шаг {{step}} из 2",
@@ -433,7 +439,8 @@
     "noComponentsDescription": "Этот результат исследования пока не имеет отдельных тестов.",
     "notifications": {
       "componentDeleted": "Компонент удален",
-      "hasBeenDeleted": "{{name}} был удален"
+      "hasBeenDeleted": "{{name}} был удален",
+      "legacyResultNotFound": "Не удалось найти результат исследования для редактирования"
     },
     "refreshComponents": "Обновить компоненты",
     "resultType": {
@@ -537,5 +544,6 @@
   "unsavedDataInstructions": "Нажмите \"Добавить компоненты\" на вкладке Просмотр, чтобы сохранить разобранные данные перед закрытием.",
   "unsavedDataMessage_one": "У вас есть {{count}} разобранный компонент теста, который еще не добавлен. Если вы закроете сейчас, эти разобранные данные будут потеряны.",
   "unsavedDataMessage_other": "У вас есть {{count}} разобранных компонентов тестов, которые еще не добавлены. Если вы закроете сейчас, эти разобранные данные будут потеряны.",
-  "unsavedDataWarning": "Несохраненные разобранные данные"
+  "unsavedDataWarning": "Несохраненные разобранные данные",
+  "bulkImport": "Массовый импорт"
 }

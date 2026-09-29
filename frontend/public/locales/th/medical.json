@@ -79,7 +79,6 @@
     "fetchError": "ไม่สามารถโหลดรายการผลตรวจได้",
     "noData": "เพิ่มผลตรวจแล็บเพื่อดูที่นี่",
     "noResults": "ไม่พบผลตรวจแล็บ",
-    "readingCount_one": "{{count}} reading",
     "refRange": "ค่าอ้างอิง",
     "searchPlaceholder": "ค้นหาการตรวจ...",
     "sort": {
@@ -886,7 +885,7 @@
       "addMedication": "เพิ่มยา",
       "conditionLinkFailed": "บันทึกยาแล้ว แต่ไม่สามารถเชื่อมโยงโรคบางโรคได้ คุณสามารถเชื่อมโยงได้ในภายหลังโดยแก้ไขยา",
       "conditionLinkPartialFailure": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
-      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
+      "conditionLinkPartialFailure_one": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
       "conditionLinkPartialFailure_other": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
       "linkConditionsDescription": "เชื่อมโยงยานี้กับโรคที่มีอยู่ (ไม่จำเป็น)",
       "noConditionsFound": "ไม่พบโรค",

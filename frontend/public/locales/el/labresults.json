@@ -440,7 +440,8 @@
     "noComponentsDescription": "Αυτό το εργαστηριακό αποτέλεσμα δεν έχει ακόμη καμία εξέταση.",
     "notifications": {
       "componentDeleted": "Το στοιχείο διαγράφηκε",
-      "hasBeenDeleted": "Το {{name}} διαγράφηκε"
+      "hasBeenDeleted": "Το {{name}} διαγράφηκε",
+      "legacyResultNotFound": "Δεν ήταν δυνατή η εύρεση του εργαστηριακού αποτελέσματος προς επεξεργασία"
     },
     "refreshComponents": "Ανανέωση στοιχείων",
     "resultType": {

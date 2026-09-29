@@ -132,9 +132,9 @@
     "linkConditionsDescription": "Powiąż ten wynik laboratoryjny z odpowiednimi schorzeniami dla lepszego śledzenia i organizacji.",
     "linkConditionsTitle": "Powiąż Schorzenia",
     "linkedVisits": "Powiązane Wizyty",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "Połącz z lekami",
+    "linkProceduresTitle": "Połącz z procedurami",
+    "linkTreatmentsTitle": "Połącz z leczeniem",
     "linkVisitsDescription": "Powiąż ten wynik laboratoryjny z wizytami podczas których został zlecony lub przejrzany.",
     "linkVisitsTitle": "Powiąż z Wizytami",
     "matchedCommonName": "dopasowanie: {{name}}",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Zmiana trybu spowoduje utratę dotychczas wprowadzonych danych. Kontynuować?",
     "noRelationshipsAvailable": "Brak zarejestrowanych schorzeń ani wizyt. Dodaj je najpierw, aby połączyć je tutaj.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "Brak zarejestrowanych schorzeń, wizyt, leków, procedur ani leczenia dla tego pacjenta.",
     "relationshipsCreateInfo": "Powiązania można dodać po zapisaniu wyniku laboratoryjnego.",
     "relationshipsSaveFirst": "Najpierw zapisz wynik laboratoryjny aby utworzyć linki powiązań.",
     "testComponentsEditInfo": "Składniki badania można zarządzać ze strony podglądu po zapisaniu."
@@ -220,7 +220,13 @@
     "addCondition": "Dodaj schorzenie",
     "addVisit": "Dodaj wizytę",
     "removeCondition": "Usuń schorzenie",
-    "removeVisit": "Usuń wizytę"
+    "removeVisit": "Usuń wizytę",
+    "addMedication": "Dodaj lek",
+    "addProcedure": "Dodaj procedurę",
+    "addTreatment": "Dodaj leczenie",
+    "removeMedication": "Usuń lek",
+    "removeProcedure": "Usuń procedurę",
+    "removeTreatment": "Usuń leczenie"
   },
   "quickFormInstructions": "Wprowadź nazwę dla tego wyniku laboratoryjnego, następnie będziesz mógł przesłać i sparsować swój PDF.",
   "quickImportModalTitle": "Szybki Import PDF - Krok {{step}} z 2",
@@ -433,7 +439,8 @@
     "noComponentsDescription": "Ten wynik laboratoryjny nie ma jeszcze żadnych badań.",
     "notifications": {
       "componentDeleted": "Składnik usunięty",
-      "hasBeenDeleted": "{{name}} zostało usunięte"
+      "hasBeenDeleted": "{{name}} zostało usunięte",
+      "legacyResultNotFound": "Nie znaleziono wyniku laboratoryjnego do edycji"
     },
     "refreshComponents": "Odśwież składniki",
     "resultType": {
@@ -492,7 +499,7 @@
   "title": "Wyniki Laboratoryjne",
   "trendChart": {
     "highLow": "Wysoki/Niski",
-    "labLabel": "Lab: {{name}}",
+    "labLabel": "Laboratorium: {{name}}",
     "negativeUndetected": "Ujemny/Niewykryty",
     "noDataPoints": "Brak punktów danych do wyświetlenia",
     "notAvailableForTextual": "Wykresy trendów nie są dostępne dla wyników tekstowych.",
@@ -537,5 +544,6 @@
   "unsavedDataInstructions": "Kliknij \"Dodaj Składniki\" w zakładce Podgląd aby zapisać sparsowane dane przed zamknięciem.",
   "unsavedDataMessage_one": "Masz {{count}} sparsowany składnik badania który nie został jeszcze dodany. Jeśli zamkniesz teraz, stracisz te sparsowane dane.",
   "unsavedDataMessage_other": "Masz {{count}} sparsowanych składników badania które nie zostały jeszcze dodane. Jeśli zamkniesz teraz, stracisz te sparsowane dane.",
-  "unsavedDataWarning": "Niezapisane Sparsowane Dane"
+  "unsavedDataWarning": "Niezapisane Sparsowane Dane",
+  "bulkImport": "Import zbiorczy"
 }

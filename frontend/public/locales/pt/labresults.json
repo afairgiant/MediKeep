@@ -132,9 +132,9 @@
     "linkConditionsDescription": "Associe este resultado laboratorial a condições médicas relevantes para melhor acompanhamento e organização.",
     "linkConditionsTitle": "Vincular Condições Médicas",
     "linkedVisits": "Consultas Vinculadas",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "Vincular a medicamentos",
+    "linkProceduresTitle": "Vincular a procedimentos",
+    "linkTreatmentsTitle": "Vincular a tratamentos",
     "linkVisitsDescription": "Associe este resultado laboratorial a consultas onde foi solicitado ou revisado.",
     "linkVisitsTitle": "Vincular a Consultas",
     "matchedCommonName": "correspondência: {{name}}",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Mudar de modo descartará o que você inseriu até agora. Continuar?",
     "noRelationshipsAvailable": "Nenhuma condição médica ou visita registrada. Adicione-as primeiro para vinculá-las aqui.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "Nenhuma condição médica, consulta, medicamento, procedimento ou tratamento registrado para este paciente.",
     "relationshipsCreateInfo": "Relacionamentos podem ser adicionados após salvar o resultado laboratorial.",
     "relationshipsSaveFirst": "Salve o resultado laboratorial primeiro para criar vínculos de relacionamento.",
     "testComponentsEditInfo": "Componentes do exame podem ser gerenciados na página de visualização após salvar."
@@ -220,7 +220,13 @@
     "addCondition": "Adicionar condição",
     "addVisit": "Adicionar visita",
     "removeCondition": "Remover condição",
-    "removeVisit": "Remover visita"
+    "removeVisit": "Remover visita",
+    "addMedication": "Adicionar medicamento",
+    "addProcedure": "Adicionar procedimento",
+    "addTreatment": "Adicionar tratamento",
+    "removeMedication": "Remover medicamento",
+    "removeProcedure": "Remover procedimento",
+    "removeTreatment": "Remover tratamento"
   },
   "quickFormInstructions": "Digite um nome para este resultado laboratorial, então você poderá fazer upload e analisar seu PDF.",
   "quickImportModalTitle": "Importação Rápida de PDF - Etapa {{step}} de 2",
@@ -538,5 +544,6 @@
   "unsavedDataInstructions": "Clique em \"Adicionar Componentes\" na aba Visualizar para salvar seus dados analisados antes de fechar.",
   "unsavedDataMessage_one": "Você possui {{count}} componente(s) de exame analisado(s) que ainda não foram adicionados. Se fechar agora, você perderá estes dados analisados.",
   "unsavedDataMessage_other": "Você possui {{count}} componente(s) de exame analisado(s) que ainda não foram adicionados. Se fechar agora, você perderá estes dados analisados.",
-  "unsavedDataWarning": "Dados Analisados Não Salvos"
+  "unsavedDataWarning": "Dados Analisados Não Salvos",
+  "bulkImport": "Importação em massa"
 }

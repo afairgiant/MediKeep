@@ -132,15 +132,15 @@
     "linkConditionsDescription": "Verknüpfen Sie dieses Laborergebnis mit relevanten medizinischen Bedingungen für bessere Nachverfolgung und Organisation.",
     "linkConditionsTitle": "Medizinische Bedingungen verknüpfen",
     "linkedVisits": "Verknüpfte Besuche",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "Mit Medikamenten verknüpfen",
+    "linkProceduresTitle": "Mit Eingriffen verknüpfen",
+    "linkTreatmentsTitle": "Mit Behandlungen verknüpfen",
     "linkVisitsDescription": "Verknüpfen Sie dieses Laborergebnis mit Besuchen, bei denen es angeordnet oder überprüft wurde.",
     "linkVisitsTitle": "Mit Besuchen verknüpfen",
     "matchedCommonName": "Treffer: {{name}}",
     "notesOptional": "Notizen (optional)",
-    "refMax": "Ref Max",
-    "refMin": "Ref Min",
+    "refMax": "Ref. Max",
+    "refMin": "Ref. Min",
     "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Verknüpfungen konnten nicht erstellt werden. Sie können sie über die Bearbeitungsseite hinzufügen.",
     "removeRow": "Zeile entfernen",
     "result": "Ergebnis",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Beim Wechseln des Modus gehen die bisher eingegebenen Daten verloren. Fortfahren?",
     "noRelationshipsAvailable": "Keine medizinischen Erkrankungen oder Besuche vorhanden. Fügen Sie diese zuerst hinzu, um sie hier zu verknüpfen.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "Für diesen Patienten sind keine Erkrankungen, Besuche, Medikamente, Eingriffe oder Behandlungen erfasst.",
     "relationshipsCreateInfo": "Verknüpfungen können nach dem Speichern des Laborergebnisses hinzugefügt werden.",
     "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Verknüpfungen zu erstellen.",
     "testComponentsEditInfo": "Testkomponenten können nach dem Speichern über die Ansichtsseite verwaltet werden."
@@ -220,7 +220,13 @@
     "addCondition": "Erkrankung hinzufügen",
     "addVisit": "Besuch hinzufügen",
     "removeCondition": "Erkrankung entfernen",
-    "removeVisit": "Besuch entfernen"
+    "removeVisit": "Besuch entfernen",
+    "addMedication": "Medikament hinzufügen",
+    "addProcedure": "Eingriff hinzufügen",
+    "addTreatment": "Behandlung hinzufügen",
+    "removeMedication": "Medikament entfernen",
+    "removeProcedure": "Eingriff entfernen",
+    "removeTreatment": "Behandlung entfernen"
   },
   "quickFormInstructions": "Geben Sie einen Namen für dieses Laborergebnis ein, dann können Sie Ihr PDF hochladen und analysieren.",
   "quickImportModalTitle": "Schneller PDF-Import - Schritt {{step}} von 2",
@@ -242,7 +248,7 @@
     "expandAll": "Alle erweitern",
     "noResults": "Keine Testergebnisse entsprechen den aktuellen Filtern",
     "results": "{{count}} Ergebnis",
-    "results_one": "{{count}} results",
+    "results_one": "{{count}} Ergebnis",
     "results_other": "{{count}} Ergebnisse",
     "source": "Quelle",
     "viewTrends": "Trends anzeigen"
@@ -260,7 +266,7 @@
   },
   "startAdding": "Beginnen Sie mit dem Hinzufügen Ihres ersten Laborergebnisses.",
   "stats": {
-    "abnormal": "Abnormal",
+    "abnormal": "Auffällig",
     "actionRequired": "Handlungsbedarf:",
     "basedOn": "Basierend auf {{count}} Test mit Referenzbereichen",
     "basedOn_one": "Basierend auf {{count}} Test mit Referenzbereichen",
@@ -502,7 +508,7 @@
     "referenceValue": "Referenz: {{min}} - {{max}}"
   },
   "trends": {
-    "abnormalLabel": "Abnormal:",
+    "abnormalLabel": "Auffällig:",
     "average": "Durchschnitt",
     "chart": "Diagramm",
     "dataPoints": "{{count}} Datenpunkte",
@@ -538,5 +544,6 @@
   "unsavedDataInstructions": "Klicken Sie auf \"Komponenten hinzufügen\" im Vorschau-Tab, um Ihre analysierten Daten vor dem Schließen zu speichern.",
   "unsavedDataMessage_one": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurde(n). Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
   "unsavedDataMessage_other": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurden. Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
-  "unsavedDataWarning": "Nicht gespeicherte analysierte Daten"
+  "unsavedDataWarning": "Nicht gespeicherte analysierte Daten",
+  "bulkImport": "Massenimport"
 }

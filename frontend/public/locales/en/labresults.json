@@ -249,7 +249,7 @@
     "expandAll": "Expand All",
     "noResults": "No test results match the current filters",
     "results": "{{count}} result",
-    "results_one": "{{count}} results",
+    "results_one": "{{count}} result",
     "results_other": "{{count}} results",
     "source": "Source",
     "viewTrends": "View trends"

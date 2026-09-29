@@ -1,8 +1,8 @@
 {
   "buttons": {
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View"
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "view": "Просмотр"
   },
   "categories": {
     "admin_dashboard": "Панель администратора",
@@ -77,7 +77,7 @@
     "procedureCode": "Код процедуры",
     "procedureName": "Название процедуры",
     "procedureType": "Тип процедуры",
-    "reset": "Reset",
+    "reset": "Сбросить",
     "selectGender": "Выберите пол",
     "selectPractitioner": "Выберите врача",
     "selectRelationship": "Выберите родство",
@@ -250,13 +250,13 @@
     "relatedCondition": "Связанное заболевание",
     "relatedConditions": "Связанные заболевания",
     "relationship": "Родство",
-    "remove": "Remove",
+    "remove": "Удалить",
     "resetPassword": "Сбросить пароль",
     "resolved": "Вылечено",
     "retry": "Повторить",
     "role": "Роль",
     "route": "Способ введения",
-    "save": "Save",
+    "save": "Сохранить",
     "saving": "Сохранение...",
     "selectCategory": "Выберите категорию",
     "selectPractitioner": "Выберите врача",
@@ -273,11 +273,11 @@
     "showingCountUniqueTests_other": "Показано {{count}} уникальных анализов",
     "sideEffects": "Побочные эффекты",
     "size": "Размер",
-    "sortBy": "Sort by",
+    "sortBy": "Сортировать по",
     "specialties": "Специализации",
     "specialty": "Специализация",
     "startDate": "Дата начала",
-    "state": "State",
+    "state": "Штат/регион",
     "stateProvince": "Область / Регион",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Защита по количеству:</strong> Всегда хранить {{count}} последних резервных копий",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Защита по количеству:</strong> Всегда хранить {{count}} последнюю резервную копию",
@@ -331,11 +331,11 @@
     "episodesCount_one": "Эпизоды ({{count}})",
     "episodesCount_other": "Эпизоды ({{count}})",
     "labResults": "Результаты анализов",
-    "medications": "Medications",
+    "medications": "Лекарства",
     "notes": "Заметки",
     "overview": "Обзор",
-    "procedures": "Procedures",
-    "treatments": "Treatments",
+    "procedures": "Процедуры",
+    "treatments": "Лечение",
     "visits": "Визиты"
   }
 }
