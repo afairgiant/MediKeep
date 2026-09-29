@@ -75,7 +75,7 @@
     "noCategoriesDescription": "No medical data categories are available for report generation.",
     "noRecords": "No records available",
     "recordCount": "{{count}} records",
-    "recordCount_one": "{{count}} records",
+    "recordCount_one": "{{count}} record",
     "recordCount_other": "{{count}} records",
     "selected": "{{count}} selected",
     "selected_one": "{{count}} selected",

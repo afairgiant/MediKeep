@@ -76,6 +76,8 @@
     "noRecords": "Записи недоступны",
     "recordCount": "{{count}} записей",
     "recordCount_one": "{{count}} запись",
+    "recordCount_few": "{{count}} записи",
+    "recordCount_many": "{{count}} записей",
     "recordCount_other": "{{count}} записей",
     "selected": "{{count}} выбрано",
     "selected_one": "{{count}} выбрана",
