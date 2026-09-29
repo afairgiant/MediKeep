@@ -378,6 +378,8 @@ class ExportService:
             date_field = model.start_date
         elif hasattr(model, "recorded_date"):  # Vitals model
             date_field = model.recorded_date
+        elif hasattr(model, "prescribed_date"):  # MedicalEquipment model
+            date_field = model.prescribed_date
         elif hasattr(model, "created_at"):
             date_field = model.created_at
 

@@ -64,6 +64,7 @@ class ExportScope(str, Enum):
     INJURIES = "injuries"
     INSURANCE = "insurance"
     LAB_RESULTS = "lab_results"
+    MEDICAL_EQUIPMENT = "medical_equipment"
     MEDICATIONS = "medications"
     PHARMACIES = "pharmacies"
     PRACTITIONERS = "practitioners"
@@ -570,6 +571,11 @@ async def get_supported_formats():
                 "value": "conditions",
                 "label": "Medical Conditions",
                 "description": "Diagnosed conditions",
+            },
+            {
+                "value": "medical_equipment",
+                "label": "Medical Equipment",
+                "description": "Prescribed and used medical equipment",
             },
             {
                 "value": "medications",
