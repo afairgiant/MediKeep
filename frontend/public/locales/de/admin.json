@@ -518,7 +518,7 @@
     "title": "Praxen"
   },
   "practitioner": {
-    "quickAddSpecialty": "Add new specialty",
+    "quickAddSpecialty": "+ Neues Fachgebiet hinzufügen…",
     "specialtyPlaceholder": "Fachgebiet auswählen",
     "specialtySaved": "Fachgebiet einsatzbereit"
   },

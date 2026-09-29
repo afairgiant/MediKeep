@@ -518,7 +518,7 @@
     "title": "Praktijken"
   },
   "practitioner": {
-    "quickAddSpecialty": "Add new specialty",
+    "quickAddSpecialty": "+ Nieuw specialisme toevoegen…",
     "specialtyPlaceholder": "Selecteer een specialisme",
     "specialtySaved": "Specialisme klaar voor gebruik"
   },

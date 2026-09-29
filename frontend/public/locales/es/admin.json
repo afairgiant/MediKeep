@@ -518,7 +518,7 @@
     "title": "Consultorios"
   },
   "practitioner": {
-    "quickAddSpecialty": "Add new specialty",
+    "quickAddSpecialty": "+ Agregar nueva especialidad…",
     "specialtyPlaceholder": "Seleccione una especialidad",
     "specialtySaved": "Especialidad lista para usar"
   },

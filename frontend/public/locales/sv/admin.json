@@ -518,7 +518,7 @@
     "title": "Mottagningar"
   },
   "practitioner": {
-    "quickAddSpecialty": "Add new specialty",
+    "quickAddSpecialty": "+ Lägg till ny specialitet…",
     "specialtyPlaceholder": "Välj en specialitet",
     "specialtySaved": "Specialiteten är redo att användas"
   },

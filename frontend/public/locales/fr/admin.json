@@ -518,7 +518,7 @@
     "title": "Établissements"
   },
   "practitioner": {
-    "quickAddSpecialty": "Add new specialty",
+    "quickAddSpecialty": "+ Ajouter une nouvelle spécialité…",
     "specialtyPlaceholder": "Sélectionnez une spécialité",
     "specialtySaved": "Spécialité prête à l'emploi"
   },

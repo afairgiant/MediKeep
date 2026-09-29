@@ -518,7 +518,7 @@
     "title": "Studi medici"
   },
   "practitioner": {
-    "quickAddSpecialty": "Add new specialty",
+    "quickAddSpecialty": "+ Aggiungi nuova specialità…",
     "specialtyPlaceholder": "Seleziona una specialità",
     "specialtySaved": "Specialità pronta all'uso"
   },

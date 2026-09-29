@@ -428,7 +428,7 @@
   },
   "medicalSpecialty": {
     "description": "说明",
-    "name": "姓名"
+    "name": "名称"
   },
   "models": {
     "backToDataModels": "返回数据模型",
@@ -518,7 +518,7 @@
     "title": "诊所"
   },
   "practitioner": {
-    "quickAddSpecialty": "Add new specialty",
+    "quickAddSpecialty": "+ 添加新专科…",
     "specialtyPlaceholder": "选择专科",
     "specialtySaved": "专科已可使用"
   },
