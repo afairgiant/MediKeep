@@ -86,7 +86,8 @@
     "treatmentName": "ชื่อการรักษา",
     "treatmentReceived": "การรักษาที่ได้รับ",
     "treatmentType": "ประเภทการรักษา",
-    "vaccineName": "ชื่อวัคซีน"
+    "vaccineName": "ชื่อวัคซีน",
+    "reset": "รีเซ็ต"
   },
   "labels": {
     "acrossCountFiles": "จาก {{count}} ไฟล์",
@@ -304,7 +305,12 @@
     "warnings": "คำเตือน",
     "website": "เว็บไซต์",
     "weekly": "รายสัปดาห์",
-    "weight": "น้ำหนัก"
+    "weight": "น้ำหนัก",
+    "remove": "ลบ",
+    "save": "บันทึก",
+    "sortBy": "เรียงตาม",
+    "state": "รัฐ/จังหวัด",
+    "zip": "รหัสไปรษณีย์"
   },
   "permissions": {
     "viewOnly": "สิทธิ์ดูอย่างเดียว"
@@ -322,6 +328,14 @@
     "notes": "หมายเหตุ",
     "labResults": "ผลการตรวจทางห้องปฏิบัติการ",
     "overview": "ภาพรวม",
-    "visits": "การมาพบแพทย์"
+    "visits": "การมาพบแพทย์",
+    "medications": "ยา",
+    "procedures": "หัตถการ",
+    "treatments": "การรักษา"
+  },
+  "buttons": {
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "view": "ดู"
   }
 }

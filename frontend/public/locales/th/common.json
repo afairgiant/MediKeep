@@ -30,7 +30,10 @@
     "tryAgain": "ลองอีกครั้ง",
     "update": "อัปเดต",
     "view": "ดู",
-    "linkMedications": "เชื่อมโยงยา"
+    "linkMedications": "เชื่อมโยงยา",
+    "clear": "ล้าง",
+    "linkProcedure": "เชื่อมโยงหัตถการ",
+    "linkTreatment": "เชื่อมโยงการรักษา"
   },
   "conditions": {
     "addNew": "เพิ่มโรคใหม่",
@@ -74,7 +77,9 @@
       "status": {
         "chronic": "เรื้อรัง"
       },
-      "updateCondition": "อัปเดตโรค"
+      "updateCondition": "อัปเดตโรค",
+      "labResultsDescription": "เชื่อมโยงผลแลปที่เกี่ยวข้องหรือใช้ติดตามภาวะนี้",
+      "saveFirstToLinkLabResults": "บันทึกภาวะก่อน จากนั้นกลับมาที่โหมดแก้ไขเพื่อเชื่อมโยงผลแลป"
     },
     "getStarted": "คลิก \"เพิ่มโรคใหม่\" เพื่อเริ่มต้น",
     "loading": "กำลังโหลดข้อมูลโรค...",
@@ -523,7 +528,17 @@
     "yes": "ใช่",
     "noConditionsLinkedToMedication": "ไม่มีโรคที่เชื่อมโยงกับยานี้",
     "conditionsAvailableToLink": "มีโรค {{count}} รายการที่สามารถเชื่อมโยงได้",
-    "medicationsAvailableToLink": "มียา {{count}} รายการที่สามารถเชื่อมโยงได้"
+    "medicationsAvailableToLink": "มียา {{count}} รายการที่สามารถเชื่อมโยงได้",
+    "cancelEdit": "ยกเลิกการแก้ไข",
+    "deleteRelationship": "ลบความสัมพันธ์",
+    "editRelationship": "แก้ไขความสัมพันธ์",
+    "expectedFrequency": "ความถี่ที่คาดหวัง",
+    "labResultsAvailableToLink_other": "มีผลแลป {{count}} รายการที่เชื่อมโยงได้",
+    "noDate": "ไม่มีวันที่",
+    "noMedicationsLinkedToLabResult": "ไม่มียาที่เชื่อมโยงกับผลแลปนี้",
+    "noProceduresLinked": "ไม่มีหัตถการที่เชื่อมโยงกับผลแลปนี้",
+    "noTreatmentsLinked": "ไม่มีการรักษาที่เชื่อมโยงกับผลแลปนี้",
+    "saveRelationship": "บันทึกความสัมพันธ์"
   },
   "labResults": {
     "emptyLabResultMessage": "คุณสร้างผลแลปแต่ไม่ได้เพิ่มส่วนประกอบการตรวจ คุณต้องการลบผลแลปนี้หรือไม่?",
@@ -604,7 +619,20 @@
     "selectVisit": "กรุณาเลือกการเยี่ยม",
     "underDevelopment": "ส่วนนี้อยู่ระหว่างการพัฒนา",
     "updateSuccess": "อัปเดตสำเร็จ",
-    "confirmRemoveMedicationRelationship": "คุณแน่ใจหรือไม่ที่จะลบความสัมพันธ์ของยานี้?"
+    "confirmRemoveMedicationRelationship": "คุณแน่ใจหรือไม่ที่จะลบความสัมพันธ์ของยานี้?",
+    "confirmRemoveLabResultRelationship": "ลบการเชื่อมโยงผลแลปนี้หรือไม่?",
+    "confirmRemoveMedicationLink": "ลบการเชื่อมโยงยานี้หรือไม่?",
+    "confirmRemoveProcedureLink": "ลบการเชื่อมโยงหัตถการนี้หรือไม่?",
+    "confirmRemoveTreatmentLink": "ลบการเชื่อมโยงการรักษานี้หรือไม่?",
+    "failedToLinkMedication": "เชื่อมโยงยาไม่สำเร็จ",
+    "failedToLinkProcedure": "เชื่อมโยงหัตถการไม่สำเร็จ",
+    "failedToLinkTreatment": "เชื่อมโยงการรักษาไม่สำเร็จ",
+    "failedToUnlinkMedication": "ยกเลิกการเชื่อมโยงยาไม่สำเร็จ",
+    "failedToUnlinkProcedure": "ยกเลิกการเชื่อมโยงหัตถการไม่สำเร็จ",
+    "failedToUnlinkTreatment": "ยกเลิกการเชื่อมโยงการรักษาไม่สำเร็จ",
+    "selectMedication": "กรุณาเลือกยา",
+    "selectProcedure": "กรุณาเลือกหัตถการ",
+    "selectTreatment": "กรุณาเลือกการรักษา"
   },
   "modals": {
     "chooseConditionsToLink": "เลือกโรคที่จะเชื่อมโยง",
@@ -631,7 +659,23 @@
     "linkMedicationsToCondition": "เชื่อมโยงยากับโรค",
     "selectConditions": "เลือกโรค",
     "describeConditionRelevanceMedication": "อธิบายความเกี่ยวข้องของโรคนี้กับยา",
-    "describeMedicationRelevance": "อธิบายความเกี่ยวข้องของยานี้กับโรค"
+    "describeMedicationRelevance": "อธิบายความเกี่ยวข้องของยานี้กับโรค",
+    "chooseLabResultsToLink": "เลือกผลแลปที่จะเชื่อมโยง",
+    "chooseOneMedicationToLink": "เลือกยาที่จะเชื่อมโยง",
+    "chooseProcedureToLink": "เลือกหัตถการที่จะเชื่อมโยง",
+    "chooseTreatmentToLink": "เลือกการรักษาที่จะเชื่อมโยง",
+    "describeMedicationLabResultRelevance": "อธิบายว่ายานี้เกี่ยวข้องกับผลแลปนี้อย่างไร",
+    "describeProcedureRelevance": "อธิบายว่าหัตถการนี้เกี่ยวข้องกับผลแลปนี้อย่างไร",
+    "describeTreatmentRelevance": "อธิบายว่าการรักษานี้เกี่ยวข้องกับผลแลปนี้อย่างไร",
+    "expectedFrequencyPlaceholder": "เช่น ทุกเดือน ทุก 3 เดือน",
+    "linkLabResultsToCondition": "เชื่อมโยงผลแลปกับภาวะ",
+    "linkMedicationToLabResult": "เชื่อมโยงยากับผลแลป",
+    "linkProcedureToLabResult": "เชื่อมโยงหัตถการกับผลแลป",
+    "linkTreatmentToLabResult": "เชื่อมโยงการรักษากับผลแลป",
+    "selectLabResults": "เลือกผลแลป",
+    "selectMedication": "เลือกยา",
+    "selectProcedure": "เลือกหัตถการ",
+    "selectTreatment": "เลือกการรักษา"
   },
   "noResults": "ไม่พบแพทย์",
   "pagination": {
@@ -1333,7 +1377,10 @@
         "clinical": "ทางคลินิก",
         "visitInfo": "ข้อมูลการเยี่ยม"
       },
-      "updateVisit": "อัปเดตการเยี่ยม"
+      "updateVisit": "อัปเดตการเยี่ยม",
+      "chooseLabResultsToLink": "เลือกผลแลปที่จะเชื่อมโยง",
+      "labResultsDescription": "เชื่อมโยงผลแลปที่เกี่ยวข้องกับการเข้ารับบริการครั้งนี้ คุณสามารถกำหนดวัตถุประสงค์และบันทึกได้หลังสร้างการเข้ารับบริการ",
+      "selectLabResults": "เลือกผลแลป"
     },
     "loadingVisits": "กำลังโหลดข้อมูลการเยี่ยม...",
     "noVisitsFound": "ไม่พบการเยี่ยมทางการแพทย์",
@@ -1357,6 +1404,10 @@
       "title": "การเยี่ยม - {{date}}",
       "treatmentPlan": "แผนการรักษา",
       "visitInformation": "ข้อมูลการเยี่ยม"
+    },
+    "notifications": {
+      "labResultLinkFailed": "สร้างการเข้ารับบริการแล้ว แต่เชื่อมโยงผลแลปบางรายการไม่สำเร็จ คุณสามารถเชื่อมโยงด้วยตนเองได้โดยแก้ไขการเข้ารับบริการ",
+      "labResultLinkWarning": "ปัญหาการเชื่อมโยงผลแลป"
     }
   },
   "vitals": {
@@ -1399,5 +1450,13 @@
       }
     }
   },
-  "warning": "คำเตือน"
+  "warning": "คำเตือน",
+  "actions": {
+    "delete": "ลบ",
+    "view": "ดู"
+  },
+  "validation": {
+    "fieldRequired": "ต้องระบุ{{field}}",
+    "noPatientSelected": "ยังไม่ได้เลือกผู้ป่วย กรุณาเลือกผู้ป่วยก่อน"
+  }
 }

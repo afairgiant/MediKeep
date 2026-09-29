@@ -148,7 +148,10 @@
     "testComponents": "รายการตรวจ (ไม่บังคับ)",
     "testDetails": "รายละเอียดการตรวจ",
     "unit": "หน่วย",
-    "matchedCommonName": "ตรงกับ: {{name}}"
+    "matchedCommonName": "ตรงกับ: {{name}}",
+    "linkMedicationsTitle": "เชื่อมโยงกับยา",
+    "linkProceduresTitle": "เชื่อมโยงกับหัตถการ",
+    "linkTreatmentsTitle": "เชื่อมโยงกับการรักษา"
   },
   "keepEmptyLabResult": "เก็บผลแลป",
   "labResult": {
@@ -165,13 +168,20 @@
     "noRelationshipsAvailable": "ไม่มีสภาวะทางการแพทย์หรือการเข้าพบที่บันทึกไว้ เพิ่มรายการเหล่านั้นก่อนเพื่อเชื่อมโยงที่นี่",
     "relationshipsCreateInfo": "สามารถเพิ่มความสัมพันธ์หลังจากบันทึกผลแลป",
     "relationshipsSaveFirst": "บันทึกผลแลปก่อนเพื่อสร้างลิงก์ความสัมพันธ์",
-    "testComponentsEditInfo": "สามารถจัดการรายการตรวจจากหน้าดูรายละเอียดหลังจากบันทึก"
+    "testComponentsEditInfo": "สามารถจัดการรายการตรวจจากหน้าดูรายละเอียดหลังจากบันทึก",
+    "noRelationshipsOnRecord": "ไม่มีภาวะทางการแพทย์ การเข้ารับบริการ ยา หัตถการ หรือการรักษาที่บันทึกไว้สำหรับผู้ป่วยรายนี้"
   },
   "pendingRelationships": {
     "addCondition": "เพิ่มภาวะ",
     "addVisit": "เพิ่มการเข้ารับบริการ",
     "removeCondition": "ลบภาวะ",
-    "removeVisit": "ลบการเข้ารับบริการ"
+    "removeVisit": "ลบการเข้ารับบริการ",
+    "addMedication": "เพิ่มยา",
+    "addProcedure": "เพิ่มหัตถการ",
+    "addTreatment": "เพิ่มการรักษา",
+    "removeMedication": "ลบยา",
+    "removeProcedure": "ลบหัตถการ",
+    "removeTreatment": "ลบการรักษา"
   },
   "modal": {
     "editLabResult": "แก้ไขผลแลป",
@@ -391,7 +401,8 @@
     "noComponentsDescription": "ผลแลปนี้ยังไม่มีรายการตรวจแต่ละรายการ",
     "notifications": {
       "componentDeleted": "ลบรายการแล้ว",
-      "hasBeenDeleted": "{{name}} ถูกลบแล้ว"
+      "hasBeenDeleted": "{{name}} ถูกลบแล้ว",
+      "legacyResultNotFound": "ไม่พบผลแลปที่จะแก้ไข"
     },
     "refreshComponents": "รีเฟรชรายการ",
     "tabs": {
@@ -532,5 +543,6 @@
     "label": "ข้อความผลลัพธ์",
     "noText": "—",
     "placeholder": "ป้อนข้อความผลลัพธ์ (เช่น ไม่พบความผิดปกติเฉียบพลัน)"
-  }
+  },
+  "bulkImport": "นำเข้าจำนวนมาก"
 }
