@@ -319,13 +319,19 @@
       "symptom_occurrence": "เวชระเบียนเหตุการณ์อาการแต่ละครั้ง",
       "treatment": "แผนการรักษาและการบำบัด",
       "user": "ผู้ใช้ระบบและผู้บริหาร",
-      "vitals": "ความดันเลือด อัตราการเต้นหัวใจ อุณหภูมิ"
+      "vitals": "ความดันเลือด อัตราการเต้นหัวใจ อุณหภูมิ",
+      "medical_specialty": "ความเชี่ยวชาญทางการแพทย์ (เช่น อายุรศาสตร์โรคหัวใจ) ที่กำหนดให้แพทย์/บุคลากร",
+      "practice": "คลินิก/สถานพยาบาล — ข้อมูลติดต่อและหลายสาขา"
     },
     "fallbackWarning": "ไม่สามารถโหลดโมเดลจากเซิร์ฟเวอร์ได้ แสดงรายชื่อโมเดลในตัว",
     "filterAriaLabel": "กรองโมเดลข้อมูล",
     "filterPlaceholder": "กรองโมเดล...",
     "noMatchFilter": "ไม่มีโมเดลที่ตรงกับ \"{{query}}\"",
-    "subtitle": "จัดการและดูตารางฐานข้อมูลและเวชระเบียนทั้งหมด"
+    "subtitle": "จัดการและดูตารางฐานข้อมูลและเวชระเบียนทั้งหมด",
+    "displayNames": {
+      "medical_specialty": "ความเชี่ยวชาญทางการแพทย์",
+      "practice": "คลินิก"
+    }
   },
   "directoryCard": {
     "files": "ไฟล์",
@@ -347,7 +353,8 @@
     "primaryKeyReadOnly": "คีย์หลัก (อ่านอย่างเดียว)",
     "selectDefault": "-- เลือก --",
     "selectField": "-- เลือก {{field}} --",
-    "systemTimestamp": "ประทับเวลาระบบ (สร้างอัตโนมัติ)"
+    "systemTimestamp": "ประทับเวลาระบบ (สร้างอัตโนมัติ)",
+    "computedField": "คำนวณจากบันทึกที่เกี่ยวข้อง (อ่านอย่างเดียว)"
   },
   "header": {
     "administrator": "ผู้บริหาร",
@@ -696,5 +703,28 @@
     "userCount": "{{count}} ผู้ใช้",
     "userCount_one": "{{count}} ผู้ใช้",
     "userCount_other": "{{count}} ผู้ใช้"
+  },
+  "medicalSpecialty": {
+    "description": "คำอธิบาย",
+    "name": "ชื่อ"
+  },
+  "practices": {
+    "locations": {
+      "add": "เพิ่มสาขา",
+      "empty": "ยังไม่มีสาขา",
+      "labelField": "ป้ายชื่อ",
+      "labelPlaceholder": "สำนักงานคลินิก",
+      "locationNumber": "สาขาที่ {{num}}",
+      "moveDown": "เลื่อนลง",
+      "moveUp": "เลื่อนขึ้น",
+      "title": "สาขา"
+    },
+    "subtitle": "จัดการคลินิก/สถานพยาบาล — ข้อมูลติดต่อ สาขา และอื่น ๆ",
+    "title": "คลินิก"
+  },
+  "practitioner": {
+    "quickAddSpecialty": "+ เพิ่มความเชี่ยวชาญใหม่…",
+    "specialtyPlaceholder": "เลือกความเชี่ยวชาญ",
+    "specialtySaved": "ความเชี่ยวชาญพร้อมใช้งาน"
   }
 }
