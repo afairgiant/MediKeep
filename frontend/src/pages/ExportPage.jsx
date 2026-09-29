@@ -7,6 +7,7 @@ import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import {
   Container,
   Paper,
+  SimpleGrid,
   Stack,
   Text,
   Title,
@@ -469,7 +470,7 @@ const ExportPage = () => {
                     {t('builder.buttons.clearSelections')}
                   </Button>
                 </Group>
-                <Stack gap="xs">
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xs">
                   {formats.scopes
                     ?.filter(scope => scope.value !== 'all')
                     .map(scope => (
@@ -480,7 +481,7 @@ const ExportPage = () => {
                         onChange={() => handleScopeToggle(scope.value)}
                       />
                     ))}
-                </Stack>
+                </SimpleGrid>
               </Box>
             )}
 
