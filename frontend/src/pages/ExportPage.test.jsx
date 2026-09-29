@@ -10,6 +10,48 @@ import { exportService } from '../services/exportService';
 // human-readable text the backend provides (e.g. "Immunizations"), not as
 // an unresolved i18n key (e.g. "exportPage.scopes.immunizations").
 
+// Override the global react-i18next mock (see setupTests.js) with one that also
+// resolves the `_one`/`_other` plural-suffix convention real i18next uses for a
+// `{ count }` option, so tests can verify singular vs. plural selection. Wrapped
+// in a spy so tests can also assert on which key was actually looked up.
+const mockT = vi.hoisted(() =>
+  vi.fn((key, defaultValueOrOptions, options) => {
+    let vars = {};
+    let text;
+
+    if (typeof defaultValueOrOptions === 'string') {
+      text = defaultValueOrOptions;
+      if (typeof options === 'object') vars = options;
+    } else if (
+      typeof defaultValueOrOptions === 'object' &&
+      defaultValueOrOptions !== null
+    ) {
+      vars = defaultValueOrOptions;
+      const resolvedKey =
+        typeof vars.count === 'number'
+          ? `${key}_${vars.count === 1 ? 'one' : 'other'}`
+          : key;
+      text = vars.defaultValue || resolvedKey;
+    } else {
+      text = key;
+    }
+
+    return text.replace(/\{\{(\w+)\}\}/g, (match, name) =>
+      vars[name] !== undefined ? String(vars[name]) : match
+    );
+  })
+);
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: mockT,
+    i18n: { language: 'en', changeLanguage: () => Promise.resolve() },
+  }),
+  Trans: ({ children }) => children,
+  I18nextProvider: ({ children }) => children,
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}));
+
 vi.mock('../services/exportService', () => ({
   exportService: {
     getSummary: vi.fn(),
@@ -36,6 +78,7 @@ const SCOPES = [
   { value: 'all', label: 'All Records', description: 'Complete medical history' },
   { value: 'allergies', label: 'Allergies', description: 'Known allergies' },
   { value: 'immunizations', label: 'Immunizations', description: 'Vaccination records' },
+  { value: 'encounters', label: 'Encounters', description: 'Medical visits and consultations' },
 ];
 
 function renderExportPage() {
@@ -70,14 +113,40 @@ describe('ExportPage scope labels', () => {
     );
     await userEvent.click(scopeSelect);
 
-    expect(
-      await screen.findByText('Immunizations (0 records)')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Allergies (0 records)')).toBeInTheDocument();
+    expect(await screen.findByText(/Immunizations \(/)).toBeInTheDocument();
+    expect(screen.getByText(/Allergies \(/)).toBeInTheDocument();
 
     expect(
       screen.queryByText(/exportPage\.scopes\./)
     ).not.toBeInTheDocument();
+  });
+
+  it('localizes the record count and picks the singular/plural form based on count', async () => {
+    exportService.getSummary.mockResolvedValue({
+      data: { counts: { immunizations: 1, allergies: 2 } },
+    });
+    renderExportPage();
+
+    await waitFor(() =>
+      expect(exportService.getSupportedFormats).toHaveBeenCalled()
+    );
+
+    const scopeSelect = await screen.findByPlaceholderText(
+      'export.configuration.dataToExport.placeholder'
+    );
+    await userEvent.click(scopeSelect);
+
+    // The count text is built via t('categories.recordCount', { count }),
+    // which real i18next resolves to the `_one`/`_other` locale-specific
+    // string based on count. This asserts the code selects the correct
+    // suffix (and thus the correct plural form) rather than hardcoding
+    // a single English word for every count, e.g. "(1 records)".
+    expect(
+      await screen.findByText('Immunizations (categories.recordCount_one)')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Allergies (categories.recordCount_other)')
+    ).toBeInTheDocument();
   });
 
   it('renders human-readable scope labels in the bulk export checkbox list', async () => {
@@ -94,11 +163,37 @@ describe('ExportPage scope labels', () => {
     const bulkSection = screen.getByTestId('bulk-scope-selection');
 
     expect(
-      within(bulkSection).getByText(/Immunizations \(0\)/)
+      within(bulkSection).getByText(/Immunizations \(/)
     ).toBeInTheDocument();
     expect(
       within(bulkSection).queryByText(/exportPage\.scopes\./)
     ).not.toBeInTheDocument();
+  });
+
+  it('localizes the record count and picks the singular/plural form in the bulk export checkbox list', async () => {
+    exportService.getSummary.mockResolvedValue({
+      data: { counts: { immunizations: 1, allergies: 2 } },
+    });
+    renderExportPage();
+
+    await waitFor(() =>
+      expect(exportService.getSupportedFormats).toHaveBeenCalled()
+    );
+
+    await userEvent.click(screen.getByText('export.exportMode.bulkExport'));
+
+    const bulkSection = screen.getByTestId('bulk-scope-selection');
+
+    expect(
+      within(bulkSection).getByText(
+        'Immunizations (categories.recordCount_one)'
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(bulkSection).getByText(
+        'Allergies (categories.recordCount_other)'
+      )
+    ).toBeInTheDocument();
   });
 
   it('selects every data type when "select all" is clicked', async () => {
@@ -162,5 +257,54 @@ describe('ExportPage scope labels', () => {
 
     expect(allergiesCheckbox).not.toBeChecked();
     expect(immunizationsCheckbox).not.toBeChecked();
+  });
+
+  it('looks up the "encounters" scope under the shared:categories.visit_history key', async () => {
+    renderExportPage();
+
+    await waitFor(() =>
+      expect(exportService.getSupportedFormats).toHaveBeenCalled()
+    );
+
+    const scopeSelect = await screen.findByPlaceholderText(
+      'export.configuration.dataToExport.placeholder'
+    );
+    await userEvent.click(scopeSelect);
+
+    await screen.findByText(/Encounters \(/);
+
+    expect(mockT).toHaveBeenCalledWith(
+      'shared:categories.visit_history',
+      'Encounters'
+    );
+    expect(mockT).not.toHaveBeenCalledWith(
+      'shared:categories.encounters',
+      expect.anything()
+    );
+  });
+
+  it('builds the "Export as" button text from the localized scope name, not the raw scope value', async () => {
+    renderExportPage();
+
+    await waitFor(() =>
+      expect(exportService.getSupportedFormats).toHaveBeenCalled()
+    );
+
+    const scopeSelect = await screen.findByPlaceholderText(
+      'export.configuration.dataToExport.placeholder'
+    );
+    await userEvent.click(scopeSelect);
+    await userEvent.click(await screen.findByText(/Immunizations \(/));
+
+    await waitFor(() =>
+      expect(mockT).toHaveBeenCalledWith(
+        'export.buttons.exportAs',
+        expect.objectContaining({ scope: 'Immunizations' })
+      )
+    );
+    expect(mockT).not.toHaveBeenCalledWith(
+      'export.buttons.exportAs',
+      expect.objectContaining({ scope: 'immunizations' })
+    );
   });
 });

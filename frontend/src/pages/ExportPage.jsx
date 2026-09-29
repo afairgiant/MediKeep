@@ -33,6 +33,12 @@ import {
 import { PageHeader } from '../components';
 import { exportService } from '../services/exportService';
 
+// The backend's export scope value doesn't always match the shared:categories
+// locale key for that data type; list the exceptions here.
+const SCOPE_CATEGORY_KEY_OVERRIDES = {
+  encounters: 'visit_history',
+};
+
 const ExportPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['reports', 'common', 'shared']);
@@ -264,6 +270,12 @@ const ExportPage = () => {
     return summary.counts[scopeValue] || 0;
   };
 
+  const getScopeLabel = scope =>
+    t(
+      `shared:categories.${SCOPE_CATEGORY_KEY_OVERRIDES[scope.value] || scope.value}`,
+      scope.label
+    );
+
   const clearAlerts = () => {
     setError(null);
     setSuccess(null);
@@ -418,7 +430,7 @@ const ExportPage = () => {
                     ?.filter(scope => scope.value !== 'all')
                     .map(scope => ({
                       value: scope.value,
-                      label: `${scope.label} (${getRecordCount(scope.value)} records)`,
+                      label: `${getScopeLabel(scope)} (${t('categories.recordCount', { count: getRecordCount(scope.value) })})`,
                     })) || []
                 }
               />
@@ -463,7 +475,7 @@ const ExportPage = () => {
                     .map(scope => (
                       <Checkbox
                         key={scope.value}
-                        label={`${scope.label} (${getRecordCount(scope.value)})`}
+                        label={`${getScopeLabel(scope)} (${t('categories.recordCount', { count: getRecordCount(scope.value) })})`}
                         checked={selectedScopes.includes(scope.value)}
                         onChange={() => handleScopeToggle(scope.value)}
                       />
@@ -544,7 +556,14 @@ const ExportPage = () => {
                   {loading
                     ? t('export.buttons.exporting')
                     : t('export.buttons.exportAs', {
-                        scope: exportConfig.scope,
+                        scope: getScopeLabel(
+                          formats.scopes?.find(
+                            scope => scope.value === exportConfig.scope
+                          ) || {
+                            value: exportConfig.scope,
+                            label: exportConfig.scope,
+                          }
+                        ),
                         format: exportConfig.format.toUpperCase(),
                       })}
                 </Button>
