@@ -79,7 +79,6 @@
     "fetchError": "Failed to load test catalog",
     "noData": "Add Lab Results to see them here.",
     "noResults": "No Test Results Found",
-    "readingCount_one": "{{count}} reading",
     "refRange": "Ref",
     "searchPlaceholder": "Search tests...",
     "sort": {

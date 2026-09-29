@@ -79,7 +79,6 @@
     "fetchError": "Laden van testcatalogus mislukt",
     "noData": "Voeg laboratoriumuitslagen toe om ze hier te zien.",
     "noResults": "Geen laboratoriumuitslagen gevonden",
-    "readingCount_one": "{{count}} meting",
     "refRange": "Ref.",
     "searchPlaceholder": "Tests zoeken...",
     "sort": {
@@ -373,13 +372,13 @@
       "miscGroupHint": "Deze records zijn nog niet gekoppeld aan de vaccinbibliotheek. Klik op een record om te bewerken en een bibliotheekitem te kiezen.",
       "noDiseaseData": "Er zijn geen vaccinaties gekoppeld aan de bibliotheek. Schakel over naar de weergave 'Op datum' om alle records te zien, of bewerk een record en selecteer opnieuw een vaccin uit de autocomplete om het te koppelen.",
       "recordCount": "{{count}} vaccinaties",
-      "recordCount_one": "{{count}} vaccinations",
-      "recordCount_other": "{{count}} vaccinations",
+      "recordCount_one": "{{count}} vaccinaties",
+      "recordCount_other": "{{count}} vaccinaties",
       "recordCountSingular": "1 vaccinatie",
       "unlinkedTag": "Niet gekoppeld",
       "unmatchedBanner": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw uit de autocomplete om het te koppelen.",
-      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
-      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_one": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw via automatisch aanvullen om het te koppelen.",
+      "unmatchedBanner_other": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw via automatisch aanvullen om het te koppelen.",
       "unmatchedTitle": "Sommige records zijn niet gekoppeld aan de vaccinbibliotheek",
       "viewMode": {
         "byDate": "Op datum",
@@ -852,10 +851,10 @@
   },
   "labResults": {
     "addPanel": {
-      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
-      "componentPartialSaveTitle": "Some components not saved",
-      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
-      "componentSaveFailedTitle": "Test components not saved",
+      "componentPartialSaveMessage": "Het panel is aangemaakt, maar sommige testcomponenten konden niet worden opgeslagen. Bewerk het panel om ze te controleren.",
+      "componentPartialSaveTitle": "Sommige componenten niet opgeslagen",
+      "componentSaveFailedMessage": "Het panel is aangemaakt, maar de testcomponenten konden niet worden opgeslagen. Bewerk het panel om ze toe te voegen.",
+      "componentSaveFailedTitle": "Testcomponenten niet opgeslagen",
       "createButton": "Resultaten opslaan",
       "createError": "Aanmaken van testpaneel mislukt",
       "creating": "Paneel aanmaken...",
@@ -972,8 +971,8 @@
         "invalid": "Tijd moet in HH:MM-notatie zijn (24 uur)",
         "label": "Herinneringstijden",
         "max": "Maximaal {{count}} tijden",
-        "max_one": "Maximum of {{count}} times",
-        "max_other": "Maximum of {{count}} times",
+        "max_one": "Maximaal {{count}} tijdstippen",
+        "max_other": "Maximaal {{count}} tijdstippen",
         "removeAriaLabel": "Tijd verwijderen"
       },
       "viewNone": "Geen herinneringen geconfigureerd"

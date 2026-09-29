@@ -35,7 +35,7 @@
     "invalidPhone": "Пожалуйста, введите корректный номер телефона.",
     "invalidPhoneDigits": "Пожалуйста, введите корректный номер телефона",
     "invalidWebsiteUrl": "Пожалуйста, введите корректный URL веб-сайта",
-    "labResultNotSelected": "Please select at least one lab result",
+    "labResultNotSelected": "Выберите хотя бы один результат исследования",
     "medicationNotSelected": "Пожалуйста, выберите лекарство",
     "mustBeValidNumber": "Должно быть корректным числом",
     "patientNotSelected": "Пожалуйста, выберите пациента.",

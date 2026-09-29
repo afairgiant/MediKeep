@@ -132,9 +132,9 @@
     "linkConditionsDescription": "Associera detta laboratorieresultat med relevanta medicinska tillstånd för bättre spårning och organisation.",
     "linkConditionsTitle": "Länka medicinska tillstånd",
     "linkedVisits": "Länkade besök",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "Länka till läkemedel",
+    "linkProceduresTitle": "Länka till ingrepp",
+    "linkTreatmentsTitle": "Länka till behandlingar",
     "linkVisitsDescription": "Associera detta laboratorieresultat med besök där det beställdes eller granskades.",
     "linkVisitsTitle": "Länka till besök",
     "matchedCommonName": "matchning: {{name}}",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Om du byter läge kommer det du har angett hittills att gå förlorat. Fortsätta?",
     "noRelationshipsAvailable": "Inga medicinska tillstånd eller besök registrerade. Lägg till dem först för att länka dem här.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "Inga tillstånd, besök, läkemedel, ingrepp eller behandlingar finns registrerade för denna patient.",
     "relationshipsCreateInfo": "Relationer kan läggas till efter att laboratorieresultatet sparats.",
     "relationshipsSaveFirst": "Spara laboratorieresultatet först för att skapa relationslänkar.",
     "testComponentsEditInfo": "Testkomponenter kan hanteras från visningssidan efter sparande."
@@ -220,7 +220,13 @@
     "addCondition": "Lägg till tillstånd",
     "addVisit": "Lägg till besök",
     "removeCondition": "Ta bort tillstånd",
-    "removeVisit": "Ta bort besök"
+    "removeVisit": "Ta bort besök",
+    "addMedication": "Lägg till läkemedel",
+    "addProcedure": "Lägg till ingrepp",
+    "addTreatment": "Lägg till behandling",
+    "removeMedication": "Ta bort läkemedel",
+    "removeProcedure": "Ta bort ingrepp",
+    "removeTreatment": "Ta bort behandling"
   },
   "quickFormInstructions": "Ange ett namn för detta laboratorieresultat, sedan kan du ladda upp och tolka din PDF.",
   "quickImportModalTitle": "Snabb PDF-import - Steg {{step}} av 2",
@@ -242,7 +248,7 @@
     "expandAll": "Expandera alla",
     "noResults": "Inga testresultat matchar de aktuella filtren",
     "results": "{{count}} resultat",
-    "results_one": "{{count}} results",
+    "results_one": "{{count}} resultat",
     "results_other": "{{count}} resultat",
     "source": "Källa",
     "viewTrends": "Visa trender"
@@ -433,7 +439,8 @@
     "noComponentsDescription": "Detta laboratorieresultat har inga tester ännu.",
     "notifications": {
       "componentDeleted": "Komponent borttagen",
-      "hasBeenDeleted": "{{name}} har tagits bort"
+      "hasBeenDeleted": "{{name}} har tagits bort",
+      "legacyResultNotFound": "Det gick inte att hitta laboratorieresultatet som ska redigeras"
     },
     "refreshComponents": "Uppdatera komponenter",
     "resultType": {
@@ -537,5 +544,6 @@
   "unsavedDataInstructions": "Klicka på \"Lägg till komponenter\" i fliken Förhandsgranskning för att spara dina tolkade data innan du stänger.",
   "unsavedDataMessage_one": "Du har {{count}} tolkad testkomponent som inte har lagts till ännu. Om du stänger nu kommer du att förlora denna tolkade data.",
   "unsavedDataMessage_other": "Du har {{count}} tolkade testkomponenter som inte har lagts till ännu. Om du stänger nu kommer du att förlora denna tolkade data.",
-  "unsavedDataWarning": "Osparade tolkade data"
+  "unsavedDataWarning": "Osparade tolkade data",
+  "bulkImport": "Massimport"
 }

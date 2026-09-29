@@ -79,7 +79,6 @@
     "fetchError": "加载检测目录失败",
     "noData": "添加检验结果后，可在此查看。",
     "noResults": "未找到检验结果",
-    "readingCount_one": "{{count}} 次检测",
     "refRange": "参考值",
     "searchPlaceholder": "搜索检测项目...",
     "sort": {
@@ -362,7 +361,7 @@
       "dateRangePlaceholder": "按日期范围筛选",
       "doseLabel": "第 {{n}} 剂",
       "dosesCount": "{{count}} 剂",
-      "dosesCount_other": "{{count}} doses",
+      "dosesCount_other": "{{count}} 剂",
       "dosesCountSingular": "1 剂",
       "emptyAll": "暂无接种记录。",
       "emptyRange": "此范围内无接种记录。",
@@ -372,11 +371,11 @@
       "miscGroupHint": "这些记录尚未关联至疫苗库。点击记录进行编辑并选择疫苗库条目。",
       "noDiseaseData": "暂无接种记录关联到疫苗库。切换到「按日期」视图以查看所有记录，或编辑记录并从自动完成中重新选择疫苗以建立关联。",
       "recordCount": "{{count}} 次接种",
-      "recordCount_other": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} 次疫苗接种",
       "recordCountSingular": "1 次接种",
       "unlinkedTag": "未关联",
       "unmatchedBanner": "{{count}} 条记录未关联。编辑记录并从自动完成中重新选择以建立关联。",
-      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} 条记录未关联。请编辑记录并从自动补全中重新选择以进行关联。",
       "unmatchedTitle": "部分记录未关联到疫苗库",
       "viewMode": {
         "byDate": "按日期",
@@ -849,10 +848,10 @@
   },
   "labResults": {
     "addPanel": {
-      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
-      "componentPartialSaveTitle": "Some components not saved",
-      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
-      "componentSaveFailedTitle": "Test components not saved",
+      "componentPartialSaveMessage": "检验组合已创建，但部分检验项目保存失败。请编辑检验组合进行检查。",
+      "componentPartialSaveTitle": "部分项目未保存",
+      "componentSaveFailedMessage": "检验组合已创建，但检验项目无法保存。请编辑检验组合以添加这些项目。",
+      "componentSaveFailedTitle": "检验项目未保存",
       "createButton": "保存结果",
       "createError": "创建检验套餐失败",
       "creating": "正在创建套餐...",
@@ -969,7 +968,7 @@
         "invalid": "时间必须为 HH:MM 格式（24小时制）",
         "label": "提醒时间",
         "max": "最多 {{count}} 个时间",
-        "max_other": "Maximum of {{count}} times",
+        "max_other": "最多 {{count}} 个时间",
         "removeAriaLabel": "移除时间"
       },
       "viewNone": "未配置提醒"

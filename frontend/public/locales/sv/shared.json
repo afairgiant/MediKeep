@@ -1,8 +1,8 @@
 {
   "buttons": {
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View"
+    "delete": "Radera",
+    "edit": "Redigera",
+    "view": "Visa"
   },
   "categories": {
     "admin_dashboard": "Adminpanel",
@@ -77,7 +77,7 @@
     "procedureCode": "Ingreppskod",
     "procedureName": "Ingreppets namn",
     "procedureType": "Typ av ingrepp",
-    "reset": "Reset",
+    "reset": "Återställ",
     "selectGender": "Välj kön",
     "selectPractitioner": "Välj vårdpersonal",
     "selectRelationship": "Välj relation",
@@ -250,13 +250,13 @@
     "relatedCondition": "Relaterat tillstånd",
     "relatedConditions": "Relaterade tillstånd",
     "relationship": "Relation",
-    "remove": "Remove",
+    "remove": "Ta bort",
     "resetPassword": "Återställ lösenord",
     "resolved": "Löst",
     "retry": "Försök igen",
     "role": "Roll",
     "route": "Administreringsväg",
-    "save": "Save",
+    "save": "Spara",
     "saving": "Sparar...",
     "selectCategory": "Välj kategori",
     "selectPractitioner": "Välj vårdpersonal",
@@ -273,11 +273,11 @@
     "showingCountUniqueTests_other": "Visar {{count}} unika prover",
     "sideEffects": "Biverkningar",
     "size": "Storlek",
-    "sortBy": "Sort by",
+    "sortBy": "Sortera efter",
     "specialties": "Specialiteter",
     "specialty": "Specialitet",
     "startDate": "Startdatum",
-    "state": "State",
+    "state": "Delstat/län",
     "stateProvince": "Län / Region",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Antal-skydd:</strong> Behåll alltid de {{count}} senaste säkerhetskopiorna",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Antal-skydd:</strong> Behåll alltid den {{count}} senaste säkerhetskopian",
@@ -331,11 +331,11 @@
     "episodesCount_one": "Episoder ({{count}})",
     "episodesCount_other": "Episoder ({{count}})",
     "labResults": "Laboratorieresultat",
-    "medications": "Medications",
+    "medications": "Läkemedel",
     "notes": "Anteckningar",
     "overview": "Översikt",
-    "procedures": "Procedures",
-    "treatments": "Treatments",
+    "procedures": "Ingrepp",
+    "treatments": "Behandlingar",
     "visits": "Besök"
   }
 }

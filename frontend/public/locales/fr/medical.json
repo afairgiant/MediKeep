@@ -79,7 +79,6 @@
     "fetchError": "Échec du chargement du catalogue d'analyses",
     "noData": "Ajoutez des résultats d'analyse pour les voir ici.",
     "noResults": "Aucun résultat d'analyse trouvé",
-    "readingCount_one": "{{count}} relevé",
     "refRange": "Réf",
     "searchPlaceholder": "Rechercher des analyses...",
     "sort": {
@@ -378,8 +377,8 @@
       "recordCountSingular": "1 vaccination",
       "unlinkedTag": "Non lié",
       "unmatchedBanner": "{{count}} enregistrements ne sont pas associés. Modifiez un enregistrement et resélectionnez-le dans l'autocomplétion pour l'associer.",
-      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
-      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_one": "{{count}} enregistrements ne sont pas associés. Modifiez un enregistrement et sélectionnez-le à nouveau depuis la saisie semi-automatique pour l'associer.",
+      "unmatchedBanner_other": "{{count}} enregistrements ne sont pas associés. Modifiez un enregistrement et sélectionnez-le à nouveau depuis la saisie semi-automatique pour l'associer.",
       "unmatchedTitle": "Certains enregistrements ne sont pas associés à la bibliothèque de vaccins",
       "viewMode": {
         "byDate": "Par date",
@@ -852,10 +851,10 @@
   },
   "labResults": {
     "addPanel": {
-      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
-      "componentPartialSaveTitle": "Some components not saved",
-      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
-      "componentSaveFailedTitle": "Test components not saved",
+      "componentPartialSaveMessage": "Le panel a été créé, mais certains composants d'analyse n'ont pas pu être enregistrés. Modifiez le panel pour vérifier.",
+      "componentPartialSaveTitle": "Certains composants non enregistrés",
+      "componentSaveFailedMessage": "Le panel a été créé, mais les composants d'analyse n'ont pas pu être enregistrés. Modifiez le panel pour les ajouter.",
+      "componentSaveFailedTitle": "Composants d'analyse non enregistrés",
       "createButton": "Enregistrer les résultats",
       "createError": "Échec de la création du panneau de tests",
       "creating": "Création du panneau...",
@@ -972,8 +971,8 @@
         "invalid": "L'horaire doit être au format HH:MM (24 h)",
         "label": "Horaires de rappel",
         "max": "Maximum de {{count}} horaires",
-        "max_one": "Maximum of {{count}} times",
-        "max_other": "Maximum of {{count}} times",
+        "max_one": "Maximum de {{count}} horaires",
+        "max_other": "Maximum de {{count}} horaires",
         "removeAriaLabel": "Supprimer l'horaire"
       },
       "viewNone": "Aucun rappel configuré"

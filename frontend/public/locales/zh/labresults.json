@@ -132,9 +132,9 @@
     "linkConditionsDescription": "将此检验结果与相关疾病关联，以便更好地跟踪和组织。",
     "linkConditionsTitle": "关联疾病",
     "linkedVisits": "关联就诊",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "关联药物",
+    "linkProceduresTitle": "关联手术",
+    "linkTreatmentsTitle": "关联治疗",
     "linkVisitsDescription": "将此检验结果与开具或审查该检验的就诊记录关联。",
     "linkVisitsTitle": "关联就诊",
     "matchedCommonName": "匹配：{{name}}",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "切换模式将丢弃您目前输入的内容。是否继续？",
     "noRelationshipsAvailable": "没有记录的医疗状况或就诊记录。请先添加它们，然后再在此处链接。",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "此患者没有任何疾病、就诊、药物、手术或治疗记录。",
     "relationshipsCreateInfo": "保存检验结果后可以添加关系。",
     "relationshipsSaveFirst": "请先保存检验结果以创建关系链接。",
     "testComponentsEditInfo": "保存后可以从查看页面管理检验组件。"
@@ -220,7 +220,13 @@
     "addCondition": "添加病症",
     "addVisit": "添加就诊",
     "removeCondition": "移除病症",
-    "removeVisit": "移除就诊"
+    "removeVisit": "移除就诊",
+    "addMedication": "添加药物",
+    "addProcedure": "添加手术",
+    "addTreatment": "添加治疗",
+    "removeMedication": "移除药物",
+    "removeProcedure": "移除手术",
+    "removeTreatment": "移除治疗"
   },
   "quickFormInstructions": "为此检验结果输入名称，然后您就可以上传并解析您的PDF。",
   "quickImportModalTitle": "快速PDF导入 - 第 {{step}} 步，共2步",
@@ -432,7 +438,8 @@
     "noComponentsDescription": "此检验结果尚未添加任何检验项目。",
     "notifications": {
       "componentDeleted": "组件已删除",
-      "hasBeenDeleted": "{{name}} 已被删除"
+      "hasBeenDeleted": "{{name}} 已被删除",
+      "legacyResultNotFound": "找不到要编辑的检验结果"
     },
     "refreshComponents": "刷新组件",
     "resultType": {
@@ -536,5 +543,6 @@
   "unsavedDataInstructions": "在关闭前，请在预览标签页中点击\"添加组件\"以保存您解析的数据。",
   "unsavedDataMessage_one": "您有 {{count}} 个已解析的检验组件尚未添加。如果现在关闭，您将丢失这些解析数据。",
   "unsavedDataMessage_other": "您有 {{count}} 个已解析的检验组件尚未添加。如果现在关闭，您将丢失这些解析数据。",
-  "unsavedDataWarning": "未保存的解析数据"
+  "unsavedDataWarning": "未保存的解析数据",
+  "bulkImport": "批量导入"
 }

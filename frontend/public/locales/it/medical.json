@@ -79,7 +79,6 @@
     "fetchError": "Impossibile caricare il catalogo dei test",
     "noData": "Aggiungi risultati di laboratorio per vederli qui.",
     "noResults": "Nessun risultato di laboratorio trovato",
-    "readingCount_one": "{{count}} misurazione",
     "refRange": "Rif",
     "searchPlaceholder": "Cerca test...",
     "sort": {
@@ -362,8 +361,8 @@
       "dateRangePlaceholder": "Filtra per intervallo di date",
       "doseLabel": "Dose {{n}}",
       "dosesCount": "{{count}} dosi",
-      "dosesCount_one": "{{count}} doses",
-      "dosesCount_other": "{{count}} doses",
+      "dosesCount_one": "{{count}} dosi",
+      "dosesCount_other": "{{count}} dosi",
       "dosesCountSingular": "1 dose",
       "emptyAll": "Nessuna vaccinazione registrata.",
       "emptyRange": "Nessuna vaccinazione in questo intervallo.",
@@ -373,13 +372,13 @@
       "miscGroupHint": "Questi record non sono ancora collegati alla libreria dei vaccini. Fai clic su uno per modificarlo e scegliere una voce della libreria.",
       "noDiseaseData": "Nessuna vaccinazione è collegata alla libreria. Passa alla vista «Per data» per vedere tutti i record, oppure modifica un record e riseleziona un vaccino dal completamento automatico per collegarlo.",
       "recordCount": "{{count}} vaccinazioni",
-      "recordCount_one": "{{count}} vaccinations",
-      "recordCount_other": "{{count}} vaccinations",
+      "recordCount_one": "{{count}} vaccinazioni",
+      "recordCount_other": "{{count}} vaccinazioni",
       "recordCountSingular": "1 vaccinazione",
       "unlinkedTag": "Non collegato",
       "unmatchedBanner": "{{count}} record non sono collegati. Modifica un record e riselezionalo dal completamento automatico per collegarlo.",
-      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
-      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_one": "{{count}} record non sono collegati. Modifica un record e selezionalo di nuovo dal completamento automatico per collegarlo.",
+      "unmatchedBanner_other": "{{count}} record non sono collegati. Modifica un record e selezionalo di nuovo dal completamento automatico per collegarlo.",
       "unmatchedTitle": "Alcuni record non sono collegati alla libreria dei vaccini",
       "viewMode": {
         "byDate": "Per data",
@@ -852,10 +851,10 @@
   },
   "labResults": {
     "addPanel": {
-      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
-      "componentPartialSaveTitle": "Some components not saved",
-      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
-      "componentSaveFailedTitle": "Test components not saved",
+      "componentPartialSaveMessage": "Il pannello è stato creato, ma alcuni componenti dell'esame non sono stati salvati. Modifica il pannello per verificare.",
+      "componentPartialSaveTitle": "Alcuni componenti non salvati",
+      "componentSaveFailedMessage": "Il pannello è stato creato, ma non è stato possibile salvare i componenti dell'esame. Modifica il pannello per aggiungerli.",
+      "componentSaveFailedTitle": "Componenti dell'esame non salvati",
       "createButton": "Salva risultati",
       "createError": "Impossibile creare il pannello di test",
       "creating": "Creazione pannello...",
@@ -972,8 +971,8 @@
         "invalid": "L'orario deve essere nel formato HH:MM (24 ore)",
         "label": "Orari dei promemoria",
         "max": "Massimo {{count}} orari",
-        "max_one": "Maximum of {{count}} times",
-        "max_other": "Maximum of {{count}} times",
+        "max_one": "Massimo {{count}} orari",
+        "max_other": "Massimo {{count}} orari",
         "removeAriaLabel": "Rimuovi orario"
       },
       "viewNone": "Nessun promemoria configurato"
@@ -1624,7 +1623,7 @@
         "urgentCare": "Assistenza urgente"
       },
       "priorityOptions": {
-        "routine": "Routine",
+        "routine": "Di routine",
         "urgent": "Urgente"
       },
       "visitTypeOptions": {

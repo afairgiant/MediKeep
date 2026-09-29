@@ -1,8 +1,8 @@
 {
   "buttons": {
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View"
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "view": "Visualizza"
   },
   "categories": {
     "admin_dashboard": "Dashboard amministratore",
@@ -77,7 +77,7 @@
     "procedureCode": "Codice procedura",
     "procedureName": "Nome della procedura",
     "procedureType": "Tipo di procedura",
-    "reset": "Reset",
+    "reset": "Reimposta",
     "selectGender": "Seleziona il sesso",
     "selectPractitioner": "Seleziona il professionista",
     "selectRelationship": "Seleziona la relazione",
@@ -250,13 +250,13 @@
     "relatedCondition": "Condizione correlata",
     "relatedConditions": "Condizioni correlate",
     "relationship": "Relazione",
-    "remove": "Remove",
+    "remove": "Rimuovi",
     "resetPassword": "Reimposta password",
     "resolved": "Risolto",
     "retry": "Riprova",
     "role": "Ruolo",
     "route": "Via",
-    "save": "Save",
+    "save": "Salva",
     "saving": "Salvataggio...",
     "selectCategory": "Seleziona categoria",
     "selectPractitioner": "Seleziona il professionista",
@@ -273,11 +273,11 @@
     "showingCountUniqueTests_other": "{{count}} test unici visualizzati",
     "sideEffects": "Effetti collaterali",
     "size": "Dimensione",
-    "sortBy": "Sort by",
+    "sortBy": "Ordina per",
     "specialties": "Specialità",
     "specialty": "Specialità",
     "startDate": "Data di inizio",
-    "state": "State",
+    "state": "Stato",
     "stateProvince": "Stato / Provincia",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Protezione per conteggio:</strong> Mantieni sempre i {{count}} backup più recenti",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Protezione per conteggio:</strong> Mantieni sempre il {{count}} backup più recente",
@@ -331,11 +331,11 @@
     "episodesCount_one": "Episodio ({{count}})",
     "episodesCount_other": "Episodi ({{count}})",
     "labResults": "Risultati di laboratorio",
-    "medications": "Medications",
+    "medications": "Farmaci",
     "notes": "Note",
     "overview": "Panoramica",
-    "procedures": "Procedures",
-    "treatments": "Treatments",
+    "procedures": "Procedure",
+    "treatments": "Trattamenti",
     "visits": "Visite"
   }
 }

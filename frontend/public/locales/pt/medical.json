@@ -79,7 +79,6 @@
     "fetchError": "Falha ao carregar o catálogo de exames",
     "noData": "Adicione resultados laboratoriais para vê-los aqui.",
     "noResults": "Nenhum resultado laboratorial encontrado",
-    "readingCount_one": "{{count}} leitura",
     "refRange": "Ref",
     "searchPlaceholder": "Pesquisar exames...",
     "sort": {
@@ -373,13 +372,13 @@
       "miscGroupHint": "Estes registros ainda não estão vinculados à biblioteca de vacinas. Clique em um deles para editar e selecionar uma entrada da biblioteca.",
       "noDiseaseData": "Nenhuma vacinação está vinculada à biblioteca. Mude para a visualização \"Por Data\" para ver todos os registros, ou edite um registro e selecione novamente uma vacina no campo de autocompletar para vinculá-lo.",
       "recordCount": "{{count}} vacinações",
-      "recordCount_one": "{{count}} vaccinations",
-      "recordCount_other": "{{count}} vaccinations",
+      "recordCount_one": "{{count}} vacinações",
+      "recordCount_other": "{{count}} vacinações",
       "recordCountSingular": "1 vacinação",
       "unlinkedTag": "Não vinculado",
       "unmatchedBanner": "{{count}} registros não estão vinculados. Edite um registro e selecione-o novamente no campo de autocompletar para vinculá-lo.",
-      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
-      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_one": "{{count}} registros não estão vinculados. Edite um registro e selecione-o novamente no preenchimento automático para vinculá-lo.",
+      "unmatchedBanner_other": "{{count}} registros não estão vinculados. Edite um registro e selecione-o novamente no preenchimento automático para vinculá-lo.",
       "unmatchedTitle": "Alguns registros não estão vinculados à biblioteca de vacinas",
       "viewMode": {
         "byDate": "Por Data",
@@ -852,10 +851,10 @@
   },
   "labResults": {
     "addPanel": {
-      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
-      "componentPartialSaveTitle": "Some components not saved",
-      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
-      "componentSaveFailedTitle": "Test components not saved",
+      "componentPartialSaveMessage": "O painel foi criado, mas alguns componentes do exame não puderam ser salvos. Edite o painel para revisar.",
+      "componentPartialSaveTitle": "Alguns componentes não foram salvos",
+      "componentSaveFailedMessage": "O painel foi criado, mas os componentes do exame não puderam ser salvos. Edite o painel para adicioná-los.",
+      "componentSaveFailedTitle": "Componentes do exame não salvos",
       "createButton": "Guardar resultados",
       "createError": "Falha ao criar painel de exames",
       "creating": "Criando painel...",
@@ -972,8 +971,8 @@
         "invalid": "O horário deve estar no formato HH:MM (24h)",
         "label": "Horários dos lembretes",
         "max": "Máximo de {{count}} horários",
-        "max_one": "Maximum of {{count}} times",
-        "max_other": "Maximum of {{count}} times",
+        "max_one": "Máximo de {{count}} horários",
+        "max_other": "Máximo de {{count}} horários",
         "removeAriaLabel": "Remover horário"
       },
       "viewNone": "Nenhum lembrete configurado"

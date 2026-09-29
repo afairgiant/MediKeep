@@ -79,14 +79,13 @@
     "fetchError": "Testkatalog konnte nicht geladen werden",
     "noData": "Fügen Sie Laborergebnisse hinzu, um sie hier zu sehen.",
     "noResults": "Keine Laborergebnisse gefunden",
-    "readingCount_one": "{{count}} Messung",
     "refRange": "Ref.",
     "searchPlaceholder": "Tests suchen...",
     "sort": {
       "alphabetical": "A-Z"
     },
     "status": {
-      "abnormal": "Abnormal",
+      "abnormal": "Auffällig",
       "borderline": "Grenzwertig",
       "critical": "Kritisch",
       "high": "Hoch",
@@ -362,8 +361,8 @@
       "dateRangePlaceholder": "Nach Zeitraum filtern",
       "doseLabel": "Dosis {{n}}",
       "dosesCount": "{{count}} Dosen",
-      "dosesCount_one": "{{count}} doses",
-      "dosesCount_other": "{{count}} doses",
+      "dosesCount_one": "{{count}} Dosen",
+      "dosesCount_other": "{{count}} Dosen",
       "dosesCountSingular": "1 Dosis",
       "emptyAll": "Noch keine Impfungen erfasst.",
       "emptyRange": "Keine Impfungen in diesem Zeitraum.",
@@ -373,13 +372,13 @@
       "miscGroupHint": "Diese Einträge sind noch nicht mit der Impfstoffbibliothek verknüpft. Klicken Sie auf einen Eintrag, um ihn zu bearbeiten und einen Bibliothekseintrag auszuwählen.",
       "noDiseaseData": "Es sind keine Impfungen mit der Bibliothek verknüpft. Wechseln Sie zur Ansicht „Nach Datum“, um alle Einträge zu sehen, oder bearbeiten Sie einen Eintrag und wählen Sie erneut einen Impfstoff aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
       "recordCount": "{{count}} Impfungen",
-      "recordCount_one": "{{count}} vaccinations",
-      "recordCount_other": "{{count}} vaccinations",
+      "recordCount_one": "{{count}} Impfungen",
+      "recordCount_other": "{{count}} Impfungen",
       "recordCountSingular": "1 Impfung",
       "unlinkedTag": "Nicht verknüpft",
       "unmatchedBanner": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
-      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
-      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_one": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der Autovervollständigung aus, um ihn zu verknüpfen.",
+      "unmatchedBanner_other": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der Autovervollständigung aus, um ihn zu verknüpfen.",
       "unmatchedTitle": "Einige Einträge sind nicht mit der Impfstoffbibliothek verknüpft",
       "viewMode": {
         "byDate": "Nach Datum",
@@ -424,7 +423,7 @@
       "placeholder": "Verabreichungsweg auswählen"
     },
     "routeOptions": {
-      "intradermal": "Intradermal (ID)",
+      "intradermal": "Intradermal (i. d.)",
       "intramuscular": "Intramuskulär (IM)",
       "subcutaneous": "Subkutan (SC)"
     },
@@ -852,10 +851,10 @@
   },
   "labResults": {
     "addPanel": {
-      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
-      "componentPartialSaveTitle": "Some components not saved",
-      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
-      "componentSaveFailedTitle": "Test components not saved",
+      "componentPartialSaveMessage": "Das Panel wurde erstellt, aber einige Testkomponenten konnten nicht gespeichert werden. Bearbeiten Sie das Panel, um sie zu überprüfen.",
+      "componentPartialSaveTitle": "Einige Komponenten nicht gespeichert",
+      "componentSaveFailedMessage": "Das Panel wurde erstellt, aber die Testkomponenten konnten nicht gespeichert werden. Bearbeiten Sie das Panel, um sie hinzuzufügen.",
+      "componentSaveFailedTitle": "Testkomponenten nicht gespeichert",
       "createButton": "Ergebnisse speichern",
       "createError": "Testpanel konnte nicht erstellt werden",
       "creating": "Panel wird erstellt...",
@@ -972,8 +971,8 @@
         "invalid": "Zeit muss im Format HH:MM (24 Stunden) sein",
         "label": "Erinnerungszeiten",
         "max": "Maximal {{count}} Zeiten",
-        "max_one": "Maximum of {{count}} times",
-        "max_other": "Maximum of {{count}} times",
+        "max_one": "Maximal {{count}} Zeiten",
+        "max_other": "Maximal {{count}} Zeiten",
         "removeAriaLabel": "Zeit entfernen"
       },
       "viewNone": "Keine Erinnerungen konfiguriert"
@@ -982,7 +981,7 @@
       "description": "Wie das Medikament verabreicht wird",
       "label": "Applikationsweg",
       "options": {
-        "aural": "Aural",
+        "aural": "Aurikulär",
         "inhalation": "Inhalation",
         "injection": "Injektion",
         "intramuscular": "Intramuskulär",

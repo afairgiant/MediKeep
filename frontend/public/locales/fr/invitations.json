@@ -17,9 +17,9 @@
   },
   "manager": {
     "born": "Né(e) le : {{date}}",
-    "conditionsCount": "{{count}} condition(s)",
-    "conditionsCount_one": "{{count}} condition",
-    "conditionsCount_other": "{{count}} conditions",
+    "conditionsCount": "{{count}} pathologie(s)",
+    "conditionsCount_one": "{{count}} pathologie",
+    "conditionsCount_other": "{{count}} pathologies",
     "customPermissions": "Permissions personnalisées appliquées",
     "expires": "Expire le : {{date}}",
     "familyMembersSharedInfo": "{{count}} membre(s) de la famille partagé(s) avec vous par autrui.",

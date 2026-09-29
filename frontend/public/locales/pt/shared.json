@@ -1,8 +1,8 @@
 {
   "buttons": {
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View"
+    "delete": "Excluir",
+    "edit": "Editar",
+    "view": "Visualizar"
   },
   "categories": {
     "admin_dashboard": "Painel Administrativo",
@@ -77,7 +77,7 @@
     "procedureCode": "Código do Procedimento",
     "procedureName": "Nome do Procedimento",
     "procedureType": "Tipo de Procedimento",
-    "reset": "Reset",
+    "reset": "Redefinir",
     "selectGender": "Selecione o gênero",
     "selectPractitioner": "Selecione o profissional",
     "selectRelationship": "Selecione o parentesco",
@@ -250,13 +250,13 @@
     "relatedCondition": "Condição Relacionada",
     "relatedConditions": "Condições Relacionadas",
     "relationship": "Parentesco",
-    "remove": "Remove",
+    "remove": "Remover",
     "resetPassword": "Redefinir Senha",
     "resolved": "Resolvido",
     "retry": "Tentar Novamente",
     "role": "Função",
     "route": "Via",
-    "save": "Save",
+    "save": "Salvar",
     "saving": "Salvando...",
     "selectCategory": "Selecione a categoria",
     "selectPractitioner": "Selecione o profissional",
@@ -273,11 +273,11 @@
     "showingCountUniqueTests_other": "Mostrando {{count}} testes únicos",
     "sideEffects": "Efeitos Colaterais",
     "size": "Tamanho",
-    "sortBy": "Sort by",
+    "sortBy": "Ordenar por",
     "specialties": "Especialidades",
     "specialty": "Especialidade",
     "startDate": "Data de Início",
-    "state": "State",
+    "state": "Estado",
     "stateProvince": "Estado / Província",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Proteção por Contagem:</strong> Sempre manter os {{count}} backups mais recentes",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Proteção por Contagem:</strong> Sempre manter o {{count}} backup mais recente",
@@ -331,11 +331,11 @@
     "episodesCount_one": "Episódio ({{count}})",
     "episodesCount_other": "Episódios ({{count}})",
     "labResults": "Resultados de Laboratório",
-    "medications": "Medications",
+    "medications": "Medicamentos",
     "notes": "Notas",
     "overview": "Visão Geral",
-    "procedures": "Procedures",
-    "treatments": "Treatments",
+    "procedures": "Procedimentos",
+    "treatments": "Tratamentos",
     "visits": "Consultas"
   }
 }

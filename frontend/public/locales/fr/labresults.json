@@ -132,9 +132,9 @@
     "linkConditionsDescription": "Associez ce résultat d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
     "linkConditionsTitle": "Connecter des conditions médicales",
     "linkedVisits": "Visites connectées",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
+    "linkMedicationsTitle": "Associer aux médicaments",
+    "linkProceduresTitle": "Associer aux procédures",
+    "linkTreatmentsTitle": "Associer aux traitements",
     "linkVisitsDescription": "Associez ce résultat d'analyse aux visites où il a été prescrit ou traité.",
     "linkVisitsTitle": "Connecter des visites",
     "matchedCommonName": "correspondance : {{name}}",
@@ -166,7 +166,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Changer de mode annulera ce que vous avez saisi jusqu'à présent. Continuer ?",
     "noRelationshipsAvailable": "Aucune condition médicale ni visite enregistrée. Ajoutez-les d'abord pour les lier ici.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
+    "noRelationshipsOnRecord": "Aucune condition médicale, visite, médicament, procédure ou traitement enregistré pour ce patient.",
     "relationshipsCreateInfo": "Les connexions peuvent être ajoutées après avoir sauvegardé le résultat d'analyse.",
     "relationshipsSaveFirst": "Sauvegardez d'abord le résultat d'analyse pour pouvoir le connecter.",
     "testComponentsEditInfo": "Les composants d'analyse peuvent être gérés depuis la page d'aperçu après sauvegarde."
@@ -220,7 +220,13 @@
     "addCondition": "Ajouter une condition",
     "addVisit": "Ajouter une visite",
     "removeCondition": "Supprimer la condition",
-    "removeVisit": "Supprimer la visite"
+    "removeVisit": "Supprimer la visite",
+    "addMedication": "Ajouter un médicament",
+    "addProcedure": "Ajouter une procédure",
+    "addTreatment": "Ajouter un traitement",
+    "removeMedication": "Supprimer le médicament",
+    "removeProcedure": "Supprimer la procédure",
+    "removeTreatment": "Supprimer le traitement"
   },
   "quickFormInstructions": "Saisissez un nom pour ce résultat d'analyse, puis vous pourrez téléverser et analyser votre PDF.",
   "quickImportModalTitle": "Importation PDF rapide - Etape {{step}} sur 2",
@@ -538,5 +544,6 @@
   "unsavedDataInstructions": "Cliquez sur \"Ajouter des composants\" dans l'onglet d'aperçu pour sauvegarder vos données analysées avant de fermer la fenêtre.",
   "unsavedDataMessage_one": "Vous avez {{count}} composant d'analyse analysé qui n'a pas encore été ajouté. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
   "unsavedDataMessage_other": "Vous avez {{count}} composants d'analyse analysés qui n'ont pas encore été ajoutés. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
-  "unsavedDataWarning": "Données analysées non sauvegardées"
+  "unsavedDataWarning": "Données analysées non sauvegardées",
+  "bulkImport": "Importation en masse"
 }
