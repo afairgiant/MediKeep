@@ -2,6 +2,7 @@ import logger from '../../services/logger';
 
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useViewport } from '../../hooks/useViewport';
 import { redirectToLogin } from '../../utils/loginRedirect';
@@ -18,7 +19,7 @@ const NavigationWrapper = ({
   user,
   isAdmin,
   showBackButton = false,
-  backButtonText = 'Back to Dashboard',
+  backButtonText,
   backButtonPath = '/dashboard',
   onBackClick,
   className = '',
@@ -26,6 +27,8 @@ const NavigationWrapper = ({
   onMobileNavClose,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('navigation');
+  const backLabel = backButtonText ?? t('menu.backToDashboard');
   const { isMobile, isTablet } = useViewport();
 
   const isMobileNavOpen = mobileNavOpen || false;
@@ -78,7 +81,7 @@ const NavigationWrapper = ({
           isAdmin={isAdmin}
           onLogout={handleLogout}
           showBackButton={showBackButton}
-          backButtonText={backButtonText}
+          backButtonText={backLabel}
           onBackClick={handleBackClick}
         />
       ) : isTablet ? (

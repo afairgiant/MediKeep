@@ -62,7 +62,7 @@ import { PageHeader } from '../../components';
 | `title`             | string          | -                       | The page title (required)                                  |
 | `icon`              | string          | -                       | Emoji or icon to display next to title                     |
 | `showBackButton`    | boolean         | `true`                  | Whether to show the back button                            |
-| `backButtonText`    | string          | `'← Back to Dashboard'` | Text for the back button                                   |
+| `backButtonText`    | string          | translated "Back to Dashboard" | Text for the back button                                   |
 | `backButtonPath`    | string          | `'/dashboard'`          | Path to navigate to when back button is clicked            |
 | `onBackClick`       | function        | -                       | Custom back button handler (overrides default navigation)  |
 | `actions`           | React.ReactNode | -                       | Custom actions to display on the right side                |

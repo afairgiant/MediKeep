@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { isUserAdmin } from '../../utils/authUtils';
 import { NavigationWrapper } from '../navigation';
@@ -13,7 +14,7 @@ const PageHeader = ({
   title,
   icon,
   showBackButton = true,
-  backButtonText = '← Back to Dashboard',
+  backButtonText,
   backButtonPath = '/dashboard',
   onBackClick,
   actions,
@@ -23,6 +24,8 @@ const PageHeader = ({
   showTitle = true,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('navigation');
+  const backLabel = backButtonText ?? `← ${t('menu.backToDashboard')}`;
   const { user } = useAuth();
   const { isMobile } = useViewport();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -59,7 +62,7 @@ const PageHeader = ({
               onClick={handleBackClick}
               type="button"
             >
-              {backButtonText}
+              {backLabel}
             </button>
           )}
         </div>
@@ -102,7 +105,7 @@ const PageHeader = ({
           user={user}
           isAdmin={isAdmin}
           showBackButton={showBackButton && isMobile}
-          backButtonText={backButtonText}
+          backButtonText={backLabel}
           backButtonPath={backButtonPath}
           onBackClick={onBackClick}
           mobileNavOpen={isMobileNavOpen}
