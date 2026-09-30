@@ -8,6 +8,7 @@ import {
   Button,
   Grid,
   TextInput,
+  Autocomplete,
   NumberInput,
   Textarea,
   Select,
@@ -30,11 +31,13 @@ import {
   IconNotes,
   IconPlus,
   IconTrash,
+  IconX,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
+import { useTestNameAutocomplete } from '../../../hooks/useTestNameAutocomplete';
 import {
   parseDateInput,
   formatDateInputChange,
@@ -953,6 +956,34 @@ const LabResultFormWrapper = ({
     inlineComponentsMethodsRef.current = methods;
   }, []);
 
+  // Test-name suggestions (create mode only): picking a panel/test fills the
+  // category and pre-populates the staged component rows, matching the quick
+  // TestPanelCreateDialog. Edit/post-create records use the plain input since
+  // their components are managed through the API.
+  const showNameAutocomplete = !editingItem && !postCreate;
+  const getInlineMethods = useCallback(
+    () => inlineComponentsMethodsRef.current,
+    []
+  );
+  const handleNameFieldsChange = useCallback(
+    fields => {
+      Object.entries(fields).forEach(([name, value]) => {
+        onInputChange({ target: { name, value } });
+      });
+    },
+    [onInputChange]
+  );
+  const {
+    nameOptions,
+    handleChange: handleNameChange,
+    handleOptionSubmit: handleNameOptionSubmit,
+    handleClear: handleNameClear,
+  } = useTestNameAutocomplete({
+    testName: formData.test_name || '',
+    getInlineMethods,
+    onFieldsChange: handleNameFieldsChange,
+  });
+
   useEffect(() => {
     if (onPendingComponentsRef) {
       onPendingComponentsRef({
@@ -1122,14 +1153,44 @@ const LabResultFormWrapper = ({
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: isGroupedResult ? 12 : 8 }}>
-                    <TextInput
-                      label={t('shared:fields.testName')}
-                      value={formData.test_name || ''}
-                      onChange={handleTextInputChange('test_name')}
-                      placeholder={t('labresults:testName.placeholder')}
-                      description={t('labresults:testName.description')}
-                      required
-                    />
+                    {showNameAutocomplete ? (
+                      <Autocomplete
+                        label={t('shared:fields.testName')}
+                        value={formData.test_name || ''}
+                        onChange={handleNameChange}
+                        onOptionSubmit={handleNameOptionSubmit}
+                        data={nameOptions}
+                        limit={50}
+                        filter={({ options, limit }) => options.slice(0, limit)}
+                        maxDropdownHeight={300}
+                        placeholder={t('labresults:testName.placeholder')}
+                        description={t('labresults:testName.description')}
+                        comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                        rightSection={
+                          formData.test_name ? (
+                            <ActionIcon
+                              size="sm"
+                              variant="subtle"
+                              color="gray"
+                              onClick={handleNameClear}
+                              aria-label={t('common:buttons.clear', 'Clear')}
+                            >
+                              <IconX size={14} />
+                            </ActionIcon>
+                          ) : null
+                        }
+                        required
+                      />
+                    ) : (
+                      <TextInput
+                        label={t('shared:fields.testName')}
+                        value={formData.test_name || ''}
+                        onChange={handleTextInputChange('test_name')}
+                        placeholder={t('labresults:testName.placeholder')}
+                        description={t('labresults:testName.description')}
+                        required
+                      />
+                    )}
                   </Grid.Col>
                   {!isGroupedResult && (
                     <Grid.Col span={{ base: 12, sm: 4 }}>
