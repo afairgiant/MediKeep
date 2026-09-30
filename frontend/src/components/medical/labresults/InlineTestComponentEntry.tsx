@@ -230,6 +230,9 @@ function InlineTestComponentEntry({
             return {
               ...comp,
               ...range,
+              // The range was looked up in lookupUnit; keep the row consistent
+              // when that unit came from the library default rather than the row.
+              unit: comp.unit || lookupUnit,
               status: calculateStatus(
                 comp.value,
                 range.ref_range_min,

@@ -188,6 +188,7 @@ describe('InlineTestComponentEntry reference range prefill', () => {
     fireEvent.blur(input);
 
     await waitFor(() => expect(screen.getByDisplayValue('70')).toBeInTheDocument());
+    expect(screen.getByDisplayValue('mg/dL')).toBeInTheDocument();
     expect(getTrends).toHaveBeenCalledWith(
       7,
       'Glucose',
