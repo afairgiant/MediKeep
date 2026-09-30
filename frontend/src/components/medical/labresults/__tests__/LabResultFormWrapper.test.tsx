@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { vi } from 'vitest';
 
 /**
@@ -37,9 +38,12 @@ vi.mock('../../practitioners/PractitionerSelectWithCreate', () => ({
   ),
 }));
 
+const mockSetComponents = vi.hoisted(() => vi.fn());
+
 vi.mock('../InlineTestComponentEntry', () => ({
   default: ({ onRef }) => {
-    if (onRef) onRef({ getComponents: () => [] });
+    if (onRef)
+      onRef({ getComponents: () => [], setComponents: mockSetComponents });
     return <div data-testid="inline-test-component" />;
   },
 }));
@@ -103,6 +107,63 @@ const defaultProps = {
 describe('LabResultFormWrapper', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('Test name autocomplete (#1027)', () => {
+    // Mirrors the page: formData lives in parent state and updates functionally.
+    const StatefulForm = (props: Record<string, unknown>) => {
+      const [formData, setFormData] = useState(defaultProps.formData);
+      return (
+        <LabResultFormWrapper
+          {...defaultProps}
+          {...props}
+          formData={formData}
+          onInputChange={(e: { target: { name: string; value: string } }) =>
+            setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+          }
+        />
+      );
+    };
+
+    const testNameInput = () =>
+      screen.getByPlaceholderText('labresults:testName.placeholder');
+
+    test('suggests panels as you type in create mode', async () => {
+      render(<StatefulForm advancedCreate />);
+      await userEvent.type(testNameInput(), 'Comprehensive Metab');
+
+      expect(
+        await screen.findByText('Comprehensive Metabolic Panel (CMP)')
+      ).toBeInTheDocument();
+    });
+
+    test('picking a panel fills name and category and pre-populates test rows', async () => {
+      render(<StatefulForm advancedCreate />);
+      await userEvent.type(testNameInput(), 'Comprehensive Metab');
+      await userEvent.click(
+        await screen.findByText('Comprehensive Metabolic Panel (CMP)')
+      );
+
+      expect(testNameInput()).toHaveValue('Comprehensive Metabolic Panel');
+      expect(
+        screen.getByDisplayValue('labresults:category.chemistry')
+      ).toBeInTheDocument();
+      expect(mockSetComponents).toHaveBeenCalled();
+      const rows = mockSetComponents.mock.calls.at(-1)?.[0];
+      expect(rows.length).toBeGreaterThan(1);
+    });
+
+    test.each([
+      ['edit mode', { editingItem: { id: 5, test_name: 'x' } }],
+      ['post-create mode', { postCreate: true }],
+    ])('keeps a plain input with no suggestions in %s', async (_label, extra) => {
+      render(<StatefulForm {...extra} />);
+      await userEvent.type(testNameInput(), 'Comprehensive Metab');
+
+      expect(
+        screen.queryByText('Comprehensive Metabolic Panel (CMP)')
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe('Basic Info tab (default)', () => {

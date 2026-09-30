@@ -13,19 +13,6 @@ import {
   Text,
   ActionIcon,
 } from '@mantine/core';
-import {
-  getPanelAutocompleteOptions,
-  extractPanelName,
-  getPanelByOption,
-  PANEL_CATEGORY_TO_FORM_CATEGORY,
-} from '../../../constants/panelLibrary';
-import { getTemplateRowsForPanel } from '../../../constants/panelTemplateMap';
-import {
-  getAutocompleteOptions as getTestAutocompleteOptions,
-  getTestByName,
-  extractTestName,
-  TEST_CATEGORY_TO_FORM_CATEGORY,
-} from '../../../constants/testLibrary';
 import { IconAlertCircle, IconX } from '@tabler/icons-react';
 import { DateInput } from '../../adapters/DateInput';
 import LabResultTagsField from './LabResultTagsField';
@@ -39,7 +26,11 @@ import InlineTestComponentEntry, {
 } from './InlineTestComponentEntry';
 import AdvancedModeSwitch from './AdvancedModeSwitch';
 import { apiService } from '../../../services/api';
-import { hasFilledValue, createEmptyRow, submitPendingTestComponents, ComponentRowData } from '../../../utils/labTestComponentUtils';
+import { submitPendingTestComponents } from '../../../utils/labTestComponentUtils';
+import {
+  useTestNameAutocomplete,
+  TestNameFields,
+} from '../../../hooks/useTestNameAutocomplete';
 import logger from '../../../services/logger';
 
 interface Practitioner {
@@ -120,24 +111,31 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inlineTestRef = useRef<InlineTestComponentMethods | null>(null);
-  const [autoPopulatedRowIds, setAutoPopulatedRowIds] = useState<ReadonlySet<string>>(new Set());
-  const lastAutoPopulatedOptionRef = useRef<string>('');
-
-  const removeUnfilledAutoRows = useCallback((ids: ReadonlySet<string>): ComponentRowData[] => {
-    const current = inlineTestRef.current?.getComponents() ?? [];
-    const filtered = current.filter(row => !ids.has(row._rowId) || hasFilledValue(row));
-    return filtered.length > 0 ? filtered : [createEmptyRow(1)];
-  }, []);
+  const getInlineMethods = useCallback(() => inlineTestRef.current, []);
+  const handleNameFieldsChange = useCallback(
+    (fields: TestNameFields) => setFormData(prev => ({ ...prev, ...fields })),
+    []
+  );
+  const {
+    nameOptions,
+    handleChange: handleNameChange,
+    handleOptionSubmit: handleNameOptionSubmit,
+    handleClear: handleNameClear,
+    reset: resetAutoPopulate,
+  } = useTestNameAutocomplete({
+    testName: formData.test_name,
+    getInlineMethods,
+    onFieldsChange: handleNameFieldsChange,
+  });
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return;
     setFormData(EMPTY_FORM);
     setError(null);
-    setAutoPopulatedRowIds(new Set());
-    lastAutoPopulatedOptionRef.current = '';
+    resetAutoPopulate();
     inlineTestRef.current?.clearComponents();
     onClose();
-  }, [isSubmitting, onClose]);
+  }, [isSubmitting, onClose, resetAutoPopulate]);
 
   const handleCreate = useCallback(async () => {
     if (!formData.test_name.trim()) {
@@ -204,8 +202,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
 
       setFormData(EMPTY_FORM);
       setError(null);
-      setAutoPopulatedRowIds(new Set());
-      lastAutoPopulatedOptionRef.current = '';
+      resetAutoPopulate();
       inlineTestRef.current?.clearComponents();
       onCreateSuccess(labResult);
     } catch (err: unknown) {
@@ -219,14 +216,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, currentPatient, onCreateSuccess, t]);
-
-  // Panels take priority; only fall back to individual tests when no panel matches,
-  // so the dropdown never mixes the two kinds of results.
-  const panelOptions = getPanelAutocompleteOptions(formData.test_name, 50);
-  const nameOptions = panelOptions.length > 0
-    ? panelOptions
-    : getTestAutocompleteOptions(formData.test_name, 50);
+  }, [formData, currentPatient, onCreateSuccess, resetAutoPopulate, t]);
 
   return (
     <Modal
@@ -261,85 +251,15 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
           placeholder={t('medical:labResults.addPanel.panelNamePlaceholder')}
           description={t('medical:labResults.addPanel.panelNameDescription')}
           value={formData.test_name}
-          onChange={value => {
-            setFormData(prev => ({ ...prev, test_name: value }));
-            if (autoPopulatedRowIds.size > 0 && value !== lastAutoPopulatedOptionRef.current) {
-              inlineTestRef.current?.setComponents(removeUnfilledAutoRows(autoPopulatedRowIds));
-              setAutoPopulatedRowIds(new Set());
-              lastAutoPopulatedOptionRef.current = '';
-            }
-          }}
-          onOptionSubmit={value => {
-            lastAutoPopulatedOptionRef.current = value;
-            const cleaned = removeUnfilledAutoRows(autoPopulatedRowIds);
-            const panel = getPanelByOption(value);
-
-            if (panel) {
-              const panelName = extractPanelName(value);
-              const category = PANEL_CATEGORY_TO_FORM_CATEGORY[panel.category] ?? '';
-              setFormData(prev => ({
-                ...prev,
-                test_name: panelName,
-                test_category: category || prev.test_category,
-              }));
-              const templateRows = getTemplateRowsForPanel(panelName);
-              if (templateRows) {
-                const combined = [
-                  ...cleaned.filter(r => r.test_name.trim() !== ''),
-                  ...templateRows,
-                ];
-                inlineTestRef.current?.setComponents(combined.length > 0 ? combined : templateRows);
-                setAutoPopulatedRowIds(new Set(templateRows.map(r => r._rowId)));
-              } else {
-                inlineTestRef.current?.setComponents(cleaned);
-                setAutoPopulatedRowIds(new Set());
-              }
-              return;
-            }
-
-            const test = getTestByName(extractTestName(value));
-            if (test) {
-              const category = TEST_CATEGORY_TO_FORM_CATEGORY[test.category] ?? '';
-              setFormData(prev => ({
-                ...prev,
-                test_name: test.test_name,
-                test_category: category || prev.test_category,
-              }));
-              const testRow: ComponentRowData = {
-                ...createEmptyRow(1),
-                test_name: test.test_name,
-                canonical_test_name: test.test_name,
-                abbreviation: test.abbreviation || '',
-                test_code: test.test_code || '',
-                unit: test.default_unit,
-                category: test.category,
-                result_type: test.result_type || 'quantitative',
-              };
-              const combined = [
-                ...cleaned.filter(r => r.test_name.trim() !== ''),
-                testRow,
-              ];
-              inlineTestRef.current?.setComponents(combined);
-              setAutoPopulatedRowIds(new Set([testRow._rowId]));
-              return;
-            }
-
-            setFormData(prev => ({ ...prev, test_name: extractPanelName(value) }));
-            inlineTestRef.current?.setComponents(cleaned);
-            setAutoPopulatedRowIds(new Set());
-          }}
+          onChange={handleNameChange}
+          onOptionSubmit={handleNameOptionSubmit}
           rightSection={
             formData.test_name ? (
               <ActionIcon
                 size="sm"
                 variant="subtle"
                 color="gray"
-                onClick={() => {
-                  inlineTestRef.current?.setComponents(removeUnfilledAutoRows(autoPopulatedRowIds));
-                  setAutoPopulatedRowIds(new Set());
-                  lastAutoPopulatedOptionRef.current = '';
-                  setFormData(prev => ({ ...prev, test_name: '' }));
-                }}
+                onClick={handleNameClear}
                 aria-label={t('common:buttons.clear', 'Clear')}
                 disabled={isSubmitting}
               >
