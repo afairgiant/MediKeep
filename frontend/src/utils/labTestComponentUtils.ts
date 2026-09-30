@@ -229,6 +229,66 @@ export function calculateStatus(
   return 'normal';
 }
 
+/** Minimal shape of a trend data point needed to pick a previous reference range. */
+export interface ReferenceRangeSource {
+  unit?: string | null;
+  ref_range_min?: number | null;
+  ref_range_max?: number | null;
+  ref_range_text?: string | null;
+  recorded_date?: string | null;
+  created_at?: string | null;
+  lab_result?: { completed_date?: string | null } | null;
+}
+
+export interface PreviousReferenceRange {
+  ref_range_min: number | '';
+  ref_range_max: number | '';
+  ref_range_text: string;
+}
+
+/** Trim and lower-case a unit so comparisons ignore whitespace and case. */
+export function normalizeUnit(unit?: string | null): string {
+  return (unit || '').trim().toLowerCase();
+}
+
+function pointTimestamp(point: ReferenceRangeSource): number {
+  const raw =
+    point.lab_result?.completed_date ||
+    point.recorded_date ||
+    point.created_at ||
+    '';
+  const time = Date.parse(raw);
+  return isNaN(time) ? -Infinity : time;
+}
+
+/**
+ * Pick the reference range from the most recent previous result that has one.
+ * Points recorded in a different unit are skipped because a range in another
+ * unit would be wrong for the new result. A blank unit only matches points
+ * that also have no unit. Returns null when nothing usable exists.
+ */
+export function pickPreviousReferenceRange(
+  points: ReferenceRangeSource[],
+  unit?: string | null
+): PreviousReferenceRange | null {
+  const wantedUnit = normalizeUnit(unit);
+  const sorted = [...points].sort(
+    (a, b) => pointTimestamp(b) - pointTimestamp(a)
+  );
+
+  for (const point of sorted) {
+    if (normalizeUnit(point.unit) !== wantedUnit) continue;
+
+    const min = isValidNumber(point.ref_range_min) ? point.ref_range_min : '';
+    const max = isValidNumber(point.ref_range_max) ? point.ref_range_max : '';
+    const text = (point.ref_range_text || '').trim();
+    if (min === '' && max === '' && !text) continue;
+
+    return { ref_range_min: min, ref_range_max: max, ref_range_text: text };
+  }
+  return null;
+}
+
 /** Capitalize first letter of a status string for display. */
 export function capitalizeStatus(status: string | undefined): string {
   if (!status) return '';

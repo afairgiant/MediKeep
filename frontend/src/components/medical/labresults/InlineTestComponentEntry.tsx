@@ -48,8 +48,13 @@ import {
   getStatusInputColor,
   createEmptyRow,
   isSubmittableComponent,
+  pickPreviousReferenceRange,
+  normalizeUnit,
   ComponentRowData,
 } from '../../../utils/labTestComponentUtils';
+import { labTestComponentApi } from '../../../services/api/labTestComponentApi';
+import { useCurrentPatient } from '../../../hooks/useGlobalData';
+import logger from '../../../services/logger';
 
 export interface InlineTestComponentMethods {
   hasPendingComponents: () => boolean;
@@ -76,6 +81,14 @@ function InlineTestComponentEntry({
     createEmptyRow(1),
   ]);
   const justSelectedRef = useRef<{ index: number; value: string } | null>(null);
+  const { patient } = useCurrentPatient() as any;
+  const patientId = patient?.id;
+  const prefillControllers = useRef<Map<number, AbortController>>(new Map());
+
+  useEffect(() => {
+    const controllers = prefillControllers.current;
+    return () => controllers.forEach(controller => controller.abort());
+  }, []);
 
   const getPendingComponents = useCallback((): ComponentRowData[] => {
     return components.filter(isSubmittableComponent);
@@ -94,9 +107,33 @@ function InlineTestComponentEntry({
     setExpanded(false);
   }, []);
 
+  // Assigned once prefillReferenceRange is defined below.
+  const prefillRef = useRef<
+    (_rowId: number, _name: string, _lookup: string, _unit: string) => void
+  >(() => {});
+
   const applyTemplateRows = useCallback((rows: ComponentRowData[]) => {
     setComponents(rows.length > 0 ? rows : [createEmptyRow(1)]);
     if (rows.length > 0) setExpanded(true);
+    rows.forEach(row => {
+      const name = row.test_name.trim();
+      const hasRange =
+        row.ref_range_min !== '' ||
+        row.ref_range_max !== '' ||
+        !!row.ref_range_text;
+      if (
+        name &&
+        !hasRange &&
+        (row.result_type ?? 'quantitative') === 'quantitative'
+      ) {
+        prefillRef.current(
+          row._rowId,
+          row.test_name,
+          row.canonical_test_name || name,
+          row.unit
+        );
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -146,6 +183,81 @@ function InlineTestComponentEntry({
     },
     []
   );
+
+  // Default the reference range to the most recent previous result of the same
+  // test. Never overwrites a range the user has already entered.
+  const prefillReferenceRange = useCallback(
+    async (
+      rowId: number,
+      testName: string,
+      lookupName: string,
+      unit: string,
+      lookupUnit: string = unit
+    ) => {
+      if (!patientId || !lookupName.trim()) return;
+
+      prefillControllers.current.get(rowId)?.abort();
+      const controller = new AbortController();
+      prefillControllers.current.set(rowId, controller);
+
+      try {
+        const trend = await labTestComponentApi.getTrendsByPatientAndTest(
+          patientId,
+          lookupName,
+          { unit: lookupUnit, limit: 20 },
+          controller.signal
+        );
+        if (controller.signal.aborted) return;
+
+        const range = pickPreviousReferenceRange(
+          trend?.data_points ?? [],
+          lookupUnit
+        );
+        if (!range) return;
+
+        setComponents(prev =>
+          prev.map(comp => {
+            if (
+              comp._rowId !== rowId ||
+              comp.test_name !== testName ||
+              normalizeUnit(comp.unit) !== normalizeUnit(unit) ||
+              comp.ref_range_min !== '' ||
+              comp.ref_range_max !== '' ||
+              comp.ref_range_text
+            ) {
+              return comp;
+            }
+            return {
+              ...comp,
+              ...range,
+              // The range was looked up in lookupUnit; keep the row consistent
+              // when that unit came from the library default rather than the row.
+              unit: comp.unit || lookupUnit,
+              status: calculateStatus(
+                comp.value,
+                range.ref_range_min,
+                range.ref_range_max,
+                range.ref_range_text
+              ),
+            };
+          })
+        );
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        logger.warn('reference_range_prefill_failed', {
+          component: 'InlineTestComponentEntry',
+          error: error instanceof Error ? error.message : String(error),
+        });
+      } finally {
+        if (prefillControllers.current.get(rowId) === controller) {
+          prefillControllers.current.delete(rowId);
+        }
+      }
+    },
+    [patientId]
+  );
+
+  prefillRef.current = prefillReferenceRange;
 
   const addRow = useCallback(() => {
     setComponents(prev => [...prev, createEmptyRow(prev.length + 1)]);
@@ -255,6 +367,17 @@ function InlineTestComponentEntry({
                           }),
                         };
                         updateComponentFields(index, autoFillFields);
+                        if (
+                          (libraryTest?.result_type ?? component.result_type) ===
+                          'quantitative'
+                        ) {
+                          prefillReferenceRange(
+                            component._rowId,
+                            cleanTestName,
+                            libraryTest?.test_name ?? cleanTestName,
+                            libraryTest?.default_unit ?? component.unit
+                          );
+                        }
                       }}
                       data={getAutocompleteOptions(
                         component.test_name || '',
@@ -288,6 +411,24 @@ function InlineTestComponentEntry({
                         transitionProps: { duration: 0, transition: 'pop' },
                       }}
                       withScrollArea
+                      onBlur={() => {
+                        const name = component.test_name.trim();
+                        if (
+                          name &&
+                          (component.result_type ?? 'quantitative') ===
+                            'quantitative'
+                        ) {
+                          prefillReferenceRange(
+                            component._rowId,
+                            component.test_name,
+                            component.canonical_test_name || name,
+                            component.unit,
+                            component.unit ||
+                              getTestByName(name)?.default_unit ||
+                              ''
+                          );
+                        }
+                      }}
                       disabled={disabled}
                     />
                   </Grid.Col>

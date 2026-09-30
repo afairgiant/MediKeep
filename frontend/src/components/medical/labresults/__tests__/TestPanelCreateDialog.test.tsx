@@ -198,11 +198,16 @@ const mockCreateBulkForLabResult = vi.fn();
 vi.mock('../../../../services/api/labTestComponentApi', () => ({
   labTestComponentApi: {
     createBulkForLabResult: (...args: any[]) => mockCreateBulkForLabResult(...args),
+    getTrendsByPatientAndTest: () => Promise.resolve({ data_points: [] }),
   },
 }));
 
+vi.mock('../../../../hooks/useGlobalData', () => ({
+  useCurrentPatient: () => ({ patient: { id: 1 } }),
+}));
+
 vi.mock('../../../../services/logger', () => ({
-  default: { info: vi.fn(), error: vi.fn() },
+  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
 vi.mock('@tabler/icons-react', () => ({
