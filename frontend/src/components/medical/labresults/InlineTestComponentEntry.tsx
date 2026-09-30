@@ -49,6 +49,7 @@ import {
   createEmptyRow,
   isSubmittableComponent,
   pickPreviousReferenceRange,
+  normalizeUnit,
   ComponentRowData,
 } from '../../../utils/labTestComponentUtils';
 import { labTestComponentApi } from '../../../services/api/labTestComponentApi';
@@ -190,7 +191,8 @@ function InlineTestComponentEntry({
       rowId: number,
       testName: string,
       lookupName: string,
-      unit: string
+      unit: string,
+      lookupUnit: string = unit
     ) => {
       if (!patientId || !lookupName.trim()) return;
 
@@ -202,14 +204,14 @@ function InlineTestComponentEntry({
         const trend = await labTestComponentApi.getTrendsByPatientAndTest(
           patientId,
           lookupName,
-          { unit: unit || undefined, limit: 20 },
+          { unit: lookupUnit, limit: 20 },
           controller.signal
         );
         if (controller.signal.aborted) return;
 
         const range = pickPreviousReferenceRange(
           trend?.data_points ?? [],
-          unit
+          lookupUnit
         );
         if (!range) return;
 
@@ -218,6 +220,7 @@ function InlineTestComponentEntry({
             if (
               comp._rowId !== rowId ||
               comp.test_name !== testName ||
+              normalizeUnit(comp.unit) !== normalizeUnit(unit) ||
               comp.ref_range_min !== '' ||
               comp.ref_range_max !== '' ||
               comp.ref_range_text
@@ -416,7 +419,10 @@ function InlineTestComponentEntry({
                             component._rowId,
                             component.test_name,
                             component.canonical_test_name || name,
-                            component.unit
+                            component.unit,
+                            component.unit ||
+                              getTestByName(name)?.default_unit ||
+                              ''
                           );
                         }
                       }}

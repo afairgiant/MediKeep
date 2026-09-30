@@ -171,6 +171,52 @@ describe('InlineTestComponentEntry reference range prefill', () => {
     );
   });
 
+  it('uses the library default unit for a fully typed library test on blur', async () => {
+    getTrends.mockResolvedValue(
+      trend([
+        {
+          unit: 'mg/dL',
+          ref_range_min: 70,
+          ref_range_max: 99,
+          lab_result: { completed_date: '2024-01-01' },
+        },
+      ])
+    );
+    render(<InlineTestComponentEntry defaultExpanded />);
+    const input = screen.getByPlaceholderText(/search tests/i);
+    fireEvent.change(input, { target: { value: 'Glucose' } });
+    fireEvent.blur(input);
+
+    await waitFor(() => expect(screen.getByDisplayValue('70')).toBeInTheDocument());
+    expect(getTrends).toHaveBeenCalledWith(
+      7,
+      'Glucose',
+      expect.objectContaining({ unit: 'mg/dL' }),
+      expect.any(AbortSignal)
+    );
+  });
+
+  it('does not fill when the unit is changed before the lookup returns', async () => {
+    let resolve: (_value: unknown) => void = () => {};
+    getTrends.mockReturnValue(new Promise(r => (resolve = r)));
+    render(<InlineTestComponentEntry defaultExpanded />);
+    const input = screen.getByPlaceholderText(/search tests/i);
+    fireEvent.change(input, { target: { value: 'My Custom Test' } });
+    fireEvent.blur(input);
+
+    fireEvent.change(screen.getByPlaceholderText(/unit/i), {
+      target: { value: 'mmol/L' },
+    });
+    resolve(
+      trend([
+        { unit: '', ref_range_min: 4, ref_range_max: 9, lab_result: { completed_date: '2024-01-01' } },
+      ])
+    );
+    await waitFor(() => expect(getTrends).toHaveBeenCalled());
+    await new Promise(r => setTimeout(r, 20));
+    expect(screen.queryByDisplayValue('4')).not.toBeInTheDocument();
+  });
+
   it('leaves the fields empty when there is no history', async () => {
     getTrends.mockResolvedValue(trend([]));
     render(<InlineTestComponentEntry defaultExpanded />);

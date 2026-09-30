@@ -246,6 +246,11 @@ export interface PreviousReferenceRange {
   ref_range_text: string;
 }
 
+/** Trim and lower-case a unit so comparisons ignore whitespace and case. */
+export function normalizeUnit(unit?: string | null): string {
+  return (unit || '').trim().toLowerCase();
+}
+
 function pointTimestamp(point: ReferenceRangeSource): number {
   const raw =
     point.lab_result?.completed_date ||
@@ -259,20 +264,20 @@ function pointTimestamp(point: ReferenceRangeSource): number {
 /**
  * Pick the reference range from the most recent previous result that has one.
  * Points recorded in a different unit are skipped because a range in another
- * unit would be wrong for the new result. Returns null when nothing usable exists.
+ * unit would be wrong for the new result. A blank unit only matches points
+ * that also have no unit. Returns null when nothing usable exists.
  */
 export function pickPreviousReferenceRange(
   points: ReferenceRangeSource[],
   unit?: string | null
 ): PreviousReferenceRange | null {
-  const wantedUnit = (unit || '').trim().toLowerCase();
+  const wantedUnit = normalizeUnit(unit);
   const sorted = [...points].sort(
     (a, b) => pointTimestamp(b) - pointTimestamp(a)
   );
 
   for (const point of sorted) {
-    const pointUnit = (point.unit || '').trim().toLowerCase();
-    if (wantedUnit && pointUnit !== wantedUnit) continue;
+    if (normalizeUnit(point.unit) !== wantedUnit) continue;
 
     const min = isValidNumber(point.ref_range_min) ? point.ref_range_min : '';
     const max = isValidNumber(point.ref_range_max) ? point.ref_range_max : '';

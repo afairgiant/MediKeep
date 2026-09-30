@@ -50,6 +50,15 @@ describe('pickPreviousReferenceRange', () => {
     expect(pickPreviousReferenceRange(points, 'mg/dL')).not.toBeNull();
   });
 
+  it('only matches unit-less points when the requested unit is blank', () => {
+    const points = [
+      point({ unit: 'mg/dL', ref_range_min: 1, ref_range_max: 2, lab_result: { completed_date: '2024-01-01' } }),
+      point({ unit: '', ref_range_min: 7, ref_range_max: 8, lab_result: { completed_date: '2023-01-01' } }),
+    ];
+    expect(pickPreviousReferenceRange(points, '')?.ref_range_min).toBe(7);
+    expect(pickPreviousReferenceRange([points[0]], '')).toBeNull();
+  });
+
   it('uses a text-only range', () => {
     const points = [point({ ref_range_text: '<200' })];
     expect(pickPreviousReferenceRange(points, 'mg/dL')).toEqual({
