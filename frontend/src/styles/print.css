@@ -5,6 +5,69 @@
 }
 
 @media print {
+  /* Print output is always light-themed so dark mode does not burn ink.
+     Re-declare the light palette with higher specificity than the dark
+     theme selectors ([data-theme='dark'], [data-mantine-color-scheme='dark']). */
+  :root,
+  :root[data-theme='dark'],
+  :root[data-mantine-color-scheme='dark'] {
+    color-scheme: light !important;
+
+    --mantine-color-body: #fff !important;
+    --mantine-color-text: #000 !important;
+    --mantine-color-dimmed: #868e96 !important;
+    --mantine-color-default: #fff !important;
+    --mantine-color-default-hover: #f8f9fa !important;
+    --mantine-color-default-color: #000 !important;
+    --mantine-color-default-border: #ced4da !important;
+    --mantine-color-placeholder: #adb5bd !important;
+
+    --color-bg-primary: #ffffff !important;
+    --color-bg-secondary: #e2e8f0 !important;
+    --color-bg-tertiary: #cbd5e1 !important;
+    --color-text-primary: #000000 !important;
+    --color-text-secondary: #000000 !important;
+    --color-text-muted: #3f4a59 !important;
+    --color-border-light: #94a3b8 !important;
+    --color-border-medium: #6b7280 !important;
+    --color-border-dark: #374151 !important;
+    --color-gray-100: #f8f9fa !important;
+    --color-gray-200: #e9ecef !important;
+    --color-gray-300: #dee2e6 !important;
+    --color-gray-400: #ced4da !important;
+    --color-gray-500: #adb5bd !important;
+    --color-gray-600: #646c74 !important;
+    --color-gray-700: #495057 !important;
+    --color-gray-800: #343a40 !important;
+    --color-gray-900: #212529 !important;
+  }
+
+  html,
+  body,
+  #root,
+  [class*='mantine-AppShell'],
+  [class*='mantine-Paper'],
+  [class*='mantine-Card'],
+  [class*='mantine-Table'] {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Force dark text everywhere, including inline-styled and dimmed text that
+     dark mode renders light. Badges (and their children) are excluded so
+     filled badges keep their own contrast colors. */
+  body
+    :not(
+      [class*='mantine-Badge'],
+      [class*='mantine-Badge'] *,
+      .status-badge,
+      .status-badge *,
+      .status-badge-small,
+      .status-badge-small *
+    ) {
+    color: #000 !important;
+  }
+
   /* Hide all interactive and navigation elements */
   .medical-page-header,
   .medical-page-controls,
