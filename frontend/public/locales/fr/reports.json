@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Ajouter des données médicales",
       "clearSelections": "Tout désélectionner",
-      "generateReport": "Générer un rapport ({{count}} entrées)",
-      "generateReport_one": "Générer un rapport ({{count}} entrée)",
-      "generateReport_other": "Générer un rapport ({{count}} entrées)",
-      "generateReportChartsOnly": "Générer un rapport ({{chartCount}} tableaux)",
-      "generateReportWithCharts": "Générer un rapport ({{recordCount}} entrées, {{chartCount}} tableaux)",
+      "generateReportSummary": "Générer un rapport ({{summary}})",
       "selectAll": "Sélectionner toutes les entrées",
       "selectAllRecordTypes": "Sélectionner tous les types d'entrées"
     },
     "configuration": {
-      "description": "Sélectionnez les données médicales à inclure dans votre rapport personnalisé",
+      "description": "Choisissez ce qu'il faut inclure et sélectionnez les éléments ci-dessous, puis générez votre rapport. Vous pouvez aussi charger un modèle enregistré ou ajuster les paramètres du rapport ici.",
       "title": "Configuration du rapport"
+    },
+    "counts": {
+      "charts_one": "{{count}} graphique",
+      "charts_other": "{{count}} graphiques"
+    },
+    "flow": {
+      "chartsDescription": "Ajoutez les constantes vitales ou les analyses de laboratoire à représenter dans le temps.",
+      "chooseDescription": "Basculez entre les dossiers médicaux et les graphiques de tendance. Un même rapport peut contenir les deux.",
+      "chooseTitle": "1. Choisissez ce qu'il faut inclure",
+      "generateDescription": "Vérifiez votre sélection, puis générez le rapport.",
+      "generateTitle": "3. Générer le rapport",
+      "recordsDescription": "Choisissez un onglet de type d'entrée, puis activez les entrées souhaitées, ou sélectionnez tout en une fois.",
+      "selectTitle": "2. Sélectionnez les éléments"
     },
     "icon": "📊",
     "loading": "Chargement du générateur de rapports...",

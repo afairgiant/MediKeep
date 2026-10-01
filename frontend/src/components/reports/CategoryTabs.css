@@ -1,0 +1,55 @@
+/* CategoryTabs: separated record-type tabs with a clearly marked active tab */
+
+.record-type-tabs .mantine-Tabs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xs);
+  padding: var(--mantine-spacing-xs);
+}
+
+.record-type-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  cursor: pointer;
+  color: var(--mantine-color-dimmed);
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-6)
+  );
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-4));
+  border-bottom: 4px solid transparent;
+  border-radius: var(--mantine-radius-md);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.record-type-tab:hover {
+  background-color: light-dark(
+    var(--mantine-color-gray-2),
+    var(--mantine-color-dark-5)
+  );
+}
+
+.record-type-tab:focus-visible {
+  outline: 2px solid var(--mantine-color-blue-5);
+  outline-offset: 2px;
+}
+
+.record-type-tab[data-active] {
+  color: light-dark(var(--mantine-color-blue-9), var(--mantine-color-blue-2));
+  background-color: light-dark(
+    var(--mantine-color-blue-1),
+    var(--mantine-color-blue-9)
+  );
+  border-color: var(--mantine-color-blue-6);
+  border-bottom-color: var(--mantine-color-blue-6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.record-type-tab[data-active] .record-type-tab-name {
+  font-weight: 700;
+}

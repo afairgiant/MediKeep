@@ -3,17 +3,28 @@
     "buttons": {
       "addRecords": "Dodaj dokumentację medyczną",
       "clearSelections": "Wyczyść wszystkie zaznaczenia",
-      "generateReport": "Generuj raport ({{count}} rekordów)",
-      "generateReport_one": "Generuj raport ({{count}} rekord)",
-      "generateReport_other": "Generuj raport ({{count}} rekordów)",
-      "generateReportChartsOnly": "Generuj raport ({{chartCount}} wykresów)",
-      "generateReportWithCharts": "Generuj raport ({{recordCount}} rekordów, {{chartCount}} wykresów)",
+      "generateReportSummary": "Generuj raport ({{summary}})",
       "selectAll": "Zaznacz wszystkie rekordy",
       "selectAllRecordTypes": "Zaznacz wszystkie typy rekordów"
     },
     "configuration": {
-      "description": "Wybierz dokumentację medyczną do uwzględnienia w niestandardowym raporcie",
+      "description": "Wybierz poniżej, co uwzględnić, i zaznacz elementy, a następnie wygeneruj raport. Możesz tu także wczytać zapisany szablon lub zmienić ustawienia raportu.",
       "title": "Konfiguracja raportu"
+    },
+    "counts": {
+      "charts_few": "{{count}} wykresy",
+      "charts_many": "{{count}} wykresów",
+      "charts_one": "{{count}} wykres",
+      "charts_other": "{{count}} wykresu"
+    },
+    "flow": {
+      "chartsDescription": "Dodaj parametry życiowe lub badania laboratoryjne, które chcesz przedstawić na wykresie w czasie.",
+      "chooseDescription": "Przełączaj się między dokumentacją medyczną a wykresami trendów. Jeden raport może zawierać oba.",
+      "chooseTitle": "1. Wybierz, co uwzględnić",
+      "generateDescription": "Sprawdź swój wybór, a następnie wygeneruj raport.",
+      "generateTitle": "3. Wygeneruj raport",
+      "recordsDescription": "Wybierz kartę typu rekordu, a następnie włącz wybrane rekordy lub zaznacz wszystko naraz.",
+      "selectTitle": "2. Wybierz elementy"
     },
     "icon": "📊",
     "loading": "Ładowanie kreatora raportów...",

@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Lägg till journalhandlingar",
       "clearSelections": "Rensa alla val",
-      "generateReport": "Generera rapport ({{count}} handlingar)",
-      "generateReport_one": "Generera rapport ({{count}} handling)",
-      "generateReport_other": "Generera rapport ({{count}} handlingar)",
-      "generateReportChartsOnly": "Generera rapport ({{chartCount}} diagram)",
-      "generateReportWithCharts": "Generera rapport ({{recordCount}} handlingar, {{chartCount}} diagram)",
+      "generateReportSummary": "Generera rapport ({{summary}})",
       "selectAll": "Välj alla handlingar",
       "selectAllRecordTypes": "Markera alla posttyper"
     },
     "configuration": {
-      "description": "Välj journalhandlingar att inkludera i din anpassade rapport",
+      "description": "Välj nedan vad som ska ingå och markera objekt, och skapa sedan din rapport. Du kan också läsa in en sparad mall eller justera rapportinställningarna här.",
       "title": "Rapportkonfiguration"
+    },
+    "counts": {
+      "charts_one": "{{count}} diagram",
+      "charts_other": "{{count}} diagram"
+    },
+    "flow": {
+      "chartsDescription": "Lägg till de vitalparametrar eller labbprover som du vill visa över tid.",
+      "chooseDescription": "Växla mellan medicinska uppgifter och trenddiagram. En rapport kan innehålla båda.",
+      "chooseTitle": "1. Välj vad som ska ingå",
+      "generateDescription": "Granska ditt val och skapa sedan rapporten.",
+      "generateTitle": "3. Skapa rapport",
+      "recordsDescription": "Välj en flik för posttyp och slå på de poster du vill ha, eller markera allt på en gång.",
+      "selectTitle": "2. Välj objekt"
     },
     "icon": "📊",
     "loading": "Laddar rapportbyggare...",

@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Agregar Registros Médicos",
       "clearSelections": "Limpiar Todas las Selecciones",
-      "generateReport": "Generar Informe ({{count}} registros)",
-      "generateReport_one": "Generar Informe ({{count}} registro)",
-      "generateReport_other": "Generar Informe ({{count}} registros)",
-      "generateReportChartsOnly": "Generar Informe ({{chartCount}} gráficos)",
-      "generateReportWithCharts": "Generar Informe ({{recordCount}} registros, {{chartCount}} gráficos)",
+      "generateReportSummary": "Generar Informe ({{summary}})",
       "selectAll": "Seleccionar Todos los Registros",
       "selectAllRecordTypes": "Seleccionar todos los tipos de registro"
     },
     "configuration": {
-      "description": "Seleccione los registros médicos a incluir en su informe personalizado",
+      "description": "Elija qué incluir y seleccione elementos más abajo; después genere su informe. También puede cargar una plantilla guardada o ajustar la configuración del informe aquí.",
       "title": "Configuración del Informe"
+    },
+    "counts": {
+      "charts_one": "{{count}} gráfico",
+      "charts_other": "{{count}} gráficos"
+    },
+    "flow": {
+      "chartsDescription": "Añada los signos vitales o las pruebas de laboratorio que quiera graficar a lo largo del tiempo.",
+      "chooseDescription": "Alterne entre registros médicos y gráficos de tendencias. Un mismo informe puede incluir ambos.",
+      "chooseTitle": "1. Elija qué incluir",
+      "generateDescription": "Revise su selección y después genere el informe.",
+      "generateTitle": "3. Generar informe",
+      "recordsDescription": "Elija una pestaña de tipo de registro y active los registros que desee, o seleccione todo a la vez.",
+      "selectTitle": "2. Seleccione elementos"
     },
     "icon": "📊",
     "loading": "Cargando generador de informes...",

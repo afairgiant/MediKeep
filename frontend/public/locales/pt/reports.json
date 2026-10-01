@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Adicionar Registos Médicos",
       "clearSelections": "Limpar Todas as Seleções",
-      "generateReport": "Gerar Relatório ({{count}} registos)",
-      "generateReport_one": "Gerar Relatório ({{count}} registo)",
-      "generateReport_other": "Gerar Relatório ({{count}} registos)",
-      "generateReportChartsOnly": "Gerar Relatório ({{chartCount}} gráficos)",
-      "generateReportWithCharts": "Gerar Relatório ({{recordCount}} registos, {{chartCount}} gráficos)",
+      "generateReportSummary": "Gerar Relatório ({{summary}})",
       "selectAll": "Selecionar Todos os Registos",
       "selectAllRecordTypes": "Selecionar todos os tipos de registo"
     },
     "configuration": {
-      "description": "Selecione registos médicos para incluir no seu relatório personalizado",
+      "description": "Escolha o que incluir e selecione os itens abaixo e, em seguida, gere o seu relatório. Também pode carregar um modelo guardado ou ajustar as definições do relatório aqui.",
       "title": "Configuração do Relatório"
+    },
+    "counts": {
+      "charts_one": "{{count}} gráfico",
+      "charts_other": "{{count}} gráficos"
+    },
+    "flow": {
+      "chartsDescription": "Adicione os sinais vitais ou as análises laboratoriais que pretende representar ao longo do tempo.",
+      "chooseDescription": "Alterne entre registos médicos e gráficos de tendência. Um único relatório pode incluir ambos.",
+      "chooseTitle": "1. Escolha o que incluir",
+      "generateDescription": "Reveja a sua seleção e, em seguida, gere o relatório.",
+      "generateTitle": "3. Gerar relatório",
+      "recordsDescription": "Escolha um separador de tipo de registo e ative os registos pretendidos, ou selecione tudo de uma vez.",
+      "selectTitle": "2. Selecione os itens"
     },
     "icon": "📊",
     "loading": "A carregar construtor de relatórios...",

@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Aggiungi cartelle cliniche",
       "clearSelections": "Cancella tutte le selezioni",
-      "generateReport": "Genera report ({{count}} record)",
-      "generateReport_one": "Genera report ({{count}} record)",
-      "generateReport_other": "Genera report ({{count}} record)",
-      "generateReportChartsOnly": "Genera report ({{chartCount}} grafici)",
-      "generateReportWithCharts": "Genera report ({{recordCount}} record, {{chartCount}} grafici)",
+      "generateReportSummary": "Genera report ({{summary}})",
       "selectAll": "Seleziona tutti i record",
       "selectAllRecordTypes": "Seleziona tutti i tipi di record"
     },
     "configuration": {
-      "description": "Seleziona le cartelle cliniche da includere nel tuo report personalizzato",
+      "description": "Scegli cosa includere e seleziona gli elementi qui sotto, poi genera il report. Puoi anche caricare un modello salvato o modificare le impostazioni del report qui.",
       "title": "Configurazione report"
+    },
+    "counts": {
+      "charts_one": "{{count}} grafico",
+      "charts_other": "{{count}} grafici"
+    },
+    "flow": {
+      "chartsDescription": "Aggiungi i parametri vitali o gli esami di laboratorio che vuoi rappresentare nel tempo.",
+      "chooseDescription": "Passa dai record medici ai grafici di tendenza. Un unico report può includere entrambi.",
+      "chooseTitle": "1. Scegli cosa includere",
+      "generateDescription": "Controlla la selezione, quindi genera il report.",
+      "generateTitle": "3. Genera report",
+      "recordsDescription": "Scegli una scheda del tipo di record, quindi attiva i singoli record desiderati oppure seleziona tutto in una volta.",
+      "selectTitle": "2. Seleziona gli elementi"
     },
     "icon": "📊",
     "loading": "Caricamento generatore di report...",
