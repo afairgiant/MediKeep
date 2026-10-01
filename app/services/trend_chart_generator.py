@@ -8,7 +8,7 @@ Charts are designed for print: white background, dark text, clear gridlines.
 """
 
 import io
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib
@@ -135,7 +135,7 @@ class TrendChartGenerator:
             _add_trend_line(ax, dates, values)
 
             # Labels
-            ylabel = f"{display_name} ({unit})" if unit else display_name
+            ylabel = _axis_label(display_name, unit)
             ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
             chart_title = vital_data.get("chart_title", f"{display_name} Trend")
             ax.set_title(
@@ -299,13 +299,14 @@ class TrendChartGenerator:
             # Plot line (adapt to data density)
             n = len(dates)
             lw = _line_width(n)
-            ax.plot(dates, values, color=COLOR_LINE, linewidth=lw, zorder=4)
+            plot_dates = _spread_same_day_dates(dates)
+            ax.plot(plot_dates, values, color=COLOR_LINE, linewidth=lw, zorder=4)
 
             # Data point dots (skip when too dense)
             if n <= 80:
                 dot_size = 5 if n <= 30 else 3
                 ax.plot(
-                    dates,
+                    plot_dates,
                     values,
                     linestyle="none",
                     marker="o",
@@ -318,7 +319,7 @@ class TrendChartGenerator:
             # Trend line
             _add_trend_line(ax, dates, values)
 
-            ylabel = f"{display_name} ({unit})" if unit else display_name
+            ylabel = _axis_label(display_name, unit)
             ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
             lab_title = lab_data.get("chart_title", f"{display_name} Trend")
             ax.set_title(
@@ -332,6 +333,62 @@ class TrendChartGenerator:
         finally:
             fig.clear()
             del fig, canvas
+
+
+# Same-day results share an x position (dates carry no time of day), so close
+# values overlap and read as a single point. Spread each day's points sideways
+# by this fraction of the plotted date span so every result stays visible.
+SAME_DAY_SPREAD_STEP = 0.012
+SAME_DAY_SPREAD_MAX_GROUP = 0.08
+
+
+def _spread_same_day_dates(dates: List) -> List[datetime]:
+    """Return plot x positions with same-calendar-day points nudged apart.
+
+    Order within a day is preserved (first entry leftmost). The nudge is purely
+    visual and scaled to the span of the data, so axis dates are unchanged for
+    all practical purposes. Days with a single point are not moved.
+    """
+    as_dt = [
+        d if isinstance(d, datetime) else datetime.combine(d, datetime.min.time())
+        for d in dates
+    ]
+    groups: Dict[Any, List[int]] = {}
+    for i, dt in enumerate(as_dt):
+        groups.setdefault(dt.date(), []).append(i)
+
+    if all(len(idx) == 1 for idx in groups.values()):
+        return as_dt
+
+    span_days = (max(as_dt) - min(as_dt)).total_seconds() / 86400.0
+    span_days = max(span_days, 1.0)
+
+    spread = list(as_dt)
+    for idx in groups.values():
+        k = len(idx)
+        if k == 1:
+            continue
+        step = min(
+            span_days * SAME_DAY_SPREAD_STEP,
+            span_days * SAME_DAY_SPREAD_MAX_GROUP / (k - 1),
+        )
+        for rank, i in enumerate(idx):
+            spread[i] = as_dt[i] + timedelta(days=(rank - (k - 1) / 2) * step)
+    return spread
+
+
+def _axis_label(display_name: str, unit: Optional[str]) -> str:
+    """Y-axis label, adding the unit unless the display name already ends with it.
+
+    Lab trend display names are built as "Test (unit)", so appending the unit
+    again produced labels like "Albumin (g/dL) (g/dL)".
+    """
+    if not unit:
+        return display_name
+    suffix = f"({unit})"
+    if display_name.rstrip().endswith(suffix):
+        return display_name
+    return f"{display_name} {suffix}"
 
 
 def _apply_print_style(ax):
