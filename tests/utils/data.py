@@ -9,7 +9,9 @@ from typing import Dict, Any
 from sqlalchemy.orm import Session
 
 from app.crud import medication, lab_result, practitioner, vitals
+from app.crud.medical_specialty import medical_specialty
 from app.models.models import Patient
+from app.schemas.medical_specialty import MedicalSpecialtyCreate
 
 
 def create_sample_medication(db: Session, patient: Patient) -> dict:
@@ -105,7 +107,9 @@ def create_sample_practitioner(db: Session) -> dict:
 
     data = {
         "name": random.choice(names),
-        "specialty": random.choice(specialties),
+        "specialty_id": medical_specialty.get_or_create(
+            db, obj_in=MedicalSpecialtyCreate(name=random.choice(specialties))
+        )[0].id,
         "phone_number": f"555-{random.randint(1000, 9999)}",
         "email": f"doctor{random.randint(1, 1000)}@example.com",
         "website": f"https://doctor{random.randint(1, 1000)}.com",

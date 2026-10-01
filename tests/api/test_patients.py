@@ -315,19 +315,16 @@ class TestPatientEndpoints:
     def test_patient_physician_invalid_assignment(
         self, authenticated_client: TestClient, test_patient: Patient
     ):
-        """Test assigning a non-existent physician to a patient.
-
-        The endpoint stores whatever positive integer is supplied for physician_id
-        without verifying the practitioner exists, so a non-existent ID is accepted (200).
-        """
+        """Assigning a non-existent physician is rejected with 400, not a DB 500."""
         update_data = {
-            "physician_id": 99999,  # Non-existent practitioner — accepted without DB check
+            "physician_id": 99999,  # Non-existent practitioner
             "first_name": "Updated",
         }
 
         response = authenticated_client.put("/api/v1/patients/me", json=update_data)
 
-        assert response.status_code == 200
+        assert response.status_code == 400
+        assert response.json()["message"] == "Practitioner not found"
 
     @pytest.mark.parametrize(
         "field,value",

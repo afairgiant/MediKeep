@@ -157,6 +157,14 @@ class TestValidateTagsAllowlist:
         with pytest.raises(ValidationError):
             _TaggedModel(tags=["a" * 51])
 
+    def test_tag_order_preserved_and_duplicates_removed(self):
+        # Order must be deterministic (a set() would reshuffle per process).
+        assert _TaggedModel(tags=["hsa", "family-plan", "HSA", "a"]).tags == [
+            "hsa",
+            "family-plan",
+            "a",
+        ]
+
     def test_none_tags_normalizes_to_empty_list(self):
         model = _TaggedModel(tags=None)
         assert model.tags == []

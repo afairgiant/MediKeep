@@ -118,8 +118,10 @@ describe('HistoryByDiseaseView', () => {
     await user.click(
       screen.getByRole('button', { name: /diphtheria/i })
     );
-    // Then click the DTaP row inside the panel (also rendered as a button)
-    await user.click(screen.getByRole('button', { name: /DTaP/ }));
+    // Then click the DTaP row inside the panel (also rendered as a button).
+    // The panel stays display:none in jsdom while Mantine's transition runs,
+    // so wait for it to become accessible.
+    await user.click(await screen.findByRole('button', { name: /DTaP/ }));
 
     expect(handleClick).toHaveBeenCalledTimes(1);
     expect(handleClick).toHaveBeenCalledWith(dtap);
