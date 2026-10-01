@@ -92,6 +92,8 @@ class CustomReportPDFGenerator:
 
     def __init__(self):
         self._register_fonts()
+        self.table_font_normal = self.font_normal
+        self.table_font_bold = self.font_bold
         self.styles = self._create_styles()
         # Default translator and preferences (overridden per-report in generate_pdf)
         self.translator = get_translator("en", "mdy")
@@ -188,6 +190,7 @@ class CustomReportPDFGenerator:
             cjk_normal_paths = [
                 # Microsoft YaHei (Windows - ships with all modern versions)
                 "C:/Windows/Fonts/msyh.ttc",
+                "/mnt/c/Windows/Fonts/msyh.ttc",  # Windows fonts seen from WSL
                 # Noto Sans CJK SC (Linux)
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
                 "/usr/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf",
@@ -198,6 +201,7 @@ class CustomReportPDFGenerator:
             ]
             cjk_bold_paths = [
                 "C:/Windows/Fonts/msyhbd.ttc",
+                "/mnt/c/Windows/Fonts/msyhbd.ttc",
                 "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
                 "/usr/share/fonts/noto-cjk/NotoSansCJKsc-Bold.otf",
                 "/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc",
@@ -444,10 +448,14 @@ class CustomReportPDFGenerator:
                     "Characters may not render correctly in the PDF.",
                     language,
                 )
+            self.table_font_normal = self.font_cjk_normal
+            self.table_font_bold = self.font_cjk_bold
             self.styles = self._create_styles(
                 font_normal=self.font_cjk_normal, font_bold=self.font_cjk_bold
             )
         else:
+            self.table_font_normal = self.font_normal
+            self.table_font_bold = self.font_bold
             self.styles = self._create_styles()
 
         # Create document
@@ -617,8 +625,8 @@ class CustomReportPDFGenerator:
             table.setStyle(
                 TableStyle(
                     [
-                        ("FONT", (0, 0), (0, -1), self.font_bold, 11),
-                        ("FONT", (1, 0), (1, -1), self.font_normal, 11),
+                        ("FONT", (0, 0), (0, -1), self.table_font_bold, 11),
+                        ("FONT", (1, 0), (1, -1), self.table_font_normal, 11),
                         ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#212121")),
                         ("ALIGN", (0, 0), (0, -1), "RIGHT"),
                         ("ALIGN", (1, 0), (1, -1), "LEFT"),
@@ -932,8 +940,8 @@ class CustomReportPDFGenerator:
                 info_table.setStyle(
                     TableStyle(
                         [
-                            ("FONT", (0, 0), (0, -1), self.font_bold, 10),
-                            ("FONT", (1, 0), (1, -1), self.font_normal, 10),
+                            ("FONT", (0, 0), (0, -1), self.table_font_bold, 10),
+                            ("FONT", (1, 0), (1, -1), self.table_font_normal, 10),
                             ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#2c3e50")),
                             ("ALIGN", (0, 0), (0, -1), "RIGHT"),
                             ("ALIGN", (1, 0), (1, -1), "LEFT"),
@@ -968,8 +976,8 @@ class CustomReportPDFGenerator:
                     table.setStyle(
                         TableStyle(
                             [
-                                ("FONT", (0, 0), (0, -1), self.font_bold, 10),
-                                ("FONT", (1, 0), (1, -1), self.font_normal, 10),
+                                ("FONT", (0, 0), (0, -1), self.table_font_bold, 10),
+                                ("FONT", (1, 0), (1, -1), self.table_font_normal, 10),
                                 (
                                     "TEXTCOLOR",
                                     (0, 0),
@@ -991,8 +999,8 @@ class CustomReportPDFGenerator:
                 table.setStyle(
                     TableStyle(
                         [
-                            ("FONT", (0, 0), (0, -1), self.font_bold, 10),
-                            ("FONT", (1, 0), (1, -1), self.font_normal, 10),
+                            ("FONT", (0, 0), (0, -1), self.table_font_bold, 10),
+                            ("FONT", (1, 0), (1, -1), self.table_font_normal, 10),
                             ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#2c3e50")),
                             ("ALIGN", (0, 0), (0, -1), "RIGHT"),
                             ("ALIGN", (1, 0), (1, -1), "LEFT"),
@@ -1110,7 +1118,7 @@ class CustomReportPDFGenerator:
                 table.setStyle(
                     TableStyle(
                         [
-                            ("FONT", (0, 0), (-1, -1), self.font_normal, 10),
+                            ("FONT", (0, 0), (-1, -1), self.table_font_normal, 10),
                             ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#2c3e50")),
                             ("ALIGN", (1, 0), (1, -1), "RIGHT"),
                             (
@@ -2788,8 +2796,8 @@ class CustomReportPDFGenerator:
         """Get consistent table style for detail tables"""
         return TableStyle(
             [
-                ("FONT", (0, 0), (0, -1), self.font_bold, 9),
-                ("FONT", (1, 0), (1, -1), self.font_normal, 9),
+                ("FONT", (0, 0), (0, -1), self.table_font_bold, 9),
+                ("FONT", (1, 0), (1, -1), self.table_font_normal, 9),
                 ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#2c3e50")),
                 ("ALIGN", (0, 0), (0, -1), "RIGHT"),
                 ("ALIGN", (1, 0), (1, -1), "LEFT"),
@@ -3527,7 +3535,7 @@ class CustomReportPDFGenerator:
                     # Bold row labels for multi-row tables (e.g., BP systolic/diastolic)
                     if len(stats_table_data) > 2:
                         table_style.append(
-                            ("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold")
+                            ("FONTNAME", (0, 1), (0, -1), self.table_font_bold)
                         )
                         table_style.append(("ALIGN", (0, 1), (0, -1), "LEFT"))
                     stats_table.setStyle(TableStyle(table_style))
