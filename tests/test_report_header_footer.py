@@ -141,3 +141,39 @@ class TestQuickReferencePageNumber:
                         texts.append(getattr(para, "text", str(para)))
         assert texts
         assert not any(" of X" in t or "Page:" in t for t in texts)
+
+    def test_footer_uses_same_date_as_report_body(self, monkeypatch):
+        _, draws = _run(_data(generation_date="2026-03-04T10:30:00"), monkeypatch)
+        assert (
+            "left",
+            "Generated: 03/04/2026 10:30 | Confidential Medical Information",
+        ) in draws
+
+    @pytest.mark.parametrize("language", ["en", "zh"])
+    @pytest.mark.parametrize("mirrored_page", [1, 2])
+    def test_long_title_is_truncated_to_fit(self, monkeypatch, language, mirrored_page):
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib.units import inch
+        from reportlab.pdfbase import pdfmetrics
+
+        title = ("非常长的报告标题" if language == "zh" else "Very long title ") * 30
+        title = title[:250]
+        _, draws = _run(_data(report_title=title, language=language), monkeypatch)
+        headers = [t for side, t in draws if t.startswith(title[:5])]
+        assert len(headers) >= 2
+        text = headers[mirrored_page - 1]
+        assert text.endswith("...")
+        assert text != title
+
+        gen = CustomReportPDFGenerator()
+        gen.translator = get_translator(language, "mdy")
+        font = (
+            gen.font_cjk_normal
+            if language in gen.CJK_LANGUAGES
+            else gen._create_styles()["SmallText"].fontName
+        )
+        assert pdfmetrics.stringWidth(text, font, 8) <= letter[0] - 1.5 * inch
+
+    def test_short_title_is_not_changed(self, monkeypatch):
+        _, draws = _run(_data(report_title="Short title"), monkeypatch)
+        assert ("left", "Short title") in draws

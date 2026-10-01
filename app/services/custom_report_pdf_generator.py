@@ -554,9 +554,6 @@ class CustomReportPDFGenerator:
         # Build PDF
         story = self._keep_headers_with_body(story)
         if report_data.get("include_header_footer", True):
-            gen_date = report_data.get("generation_date")
-            if not isinstance(gen_date, datetime):
-                gen_date = datetime.now()
             canvas_cls = self._header_footer_canvas(title, gen_date)
             doc.build(story, canvasmaker=canvas_cls)
         else:
@@ -1221,6 +1218,17 @@ class CustomReportPDFGenerator:
         of_word = translator.text("of")
         gray = colors.HexColor("#6c757d")
 
+        def fit_text(text: str, max_width: float) -> str:
+            """Truncate with an ellipsis so the text fits the available width."""
+            if pdfmetrics.stringWidth(text, font, 8) <= max_width:
+                return text
+            ellipsis = "..."
+            while (
+                text and pdfmetrics.stringWidth(text + ellipsis, font, 8) > max_width
+            ):
+                text = text[:-1]
+            return text.rstrip() + ellipsis
+
         class HeaderFooterCanvas(canvas.Canvas):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
@@ -1255,7 +1263,7 @@ class CustomReportPDFGenerator:
                 start_x, end_x = (right, left) if mirrored else (left, right)
 
                 header_y = height - 0.55 * inch
-                draw_start(start_x, header_y, header_text[:120])
+                draw_start(start_x, header_y, fit_text(header_text, right - left))
                 self.line(left, header_y - 4, right, header_y - 4)
 
                 footer_y = 0.45 * inch
