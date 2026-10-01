@@ -170,14 +170,27 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
           </Group>
         </Stack>
 
-        <Switch
-          checked={selected}
-          onChange={onToggle}
-          color="blue"
-          size="md"
-          aria-label={`Select ${record.title}`}
-          onClick={e => e.stopPropagation()}
-        />
+        {/* The wrapper stops both the label click and the synthesized input
+            click from reaching the Paper, which would toggle a second time. */}
+        <div onClick={e => e.stopPropagation()}>
+          <Switch
+            checked={selected}
+            onChange={onToggle}
+            color="blue"
+            size="md"
+            aria-label={`Select ${record.title}`}
+            styles={{
+              track: selected
+                ? undefined
+                : {
+                    backgroundColor:
+                      'light-dark(var(--mantine-color-gray-5), var(--mantine-color-dark-4))',
+                    borderColor:
+                      'light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-2))',
+                  },
+            }}
+          />
+        </div>
       </Group>
     </Paper>
   );
