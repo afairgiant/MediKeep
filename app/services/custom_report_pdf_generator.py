@@ -1092,30 +1092,59 @@ class CustomReportPDFGenerator:
     HEADER_MIN_BODY_LINES = 4
     BODY_LINE_HEIGHT = 12  # points; matches the CustomBody leading
 
+    def _is_header(self, flowable) -> bool:
+        style = getattr(flowable, "style", None)
+        return (
+            isinstance(flowable, Paragraph)
+            and style is not None
+            and style.name in self.HEADER_STYLE_NAMES
+        )
+
+    @staticmethod
+    def _header_height(flowable) -> float:
+        style = flowable.style
+        return style.leading + style.spaceBefore + style.spaceAfter
+
     def _keep_headers_with_body(self, story: List) -> List:
         """Start a new page when a header would leave too little room for body text.
 
-        Inserts a CondPageBreak before every header paragraph, sized to the
-        header plus HEADER_MIN_BODY_LINES lines of body text, so a header is
-        never the last thing on a page.
+        Headers that follow each other (e.g. a date heading, then a test name
+        heading, with spacers in between) are treated as one group: a single
+        CondPageBreak before the first header reserves the height of every
+        header and spacer in the group plus HEADER_MIN_BODY_LINES lines of body
+        text. This stops a heading being stranded at the bottom of a page when
+        the heading after it would not fit.
         """
         result = []
-        for flowable in story:
-            style = getattr(flowable, "style", None)
-            if (
-                isinstance(flowable, Paragraph)
-                and style is not None
-                and style.name in self.HEADER_STYLE_NAMES
-                and not (result and isinstance(result[-1], (PageBreak, CondPageBreak)))
+        i = 0
+        while i < len(story):
+            flowable = story[i]
+            if not self._is_header(flowable):
+                result.append(flowable)
+                i += 1
+                continue
+
+            # Collect the run of headers (and spacers between them)
+            j = i
+            reserved = 0.0
+            while j < len(story) and (
+                self._is_header(story[j]) or isinstance(story[j], Spacer)
             ):
-                header_height = style.leading + style.spaceBefore + style.spaceAfter
+                reserved += (
+                    self._header_height(story[j])
+                    if self._is_header(story[j])
+                    else story[j].height
+                )
+                j += 1
+
+            if not (result and isinstance(result[-1], (PageBreak, CondPageBreak))):
                 result.append(
                     CondPageBreak(
-                        header_height
-                        + self.HEADER_MIN_BODY_LINES * self.BODY_LINE_HEIGHT
+                        reserved + self.HEADER_MIN_BODY_LINES * self.BODY_LINE_HEIGHT
                     )
                 )
-            result.append(flowable)
+            result.extend(story[i:j])
+            i = j
         return result
 
     # The builder and the API schema both default the title to this English
@@ -3064,6 +3093,21 @@ class CustomReportPDFGenerator:
 
         return story
 
+    @staticmethod
+    def _is_present(value: Any) -> bool:
+        """True unless the value is absent or empty.
+
+        Unlike a truthiness test this keeps numeric zero, so a $0 deductible or
+        a 0% coverage is still printed.
+        """
+        if value is None:
+            return False
+        if isinstance(value, str):
+            return bool(value.strip())
+        if isinstance(value, (list, tuple, set, dict)):
+            return len(value) > 0
+        return True
+
     def _format_single_insurance(self, record: Dict[str, Any]) -> List:
         """Format a single insurance record"""
         story = []
@@ -3140,7 +3184,7 @@ class CustomReportPDFGenerator:
                 coverage_parts = [
                     f"{self.translator.insurance_detail(k)}: {v}"
                     for k, v in coverage.items()
-                    if v
+                    if self._is_present(v)
                 ]
                 coverage = ", ".join(coverage_parts) if coverage_parts else None
             if coverage:
@@ -3158,7 +3202,7 @@ class CustomReportPDFGenerator:
                 contact_parts = [
                     f"{self.translator.insurance_detail(k)}: {v}"
                     for k, v in contact.items()
-                    if v
+                    if self._is_present(v)
                 ]
                 contact = ", ".join(contact_parts) if contact_parts else None
             if contact:

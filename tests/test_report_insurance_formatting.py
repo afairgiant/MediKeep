@@ -91,6 +91,46 @@ class TestInsuranceReportSubtitles:
             assert raw not in text
         assert "500" in text and "PPO" in text and "555-0100" in text
 
+    def test_numeric_zero_is_kept(self, generator):
+        record = {
+            "company_name": "Acme Health",
+            "coverage_details": {
+                "deductible_individual": 0,
+                "copay_generic": 0.0,
+                "basic_coverage": "0",
+                "plan_type": "PPO",
+            },
+            "contact_info": {"customer_service_phone": 0},
+        }
+        text = _extract_text(generator._format_insurance([record]))
+
+        assert "Individual Deductible: 0" in text
+        assert "Generic Copay: 0.0" in text
+        assert "Basic Coverage %: 0" in text
+        assert "Customer Service Phone: 0" in text
+
+    @pytest.mark.parametrize("empty", [None, "", "   ", [], {}])
+    def test_absent_and_empty_values_are_still_skipped(self, generator, empty):
+        record = {
+            "company_name": "Acme Health",
+            "coverage_details": {"deductible_individual": empty, "plan_type": "PPO"},
+            "contact_info": {"website_url": empty},
+        }
+        text = _extract_text(generator._format_insurance([record]))
+
+        assert "Individual Deductible" not in text
+        assert "Website" not in text
+        assert "PPO" in text
+
+    def test_section_is_omitted_when_every_value_is_empty(self, generator):
+        record = {
+            "company_name": "Acme Health",
+            "coverage_details": {"deductible_individual": None, "plan_type": ""},
+        }
+        text = _extract_text(generator._format_insurance([record]))
+
+        assert "Coverage:" not in text
+
     def test_empty_values_are_skipped(self, generator):
         record = {
             "company_name": "Acme Health",

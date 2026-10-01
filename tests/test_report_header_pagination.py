@@ -52,20 +52,42 @@ def _page_filler(gen, lines):
 
 
 class TestKeepHeadersWithBody:
-    def test_conditional_break_inserted_before_each_header_style(self):
+    def test_headers_separated_by_body_each_get_a_break(self):
         gen = _generator()
         story = [
             Paragraph("Section", gen.styles["SectionHeader"]),
+            Paragraph("Body 1", gen.styles["CustomBody"]),
             Paragraph("Sub", gen.styles["SubsectionHeader"]),
+            Paragraph("Body 2", gen.styles["CustomBody"]),
             Paragraph("Record", gen.styles["RecordHeader"]),
-            Paragraph("Body", gen.styles["CustomBody"]),
+            Paragraph("Body 3", gen.styles["CustomBody"]),
         ]
         result = gen._keep_headers_with_body(story)
 
-        assert len(result) == 7
-        for i in (0, 2, 4):
+        assert len(result) == 9
+        for i in (0, 3, 6):
             assert isinstance(result[i], CondPageBreak)
         assert [f for f in result if not isinstance(f, CondPageBreak)] == story
+
+    def test_consecutive_headers_share_one_break_reserving_the_whole_group(self):
+        gen = _generator()
+        date_header = Paragraph("DATE", gen.styles["DateGroupHeader"])
+        gap = Spacer(1, 6)
+        test_header = Paragraph("TEST", gen.styles["SubsectionHeader"])
+        body = Paragraph("body", gen.styles["CustomBody"])
+        result = gen._keep_headers_with_body([date_header, gap, test_header, body])
+
+        breaks = [f for f in result if isinstance(f, CondPageBreak)]
+        assert len(breaks) == 1
+        assert result[0] is breaks[0]
+        expected = (
+            gen._header_height(date_header)
+            + 6
+            + gen._header_height(test_header)
+            + 4 * gen.BODY_LINE_HEIGHT
+        )
+        assert breaks[0].height == expected
+        assert result[1:] == [date_header, gap, test_header, body]
 
     def test_no_extra_break_after_an_explicit_page_break(self):
         gen = _generator()
@@ -133,3 +155,58 @@ class TestLayout:
 
         assert placed["HEADER"] == 1
         assert placed["body 0"] == 1
+
+
+class TestHeaderGroupLayout:
+    """A date heading followed by a test heading must move as one group."""
+
+    # SimpleDocTemplate's frame also has 6pt of padding at the top and bottom
+    USABLE = letter[1] - 1 * inch - 0.75 * inch - 12
+
+    def _story(self, gen, free_points):
+        return [
+            Spacer(1, self.USABLE - free_points),
+            Paragraph("DATE", gen.styles["DateGroupHeader"]),
+            Spacer(1, 0.05 * inch),
+            Paragraph("TEST", gen.styles["SubsectionHeader"]),
+        ] + [Paragraph(f"body {i}", gen.styles["CustomBody"]) for i in range(6)]
+
+    def _room_for_date_heading_and_four_lines_only(self, gen):
+        """Enough for the date heading + 4 body lines, but not the test heading too."""
+        date_style = gen.styles["DateGroupHeader"]
+        date_height = (
+            date_style.leading + date_style.spaceBefore + date_style.spaceAfter
+        )
+        return date_height + 4 * gen.BODY_LINE_HEIGHT + 2
+
+    def test_date_heading_is_not_stranded_before_a_test_heading(self):
+        gen = _generator()
+        story = self._story(gen, self._room_for_date_heading_and_four_lines_only(gen))
+        placed = _build(gen._keep_headers_with_body(story))
+
+        assert placed["DATE"] == placed["TEST"] == placed["body 0"] == 2
+
+    def test_per_header_breaks_would_have_stranded_the_date_heading(self):
+        """Documents the bug: a break before each header separately strands DATE."""
+        gen = _generator()
+        story = self._story(gen, self._room_for_date_heading_and_four_lines_only(gen))
+        per_header = []
+        for flowable in story:
+            if gen._is_header(flowable):
+                per_header.append(
+                    CondPageBreak(
+                        gen._header_height(flowable) + 4 * gen.BODY_LINE_HEIGHT
+                    )
+                )
+            per_header.append(flowable)
+        placed = _build(per_header)
+
+        assert placed["DATE"] == 1
+        assert placed["TEST"] == 2
+
+    def test_group_stays_on_the_page_when_everything_fits(self):
+        gen = _generator()
+        story = self._story(gen, 300)
+        placed = _build(gen._keep_headers_with_body(story))
+
+        assert placed["DATE"] == placed["TEST"] == placed["body 0"] == 1
