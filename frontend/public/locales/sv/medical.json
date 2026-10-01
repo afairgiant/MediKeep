@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "nödkontakt",
+    "filters": {
+      "allRelationships": "Alla relationer"
+    },
     "form": {
+      "actions": {
+        "create": "Skapa nödkontakt",
+        "update": "Uppdatera nödkontakt"
+      },
       "address": {
         "description": "Kontaktpersonens adress (valfritt)",
         "label": "Adress",
@@ -189,14 +197,40 @@
         "placeholder": "Ytterligare information (t.ex. 'Tillgänglig vardagar', 'Talar engelska')"
       },
       "primaryPhone": {
-        "description": "Primärt telefonnummer",
         "label": "Primärt telefonnummer",
         "placeholder": "t.ex. +46 70 123 45 67"
       },
       "relationship": {
         "description": "Relation till patienten",
         "label": "Relation",
-        "placeholder": "Välj relation"
+        "placeholder": "Välj relation",
+        "options": {
+          "aunt": "Faster/moster",
+          "brother": "Bror",
+          "caregiver": "Vårdare",
+          "child": "Barn",
+          "cousin": "Kusin",
+          "daughter": "Dotter",
+          "father": "Far",
+          "friend": "Vän",
+          "grandchild": "Barnbarn",
+          "granddaughter": "Dotterdotter/sondotter",
+          "grandfather": "Morfar/farfar",
+          "grandmother": "Mormor/farmor",
+          "grandparent": "Far-/morförälder",
+          "grandson": "Dotterson/sonson",
+          "guardian": "Förmyndare",
+          "mother": "Mor",
+          "neighbor": "Granne",
+          "other": "Annan",
+          "parent": "Förälder",
+          "partner": "Partner",
+          "sibling": "Syskon",
+          "sister": "Syster",
+          "son": "Son",
+          "spouse": "Make/maka",
+          "uncle": "Farbror/morbror"
+        }
       },
       "secondaryPhone": {
         "description": "Valfritt sekundärt telefonnummer",

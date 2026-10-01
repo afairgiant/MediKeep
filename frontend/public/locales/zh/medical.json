@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "紧急联系人",
+    "filters": {
+      "allRelationships": "所有关系"
+    },
     "form": {
+      "actions": {
+        "create": "创建紧急联系人",
+        "update": "更新紧急联系人"
+      },
       "address": {
         "description": "联系人地址（可选）",
         "label": "地址",
@@ -189,14 +197,40 @@
         "placeholder": "附加信息（如\"仅工作日可联系\"、\"会说英语\"）"
       },
       "primaryPhone": {
-        "description": "主要电话号码",
         "label": "主要电话",
         "placeholder": "如：138 1234 5678"
       },
       "relationship": {
         "description": "与患者的关系",
         "label": "关系",
-        "placeholder": "选择关系"
+        "placeholder": "选择关系",
+        "options": {
+          "aunt": "姑姨",
+          "brother": "兄弟",
+          "caregiver": "护理人员",
+          "child": "子女",
+          "cousin": "堂表亲",
+          "daughter": "女儿",
+          "father": "父亲",
+          "friend": "朋友",
+          "grandchild": "孙辈",
+          "granddaughter": "孙女",
+          "grandfather": "祖父",
+          "grandmother": "祖母",
+          "grandparent": "祖父母",
+          "grandson": "孙子",
+          "guardian": "监护人",
+          "mother": "母亲",
+          "neighbor": "邻居",
+          "other": "其他",
+          "parent": "父母",
+          "partner": "伴侣",
+          "sibling": "兄弟姐妹",
+          "sister": "姐妹",
+          "son": "儿子",
+          "spouse": "配偶",
+          "uncle": "叔舅"
+        }
       },
       "secondaryPhone": {
         "description": "可选的备用电话号码",

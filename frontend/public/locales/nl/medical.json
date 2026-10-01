@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "noodcontact",
+    "filters": {
+      "allRelationships": "Alle relaties"
+    },
     "form": {
+      "actions": {
+        "create": "Noodcontact aanmaken",
+        "update": "Noodcontact bijwerken"
+      },
       "address": {
         "description": "Adres van het contact (optioneel)",
         "label": "Adres",
@@ -189,14 +197,40 @@
         "placeholder": "Aanvullende informatie (bv. 'Alleen doordeweeks bereikbaar', 'Spreekt Spaans')"
       },
       "primaryPhone": {
-        "description": "Primair telefoonnummer",
         "label": "Primair telefoonnummer",
         "placeholder": "bv. +31 6 12345678"
       },
       "relationship": {
         "description": "Relatie tot de patiënt",
         "label": "Relatie",
-        "placeholder": "Selecteer relatie"
+        "placeholder": "Selecteer relatie",
+        "options": {
+          "aunt": "Tante",
+          "brother": "Broer",
+          "caregiver": "Verzorger",
+          "child": "Kind",
+          "cousin": "Neef/nicht",
+          "daughter": "Dochter",
+          "father": "Vader",
+          "friend": "Vriend(in)",
+          "grandchild": "Kleinkind",
+          "granddaughter": "Kleindochter",
+          "grandfather": "Grootvader",
+          "grandmother": "Grootmoeder",
+          "grandparent": "Grootouder",
+          "grandson": "Kleinzoon",
+          "guardian": "Voogd",
+          "mother": "Moeder",
+          "neighbor": "Buur",
+          "other": "Overig",
+          "parent": "Ouder",
+          "partner": "Partner",
+          "sibling": "Broer/zus",
+          "sister": "Zus",
+          "son": "Zoon",
+          "spouse": "Echtgenoot/echtgenote",
+          "uncle": "Oom"
+        }
       },
       "secondaryPhone": {
         "description": "Optioneel secundair telefoonnummer",

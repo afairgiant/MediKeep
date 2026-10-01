@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "επαφή έκτακτης ανάγκης",
+    "filters": {
+      "allRelationships": "Όλες οι σχέσεις"
+    },
     "form": {
+      "actions": {
+        "create": "Δημιουργία επαφής έκτακτης ανάγκης",
+        "update": "Ενημέρωση επαφής έκτακτης ανάγκης"
+      },
       "address": {
         "description": "Διεύθυνση επαφής (προαιρετικό)",
         "label": "Διεύθυνση",
@@ -189,14 +197,40 @@
         "placeholder": "Επιπλέον πληροφορίες (π.χ., «Διαθέσιμος μόνο τις καθημερινές», «Μιλάει Ισπανικά»)"
       },
       "primaryPhone": {
-        "description": "Κύριος αριθμός τηλεφώνου",
         "label": "Κύριο Τηλέφωνο",
         "placeholder": "π.χ., +30 210 123 4567"
       },
       "relationship": {
         "description": "Σχέση με τον ασθενή",
         "label": "Σχέση",
-        "placeholder": "Επιλέξτε σχέση"
+        "placeholder": "Επιλέξτε σχέση",
+        "options": {
+          "aunt": "Θεία",
+          "brother": "Αδελφός",
+          "caregiver": "Φροντιστής",
+          "child": "Παιδί",
+          "cousin": "Ξάδελφος",
+          "daughter": "Κόρη",
+          "father": "Πατέρας",
+          "friend": "Φίλος",
+          "grandchild": "Εγγόνι",
+          "granddaughter": "Εγγονή",
+          "grandfather": "Παππούς",
+          "grandmother": "Γιαγιά",
+          "grandparent": "Παππούς/Γιαγιά",
+          "grandson": "Εγγονός",
+          "guardian": "Κηδεμόνας",
+          "mother": "Μητέρα",
+          "neighbor": "Γείτονας",
+          "other": "Άλλο",
+          "parent": "Γονέας",
+          "partner": "Σύντροφος",
+          "sibling": "Αδελφός/Αδελφή",
+          "sister": "Αδελφή",
+          "son": "Γιος",
+          "spouse": "Σύζυγος",
+          "uncle": "Θείος"
+        }
       },
       "secondaryPhone": {
         "description": "Προαιρετικός δεύτερος αριθμός τηλεφώνου",

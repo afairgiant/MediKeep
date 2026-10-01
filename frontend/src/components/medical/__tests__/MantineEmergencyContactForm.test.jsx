@@ -116,10 +116,11 @@ describe('MantineEmergencyContactForm', () => {
       render(<MantineEmergencyContactForm {...editProps} />);
 
       expect(screen.getByText('Edit Emergency Contact')).toBeInTheDocument();
-      // Button text: "Update Emergency Contact"
       const submitButton = document.querySelector('button[type="submit"]');
       expect(submitButton).toBeInTheDocument();
-      expect(submitButton.textContent).toContain('common:buttons.update');
+      expect(submitButton.textContent).toContain(
+        'medical:emergencyContacts.form.actions.update'
+      );
     });
   });
 
@@ -521,10 +522,10 @@ describe('MantineEmergencyContactForm', () => {
         )
       ).toBeInTheDocument();
       expect(
-        screen.getByText(
+        screen.queryByText(
           'medical:emergencyContacts.form.primaryPhone.description'
         )
-      ).toBeInTheDocument();
+      ).not.toBeInTheDocument();
     });
 
     test('has proper button attributes', () => {

@@ -608,6 +608,7 @@
   "messages": {
     "checkBackSoon": "Schauen Sie bald wieder vorbei für Updates!",
     "clearAll": "Alle löschen",
+    "confirmDeleteEntity": "Möchten Sie diesen Eintrag ({{entity}}) wirklich löschen?",
     "confirmRemoveConditionRelationship": "Möchten Sie diese Erkrankungsverknüpfung wirklich entfernen?",
     "confirmRemoveEquipmentRelationship": "Möchten Sie diese Geräteverknüpfung wirklich entfernen?",
     "confirmRemoveLabResultLink": "Diese Laborergebnis-Verknüpfung entfernen?",

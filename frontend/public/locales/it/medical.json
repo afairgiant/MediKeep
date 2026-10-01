@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "contatto di emergenza",
+    "filters": {
+      "allRelationships": "Tutte le relazioni"
+    },
     "form": {
+      "actions": {
+        "create": "Crea contatto di emergenza",
+        "update": "Aggiorna contatto di emergenza"
+      },
       "address": {
         "description": "Indirizzo del contatto (opzionale)",
         "label": "Indirizzo",
@@ -189,14 +197,40 @@
         "placeholder": "Informazioni aggiuntive (ad es., 'Disponibile solo nei giorni feriali', 'Parla spagnolo')"
       },
       "primaryPhone": {
-        "description": "Numero di telefono principale",
         "label": "Telefono principale",
         "placeholder": "ad es., +39 555 123-4567"
       },
       "relationship": {
         "description": "Relazione con il paziente",
         "label": "Relazione",
-        "placeholder": "Seleziona la relazione"
+        "placeholder": "Seleziona la relazione",
+        "options": {
+          "aunt": "Zia",
+          "brother": "Fratello",
+          "caregiver": "Assistente",
+          "child": "Figlio/a",
+          "cousin": "Cugino/a",
+          "daughter": "Figlia",
+          "father": "Padre",
+          "friend": "Amico/a",
+          "grandchild": "Nipote",
+          "granddaughter": "Nipote (femmina)",
+          "grandfather": "Nonno",
+          "grandmother": "Nonna",
+          "grandparent": "Nonno/a",
+          "grandson": "Nipote (maschio)",
+          "guardian": "Tutore",
+          "mother": "Madre",
+          "neighbor": "Vicino/a",
+          "other": "Altro",
+          "parent": "Genitore",
+          "partner": "Partner",
+          "sibling": "Fratello/Sorella",
+          "sister": "Sorella",
+          "son": "Figlio",
+          "spouse": "Coniuge",
+          "uncle": "Zio"
+        }
       },
       "secondaryPhone": {
         "description": "Numero di telefono secondario opzionale",

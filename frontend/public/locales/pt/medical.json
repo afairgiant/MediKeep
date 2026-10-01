@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "contacto de emergência",
+    "filters": {
+      "allRelationships": "Todas as relações"
+    },
     "form": {
+      "actions": {
+        "create": "Criar contacto de emergência",
+        "update": "Atualizar contacto de emergência"
+      },
       "address": {
         "description": "Endereço do contato (opcional)",
         "label": "Endereço",
@@ -189,14 +197,40 @@
         "placeholder": "Informações adicionais (p. ex., 'Disponível apenas em dias úteis', 'Fala espanhol')"
       },
       "primaryPhone": {
-        "description": "Número de telefone principal",
         "label": "Telefone Principal",
         "placeholder": "p. ex., +55 11 91234-5678"
       },
       "relationship": {
         "description": "Relação com o paciente",
         "label": "Parentesco",
-        "placeholder": "Selecione o parentesco"
+        "placeholder": "Selecione o parentesco",
+        "options": {
+          "aunt": "Tia",
+          "brother": "Irmão",
+          "caregiver": "Cuidador(a)",
+          "child": "Filho(a)",
+          "cousin": "Primo(a)",
+          "daughter": "Filha",
+          "father": "Pai",
+          "friend": "Amigo(a)",
+          "grandchild": "Neto(a)",
+          "granddaughter": "Neta",
+          "grandfather": "Avô",
+          "grandmother": "Avó",
+          "grandparent": "Avô/Avó",
+          "grandson": "Neto",
+          "guardian": "Tutor(a)",
+          "mother": "Mãe",
+          "neighbor": "Vizinho(a)",
+          "other": "Outro",
+          "parent": "Pai/Mãe",
+          "partner": "Parceiro(a)",
+          "sibling": "Irmão/Irmã",
+          "sister": "Irmã",
+          "son": "Filho",
+          "spouse": "Cônjuge",
+          "uncle": "Tio"
+        }
       },
       "secondaryPhone": {
         "description": "Número de telefone secundário opcional",

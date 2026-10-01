@@ -19,6 +19,7 @@ import SubmitButton from '../shared/SubmitButton';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { isValidPhoneNumber } from '../../utils/phoneUtils';
 import logger from '../../services/logger';
+import { EMERGENCY_CONTACT_RELATIONSHIPS } from '../../constants/emergencyContactRelationships';
 
 const MantineEmergencyContactForm = ({
   isOpen,
@@ -111,33 +112,7 @@ const MantineEmergencyContactForm = ({
 
   if (!isOpen) return null;
 
-  const relationshipOptions = [
-    'spouse',
-    'partner',
-    'parent',
-    'mother',
-    'father',
-    'child',
-    'son',
-    'daughter',
-    'sibling',
-    'brother',
-    'sister',
-    'grandparent',
-    'grandmother',
-    'grandfather',
-    'grandchild',
-    'grandson',
-    'granddaughter',
-    'aunt',
-    'uncle',
-    'cousin',
-    'friend',
-    'neighbor',
-    'caregiver',
-    'guardian',
-    'other',
-  ].map(key => ({
+  const relationshipOptions = EMERGENCY_CONTACT_RELATIONSHIPS.map(key => ({
     value: key,
     label: t(`medical:emergencyContacts.form.relationship.options.${key}`),
   }));
@@ -224,9 +199,6 @@ const MantineEmergencyContactForm = ({
                       onChange={handleValidatedTextInput('phone_number')}
                       placeholder={t(
                         'medical:emergencyContacts.form.primaryPhone.placeholder'
-                      )}
-                      description={t(
-                        'medical:emergencyContacts.form.primaryPhone.description'
                       )}
                       error={fieldErrors.phone_number}
                       required
@@ -345,9 +317,8 @@ const MantineEmergencyContactForm = ({
               disabled={!formData.name?.trim()}
             >
               {editingContact
-                ? t('common:buttons.update')
-                : t('common:buttons.create')}{' '}
-              {t('shared:categories.emergency_contacts')}
+                ? t('medical:emergencyContacts.form.actions.update')
+                : t('medical:emergencyContacts.form.actions.create')}
             </SubmitButton>
           </Group>
         </Stack>

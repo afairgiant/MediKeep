@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "ผู้ติดต่อฉุกเฉิน",
+    "filters": {
+      "allRelationships": "ความสัมพันธ์ทั้งหมด"
+    },
     "form": {
+      "actions": {
+        "create": "สร้างผู้ติดต่อฉุกเฉิน",
+        "update": "อัปเดตผู้ติดต่อฉุกเฉิน"
+      },
       "address": {
         "description": "ที่อยู่ของผู้ติดต่อ (ไม่จำเป็น)",
         "label": "ที่อยู่",
@@ -189,14 +197,40 @@
         "placeholder": "ข้อมูลเพิ่มเติม (เช่น 'ติดต่อได้เฉพาะวันทำงาน', 'พูดภาษาสเปนได้')"
       },
       "primaryPhone": {
-        "description": "เบอร์โทรศัพท์หลัก",
         "label": "เบอร์โทรหลัก",
         "placeholder": "เช่น 081-234-5678"
       },
       "relationship": {
         "description": "ความสัมพันธ์กับผู้ป่วย",
         "label": "ความสัมพันธ์",
-        "placeholder": "เลือกความสัมพันธ์"
+        "placeholder": "เลือกความสัมพันธ์",
+        "options": {
+          "aunt": "ป้า/น้า/อา",
+          "brother": "พี่ชาย/น้องชาย",
+          "caregiver": "ผู้ดูแล",
+          "child": "บุตร",
+          "cousin": "ญาติ",
+          "daughter": "บุตรสาว",
+          "father": "พ่อ",
+          "friend": "เพื่อน",
+          "grandchild": "หลาน",
+          "granddaughter": "หลานสาว",
+          "grandfather": "ปู่/ตา",
+          "grandmother": "ย่า/ยาย",
+          "grandparent": "ปู่ย่าตายาย",
+          "grandson": "หลานชาย",
+          "guardian": "ผู้ปกครองตามกฎหมาย",
+          "mother": "แม่",
+          "neighbor": "เพื่อนบ้าน",
+          "other": "อื่น ๆ",
+          "parent": "ผู้ปกครอง",
+          "partner": "คู่ครอง",
+          "sibling": "พี่น้อง",
+          "sister": "พี่สาว/น้องสาว",
+          "son": "บุตรชาย",
+          "spouse": "คู่สมรส",
+          "uncle": "ลุง/น้า/อา"
+        }
       },
       "secondaryPhone": {
         "description": "เบอร์โทรศัพท์สำรองเสริม",

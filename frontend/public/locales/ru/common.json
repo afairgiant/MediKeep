@@ -608,6 +608,7 @@
   "messages": {
     "checkBackSoon": "Скоро будут обновления!",
     "clearAll": "Очистить всё",
+    "confirmDeleteEntity": "Вы уверены, что хотите удалить этот элемент ({{entity}})?",
     "confirmRemoveConditionRelationship": "Вы уверены, что хотите убрать эту связь с заболеванием?",
     "confirmRemoveEquipmentRelationship": "Вы уверены, что хотите удалить эту связь с оборудованием?",
     "confirmRemoveLabResultLink": "Удалить эту связь с результатом анализа?",

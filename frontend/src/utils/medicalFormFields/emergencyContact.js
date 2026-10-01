@@ -28,7 +28,6 @@ export const emergencyContactFormFields = [
     labelKey: 'medical:emergencyContacts.form.primaryPhone.label',
     placeholderKey: 'medical:emergencyContacts.form.primaryPhone.placeholder',
     required: true,
-    descriptionKey: 'medical:emergencyContacts.form.primaryPhone.description',
     gridColumn: 6,
     maxLength: 20,
   },

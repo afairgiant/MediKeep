@@ -608,6 +608,7 @@
   "messages": {
     "checkBackSoon": "Torna presto per gli aggiornamenti!",
     "clearAll": "Cancella tutto",
+    "confirmDeleteEntity": "Sei sicuro di voler eliminare questo {{entity}}?",
     "confirmRemoveConditionRelationship": "Sei sicuro di voler rimuovere questa relazione della condizione?",
     "confirmRemoveEquipmentRelationship": "Sei sicuro di voler rimuovere questo collegamento all'attrezzatura?",
     "confirmRemoveLabResultLink": "Rimuovere questo collegamento al risultato di laboratorio?",
