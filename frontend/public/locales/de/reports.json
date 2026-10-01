@@ -8,7 +8,8 @@
       "generateReport_other": "Bericht erstellen ({{count}} Datensätze)",
       "generateReportChartsOnly": "Bericht erstellen ({{chartCount}} Diagramme)",
       "generateReportWithCharts": "Bericht erstellen ({{recordCount}} Datensätze, {{chartCount}} Diagramme)",
-      "selectAll": "Alle Datensätze auswählen"
+      "selectAll": "Alle Datensätze auswählen",
+      "selectAllDataTypes": "Alle Datentypen auswählen"
     },
     "configuration": {
       "description": "Wählen Sie medizinische Datensätze für Ihren individuellen Bericht aus",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Auswahl aufheben",
     "noCategories": "Keine Kategorien verfügbar",
     "noCategoriesDescription": "Keine medizinischen Datenkategorien für die Berichterstellung verfügbar.",
     "noRecords": "Keine Datensätze verfügbar",
     "recordCount": "{{count}} Datensätze",
     "recordCount_one": "{{count}} Datensatz",
     "recordCount_other": "{{count}} Datensätze",
+    "selectAll": "Alle auswählen",
     "selected": "{{count}} ausgewählt",
     "selected_one": "{{count}} ausgewählt",
     "selected_other": "{{count}} ausgewählt",

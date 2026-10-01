@@ -8,7 +8,8 @@
       "generateReport_other": "Générer un rapport ({{count}} entrées)",
       "generateReportChartsOnly": "Générer un rapport ({{chartCount}} tableaux)",
       "generateReportWithCharts": "Générer un rapport ({{recordCount}} entrées, {{chartCount}} tableaux)",
-      "selectAll": "Sélectionner toutes les entrées"
+      "selectAll": "Sélectionner toutes les entrées",
+      "selectAllDataTypes": "Sélectionner tous les types de données"
     },
     "configuration": {
       "description": "Sélectionnez les données médicales à inclure dans votre rapport personnalisé",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Effacer la sélection",
     "noCategories": "Aucune catégorie disponible",
     "noCategoriesDescription": "Aucune catégorie de données médicales n'est disponible pour la génération de rapports.",
     "noRecords": "Aucune entrée disponible",
     "recordCount": "{{count}} entrées",
     "recordCount_one": "{{count}} entrée",
     "recordCount_other": "{{count}} entrées",
+    "selectAll": "Tout sélectionner",
     "selected": "{{count}} sélectionnés",
     "selected_one": "{{count}} sélectionné",
     "selected_other": "{{count}} sélectionnés",

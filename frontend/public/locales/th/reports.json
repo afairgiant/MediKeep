@@ -8,7 +8,8 @@
       "generateReport_other": "สร้างรายงาน ({{count}} บันทึก)",
       "generateReportChartsOnly": "สร้างรายงาน ({{chartCount}} กราฟ)",
       "generateReportWithCharts": "สร้างรายงาน ({{recordCount}} บันทึก, {{chartCount}} กราف)",
-      "selectAll": "เลือกบันทึกทั้งหมด"
+      "selectAll": "เลือกบันทึกทั้งหมด",
+      "selectAllDataTypes": "เลือกประเภทข้อมูลทั้งหมด"
     },
     "configuration": {
       "description": "เลือกบันทึกทางการแพทย์ที่ต้องการรวมไว้ในรายงานแบบกำหนดเอง",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "ล้างการเลือก",
     "noCategories": "ไม่มีหมวดหมู่",
     "noCategoriesDescription": "ไม่มีหมวดหมู่ข้อมูลทางการแพทย์สำหรับการสร้างรายงาน",
     "noRecords": "ไม่มีบันทึก",
     "recordCount": "{{count}} บันทึก",
     "recordCount_one": "{{count}} บันทึก",
     "recordCount_other": "{{count}} บันทึก",
+    "selectAll": "เลือกทั้งหมด",
     "selected": "เลือกแล้ว {{count}} รายการ",
     "selected_one": "เลือกแล้ว {{count}} รายการ",
     "selected_other": "เลือกแล้ว {{count}} รายการ",

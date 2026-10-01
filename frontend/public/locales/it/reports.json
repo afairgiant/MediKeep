@@ -8,7 +8,8 @@
       "generateReport_other": "Genera report ({{count}} record)",
       "generateReportChartsOnly": "Genera report ({{chartCount}} grafici)",
       "generateReportWithCharts": "Genera report ({{recordCount}} record, {{chartCount}} grafici)",
-      "selectAll": "Seleziona tutti i record"
+      "selectAll": "Seleziona tutti i record",
+      "selectAllDataTypes": "Seleziona tutti i tipi di dati"
     },
     "configuration": {
       "description": "Seleziona le cartelle cliniche da includere nel tuo report personalizzato",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Cancella selezione",
     "noCategories": "Nessuna categoria disponibile",
     "noCategoriesDescription": "Nessuna categoria di dati medici è disponibile per la generazione di report.",
     "noRecords": "Nessun record disponibile",
     "recordCount": "{{count}} record",
     "recordCount_one": "{{count}} record",
     "recordCount_other": "{{count}} record",
+    "selectAll": "Seleziona tutto",
     "selected": "{{count}} selezionati",
     "selected_one": "{{count}} selezionati",
     "selected_other": "{{count}} selezionati",

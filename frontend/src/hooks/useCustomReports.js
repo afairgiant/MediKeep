@@ -166,6 +166,41 @@ export const useCustomReports = () => {
     });
   }, []);
 
+  // Select every record in every given category (idempotent, never deselects)
+  const selectAllCategories = useCallback(categories => {
+    setSelectedRecords(prev => {
+      const next = { ...prev };
+      Object.entries(categories || {}).forEach(([category, categoryData]) => {
+        if (!categoryData?.records?.length) return;
+        next[category] = {};
+        categoryData.records.forEach(record => {
+          next[category][record.id] = record;
+        });
+      });
+      return next;
+    });
+    logger.debug(
+      'custom_reports_all_categories_selected',
+      'All records in all categories selected',
+      { component: 'useCustomReports' }
+    );
+  }, []);
+
+  // Clear all selected records in a single category
+  const clearCategorySelection = useCallback(category => {
+    setSelectedRecords(prev => {
+      if (!prev[category]) return prev;
+      const newSelected = { ...prev };
+      delete newSelected[category];
+      return newSelected;
+    });
+    logger.debug(
+      'custom_reports_category_cleared',
+      'Selections in category cleared',
+      { category, component: 'useCustomReports' }
+    );
+  }, []);
+
   // Clear all selections (records + charts)
   const clearSelections = useCallback(() => {
     setSelectedRecords({});
@@ -567,6 +602,8 @@ export const useCustomReports = () => {
     fetchDataSummary,
     toggleRecordSelection,
     toggleCategorySelection,
+    clearCategorySelection,
+    selectAllCategories,
     clearSelections,
     updateReportSettings,
     applyTemplate,

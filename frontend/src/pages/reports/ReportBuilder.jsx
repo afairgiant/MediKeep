@@ -57,6 +57,8 @@ const ReportBuilder = () => {
     fetchDataSummary,
     toggleRecordSelection,
     toggleCategorySelection,
+    clearCategorySelection,
+    selectAllCategories,
     clearSelections,
     updateReportSettings,
     applyTemplate,
@@ -408,21 +410,13 @@ const ReportBuilder = () => {
                 size="xs"
                 variant="subtle"
                 color="blue"
-                onClick={() => {
-                  // Select all records from all categories
-                  availableCategories.forEach(category => {
-                    const categoryData = dataSummary?.categories?.[category];
-                    if (categoryData?.records) {
-                      toggleCategorySelection(category, categoryData.records);
-                    }
-                  });
-                }}
+                onClick={() => selectAllCategories(dataSummary?.categories)}
                 disabled={
                   !dataSummary?.categories ||
                   Object.keys(dataSummary.categories).length === 0
                 }
               >
-                {t('builder.buttons.selectAll')}
+                {t('builder.buttons.selectAllDataTypes')}
               </Button>
             )}
             {hasSelections && (
@@ -489,6 +483,7 @@ const ReportBuilder = () => {
                   onTabChange={setActiveTab}
                   onToggleRecord={toggleRecordSelection}
                   onToggleCategory={toggleCategorySelection}
+                  onClearCategory={clearCategorySelection}
                   categoryDisplayNames={categoryDisplayNames}
                 />
               </Paper>

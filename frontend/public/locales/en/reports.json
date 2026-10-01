@@ -8,7 +8,8 @@
       "generateReport_other": "Generate Report ({{count}} records)",
       "generateReportChartsOnly": "Generate Report ({{chartCount}} charts)",
       "generateReportWithCharts": "Generate Report ({{recordCount}} records, {{chartCount}} charts)",
-      "selectAll": "Select All Records"
+      "selectAll": "Select All Records",
+      "selectAllDataTypes": "Select All Data Types"
     },
     "configuration": {
       "description": "Select medical records to include in your custom report",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Clear Selection",
     "noCategories": "No Categories Available",
     "noCategoriesDescription": "No medical data categories are available for report generation.",
     "noRecords": "No records available",
     "recordCount": "{{count}} records",
     "recordCount_one": "{{count}} record",
     "recordCount_other": "{{count}} records",
+    "selectAll": "Select All",
     "selected": "{{count}} selected",
     "selected_one": "{{count}} selected",
     "selected_other": "{{count}} selected",
