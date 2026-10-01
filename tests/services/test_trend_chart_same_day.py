@@ -51,6 +51,22 @@ class TestSpreadSameDayDates:
             offset = abs(moved - datetime.combine(original, datetime.min.time()))
             assert offset <= timedelta(days=span * 0.08)
 
+    def test_adjacent_days_and_a_distant_result_stay_chronological(self):
+        # Three results on Jan 5, one on the next day and one far away: the
+        # series span is large, so an unbounded spread would carry Jan 5's
+        # points past Jan 6's.
+        dates = [date(2026, 1, 5)] * 3 + [date(2026, 1, 6), date(2026, 12, 31)]
+        result = _spread_same_day_dates(dates)
+        assert result == sorted(result)
+        assert len(set(result)) == len(result)
+        assert max(result[:3]) < result[3] < result[4]
+
+    def test_adjacent_groups_spreading_toward_each_other_do_not_meet(self):
+        dates = [date(2026, 1, 5)] * 3 + [date(2026, 1, 6)] * 3 + [date(2027, 1, 5)]
+        result = _spread_same_day_dates(dates)
+        assert max(result[:3]) < min(result[3:6])
+        assert result == sorted(result)
+
     def test_all_results_on_one_day_do_not_divide_by_zero(self):
         dates = [date(2026, 1, 5)] * 4
         result = _spread_same_day_dates(dates)

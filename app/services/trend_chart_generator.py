@@ -340,14 +340,16 @@ class TrendChartGenerator:
 # by this fraction of the plotted date span so every result stays visible.
 SAME_DAY_SPREAD_STEP = 0.012
 SAME_DAY_SPREAD_MAX_GROUP = 0.08
+SAME_DAY_NEIGHBOUR_ROOM_FRACTION = 0.4
 
 
 def _spread_same_day_dates(dates: List) -> List[datetime]:
     """Return plot x positions with same-calendar-day points nudged apart.
 
     Order within a day is preserved (first entry leftmost). The nudge is purely
-    visual and scaled to the span of the data, so axis dates are unchanged for
-    all practical purposes. Days with a single point are not moved.
+    visual, scaled to the span of the data and bounded by the gap to the
+    neighbouring days so chronological order is never changed. Days with a
+    single point are not moved.
     """
     as_dt = [
         d if isinstance(d, datetime) else datetime.combine(d, datetime.min.time())
@@ -363,15 +365,32 @@ def _spread_same_day_dates(dates: List) -> List[datetime]:
     span_days = (max(as_dt) - min(as_dt)).total_seconds() / 86400.0
     span_days = max(span_days, 1.0)
 
+    # Each group is also bounded by the room to its neighbouring days, so a
+    # spread can never carry a point past an adjacent day's result.
+    ordered = sorted(groups.values(), key=lambda idx: min(as_dt[i] for i in idx))
     spread = list(as_dt)
-    for idx in groups.values():
+    for pos, idx in enumerate(ordered):
         k = len(idx)
         if k == 1:
             continue
+        lo = min(as_dt[i] for i in idx)
+        hi = max(as_dt[i] for i in idx)
+        rooms = []
+        if pos > 0:
+            prev_hi = max(as_dt[i] for i in ordered[pos - 1])
+            rooms.append((lo - prev_hi).total_seconds() / 86400.0)
+        if pos < len(ordered) - 1:
+            next_lo = min(as_dt[i] for i in ordered[pos + 1])
+            rooms.append((next_lo - hi).total_seconds() / 86400.0)
         step = min(
             span_days * SAME_DAY_SPREAD_STEP,
             span_days * SAME_DAY_SPREAD_MAX_GROUP / (k - 1),
         )
+        if rooms:
+            # Use at most this fraction of the room on each side, so two
+            # neighbouring groups spreading toward each other cannot meet.
+            max_half_width = SAME_DAY_NEIGHBOUR_ROOM_FRACTION * min(rooms)
+            step = min(step, max_half_width / ((k - 1) / 2))
         for rank, i in enumerate(idx):
             spread[i] = as_dt[i] + timedelta(days=(rank - (k - 1) / 2) * step)
     return spread
