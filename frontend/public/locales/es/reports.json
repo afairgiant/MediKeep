@@ -38,6 +38,10 @@
       "recordsSelected": "Registros Seleccionados"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Imprimir el nombre del informe arriba y el número de página y la fecha abajo en cada página",
+        "label": "Incluir encabezado y pie de página"
+      },
       "includePatientInfo": {
         "description": "Agregar información demográfica y de contacto",
         "label": "Incluir Información del Paciente"

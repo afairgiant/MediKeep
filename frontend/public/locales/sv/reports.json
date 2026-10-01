@@ -38,6 +38,10 @@
       "recordsSelected": "Valda handlingar"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Skriv ut rapportnamnet högst upp samt sidnummer och datum längst ned på varje sida",
+        "label": "Inkludera sidhuvud och sidfot"
+      },
       "includePatientInfo": {
         "description": "Lägg till demografisk information och kontaktuppgifter",
         "label": "Inkludera patientinformation"

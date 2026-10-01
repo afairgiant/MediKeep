@@ -38,6 +38,10 @@
       "recordsSelected": "Registos Selecionados"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Imprimir o nome do relatório no topo e o número da página e a data no rodapé de cada página",
+        "label": "Incluir cabeçalho e rodapé"
+      },
       "includePatientInfo": {
         "description": "Adicionar informações demográficas e de contacto",
         "label": "Incluir Informações do Paciente"

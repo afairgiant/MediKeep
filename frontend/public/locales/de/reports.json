@@ -38,6 +38,10 @@
       "recordsSelected": "Datensätze ausgewählt"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Berichtsnamen oben sowie Seitenzahl und Datum unten auf jeder Seite drucken",
+        "label": "Kopf- und Fußzeile einfügen"
+      },
       "includePatientInfo": {
         "description": "Demografische und Kontaktinformationen hinzufügen",
         "label": "Patienteninformationen einbeziehen"

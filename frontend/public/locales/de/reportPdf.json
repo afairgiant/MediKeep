@@ -137,7 +137,10 @@
     "treatmentPlan": "Behandlungsplan",
     "treatment": "Behandlung",
     "treatmentReceived": "Erhaltene Behandlung",
-    "chiefComplaint": "Hauptbeschwerde"
+    "chiefComplaint": "Hauptbeschwerde",
+    "prescribedDate": "Verschreibungsdatum",
+    "lastServiceDate": "Letztes Wartungsdatum",
+    "nextServiceDate": "Nächstes Wartungsdatum"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Hausarzt",
@@ -191,6 +194,7 @@
     "record": "Eintrag",
     "records": "Einträge",
     "generatedOn": "Erstellt am",
+    "generated": "Erstellt",
     "emergencyInformation": "Notfallinformationen",
     "reportSummary": "Berichtsübersicht",
     "noData": "Keine Daten verfügbar",

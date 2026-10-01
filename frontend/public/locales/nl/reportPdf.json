@@ -137,7 +137,10 @@
     "treatmentPlan": "Behandelplan",
     "treatment": "Behandeling",
     "treatmentReceived": "Ontvangen behandeling",
-    "chiefComplaint": "Hoofdklacht"
+    "chiefComplaint": "Hoofdklacht",
+    "prescribedDate": "Datum voorschrift",
+    "lastServiceDate": "Datum laatste onderhoud",
+    "nextServiceDate": "Datum volgend onderhoud"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Huisarts",
@@ -191,6 +194,7 @@
     "record": "Record",
     "records": "records",
     "generatedOn": "Gegenereerd op",
+    "generated": "Gegenereerd",
     "emergencyInformation": "Noodinformatie",
     "reportSummary": "Rapportsamenvatting",
     "noData": "Geen gegevens beschikbaar",

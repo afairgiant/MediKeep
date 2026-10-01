@@ -1,6 +1,8 @@
 import { Tabs, Badge, Text, Stack, Center } from '@mantine/core';
 import { IconFileDescription } from '@tabler/icons-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { sortCategoriesByName } from '../../utils/reportLabels';
 import RecordSelector from './RecordSelector';
 import './CategoryTabs.css';
 
@@ -21,7 +23,22 @@ const CategoryTabs = ({
   onClearCategory,
   categoryDisplayNames = {},
 }) => {
-  const { t } = useTranslation('reports');
+  const { t, i18n } = useTranslation('reports');
+  const sortedCategories = useMemo(
+    () =>
+      sortCategoriesByName(
+        categories || [],
+        Object.fromEntries(
+          (categories || []).map(category => [
+            category,
+            categoryDisplayNames[category] || formatCategoryName(category),
+          ])
+        ),
+        i18n.language
+      ),
+    [categories, categoryDisplayNames, i18n.language]
+  );
+
   // If no categories available, show empty state
   if (!categories || categories.length === 0) {
     return (
@@ -53,7 +70,7 @@ const CategoryTabs = ({
       className="record-type-tabs"
     >
       <Tabs.List>
-        {categories.map(category => {
+        {sortedCategories.map(category => {
           const categoryData = dataSummary?.categories?.[category];
           const selectedInCategory = Object.keys(
             selectedRecords[category] || {}
@@ -88,7 +105,7 @@ const CategoryTabs = ({
         })}
       </Tabs.List>
 
-      {categories.map(category => (
+      {sortedCategories.map(category => (
         <Tabs.Panel key={category} value={category} pt="lg">
           <RecordSelector
             category={category}

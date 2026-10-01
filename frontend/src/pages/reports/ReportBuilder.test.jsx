@@ -212,4 +212,35 @@ describe('ReportBuilder flow', () => {
     expect(records.checked).toBe(true);
     expect(charts.checked).toBe(false);
   });
+
+  it('toggles the header/footer setting from the settings modal', async () => {
+    mockReports.value = buildReports({
+      reportSettings: { include_header_footer: true },
+    });
+    render(<ReportBuilder />);
+
+    fireEvent.click(screen.getByText('shared:labels.settings'));
+    const toggle = await screen.findByLabelText(/includeHeaderFooter\.label/);
+    expect(toggle.checked).toBe(true);
+
+    fireEvent.click(toggle);
+    expect(mockReports.value.updateReportSettings).toHaveBeenCalledWith({
+      include_header_footer: false,
+    });
+  });
+
+  it('starts with no data type tab selected until one is chosen', () => {
+    render(<ReportBuilder />);
+
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.length).toBeGreaterThan(0);
+    tabs.forEach(tab =>
+      expect(tab.getAttribute('aria-selected')).toBe('false')
+    );
+
+    fireEvent.click(tabs[0]);
+    expect(screen.getAllByRole('tab')[0].getAttribute('aria-selected')).toBe(
+      'true'
+    );
+  });
 });

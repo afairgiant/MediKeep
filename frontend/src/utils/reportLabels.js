@@ -22,3 +22,16 @@ export const buildGenerateButtonLabel = (
   }).format(parts);
   return t('builder.buttons.generateReportSummary', { summary });
 };
+
+/**
+ * Order category keys alphabetically by their displayed (translated) name,
+ * using the language's own collation rules (e.g. "Ö" sorts with "O" in German
+ * but after "Z" in Swedish). Ties fall back to the key so the order is stable.
+ */
+export const sortCategoriesByName = (categories, displayNames, language) => {
+  const collator = new Intl.Collator(language, { sensitivity: 'base' });
+  const nameOf = category => displayNames[category] || category;
+  return [...categories].sort(
+    (a, b) => collator.compare(nameOf(a), nameOf(b)) || a.localeCompare(b, 'en')
+  );
+};

@@ -40,6 +40,10 @@
       "recordsSelected": "Wybrane rekordy"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Drukuj nazwę raportu u góry oraz numer strony i datę na dole każdej strony",
+        "label": "Dołącz nagłówek i stopkę"
+      },
       "includePatientInfo": {
         "description": "Dodaj dane demograficzne i kontaktowe",
         "label": "Dołącz informacje o pacjencie"

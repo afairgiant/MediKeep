@@ -362,6 +362,7 @@ describe('useCustomReports', () => {
       expect(result.current.reportSettings.include_patient_info).toBe(true);
       expect(result.current.reportSettings.include_summary).toBe(true);
       expect(result.current.reportSettings.include_profile_picture).toBe(true);
+      expect(result.current.reportSettings.include_header_footer).toBe(true);
       expect(result.current.reportSettings.date_range).toBeNull();
     });
 

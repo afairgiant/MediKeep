@@ -69,6 +69,10 @@ class CustomReportRequest(BaseModel):
     include_summary: bool = Field(
         default=True, description="Include summary statistics"
     )
+    include_header_footer: bool = Field(
+        default=True,
+        description="Print the report name at the top and page number/date at the bottom of each page",
+    )
     date_range: Optional[DateRange] = Field(
         default=None, description="Optional date range filter"
     )

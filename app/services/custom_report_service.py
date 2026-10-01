@@ -1425,6 +1425,7 @@ class CustomReportService:
             "include_patient_info": request.include_patient_info,
             "include_summary": request.include_summary,
             "include_profile_picture": request.include_profile_picture,
+            "include_header_footer": request.include_header_footer,
             "trend_charts": trend_chart_data if trend_chart_data else None,
             # User preferences for formatting
             "unit_system": unit_system,

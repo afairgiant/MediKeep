@@ -137,7 +137,10 @@
     "chiefComplaint": "主诉",
     "phone": "电话号码",
     "email": "电子邮箱",
-    "appointmentType": "预约类型"
+    "appointmentType": "预约类型",
+    "prescribedDate": "处方日期",
+    "lastServiceDate": "上次维护日期",
+    "nextServiceDate": "下次维护日期"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "主治医生",
@@ -191,6 +194,7 @@
     "record": "记录",
     "records": "条记录",
     "generatedOn": "生成时间",
+    "generated": "生成",
     "emergencyInformation": "紧急医疗信息",
     "reportSummary": "报告摘要",
     "noData": "暂无数据",
