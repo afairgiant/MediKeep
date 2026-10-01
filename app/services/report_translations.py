@@ -157,6 +157,31 @@ class ReportTranslator:
         ).get(camel_key)
         return result or key.replace("_", " ").title()
 
+    def insurance_detail(self, key: str) -> str:
+        """Get translated label for an insurance coverage/contact detail key.
+
+        key is the snake_case key stored in coverage_details / contact_info
+        (e.g., 'deductible_individual'); unknown keys fall back to a
+        title-cased version ('Deductible Individual').
+        """
+        camel_key = self._to_camel_case(key)
+        result = self._data.get("insuranceDetails", {}).get(
+            camel_key
+        ) or self._en_data.get("insuranceDetails", {}).get(camel_key)
+        return result or key.replace("_", " ").title()
+
+    def relationship(self, key: str) -> str:
+        """Get translated family relationship label.
+
+        key is the backend enum value (e.g., 'paternal_grandfather'); unknown
+        values fall back to a title-cased version ('Paternal Grandfather').
+        """
+        camel_key = self._to_camel_case(key)
+        result = self._data.get("relationships", {}).get(
+            camel_key
+        ) or self._en_data.get("relationships", {}).get(camel_key)
+        return result or key.replace("_", " ").title()
+
     def text(self, key: str, **kwargs) -> str:
         """Get translated report text with optional interpolation.
 
@@ -168,7 +193,8 @@ class ReportTranslator:
             "report", {}
         ).get(camel_key)
         if not template:
-            return key
+            # Never show a raw snake_case key in a report
+            return key.replace("_", " ").title()
 
         if kwargs:
             # Convert i18next {{var}} syntax to Python {var} then format
