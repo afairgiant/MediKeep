@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "emergency contact",
+    "filters": {
+      "allRelationships": "All Relationships"
+    },
     "form": {
+      "actions": {
+        "create": "Create Emergency Contact",
+        "update": "Update Emergency Contact"
+      },
       "address": {
         "description": "Contact's address (optional)",
         "label": "Address",
@@ -189,14 +197,40 @@
         "placeholder": "Additional information (e.g., 'Available weekdays only', 'Speaks Spanish')"
       },
       "primaryPhone": {
-        "description": "Primary phone number",
         "label": "Primary Phone",
         "placeholder": "e.g., +1 555 123-4567"
       },
       "relationship": {
         "description": "Relationship to patient",
         "label": "Relationship",
-        "placeholder": "Select relationship"
+        "placeholder": "Select relationship",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Optional secondary phone number",

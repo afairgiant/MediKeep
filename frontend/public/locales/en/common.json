@@ -608,6 +608,7 @@
   "messages": {
     "checkBackSoon": "Check back soon for updates!",
     "clearAll": "Clear All",
+    "confirmDeleteEntity": "Are you sure you want to delete this {{entity}}?",
     "confirmRemoveConditionRelationship": "Are you sure you want to remove this condition relationship?",
     "confirmRemoveEquipmentRelationship": "Are you sure you want to remove this equipment link?",
     "confirmRemoveLabResultLink": "Remove this lab result link?",

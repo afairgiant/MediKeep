@@ -608,6 +608,7 @@
   "messages": {
     "checkBackSoon": "Kom binnenkort terug voor updates!",
     "clearAll": "Alles wissen",
+    "confirmDeleteEntity": "Weet u zeker dat u dit item ({{entity}}) wilt verwijderen?",
     "confirmRemoveConditionRelationship": "Weet u zeker dat u deze aandoeningsrelatie wilt verwijderen?",
     "confirmRemoveEquipmentRelationship": "Weet u zeker dat u deze apparatuurkoppeling wilt verwijderen?",
     "confirmRemoveLabResultLink": "Deze labresultaatkoppeling verwijderen?",

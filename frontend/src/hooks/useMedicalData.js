@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApi } from './useApi.js';
 import { useCurrentPatient } from './useGlobalData';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,11 +8,13 @@ import logger from '../services/logger';
 export const useMedicalData = config => {
   const {
     entityName,
+    entityLabel,
     apiMethodsConfig,
     requiresPatient = true,
     loadFilesCounts = false,
   } = config;
 
+  const { t } = useTranslation('common');
   const [items, setItems] = useState([]);
   const [filesCounts, setFilesCounts] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
@@ -207,7 +210,11 @@ export const useMedicalData = config => {
   const deleteItem = useCallback(
     async id => {
       if (
-        !window.confirm(`Are you sure you want to delete this ${entityName}?`)
+        !window.confirm(
+          t('messages.confirmDeleteEntity', {
+            entity: entityLabel || entityName,
+          })
+        )
       ) {
         return false;
       }
@@ -244,7 +251,7 @@ export const useMedicalData = config => {
       }
       return false;
     },
-    [execute, apiMethodsConfig, entityName]
+    [execute, apiMethodsConfig, entityName, entityLabel, t]
   ); // Store stable references to prevent dependency changes
   const configRef = useRef({
     entityName,

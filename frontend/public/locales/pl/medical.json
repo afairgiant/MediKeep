@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "kontakt alarmowy",
+    "filters": {
+      "allRelationships": "Wszystkie relacje"
+    },
     "form": {
+      "actions": {
+        "create": "Utwórz kontakt alarmowy",
+        "update": "Zaktualizuj kontakt alarmowy"
+      },
       "address": {
         "description": "Adres kontaktu (opcjonalnie)",
         "label": "Adres",
@@ -189,14 +197,40 @@
         "placeholder": "Dodatkowe informacje (np. 'Dostępny tylko w dni robocze', 'Mówi po angielsku')"
       },
       "primaryPhone": {
-        "description": "Główny numer telefonu",
         "label": "Telefon główny",
         "placeholder": "np. +48 555 123 456"
       },
       "relationship": {
         "description": "Pokrewieństwo z pacjentem",
         "label": "Pokrewieństwo",
-        "placeholder": "Wybierz pokrewieństwo"
+        "placeholder": "Wybierz pokrewieństwo",
+        "options": {
+          "aunt": "Ciocia",
+          "brother": "Brat",
+          "caregiver": "Opiekun",
+          "child": "Dziecko",
+          "cousin": "Kuzyn(ka)",
+          "daughter": "Córka",
+          "father": "Ojciec",
+          "friend": "Przyjaciel",
+          "grandchild": "Wnuk/Wnuczka",
+          "granddaughter": "Wnuczka",
+          "grandfather": "Dziadek",
+          "grandmother": "Babcia",
+          "grandparent": "Dziadek/Babcia",
+          "grandson": "Wnuk",
+          "guardian": "Opiekun prawny",
+          "mother": "Matka",
+          "neighbor": "Sąsiad",
+          "other": "Inne",
+          "parent": "Rodzic",
+          "partner": "Partner",
+          "sibling": "Rodzeństwo",
+          "sister": "Siostra",
+          "son": "Syn",
+          "spouse": "Małżonek",
+          "uncle": "Wujek"
+        }
       },
       "secondaryPhone": {
         "description": "Opcjonalny dodatkowy numer telefonu",

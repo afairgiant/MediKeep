@@ -608,6 +608,7 @@
   "messages": {
     "checkBackSoon": "Revenez bientôt pour des mises à jour !",
     "clearAll": "Tout effacer",
+    "confirmDeleteEntity": "Voulez-vous vraiment supprimer ce {{entity}} ?",
     "confirmRemoveConditionRelationship": "Voulez-vous vraiment supprimer cette connexion à une condition ?",
     "confirmRemoveEquipmentRelationship": "Voulez-vous vraiment supprimer cette connexion à un équipement ?",
     "confirmRemoveLabResultLink": "Supprimer cette connexion à un résultat d'analyse ?",

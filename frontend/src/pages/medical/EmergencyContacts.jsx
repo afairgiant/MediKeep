@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Container,
   Paper,
@@ -38,10 +38,11 @@ import MantineEmergencyContactForm from '../../components/medical/MantineEmergen
 import { useTranslation } from 'react-i18next';
 import { phoneTelHref } from '../../utils/phoneUtils';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import { EMERGENCY_CONTACT_RELATIONSHIPS } from '../../constants/emergencyContactRelationships';
 import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['common', 'shared', 'medical']);
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const [viewMode, setViewMode] = usePersistedViewMode('emergency-contacts');
   const {
@@ -74,6 +75,7 @@ const EmergencyContacts = () => {
     setError,
   } = useMedicalData({
     entityName: 'emergency_contact',
+    entityLabel: t('medical:emergencyContacts.entityName'),
     apiMethodsConfig: {
       getAll: signal => apiService.getEmergencyContacts(signal),
       getByPatient: (patientId, signal) =>
@@ -231,6 +233,31 @@ const EmergencyContacts = () => {
     clampPage(filteredContacts.length);
   }, [filteredContacts.length, clampPage]);
 
+  const getRelationshipLabel = relationship =>
+    t(`medical:emergencyContacts.form.relationship.options.${relationship}`, {
+      defaultValue:
+        relationship.charAt(0).toUpperCase() + relationship.slice(1),
+    });
+
+  const filterDataManagement = useMemo(
+    () => ({
+      ...dataManagement,
+      categoryOptions: [
+        {
+          value: 'all',
+          label: t('medical:emergencyContacts.filters.allRelationships'),
+        },
+        ...EMERGENCY_CONTACT_RELATIONSHIPS.map(key => ({
+          value: key,
+          label: t(
+            `medical:emergencyContacts.form.relationship.options.${key}`
+          ),
+        })),
+      ],
+    }),
+    [dataManagement, t]
+  );
+
   // Helper function to get relationship icon
   const getRelationshipIcon = relationship => {
     const icons = {
@@ -303,7 +330,10 @@ const EmergencyContacts = () => {
           />
 
           {/* Mantine Filter Controls */}
-          <MedicalPageFilters dataManagement={dataManagement} config={config} />
+          <MedicalPageFilters
+            dataManagement={filterDataManagement}
+            config={config}
+          />
 
           {/* Content */}
           {filteredContacts.length === 0 ? (
@@ -389,8 +419,7 @@ const EmergencyContacts = () => {
                         variant="light"
                         size="sm"
                       >
-                        {contact.relationship.charAt(0).toUpperCase() +
-                          contact.relationship.slice(1)}
+                        {getRelationshipLabel(contact.relationship)}
                       </Badge>
                     </Group>
 
@@ -560,7 +589,7 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {value.charAt(0).toUpperCase() + value.slice(1)}
+                      {getRelationshipLabel(value)}
                     </Badge>
                   ),
                   phone_number: value =>
@@ -671,8 +700,7 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {viewingContact.relationship.charAt(0).toUpperCase() +
-                        viewingContact.relationship.slice(1)}
+                      {getRelationshipLabel(viewingContact.relationship)}
                     </Badge>
                     {viewingContact.is_primary && (
                       <Badge color="yellow" variant="filled" size="sm">

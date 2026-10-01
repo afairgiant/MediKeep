@@ -607,6 +607,7 @@
   "messages": {
     "checkBackSoon": "请稍后查看更新！",
     "clearAll": "全部清除",
+    "confirmDeleteEntity": "确定要删除此{{entity}}吗？",
     "confirmRemoveConditionRelationship": "确定要删除此疾病关联吗？",
     "confirmRemoveEquipmentRelationship": "确定要删除此设备关联吗？",
     "confirmRemoveLabResultLink": "删除此化验结果关联吗？",

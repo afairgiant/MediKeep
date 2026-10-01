@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "Notfallkontakt",
+    "filters": {
+      "allRelationships": "Alle Beziehungen"
+    },
     "form": {
+      "actions": {
+        "create": "Notfallkontakt erstellen",
+        "update": "Notfallkontakt aktualisieren"
+      },
       "address": {
         "description": "Adresse des Kontakts (optional)",
         "label": "Adresse",
@@ -189,14 +197,40 @@
         "placeholder": "Zusätzliche Informationen (z.B. 'Nur werktags erreichbar', 'Spricht Spanisch')"
       },
       "primaryPhone": {
-        "description": "Haupttelefonnummer",
         "label": "Haupttelefon",
         "placeholder": "z.B. (555) 123-4567"
       },
       "relationship": {
         "description": "Beziehung zum Patienten",
         "label": "Beziehung",
-        "placeholder": "Beziehung auswählen"
+        "placeholder": "Beziehung auswählen",
+        "options": {
+          "aunt": "Tante",
+          "brother": "Bruder",
+          "caregiver": "Betreuer",
+          "child": "Kind",
+          "cousin": "Cousin/Cousine",
+          "daughter": "Tochter",
+          "father": "Vater",
+          "friend": "Freund",
+          "grandchild": "Enkelkind",
+          "granddaughter": "Enkelin",
+          "grandfather": "Großvater",
+          "grandmother": "Großmutter",
+          "grandparent": "Großelternteil",
+          "grandson": "Enkel",
+          "guardian": "Vormund",
+          "mother": "Mutter",
+          "neighbor": "Nachbar",
+          "other": "Sonstige",
+          "parent": "Elternteil",
+          "partner": "Partner",
+          "sibling": "Geschwister",
+          "sister": "Schwester",
+          "son": "Sohn",
+          "spouse": "Ehepartner",
+          "uncle": "Onkel"
+        }
       },
       "secondaryPhone": {
         "description": "Optionale zweite Telefonnummer",

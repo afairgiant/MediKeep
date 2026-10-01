@@ -608,6 +608,7 @@
   "messages": {
     "checkBackSoon": "Kom tillbaka snart för uppdateringar!",
     "clearAll": "Rensa alla",
+    "confirmDeleteEntity": "Är du säker på att du vill ta bort detta objekt ({{entity}})?",
     "confirmRemoveConditionRelationship": "Är du säker på att du vill ta bort denna tillståndsrelation?",
     "confirmRemoveEquipmentRelationship": "Är du säker på att du vill ta bort denna utrustningslänk?",
     "confirmRemoveLabResultLink": "Ta bort denna labbresultatlänk?",

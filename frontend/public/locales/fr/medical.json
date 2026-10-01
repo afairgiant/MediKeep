@@ -160,7 +160,15 @@
     }
   },
   "emergencyContacts": {
+    "entityName": "contact d'urgence",
+    "filters": {
+      "allRelationships": "Toutes les relations"
+    },
     "form": {
+      "actions": {
+        "create": "Créer un contact d'urgence",
+        "update": "Mettre à jour le contact d'urgence"
+      },
       "address": {
         "description": "Adresse du contact (optionnelle)",
         "label": "Adresse",
@@ -189,14 +197,40 @@
         "placeholder": "Informations supplémentaires (p. ex. : « Disponible uniquement en semaine », « Parle espagnol »)"
       },
       "primaryPhone": {
-        "description": "Numéro de téléphone principal",
         "label": "Téléphone principal",
         "placeholder": "p. ex. : +33 6 12 34 56 78"
       },
       "relationship": {
         "description": "Lien avec le patient",
         "label": "Lien",
-        "placeholder": "Sélectionnez le lien"
+        "placeholder": "Sélectionnez le lien",
+        "options": {
+          "aunt": "Tante",
+          "brother": "Frère",
+          "caregiver": "Aidant",
+          "child": "Enfant",
+          "cousin": "Cousin(e)",
+          "daughter": "Fille",
+          "father": "Père",
+          "friend": "Ami(e)",
+          "grandchild": "Petit-enfant",
+          "granddaughter": "Petite-fille",
+          "grandfather": "Grand-père",
+          "grandmother": "Grand-mère",
+          "grandparent": "Grand-parent",
+          "grandson": "Petit-fils",
+          "guardian": "Tuteur",
+          "mother": "Mère",
+          "neighbor": "Voisin(e)",
+          "other": "Autre",
+          "parent": "Parent",
+          "partner": "Partenaire",
+          "sibling": "Frère/Sœur",
+          "sister": "Sœur",
+          "son": "Fils",
+          "spouse": "Conjoint",
+          "uncle": "Oncle"
+        }
       },
       "secondaryPhone": {
         "description": "Numéro de téléphone secondaire (optionnel)",
