@@ -91,8 +91,8 @@ def test_update_resolves_who_code_to_fk(db_session, user_with_patient):
 
 
 def test_update_with_unknown_who_code_clears_fk(db_session, user_with_patient):
-    """If the picked WHO code isn't in the library, treat it like a clear - better
-    to silently drop the link than to keep a stale FK that doesn't match the typed name."""
+    """If the picked WHO code isn't in the library and the stored name doesn't
+    match any library entry either, drop the link rather than keep a stale FK."""
     sv = _make_library_vaccine(db_session, who_code="EXISTING-001", name="Existing")
     create_payload = ImmunizationCreate(
         vaccine_name="Existing",
@@ -104,7 +104,7 @@ def test_update_with_unknown_who_code_clears_fk(db_session, user_with_patient):
     assert existing.standardized_vaccine_id == sv.id
 
     update_payload = ImmunizationUpdate(
-        standardized_vaccine_who_code="UNKNOWN-CODE"
+        vaccine_name="Custom Brew", standardized_vaccine_who_code="UNKNOWN-CODE"
     )
     updated = immunization_crud.update(
         db_session, db_obj=existing, obj_in=update_payload
@@ -113,7 +113,7 @@ def test_update_with_unknown_who_code_clears_fk(db_session, user_with_patient):
 
 
 def test_update_explicit_null_clears_fk(db_session, user_with_patient):
-    """Carried over from Task 3 review: pass explicit null to clear the link."""
+    """Explicit null who_code clears the link when the name matches no library entry."""
     sv = _make_library_vaccine(db_session, who_code="LINK-001", name="LinkedVax")
     create_payload = ImmunizationCreate(
         vaccine_name="LinkedVax",
@@ -124,7 +124,9 @@ def test_update_explicit_null_clears_fk(db_session, user_with_patient):
     existing = immunization_crud.create(db_session, obj_in=create_payload)
     assert existing.standardized_vaccine_id == sv.id
 
-    update_payload = ImmunizationUpdate(standardized_vaccine_who_code=None)
+    update_payload = ImmunizationUpdate(
+        vaccine_name="Custom Brew", standardized_vaccine_who_code=None
+    )
     updated = immunization_crud.update(
         db_session, db_obj=existing, obj_in=update_payload
     )
@@ -132,7 +134,7 @@ def test_update_explicit_null_clears_fk(db_session, user_with_patient):
 
 
 def test_update_without_who_code_field_preserves_fk(db_session, user_with_patient):
-    """If the payload doesn't include who_code at all, the existing FK is preserved."""
+    """If the payload touches neither who_code nor vaccine_name, the FK is preserved."""
     sv = _make_library_vaccine(db_session, who_code="KEEP-001", name="KeepVax")
     create_payload = ImmunizationCreate(
         vaccine_name="KeepVax",
@@ -143,13 +145,56 @@ def test_update_without_who_code_field_preserves_fk(db_session, user_with_patien
     existing = immunization_crud.create(db_session, obj_in=create_payload)
     assert existing.standardized_vaccine_id == sv.id
 
-    # Update vaccine_name only - don't touch who_code
-    update_payload = ImmunizationUpdate(vaccine_name="Updated Name")
+    # Update an unrelated field - don't touch vaccine identity
+    update_payload = ImmunizationUpdate(lot_number="LOT-123")
     updated = immunization_crud.update(
         db_session, db_obj=existing, obj_in=update_payload
     )
     assert updated.standardized_vaccine_id == sv.id, "FK should be preserved"
-    assert updated.vaccine_name == "Updated Name"
+    assert updated.lot_number == "LOT-123"
+
+
+def test_update_rename_to_unmatched_name_unlinks_fk(db_session, user_with_patient):
+    """Renaming to a name matching no library entry unlinks (documented in update())."""
+    sv = _make_library_vaccine(db_session, who_code="KEEP-002", name="KeepVax2")
+    existing = immunization_crud.create(
+        db_session,
+        obj_in=ImmunizationCreate(
+            vaccine_name="KeepVax2",
+            date_administered=date(2024, 1, 1),
+            patient_id=user_with_patient["patient"].id,
+            standardized_vaccine_who_code=sv.who_code,
+        ),
+    )
+    assert existing.standardized_vaccine_id == sv.id
+
+    updated = immunization_crud.update(
+        db_session,
+        db_obj=existing,
+        obj_in=ImmunizationUpdate(vaccine_name="Updated Name"),
+    )
+    assert updated.standardized_vaccine_id is None
+
+
+def test_update_unknown_who_code_falls_back_to_stored_name(
+    db_session, user_with_patient
+):
+    """An unresolvable who_code still links via the stored vaccine_name."""
+    sv = _make_library_vaccine(db_session, who_code="FB-001", name="FallbackVax")
+    existing = immunization_crud.create(
+        db_session,
+        obj_in=ImmunizationCreate(
+            vaccine_name="FallbackVax",
+            date_administered=date(2024, 1, 1),
+            patient_id=user_with_patient["patient"].id,
+        ),
+    )
+    updated = immunization_crud.update(
+        db_session,
+        db_obj=existing,
+        obj_in=ImmunizationUpdate(standardized_vaccine_who_code="UNKNOWN-CODE"),
+    )
+    assert updated.standardized_vaccine_id == sv.id
 
 
 class TestImmunizationCRUD:

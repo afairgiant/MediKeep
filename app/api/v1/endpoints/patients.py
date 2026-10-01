@@ -26,6 +26,7 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.crud.patient import patient
+from app.crud.practitioner import practitioner
 from app.models.activity_log import ActivityLog
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import Patient as PatientModel
@@ -190,6 +191,19 @@ def update_my_patient_record(
         raise HTTPException(status_code=404, detail="Patient record not found")
 
     patient_id = getattr(existing_patient, "id", None)
+
+    if patient_in.physician_id is not None and not practitioner.get(
+        db, id=patient_in.physician_id
+    ):
+        log_endpoint_access(
+            logger,
+            request,
+            user_id,
+            "patient_record_update_invalid_physician",
+            patient_id=patient_id,
+            message="Patient update rejected: assigned practitioner not found",
+        )
+        raise HTTPException(status_code=400, detail="Practitioner not found")
 
     try:
         # Log update attempt without sensitive data

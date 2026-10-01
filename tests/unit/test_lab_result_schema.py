@@ -215,7 +215,13 @@ class TestLabResultNumericFieldsCreate:
 
     def test_value_out_of_range_rejected(self):
         with pytest.raises(ValidationError, match="reasonable"):
-            make_create(value=2_000_000)
+            make_create(value=2e15)
+
+    def test_value_large_but_within_range_accepted(self):
+        assert make_create(value=2_000_000).value == 2_000_000
+
+    def test_value_at_upper_bound_accepted(self):
+        assert make_create(value=1e15).value == 1e15
 
     def test_unit_stripped(self):
         result = make_create(unit="  mg/dL  ")

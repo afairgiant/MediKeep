@@ -77,7 +77,7 @@ def _normalize_and_validate_tags(v: List[str]) -> List[str]:
         raise ValueError("Maximum 15 tags per record")
 
     normalized_tags = [normalize_and_validate_tag(tag) for tag in v]
-    return list(set(normalized_tags))  # Remove duplicates
+    return list(dict.fromkeys(normalized_tags))  # Remove duplicates, keep order
 
 
 class TaggedEntityMixin(BaseModel):
