@@ -38,6 +38,10 @@
       "recordsSelected": "Dossiers geselecteerd"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Print de rapportnaam bovenaan en het paginanummer en de datum onderaan elke pagina",
+        "label": "Kop- en voettekst opnemen"
+      },
       "includePatientInfo": {
         "description": "Demografische en contactgegevens toevoegen",
         "label": "Patiëntinformatie opnemen"

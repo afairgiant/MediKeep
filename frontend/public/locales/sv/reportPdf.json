@@ -137,7 +137,10 @@
     "treatmentPlan": "Behandlingsplan",
     "treatment": "Behandling",
     "treatmentReceived": "Mottagen behandling",
-    "chiefComplaint": "Huvudbesvär"
+    "chiefComplaint": "Huvudbesvär",
+    "prescribedDate": "Förskrivningsdatum",
+    "lastServiceDate": "Datum för senaste service",
+    "nextServiceDate": "Datum för nästa service"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primärvårdsläkare",
@@ -191,6 +194,7 @@
     "record": "Post",
     "records": "poster",
     "generatedOn": "Genererad den",
+    "generated": "Genererad",
     "emergencyInformation": "Nödinformation",
     "reportSummary": "Rapportsammanfattning",
     "noData": "Inga data tillgängliga",

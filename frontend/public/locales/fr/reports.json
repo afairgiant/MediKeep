@@ -38,6 +38,10 @@
       "recordsSelected": "Entrées sélectionnées"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Imprimer le nom du rapport en haut et le numéro de page et la date en bas de chaque page",
+        "label": "Inclure l'en-tête et le pied de page"
+      },
       "includePatientInfo": {
         "description": "Ajoutez les informations démographiques et de contact",
         "label": "Inclure les informations du patient"

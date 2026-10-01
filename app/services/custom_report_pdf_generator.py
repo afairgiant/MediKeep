@@ -18,6 +18,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
@@ -552,7 +553,14 @@ class CustomReportPDFGenerator:
 
         # Build PDF
         story = self._keep_headers_with_body(story)
-        doc.build(story)
+        if report_data.get("include_header_footer", True):
+            gen_date = report_data.get("generation_date")
+            if not isinstance(gen_date, datetime):
+                gen_date = datetime.now()
+            canvas_cls = self._header_footer_canvas(title, gen_date)
+            doc.build(story, canvasmaker=canvas_cls)
+        else:
+            doc.build(story)
 
         # Get PDF bytes
         pdf_bytes = output_buffer.getvalue()
@@ -801,7 +809,6 @@ class CustomReportPDFGenerator:
         col3_data = [
             f"<b>{t.text('last_visit')}:</b> {last_visit_date}",
             f"<b>{t.text('report_date')}:</b> {t.format_date(datetime.now())}",
-            f"<b>{t.text('page')}:</b> 1 {t.text('of')} X",
         ]
 
         # Create three separate paragraphs for each column to avoid HTML rendering issues
@@ -1195,6 +1202,74 @@ class CustomReportPDFGenerator:
     # text, so it means "the user did not choose a title" and is localized.
     DEFAULT_REPORT_TITLE = "Custom Medical Report"
 
+    def _header_footer_canvas(self, title: str, generation_date: datetime):
+        """Canvas class that prints the report name and page x of y on every page.
+
+        The total page count is only known once the document is laid out, so
+        pages are held back and stamped in save().
+        """
+        translator = self.translator
+        font = self.styles["SmallText"].fontName
+        # Title arrives escaped for Paragraph markup; canvas text is plain
+        header_text = html.unescape(title)
+        date_text = (
+            f"{translator.text('generated')}: "
+            f"{translator.format_date(generation_date, include_time=True)}"
+            f" | {translator.text('confidential_notice')}"
+        )
+        page_word = translator.text("page")
+        of_word = translator.text("of")
+        gray = colors.HexColor("#6c757d")
+
+        class HeaderFooterCanvas(canvas.Canvas):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self._saved_page_states = []
+
+            def showPage(self):
+                self._saved_page_states.append(dict(self.__dict__))
+                self._startPage()
+
+            def save(self):
+                total = len(self._saved_page_states)
+                for state in self._saved_page_states:
+                    self.__dict__.update(state)
+                    self._draw_header_footer(total)
+                    super().showPage()
+                super().save()
+
+            def _draw_header_footer(self, total):
+                width, height = self._pagesize
+                left = 0.75 * inch
+                right = width - 0.75 * inch
+                self.saveState()
+                self.setFont(font, 8)
+                self.setFillColor(gray)
+                self.setStrokeColor(colors.HexColor("#dee2e6"))
+                self.setLineWidth(0.5)
+
+                # Even pages mirror odd pages, as in a printed book
+                mirrored = self._pageNumber % 2 == 0
+                draw_start = self.drawRightString if mirrored else self.drawString
+                draw_end = self.drawString if mirrored else self.drawRightString
+                start_x, end_x = (right, left) if mirrored else (left, right)
+
+                header_y = height - 0.55 * inch
+                draw_start(start_x, header_y, header_text[:120])
+                self.line(left, header_y - 4, right, header_y - 4)
+
+                footer_y = 0.45 * inch
+                self.line(left, footer_y + 10, right, footer_y + 10)
+                draw_start(start_x, footer_y, date_text)
+                draw_end(
+                    end_x,
+                    footer_y,
+                    f"{page_word} {self._pageNumber} {of_word} {total}",
+                )
+                self.restoreState()
+
+        return HeaderFooterCanvas
+
     def _resolve_report_title(self, title: Optional[str]) -> str:
         """Use the localized default title unless the user typed their own."""
         is_default = (
@@ -1521,7 +1596,7 @@ class CustomReportPDFGenerator:
                 f"{self.translator.field('pharmacy')}: {record['pharmacy_name']}"
             )
         if prescriber_info:
-            details.append(" | ".join(prescriber_info))
+            details.extend(prescriber_info)
 
         # Duration and status - make dates prominent
         timing_info = []
@@ -1542,7 +1617,7 @@ class CustomReportPDFGenerator:
                 f"<b>{self.translator.field('status')}:</b> {status_display}"
             )
         if timing_info:
-            details.append(" | ".join(timing_info))
+            details.extend(timing_info)
 
         # Refills and quantity
         supply_info = []
@@ -1555,7 +1630,7 @@ class CustomReportPDFGenerator:
                 f"{self.translator.field('refills')}: {record['refills_remaining']}"
             )
         if supply_info:
-            details.append(" | ".join(supply_info))
+            details.extend(supply_info)
 
         # Side effects or warnings
         if record.get("side_effects"):
@@ -1690,7 +1765,7 @@ class CustomReportPDFGenerator:
                 f"{self.translator.field('verification')}: {record['verification_status']}"
             )
         if status_info:
-            details.append(" | ".join(status_info))
+            details.extend(status_info)
 
         # Treating practitioner
         if record.get("practitioner_name"):
@@ -1797,7 +1872,7 @@ class CustomReportPDFGenerator:
                     f"{self.translator.field('setting')}: {record['procedure_setting']}"
                 )
             if provider_info:
-                details.append(" | ".join(provider_info))
+                details.extend(provider_info)
 
             # Procedure details
             proc_info = []
@@ -1810,7 +1885,7 @@ class CustomReportPDFGenerator:
                     f"{self.translator.field('anesthesia')}: {record['anesthesia_type']}"
                 )
             if proc_info:
-                details.append(" | ".join(proc_info))
+                details.extend(proc_info)
 
             # Status and outcome
             outcome_info = []
@@ -1823,7 +1898,7 @@ class CustomReportPDFGenerator:
                     f"{self.translator.field('outcome')}: {record['outcome']}"
                 )
             if outcome_info:
-                details.append(" | ".join(outcome_info))
+                details.extend(outcome_info)
 
             # Complications or follow-up
             if record.get("complications"):
@@ -1976,7 +2051,7 @@ class CustomReportPDFGenerator:
                         f"{self.translator.field('type')}: {record['test_category']}"
                     )
                 if test_info:
-                    details.append(" | ".join(test_info))
+                    details.extend(test_info)
 
                 # Timing information
                 timing_info = []
@@ -1989,7 +2064,7 @@ class CustomReportPDFGenerator:
                         f"{self.translator.field('end_date')}: {self._format_date(record['completed_date'])}"
                     )
                 if timing_info:
-                    details.append(" | ".join(timing_info))
+                    details.extend(timing_info)
 
                 # Provider and facility
                 provider_info = []
@@ -2000,7 +2075,7 @@ class CustomReportPDFGenerator:
                         f"{self.translator.field('facility')}: {record['facility']}"
                     )
                 if provider_info:
-                    details.append(" | ".join(provider_info))
+                    details.extend(provider_info)
 
                 # Status
                 if record.get("status"):
@@ -2100,7 +2175,7 @@ class CustomReportPDFGenerator:
                         f"{self.translator.field('end_date')}: {self._format_date(record['expiration_date'])}"
                     )
                 if mfg_info:
-                    details.append(" | ".join(mfg_info))
+                    details.extend(mfg_info)
 
                 # Administration details
                 admin_info = []
@@ -2117,7 +2192,7 @@ class CustomReportPDFGenerator:
                         f"{self.translator.field('dose_number')}: {record['dose_amount']}"
                     )
                 if admin_info:
-                    details.append(" | ".join(admin_info))
+                    details.extend(admin_info)
 
                 # Provider info
                 if record.get("administered_by"):
@@ -2243,7 +2318,7 @@ class CustomReportPDFGenerator:
                     f"<b>{self.translator.field('status')}:</b> {status_display}"
                 )
             if verification_info:
-                details.append(" | ".join(verification_info))
+                details.extend(verification_info)
 
             # Associated medication if drug allergy - make prominent for drug interactions
             if record.get("medication_name"):
@@ -2323,7 +2398,7 @@ class CustomReportPDFGenerator:
                     f"<b>{self.translator.field('for_conditions')}:</b> {record['condition_name']}"
                 )
             if provider_condition:
-                details.append(" | ".join(provider_condition))
+                details.extend(provider_condition)
 
             # Status and dates
             timing_status = []
@@ -2344,7 +2419,7 @@ class CustomReportPDFGenerator:
                     f"<b>{self.translator.field('status')}:</b> {status_display}"
                 )
             if timing_status:
-                details.append(" | ".join(timing_status))
+                details.extend(timing_status)
 
             # Treatment category and location
             logistics = []
@@ -2357,7 +2432,7 @@ class CustomReportPDFGenerator:
                     f"{self.translator.field('location')}: {record['location']}"
                 )
             if logistics:
-                details.append(" | ".join(logistics))
+                details.extend(logistics)
 
             # Description
             if record.get("description"):
@@ -2441,7 +2516,7 @@ class CustomReportPDFGenerator:
                     f"<b>{self.translator.field('related_condition')}:</b> {record['condition_name']}"
                 )
             if provider_condition:
-                details.append(" | ".join(provider_condition))
+                details.extend(provider_condition)
 
             # Chief complaint (patient's primary concern)
             if record.get("chief_complaint"):
@@ -2476,7 +2551,7 @@ class CustomReportPDFGenerator:
                     f"{self.translator.field('follow_up')}: {record['follow_up_instructions']}"
                 )
             if logistics:
-                details.append(" | ".join(logistics))
+                details.extend(logistics)
 
             if details:
                 for detail in details:
@@ -2653,9 +2728,8 @@ class CustomReportPDFGenerator:
                 details.append(f"{self.translator.field('email')}: {record['email']}")
 
             if details:
-                story.append(
-                    Paragraph(f"    {' | '.join(details)}", self.styles["CustomBody"])
-                )
+                for part in details:
+                    story.append(Paragraph(f"    {part}", self.styles["CustomBody"]))
 
             if record.get("address"):
                 story.append(
@@ -2761,9 +2835,8 @@ class CustomReportPDFGenerator:
                 details.append(f"{self.translator.text('gender')}: {record['gender']}")
 
             if details:
-                story.append(
-                    Paragraph(f"    {' | '.join(details)}", self.styles["CustomBody"])
-                )
+                for part in details:
+                    story.append(Paragraph(f"    {part}", self.styles["CustomBody"]))
 
             # Notes if available
             if record.get("notes"):
@@ -2931,9 +3004,8 @@ class CustomReportPDFGenerator:
             )
 
         if info_parts:
-            story.append(
-                Paragraph(f"  {' | '.join(info_parts)}", self.styles["CustomBody"])
-            )
+            for part in info_parts:
+                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
 
         # Triggers
         if record.get("typical_triggers"):
@@ -3035,9 +3107,8 @@ class CustomReportPDFGenerator:
             info_parts.append(f"{self.translator.field('status')}: {record['status']}")
 
         if info_parts:
-            story.append(
-                Paragraph(f"  {' | '.join(info_parts)}", self.styles["CustomBody"])
-            )
+            for part in info_parts:
+                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
 
         # Date and mechanism
         date_mech_parts = []
@@ -3051,9 +3122,8 @@ class CustomReportPDFGenerator:
             )
 
         if date_mech_parts:
-            story.append(
-                Paragraph(f"  {' | '.join(date_mech_parts)}", self.styles["CustomBody"])
-            )
+            for part in date_mech_parts:
+                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
 
         # Treatment and recovery
         if record.get("treatment_received"):
@@ -3176,9 +3246,8 @@ class CustomReportPDFGenerator:
             )
 
         if info_parts:
-            story.append(
-                Paragraph(f"  {' | '.join(info_parts)}", self.styles["CustomBody"])
-            )
+            for part in info_parts:
+                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
 
         # Member information
         member_parts = []
@@ -3192,9 +3261,8 @@ class CustomReportPDFGenerator:
             member_parts.append(f"Group #: {record['group_number']}")
 
         if member_parts:
-            story.append(
-                Paragraph(f"  {' | '.join(member_parts)}", self.styles["CustomBody"])
-            )
+            for part in member_parts:
+                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
 
         # Policy holder
         if record.get("policy_holder_name"):
@@ -3217,9 +3285,8 @@ class CustomReportPDFGenerator:
             )
 
         if date_parts:
-            story.append(
-                Paragraph(f"  {' | '.join(date_parts)}", self.styles["CustomBody"])
-            )
+            for part in date_parts:
+                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
 
         # Coverage details (may be JSON)
         if record.get("coverage_details"):
@@ -3315,28 +3382,28 @@ class CustomReportPDFGenerator:
                         f"{self.translator.field('serial_number')}: {record['serial_number']}"
                     )
                 if id_parts:
-                    details.append(" | ".join(id_parts))
+                    details.extend(id_parts)
 
                 # Dates and supplier
                 service_parts = []
                 if record.get("prescribed_date"):
                     service_parts.append(
-                        f"{self.translator.field('date')}: {self._format_date(record['prescribed_date'])}"
+                        f"{self.translator.field('prescribed_date')}: {self._format_date(record['prescribed_date'])}"
                     )
                 if record.get("last_service_date"):
                     service_parts.append(
-                        f"{self.translator.field('date')}: {self._format_date(record['last_service_date'])}"
+                        f"{self.translator.field('last_service_date')}: {self._format_date(record['last_service_date'])}"
                     )
                 if record.get("next_service_date"):
                     service_parts.append(
-                        f"{self.translator.field('date')}: {self._format_date(record['next_service_date'])}"
+                        f"{self.translator.field('next_service_date')}: {self._format_date(record['next_service_date'])}"
                     )
                 if record.get("supplier"):
                     service_parts.append(
                         f"{self.translator.field('provider')}: {record['supplier']}"
                     )
                 if service_parts:
-                    details.append(" | ".join(service_parts))
+                    details.extend(service_parts)
 
                 # Prescribed by
                 if record.get("prescribed_by"):

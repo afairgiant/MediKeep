@@ -137,7 +137,10 @@
     "treatmentPlan": "Treatment Plan",
     "treatment": "Treatment",
     "treatmentReceived": "Treatment Received",
-    "chiefComplaint": "Chief Complaint"
+    "chiefComplaint": "Chief Complaint",
+    "prescribedDate": "Prescribed Date",
+    "lastServiceDate": "Last Service Date",
+    "nextServiceDate": "Next Service Date"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primary Care Physician",
@@ -191,6 +194,7 @@
     "record": "Record",
     "records": "records",
     "generatedOn": "Generated on",
+    "generated": "Generated",
     "emergencyInformation": "Emergency Information",
     "reportSummary": "Report Summary",
     "noData": "No data available",

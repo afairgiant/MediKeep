@@ -37,6 +37,10 @@
       "recordsSelected": "บันทึกที่เลือก"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "พิมพ์ชื่อรายงานที่ด้านบนและหมายเลขหน้าพร้อมวันที่ที่ด้านล่างของทุกหน้า",
+        "label": "รวมส่วนหัวและส่วนท้าย"
+      },
       "includePatientInfo": {
         "description": "เพิ่มข้อมูลประชากรและข้อมูลการติดต่อ",
         "label": "รวมข้อมูลผู้ป่วย"

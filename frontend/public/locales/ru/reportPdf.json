@@ -137,7 +137,10 @@
     "treatmentPlan": "План лечения",
     "treatment": "Лечение",
     "treatmentReceived": "Полученное лечение",
-    "chiefComplaint": "Основная жалоба"
+    "chiefComplaint": "Основная жалоба",
+    "prescribedDate": "Дата назначения",
+    "lastServiceDate": "Дата последнего ТО",
+    "nextServiceDate": "Дата следующего ТО"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Лечащий врач",
@@ -191,6 +194,7 @@
     "record": "запись",
     "records": "записей",
     "generatedOn": "Создан",
+    "generated": "Создан",
     "emergencyInformation": "Информация для экстренных случаев",
     "reportSummary": "Сводка отчёта",
     "noData": "Данные отсутствуют",

@@ -137,7 +137,10 @@
     "chiefComplaint": "Κύριο Παράπονο",
     "phone": "Αριθμός Τηλεφώνου",
     "email": "Email",
-    "appointmentType": "Τύπος Ραντεβού"
+    "appointmentType": "Τύπος Ραντεβού",
+    "prescribedDate": "Ημερομηνία Συνταγογράφησης",
+    "lastServiceDate": "Ημερομηνία Τελευταίου Σέρβις",
+    "nextServiceDate": "Ημερομηνία Επόμενου Σέρβις"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Ιατρός Πρωτοβάθμιας Φροντίδας",
@@ -191,6 +194,7 @@
     "record": "Εγγραφή",
     "records": "εγγραφές",
     "generatedOn": "Δημιουργήθηκε στις",
+    "generated": "Δημιουργήθηκε",
     "emergencyInformation": "Πληροφορίες Έκτακτης Ανάγκης",
     "reportSummary": "Σύνοψη Αναφοράς",
     "noData": "Δεν υπάρχουν διαθέσιμα δεδομένα",

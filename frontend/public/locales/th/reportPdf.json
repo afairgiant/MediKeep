@@ -137,7 +137,10 @@
     "chiefComplaint": "อาการหลัก",
     "phone": "หมายเลขโทรศัพท์",
     "email": "อีเมล",
-    "appointmentType": "ประเภทการนัดหมาย"
+    "appointmentType": "ประเภทการนัดหมาย",
+    "prescribedDate": "วันที่สั่งจ่าย",
+    "lastServiceDate": "วันที่บำรุงรักษาครั้งล่าสุด",
+    "nextServiceDate": "วันที่บำรุงรักษาครั้งถัดไป"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "แพทย์ปฐมภูมิ",
@@ -191,6 +194,7 @@
     "record": "รายการ",
     "records": "รายการ",
     "generatedOn": "สร้างรายงานเมื่อ",
+    "generated": "สร้างเมื่อ",
     "emergencyInformation": "ข้อมูลฉุกเฉิน",
     "reportSummary": "สรุปรายงาน",
     "noData": "ไม่มีข้อมูล",

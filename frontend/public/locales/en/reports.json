@@ -38,6 +38,10 @@
       "recordsSelected": "Records Selected"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Print the report name at the top and the page number and date at the bottom of each page",
+        "label": "Include Header and Footer"
+      },
       "includePatientInfo": {
         "description": "Add demographic and contact information",
         "label": "Include Patient Information"

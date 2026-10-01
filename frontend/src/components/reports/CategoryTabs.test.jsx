@@ -45,9 +45,10 @@ describe('CategoryTabs', () => {
     expect(tabs).toHaveLength(2);
     tabs.forEach(tab => expect(tab.className).toContain('record-type-tab'));
 
-    expect(tabs[0].hasAttribute('data-active')).toBe(true);
-    expect(tabs[0].getAttribute('aria-selected')).toBe('true');
-    expect(tabs[1].hasAttribute('data-active')).toBe(false);
+    // Tabs are sorted by name: Allergies, then Medications (the active tab)
+    expect(tabs[1].hasAttribute('data-active')).toBe(true);
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+    expect(tabs[0].hasAttribute('data-active')).toBe(false);
   });
 
   it('calls onTabChange when another tab is clicked', () => {
@@ -65,5 +66,27 @@ describe('CategoryTabs', () => {
     expect(
       screen.getByRole('tab', { name: /Medications/ }).textContent
     ).toContain('1');
+  });
+
+  it('orders tabs by the displayed name, not the category order', () => {
+    renderTabs({
+      categories: ['medications', 'allergies', 'vitals'],
+      dataSummary: {
+        categories: {
+          ...dataSummary.categories,
+          vitals: { count: 0, has_more: false, records: [] },
+        },
+      },
+      categoryDisplayNames: {
+        medications: 'Medications',
+        allergies: 'Allergies',
+        vitals: 'Abnormal',
+      },
+    });
+
+    const names = screen
+      .getAllByRole('tab')
+      .map(tab => tab.querySelector('.record-type-tab-name').textContent);
+    expect(names).toEqual(['Abnormal', 'Allergies', 'Medications']);
   });
 });

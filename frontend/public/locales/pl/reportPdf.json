@@ -137,7 +137,10 @@
     "treatmentPlan": "Plan leczenia",
     "treatment": "Leczenie",
     "treatmentReceived": "Otrzymane leczenie",
-    "chiefComplaint": "Główny problem"
+    "chiefComplaint": "Główny problem",
+    "prescribedDate": "Data przepisania",
+    "lastServiceDate": "Data ostatniego serwisu",
+    "nextServiceDate": "Data następnego serwisu"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Lekarz POZ",
@@ -191,6 +194,7 @@
     "record": "Rekord",
     "records": "rekordów",
     "generatedOn": "Wygenerowano dnia",
+    "generated": "Wygenerowano",
     "emergencyInformation": "Informacje ratunkowe",
     "reportSummary": "Podsumowanie raportu",
     "noData": "Brak dostępnych danych",

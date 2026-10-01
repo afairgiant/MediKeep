@@ -137,7 +137,10 @@
     "treatmentPlan": "Plan de tratamiento",
     "treatment": "Tratamiento",
     "treatmentReceived": "Tratamiento recibido",
-    "chiefComplaint": "Motivo de consulta"
+    "chiefComplaint": "Motivo de consulta",
+    "prescribedDate": "Fecha de prescripción",
+    "lastServiceDate": "Fecha del último servicio",
+    "nextServiceDate": "Fecha del próximo servicio"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Médico de Atención Primaria",
@@ -191,6 +194,7 @@
     "record": "Registro",
     "records": "registros",
     "generatedOn": "Generado el",
+    "generated": "Generado",
     "emergencyInformation": "Información de emergencia",
     "reportSummary": "Resumen del informe",
     "noData": "No hay datos disponibles",

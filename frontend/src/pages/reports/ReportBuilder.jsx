@@ -94,7 +94,7 @@ const ReportBuilder = () => {
   const [loadedTemplate, setLoadedTemplate] = useState(null);
 
   // UI state
-  const [activeTab, setActiveTab] = useState('medications');
+  const [activeTab, setActiveTab] = useState(null);
   const [activeSegment, setActiveSegment] = useState('records');
   const [
     showSettingsModal,
@@ -195,6 +195,7 @@ const ReportBuilder = () => {
         include_patient_info: reportSettings.include_patient_info,
         include_profile_picture: reportSettings.include_profile_picture,
         include_summary: reportSettings.include_summary,
+        include_header_footer: reportSettings.include_header_footer,
         date_range: reportSettings.date_range,
       },
     }),
@@ -207,6 +208,7 @@ const ReportBuilder = () => {
       reportSettings.include_patient_info,
       reportSettings.include_profile_picture,
       reportSettings.include_summary,
+      reportSettings.include_header_footer,
       reportSettings.date_range,
     ]
   );
@@ -599,6 +601,19 @@ const ReportBuilder = () => {
               onChange={event =>
                 updateReportSettings({
                   include_summary: event.currentTarget.checked,
+                })
+              }
+            />
+
+            <Switch
+              label={t('builder.settingsModal.includeHeaderFooter.label')}
+              description={t(
+                'builder.settingsModal.includeHeaderFooter.description'
+              )}
+              checked={reportSettings.include_header_footer}
+              onChange={event =>
+                updateReportSettings({
+                  include_header_footer: event.currentTarget.checked,
                 })
               }
             />

@@ -28,6 +28,7 @@ const DEFAULT_REPORT_SETTINGS = Object.freeze({
   report_title: 'Custom Medical Report',
   include_patient_info: true,
   include_summary: true,
+  include_header_footer: true,
   include_profile_picture: true,
   date_range: null,
 });

@@ -38,6 +38,10 @@
       "recordsSelected": "Record selezionati"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "Stampa il nome del report in alto e il numero di pagina e la data in basso in ogni pagina",
+        "label": "Includi intestazione e piè di pagina"
+      },
       "includePatientInfo": {
         "description": "Aggiungi informazioni demografiche e di contatto",
         "label": "Includi informazioni del paziente"

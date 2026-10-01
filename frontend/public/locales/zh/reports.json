@@ -37,6 +37,10 @@
       "recordsSelected": "已选择记录"
     },
     "settingsModal": {
+      "includeHeaderFooter": {
+        "description": "在每页顶部打印报告名称,在底部打印页码和日期",
+        "label": "包含页眉和页脚"
+      },
       "includePatientInfo": {
         "description": "添加人口统计学信息和联系信息",
         "label": "包含患者信息"
