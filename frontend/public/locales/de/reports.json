@@ -67,6 +67,8 @@
       "labTestCharts": {
         "description": "Labortests suchen und für Diagramme auswählen",
         "resultCount": "{{count}} Ergebnisse",
+        "resultCount_one": "{{count}} Ergebnis",
+        "resultCount_other": "{{count}} Ergebnisse",
         "searchPlaceholder": "Labortests suchen...",
         "title": "Labortest-Diagramme"
       },

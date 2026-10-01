@@ -221,7 +221,7 @@
     "statistics": "Statistics",
     "mean": "Mean",
     "dataPoints": "Data Points",
-    "latest": "latest",
+    "latest": "Latest",
     "average": "Average",
     "range": "Range",
     "count": "Count",
@@ -269,7 +269,8 @@
     "medicalConditionCount": "{{count}} medical condition(s)",
     "noDetails": "No details",
     "detailsUnavailable": "Details not available",
-    "noMeasurements": "No measurements"
+    "noMeasurements": "No measurements",
+    "rangeEnd": "latest"
   },
   "values": {
     "active": "Active",

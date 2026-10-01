@@ -67,6 +67,8 @@
       "labTestCharts": {
         "description": "Search and select lab tests to chart",
         "resultCount": "{{count}} results",
+        "resultCount_one": "{{count}} result",
+        "resultCount_other": "{{count}} results",
         "searchPlaceholder": "Search lab tests...",
         "title": "Lab Test Charts"
       },

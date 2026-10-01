@@ -221,7 +221,7 @@
     "statistics": "Statistik",
     "mean": "Medelvärde",
     "dataPoints": "Datapunkter",
-    "latest": "senaste",
+    "latest": "Senaste",
     "average": "Medel",
     "range": "Intervall",
     "count": "Antal",
@@ -269,7 +269,8 @@
     "medicalConditionCount": "{{count}} medicinskt tillstånd",
     "noDetails": "Inga detaljer",
     "detailsUnavailable": "Detaljer ej tillgängliga",
-    "noMeasurements": "Inga mätvärden"
+    "noMeasurements": "Inga mätvärden",
+    "rangeEnd": "senaste"
   },
   "values": {
     "active": "Aktiv",

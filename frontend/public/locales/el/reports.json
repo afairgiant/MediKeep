@@ -67,6 +67,8 @@
       "labTestCharts": {
         "description": "Αναζητήστε και επιλέξτε εργαστηριακές εξετάσεις για γράφημα",
         "resultCount": "{{count}} αποτελέσματα",
+        "resultCount_one": "{{count}} αποτέλεσμα",
+        "resultCount_other": "{{count}} αποτελέσματα",
         "searchPlaceholder": "Αναζήτηση εργαστηριακών εξετάσεων...",
         "title": "Γραφήματα Εργαστηριακών Εξετάσεων"
       },

@@ -67,6 +67,8 @@
       "labTestCharts": {
         "description": "Procure e selecione exames laboratoriais para criar gráficos",
         "resultCount": "{{count}} resultados",
+        "resultCount_one": "{{count}} resultado",
+        "resultCount_other": "{{count}} resultados",
         "searchPlaceholder": "Procurar exames laboratoriais...",
         "title": "Gráficos de Exames Laboratoriais"
       },

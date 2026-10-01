@@ -67,6 +67,8 @@
       "labTestCharts": {
         "description": "Zoek en selecteer laboratoriumtests om in grafiek weer te geven",
         "resultCount": "{{count}} resultaten",
+        "resultCount_one": "{{count}} resultaat",
+        "resultCount_other": "{{count}} resultaten",
         "searchPlaceholder": "Laboratoriumtests zoeken...",
         "title": "Laboratoriumtestgrafieken"
       },

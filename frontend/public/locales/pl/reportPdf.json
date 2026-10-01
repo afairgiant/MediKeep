@@ -221,7 +221,7 @@
     "statistics": "Statystyki",
     "mean": "Średnia",
     "dataPoints": "Punkty danych",
-    "latest": "najpóźniej",
+    "latest": "Najnowszy",
     "average": "Średnia",
     "range": "Zakres",
     "count": "Liczba",
@@ -269,7 +269,8 @@
     "medicalConditionCount": "Schorzenia: {{count}}",
     "noDetails": "Brak szczegółów",
     "detailsUnavailable": "Szczegóły niedostępne",
-    "noMeasurements": "Brak pomiarów"
+    "noMeasurements": "Brak pomiarów",
+    "rangeEnd": "najpóźniej"
   },
   "values": {
     "active": "Aktywne",

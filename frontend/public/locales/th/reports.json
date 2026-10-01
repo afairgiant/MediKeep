@@ -66,6 +66,8 @@
       "labTestCharts": {
         "description": "ค้นหาและเลือกการตรวจทางห้องปฏิบัติการเพื่อสร้างกราฟ",
         "resultCount": "{{count}} ผลลัพธ์",
+        "resultCount_one": "{{count}} ผลลัพธ์",
+        "resultCount_other": "{{count}} ผลลัพธ์",
         "searchPlaceholder": "ค้นหาการตรวจทางห้องปฏิบัติการ...",
         "title": "กราฟการตรวจทางห้องปฏิบัติการ"
       },

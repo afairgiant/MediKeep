@@ -69,6 +69,10 @@
       "labTestCharts": {
         "description": "Wyszukaj i wybierz badania laboratoryjne do wykresów",
         "resultCount": "wyników: {{count}}",
+        "resultCount_few": "{{count}} wyniki",
+        "resultCount_many": "{{count}} wyników",
+        "resultCount_one": "{{count}} wynik",
+        "resultCount_other": "{{count}} wyniku",
         "searchPlaceholder": "Wyszukaj badania laboratoryjne...",
         "title": "Wykresy badań laboratoryjnych"
       },

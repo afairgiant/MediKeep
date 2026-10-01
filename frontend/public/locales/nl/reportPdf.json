@@ -221,7 +221,7 @@
     "statistics": "Statistieken",
     "mean": "Gemiddelde",
     "dataPoints": "Datapunten",
-    "latest": "laatste",
+    "latest": "Laatste",
     "average": "Gemiddelde",
     "range": "Bereik",
     "count": "Aantal",
@@ -269,7 +269,8 @@
     "medicalConditionCount": "{{count}} medische aandoening(en)",
     "noDetails": "Geen details",
     "detailsUnavailable": "Details niet beschikbaar",
-    "noMeasurements": "Geen metingen"
+    "noMeasurements": "Geen metingen",
+    "rangeEnd": "laatste"
   },
   "values": {
     "active": "Actief",

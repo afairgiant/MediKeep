@@ -66,6 +66,8 @@
       "labTestCharts": {
         "description": "搜索并选择要制图的实验室检查",
         "resultCount": "{{count}} 条结果",
+        "resultCount_one": "{{count}} 条结果",
+        "resultCount_other": "{{count}} 条结果",
         "searchPlaceholder": "搜索实验室检查...",
         "title": "实验室检查图表"
       },

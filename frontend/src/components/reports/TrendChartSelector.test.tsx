@@ -49,18 +49,22 @@ vi.mock('../../services/logger', () => ({
 }));
 
 // Mock i18next
+const mockT = vi.hoisted(() =>
+  vi.fn((key: string, opts?: Record<string, unknown>) => {
+    if (opts) {
+      let result = key;
+      Object.entries(opts).forEach(([k, v]) => {
+        result = result.replace(`{{${k}}}`, String(v));
+      });
+      return result;
+    }
+    return key;
+  })
+);
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, opts?: Record<string, unknown>) => {
-      if (opts) {
-        let result = key;
-        Object.entries(opts).forEach(([k, v]) => {
-          result = result.replace(`{{${k}}}`, String(v));
-        });
-        return result;
-      }
-      return key;
-    },
+    t: mockT,
     i18n: { language: 'en' },
   }),
 }));
@@ -196,6 +200,15 @@ describe('TrendChartSelector', () => {
         screen.getByText(/Calcium \(mmol\/L\) - .*labTestCharts\.resultCount/)
       ).toBeInTheDocument();
     });
+
+    expect(mockT).toHaveBeenCalledWith(
+      'builder.trendCharts.labTestCharts.resultCount',
+      { count: 4 }
+    );
+    expect(mockT).toHaveBeenCalledWith(
+      'builder.trendCharts.labTestCharts.resultCount',
+      { count: 3 }
+    );
   });
 
   it('shows a legacy-unit warning on lab charts with no unit', async () => {

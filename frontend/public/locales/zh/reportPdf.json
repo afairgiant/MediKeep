@@ -269,7 +269,8 @@
     "medicalConditionCount": "{{count}} 项病情",
     "noDetails": "无详情",
     "detailsUnavailable": "详情不可用",
-    "noMeasurements": "无测量值"
+    "noMeasurements": "无测量值",
+    "rangeEnd": "最新"
   },
   "values": {
     "active": "活动",

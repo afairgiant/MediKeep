@@ -269,7 +269,8 @@
     "medicalConditionCount": "{{count}} โรค/ภาวะทางการแพทย์",
     "noDetails": "ไม่มีรายละเอียด",
     "detailsUnavailable": "ไม่มีรายละเอียด",
-    "noMeasurements": "ไม่มีการวัด"
+    "noMeasurements": "ไม่มีการวัด",
+    "rangeEnd": "ล่าสุด"
   },
   "values": {
     "active": "ใช้งานอยู่",

@@ -221,7 +221,7 @@
     "statistics": "Στατιστικά",
     "mean": "Μέση Τιμή",
     "dataPoints": "Σημεία Δεδομένων",
-    "latest": "τέλος",
+    "latest": "Τελευταίο",
     "average": "Μέσος Όρος",
     "range": "Εύρος",
     "count": "Πλήθος",
@@ -269,7 +269,8 @@
     "medicalConditionCount": "{{count}} ιατρική(ές) κατάσταση(εις)",
     "noDetails": "Χωρίς λεπτομέρειες",
     "detailsUnavailable": "Οι λεπτομέρειες δεν είναι διαθέσιμες",
-    "noMeasurements": "Χωρίς μετρήσεις"
+    "noMeasurements": "Χωρίς μετρήσεις",
+    "rangeEnd": "τέλος"
   },
   "values": {
     "active": "Ενεργό",

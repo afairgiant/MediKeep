@@ -32,6 +32,13 @@ class TestRangeLabel:
         assert label == "Période demandée : 01/01/2026 – 04/03/2026"
         assert "Requested" not in label
 
+    def test_latest_column_header_is_not_the_range_end_word(self):
+        # report.latest is the statistics "Latest" header; it must stay distinct
+        assert ReportTranslator("fr").text("latest") == "Dernier"
+        assert ReportTranslator("fr").text("range_end") == "fin"
+        gen = TrendChartGenerator(translator=get_translator("fr", "dmy"))
+        assert gen._range_label(datetime(2026, 1, 1), None).endswith("fin")
+
     def test_open_ended_range_uses_translated_words(self):
         gen = TrendChartGenerator(translator=get_translator("zh", "ymd"))
         label = gen._range_label(None, datetime(2026, 3, 4))
@@ -42,7 +49,7 @@ class TestRangeLabel:
     )
     def test_chart_text_keys_exist_in_every_language(self, lang):
         t = ReportTranslator(lang)
-        for key in ("requested_range", "earliest", "latest", "normal_range", "chart_range_note"):
+        for key in ("requested_range", "earliest", "range_end", "normal_range", "chart_range_note"):
             assert "_" not in t.text(key, **{"from": "a", "to": "b"})
 
 

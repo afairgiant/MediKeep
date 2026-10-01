@@ -97,7 +97,7 @@ class TrendChartGenerator:
             to_str = date_to.strftime("%b %d, %Y") if date_to else "latest"
             return f"Requested range: {from_str}  \u2013  {to_str}"
         from_str = t.format_date(date_from) if date_from else t.text("earliest")
-        to_str = t.format_date(date_to) if date_to else t.text("latest")
+        to_str = t.format_date(date_to) if date_to else t.text("range_end")
         return t.text("requested_range", **{"from": from_str, "to": to_str})
 
     def _tick_formats(self):

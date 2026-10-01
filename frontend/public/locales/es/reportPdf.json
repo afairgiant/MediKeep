@@ -221,7 +221,7 @@
     "statistics": "Estadísticas",
     "mean": "Media",
     "dataPoints": "Puntos de datos",
-    "latest": "fin",
+    "latest": "Último",
     "average": "Promedio",
     "range": "Rango",
     "count": "Cantidad",
@@ -269,7 +269,8 @@
     "medicalConditionCount": "{{count}} afección(es) médica(s)",
     "noDetails": "Sin detalles",
     "detailsUnavailable": "Detalles no disponibles",
-    "noMeasurements": "Sin mediciones"
+    "noMeasurements": "Sin mediciones",
+    "rangeEnd": "fin"
   },
   "values": {
     "active": "Activo",
