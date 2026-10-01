@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Generuj raport ({{chartCount}} wykresów)",
       "generateReportWithCharts": "Generuj raport ({{recordCount}} rekordów, {{chartCount}} wykresów)",
       "selectAll": "Zaznacz wszystkie rekordy",
-      "selectAllDataTypes": "Zaznacz wszystkie typy danych"
+      "selectAllRecordTypes": "Zaznacz wszystkie typy rekordów"
     },
     "configuration": {
       "description": "Wybierz dokumentację medyczną do uwzględnienia w niestandardowym raporcie",

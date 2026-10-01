@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Generera rapport ({{chartCount}} diagram)",
       "generateReportWithCharts": "Generera rapport ({{recordCount}} handlingar, {{chartCount}} diagram)",
       "selectAll": "Välj alla handlingar",
-      "selectAllDataTypes": "Markera alla datatyper"
+      "selectAllRecordTypes": "Markera alla posttyper"
     },
     "configuration": {
       "description": "Välj journalhandlingar att inkludera i din anpassade rapport",

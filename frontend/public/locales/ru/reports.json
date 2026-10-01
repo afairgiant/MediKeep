@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Создать отчёт ({{chartCount}} графиков)",
       "generateReportWithCharts": "Создать отчёт ({{recordCount}} записей, {{chartCount}} графиков)",
       "selectAll": "Выбрать все записи",
-      "selectAllDataTypes": "Выбрать все типы данных"
+      "selectAllRecordTypes": "Выбрать все типы записей"
     },
     "configuration": {
       "description": "Выберите медицинские записи для включения в персональный отчёт",

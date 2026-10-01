@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Genera report ({{chartCount}} grafici)",
       "generateReportWithCharts": "Genera report ({{recordCount}} record, {{chartCount}} grafici)",
       "selectAll": "Seleziona tutti i record",
-      "selectAllDataTypes": "Seleziona tutti i tipi di dati"
+      "selectAllRecordTypes": "Seleziona tutti i tipi di record"
     },
     "configuration": {
       "description": "Seleziona le cartelle cliniche da includere nel tuo report personalizzato",

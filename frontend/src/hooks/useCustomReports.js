@@ -201,11 +201,10 @@ export const useCustomReports = () => {
     );
   }, []);
 
-  // Clear all selections (records + charts)
-  const clearSelections = useCallback(() => {
+  // Clear selected records only, leaving trend charts untouched
+  const clearRecordSelections = useCallback(() => {
     setSelectedRecords({});
-    setTrendCharts({ vital_charts: [], lab_test_charts: [] });
-    logger.info('custom_reports_selections_cleared', 'All selections cleared', {
+    logger.info('custom_reports_records_cleared', 'All records cleared', {
       component: 'useCustomReports',
     });
   }, []);
@@ -604,7 +603,7 @@ export const useCustomReports = () => {
     toggleCategorySelection,
     clearCategorySelection,
     selectAllCategories,
-    clearSelections,
+    clearRecordSelections,
     updateReportSettings,
     applyTemplate,
     generateReport,

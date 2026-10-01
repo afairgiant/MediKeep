@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Generar Informe ({{chartCount}} gráficos)",
       "generateReportWithCharts": "Generar Informe ({{recordCount}} registros, {{chartCount}} gráficos)",
       "selectAll": "Seleccionar Todos los Registros",
-      "selectAllDataTypes": "Seleccionar todos los tipos de datos"
+      "selectAllRecordTypes": "Seleccionar todos los tipos de registro"
     },
     "configuration": {
       "description": "Seleccione los registros médicos a incluir en su informe personalizado",

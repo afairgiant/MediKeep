@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "生成报告（{{chartCount}} 个图表）",
       "generateReportWithCharts": "生成报告（{{recordCount}} 条记录，{{chartCount}} 个图表）",
       "selectAll": "选择所有记录",
-      "selectAllDataTypes": "选择所有数据类型"
+      "selectAllRecordTypes": "选择所有记录类型"
     },
     "configuration": {
       "description": "选择要包含在自定义报告中的医疗记录",

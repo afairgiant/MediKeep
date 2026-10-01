@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Gerar Relatório ({{chartCount}} gráficos)",
       "generateReportWithCharts": "Gerar Relatório ({{recordCount}} registos, {{chartCount}} gráficos)",
       "selectAll": "Selecionar Todos os Registos",
-      "selectAllDataTypes": "Selecionar todos os tipos de dados"
+      "selectAllRecordTypes": "Selecionar todos os tipos de registo"
     },
     "configuration": {
       "description": "Selecione registos médicos para incluir no seu relatório personalizado",

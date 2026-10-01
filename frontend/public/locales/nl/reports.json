@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Rapport genereren ({{chartCount}} grafieken)",
       "generateReportWithCharts": "Rapport genereren ({{recordCount}} dossiers, {{chartCount}} grafieken)",
       "selectAll": "Alle dossiers selecteren",
-      "selectAllDataTypes": "Alle gegevenstypen selecteren"
+      "selectAllRecordTypes": "Alle recordtypen selecteren"
     },
     "configuration": {
       "description": "Selecteer medische dossiers om op te nemen in uw aangepaste rapport",

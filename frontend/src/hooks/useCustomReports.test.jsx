@@ -129,6 +129,39 @@ describe('useCustomReports', () => {
     });
   });
 
+  describe('scoped clear actions', () => {
+    const selectRecordAndChart = result => {
+      act(() => {
+        result.current.toggleRecordSelection('medications', 101, { id: 101 });
+        result.current.addLabTestChart('Glucose', 'mg/dL');
+      });
+    };
+
+    it('clearTrendCharts leaves selected records untouched', () => {
+      const { result } = renderHook(() => useCustomReports());
+      selectRecordAndChart(result);
+
+      act(() => {
+        result.current.clearTrendCharts();
+      });
+
+      expect(result.current.trendChartCount).toBe(0);
+      expect(result.current.selectedCount).toBe(1);
+    });
+
+    it('clearRecordSelections leaves trend charts untouched', () => {
+      const { result } = renderHook(() => useCustomReports());
+      selectRecordAndChart(result);
+
+      act(() => {
+        result.current.clearRecordSelections();
+      });
+
+      expect(result.current.selectedCount).toBe(0);
+      expect(result.current.trendChartCount).toBe(1);
+    });
+  });
+
   describe('applyTemplate', () => {
     it('hydrates selectedRecords from record_ids using the data summary', () => {
       const { result } = renderHook(() => useCustomReports());

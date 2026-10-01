@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Bericht erstellen ({{chartCount}} Diagramme)",
       "generateReportWithCharts": "Bericht erstellen ({{recordCount}} Datensätze, {{chartCount}} Diagramme)",
       "selectAll": "Alle Datensätze auswählen",
-      "selectAllDataTypes": "Alle Datentypen auswählen"
+      "selectAllRecordTypes": "Alle Datensatztypen auswählen"
     },
     "configuration": {
       "description": "Wählen Sie medizinische Datensätze für Ihren individuellen Bericht aus",

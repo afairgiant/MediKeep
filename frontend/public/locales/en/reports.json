@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Generate Report ({{chartCount}} charts)",
       "generateReportWithCharts": "Generate Report ({{recordCount}} records, {{chartCount}} charts)",
       "selectAll": "Select All Records",
-      "selectAllDataTypes": "Select All Data Types"
+      "selectAllRecordTypes": "Select All Record Types"
     },
     "configuration": {
       "description": "Select medical records to include in your custom report",

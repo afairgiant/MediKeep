@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "สร้างรายงาน ({{chartCount}} กราฟ)",
       "generateReportWithCharts": "สร้างรายงาน ({{recordCount}} บันทึก, {{chartCount}} กราف)",
       "selectAll": "เลือกบันทึกทั้งหมด",
-      "selectAllDataTypes": "เลือกประเภทข้อมูลทั้งหมด"
+      "selectAllRecordTypes": "เลือกประเภทบันทึกทั้งหมด"
     },
     "configuration": {
       "description": "เลือกบันทึกทางการแพทย์ที่ต้องการรวมไว้ในรายงานแบบกำหนดเอง",

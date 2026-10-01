@@ -9,7 +9,7 @@
       "generateReportChartsOnly": "Générer un rapport ({{chartCount}} tableaux)",
       "generateReportWithCharts": "Générer un rapport ({{recordCount}} entrées, {{chartCount}} tableaux)",
       "selectAll": "Sélectionner toutes les entrées",
-      "selectAllDataTypes": "Sélectionner tous les types de données"
+      "selectAllRecordTypes": "Sélectionner tous les types d'entrées"
     },
     "configuration": {
       "description": "Sélectionnez les données médicales à inclure dans votre rapport personnalisé",

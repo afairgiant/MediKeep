@@ -59,7 +59,8 @@ const ReportBuilder = () => {
     toggleCategorySelection,
     clearCategorySelection,
     selectAllCategories,
-    clearSelections,
+    clearRecordSelections,
+    clearTrendCharts,
     updateReportSettings,
     applyTemplate,
     generateReport,
@@ -280,9 +281,13 @@ const ReportBuilder = () => {
   // are explicitly starting from scratch, so "Update current" shouldn't
   // target a template whose selections are no longer represented.
   const handleClearSelections = useCallback(() => {
-    clearSelections();
+    if (activeSegment === 'trendCharts') {
+      clearTrendCharts();
+    } else {
+      clearRecordSelections();
+    }
     setLoadedTemplate(null);
-  }, [clearSelections]);
+  }, [activeSegment, clearRecordSelections, clearTrendCharts]);
 
   // Build generate button label
   const getGenerateButtonLabel = () => {
@@ -416,10 +421,12 @@ const ReportBuilder = () => {
                   Object.keys(dataSummary.categories).length === 0
                 }
               >
-                {t('builder.buttons.selectAllDataTypes')}
+                {t('builder.buttons.selectAllRecordTypes')}
               </Button>
             )}
-            {hasSelections && (
+            {(activeSegment === 'trendCharts'
+              ? trendChartCount > 0
+              : selectedCount > 0) && (
               <Button
                 size="xs"
                 variant="subtle"
