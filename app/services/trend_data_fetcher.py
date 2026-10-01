@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.crud.lab_test_component import (
+    _component_sort_date,
     apply_unit_filter,
     lab_test_component as crud_lab_test_component,
 )
@@ -220,8 +221,13 @@ class TrendDataFetcher:
 
         statistics = calculate_trend_statistics(components)
 
-        # Components are returned newest-first; reverse for chronological order
-        components_chronological = list(reversed(components))
+        # Components are returned newest-first; reverse for chronological order.
+        # Same-day results tie on date, so break ties by id to keep their entry
+        # order stable between renders.
+        components_chronological = sorted(
+            reversed(components),
+            key=lambda c: (_component_sort_date(c), getattr(c, "id", None) or 0),
+        )
 
         dates = []
         values = []
