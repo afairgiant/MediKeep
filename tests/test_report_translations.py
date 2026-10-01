@@ -1,7 +1,10 @@
 """Tests for the report translations module."""
 
+import json
+import re
 import pytest
 from datetime import date, datetime
+from pathlib import Path
 
 from app.services.report_translations import (
     ReportTranslator,
@@ -65,9 +68,9 @@ class TestReportTranslator:
         result = t.text("records_by_category")
         assert result == "Records by Category"
 
-    def test_text_unknown_key_returns_key(self):
+    def test_text_unknown_key_is_title_cased_not_raw(self):
         t = ReportTranslator()
-        assert t.text("nonexistent_key") == "nonexistent_key"
+        assert t.text("nonexistent_key") == "Nonexistent Key"
 
     def test_text_snake_to_camel_conversion(self):
         t = ReportTranslator(language="en")
@@ -193,3 +196,70 @@ class TestGetTranslator:
         t = get_translator("fr", "dmy")
         assert t.language == "fr"
         assert t.date_format_code == "dmy"
+
+
+# Report text keys the PDF/export code looks up with ReportTranslator.text().
+# Before #1093 these were missing from reportPdf.json, so the report printed
+# the raw key (e.g. "patient_information", "trend_charts").
+REPORT_TEXT_KEYS = [
+    "patient_information",
+    "trend_charts",
+    "total_records",
+    "medical_conditions",
+    "blood_type",
+    "gender",
+    "not_specified",
+]
+
+
+class TestReportHeadersFormatting:
+    """Regression tests for #1093: raw snake_case keys in report headers."""
+
+    @pytest.mark.parametrize("lang", list(SUPPORTED_LANGUAGES))
+    @pytest.mark.parametrize("key", REPORT_TEXT_KEYS)
+    def test_report_text_keys_resolve_in_every_language(self, lang, key):
+        result = ReportTranslator(language=lang).text(key)
+        assert result and "_" not in result
+        assert result != key
+
+    def test_english_headers(self):
+        t = ReportTranslator(language="en")
+        assert t.text("patient_information") == "Patient Information"
+        assert t.text("trend_charts") == "Trend Charts"
+        assert t.text("total_records") == "Total Records"
+
+    @pytest.mark.parametrize("lang", list(SUPPORTED_LANGUAGES))
+    def test_every_text_key_used_in_app_exists_in_english_locale(self, lang):
+        """Every .text("snake_key") call in app/ must have a report entry."""
+        report_keys = set(_load_locale("en")["report"])
+        used = set()
+        for path in Path("app").rglob("*.py"):
+            used.update(
+                re.findall(
+                    r"\.text\(\s*['\"]([a-z0-9_]+)['\"]", path.read_text("utf-8")
+                )
+            )
+        missing = sorted(
+            key
+            for key in used
+            if ReportTranslator._to_camel_case(key) not in report_keys
+        )
+        assert not missing, f"report.* missing in reportPdf.json: {missing}"
+
+    @pytest.mark.parametrize("lang", list(SUPPORTED_LANGUAGES))
+    def test_family_relationships_are_translated_in_every_language(self, lang):
+        t = ReportTranslator(language=lang)
+        for value in ["father", "paternal_grandfather", "maternal_grandmother"]:
+            result = t.relationship(value)
+            assert "_" not in result
+            assert result != value
+
+    def test_relationship_english_labels(self):
+        t = ReportTranslator(language="en")
+        assert t.relationship("paternal_grandfather") == "Paternal Grandfather"
+        assert t.relationship("maternal_grandmother") == "Maternal Grandmother"
+
+    def test_relationship_unknown_value_is_title_cased(self):
+        t = ReportTranslator(language="en")
+        assert t.relationship("other") == "Other"
+        assert t.relationship("great_uncle") == "Great Uncle"

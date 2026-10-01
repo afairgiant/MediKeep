@@ -1224,6 +1224,19 @@ class CustomReportService:
                     f"Lab result {record.id} enhanced with {len(record_dict.get('test_components', []))} test components"
                 )
 
+            # Practitioners: resolve specialty and practice details, including the
+            # practice's locations (the practitioner row itself has no address)
+            elif category == "practitioners":
+                specialty = getattr(record, "specialty_rel", None)
+                if specialty and specialty.name:
+                    record_dict["specialty"] = specialty.name
+
+                practice = getattr(record, "practice_rel", None)
+                if practice:
+                    if practice.name:
+                        record_dict["practice"] = practice.name
+                    record_dict["locations"] = list(practice.locations or [])
+
             # Special handling for injuries - include practitioner and injury_type names
             elif category == "injuries":
                 practitioner_name = self._resolve_practitioner_name(record)

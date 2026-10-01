@@ -5,7 +5,9 @@ This module provides a dedicated PDF generator for custom medical reports
 with proper formatting and data display.
 """
 
+import html
 import io
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -19,6 +21,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
+    CondPageBreak,
     Image,
     KeepTogether,
     PageBreak,
@@ -34,6 +37,46 @@ from app.services.export_service import UnitConverter
 from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
+
+
+def escape_markup_values(value: Any) -> Any:
+    """Return a copy of ``value`` with every string escaped for ReportLab markup.
+
+    ReportLab's Paragraph parses an XML-like mini-language (<b>, <a href>,
+    <img>, <font>...), so user-supplied text (names, notes, OCR'd lab text,
+    shared practitioner/pharmacy names) must be escaped before it is placed in
+    a Paragraph. Escaping the report data once, up front, covers every
+    formatter. Dict keys and non-string values are left alone.
+    """
+    if isinstance(value, str):
+        return html.escape(value, quote=False)
+    if isinstance(value, dict):
+        return {k: escape_markup_values(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [escape_markup_values(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(escape_markup_values(v) for v in value)
+    return value
+
+
+class _PlainTextTable(Table):
+    """Table whose string cells are drawn literally.
+
+    Plain string cells are not parsed as markup, so the escaping applied to
+    the report data would show up as "&amp;". Undo it for those cells;
+    Paragraph cells are left as they are.
+    """
+
+    def __init__(self, data, *args, **kwargs):
+        # ReportLab builds split fragments with self.__class__(..., normalizedData=1),
+        # passing cells that were already decoded. Decoding them again would turn
+        # a literal "&amp;" into "&", so only decode data we escaped ourselves.
+        if not kwargs.get("normalizedData"):
+            data = [
+                [html.unescape(cell) if isinstance(cell, str) else cell for cell in row]
+                for row in data
+            ]
+        super().__init__(data, *args, **kwargs)
 
 
 class CustomReportPDFGenerator:
@@ -276,6 +319,41 @@ class CustomReportPDFGenerator:
                 leading=12,
                 textColor=dark_text,
                 fontName=font_normal,
+                allowWidows=0,
+                allowOrphans=0,
+            )
+        )
+
+        # Date group header: larger than the test names beneath it, so it is
+        # clear the tests are grouped (and sorted) by date
+        styles.add(
+            ParagraphStyle(
+                name="DateGroupHeader",
+                parent=styles["BodyText"],
+                fontSize=13,
+                leading=16,
+                textColor=colors.HexColor("#0D47A1"),
+                fontName=font_bold,
+                backColor=colors.HexColor("#E3F2FD"),
+                borderPadding=(4, 6, 4, 6),
+                spaceBefore=14,
+                spaceAfter=8,
+            )
+        )
+
+        # Record header style: shaded band marking the start of each record
+        styles.add(
+            ParagraphStyle(
+                name="RecordHeader",
+                parent=styles["BodyText"],
+                fontSize=10,
+                leading=13,
+                textColor=dark_text,
+                fontName=font_bold,
+                backColor=colors.HexColor("#ECEFF1"),
+                borderPadding=(3, 4, 3, 4),
+                spaceBefore=10,
+                spaceAfter=5,
             )
         )
 
@@ -348,6 +426,9 @@ class CustomReportPDFGenerator:
         if output_buffer is None:
             output_buffer = io.BytesIO()
 
+        # User-supplied text goes into ReportLab Paragraph markup: escape it once
+        report_data = escape_markup_values(report_data)
+
         # Apply user preferences for this report
         language = report_data.get("language", "en")
         date_format = report_data.get("date_format", "mdy")
@@ -382,7 +463,7 @@ class CustomReportPDFGenerator:
         story = []
 
         # Add medical report header
-        title = report_data.get("report_title", "MEDICAL SUMMARY REPORT")
+        title = self._resolve_report_title(report_data.get("report_title"))
         story.append(Paragraph(title.upper(), self.styles["CustomTitle"]))
 
         # Add patient identification bar (critical for medical safety)
@@ -436,7 +517,8 @@ class CustomReportPDFGenerator:
         # Add data sections
         data = report_data.get("data", {})
         if data:
-            for category, records in data.items():
+            for category in self._sorted_categories(data):
+                records = data[category]
                 if records:  # Only add sections with data
                     story.extend(self._create_category_section(category, records))
 
@@ -469,6 +551,7 @@ class CustomReportPDFGenerator:
             )
 
         # Build PDF
+        story = self._keep_headers_with_body(story)
         doc.build(story)
 
         # Get PDF bytes
@@ -525,7 +608,7 @@ class CustomReportPDFGenerator:
             )
 
         if patient_info:
-            table = Table(patient_info, colWidths=[1 * inch, 3 * inch])
+            table = _PlainTextTable(patient_info, colWidths=[1 * inch, 3 * inch])
             table.setStyle(
                 TableStyle(
                     [
@@ -640,7 +723,7 @@ class CustomReportPDFGenerator:
             # Create a smaller, less prominent alert box with paragraphs
             if emergency_paragraphs:
                 emergency_data = [[para] for para in emergency_paragraphs]
-                emergency_table = Table(emergency_data, colWidths=[6.5 * inch])
+                emergency_table = _PlainTextTable(emergency_data, colWidths=[6.5 * inch])
                 emergency_table.setStyle(
                     TableStyle(
                         [
@@ -737,7 +820,7 @@ class CustomReportPDFGenerator:
         # Create table with paragraph objects instead of HTML strings
         summary_table_data = [[col1_paragraphs, col2_paragraphs, col3_paragraphs]]
 
-        summary_table = Table(
+        summary_table = _PlainTextTable(
             summary_table_data, colWidths=[2.2 * inch, 2.2 * inch, 2.1 * inch]
         )
         summary_table.setStyle(
@@ -841,7 +924,7 @@ class CustomReportPDFGenerator:
                 layout_data = []
 
                 # Create info table first
-                info_table = Table(patient_info, colWidths=[1.2 * inch, 3.0 * inch])
+                info_table = _PlainTextTable(patient_info, colWidths=[1.2 * inch, 3.0 * inch])
                 info_table.setStyle(
                     TableStyle(
                         [
@@ -859,7 +942,7 @@ class CustomReportPDFGenerator:
                 # Create main layout table: [photo, info]
                 layout_data.append([photo_element, info_table])
 
-                layout_table = Table(layout_data, colWidths=[1.8 * inch, 4.7 * inch])
+                layout_table = _PlainTextTable(layout_data, colWidths=[1.8 * inch, 4.7 * inch])
                 layout_table.setStyle(
                     TableStyle(
                         [
@@ -877,7 +960,7 @@ class CustomReportPDFGenerator:
                 logger.debug("No profile picture found, using standard layout")
                 # Fallback to standard layout without photo
                 if patient_info:
-                    table = Table(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
+                    table = _PlainTextTable(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
                     table.setStyle(
                         TableStyle(
                             [
@@ -900,7 +983,7 @@ class CustomReportPDFGenerator:
         else:
             # Standard layout without photo
             if patient_info:
-                table = Table(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
+                table = _PlainTextTable(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
                 table.setStyle(
                     TableStyle(
                         [
@@ -1013,12 +1096,13 @@ class CustomReportPDFGenerator:
             )
 
             breakdown_data = []
-            for category, count in category_counts.items():
+            for category in self._sorted_categories(category_counts):
+                count = category_counts[category]
                 display_name = self.translator.category(category)
                 breakdown_data.append([display_name, str(count)])
 
             if breakdown_data:
-                table = Table(breakdown_data, colWidths=[3 * inch, 1 * inch])
+                table = _PlainTextTable(breakdown_data, colWidths=[3 * inch, 1 * inch])
                 table.setStyle(
                     TableStyle(
                         [
@@ -1040,6 +1124,101 @@ class CustomReportPDFGenerator:
 
         story.append(Spacer(1, 0.3 * inch))
         return story
+
+    # Styles whose paragraphs are headings that must not be stranded at the
+    # bottom of a page, and how many body lines must fit below them.
+    HEADER_STYLE_NAMES = (
+        "SectionHeader",
+        "SubsectionHeader",
+        "RecordHeader",
+        "DateGroupHeader",
+    )
+    HEADER_MIN_BODY_LINES = 4
+    BODY_LINE_HEIGHT = 12  # points; matches the CustomBody leading
+
+    def _is_header(self, flowable) -> bool:
+        style = getattr(flowable, "style", None)
+        return (
+            isinstance(flowable, Paragraph)
+            and style is not None
+            and style.name in self.HEADER_STYLE_NAMES
+        )
+
+    @staticmethod
+    def _header_height(flowable) -> float:
+        style = flowable.style
+        return style.leading + style.spaceBefore + style.spaceAfter
+
+    def _keep_headers_with_body(self, story: List) -> List:
+        """Start a new page when a header would leave too little room for body text.
+
+        Headers that follow each other (e.g. a date heading, then a test name
+        heading, with spacers in between) are treated as one group: a single
+        CondPageBreak before the first header reserves the height of every
+        header and spacer in the group plus HEADER_MIN_BODY_LINES lines of body
+        text. This stops a heading being stranded at the bottom of a page when
+        the heading after it would not fit.
+        """
+        result = []
+        i = 0
+        while i < len(story):
+            flowable = story[i]
+            if not self._is_header(flowable):
+                result.append(flowable)
+                i += 1
+                continue
+
+            # Collect the run of headers (and spacers between them)
+            j = i
+            reserved = 0.0
+            while j < len(story) and (
+                self._is_header(story[j]) or isinstance(story[j], Spacer)
+            ):
+                reserved += (
+                    self._header_height(story[j])
+                    if self._is_header(story[j])
+                    else story[j].height
+                )
+                j += 1
+
+            if not (result and isinstance(result[-1], (PageBreak, CondPageBreak))):
+                result.append(
+                    CondPageBreak(
+                        reserved + self.HEADER_MIN_BODY_LINES * self.BODY_LINE_HEIGHT
+                    )
+                )
+            result.extend(story[i:j])
+            i = j
+        return result
+
+    # The builder and the API schema both default the title to this English
+    # text, so it means "the user did not choose a title" and is localized.
+    DEFAULT_REPORT_TITLE = "Custom Medical Report"
+
+    def _resolve_report_title(self, title: Optional[str]) -> str:
+        """Use the localized default title unless the user typed their own."""
+        is_default = (
+            not title
+            or title.strip().casefold() == self.DEFAULT_REPORT_TITLE.casefold()
+        )
+        return self.translator.text("report_title") if is_default else title
+
+    def _sorted_categories(self, categories) -> List[str]:
+        """Category keys ordered by their displayed (translated) name.
+
+        Sections used to print in the order the user happened to select them.
+        """
+        return sorted(
+            categories,
+            key=lambda c: (self._sort_key(self.translator.category(c)), c),
+        )
+
+    @staticmethod
+    def _sort_key(name: str) -> str:
+        """Case- and accent-insensitive key so e.g. "Étude" sorts with "E"."""
+        decomposed = unicodedata.normalize("NFKD", name)
+        stripped = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+        return stripped.casefold()
 
     def _create_category_section(
         self, category: str, records: List[Dict[str, Any]]
@@ -1228,7 +1407,7 @@ class CustomReportPDFGenerator:
                 details.append([f"{t.field('recorded_by')}:", str(recorded_by)])
 
             if details:
-                table = Table(details, colWidths=[2.0 * inch, 4.0 * inch])
+                table = _PlainTextTable(details, colWidths=[2.0 * inch, 4.0 * inch])
                 table.setStyle(self._get_detail_table_style())
                 story.append(table)
 
@@ -1691,26 +1870,31 @@ class CustomReportPDFGenerator:
         """Format lab result records with clinical significance"""
         story = []
 
-        # Group by date for better organization
+        # Group by calendar day. Sort on the real (ISO) date, newest first with
+        # undated results last, never on the formatted display string.
         records_by_date = {}
         for record in records:
-            date_key = (
-                self._format_date(record.get("ordered_date", ""))
-                if record.get("ordered_date")
-                else "Undated"
-            )
-            if date_key not in records_by_date:
-                records_by_date[date_key] = []
-            records_by_date[date_key].append(record)
+            ordered = record.get("ordered_date")
+            date_key = str(ordered)[:10] if ordered else None
+            records_by_date.setdefault(date_key, []).append(record)
 
-        for date, date_records in sorted(records_by_date.items(), reverse=True):
+        dated_keys = sorted((k for k in records_by_date if k), reverse=True)
+        ordered_keys = dated_keys + ([None] if None in records_by_date else [])
+
+        for date_key in ordered_keys:
+            date_records = records_by_date[date_key]
             if len(records_by_date) > 1:  # Only show date headers if multiple dates
+                date_label = (
+                    self._format_date(date_records[0]["ordered_date"])
+                    if date_key
+                    else self.translator.text("undated")
+                )
                 story.append(
                     Paragraph(
-                        f"<b><i>Tests from {date}</i></b>", self.styles["CustomBody"]
+                        self.translator.text("tests_from", date=date_label),
+                        self.styles["DateGroupHeader"],
                     )
                 )
-                story.append(Spacer(1, 0.05 * inch))
 
             for record in date_records:
                 name = record.get("test_name", "Unnamed Test")
@@ -2324,6 +2508,25 @@ class CustomReportPDFGenerator:
 
         return story
 
+    @staticmethod
+    def _join_address(
+        street: Optional[str],
+        city: Optional[str],
+        state: Optional[str],
+        postal_code: Optional[str],
+        country: Optional[str] = None,
+    ) -> str:
+        """Join address parts into one line, skipping empty parts.
+
+        "123 Main St, Springfield, IL 62701, USA" - state and postal code share
+        a segment.
+        """
+        state_zip = " ".join(
+            p.strip() for p in (state, postal_code) if p and p.strip()
+        )
+        parts = [street, city, state_zip, country]
+        return ", ".join(p.strip() for p in parts if p and p.strip())
+
     def _format_practitioners(self, records: List[Dict[str, Any]]) -> List:
         """Format practitioner records"""
         story = []
@@ -2354,9 +2557,27 @@ class CustomReportPDFGenerator:
                     f"{self.translator.field('website')}: {record['website']}"
                 )
 
-            if details:
+            # One detail per line
+            for detail in details:
+                story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
+
+            # One line per practice location
+            for location in record.get("locations") or []:
+                address = self._join_address(
+                    location.get("address"),
+                    location.get("city"),
+                    location.get("state"),
+                    location.get("zip"),
+                )
+                if not address:
+                    continue
+                label = (location.get("label") or "").strip()
+                prefix = f"{label} - " if label else ""
                 story.append(
-                    Paragraph(f"    {' | '.join(details)}", self.styles["CustomBody"])
+                    Paragraph(
+                        f"    {self.translator.field('address')}: {prefix}{address}",
+                        self.styles["CustomBody"],
+                    )
                 )
 
             story.append(Spacer(1, 0.08 * inch))
@@ -2373,21 +2594,27 @@ class CustomReportPDFGenerator:
             story.append(Paragraph(f"<b>{name}</b>", self.styles["SubsectionHeader"]))
 
             details = []
-            if record.get("address"):
-                # Truncate long addresses
-                addr = record["address"]
-                if len(addr) > 60:
-                    addr = addr[:60] + "..."
-                details.append(addr)
+            address = self._join_address(
+                record.get("street_address"),
+                record.get("city"),
+                record.get("state"),
+                record.get("zip_code"),
+                record.get("country"),
+            )
+            if address:
+                details.append(f"{self.translator.field('address')}: {address}")
             if record.get("phone_number"):
                 details.append(
                     f"{self.translator.field('phone')}: {record['phone_number']}"
                 )
-
-            if details:
-                story.append(
-                    Paragraph(f"    {' | '.join(details)}", self.styles["CustomBody"])
+            if record.get("website"):
+                details.append(
+                    f"{self.translator.field('website')}: {record['website']}"
                 )
+
+            # One detail per line
+            for detail in details:
+                story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
 
             story.append(Spacer(1, 0.08 * inch))
 
@@ -2467,7 +2694,7 @@ class CustomReportPDFGenerator:
                     details.append([f"{display_key}:", str(value)])
 
             if details:
-                table = Table(details, colWidths=[1.5 * inch, 4.5 * inch])
+                table = _PlainTextTable(details, colWidths=[1.5 * inch, 4.5 * inch])
                 table.setStyle(self._get_detail_table_style())
                 story.append(table)
 
@@ -2509,7 +2736,9 @@ class CustomReportPDFGenerator:
             # Build header with key information
             header_parts = [f"<b>{name}</b>"]
             if relationship:
-                header_parts.append(f"- {relationship}")
+                header_parts.append(
+                    f"- {self.translator.relationship(relationship)}"
+                )
 
             # Add age/life span information
             if birth_year:
@@ -2908,6 +3137,21 @@ class CustomReportPDFGenerator:
 
         return story
 
+    @staticmethod
+    def _is_present(value: Any) -> bool:
+        """True unless the value is absent or empty.
+
+        Unlike a truthiness test this keeps numeric zero, so a $0 deductible or
+        a 0% coverage is still printed.
+        """
+        if value is None:
+            return False
+        if isinstance(value, str):
+            return bool(value.strip())
+        if isinstance(value, (list, tuple, set, dict)):
+            return len(value) > 0
+        return True
+
     def _format_single_insurance(self, record: Dict[str, Any]) -> List:
         """Format a single insurance record"""
         story = []
@@ -2915,12 +3159,8 @@ class CustomReportPDFGenerator:
         # Company name as header
         company = record.get("company_name", "Unknown Insurance")
         plan = record.get("plan_name", "")
-        if plan:
-            story.append(
-                Paragraph(f"<b>{company}</b> - {plan}", self.styles["CustomBody"])
-            )
-        else:
-            story.append(Paragraph(f"<b>{company}</b>", self.styles["CustomBody"]))
+        header = f"<b>{company}</b> - {plan}" if plan else f"<b>{company}</b>"
+        story.append(Paragraph(header, self.styles["RecordHeader"]))
 
         # Insurance type and status
         info_parts = []
@@ -2985,22 +3225,36 @@ class CustomReportPDFGenerator:
         if record.get("coverage_details"):
             coverage = record["coverage_details"]
             if isinstance(coverage, dict):
-                coverage_parts = [f"{k}: {v}" for k, v in coverage.items() if v]
+                coverage_parts = [
+                    f"{self.translator.insurance_detail(k)}: {v}"
+                    for k, v in coverage.items()
+                    if self._is_present(v)
+                ]
                 coverage = ", ".join(coverage_parts) if coverage_parts else None
             if coverage:
                 story.append(
-                    Paragraph(f"  Coverage: {coverage}", self.styles["CustomBody"])
+                    Paragraph(
+                        f"  {self.translator.text('coverage')}: {coverage}",
+                        self.styles["CustomBody"],
+                    )
                 )
 
         # Contact info (may be JSON)
         if record.get("contact_info"):
             contact = record["contact_info"]
             if isinstance(contact, dict):
-                contact_parts = [f"{k}: {v}" for k, v in contact.items() if v]
+                contact_parts = [
+                    f"{self.translator.insurance_detail(k)}: {v}"
+                    for k, v in contact.items()
+                    if self._is_present(v)
+                ]
                 contact = ", ".join(contact_parts) if contact_parts else None
             if contact:
                 story.append(
-                    Paragraph(f"  Contact: {contact}", self.styles["CustomBody"])
+                    Paragraph(
+                        f"  {self.translator.text('contact')}: {contact}",
+                        self.styles["CustomBody"],
+                    )
                 )
 
         # Notes
@@ -3180,7 +3434,7 @@ class CustomReportPDFGenerator:
                 if stats_table_data:
                     num_cols = len(stats_table_data[0])
                     col_width = 6.0 * inch / num_cols
-                    stats_table = Table(
+                    stats_table = _PlainTextTable(
                         stats_table_data,
                         colWidths=[col_width] * num_cols,
                     )
