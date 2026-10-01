@@ -66,6 +66,7 @@
       "emptyState": "Nessun dato di tendenza disponibile. Aggiungi segni vitali o risultati di laboratorio per abilitare i grafici di tendenza.",
       "labTestCharts": {
         "description": "Cerca e seleziona gli esami di laboratorio da rappresentare in grafico",
+        "resultCount": "{{count}} risultati",
         "searchPlaceholder": "Cerca esami di laboratorio...",
         "title": "Grafici esami di laboratorio"
       },

@@ -191,9 +191,9 @@ describe('TrendChartSelector', () => {
     fireEvent.change(labInput, { target: { value: 'Calcium' } });
 
     await waitFor(() => {
-      expect(screen.getByText(/Calcium \(mg\/L\) - 4 results/)).toBeInTheDocument();
+      expect(screen.getByText(/Calcium \(mg\/L\) - .*labTestCharts\.resultCount/)).toBeInTheDocument();
       expect(
-        screen.getByText(/Calcium \(mmol\/L\) - 3 results/)
+        screen.getByText(/Calcium \(mmol\/L\) - .*labTestCharts\.resultCount/)
       ).toBeInTheDocument();
     });
   });

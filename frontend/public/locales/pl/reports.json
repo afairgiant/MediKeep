@@ -68,6 +68,7 @@
       "emptyState": "Brak danych trendów. Dodaj parametry życiowe lub wyniki badań laboratoryjnych, aby włączyć wykresy trendów.",
       "labTestCharts": {
         "description": "Wyszukaj i wybierz badania laboratoryjne do wykresów",
+        "resultCount": "wyników: {{count}}",
         "searchPlaceholder": "Wyszukaj badania laboratoryjne...",
         "title": "Wykresy badań laboratoryjnych"
       },

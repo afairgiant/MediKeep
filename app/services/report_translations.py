@@ -101,6 +101,14 @@ _DATE_FORMATS = {
     "ymd": "%Y-%m-%d",
 }
 
+# Day/month only (chart axis ticks within a single year)
+_SHORT_DATE_FORMATS = {
+    "mdy": "%m/%d",
+    "dmy": "%d/%m",
+    "dmy_dot": "%d.%m.",
+    "ymd": "%m-%d",
+}
+
 _DATETIME_FORMATS = {
     "mdy": "%m/%d/%Y %H:%M",
     "dmy": "%d/%m/%Y %H:%M",
@@ -110,6 +118,9 @@ _DATETIME_FORMATS = {
 
 # Regex to convert i18next {{var}} to Python {var}
 _INTERPOLATION_RE = re.compile(r"\{\{(\w+)\}\}")
+
+# Separators used inside stored values ('on-hold', 'blood work', 'in_progress')
+_VALUE_SEPARATOR_RE = re.compile(r"[\s_-]+")
 
 
 class ReportTranslator:
@@ -169,6 +180,24 @@ class ReportTranslator:
             camel_key
         ) or self._en_data.get("insuranceDetails", {}).get(camel_key)
         return result or key.replace("_", " ").title()
+
+    def value(self, raw: Any) -> str:
+        """Get translated display text for a stored enum/choice value.
+
+        Handles hyphenated, spaced and mixed-case values ('on-hold',
+        'Blood Work', 'IN_PROGRESS') by normalizing to snake_case before the
+        lookup. Unknown values (including free text) are returned exactly as
+        stored so user-entered text is never altered.
+        """
+        text = str(raw).strip() if raw is not None else ""
+        if not text:
+            return ""
+        key = _VALUE_SEPARATOR_RE.sub("_", text.lower())
+        camel_key = self._to_camel_case(key)
+        result = self._data.get("values", {}).get(camel_key) or self._en_data.get(
+            "values", {}
+        ).get(camel_key)
+        return result or text
 
     def relationship(self, key: str) -> str:
         """Get translated family relationship label.
@@ -238,6 +267,10 @@ class ReportTranslator:
             pattern = _DATE_FORMATS.get(self._date_format, _DATE_FORMATS["mdy"])
 
         return dt.strftime(pattern)
+
+    def format_short_date(self, value: Union[date, datetime]) -> str:
+        """Format a date without the year, per the user's date_format preference."""
+        return value.strftime(_SHORT_DATE_FORMATS[self._date_format])
 
     @staticmethod
     @lru_cache(maxsize=256)

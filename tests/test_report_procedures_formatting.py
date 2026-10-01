@@ -66,8 +66,8 @@ class TestProceduresFormatting:
         story = generator._format_procedures([full_procedure_record])
         all_text = _extract_paragraph_text(story)
 
-        assert "completed" in all_text
-        assert "successful" in all_text
+        assert "Completed" in all_text
+        assert "Successful" in all_text
 
     def test_facility_rendered(self, generator, full_procedure_record):
         """Facility name should appear in the output."""

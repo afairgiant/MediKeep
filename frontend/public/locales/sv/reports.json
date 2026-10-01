@@ -66,6 +66,7 @@
       "emptyState": "Ingen trenddata tillgänglig. Lägg till vitala parametrar eller laboratorieresultat för att aktivera trenddiagram.",
       "labTestCharts": {
         "description": "Sök och välj laboratorietester för diagram",
+        "resultCount": "{{count}} resultat",
         "searchPlaceholder": "Sök laboratorietester...",
         "title": "Laboratorietestdiagram"
       },

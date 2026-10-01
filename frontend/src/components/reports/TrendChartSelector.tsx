@@ -213,9 +213,12 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
     () =>
       availableLabTests.map(lt => ({
         value: encodeLabChartValue(lt.test_name, lt.unit),
-        label: `${lt.test_name}${lt.unit ? ` (${lt.unit})` : ''} - ${lt.count} results`,
+        label: `${lt.test_name}${lt.unit ? ` (${lt.unit})` : ''} - ${t(
+          'builder.trendCharts.labTestCharts.resultCount',
+          { count: lt.count }
+        )}`,
       })),
-    [availableLabTests]
+    [availableLabTests, t]
   );
 
   const handleVitalToggle = (vitalType: string, checked: boolean) => {

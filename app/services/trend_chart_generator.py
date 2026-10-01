@@ -20,6 +20,7 @@ import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.dates import date2num
 from matplotlib.figure import Figure
+from matplotlib.font_manager import FontProperties
 
 from app.core.logging.config import get_logger
 
@@ -65,6 +66,56 @@ def _line_width(n: int) -> float:
 
 class TrendChartGenerator:
     """Generates trend chart PNG images using matplotlib OO API."""
+
+    def __init__(self, translator=None, font_path: Optional[str] = None):
+        """
+        Args:
+            translator: Optional ReportTranslator for chart text; English when omitted.
+            font_path: Optional font file (e.g. a CJK font) used for all chart text.
+        """
+        self._translator = translator
+        self._font = FontProperties(fname=font_path) if font_path else None
+
+    def _text_kwargs(self) -> dict:
+        return {"fontproperties": self._font} if self._font else {}
+
+    def _label(self, key: str, default: str, field: bool = False) -> str:
+        if self._translator is None:
+            return default
+        return self._translator.field(key) if field else self._translator.text(key)
+
+    def _font_at(self, size: float) -> FontProperties:
+        font = self._font.copy()
+        font.set_size(size)
+        return font
+
+    def _range_label(self, date_from, date_to) -> str:
+        """Subtitle describing the requested date range."""
+        t = self._translator
+        if t is None:
+            from_str = date_from.strftime("%b %d, %Y") if date_from else "earliest"
+            to_str = date_to.strftime("%b %d, %Y") if date_to else "latest"
+            return f"Requested range: {from_str}  \u2013  {to_str}"
+        from_str = t.format_date(date_from) if date_from else t.text("earliest")
+        to_str = t.format_date(date_to) if date_to else t.text("latest")
+        return t.text("requested_range", **{"from": from_str, "to": to_str})
+
+    def _tick_formats(self):
+        """(full, short) tick formatters; None means English month names."""
+        t = self._translator
+        if t is None:
+            return None
+        return t.format_date, t.format_short_date
+
+    def _apply_date_axis(self, ax, date_from, date_to) -> None:
+        _format_date_axis(
+            ax,
+            date_from,
+            date_to,
+            range_label=self._range_label(date_from, date_to),
+            text_kwargs=self._text_kwargs(),
+            tick_formats=self._tick_formats(),
+        )
 
     def generate_vital_chart(
         self,
@@ -116,7 +167,7 @@ class TrendChartGenerator:
                     facecolor=COLOR_REF_BAND,
                     edgecolor=COLOR_REF_EDGE,
                     linewidth=0.5,
-                    label="Normal range",
+                    label=self._label("normal_range", "Normal range"),
                 )
 
             # Plot line (adapt markers/thickness to data density)
@@ -136,13 +187,18 @@ class TrendChartGenerator:
 
             # Labels
             ylabel = _axis_label(display_name, unit)
-            ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
+            ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT, **self._text_kwargs())
             chart_title = vital_data.get("chart_title", f"{display_name} Trend")
             ax.set_title(
-                chart_title, fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14
+                chart_title,
+                fontsize=11,
+                color=COLOR_TEXT,
+                fontweight="bold",
+                pad=14,
+                **self._text_kwargs(),
             )
 
-            _format_date_axis(
+            self._apply_date_axis(
                 ax, vital_data.get("date_from"), vital_data.get("date_to")
             )
 
@@ -198,7 +254,7 @@ class TrendChartGenerator:
                 systolic,
                 color=COLOR_SYSTOLIC,
                 linewidth=lw,
-                label="Systolic",
+                label=self._label("systolic_bp", "Systolic", field=True),
                 zorder=5,
                 **mk,
             )
@@ -207,7 +263,7 @@ class TrendChartGenerator:
                 diastolic,
                 color=COLOR_DIASTOLIC,
                 linewidth=lw,
-                label="Diastolic",
+                label=self._label("diastolic_bp", "Diastolic", field=True),
                 zorder=5,
                 **mk,
             )
@@ -217,10 +273,17 @@ class TrendChartGenerator:
             _add_trend_line(ax, dates, diastolic)
 
             bp_display = bp_data.get("display_name", "Blood Pressure")
-            ax.set_ylabel(f"{bp_display} (mmHg)", fontsize=9, color=COLOR_TEXT)
+            ax.set_ylabel(
+                f"{bp_display} (mmHg)", fontsize=9, color=COLOR_TEXT, **self._text_kwargs()
+            )
             bp_title = bp_data.get("chart_title", f"{bp_display} Trend")
             ax.set_title(
-                bp_title, fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14
+                bp_title,
+                fontsize=11,
+                color=COLOR_TEXT,
+                fontweight="bold",
+                pad=14,
+                **self._text_kwargs(),
             )
             ax.legend(
                 loc="lower left",
@@ -229,9 +292,10 @@ class TrendChartGenerator:
                 bbox_to_anchor=(0.0, 1.02),
                 ncol=2,
                 borderaxespad=0,
+                **({"prop": self._font_at(7)} if self._font else {}),
             )
 
-            _format_date_axis(ax, bp_data.get("date_from"), bp_data.get("date_to"))
+            self._apply_date_axis(ax, bp_data.get("date_from"), bp_data.get("date_to"))
 
             fig.tight_layout()
             return _figure_to_png(fig, canvas)
@@ -293,7 +357,7 @@ class TrendChartGenerator:
                     facecolor=COLOR_REF_BAND,
                     edgecolor=COLOR_REF_EDGE,
                     linewidth=0.5,
-                    label="Normal range",
+                    label=self._label("normal_range", "Normal range"),
                 )
 
             # Plot line (adapt to data density)
@@ -320,13 +384,18 @@ class TrendChartGenerator:
             _add_trend_line(ax, dates, values)
 
             ylabel = _axis_label(display_name, unit)
-            ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
+            ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT, **self._text_kwargs())
             lab_title = lab_data.get("chart_title", f"{display_name} Trend")
             ax.set_title(
-                lab_title, fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14
+                lab_title,
+                fontsize=11,
+                color=COLOR_TEXT,
+                fontweight="bold",
+                pad=14,
+                **self._text_kwargs(),
             )
 
-            _format_date_axis(ax, lab_data.get("date_from"), lab_data.get("date_to"))
+            self._apply_date_axis(ax, lab_data.get("date_from"), lab_data.get("date_to"))
 
             fig.tight_layout()
             return _figure_to_png(fig, canvas)
@@ -421,24 +490,34 @@ def _apply_print_style(ax):
         spine.set_linewidth(0.5)
 
 
-def _format_date_axis(ax, date_from=None, date_to=None):
+def _format_date_axis(
+    ax,
+    date_from=None,
+    date_to=None,
+    range_label=None,
+    text_kwargs=None,
+    tick_formats=None,
+):
     """Format the x-axis with date labels. Adds a subtitle showing the requested date range."""
     from matplotlib.dates import num2date
     from matplotlib.ticker import FixedLocator, FuncFormatter
 
     # Add date range note under the title if the user specified dates
     if date_from or date_to:
-        from_str = date_from.strftime("%b %d, %Y") if date_from else "earliest"
-        to_str = date_to.strftime("%b %d, %Y") if date_to else "latest"
+        if range_label is None:
+            from_str = date_from.strftime("%b %d, %Y") if date_from else "earliest"
+            to_str = date_to.strftime("%b %d, %Y") if date_to else "latest"
+            range_label = f"Requested range: {from_str}  \u2013  {to_str}"
         ax.text(
             0.5,
             1.02,
-            f"Requested range: {from_str}  \u2013  {to_str}",
+            range_label,
             transform=ax.transAxes,
             fontsize=7,
             color="#757575",
             ha="center",
             va="bottom",
+            **(text_kwargs or {}),
         )
 
     x_min, x_max = ax.get_xlim()
@@ -466,9 +545,10 @@ def _format_date_axis(ax, date_from=None, date_to=None):
     def _tick_fmt(val, _pos):
         dt = num2date(val)
         is_endpoint = abs(val - x_min) < 0.5 or abs(val - x_max) < 0.5
-        if is_endpoint or span > 365:
-            return dt.strftime("%b %d, %Y")
-        return dt.strftime("%b %d")
+        full = is_endpoint or span > 365
+        if tick_formats:
+            return tick_formats[0](dt) if full else tick_formats[1](dt)
+        return dt.strftime("%b %d, %Y" if full else "%b %d")
 
     ax.xaxis.set_major_formatter(FuncFormatter(_tick_fmt))
     ax.figure.autofmt_xdate(rotation=30, ha="right")
