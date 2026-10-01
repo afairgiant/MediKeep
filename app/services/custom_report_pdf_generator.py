@@ -11,7 +11,6 @@ import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from xml.sax.saxutils import escape as xml_escape
 
 from PIL import Image as PILImage
 from reportlab.lib import colors
@@ -50,7 +49,7 @@ def escape_markup_values(value: Any) -> Any:
     formatter. Dict keys and non-string values are left alone.
     """
     if isinstance(value, str):
-        return xml_escape(value)
+        return html.escape(value, quote=False)
     if isinstance(value, dict):
         return {k: escape_markup_values(v) for k, v in value.items()}
     if isinstance(value, list):
