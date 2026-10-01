@@ -77,6 +77,41 @@ class TestPlainTextTable:
         assert table._cellvalues[0][1] == 5
 
 
+class TestPlainTextTableSplit:
+    """ReportLab rebuilds split fragments via self.__class__(..., normalizedData=1);
+    cells that were already decoded must not be decoded a second time."""
+
+    def _long_table(self, text, rows=30):
+        escaped = escape_markup_values(text)
+        return _PlainTextTable([["Name:", escaped] for _ in range(rows)])
+
+    @pytest.mark.parametrize("text", ["&amp;", "&lt;b&gt;", "A &amp; B", "&#65;"])
+    def test_entity_text_is_unchanged_after_a_split(self, text):
+        table = self._long_table(text)
+        table.wrap(400, 1000)
+        parts = table.split(400, 80)
+
+        assert len(parts) > 1
+        for part in parts:
+            for row in part._cellvalues:
+                assert row[1] == text
+
+    def test_fragments_built_with_normalized_data_are_not_decoded_again(self):
+        table = _PlainTextTable([["k", "&amp;"]], normalizedData=1)
+        assert table._cellvalues[0][1] == "&amp;"
+
+    def test_a_split_table_in_a_real_document_keeps_the_text(self):
+        import io
+
+        from reportlab.platypus import SimpleDocTemplate
+
+        table = self._long_table("A &amp; B", rows=120)
+        SimpleDocTemplate(io.BytesIO()).build([table])
+        # The original table is split into fragments while building; the source
+        # cell text must be what the user typed, not decoded twice.
+        assert table._cellvalues[0][1] == "A &amp; B"
+
+
 class TestGeneratePdfEscapesReportData:
     def test_records_reach_the_formatters_escaped(self, monkeypatch):
         gen = CustomReportPDFGenerator()

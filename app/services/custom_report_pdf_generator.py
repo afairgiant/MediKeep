@@ -69,11 +69,15 @@ class _PlainTextTable(Table):
     """
 
     def __init__(self, data, *args, **kwargs):
-        cleaned = [
-            [html.unescape(cell) if isinstance(cell, str) else cell for cell in row]
-            for row in data
-        ]
-        super().__init__(cleaned, *args, **kwargs)
+        # ReportLab builds split fragments with self.__class__(..., normalizedData=1),
+        # passing cells that were already decoded. Decoding them again would turn
+        # a literal "&amp;" into "&", so only decode data we escaped ourselves.
+        if not kwargs.get("normalizedData"):
+            data = [
+                [html.unescape(cell) if isinstance(cell, str) else cell for cell in row]
+                for row in data
+            ]
+        super().__init__(data, *args, **kwargs)
 
 
 class CustomReportPDFGenerator:
