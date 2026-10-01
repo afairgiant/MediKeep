@@ -17,6 +17,7 @@ const CategoryTabs = ({
   onTabChange,
   onToggleRecord,
   onToggleCategory,
+  onClearCategory,
   categoryDisplayNames = {},
 }) => {
   const { t } = useTranslation('reports');
@@ -88,6 +89,7 @@ const CategoryTabs = ({
             selectedRecords={selectedRecords[category] || {}}
             onToggleRecord={onToggleRecord}
             onToggleCategory={onToggleCategory}
+            onClearCategory={onClearCategory}
             categoryDisplayName={
               categoryDisplayNames[category] || formatCategoryName(category)
             }

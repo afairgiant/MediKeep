@@ -48,6 +48,120 @@ describe('useCustomReports', () => {
     vi.clearAllMocks();
   });
 
+  describe('selectAllCategories', () => {
+    it('selects every record in every category', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+
+      expect(Object.keys(result.current.selectedRecords.medications)).toEqual([
+        '101',
+        '102',
+      ]);
+      expect(Object.keys(result.current.selectedRecords.lab_results)).toEqual([
+        '201',
+      ]);
+    });
+
+    it('keeps a fully selected category selected instead of toggling it off', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.toggleCategorySelection(
+          'medications',
+          dataSummary.categories.medications.records
+        );
+      });
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+
+      expect(Object.keys(result.current.selectedRecords.medications)).toEqual([
+        '101',
+        '102',
+      ]);
+      expect(result.current.selectedRecords.lab_results[201]).toBeDefined();
+    });
+
+    it('skips empty categories and tolerates missing input', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories({
+          medications: { count: 0, records: [] },
+        });
+        result.current.selectAllCategories(undefined);
+      });
+
+      expect(result.current.selectedRecords).toEqual({});
+    });
+  });
+
+  describe('clearCategorySelection', () => {
+    it('clears only the given category, even when partially selected', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.toggleRecordSelection('medications', 101, {
+          id: 101,
+        });
+        result.current.toggleRecordSelection('lab_results', 201, { id: 201 });
+      });
+      act(() => {
+        result.current.clearCategorySelection('medications');
+      });
+
+      expect(result.current.selectedRecords.medications).toBeUndefined();
+      expect(result.current.selectedRecords.lab_results[201]).toBeDefined();
+    });
+
+    it('is a no-op for a category with no selections', () => {
+      const { result } = renderHook(() => useCustomReports());
+      const before = result.current.selectedRecords;
+
+      act(() => {
+        result.current.clearCategorySelection('medications');
+      });
+
+      expect(result.current.selectedRecords).toBe(before);
+    });
+  });
+
+  describe('scoped clear actions', () => {
+    const selectRecordAndChart = result => {
+      act(() => {
+        result.current.toggleRecordSelection('medications', 101, { id: 101 });
+        result.current.addLabTestChart('Glucose', 'mg/dL');
+      });
+    };
+
+    it('clearTrendCharts leaves selected records untouched', () => {
+      const { result } = renderHook(() => useCustomReports());
+      selectRecordAndChart(result);
+
+      act(() => {
+        result.current.clearTrendCharts();
+      });
+
+      expect(result.current.trendChartCount).toBe(0);
+      expect(result.current.selectedCount).toBe(1);
+    });
+
+    it('clearRecordSelections leaves trend charts untouched', () => {
+      const { result } = renderHook(() => useCustomReports());
+      selectRecordAndChart(result);
+
+      act(() => {
+        result.current.clearRecordSelections();
+      });
+
+      expect(result.current.selectedCount).toBe(0);
+      expect(result.current.trendChartCount).toBe(1);
+    });
+  });
+
   describe('applyTemplate', () => {
     it('hydrates selectedRecords from record_ids using the data summary', () => {
       const { result } = renderHook(() => useCustomReports());

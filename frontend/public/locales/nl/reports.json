@@ -8,7 +8,8 @@
       "generateReport_other": "Rapport genereren ({{count}} dossiers)",
       "generateReportChartsOnly": "Rapport genereren ({{chartCount}} grafieken)",
       "generateReportWithCharts": "Rapport genereren ({{recordCount}} dossiers, {{chartCount}} grafieken)",
-      "selectAll": "Alle dossiers selecteren"
+      "selectAll": "Alle dossiers selecteren",
+      "selectAllRecordTypes": "Alle recordtypen selecteren"
     },
     "configuration": {
       "description": "Selecteer medische dossiers om op te nemen in uw aangepaste rapport",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Selectie wissen",
     "noCategories": "Geen categorieën beschikbaar",
     "noCategoriesDescription": "Er zijn geen medische gegevenscategorieën beschikbaar voor het genereren van rapporten.",
     "noRecords": "Geen dossiers beschikbaar",
     "recordCount": "{{count}} dossiers",
     "recordCount_one": "{{count}} dossier",
     "recordCount_other": "{{count}} dossiers",
+    "selectAll": "Alles selecteren",
     "selected": "{{count}} geselecteerd",
     "selected_one": "{{count}} geselecteerd",
     "selected_other": "{{count}} geselecteerd",

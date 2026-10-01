@@ -8,7 +8,8 @@
       "generateReport_other": "Gerar Relatório ({{count}} registos)",
       "generateReportChartsOnly": "Gerar Relatório ({{chartCount}} gráficos)",
       "generateReportWithCharts": "Gerar Relatório ({{recordCount}} registos, {{chartCount}} gráficos)",
-      "selectAll": "Selecionar Todos os Registos"
+      "selectAll": "Selecionar Todos os Registos",
+      "selectAllRecordTypes": "Selecionar todos os tipos de registo"
     },
     "configuration": {
       "description": "Selecione registos médicos para incluir no seu relatório personalizado",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Limpar seleção",
     "noCategories": "Nenhumas Categorias Disponíveis",
     "noCategoriesDescription": "Nenhumas categorias de dados médicos estão disponíveis para geração de relatórios.",
     "noRecords": "Nenhuns registos disponíveis",
     "recordCount": "{{count}} registos",
     "recordCount_one": "{{count}} registo",
     "recordCount_other": "{{count}} registos",
+    "selectAll": "Selecionar tudo",
     "selected": "{{count}} selecionados",
     "selected_one": "{{count}} selecionado",
     "selected_other": "{{count}} selecionados",

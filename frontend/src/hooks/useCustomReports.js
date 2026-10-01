@@ -166,11 +166,45 @@ export const useCustomReports = () => {
     });
   }, []);
 
-  // Clear all selections (records + charts)
-  const clearSelections = useCallback(() => {
+  // Select every record in every given category (idempotent, never deselects)
+  const selectAllCategories = useCallback(categories => {
+    setSelectedRecords(prev => {
+      const next = { ...prev };
+      Object.entries(categories || {}).forEach(([category, categoryData]) => {
+        if (!categoryData?.records?.length) return;
+        next[category] = {};
+        categoryData.records.forEach(record => {
+          next[category][record.id] = record;
+        });
+      });
+      return next;
+    });
+    logger.debug(
+      'custom_reports_all_categories_selected',
+      'All records in all categories selected',
+      { component: 'useCustomReports' }
+    );
+  }, []);
+
+  // Clear all selected records in a single category
+  const clearCategorySelection = useCallback(category => {
+    setSelectedRecords(prev => {
+      if (!prev[category]) return prev;
+      const newSelected = { ...prev };
+      delete newSelected[category];
+      return newSelected;
+    });
+    logger.debug(
+      'custom_reports_category_cleared',
+      'Selections in category cleared',
+      { category, component: 'useCustomReports' }
+    );
+  }, []);
+
+  // Clear selected records only, leaving trend charts untouched
+  const clearRecordSelections = useCallback(() => {
     setSelectedRecords({});
-    setTrendCharts({ vital_charts: [], lab_test_charts: [] });
-    logger.info('custom_reports_selections_cleared', 'All selections cleared', {
+    logger.info('custom_reports_records_cleared', 'All records cleared', {
       component: 'useCustomReports',
     });
   }, []);
@@ -567,7 +601,9 @@ export const useCustomReports = () => {
     fetchDataSummary,
     toggleRecordSelection,
     toggleCategorySelection,
-    clearSelections,
+    clearCategorySelection,
+    selectAllCategories,
+    clearRecordSelections,
     updateReportSettings,
     applyTemplate,
     generateReport,

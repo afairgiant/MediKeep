@@ -8,7 +8,8 @@
       "generateReport_other": "Generar Informe ({{count}} registros)",
       "generateReportChartsOnly": "Generar Informe ({{chartCount}} gráficos)",
       "generateReportWithCharts": "Generar Informe ({{recordCount}} registros, {{chartCount}} gráficos)",
-      "selectAll": "Seleccionar Todos los Registros"
+      "selectAll": "Seleccionar Todos los Registros",
+      "selectAllRecordTypes": "Seleccionar todos los tipos de registro"
     },
     "configuration": {
       "description": "Seleccione los registros médicos a incluir en su informe personalizado",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Borrar selección",
     "noCategories": "No Hay Categorías Disponibles",
     "noCategoriesDescription": "No hay categorías de datos médicos disponibles para la generación de informes.",
     "noRecords": "No hay registros disponibles",
     "recordCount": "{{count}} registros",
     "recordCount_one": "{{count}} registro",
     "recordCount_other": "{{count}} registros",
+    "selectAll": "Seleccionar todo",
     "selected": "{{count}} seleccionados",
     "selected_one": "{{count}} seleccionado",
     "selected_other": "{{count}} seleccionados",

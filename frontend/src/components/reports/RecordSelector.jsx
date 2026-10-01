@@ -23,6 +23,7 @@ const RecordSelector = ({
   selectedRecords = {},
   onToggleRecord,
   onToggleCategory,
+  onClearCategory,
   categoryDisplayName,
 }) => {
   const { t } = useTranslation('reports');
@@ -63,14 +64,25 @@ const RecordSelector = ({
               </Badge>
             )}
           </Group>
-          <Button
-            size="sm"
-            variant={allSelected ? 'filled' : 'outline'}
-            color={allSelected ? 'red' : 'blue'}
-            onClick={() => onToggleCategory(category, categoryData.records)}
-          >
-            {allSelected ? 'Deselect Tab' : 'Select Tab'}
-          </Button>
+          <Group gap="xs">
+            <Button
+              size="xs"
+              variant="subtle"
+              onClick={() => onToggleCategory(category, categoryData.records)}
+              disabled={allSelected || categoryData.records.length === 0}
+            >
+              {t('categories.selectAll')}
+            </Button>
+            <Button
+              size="xs"
+              variant="subtle"
+              color="red"
+              onClick={() => onClearCategory(category)}
+              disabled={selectedCount === 0}
+            >
+              {t('categories.clearSelection')}
+            </Button>
+          </Group>
         </Group>
       </Paper>
 

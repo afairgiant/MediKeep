@@ -8,7 +8,8 @@
       "generateReport_other": "Generera rapport ({{count}} handlingar)",
       "generateReportChartsOnly": "Generera rapport ({{chartCount}} diagram)",
       "generateReportWithCharts": "Generera rapport ({{recordCount}} handlingar, {{chartCount}} diagram)",
-      "selectAll": "Välj alla handlingar"
+      "selectAll": "Välj alla handlingar",
+      "selectAllRecordTypes": "Markera alla posttyper"
     },
     "configuration": {
       "description": "Välj journalhandlingar att inkludera i din anpassade rapport",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Rensa markering",
     "noCategories": "Inga kategorier tillgängliga",
     "noCategoriesDescription": "Inga medicinska datakategorier är tillgängliga för rapportgenerering.",
     "noRecords": "Inga handlingar tillgängliga",
     "recordCount": "{{count}} handlingar",
     "recordCount_one": "{{count}} handling",
     "recordCount_other": "{{count}} handlingar",
+    "selectAll": "Markera alla",
     "selected": "{{count}} valda",
     "selected_one": "{{count}} vald",
     "selected_other": "{{count}} valda",

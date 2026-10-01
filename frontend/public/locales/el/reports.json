@@ -8,7 +8,8 @@
       "generateReport_other": "Δημιουργία Αναφοράς ({{count}} εγγραφές)",
       "generateReportChartsOnly": "Δημιουργία Αναφοράς (Γραφήματα: {{chartCount}})",
       "generateReportWithCharts": "Δημιουργία Αναφοράς (Εγγραφές: {{recordCount}}, Γραφήματα: {{chartCount}})",
-      "selectAll": "Επιλογή Όλων των Εγγραφών"
+      "selectAll": "Επιλογή Όλων των Εγγραφών",
+      "selectAllRecordTypes": "Επιλογή όλων των τύπων εγγραφών"
     },
     "configuration": {
       "description": "Επιλέξτε ιατρικά αρχεία για να συμπεριληφθούν στην προσαρμοσμένη αναφορά σας",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "Εκκαθάριση επιλογής",
     "noCategories": "Δεν Υπάρχουν Διαθέσιμες Κατηγορίες",
     "noCategoriesDescription": "Δεν υπάρχουν διαθέσιμες κατηγορίες ιατρικών δεδομένων για δημιουργία αναφοράς.",
     "noRecords": "Δεν υπάρχουν διαθέσιμες εγγραφές",
     "recordCount": "{{count}} εγγραφές",
     "recordCount_one": "{{count}} εγγραφή",
     "recordCount_other": "{{count}} εγγραφές",
+    "selectAll": "Επιλογή όλων",
     "selected": "{{count}} επιλεγμένα",
     "selected_one": "{{count}} επιλεγμένο",
     "selected_other": "{{count}} επιλεγμένα",

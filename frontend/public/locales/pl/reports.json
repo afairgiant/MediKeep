@@ -8,7 +8,8 @@
       "generateReport_other": "Generuj raport ({{count}} rekordów)",
       "generateReportChartsOnly": "Generuj raport ({{chartCount}} wykresów)",
       "generateReportWithCharts": "Generuj raport ({{recordCount}} rekordów, {{chartCount}} wykresów)",
-      "selectAll": "Zaznacz wszystkie rekordy"
+      "selectAll": "Zaznacz wszystkie rekordy",
+      "selectAllRecordTypes": "Zaznacz wszystkie typy rekordów"
     },
     "configuration": {
       "description": "Wybierz dokumentację medyczną do uwzględnienia w niestandardowym raporcie",
@@ -71,6 +72,7 @@
     }
   },
   "categories": {
+    "clearSelection": "Wyczyść zaznaczenie",
     "noCategories": "Brak dostępnych kategorii",
     "noCategoriesDescription": "Brak dostępnych kategorii danych medycznych do generowania raportów.",
     "noRecords": "Brak dostępnych rekordów",
@@ -79,6 +81,7 @@
     "recordCount_few": "{{count}} rekordy",
     "recordCount_many": "{{count}} rekordów",
     "recordCount_other": "{{count}} rekordów",
+    "selectAll": "Zaznacz wszystko",
     "selected": "{{count}} wybranych",
     "selected_one": "{{count}} wybrany",
     "selected_other": "{{count}} wybranych",

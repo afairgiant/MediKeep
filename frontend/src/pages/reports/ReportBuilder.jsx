@@ -57,7 +57,10 @@ const ReportBuilder = () => {
     fetchDataSummary,
     toggleRecordSelection,
     toggleCategorySelection,
-    clearSelections,
+    clearCategorySelection,
+    selectAllCategories,
+    clearRecordSelections,
+    clearTrendCharts,
     updateReportSettings,
     applyTemplate,
     generateReport,
@@ -278,9 +281,13 @@ const ReportBuilder = () => {
   // are explicitly starting from scratch, so "Update current" shouldn't
   // target a template whose selections are no longer represented.
   const handleClearSelections = useCallback(() => {
-    clearSelections();
+    if (activeSegment === 'trendCharts') {
+      clearTrendCharts();
+    } else {
+      clearRecordSelections();
+    }
     setLoadedTemplate(null);
-  }, [clearSelections]);
+  }, [activeSegment, clearRecordSelections, clearTrendCharts]);
 
   // Build generate button label
   const getGenerateButtonLabel = () => {
@@ -408,24 +415,18 @@ const ReportBuilder = () => {
                 size="xs"
                 variant="subtle"
                 color="blue"
-                onClick={() => {
-                  // Select all records from all categories
-                  availableCategories.forEach(category => {
-                    const categoryData = dataSummary?.categories?.[category];
-                    if (categoryData?.records) {
-                      toggleCategorySelection(category, categoryData.records);
-                    }
-                  });
-                }}
+                onClick={() => selectAllCategories(dataSummary?.categories)}
                 disabled={
                   !dataSummary?.categories ||
                   Object.keys(dataSummary.categories).length === 0
                 }
               >
-                {t('builder.buttons.selectAll')}
+                {t('builder.buttons.selectAllRecordTypes')}
               </Button>
             )}
-            {hasSelections && (
+            {(activeSegment === 'trendCharts'
+              ? trendChartCount > 0
+              : selectedCount > 0) && (
               <Button
                 size="xs"
                 variant="subtle"
@@ -489,6 +490,7 @@ const ReportBuilder = () => {
                   onTabChange={setActiveTab}
                   onToggleRecord={toggleRecordSelection}
                   onToggleCategory={toggleCategorySelection}
+                  onClearCategory={clearCategorySelection}
                   categoryDisplayNames={categoryDisplayNames}
                 />
               </Paper>

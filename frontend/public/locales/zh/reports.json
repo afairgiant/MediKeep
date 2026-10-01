@@ -8,7 +8,8 @@
       "generateReport_other": "生成报告（{{count}} 条记录）",
       "generateReportChartsOnly": "生成报告（{{chartCount}} 个图表）",
       "generateReportWithCharts": "生成报告（{{recordCount}} 条记录，{{chartCount}} 个图表）",
-      "selectAll": "选择所有记录"
+      "selectAll": "选择所有记录",
+      "selectAllRecordTypes": "选择所有记录类型"
     },
     "configuration": {
       "description": "选择要包含在自定义报告中的医疗记录",
@@ -71,12 +72,14 @@
     }
   },
   "categories": {
+    "clearSelection": "清除选择",
     "noCategories": "无可用分类",
     "noCategoriesDescription": "没有可用于报告生成的医疗数据分类。",
     "noRecords": "无可用记录",
     "recordCount": "{{count}} 条记录",
     "recordCount_one": "{{count}} 条记录",
     "recordCount_other": "{{count}} 条记录",
+    "selectAll": "全选",
     "selected": "已选择 {{count}} 个",
     "selected_one": "已选择 {{count}} 个",
     "selected_other": "已选择 {{count}} 个",

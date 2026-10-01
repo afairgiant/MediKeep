@@ -8,7 +8,8 @@
       "generateReport_other": "Создать отчёт ({{count}} записей)",
       "generateReportChartsOnly": "Создать отчёт ({{chartCount}} графиков)",
       "generateReportWithCharts": "Создать отчёт ({{recordCount}} записей, {{chartCount}} графиков)",
-      "selectAll": "Выбрать все записи"
+      "selectAll": "Выбрать все записи",
+      "selectAllRecordTypes": "Выбрать все типы записей"
     },
     "configuration": {
       "description": "Выберите медицинские записи для включения в персональный отчёт",
@@ -71,6 +72,7 @@
     }
   },
   "categories": {
+    "clearSelection": "Очистить выбор",
     "noCategories": "Категории недоступны",
     "noCategoriesDescription": "Категории медицинских данных для создания отчётов недоступны.",
     "noRecords": "Записи недоступны",
@@ -79,6 +81,7 @@
     "recordCount_few": "{{count}} записи",
     "recordCount_many": "{{count}} записей",
     "recordCount_other": "{{count}} записей",
+    "selectAll": "Выбрать все",
     "selected": "{{count}} выбрано",
     "selected_one": "{{count}} выбрана",
     "selected_other": "{{count}} выбрано",
