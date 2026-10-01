@@ -198,6 +198,27 @@ describe('ReportBuilder flow', () => {
     expect(buttons[0].disabled).toBe(true);
   });
 
+  it('translates the medical equipment category tab', () => {
+    mockReports.value = buildReports({
+      dataSummary: {
+        total_records: 1,
+        categories: {
+          medical_equipment: {
+            count: 1,
+            has_more: false,
+            records: [{ id: 1, title: 'CPAP' }],
+          },
+        },
+      },
+    });
+    render(<ReportBuilder />);
+
+    expect(
+      screen.getAllByText('shared:categories.medical_equipment').length
+    ).toBeGreaterThan(0);
+    expect(screen.queryByText('Medical Equipment')).not.toBeInTheDocument();
+  });
+
   it('styles the view toggle as two distinct options', () => {
     render(<ReportBuilder />);
 

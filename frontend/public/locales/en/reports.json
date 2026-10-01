@@ -66,6 +66,9 @@
       "emptyState": "No trend data available. Add vital signs or lab results to enable trend charts.",
       "labTestCharts": {
         "description": "Search and select lab tests to chart",
+        "resultCount": "{{count}} results",
+        "resultCount_one": "{{count}} result",
+        "resultCount_other": "{{count}} results",
         "searchPlaceholder": "Search lab tests...",
         "title": "Lab Test Charts"
       },

@@ -66,6 +66,9 @@
       "emptyState": "Aucune donnée de tendances disponible. Ajoutez des signes vitaux ou des résultats d'analyse pour activer les tableaux de tendances.",
       "labTestCharts": {
         "description": "Recherchez et sélectionnez les résultats d'analyse à présenter",
+        "resultCount": "{{count}} résultats",
+        "resultCount_one": "{{count}} résultat",
+        "resultCount_other": "{{count}} résultats",
         "searchPlaceholder": "Rechercher dans les résultats d'analyse...",
         "title": "Tableaux de résultats d'analyse"
       },

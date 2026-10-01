@@ -35,6 +35,7 @@ from reportlab.platypus import (
 
 from app.core.logging.config import get_logger
 from app.services.export_service import UnitConverter
+from app.services.report_fonts import CJK_BOLD_FONT_PATHS, CJK_NORMAL_FONT_PATHS
 from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
@@ -187,31 +188,11 @@ class CustomReportPDFGenerator:
             self.font_bold = "UnicodeFont-Bold" if bold_registered else "Helvetica-Bold"
 
             # --- CJK fonts (Chinese, Japanese, Korean) ---
-            cjk_normal_paths = [
-                # Microsoft YaHei (Windows - ships with all modern versions)
-                "C:/Windows/Fonts/msyh.ttc",
-                "/mnt/c/Windows/Fonts/msyh.ttc",  # Windows fonts seen from WSL
-                # Noto Sans CJK SC (Linux)
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf",
-                "/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc",
-                # PingFang SC (macOS)
-                "/System/Library/Fonts/PingFang.ttc",
-                "/Library/Fonts/PingFang.ttc",
-            ]
-            cjk_bold_paths = [
-                "C:/Windows/Fonts/msyhbd.ttc",
-                "/mnt/c/Windows/Fonts/msyhbd.ttc",
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
-                "/usr/share/fonts/noto-cjk/NotoSansCJKsc-Bold.otf",
-                "/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc",
-                "/System/Library/Fonts/PingFang.ttc",
-                "/Library/Fonts/PingFang.ttc",
-            ]
-
-            cjk_registered = self._try_register_font("CJKFont", cjk_normal_paths)
+            cjk_registered = self._try_register_font(
+                "CJKFont", CJK_NORMAL_FONT_PATHS
+            )
             cjk_bold_registered = self._try_register_font(
-                "CJKFont-Bold", cjk_bold_paths
+                "CJKFont-Bold", CJK_BOLD_FONT_PATHS
             )
 
             # Store CJK font names (fall back to Latin fonts if unavailable)
@@ -1592,7 +1573,7 @@ class CustomReportPDFGenerator:
         # Medication type (prescription, OTC, supplement, herbal)
         if record.get("medication_type"):
             details.append(
-                f"<b>{self.translator.field('type')}:</b> {record['medication_type'].replace('_', ' ').title()}"
+                f"<b>{self.translator.field('type')}:</b> {self.translator.value(record['medication_type'])}"
             )
 
         # Indication (purpose) is very important for medical providers - make it prominent
@@ -1628,7 +1609,7 @@ class CustomReportPDFGenerator:
                     f"<b>{self.translator.field('started')}:</b> {start} ({self.translator.field('ongoing')})"
                 )
         if record.get("status"):
-            status_display = record["status"].title()
+            status_display = self.translator.value(record["status"])
             timing_info.append(
                 f"<b>{self.translator.field('status')}:</b> {status_display}"
             )
@@ -1760,7 +1741,7 @@ class CustomReportPDFGenerator:
         if icd_code:
             header_parts.append(f"(ICD: {icd_code})")
         if severity:
-            header_parts.append(f"- {severity.upper()}")
+            header_parts.append(f"- {self.translator.value(severity).upper()}")
 
         story.append(Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"]))
 
@@ -1775,10 +1756,12 @@ class CustomReportPDFGenerator:
         # Status and verification
         status_info = []
         if record.get("status"):
-            status_info.append(f"{self.translator.field('status')}: {record['status']}")
+            status_info.append(
+                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
+            )
         if record.get("verification_status"):
             status_info.append(
-                f"{self.translator.field('verification')}: {record['verification_status']}"
+                f"{self.translator.field('verification')}: {self.translator.value(record['verification_status'])}"
             )
         if status_info:
             details.extend(status_info)
@@ -1907,11 +1890,11 @@ class CustomReportPDFGenerator:
             outcome_info = []
             if record.get("status"):
                 outcome_info.append(
-                    f"{self.translator.field('status')}: {record['status']}"
+                    f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
                 )
             if record.get("outcome"):
                 outcome_info.append(
-                    f"{self.translator.field('outcome')}: {record['outcome']}"
+                    f"{self.translator.field('outcome')}: {self.translator.value(record['outcome'])}"
                 )
             if outcome_info:
                 details.extend(outcome_info)
@@ -1995,15 +1978,16 @@ class CustomReportPDFGenerator:
                 header_parts = [f"<b>{name}</b>"]
 
                 if record.get("test_type"):
-                    header_parts.append(f" ({record['test_type']})")
+                    header_parts.append(f" ({self.translator.value(record['test_type'])})")
 
                 if labs_result:
                     if labs_result.lower() in ("abnormal", "critical"):
                         header_parts.append(
-                            f": <font color='red'>{labs_result} (ABNORMAL)</font>"
+                            f": <font color='red'>{self.translator.value(labs_result)} "
+                            f"({self.translator.value('abnormal').upper()})</font>"
                         )
                     else:
-                        header_parts.append(f": {labs_result}")
+                        header_parts.append(f": {self.translator.value(labs_result)}")
 
                 story.append(
                     Paragraph("".join(header_parts), self.styles["SubsectionHeader"])
@@ -2026,7 +2010,7 @@ class CustomReportPDFGenerator:
                         if comp_value is not None:
                             display_value = str(comp_value)
                         elif comp_qual:
-                            display_value = comp_qual
+                            display_value = self.translator.value(comp_qual)
                         else:
                             display_value = ""
 
@@ -2044,10 +2028,12 @@ class CustomReportPDFGenerator:
                             if comp_unit:
                                 value_str += f" {comp_unit}"
                             if is_abnormal:
-                                value_str = f"<font color='red'>{value_str} ({comp_status.upper()})</font>"
+                                value_str = f"<font color='red'>{value_str} ({self.translator.value(comp_status).upper()})</font>"
                             comp_parts.append(f": {value_str}")
                         if comp_ref:
-                            comp_parts.append(f"  [Ref: {comp_ref}]")
+                            comp_parts.append(
+                                f"  [{self.translator.field('reference_range')}: {comp_ref}]"
+                            )
 
                         story.append(
                             Paragraph(
@@ -2061,10 +2047,12 @@ class CustomReportPDFGenerator:
                 # Test metadata
                 test_info = []
                 if record.get("test_code"):
-                    test_info.append(f"Code: {record['test_code']}")
+                    test_info.append(
+                        f"{self.translator.field('code')}: {record['test_code']}"
+                    )
                 if record.get("test_category"):
                     test_info.append(
-                        f"{self.translator.field('type')}: {record['test_category']}"
+                        f"{self.translator.field('type')}: {self.translator.value(record['test_category'])}"
                     )
                 if test_info:
                     details.extend(test_info)
@@ -2085,7 +2073,9 @@ class CustomReportPDFGenerator:
                 # Provider and facility
                 provider_info = []
                 if record.get("ordered_by"):
-                    provider_info.append(f"Ordered by: {record['ordered_by']}")
+                    provider_info.append(
+                        f"{self.translator.field('ordered_by')}: {record['ordered_by']}"
+                    )
                 if record.get("facility"):
                     provider_info.append(
                         f"{self.translator.field('facility')}: {record['facility']}"
@@ -2095,7 +2085,7 @@ class CustomReportPDFGenerator:
 
                 # Status
                 if record.get("status"):
-                    status_display = record["status"]
+                    status_display = self.translator.value(record["status"])
                     if record["status"].lower() in ("critical", "urgent"):
                         status_display = (
                             f"<font color='red'>{status_display.upper()}</font>"
@@ -2181,7 +2171,9 @@ class CustomReportPDFGenerator:
                 # Manufacturing info (important for tracking)
                 mfg_info = []
                 if record.get("manufacturer"):
-                    mfg_info.append(record["manufacturer"])
+                    mfg_info.append(
+                        f"{self.translator.field('manufacturer')}: {record['manufacturer']}"
+                    )
                 if record.get("lot_number"):
                     mfg_info.append(
                         f"{self.translator.field('lot_number')}: {record['lot_number']}"
@@ -2304,9 +2296,9 @@ class CustomReportPDFGenerator:
 
             header_parts = [header]
             if category:
-                header_parts.append(f"[{category}]")
+                header_parts.append(f"[{self.translator.value(category)}]")
             if severity:
-                severity_display = severity.upper()
+                severity_display = self.translator.value(severity).upper()
                 if severity.lower() in ["critical", "severe"]:
                     severity_display = f"<font color='red'>{severity_display}</font>"
                 header_parts.append(f"- {severity_display}")
@@ -2329,7 +2321,7 @@ class CustomReportPDFGenerator:
                     f"<b>{self.translator.field('onset')}:</b> {self._format_date(record['onset_date'])}"
                 )
             if record.get("status"):
-                status_display = record["status"].title()
+                status_display = self.translator.value(record["status"])
                 verification_info.append(
                     f"<b>{self.translator.field('status')}:</b> {status_display}"
                 )
@@ -2430,7 +2422,7 @@ class CustomReportPDFGenerator:
                         f"<b>{self.translator.field('started')}:</b> {start} ({self.translator.field('ongoing')})"
                     )
             if record.get("status"):
-                status_display = record["status"].title()
+                status_display = self.translator.value(record["status"])
                 timing_status.append(
                     f"<b>{self.translator.field('status')}:</b> {status_display}"
                 )
@@ -2441,7 +2433,7 @@ class CustomReportPDFGenerator:
             logistics = []
             if record.get("treatment_category"):
                 logistics.append(
-                    f"{self.translator.field('type')}: {record['treatment_category']}"
+                    f"{self.translator.field('type')}: {self.translator.value(record['treatment_category'])}"
                 )
             if record.get("location"):
                 logistics.append(
@@ -2723,7 +2715,7 @@ class CustomReportPDFGenerator:
 
             header_parts = [f"<b>{name}</b>"]
             if relationship:
-                header_parts.append(f"- {relationship}")
+                header_parts.append(f"- {self.translator.value(relationship)}")
             if record.get("is_primary"):
                 header_parts.append("(Primary)")
 
@@ -2750,7 +2742,8 @@ class CustomReportPDFGenerator:
             if record.get("address"):
                 story.append(
                     Paragraph(
-                        f"    Address: {record['address']}", self.styles["CustomBody"]
+                        f"    {self.translator.field('address')}: {record['address']}",
+                        self.styles["CustomBody"],
                     )
                 )
 
@@ -2885,15 +2878,15 @@ class CustomReportPDFGenerator:
                         )
                     if condition.get("severity"):
                         condition_details.append(
-                            f"{self.translator.field('severity')}: {condition['severity']}"
+                            f"{self.translator.field('severity')}: {self.translator.value(condition['severity'])}"
                         )
                     if condition.get("status"):
                         condition_details.append(
-                            f"{self.translator.field('status')}: {condition['status']}"
+                            f"{self.translator.field('status')}: {self.translator.value(condition['status'])}"
                         )
                     if condition.get("condition_type"):
                         condition_details.append(
-                            f"{self.translator.field('type')}: {condition['condition_type']}"
+                            f"{self.translator.field('type')}: {self.translator.value(condition['condition_type'])}"
                         )
 
                     condition_text = f"• {condition_name}"
@@ -2908,7 +2901,7 @@ class CustomReportPDFGenerator:
                     if condition.get("notes"):
                         story.append(
                             Paragraph(
-                                f"        Notes: {condition['notes']}",
+                                f"        {self.translator.field('notes')}: {condition['notes']}",
                                 self.styles["CustomBody"],
                             )
                         )
@@ -3007,9 +3000,13 @@ class CustomReportPDFGenerator:
         # Build info lines
         info_parts = []
         if record.get("category"):
-            info_parts.append(f"{self.translator.field('type')}: {record['category']}")
+            info_parts.append(
+                f"{self.translator.field('type')}: {self.translator.value(record['category'])}"
+            )
         if record.get("status"):
-            info_parts.append(f"{self.translator.field('status')}: {record['status']}")
+            info_parts.append(
+                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
+            )
         if record.get("first_occurrence_date"):
             info_parts.append(
                 f"{self.translator.field('onset_date')}: {self._format_date(record['first_occurrence_date'])}"
@@ -3102,7 +3099,9 @@ class CustomReportPDFGenerator:
         # Injury name as header
         name = record.get("injury_name", "Unknown Injury")
         severity = record.get("severity", "")
-        severity_badge = f" [{severity.upper()}]" if severity else ""
+        severity_badge = (
+            f" [{self.translator.value(severity).upper()}]" if severity else ""
+        )
         story.append(
             Paragraph(f"<b>{name}{severity_badge}</b>", self.styles["CustomBody"])
         )
@@ -3117,10 +3116,12 @@ class CustomReportPDFGenerator:
         if record.get("body_part"):
             body_part = record["body_part"]
             if record.get("laterality"):
-                body_part = f"{record['laterality']} {body_part}"
+                body_part = f"{self.translator.value(record['laterality'])} {body_part}"
             info_parts.append(f"{self.translator.field('location')}: {body_part}")
         if record.get("status"):
-            info_parts.append(f"{self.translator.field('status')}: {record['status']}")
+            info_parts.append(
+                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
+            )
 
         if info_parts:
             for part in info_parts:
@@ -3161,7 +3162,7 @@ class CustomReportPDFGenerator:
         if record.get("practitioner"):
             story.append(
                 Paragraph(
-                    f"  Treating Provider: {record['practitioner']}",
+                    f"  {self.translator.field('treating_provider')}: {record['practitioner']}",
                     self.styles["CustomBody"],
                 )
             )
@@ -3252,10 +3253,12 @@ class CustomReportPDFGenerator:
         info_parts = []
         if record.get("insurance_type"):
             info_parts.append(
-                f"{self.translator.field('type')}: {record['insurance_type']}"
+                f"{self.translator.field('type')}: {self.translator.value(record['insurance_type'])}"
             )
         if record.get("status"):
-            info_parts.append(f"{self.translator.field('status')}: {record['status']}")
+            info_parts.append(
+                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
+            )
         if record.get("employer_group"):
             info_parts.append(
                 f"{self.translator.field('group_number')}: {record['employer_group']}"
@@ -3272,9 +3275,13 @@ class CustomReportPDFGenerator:
                 f"{self.translator.field('name')}: {record['member_name']}"
             )
         if record.get("member_id"):
-            member_parts.append(f"Member ID: {record['member_id']}")
+            member_parts.append(
+                f"{self.translator.field('member_id')}: {record['member_id']}"
+            )
         if record.get("group_number"):
-            member_parts.append(f"Group #: {record['group_number']}")
+            member_parts.append(
+                f"{self.translator.field('group_number')}: {record['group_number']}"
+            )
 
         if member_parts:
             for part in member_parts:
@@ -3286,7 +3293,9 @@ class CustomReportPDFGenerator:
                 f"{self.translator.field('name')}: {record['policy_holder_name']}"
             )
             if record.get("relationship_to_holder"):
-                holder_info += f" ({record['relationship_to_holder']})"
+                holder_info += (
+                    f" ({self.translator.value(record['relationship_to_holder'])})"
+                )
             story.append(Paragraph(f"  {holder_info}", self.styles["CustomBody"]))
 
         # Dates
@@ -3522,7 +3531,8 @@ class CustomReportPDFGenerator:
                         colWidths=[col_width] * num_cols,
                     )
                     table_style = [
-                        ("FONTSIZE", (0, 0), (-1, -1), 8),
+                        ("FONT", (0, 0), (-1, 0), self.table_font_bold, 8),
+                        ("FONT", (0, 1), (-1, -1), self.table_font_normal, 8),
                         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#37474F")),
                         ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#FAFAFA")),
@@ -3554,7 +3564,7 @@ class CustomReportPDFGenerator:
                 )
                 block_elements.append(
                     Paragraph(
-                        "*Chart displays all available data within the requested date range.",
+                        f"*{self.translator.text('chart_range_note')}",
                         footnote_style,
                     )
                 )
@@ -3585,14 +3595,14 @@ class CustomReportPDFGenerator:
                 self.translator.text("count"),
             ]
             sys_row = [
-                "Systolic",
+                self.translator.field("systolic_bp"),
                 f"{sys_stats.get('latest', '-')} {unit}",
                 f"{sys_stats.get('average', '-')} {unit}",
                 f"{sys_stats.get('min', '-')} - {sys_stats.get('max', '-')} {unit}",
                 str(count),
             ]
             dia_row = [
-                "Diastolic",
+                self.translator.field("diastolic_bp"),
                 f"{dia_stats.get('latest', '-')} {unit}",
                 f"{dia_stats.get('average', '-')} {unit}",
                 f"{dia_stats.get('min', '-')} - {dia_stats.get('max', '-')} {unit}",

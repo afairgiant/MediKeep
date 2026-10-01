@@ -54,6 +54,7 @@ from app.schemas.trend_charts import TrendChartSelection
 from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.export_service import ExportService, UnitConverter
+from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
 
@@ -88,6 +89,7 @@ class CustomReportService:
         self.pdf_generator = CustomReportPDFGenerator()
         # Cache for frequently accessed summaries (5 minutes timeout)
         self._summary_cache = {}
+        self._translator = get_translator("en", "mdy")
         self._cache_timeout = 300
         # Default unit system, updated per-request when user prefs are loaded
         self._user_unit_system = "imperial"
@@ -103,6 +105,10 @@ class CustomReportService:
         # Load user preferences for unit display in summaries
         user_prefs = user_preferences_crud.get_by_user_id(self.db, user_id=user_id)
         self._user_unit_system = (user_prefs and user_prefs.unit_system) or "imperial"
+        language = (user_prefs and user_prefs.language) or "en"
+        self._translator = get_translator(
+            language, (user_prefs and user_prefs.date_format) or "mdy"
+        )
 
         # Get the active patient for the user first
         user = self.db.query(User).filter(User.id == user_id).first()
@@ -197,7 +203,7 @@ class CustomReportService:
                     return DataSummaryResponse(categories={}, total_records=0)
 
         # Include patient ID in cache key so different patients have different caches
-        cache_key = f"summary_{user_id}_{user.active_patient_id}"
+        cache_key = f"summary_{user_id}_{user.active_patient_id}_{language}"
         now = time.time()
 
         # Check cache
@@ -513,302 +519,233 @@ class CustomReportService:
 
         return None
 
+    def _labeled(self, field_key: str, value: Any, translate: bool = False) -> str:
+        """'Label: value' in the user's language; translate=True for stored enum values."""
+        t = self._translator
+        text = t.value(value) if translate else value
+        return f"{t.field(field_key)}: {text}"
+
     def _get_key_info(self, item: Any, category: str) -> str:
-        """Get key information for the record based on category"""
+        """Get key information for the record based on category, in the user's language"""
+        t = self._translator
+        labeled = self._labeled
         try:
+            parts: List[str] = []
+
+            def get(name):
+                return getattr(item, name, None)
+
             if category == "medications":
-                parts = []
-                dosage = getattr(item, "dosage", None)
-                frequency = getattr(item, "frequency", None)
-                route = getattr(item, "route", None)
-                indication = getattr(item, "indication", None)
+                if get("dosage"):
+                    parts.append(labeled("dosage", get("dosage")))
+                if get("frequency"):
+                    parts.append(labeled("frequency", get("frequency")))
+                if get("route"):
+                    parts.append(labeled("route", get("route")))
+                if get("indication"):
+                    parts.append(labeled("purpose", get("indication")))
 
-                if dosage:
-                    parts.append(f"Dosage: {dosage}")
-                if frequency:
-                    parts.append(f"Frequency: {frequency}")
-                if route:
-                    parts.append(f"Route: {route}")
-                if indication:
-                    parts.append(f"For: {indication}")
+            elif category == "conditions":
+                if get("severity"):
+                    parts.append(labeled("severity", get("severity"), True))
+                if get("verification_status"):
+                    parts.append(labeled("status", get("verification_status"), True))
 
-                return " | ".join(parts) if parts else "Medication details"
+            elif category == "procedures":
+                if get("procedure_code"):
+                    parts.append(labeled("code", get("procedure_code")))
+                if get("status"):
+                    parts.append(labeled("status", get("status"), True))
 
-            if category == "conditions":
-                parts = []
-                severity = getattr(item, "severity", None)
-                verification_status = getattr(item, "verification_status", None)
+            elif category == "lab_results":
+                if get("test_type"):
+                    parts.append(labeled("type", get("test_type"), True))
+                if get("labs_result"):
+                    parts.append(labeled("result", get("labs_result"), True))
+                if get("status"):
+                    parts.append(labeled("status", get("status"), True))
 
-                if severity:
-                    parts.append(f"Severity: {severity}")
-                if verification_status:
-                    parts.append(f"Status: {verification_status}")
+            elif category == "immunizations":
+                if get("site"):
+                    parts.append(labeled("administration_site", get("site")))
+                if get("manufacturer"):
+                    parts.append(labeled("manufacturer", get("manufacturer")))
+                if get("lot_number"):
+                    parts.append(labeled("lot_number", get("lot_number")))
 
-                return " | ".join(parts) if parts else "Condition details"
+            elif category == "treatments":
+                if get("dosage"):
+                    parts.append(labeled("dosage", get("dosage")))
+                if get("frequency"):
+                    parts.append(labeled("frequency", get("frequency")))
+                if get("status"):
+                    parts.append(labeled("status", get("status"), True))
 
-            if category == "procedures":
-                parts = []
-                procedure_code = getattr(item, "procedure_code", None)
-                status = getattr(item, "status", None)
-
-                if procedure_code:
-                    parts.append(f"Code: {procedure_code}")
-                if status:
-                    parts.append(f"Status: {status}")
-
-                return " | ".join(parts) if parts else "Procedure details"
-
-            if category == "lab_results":
-                parts = []
-                test_type = getattr(item, "test_type", None)
-                labs_result = getattr(item, "labs_result", None)
-                status = getattr(item, "status", None)
-
-                if test_type:
-                    parts.append(f"Type: {test_type}")
-                if labs_result:
-                    parts.append(f"Result: {labs_result}")
-                if status:
-                    parts.append(f"Status: {status}")
-
-                return " | ".join(parts) if parts else "Lab result details"
-
-            if category == "immunizations":
-                parts = []
-                site = getattr(item, "site", None)
-                lot_number = getattr(item, "lot_number", None)
-                manufacturer = getattr(item, "manufacturer", None)
-
-                if site:
-                    parts.append(f"Site: {site}")
-                if manufacturer:
-                    parts.append(f"Manufacturer: {manufacturer}")
-                if lot_number:
-                    parts.append(f"Lot: {lot_number}")
-
-                return " | ".join(parts) if parts else "Immunization details"
-
-            if category == "treatments":
-                parts = []
-                dosage = getattr(item, "dosage", None)
-                frequency = getattr(item, "frequency", None)
-                status = getattr(item, "status", None)
-
-                if dosage:
-                    parts.append(f"Dosage: {dosage}")
-                if frequency:
-                    parts.append(f"Frequency: {frequency}")
-                if status:
-                    parts.append(f"Status: {status}")
-
-                return " | ".join(parts) if parts else "Treatment details"
-
-            if category == "vitals":
+            elif category == "vitals":
                 return self._format_vitals_info(
                     item, unit_system=self._user_unit_system
                 )
 
-            if category == "encounters":
-                parts = []
-                reason = getattr(item, "reason", None)
-                visit_type = getattr(item, "visit_type", None)
-                diagnosis = getattr(item, "diagnosis", None)
-                chief_complaint = getattr(item, "chief_complaint", None)
+            elif category == "encounters":
+                if get("reason"):
+                    parts.append(labeled("reason", get("reason")))
+                if get("visit_type"):
+                    parts.append(labeled("type", get("visit_type"), True))
+                if get("diagnosis"):
+                    parts.append(labeled("diagnosis", get("diagnosis")))
+                elif get("chief_complaint"):
+                    parts.append(labeled("chief_complaint", get("chief_complaint")))
 
-                if reason:
-                    parts.append(f"Reason: {reason}")
-                if visit_type:
-                    parts.append(f"Type: {visit_type}")
-                if diagnosis:
-                    parts.append(f"Diagnosis: {diagnosis}")
-                elif chief_complaint:
-                    parts.append(f"Complaint: {chief_complaint}")
+            elif category == "allergies":
+                if get("severity"):
+                    parts.append(labeled("severity", get("severity"), True))
+                if get("reaction"):
+                    parts.append(labeled("reaction", get("reaction")))
 
-                return " | ".join(parts) if parts else "Visit details"
+            elif category == "practitioners":
+                if get("practice"):
+                    parts.append(labeled("practice", get("practice")))
+                if get("specialty"):
+                    parts.append(labeled("specialty", get("specialty")))
+                if get("phone_number"):
+                    parts.append(labeled("phone", get("phone_number")))
 
-            if category == "allergies":
-                parts = []
-                severity = getattr(item, "severity", None)
-                reaction = getattr(item, "reaction", None)
-
-                if severity:
-                    parts.append(f"Severity: {severity}")
-                if reaction:
-                    parts.append(f"Reaction: {reaction}")
-
-                return " | ".join(parts) if parts else "Allergy details"
-
-            if category == "practitioners":
-                parts = []
-                practice = getattr(item, "practice", None)
-                specialty = getattr(item, "specialty", None)
-                phone = getattr(item, "phone_number", None)
-
-                if practice:
-                    parts.append(f"Practice: {practice}")
-                if specialty:
-                    parts.append(f"Specialty: {specialty}")
-                if phone:
-                    parts.append(f"Phone: {phone}")
-
-                return " | ".join(parts) if parts else "Practitioner details"
-
-            if category == "pharmacies":
-                parts = []
-                brand = getattr(item, "brand", None)
-                address = getattr(item, "address", None)
-                phone = getattr(item, "phone_number", None)
-
-                if brand:
-                    parts.append(f"Brand: {brand}")
+            elif category == "pharmacies":
+                if get("brand"):
+                    parts.append(labeled("brand", get("brand")))
+                address = get("address")
                 if address:
                     # Truncate long addresses
-                    addr_display = (
-                        address[:50] + "..." if len(address) > 50 else address
-                    )
-                    parts.append(addr_display)
-                if phone:
-                    parts.append(f"Phone: {phone}")
+                    parts.append(address[:50] + "..." if len(address) > 50 else address)
+                if get("phone_number"):
+                    parts.append(labeled("phone", get("phone_number")))
 
-                return " | ".join(parts) if parts else "Pharmacy details"
+            elif category == "emergency_contacts":
+                if get("relationship"):
+                    parts.append(t.value(get("relationship")))
+                if get("phone_number"):
+                    parts.append(labeled("phone", get("phone_number")))
 
-            if category == "emergency_contacts":
-                parts = []
-                relationship = getattr(item, "relationship", None)
-                phone = getattr(item, "phone_number", None)
+            elif category == "family_history":
+                parts.extend(self._family_member_info(item))
 
-                if relationship:
-                    parts.append(relationship)
-                if phone:
-                    parts.append(f"Phone: {phone}")
-
-                return " | ".join(parts) if parts else "Contact details"
-
-            if category == "family_history":
-                parts = []
-                relationship = getattr(item, "relationship", None)
-                birth_year = getattr(item, "birth_year", None)
-                is_deceased = getattr(item, "is_deceased", None)
-
-                if relationship:
-                    parts.append(relationship)
-                if birth_year:
-                    age_info = f"Born {birth_year}"
-                    if is_deceased:
-                        death_year = getattr(item, "death_year", None)
-                        if death_year:
-                            age_info += f", died {death_year}"
-                        else:
-                            age_info += ", deceased"
-                    parts.append(age_info)
-                elif is_deceased:
-                    parts.append("Deceased")
-
-                # Try to get condition count from related conditions
-                try:
-                    condition_count = (
-                        self.db.query(FamilyCondition)
-                        .filter(FamilyCondition.family_member_id == item.id)
-                        .count()
-                    )
-                    if condition_count > 0:
-                        parts.append(
-                            f"{condition_count} medical condition{'s' if condition_count != 1 else ''}"
-                        )
-                except Exception:
-                    # If we can't get conditions, don't add to parts
-                    pass
-
-                return " | ".join(parts) if parts else "Family member details"
-
-            if category == "symptoms":
-                parts = []
-                category_val = getattr(item, "category", None)
-                status = getattr(item, "status", None)
-                is_chronic = getattr(item, "is_chronic", None)
-                typical_triggers = getattr(item, "typical_triggers", None)
-
-                if category_val:
-                    parts.append(f"Category: {category_val}")
-                if status:
-                    parts.append(f"Status: {status}")
-                if is_chronic:
-                    parts.append("Chronic")
+            elif category == "symptoms":
+                if get("category"):
+                    parts.append(labeled("category", get("category"), True))
+                if get("status"):
+                    parts.append(labeled("status", get("status"), True))
+                if get("is_chronic"):
+                    parts.append(t.field("chronic"))
+                typical_triggers = get("typical_triggers")
                 if typical_triggers:
                     if isinstance(typical_triggers, (list, tuple)):
-                        triggers_text = ", ".join(str(t) for t in typical_triggers)
+                        triggers_text = ", ".join(str(x) for x in typical_triggers)
                     else:
                         triggers_text = str(typical_triggers)
-                    triggers_display = (
-                        triggers_text[:50] + "..."
-                        if len(triggers_text) > 50
-                        else triggers_text
+                    parts.append(
+                        labeled(
+                            "triggers",
+                            triggers_text[:50] + "..."
+                            if len(triggers_text) > 50
+                            else triggers_text,
+                        )
                     )
-                    parts.append(f"Triggers: {triggers_display}")
 
-                return " | ".join(parts) if parts else "Symptom details"
-
-            if category == "injuries":
-                parts = []
-                body_part = getattr(item, "body_part", None)
-                severity = getattr(item, "severity", None)
-                status = getattr(item, "status", None)
-                mechanism = getattr(item, "mechanism", None)
-
-                if body_part:
-                    parts.append(f"Body Part: {body_part}")
-                if severity:
-                    parts.append(f"Severity: {severity}")
-                if status:
-                    parts.append(f"Status: {status}")
+            elif category == "injuries":
+                if get("body_part"):
+                    parts.append(labeled("body_area", get("body_part")))
+                if get("severity"):
+                    parts.append(labeled("severity", get("severity"), True))
+                if get("status"):
+                    parts.append(labeled("status", get("status"), True))
+                mechanism = get("mechanism")
                 if mechanism:
-                    mech_display = (
-                        mechanism[:30] + "..."
-                        if len(str(mechanism)) > 30
-                        else mechanism
+                    parts.append(
+                        labeled(
+                            "cause",
+                            mechanism[:30] + "..."
+                            if len(str(mechanism)) > 30
+                            else mechanism,
+                        )
                     )
-                    parts.append(f"Cause: {mech_display}")
 
-                return " | ".join(parts) if parts else "Injury details"
+            elif category == "insurance":
+                if get("insurance_type"):
+                    parts.append(t.value(get("insurance_type")))
+                if get("plan_name"):
+                    parts.append(labeled("plan", get("plan_name")))
+                if get("member_id"):
+                    parts.append(labeled("member_id", get("member_id")))
+                if get("is_primary"):
+                    parts.append(t.field("primary"))
 
-            if category == "insurance":
-                parts = []
-                insurance_type = getattr(item, "insurance_type", None)
-                plan_name = getattr(item, "plan_name", None)
-                member_id = getattr(item, "member_id", None)
-                is_primary = getattr(item, "is_primary", None)
+            elif category == "medical_equipment":
+                if get("equipment_type"):
+                    parts.append(labeled("type", get("equipment_type")))
+                if get("manufacturer"):
+                    parts.append(labeled("manufacturer", get("manufacturer")))
+                if get("status"):
+                    parts.append(labeled("status", get("status"), True))
 
-                if insurance_type:
-                    parts.append(insurance_type)
-                if plan_name:
-                    parts.append(f"Plan: {plan_name}")
-                if member_id:
-                    parts.append(f"Member ID: {member_id}")
-                if is_primary:
-                    parts.append("Primary")
+            else:
+                return f"{category.replace('_', ' ').title()} record"
 
-                return " | ".join(parts) if parts else "Insurance details"
-
-            return f"{category.replace('_', ' ').title()} record"
+            return " | ".join(parts) if parts else t.text("no_details")
         except Exception:
-            return "Details not available"
+            return t.text("details_unavailable")
+
+    def _family_member_info(self, item: Any) -> List[str]:
+        """Detail parts for a family history record"""
+        t = self._translator
+        parts: List[str] = []
+        if getattr(item, "relationship", None):
+            parts.append(t.relationship(item.relationship))
+        birth_year = getattr(item, "birth_year", None)
+        is_deceased = getattr(item, "is_deceased", None)
+        death_year = getattr(item, "death_year", None)
+        if birth_year:
+            if is_deceased and death_year:
+                parts.append(t.text("born_died", birth=birth_year, death=death_year))
+            elif is_deceased:
+                parts.append(t.text("born_deceased", year=birth_year))
+            else:
+                parts.append(t.text("born", year=birth_year))
+        elif is_deceased:
+            parts.append(t.text("deceased"))
+
+        # Try to get condition count from related conditions
+        try:
+            condition_count = (
+                self.db.query(FamilyCondition)
+                .filter(FamilyCondition.family_member_id == item.id)
+                .count()
+            )
+            if condition_count > 0:
+                parts.append(t.text("medical_condition_count", count=condition_count))
+        except Exception:
+            # If we can't get conditions, don't add to parts
+            pass
+        return parts
 
     def _format_vitals_info(self, vital: Vitals, unit_system: str = "imperial") -> str:
         """Format vital signs into a readable summary with unit conversion"""
+        t = self._translator
         parts = []
         unit_labels = UnitConverter.get_unit_labels(unit_system)
         if hasattr(vital, "blood_pressure_systolic") and vital.blood_pressure_systolic:
             parts.append(
-                f"BP: {vital.blood_pressure_systolic}/{vital.blood_pressure_diastolic or '?'}"
+                f"{t.field('blood_pressure')}: {vital.blood_pressure_systolic}/{vital.blood_pressure_diastolic or '?'}"
             )
         if hasattr(vital, "heart_rate") and vital.heart_rate:
-            parts.append(f"HR: {vital.heart_rate}")
+            parts.append(f"{t.field('heart_rate')}: {vital.heart_rate}")
         if hasattr(vital, "temperature") and vital.temperature:
             temp = vital.temperature
             if unit_system == "metric":
                 temp = UnitConverter.fahrenheit_to_celsius(temp)
-            parts.append(f"Temp: {temp}{unit_labels['temperature']}")
-        return " | ".join(parts) if parts else "No measurements"
+            parts.append(
+                f"{t.field('temperature')}: {temp}{unit_labels['temperature']}"
+            )
+        return " | ".join(parts) if parts else t.text("no_measurements")
 
     def _get_last_update_timestamp(self, patient_id: int) -> Optional[datetime]:
         """Get the most recent update timestamp across all categories"""
@@ -1047,13 +984,16 @@ class CustomReportService:
         date_format: str = "mdy",
     ) -> List[Dict[str, Any]]:
         """Generate trend chart images and collect their data for PDF inclusion."""
-        from app.services.report_translations import get_translator
+        from app.services.report_fonts import CJK_LANGUAGES, find_cjk_font_path
         from app.services.trend_chart_generator import TrendChartGenerator
         from app.services.trend_data_fetcher import TrendDataFetcher
 
         fetcher = TrendDataFetcher(self.db)
-        generator = TrendChartGenerator()
         translator = get_translator(language, date_format)
+        generator = TrendChartGenerator(
+            translator=translator,
+            font_path=find_cjk_font_path() if language in CJK_LANGUAGES else None,
+        )
         chart_results = []
 
         # Build a unified list of (label, fetch_fn, render_fn, chart_type) tasks

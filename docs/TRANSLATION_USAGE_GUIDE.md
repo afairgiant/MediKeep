@@ -169,7 +169,7 @@ function FileUploader() {
 - **medical** - All medical form fields (14 forms)
 - **navigation** - Menu items, page titles, sections
 - **notifications** - Toasts, notification channels and events
-- **reportPdf** - Generated PDF report text
+- **reportPdf** - Generated PDF report text (sections: `categories`, `fields`, `insuranceDetails`, `relationships`, `values`, `report`). Stored enum values (status, severity, type, ...) are translated at render time with `ReportTranslator.value()` from the `values` section; unknown or free-text values are printed unchanged.
 - **reports** - Custom report builder, export page
 - **settings** - User, notification, and Paperless settings
 - **shared** - Field and label definitions reused across namespaces
