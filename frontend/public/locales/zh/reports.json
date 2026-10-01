@@ -3,17 +3,25 @@
     "buttons": {
       "addRecords": "添加医疗记录",
       "clearSelections": "清除所有选择",
-      "generateReport": "生成报告（{{count}} 条记录）",
-      "generateReport_one": "生成报告（{{count}} 条记录）",
-      "generateReport_other": "生成报告（{{count}} 条记录）",
-      "generateReportChartsOnly": "生成报告（{{chartCount}} 个图表）",
-      "generateReportWithCharts": "生成报告（{{recordCount}} 条记录，{{chartCount}} 个图表）",
+      "generateReportSummary": "生成报告（{{summary}}）",
       "selectAll": "选择所有记录",
       "selectAllRecordTypes": "选择所有记录类型"
     },
     "configuration": {
-      "description": "选择要包含在自定义报告中的医疗记录",
+      "description": "请在下方选择要包含的内容和项目，然后生成报告。您也可以在此加载已保存的模板或调整报告设置。",
       "title": "报告配置"
+    },
+    "counts": {
+      "charts_other": "{{count}} 个图表"
+    },
+    "flow": {
+      "chartsDescription": "添加要按时间绘制图表的生命体征或化验项目。",
+      "chooseDescription": "在医疗记录和趋势图之间切换。一份报告可以同时包含两者。",
+      "chooseTitle": "1. 选择要包含的内容",
+      "generateDescription": "请检查您的选择，然后生成报告。",
+      "generateTitle": "3. 生成报告",
+      "recordsDescription": "选择一个记录类型标签页，然后开启所需的单条记录，或一次性全选。",
+      "selectTitle": "2. 选择项目"
     },
     "icon": "📊",
     "loading": "正在加载报告生成器...",

@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Medizinische Datensätze hinzufügen",
       "clearSelections": "Alle Auswahlen löschen",
-      "generateReport": "Bericht erstellen ({{count}} Datensätze)",
-      "generateReport_one": "Bericht erstellen ({{count}} Datensatz)",
-      "generateReport_other": "Bericht erstellen ({{count}} Datensätze)",
-      "generateReportChartsOnly": "Bericht erstellen ({{chartCount}} Diagramme)",
-      "generateReportWithCharts": "Bericht erstellen ({{recordCount}} Datensätze, {{chartCount}} Diagramme)",
+      "generateReportSummary": "Bericht erstellen ({{summary}})",
       "selectAll": "Alle Datensätze auswählen",
       "selectAllRecordTypes": "Alle Datensatztypen auswählen"
     },
     "configuration": {
-      "description": "Wählen Sie medizinische Datensätze für Ihren individuellen Bericht aus",
+      "description": "Wählen Sie unten aus, was enthalten sein soll, und erstellen Sie dann Ihren Bericht. Hier können Sie auch eine gespeicherte Vorlage laden oder die Berichtseinstellungen anpassen.",
       "title": "Berichtkonfiguration"
+    },
+    "counts": {
+      "charts_one": "{{count}} Diagramm",
+      "charts_other": "{{count}} Diagramme"
+    },
+    "flow": {
+      "chartsDescription": "Fügen Sie die Vitalwerte oder Labortests hinzu, die im Zeitverlauf dargestellt werden sollen.",
+      "chooseDescription": "Wechseln Sie zwischen Krankenakten und Trenddiagrammen. Ein Bericht kann beides enthalten.",
+      "chooseTitle": "1. Auswählen, was enthalten sein soll",
+      "generateDescription": "Prüfen Sie Ihre Auswahl und erstellen Sie dann den Bericht.",
+      "generateTitle": "3. Bericht erstellen",
+      "recordsDescription": "Wählen Sie einen Datensatztyp-Tab und aktivieren Sie die gewünschten Datensätze oder wählen Sie alles auf einmal aus.",
+      "selectTitle": "2. Elemente auswählen"
     },
     "icon": "📊",
     "loading": "Berichtgenerator wird geladen...",

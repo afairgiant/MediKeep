@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Medische dossiers toevoegen",
       "clearSelections": "Alle selecties wissen",
-      "generateReport": "Rapport genereren ({{count}} dossiers)",
-      "generateReport_one": "Rapport genereren ({{count}} dossier)",
-      "generateReport_other": "Rapport genereren ({{count}} dossiers)",
-      "generateReportChartsOnly": "Rapport genereren ({{chartCount}} grafieken)",
-      "generateReportWithCharts": "Rapport genereren ({{recordCount}} dossiers, {{chartCount}} grafieken)",
+      "generateReportSummary": "Rapport genereren ({{summary}})",
       "selectAll": "Alle dossiers selecteren",
       "selectAllRecordTypes": "Alle recordtypen selecteren"
     },
     "configuration": {
-      "description": "Selecteer medische dossiers om op te nemen in uw aangepaste rapport",
+      "description": "Kies hieronder wat u wilt opnemen en selecteer items, en genereer vervolgens uw rapport. U kunt hier ook een opgeslagen sjabloon laden of de rapportinstellingen aanpassen.",
       "title": "Rapportconfiguratie"
+    },
+    "counts": {
+      "charts_one": "{{count}} grafiek",
+      "charts_other": "{{count}} grafieken"
+    },
+    "flow": {
+      "chartsDescription": "Voeg de vitale waarden of labtests toe die u in de tijd wilt weergeven.",
+      "chooseDescription": "Schakel tussen medische dossiers en trendgrafieken. Eén rapport kan beide bevatten.",
+      "chooseTitle": "1. Kies wat u wilt opnemen",
+      "generateDescription": "Controleer uw selectie en genereer vervolgens het rapport.",
+      "generateTitle": "3. Rapport genereren",
+      "recordsDescription": "Kies een tabblad met een recordtype en zet de gewenste records aan, of selecteer alles in één keer.",
+      "selectTitle": "2. Selecteer items"
     },
     "icon": "📊",
     "loading": "Rapportbouwer laden...",

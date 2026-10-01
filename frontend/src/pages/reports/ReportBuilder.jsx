@@ -35,10 +35,12 @@ import TemplateManager from '../../components/reports/TemplateManager';
 import { useCustomReports } from '../../hooks/useCustomReports';
 import { useReportTemplates } from '../../hooks/useReportTemplates';
 import logger from '../../services/logger';
+import { buildGenerateButtonLabel } from '../../utils/reportLabels';
 import { useTranslation } from 'react-i18next';
+import './ReportBuilder.css';
 
 const ReportBuilder = () => {
-  const { t } = useTranslation(['reports', 'common', 'shared']);
+  const { t, i18n } = useTranslation(['reports', 'common', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -289,21 +291,8 @@ const ReportBuilder = () => {
     setLoadedTemplate(null);
   }, [activeSegment, clearRecordSelections, clearTrendCharts]);
 
-  // Build generate button label
-  const getGenerateButtonLabel = () => {
-    if (selectedCount > 0 && trendChartCount > 0) {
-      return t('builder.buttons.generateReportWithCharts', {
-        recordCount: selectedCount,
-        chartCount: trendChartCount,
-      });
-    }
-    if (trendChartCount > 0) {
-      return t('builder.buttons.generateReportChartsOnly', {
-        chartCount: trendChartCount,
-      });
-    }
-    return t('builder.buttons.generateReport', { count: selectedCount });
-  };
+  const getGenerateButtonLabel = () =>
+    buildGenerateButtonLabel(t, i18n.language, selectedCount, trendChartCount);
 
   // Only block the whole page on the initial data load. Once dataSummary is
   // present, subsequent background loads (template fetch/delete) shouldn't
@@ -369,17 +358,6 @@ const ReportBuilder = () => {
               >
                 {t('shared:labels.settings')}
               </Button>
-
-              {hasSelections && (
-                <Button
-                  leftSection={<IconDownload size={16} />}
-                  onClick={generateReport}
-                  loading={isGenerating}
-                  disabled={!hasSelections}
-                >
-                  {getGenerateButtonLabel()}
-                </Button>
-              )}
             </Group>
           </Group>
 
@@ -407,75 +385,90 @@ const ReportBuilder = () => {
               />
             </Box>
           )}
+        </Paper>
 
-          {/* Selection controls */}
-          <Group justify="space-between" mb="md">
-            {activeSegment === 'records' && (
+        {/* Step 1: choose between records and trend charts */}
+        <Stack gap="xs">
+          <Title order={4}>{t('builder.flow.chooseTitle')}</Title>
+          <Text c="dimmed" size="sm">
+            {t('builder.flow.chooseDescription')}
+          </Text>
+          <SegmentedControl
+            value={activeSegment}
+            onChange={setActiveSegment}
+            data={[
+              {
+                value: 'records',
+                label: (
+                  <Group gap={6} wrap="nowrap">
+                    <IconNotes size={16} />
+                    <span>{t('shared:labels.medicalRecords')}</span>
+                    {selectedCount > 0 && (
+                      <Badge size="xs" variant="filled" color="blue">
+                        {selectedCount}
+                      </Badge>
+                    )}
+                  </Group>
+                ),
+              },
+              {
+                value: 'trendCharts',
+                label: (
+                  <Group gap={6} wrap="nowrap">
+                    <IconChartLine size={16} />
+                    <span>{t('shared:labels.trendCharts')}</span>
+                    {trendChartCount > 0 && (
+                      <Badge size="xs" variant="filled" color="teal">
+                        {trendChartCount}
+                      </Badge>
+                    )}
+                  </Group>
+                ),
+              },
+            ]}
+            fullWidth
+            size="md"
+            className="report-view-toggle"
+          />
+        </Stack>
+
+        {/* Step 2: select items, with the bulk controls right above them */}
+        <Stack gap="xs">
+          <Title order={4}>{t('builder.flow.selectTitle')}</Title>
+          <Text c="dimmed" size="sm">
+            {activeSegment === 'records'
+              ? t('builder.flow.recordsDescription')
+              : t('builder.flow.chartsDescription')}
+          </Text>
+          <Group justify="space-between">
+            {activeSegment === 'records' ? (
               <Button
                 size="xs"
                 variant="subtle"
                 color="blue"
                 onClick={() => selectAllCategories(dataSummary?.categories)}
-                disabled={
-                  !dataSummary?.categories ||
-                  Object.keys(dataSummary.categories).length === 0
-                }
+                disabled={availableCategories.length === 0}
               >
                 {t('builder.buttons.selectAllRecordTypes')}
               </Button>
+            ) : (
+              <span />
             )}
-            {(activeSegment === 'trendCharts'
-              ? trendChartCount > 0
-              : selectedCount > 0) && (
-              <Button
-                size="xs"
-                variant="subtle"
-                color="red"
-                onClick={handleClearSelections}
-              >
-                {t('builder.buttons.clearSelections')}
-              </Button>
-            )}
+            <Button
+              size="xs"
+              variant="subtle"
+              color="red"
+              onClick={handleClearSelections}
+              disabled={
+                activeSegment === 'trendCharts'
+                  ? trendChartCount === 0
+                  : selectedCount === 0
+              }
+            >
+              {t('builder.buttons.clearSelections')}
+            </Button>
           </Group>
-        </Paper>
-
-        {/* Segment control for switching between Records and Trend Charts */}
-        <SegmentedControl
-          value={activeSegment}
-          onChange={setActiveSegment}
-          data={[
-            {
-              value: 'records',
-              label: (
-                <Group gap={6} wrap="nowrap">
-                  <IconNotes size={16} />
-                  <span>{t('shared:labels.medicalRecords')}</span>
-                  {selectedCount > 0 && (
-                    <Badge size="xs" variant="filled" color="blue">
-                      {selectedCount}
-                    </Badge>
-                  )}
-                </Group>
-              ),
-            },
-            {
-              value: 'trendCharts',
-              label: (
-                <Group gap={6} wrap="nowrap">
-                  <IconChartLine size={16} />
-                  <span>{t('shared:labels.trendCharts')}</span>
-                  {trendChartCount > 0 && (
-                    <Badge size="xs" variant="filled" color="teal">
-                      {trendChartCount}
-                    </Badge>
-                  )}
-                </Group>
-              ),
-            },
-          ]}
-          fullWidth
-          size="md"
-        />
+        </Stack>
 
         {/* Medical Records segment */}
         {activeSegment === 'records' && (
@@ -534,6 +527,24 @@ const ReportBuilder = () => {
             />
           </Paper>
         )}
+
+        {/* Step 3: generate */}
+        <Stack gap="xs">
+          <Title order={4}>{t('builder.flow.generateTitle')}</Title>
+          <Text c="dimmed" size="sm">
+            {t('builder.flow.generateDescription')}
+          </Text>
+          <Group>
+            <Button
+              leftSection={<IconDownload size={16} />}
+              onClick={generateReport}
+              loading={isGenerating}
+              disabled={!hasSelections}
+            >
+              {getGenerateButtonLabel()}
+            </Button>
+          </Group>
+        </Stack>
       </Stack>
 
       {/* Report Settings Modal */}

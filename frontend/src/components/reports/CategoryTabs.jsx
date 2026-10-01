@@ -2,6 +2,7 @@ import { Tabs, Badge, Text, Stack, Center } from '@mantine/core';
 import { IconFileDescription } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import RecordSelector from './RecordSelector';
+import './CategoryTabs.css';
 
 /**
  * CategoryTabs Component
@@ -45,7 +46,12 @@ const CategoryTabs = ({
   }
 
   return (
-    <Tabs value={activeTab} onChange={onTabChange} variant="outline">
+    <Tabs
+      value={activeTab}
+      onChange={onTabChange}
+      variant="unstyled"
+      className="record-type-tabs"
+    >
       <Tabs.List>
         {categories.map(category => {
           const categoryData = dataSummary?.categories?.[category];
@@ -57,6 +63,7 @@ const CategoryTabs = ({
             <Tabs.Tab
               key={category}
               value={category}
+              className="record-type-tab"
               rightSection={
                 selectedInCategory > 0 ? (
                   <Badge size="sm" color="green" variant="filled">
@@ -66,7 +73,7 @@ const CategoryTabs = ({
               }
             >
               <Stack gap={2} align="center">
-                <Text size="sm" fw={500}>
+                <Text size="sm" fw={500} className="record-type-tab-name">
                   {categoryDisplayNames[category] ||
                     formatCategoryName(category)}
                 </Text>

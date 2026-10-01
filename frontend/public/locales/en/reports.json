@@ -3,17 +3,26 @@
     "buttons": {
       "addRecords": "Add Medical Records",
       "clearSelections": "Clear All Selections",
-      "generateReport": "Generate Report ({{count}} records)",
-      "generateReport_one": "Generate Report ({{count}} record)",
-      "generateReport_other": "Generate Report ({{count}} records)",
-      "generateReportChartsOnly": "Generate Report ({{chartCount}} charts)",
-      "generateReportWithCharts": "Generate Report ({{recordCount}} records, {{chartCount}} charts)",
+      "generateReportSummary": "Generate Report ({{summary}})",
       "selectAll": "Select All Records",
       "selectAllRecordTypes": "Select All Record Types"
     },
     "configuration": {
-      "description": "Select medical records to include in your custom report",
+      "description": "Choose what to include and select items below, then generate your report. You can also load a saved template or adjust report settings here.",
       "title": "Report Configuration"
+    },
+    "counts": {
+      "charts_one": "{{count}} chart",
+      "charts_other": "{{count}} charts"
+    },
+    "flow": {
+      "chartsDescription": "Add the vitals or lab tests you want charted over time.",
+      "chooseDescription": "Switch between medical records and trend charts. A single report can include both.",
+      "chooseTitle": "1. Choose what to include",
+      "generateDescription": "Review your selections, then generate the report.",
+      "generateTitle": "3. Generate Report",
+      "recordsDescription": "Pick a record type tab, then switch on the individual records you want, or select everything at once.",
+      "selectTitle": "2. Select items"
     },
     "icon": "📊",
     "loading": "Loading report builder...",
