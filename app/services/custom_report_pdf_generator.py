@@ -5,11 +5,13 @@ This module provides a dedicated PDF generator for custom medical reports
 with proper formatting and data display.
 """
 
+import html
 import io
 import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from xml.sax.saxutils import escape as xml_escape
 
 from PIL import Image as PILImage
 from reportlab.lib import colors
@@ -36,6 +38,42 @@ from app.services.export_service import UnitConverter
 from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
+
+
+def escape_markup_values(value: Any) -> Any:
+    """Return a copy of ``value`` with every string escaped for ReportLab markup.
+
+    ReportLab's Paragraph parses an XML-like mini-language (<b>, <a href>,
+    <img>, <font>...), so user-supplied text (names, notes, OCR'd lab text,
+    shared practitioner/pharmacy names) must be escaped before it is placed in
+    a Paragraph. Escaping the report data once, up front, covers every
+    formatter. Dict keys and non-string values are left alone.
+    """
+    if isinstance(value, str):
+        return xml_escape(value)
+    if isinstance(value, dict):
+        return {k: escape_markup_values(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [escape_markup_values(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(escape_markup_values(v) for v in value)
+    return value
+
+
+class _PlainTextTable(Table):
+    """Table whose string cells are drawn literally.
+
+    Plain string cells are not parsed as markup, so the escaping applied to
+    the report data would show up as "&amp;". Undo it for those cells;
+    Paragraph cells are left as they are.
+    """
+
+    def __init__(self, data, *args, **kwargs):
+        cleaned = [
+            [html.unescape(cell) if isinstance(cell, str) else cell for cell in row]
+            for row in data
+        ]
+        super().__init__(cleaned, *args, **kwargs)
 
 
 class CustomReportPDFGenerator:
@@ -385,6 +423,9 @@ class CustomReportPDFGenerator:
         if output_buffer is None:
             output_buffer = io.BytesIO()
 
+        # User-supplied text goes into ReportLab Paragraph markup: escape it once
+        report_data = escape_markup_values(report_data)
+
         # Apply user preferences for this report
         language = report_data.get("language", "en")
         date_format = report_data.get("date_format", "mdy")
@@ -564,7 +605,7 @@ class CustomReportPDFGenerator:
             )
 
         if patient_info:
-            table = Table(patient_info, colWidths=[1 * inch, 3 * inch])
+            table = _PlainTextTable(patient_info, colWidths=[1 * inch, 3 * inch])
             table.setStyle(
                 TableStyle(
                     [
@@ -679,7 +720,7 @@ class CustomReportPDFGenerator:
             # Create a smaller, less prominent alert box with paragraphs
             if emergency_paragraphs:
                 emergency_data = [[para] for para in emergency_paragraphs]
-                emergency_table = Table(emergency_data, colWidths=[6.5 * inch])
+                emergency_table = _PlainTextTable(emergency_data, colWidths=[6.5 * inch])
                 emergency_table.setStyle(
                     TableStyle(
                         [
@@ -776,7 +817,7 @@ class CustomReportPDFGenerator:
         # Create table with paragraph objects instead of HTML strings
         summary_table_data = [[col1_paragraphs, col2_paragraphs, col3_paragraphs]]
 
-        summary_table = Table(
+        summary_table = _PlainTextTable(
             summary_table_data, colWidths=[2.2 * inch, 2.2 * inch, 2.1 * inch]
         )
         summary_table.setStyle(
@@ -880,7 +921,7 @@ class CustomReportPDFGenerator:
                 layout_data = []
 
                 # Create info table first
-                info_table = Table(patient_info, colWidths=[1.2 * inch, 3.0 * inch])
+                info_table = _PlainTextTable(patient_info, colWidths=[1.2 * inch, 3.0 * inch])
                 info_table.setStyle(
                     TableStyle(
                         [
@@ -898,7 +939,7 @@ class CustomReportPDFGenerator:
                 # Create main layout table: [photo, info]
                 layout_data.append([photo_element, info_table])
 
-                layout_table = Table(layout_data, colWidths=[1.8 * inch, 4.7 * inch])
+                layout_table = _PlainTextTable(layout_data, colWidths=[1.8 * inch, 4.7 * inch])
                 layout_table.setStyle(
                     TableStyle(
                         [
@@ -916,7 +957,7 @@ class CustomReportPDFGenerator:
                 logger.debug("No profile picture found, using standard layout")
                 # Fallback to standard layout without photo
                 if patient_info:
-                    table = Table(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
+                    table = _PlainTextTable(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
                     table.setStyle(
                         TableStyle(
                             [
@@ -939,7 +980,7 @@ class CustomReportPDFGenerator:
         else:
             # Standard layout without photo
             if patient_info:
-                table = Table(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
+                table = _PlainTextTable(patient_info, colWidths=[1.5 * inch, 4.5 * inch])
                 table.setStyle(
                     TableStyle(
                         [
@@ -1058,7 +1099,7 @@ class CustomReportPDFGenerator:
                 breakdown_data.append([display_name, str(count)])
 
             if breakdown_data:
-                table = Table(breakdown_data, colWidths=[3 * inch, 1 * inch])
+                table = _PlainTextTable(breakdown_data, colWidths=[3 * inch, 1 * inch])
                 table.setStyle(
                     TableStyle(
                         [
@@ -1363,7 +1404,7 @@ class CustomReportPDFGenerator:
                 details.append([f"{t.field('recorded_by')}:", str(recorded_by)])
 
             if details:
-                table = Table(details, colWidths=[2.0 * inch, 4.0 * inch])
+                table = _PlainTextTable(details, colWidths=[2.0 * inch, 4.0 * inch])
                 table.setStyle(self._get_detail_table_style())
                 story.append(table)
 
@@ -2650,7 +2691,7 @@ class CustomReportPDFGenerator:
                     details.append([f"{display_key}:", str(value)])
 
             if details:
-                table = Table(details, colWidths=[1.5 * inch, 4.5 * inch])
+                table = _PlainTextTable(details, colWidths=[1.5 * inch, 4.5 * inch])
                 table.setStyle(self._get_detail_table_style())
                 story.append(table)
 
@@ -3390,7 +3431,7 @@ class CustomReportPDFGenerator:
                 if stats_table_data:
                     num_cols = len(stats_table_data[0])
                     col_width = 6.0 * inch / num_cols
-                    stats_table = Table(
+                    stats_table = _PlainTextTable(
                         stats_table_data,
                         colWidths=[col_width] * num_cols,
                     )
