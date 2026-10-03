@@ -304,7 +304,7 @@ export function SearchFilterSidebar({
       : []),
     { value: 'date_desc', label: t('search.sortDateNewest') },
     { value: 'date_asc', label: t('search.sortDateOldest') },
-    { value: 'title', label: t('search.sortTitle') },
+    { value: 'title', label: t('shared:labels.name') },
   ];
 
   // ----- Collapsed strip -----

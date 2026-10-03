@@ -139,6 +139,13 @@ describe('injury search results', () => {
     expect(getItemTitle('injury', {}, t)).toBe('search.fallbacks.injury');
   });
 
+  it('only references search.types keys that exist in the locale files', () => {
+    const searchTypeKeys = Object.values(TYPE_LABEL_KEY_MAP).filter(key =>
+      key.startsWith('search.types.')
+    );
+    expect(searchTypeKeys.sort()).toEqual(['search.types.encounters']);
+  });
+
   it('links to the injuries page', () => {
     expect(searchService.getRecordRoute('injury', 3)).toBe('/injuries?view=3');
     expect(getTypeLabel(t, 'injury')).toBe('shared:categories.injuries');

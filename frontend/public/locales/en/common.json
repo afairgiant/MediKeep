@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Date (Newest First)",
     "sortDateOldest": "Date (Oldest First)",
     "sortRelevance": "Relevance",
-    "sortTitle": "Title",
     "subtitle": "Search across all medical records",
     "subtitles": {
       "result": "Result: {{value}}"

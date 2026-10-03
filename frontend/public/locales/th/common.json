@@ -1093,7 +1093,6 @@
     "sortDateNewest": "วันที่ (ใหม่ที่สุดก่อน)",
     "sortDateOldest": "วันที่ (เก่าที่สุดก่อน)",
     "sortRelevance": "ความเกี่ยวข้อง",
-    "sortTitle": "หัวข้อ",
     "subtitle": "ค้นหาข้ามบันทึกการแพทย์ทั้งหมด",
     "subtitles": {
       "result": "ผลลัพธ์: {{value}}"

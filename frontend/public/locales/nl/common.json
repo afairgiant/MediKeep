@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Datum (Nieuwste eerst)",
     "sortDateOldest": "Datum (Oudste eerst)",
     "sortRelevance": "Relevantie",
-    "sortTitle": "Titel",
     "subtitle": "Zoek in alle medische dossiers",
     "subtitles": {
       "result": "Resultaat: {{value}}"

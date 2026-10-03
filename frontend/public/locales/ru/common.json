@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Дате (сначала новые)",
     "sortDateOldest": "Дате (сначала старые)",
     "sortRelevance": "Релевантности",
-    "sortTitle": "Названию",
     "subtitle": "Поиск по всем медицинским записям",
     "subtitles": {
       "result": "Результат: {{value}}"

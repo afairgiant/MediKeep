@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Datum (nyaste först)",
     "sortDateOldest": "Datum (äldsta först)",
     "sortRelevance": "Relevans",
-    "sortTitle": "Titel",
     "subtitle": "Sök i alla medicinska journaler",
     "subtitles": {
       "result": "Resultat: {{value}}"
