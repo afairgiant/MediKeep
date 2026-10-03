@@ -14,6 +14,7 @@ import {
   Loader,
   Center,
   Tooltip,
+  Pagination,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -27,14 +28,16 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { formatTimeToAmPm } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import OccurrenceFields from './OccurrenceFields';
 import logger from '../../../services/logger';
 import { symptomApi } from '../../../services/api/symptomApi';
 import {
   SYMPTOM_STATUS_COLORS,
   SYMPTOM_SEVERITY_COLORS,
 } from '../../../constants/symptomEnums';
+import { OCCURRENCE_SEVERITY_LABEL_KEYS } from '../../../utils/medicalFormFields/symptomOccurrence';
+import { usePagination } from '../../../hooks/usePagination';
 
 const SymptomViewModal = ({
   isOpen,
@@ -48,9 +51,11 @@ const SymptomViewModal = ({
   disableEdit = false,
   disableEditTooltip,
 }) => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['common', 'shared', 'medical']);
   const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
+  const { page, setPage, paginateData, totalPages, resetPage, clampPage } =
+    usePagination();
   const [occurrences, setOccurrences] = useState([]);
   const [loadingOccurrences, setLoadingOccurrences] = useState(false);
 
@@ -58,8 +63,13 @@ const SymptomViewModal = ({
   useEffect(() => {
     if (isOpen) {
       setActiveTab('overview');
+      resetPage();
     }
-  }, [isOpen, symptom?.id]);
+  }, [isOpen, symptom?.id, resetPage]);
+
+  useEffect(() => {
+    clampPage(occurrences.length);
+  }, [occurrences.length, clampPage]);
 
   // Fetch occurrences when symptom changes or modal opens
   useEffect(() => {
@@ -134,6 +144,9 @@ const SymptomViewModal = ({
     occurrenceDates.length > 0 ? new Date(Math.min(...occurrenceDates)) : null;
   const lastOccurrenceDate =
     occurrenceDates.length > 0 ? new Date(Math.max(...occurrenceDates)) : null;
+
+  const episodePageCount = totalPages(totalOccurrences);
+  const visibleOccurrences = paginateData(occurrences);
 
   return (
     <Modal
@@ -426,7 +439,7 @@ const SymptomViewModal = ({
                   </Paper>
                 ) : (
                   <Stack gap="sm">
-                    {occurrences.map(occurrence => (
+                    {visibleOccurrences.map(occurrence => (
                       <Paper key={occurrence.id} p="md" withBorder>
                         <Group justify="space-between" align="flex-start">
                           <Stack gap="xs" style={{ flex: 1 }}>
@@ -440,7 +453,12 @@ const SymptomViewModal = ({
                                 }
                                 size="sm"
                               >
-                                {occurrence.severity}
+                                {t(
+                                  OCCURRENCE_SEVERITY_LABEL_KEYS[
+                                    occurrence.severity
+                                  ],
+                                  occurrence.severity
+                                )}
                               </Badge>
                               {occurrence.pain_scale !== null && (
                                 <Badge color="red" variant="outline" size="sm">
@@ -450,78 +468,10 @@ const SymptomViewModal = ({
                               )}
                             </Group>
 
-                            {occurrence.occurrence_time && (
-                              <Text size="xs" c="dimmed">
-                                {t('shared:labels.time', 'Time')}:{' '}
-                                {formatTimeToAmPm(occurrence.occurrence_time)}
-                              </Text>
-                            )}
-
-                            {occurrence.duration && (
-                              <Text size="xs" c="dimmed">
-                                {t('shared:labels.duration', 'Duration')}:{' '}
-                                {occurrence.duration}
-                              </Text>
-                            )}
-
-                            {occurrence.location && (
-                              <Text size="xs" c="dimmed">
-                                {t('shared:labels.location', 'Location')}:{' '}
-                                {occurrence.location}
-                              </Text>
-                            )}
-
-                            {occurrence.impact_level && (
-                              <Text size="xs" c="dimmed">
-                                {t('symptoms.viewModal.impact', 'Impact')}:{' '}
-                                {occurrence.impact_level.replace('_', ' ')}
-                              </Text>
-                            )}
-
-                            {occurrence.triggers &&
-                              occurrence.triggers.length > 0 && (
-                                <Group gap="xs">
-                                  <Text size="xs" c="dimmed">
-                                    {t(
-                                      'symptoms.viewModal.triggers',
-                                      'Triggers'
-                                    )}
-                                    :
-                                  </Text>
-                                  {occurrence.triggers.map((trigger, idx) => (
-                                    <Badge key={idx} size="xs" variant="dot">
-                                      {trigger}
-                                    </Badge>
-                                  ))}
-                                </Group>
-                              )}
-
-                            {occurrence.relief_methods &&
-                              occurrence.relief_methods.length > 0 && (
-                                <Group gap="xs">
-                                  <Text size="xs" c="dimmed">
-                                    {t('symptoms.viewModal.relief', 'Relief')}:
-                                  </Text>
-                                  {occurrence.relief_methods.map(
-                                    (method, idx) => (
-                                      <Badge
-                                        key={idx}
-                                        size="xs"
-                                        color="green"
-                                        variant="dot"
-                                      >
-                                        {method}
-                                      </Badge>
-                                    )
-                                  )}
-                                </Group>
-                              )}
-
-                            {occurrence.notes && (
-                              <Text size="xs" lineClamp={2}>
-                                {occurrence.notes}
-                              </Text>
-                            )}
+                            <OccurrenceFields
+                              occurrence={occurrence}
+                              size="xs"
+                            />
                           </Stack>
 
                           <Group gap="xs">
@@ -558,6 +508,16 @@ const SymptomViewModal = ({
                         </Group>
                       </Paper>
                     ))}
+                    {episodePageCount > 1 && (
+                      <Center>
+                        <Pagination
+                          total={episodePageCount}
+                          value={page}
+                          onChange={setPage}
+                          size="sm"
+                        />
+                      </Center>
+                    )}
                   </Stack>
                 )}
               </Stack>

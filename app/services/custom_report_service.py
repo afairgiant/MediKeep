@@ -1094,6 +1094,8 @@ class CustomReportService:
         # Eager-load test components for lab results to avoid N+1 queries
         if category == "lab_results":
             query = query.options(selectinload(LabResult.test_components))
+        elif category == "symptoms":
+            query = query.options(selectinload(Symptom.occurrences))
 
         records = query.all()
 
@@ -1124,6 +1126,12 @@ class CustomReportService:
                 logger.info(
                     f"Family member {family_member_id} has {len(family_conditions)} conditions"
                 )
+
+            elif category == "symptoms":
+                record_dict["occurrences"] = [
+                    self._model_to_dict(occurrence)
+                    for occurrence in record.occurrences
+                ]
 
             # Enrich records with practitioner and condition names
             elif category in ("encounters", "treatments", "procedures"):

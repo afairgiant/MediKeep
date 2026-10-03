@@ -153,7 +153,13 @@
     "category": "Κατηγορία",
     "triggers": "Εκλυτικοί παράγοντες",
     "chronic": "Χρόνιο",
-    "primary": "Κύριο"
+    "primary": "Κύριο",
+    "episodes": "Επεισόδια",
+    "time": "Ώρα",
+    "impact": "Επίπτωση",
+    "reliefMethods": "Μέθοδοι ανακούφισης",
+    "associatedSymptoms": "Συνοδά συμπτώματα",
+    "resolutionNotes": "Σημειώσεις υποχώρησης"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Ιατρός Πρωτοβάθμιας Φροντίδας",
@@ -361,6 +367,8 @@
     "undetected": "Δεν ανιχνεύθηκε",
     "normal": "Φυσιολογικό",
     "high": "Υψηλό",
-    "low": "Χαμηλό"
+    "low": "Χαμηλό",
+    "noImpact": "Καμία επίπτωση",
+    "debilitating": "Εξουθενωτικό"
   }
 }

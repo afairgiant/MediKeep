@@ -181,3 +181,13 @@ export const symptomOccurrenceFormFields = [
     maxLength: 2000,
   },
 ];
+
+const optionLabelKeys = fieldName =>
+  Object.fromEntries(
+    symptomOccurrenceFormFields
+      .find(field => field.name === fieldName)
+      .options.map(option => [option.value, option.labelKey])
+  );
+
+export const OCCURRENCE_SEVERITY_LABEL_KEYS = optionLabelKeys('severity');
+export const OCCURRENCE_IMPACT_LABEL_KEYS = optionLabelKeys('impact_level');

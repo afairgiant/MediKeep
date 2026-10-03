@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time
 from typing import List, Optional
 
 from sqlalchemy import and_, desc, func
@@ -441,18 +441,8 @@ class CRUDSymptomOccurrence(
         """
         query = (
             db.query(
-                self.model.id,
-                self.model.occurrence_date,
-                self.model.severity,
-                self.model.pain_scale,
-                self.model.duration,
-                self.model.location,
-                self.model.time_of_day,
-                self.model.impact_level,
-                self.model.notes,
-                self.model.resolved_date,
+                self.model,
                 Symptom.symptom_name,
-                Symptom.id.label("symptom_id"),
                 Symptom.status.label("symptom_status"),
             )
             .join(Symptom)
@@ -467,28 +457,20 @@ class CRUDSymptomOccurrence(
         results = query.order_by(desc(self.model.occurrence_date)).all()
 
         timeline_data = []
-        for row in results:
-            timeline_data.append(
-                {
-                    "occurrence_id": row.id,
-                    "date": (
-                        row.occurrence_date.isoformat() if row.occurrence_date else None
-                    ),
-                    "symptom_name": row.symptom_name,
-                    "symptom_id": row.symptom_id,
-                    "severity": row.severity,
-                    "pain_scale": row.pain_scale,
-                    "duration": row.duration,
-                    "location": row.location,
-                    "time_of_day": row.time_of_day,
-                    "impact_level": row.impact_level,
-                    "notes": row.notes,
-                    "resolved_date": (
-                        row.resolved_date.isoformat() if row.resolved_date else None
-                    ),
-                    "symptom_status": row.symptom_status,
-                }
-            )
+        for occurrence, symptom_name, symptom_status in results:
+            # All columns, so a new occurrence field reaches the timeline unprompted
+            row = {
+                column.name: getattr(occurrence, column.name)
+                for column in self.model.__table__.columns
+            }
+            row["occurrence_id"] = row.pop("id")
+            row["date"] = row.pop("occurrence_date")
+            for key, value in row.items():
+                if isinstance(value, (date, time, datetime)):
+                    row[key] = value.isoformat()
+            row["symptom_name"] = symptom_name
+            row["symptom_status"] = symptom_status
+            timeline_data.append(row)
 
         return timeline_data
 

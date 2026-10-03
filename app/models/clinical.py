@@ -497,7 +497,10 @@ class Symptom(Base):
         "SymptomOccurrence",
         back_populates="symptom",
         cascade="all, delete-orphan",
-        order_by="SymptomOccurrence.occurrence_date.desc()",
+        order_by=(
+            "SymptomOccurrence.occurrence_date.desc(), "
+            "SymptomOccurrence.occurrence_time.desc().nulls_last()"
+        ),
     )
 
     # Many-to-Many relationships through junction tables

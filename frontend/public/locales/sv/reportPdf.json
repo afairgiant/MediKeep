@@ -153,7 +153,13 @@
     "category": "Kategori",
     "triggers": "Utlösande faktorer",
     "chronic": "Kronisk",
-    "primary": "Primär"
+    "primary": "Primär",
+    "episodes": "Episoder",
+    "time": "Tid",
+    "impact": "Påverkan",
+    "reliefMethods": "Lindringsmetoder",
+    "associatedSymptoms": "Associerade symtom",
+    "resolutionNotes": "Anteckningar om tillfrisknande"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primärvårdsläkare",
@@ -361,6 +367,8 @@
     "undetected": "Ej påvisad",
     "normal": "Normal",
     "high": "Högt",
-    "low": "Lågt"
+    "low": "Lågt",
+    "noImpact": "Ingen påverkan",
+    "debilitating": "Funktionsnedsättande"
   }
 }

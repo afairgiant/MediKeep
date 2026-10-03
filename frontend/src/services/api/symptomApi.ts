@@ -257,7 +257,20 @@ export interface TimelineDataPoint {
   pain_scale?: number;
   occurrence_id: number;
   symptom_id: number;
-  resolved_date?: string;
+  duration?: string | null;
+  location?: string | null;
+  time_of_day?: TimeOfDay | null; // Legacy field
+  occurrence_time?: string | null; // HH:MM:SS format
+  impact_level?: ImpactLevel | null;
+  triggers?: string[] | null;
+  relief_methods?: string[] | null;
+  associated_symptoms?: string[] | null;
+  notes?: string | null;
+  resolved_date?: string | null;
+  resolved_time?: string | null; // HH:MM:SS format
+  resolution_notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
   symptom_status: SymptomStatus;
 }
 
@@ -490,7 +503,7 @@ class SymptomApiService extends BaseApiService {
   async getOccurrences(
     symptomId: number,
     skip: number = 0,
-    limit: number = 100,
+    limit?: number,
     signal?: AbortSignal
   ): Promise<SymptomOccurrence[]> {
     try {
@@ -501,10 +514,9 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      const params: Record<string, string> = {
-        skip: String(skip),
-        limit: String(limit),
-      };
+      const params: Record<string, string> = { skip: String(skip) };
+      // Without a limit the endpoint returns every occurrence
+      if (limit !== undefined) params.limit = String(limit);
 
       const response = await this.get(`/${symptomId}/occurrences`, {
         params,

@@ -153,7 +153,13 @@
     "category": "หมวดหมู่",
     "triggers": "ปัจจัยกระตุ้น",
     "chronic": "เรื้อรัง",
-    "primary": "หลัก"
+    "primary": "หลัก",
+    "episodes": "ครั้งที่เกิดอาการ",
+    "time": "เวลา",
+    "impact": "ผลกระทบ",
+    "reliefMethods": "วิธีบรรเทาอาการ",
+    "associatedSymptoms": "อาการร่วม",
+    "resolutionNotes": "บันทึกการหายของอาการ"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "แพทย์ปฐมภูมิ",
@@ -361,6 +367,8 @@
     "undetected": "ไม่พบ",
     "normal": "ปกติ",
     "high": "สูง",
-    "low": "ต่ำ"
+    "low": "ต่ำ",
+    "noImpact": "ไม่มีผลกระทบ",
+    "debilitating": "รุนแรงจนทำกิจกรรมไม่ได้"
   }
 }

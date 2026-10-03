@@ -153,7 +153,13 @@
     "category": "类别",
     "triggers": "诱因",
     "chronic": "慢性",
-    "primary": "主要"
+    "primary": "主要",
+    "episodes": "发作记录",
+    "time": "时间",
+    "impact": "影响",
+    "reliefMethods": "缓解方法",
+    "associatedSymptoms": "伴随症状",
+    "resolutionNotes": "缓解备注"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "主治医生",
@@ -361,6 +367,8 @@
     "undetected": "未检出",
     "normal": "正常",
     "high": "偏高",
-    "low": "偏低"
+    "low": "偏低",
+    "noImpact": "无影响",
+    "debilitating": "严重影响生活"
   }
 }

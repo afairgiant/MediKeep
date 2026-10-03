@@ -153,7 +153,13 @@
     "category": "Категория",
     "triggers": "Провоцирующие факторы",
     "chronic": "Хроническое",
-    "primary": "Основной"
+    "primary": "Основной",
+    "episodes": "Эпизоды",
+    "time": "Время",
+    "impact": "Влияние",
+    "reliefMethods": "Способы облегчения",
+    "associatedSymptoms": "Сопутствующие симптомы",
+    "resolutionNotes": "Заметки о разрешении"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Лечащий врач",
@@ -361,6 +367,8 @@
     "undetected": "Не обнаружено",
     "normal": "Норма",
     "high": "Повышен",
-    "low": "Понижен"
+    "low": "Понижен",
+    "noImpact": "Без влияния",
+    "debilitating": "Изнуряющее"
   }
 }
