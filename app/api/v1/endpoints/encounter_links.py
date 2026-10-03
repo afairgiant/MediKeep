@@ -244,8 +244,15 @@ def _register_visit_routes(router: APIRouter, config: EncounterLinkConfig) -> No
             db_encounter = _get_encounter(
                 db, request, encounter_id, current_user_patient_id, current_user, "edit"
             )
-            entity = db.get(config.crud.entity_model, link_in.entity_id)
-            handle_not_found(entity, config.label, request)
+            entity = _get_entity(
+                db,
+                request,
+                config,
+                link_in.entity_id,
+                current_user_patient_id,
+                current_user,
+                "view",
+            )
             _require_same_patient(request, config, entity, db_encounter)
             link = _create_one(
                 db, request, config, db_encounter, entity, link_in.relevance_note
@@ -267,8 +274,15 @@ def _register_visit_routes(router: APIRouter, config: EncounterLinkConfig) -> No
             )
             entities = {}
             for entity_id in bulk_in.entity_ids:
-                entity = db.get(config.crud.entity_model, entity_id)
-                handle_not_found(entity, config.label, request)
+                entity = _get_entity(
+                    db,
+                    request,
+                    config,
+                    entity_id,
+                    current_user_patient_id,
+                    current_user,
+                    "view",
+                )
                 _require_same_patient(request, config, entity, db_encounter)
                 entities[entity_id] = entity
             created = config.crud.create_bulk(
@@ -375,9 +389,12 @@ def _register_record_routes(router: APIRouter, config: EncounterLinkConfig) -> N
             rows = config.crud.get_by_entity_with_details(db, entity_id=entity_id)
             return [_serialize(config, link, entity, enc) for link, enc in rows]
 
-    def _get_same_patient_encounter(db, request, entity, encounter_id):
-        db_encounter = encounter.get(db, id=encounter_id)
-        handle_not_found(db_encounter, "Encounter", request)
+    def _get_same_patient_encounter(
+        db, request, entity, encounter_id, current_user_patient_id, current_user
+    ):
+        db_encounter = _get_encounter(
+            db, request, encounter_id, current_user_patient_id, current_user, "view"
+        )
         _require_same_patient(request, config, entity, db_encounter)
         return db_encounter
 
@@ -400,7 +417,12 @@ def _register_record_routes(router: APIRouter, config: EncounterLinkConfig) -> N
                 "edit",
             )
             db_encounter = _get_same_patient_encounter(
-                db, request, entity, link_in.encounter_id
+                db,
+                request,
+                entity,
+                link_in.encounter_id,
+                current_user_patient_id,
+                current_user,
             )
             link = _create_one(
                 db, request, config, db_encounter, entity, link_in.relevance_note
@@ -428,7 +450,12 @@ def _register_record_routes(router: APIRouter, config: EncounterLinkConfig) -> N
             )
             encounters = {
                 encounter_id: _get_same_patient_encounter(
-                    db, request, entity, encounter_id
+                    db,
+                    request,
+                    entity,
+                    encounter_id,
+                    current_user_patient_id,
+                    current_user,
                 )
                 for encounter_id in bulk_in.encounter_ids
             }

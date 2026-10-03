@@ -934,8 +934,8 @@ describe('Add Lab Result from an open Visit', () => {
   });
 });
 
-describe('Add Treatment from an open Visit in Treatment Plan mode', () => {
-  it('keeps the mode control, shows no link tabs or plan setup, and creates an advanced treatment', async () => {
+describe('Add Treatment from an open Visit', () => {
+  it('offers no Treatment Plan mode, keeps the schedule, and creates a simple treatment', async () => {
     api.createTreatment.mockResolvedValue({
       id: 1001,
       treatment_name: 'Physio',
@@ -950,30 +950,25 @@ describe('Add Treatment from an open Visit in Treatment Plan mode', () => {
     );
     const sub = await screen.findByRole('dialog', { name: 'Add Treatment' });
 
-    await user.click(
-      within(sub).getByText(/Treatment Plan|treatments\.mode\.advanced/)
-    );
-    await user.type(within(sub).getByLabelText(/Treatment Name/), 'Physio');
-
-    for (const linkTab of [
-      'shared:categories.medications',
-      'Visits',
-      'shared:categories.lab_results',
-      'shared:categories.medical_equipment',
-    ]) {
-      expect(
-        within(sub).queryByRole('tab', { name: withCount(linkTab) })
-      ).toBeNull();
-    }
+    // The plan tabs are not available here, so the mode toggle is not offered
+    expect(within(sub).queryByText('treatments.mode.label')).toBeNull();
+    expect(
+      within(sub).queryByText(/Treatment Plan|treatments\.mode\.advanced/)
+    ).toBeNull();
+    // ...and the schedule tab stays
+    expect(
+      within(sub).getByRole('tab', { name: /Schedule|scheduleDosage/ })
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('treatment-plan-setup')).toBeNull();
 
+    await user.type(within(sub).getByLabelText(/Treatment Name/), 'Physio');
     await user.click(
       within(sub).getByRole('button', { name: /Create Treatment/ })
     );
     await waitFor(() => expect(api.createTreatment).toHaveBeenCalledTimes(1));
     expect(api.createTreatment.mock.calls[0][0]).toMatchObject({
       treatment_name: 'Physio',
-      mode: 'advanced',
+      mode: 'simple',
       patient_id: PATIENT_ID,
     });
     await waitFor(() =>

@@ -13,16 +13,21 @@ export const countPendingLinks = (pending?: PendingLinks): number =>
 
 /**
  * Create the links chosen in the Add form once the visit exists.
- * Every call is attempted; returns the number of calls that failed.
+ * Every call is attempted (in parallel); returns the number of calls that failed.
  */
 export const savePendingEncounterLinks = async (
   visitId: number,
   pending?: PendingLinks
 ): Promise<number> => {
-  let failed = 0;
-  for (const config of ENCOUNTER_LINK_TYPES) {
-    const links = pending?.[config.key] ?? [];
-    for (const group of groupByNoteAndPurpose(links)) {
+  const calls = ENCOUNTER_LINK_TYPES.flatMap(config =>
+    groupByNoteAndPurpose(pending?.[config.key] ?? []).map(group => ({
+      config,
+      group,
+    }))
+  );
+
+  const results = await Promise.all(
+    calls.map(async ({ config, group }) => {
       try {
         await apiService.createEncounterLinksBulk(
           visitId,
@@ -33,8 +38,8 @@ export const savePendingEncounterLinks = async (
             group[0].purpose
           )
         );
+        return 0;
       } catch (err) {
-        failed += 1;
         logger.error('visit_pending_links_failed', {
           message: 'Failed to link records to new visit',
           linkType: config.key,
@@ -42,8 +47,9 @@ export const savePendingEncounterLinks = async (
           error: err instanceof Error ? err.message : String(err),
           component: 'savePendingEncounterLinks',
         });
+        return 1;
       }
-    }
-  }
-  return failed;
+    })
+  );
+  return results.reduce<number>((sum, failed) => sum + failed, 0);
 };

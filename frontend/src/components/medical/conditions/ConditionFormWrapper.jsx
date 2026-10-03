@@ -123,11 +123,13 @@ const ConditionFormWrapper = ({
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(getRememberedEditTab('conditions', 'basic'));
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('conditions', 'basic')
+      );
     } else {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   // Handle form submission
   const handleSubmit = async e => {

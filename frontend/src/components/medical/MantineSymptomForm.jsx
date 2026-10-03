@@ -130,12 +130,14 @@ const MantineSymptomForm = ({
   // Reset tab when modal opens; clear submitting flag when it closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(getRememberedEditTab('symptoms', 'basic'));
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('symptoms', 'basic')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   const handleSubmit = async e => {
     e.preventDefault();

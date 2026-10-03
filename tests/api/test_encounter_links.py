@@ -21,6 +21,7 @@ from app.models.models import (
     EncounterSymptom,
     Injury,
     Medication,
+    Patient,
     PatientShare,
     Procedure,
     Symptom,
@@ -167,6 +168,24 @@ def other_patient_id(db_session):
     return other_patient.id
 
 
+@pytest.fixture
+def own_second_patient_id(db_session, user_with_patient):
+    """A second patient owned by the authenticated user, so fully accessible to them."""
+    holder = create_random_user(db_session)
+    second = Patient(
+        user_id=holder["user"].id,
+        owner_user_id=user_with_patient["user"].id,
+        first_name="Second",
+        last_name="Patient",
+        birth_date=date(1990, 1, 1),
+        gender="M",
+        address="789 Second St",
+    )
+    db_session.add(second)
+    db_session.commit()
+    return second.id
+
+
 @pytest.mark.parametrize("link_type", list(LINK_TYPES))
 class TestEncounterLinks:
     def test_list_empty(self, client, authenticated_headers, encounter_id, link_type):
@@ -253,7 +272,7 @@ class TestEncounterLinks:
             json={"entity_id": foreign_id},
             headers=authenticated_headers,
         )
-        assert response.status_code == 400
+        assert response.status_code == 404
 
     def test_invalid_payloads_rejected(
         self, client, authenticated_headers, encounter_id, make_record, link_type
@@ -312,7 +331,7 @@ class TestEncounterLinks:
             json={"entity_ids": [mine, foreign]},
             headers=authenticated_headers,
         )
-        assert response.status_code == 400
+        assert response.status_code == 404
         assert (
             client.get(
                 _url(encounter_id, link_type), headers=authenticated_headers
@@ -599,7 +618,7 @@ class TestRecordSideWrite:
             json={"encounter_id": foreign.id},
             headers=authenticated_headers,
         )
-        assert response.status_code == 400
+        assert response.status_code == 404
 
     def test_missing_encounter_and_invalid_payloads(
         self, client, authenticated_headers, make_record, link_type
@@ -877,3 +896,49 @@ def test_treatment_link_preserves_visit_fields(
         _url(encounter_id, "treatments"), headers=authenticated_headers
     ).json()
     assert listed[0]["entity_name"] == "Physio plan"
+
+
+@pytest.mark.parametrize("link_type", list(LINK_TYPES))
+class TestSamePatientRule:
+    """Records the user can access, but that belong to a different patient than the
+    visit, are rejected with 400. Inaccessible records answer 404 (no existence leak).
+    """
+
+    def test_visit_side_rejects_own_other_patient_record(
+        self,
+        client,
+        authenticated_headers,
+        encounter_id,
+        make_record,
+        own_second_patient_id,
+        link_type,
+    ):
+        record_id = make_record(link_type, for_patient_id=own_second_patient_id)
+        response = client.post(
+            _url(encounter_id, link_type),
+            json={"entity_id": record_id},
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 400
+
+    def test_foreign_and_missing_records_look_the_same(
+        self,
+        client,
+        authenticated_headers,
+        encounter_id,
+        make_record,
+        other_patient_id,
+        link_type,
+    ):
+        foreign_id = make_record(link_type, for_patient_id=other_patient_id)
+        foreign = client.post(
+            _url(encounter_id, link_type),
+            json={"entity_id": foreign_id},
+            headers=authenticated_headers,
+        )
+        missing = client.post(
+            _url(encounter_id, link_type),
+            json={"entity_id": 999999},
+            headers=authenticated_headers,
+        )
+        assert foreign.status_code == missing.status_code == 404

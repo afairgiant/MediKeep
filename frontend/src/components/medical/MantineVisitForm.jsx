@@ -77,12 +77,14 @@ const MantineVisitForm = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(getRememberedEditTab('visits', 'info'));
+      setActiveTab(
+        subDialog ? 'info' : getRememberedEditTab('visits', 'info')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   // Convert conditions to options
   const conditionOptions = conditionsOptions.map(cond => ({

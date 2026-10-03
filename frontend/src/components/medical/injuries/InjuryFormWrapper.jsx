@@ -116,12 +116,14 @@ const InjuryFormWrapper = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(getRememberedEditTab('injuries', 'basic'));
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('injuries', 'basic')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   // Handle form submission
   const handleSubmit = async e => {

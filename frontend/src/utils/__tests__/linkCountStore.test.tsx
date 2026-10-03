@@ -111,3 +111,18 @@ describe('useLoadLinkCounts', () => {
     expect(result.current).toBeUndefined();
   });
 });
+
+describe('useLoadLinkCounts cleanup', () => {
+  it('drops the counts when the owner unmounts, so a reopen never shows stale numbers', async () => {
+    const key = linkCountKey('t9', 1, 'a');
+    const { result, unmount } = renderHook(() => {
+      useLoadLinkCounts([{ key, load: vi.fn().mockResolvedValue(4) }], true);
+      return useLinkCount(key);
+    });
+    await waitFor(() => expect(result.current).toBe(4));
+    unmount();
+
+    const reopened = renderHook(() => useLinkCount(key));
+    expect(reopened.result.current).toBeUndefined();
+  });
+});

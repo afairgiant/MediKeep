@@ -110,8 +110,9 @@ export const useInlineCreateFlow = <TForm extends object>({
     setBusy(true);
 
     let record: CreatedRecord;
-    const payload = buildPayload(formData, patientId);
+    let payload: ReturnType<typeof buildPayload>;
     try {
+      payload = buildPayload(formData, patientId);
       record = await create(payload);
       if (!record?.id) throw new Error('Create returned no record');
     } catch (err) {

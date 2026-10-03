@@ -15,6 +15,7 @@ import {
 import type { LinkSource } from '../../../types/encounterLinks';
 
 const permissions = vi.hoisted(() => ({ canCreate: true }));
+const stubOutcome = vi.hoisted(() => ({ onCreated: '' }));
 vi.mock('../../../hooks/usePatientPermissions', () => ({
   usePatientPermissions: () => ({
     canCreate: permissions.canCreate,
@@ -38,6 +39,7 @@ vi.mock('../../inlineCreate/ProcedureCreateDialog', () => ({
         type="button"
         onClick={async () => {
           // Like the real dialog: a failure to link is handled there, not thrown
+          stubOutcome.onCreated = 'pending';
           try {
             await props.onCreated({
               id: 501,
@@ -45,7 +47,9 @@ vi.mock('../../inlineCreate/ProcedureCreateDialog', () => ({
               date: '2026-01-15',
               status: 'scheduled',
             });
+            stubOutcome.onCreated = 'resolved';
           } catch {
+            stubOutcome.onCreated = 'rejected';
             // warning shown by the real flow
           }
           props.onClose();
@@ -169,6 +173,23 @@ describe('LinkedRecordsSection - a record created from the section', () => {
     );
     // loaded once on mount, then again after the link
     expect(source.loadRows).toHaveBeenCalledTimes(2);
+  });
+
+  it('saved parent: a failed refresh after a successful link is not reported as a link failure', async () => {
+    const source = renderSection();
+    const add = await screen.findByRole('button', { name: ADD });
+    // The initial load has finished; only the refresh after linking fails
+    (source.loadRows as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('refresh failed')
+    );
+    await userEvent.click(add);
+    await userEvent.click(await screen.findByText('stub-create'));
+
+    await waitFor(() => expect(stubOutcome.onCreated).not.toBe('pending'));
+    expect(source.createLinks).toHaveBeenCalledWith([501], null, null);
+    // The link exists, so the create flow must not warn that linking failed
+    expect(stubOutcome.onCreated).toBe('resolved');
+    expect(await screen.findByText('refresh failed')).toBeInTheDocument();
   });
 
   it('unsaved parent: holds a pending link and does not call the API', async () => {

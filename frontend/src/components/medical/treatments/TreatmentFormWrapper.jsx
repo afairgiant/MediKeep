@@ -386,7 +386,7 @@ const TreatmentFormWrapper = ({
                   {!subDialog && visitsTab}
                 </>
               )}
-              {formData.mode === 'advanced' && !subDialog && (
+              {formData.mode === 'advanced' && (
                 <>
                   <Tabs.Tab
                     value="medications"
@@ -435,58 +435,62 @@ const TreatmentFormWrapper = ({
             <Tabs.Panel value="basic">
               <Box mt="md">
                 <Grid>
-                  <Grid.Col span={12}>
-                    <Stack gap={4}>
-                      <Text size="sm" fw={500}>
-                        {t('treatments.mode.label', 'Treatment Mode')}
-                      </Text>
-                      <SegmentedControl
-                        value={formData.mode || 'simple'}
-                        onChange={value => {
-                          onInputChange({ target: { name: 'mode', value } });
-                          // Reset to basic tab when hiding current tab
-                          if (
-                            value === 'simple' &&
-                            activeTab !== 'visits' &&
-                            RELATIONSHIP_TABS.includes(activeTab)
-                          ) {
-                            setActiveTab('basic');
-                          }
-                          if (
-                            value === 'advanced' &&
-                            activeTab === 'schedule'
-                          ) {
-                            setActiveTab('basic');
-                          }
-                        }}
-                        data={[
-                          {
-                            value: 'simple',
-                            label: t('treatments.mode.simple', 'Simple'),
-                          },
-                          {
-                            value: 'advanced',
-                            label: t(
-                              'shared:labels.treatmentPlan',
-                              'Treatment Plan'
-                            ),
-                          },
-                        ]}
-                        size="sm"
-                      />
-                      <Text size="xs" c="dimmed">
-                        {formData.mode === 'advanced'
-                          ? t(
-                              'treatments.mode.advancedDescription',
-                              'Medication-centric plan with per-medication overrides'
-                            )
-                          : t(
-                              'treatments.mode.simpleDescription',
-                              'Basic tracking with schedule and dosage'
-                            )}
-                      </Text>
-                    </Stack>
-                  </Grid.Col>
+                  {/* A treatment created from another dialog is always Simple: the plan tabs
+                      are not available there, so the toggle would only hide the schedule */}
+                  {!subDialog && (
+                    <Grid.Col span={12}>
+                      <Stack gap={4}>
+                        <Text size="sm" fw={500}>
+                          {t('treatments.mode.label', 'Treatment Mode')}
+                        </Text>
+                        <SegmentedControl
+                          value={formData.mode || 'simple'}
+                          onChange={value => {
+                            onInputChange({ target: { name: 'mode', value } });
+                            // Reset to basic tab when hiding current tab
+                            if (
+                              value === 'simple' &&
+                              activeTab !== 'visits' &&
+                              RELATIONSHIP_TABS.includes(activeTab)
+                            ) {
+                              setActiveTab('basic');
+                            }
+                            if (
+                              value === 'advanced' &&
+                              activeTab === 'schedule'
+                            ) {
+                              setActiveTab('basic');
+                            }
+                          }}
+                          data={[
+                            {
+                              value: 'simple',
+                              label: t('treatments.mode.simple', 'Simple'),
+                            },
+                            {
+                              value: 'advanced',
+                              label: t(
+                                'shared:labels.treatmentPlan',
+                                'Treatment Plan'
+                              ),
+                            },
+                          ]}
+                          size="sm"
+                        />
+                        <Text size="xs" c="dimmed">
+                          {formData.mode === 'advanced'
+                            ? t(
+                                'treatments.mode.advancedDescription',
+                                'Medication-centric plan with per-medication overrides'
+                              )
+                            : t(
+                                'treatments.mode.simpleDescription',
+                                'Basic tracking with schedule and dosage'
+                              )}
+                        </Text>
+                      </Stack>
+                    </Grid.Col>
+                  )}
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
                       label={t('shared:fields.treatmentName', 'Treatment Name')}

@@ -1976,6 +1976,31 @@ JUNCTION TABLES (Many-to-Many)
 - Cascade deletes with either parent
 - Only one relationship per encounter/lab_result pair
 
+### encounter_procedures, encounter_symptoms, encounter_injuries, encounter_medications, encounter_conditions
+**Purpose**: Many-to-many relationships between encounters (visits) and procedures, symptoms, injuries, medications and conditions. The five tables share one shape (`EncounterLinkMixin` in `app/models/associations.py`); only the linked-record column differs.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| encounter_id | Integer | FK(encounters.id) ON DELETE CASCADE, NOT NULL | Associated encounter |
+| procedure_id / symptom_id / injury_id / medication_id / condition_id | Integer | FK(<record table>.id) ON DELETE CASCADE, NOT NULL | Associated record (one column per table) |
+| relevance_note | String | | Optional note for this link (max 500 characters via the API) |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Indexes** (`<key>` is procedure, symptom, injury, medication or condition):
+- `idx_encounter_<key>_encounter_id` on encounter_id
+- `idx_encounter_<key>_<key>_id` on the record column
+
+**Constraints**:
+- `uq_encounter_<key>` UNIQUE on (encounter_id, record column)
+
+**Business Rules**:
+- The encounter and the linked record must belong to the same patient
+- Cascade deletes with either parent; deleting a link never deletes the record or the visit
+- Only one link per encounter/record pair
+- Created by migration `7c1e4a9b2d35`; see `docs/developer-guide/encounter-links.md` for the API
+
 ### treatment_encounters
 **Purpose**: Many-to-many relationship between treatments and encounters
 

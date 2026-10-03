@@ -997,6 +997,33 @@ const LabResultFormWrapper = ({
 
   if (!isOpen) return null;
 
+
+  // The create-mode picker is identical on every linked-record tab except `section`
+  const renderPendingPicker = section => (
+    <PendingRelationshipsPicker
+      section={section}
+      conditions={conditions}
+      medications={medications}
+      procedures={procedures}
+      treatments={treatments}
+      pendingConditions={pendingConditions}
+      pendingMedications={pendingMedications}
+      pendingProcedures={pendingProcedures}
+      pendingTreatments={pendingTreatments}
+      onAddCondition={addPendingCondition}
+      onRemoveCondition={removePendingCondition}
+      onAddMedication={addPendingMedication}
+      onRemoveMedication={removePendingMedication}
+      onAddProcedure={addPendingProcedure}
+      onRemoveProcedure={removePendingProcedure}
+      onAddTreatment={addPendingTreatment}
+      onRemoveTreatment={removePendingTreatment}
+      patientId={patientId}
+      pendingVisitLinks={pendingVisitLinks}
+      onPendingVisitsChange={handlePendingVisitsChange}
+      navigate={navigate}
+    />
+  );
   return (
     <Modal
       opened={isOpen}
@@ -1541,29 +1568,7 @@ const LabResultFormWrapper = ({
                           </Stack>
                         </Paper>
                       ) : (
-                        <PendingRelationshipsPicker
-                          section="conditions"
-                          conditions={conditions}
-                          medications={medications}
-                          procedures={procedures}
-                          treatments={treatments}
-                          pendingConditions={pendingConditions}
-                          pendingMedications={pendingMedications}
-                          pendingProcedures={pendingProcedures}
-                          pendingTreatments={pendingTreatments}
-                          onAddCondition={addPendingCondition}
-                          onRemoveCondition={removePendingCondition}
-                          onAddMedication={addPendingMedication}
-                          onRemoveMedication={removePendingMedication}
-                          onAddProcedure={addPendingProcedure}
-                          onRemoveProcedure={removePendingProcedure}
-                          onAddTreatment={addPendingTreatment}
-                          onRemoveTreatment={removePendingTreatment}
-                          patientId={patientId}
-                          pendingVisitLinks={pendingVisitLinks}
-                          onPendingVisitsChange={handlePendingVisitsChange}
-                          navigate={navigate}
-                        />
+                        renderPendingPicker('conditions')
                       ))}
                   </Box>
                 </Tabs.Panel>
@@ -1578,29 +1583,7 @@ const LabResultFormWrapper = ({
                           navigate={navigate}
                         />
                       ) : (
-                        <PendingRelationshipsPicker
-                          section="visits"
-                          conditions={conditions}
-                          medications={medications}
-                          procedures={procedures}
-                          treatments={treatments}
-                          pendingConditions={pendingConditions}
-                          pendingMedications={pendingMedications}
-                          pendingProcedures={pendingProcedures}
-                          pendingTreatments={pendingTreatments}
-                          onAddCondition={addPendingCondition}
-                          onRemoveCondition={removePendingCondition}
-                          onAddMedication={addPendingMedication}
-                          onRemoveMedication={removePendingMedication}
-                          onAddProcedure={addPendingProcedure}
-                          onRemoveProcedure={removePendingProcedure}
-                          onAddTreatment={addPendingTreatment}
-                          onRemoveTreatment={removePendingTreatment}
-                          patientId={patientId}
-                          pendingVisitLinks={pendingVisitLinks}
-                          onPendingVisitsChange={handlePendingVisitsChange}
-                          navigate={navigate}
-                        />
+                        renderPendingPicker('visits')
                       ))}
                   </Box>
                 </Tabs.Panel>
@@ -1628,29 +1611,7 @@ const LabResultFormWrapper = ({
                           </Stack>
                         </Paper>
                       ) : (
-                        <PendingRelationshipsPicker
-                          section="medications"
-                          conditions={conditions}
-                          medications={medications}
-                          procedures={procedures}
-                          treatments={treatments}
-                          pendingConditions={pendingConditions}
-                          pendingMedications={pendingMedications}
-                          pendingProcedures={pendingProcedures}
-                          pendingTreatments={pendingTreatments}
-                          onAddCondition={addPendingCondition}
-                          onRemoveCondition={removePendingCondition}
-                          onAddMedication={addPendingMedication}
-                          onRemoveMedication={removePendingMedication}
-                          onAddProcedure={addPendingProcedure}
-                          onRemoveProcedure={removePendingProcedure}
-                          onAddTreatment={addPendingTreatment}
-                          onRemoveTreatment={removePendingTreatment}
-                          patientId={patientId}
-                          pendingVisitLinks={pendingVisitLinks}
-                          onPendingVisitsChange={handlePendingVisitsChange}
-                          navigate={navigate}
-                        />
+                        renderPendingPicker('medications')
                       ))}
                   </Box>
                 </Tabs.Panel>
@@ -1678,29 +1639,7 @@ const LabResultFormWrapper = ({
                           </Stack>
                         </Paper>
                       ) : (
-                        <PendingRelationshipsPicker
-                          section="procedures"
-                          conditions={conditions}
-                          medications={medications}
-                          procedures={procedures}
-                          treatments={treatments}
-                          pendingConditions={pendingConditions}
-                          pendingMedications={pendingMedications}
-                          pendingProcedures={pendingProcedures}
-                          pendingTreatments={pendingTreatments}
-                          onAddCondition={addPendingCondition}
-                          onRemoveCondition={removePendingCondition}
-                          onAddMedication={addPendingMedication}
-                          onRemoveMedication={removePendingMedication}
-                          onAddProcedure={addPendingProcedure}
-                          onRemoveProcedure={removePendingProcedure}
-                          onAddTreatment={addPendingTreatment}
-                          onRemoveTreatment={removePendingTreatment}
-                          patientId={patientId}
-                          pendingVisitLinks={pendingVisitLinks}
-                          onPendingVisitsChange={handlePendingVisitsChange}
-                          navigate={navigate}
-                        />
+                        renderPendingPicker('procedures')
                       ))}
                   </Box>
                 </Tabs.Panel>
@@ -1728,29 +1667,7 @@ const LabResultFormWrapper = ({
                           </Stack>
                         </Paper>
                       ) : (
-                        <PendingRelationshipsPicker
-                          section="treatments"
-                          conditions={conditions}
-                          medications={medications}
-                          procedures={procedures}
-                          treatments={treatments}
-                          pendingConditions={pendingConditions}
-                          pendingMedications={pendingMedications}
-                          pendingProcedures={pendingProcedures}
-                          pendingTreatments={pendingTreatments}
-                          onAddCondition={addPendingCondition}
-                          onRemoveCondition={removePendingCondition}
-                          onAddMedication={addPendingMedication}
-                          onRemoveMedication={removePendingMedication}
-                          onAddProcedure={addPendingProcedure}
-                          onRemoveProcedure={removePendingProcedure}
-                          onAddTreatment={addPendingTreatment}
-                          onRemoveTreatment={removePendingTreatment}
-                          patientId={patientId}
-                          pendingVisitLinks={pendingVisitLinks}
-                          onPendingVisitsChange={handlePendingVisitsChange}
-                          navigate={navigate}
-                        />
+                        renderPendingPicker('treatments')
                       ))}
                   </Box>
                 </Tabs.Panel>

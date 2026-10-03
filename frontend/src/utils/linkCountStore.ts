@@ -82,7 +82,12 @@ export const useLoadLinkCounts = (
           });
         });
     });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      // Drop the counts when the owner goes away, so a reopened dialog never
+      // flashes the previous value before the fresh one arrives
+      loaders.forEach(({ key }) => clearLinkCount(key));
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature, enabled]);
 };

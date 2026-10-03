@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { apiService } from '../services/api';
+import logger from '../services/logger';
 
 export interface TreatmentLinkCounts {
   medications?: number;
@@ -37,8 +38,16 @@ export const useTreatmentLinkCounts = (
         if (!signal.aborted && count !== undefined) {
           setCounts(prev => ({ ...prev, [key]: count }));
         }
-      } catch {
+      } catch (err) {
         // No count is shown for this tab
+        if (err instanceof Error && err.name === 'AbortError') return;
+        logger.error('treatment_link_count_load_failed', {
+          message: 'Failed to load a treatment link count',
+          treatmentId,
+          key,
+          error: err instanceof Error ? err.message : String(err),
+          component: 'useTreatmentLinkCounts',
+        });
       }
     };
     load(

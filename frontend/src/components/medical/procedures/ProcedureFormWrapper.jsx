@@ -73,12 +73,14 @@ const ProcedureFormWrapper = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(getRememberedEditTab('procedures', 'basic'));
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('procedures', 'basic')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {

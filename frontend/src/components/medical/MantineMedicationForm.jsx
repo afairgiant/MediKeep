@@ -211,12 +211,14 @@ const MantineMedicationForm = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(getRememberedEditTab('medications', 'basic'));
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('medications', 'basic')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   // Convert practitioners to options
   const practitionerOptions = practitioners.map(practitioner => ({

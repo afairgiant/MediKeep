@@ -112,6 +112,22 @@ const LinkedRecordsSection = ({
     [source]
   );
 
+  // Re-read the list after a change. The change already succeeded, so a failed
+  // refresh must not be reported to the caller as a failed link.
+  const refreshRows = async () => {
+    try {
+      setLoadError(null);
+      await loadRows();
+    } catch (err) {
+      logger.error('linked_records_refresh_failed', {
+        message: 'Failed to refresh links after a change',
+        error: errorMessage(err),
+        component: 'LinkedRecordsSection',
+      });
+      setLoadError(errorMessage(err));
+    }
+  };
+
   useEffect(() => {
     if (!isSaved) return undefined;
     const controller = new AbortController();
@@ -187,7 +203,7 @@ const LinkedRecordsSection = ({
       return;
     }
     await source.createLinks(ids, note, purpose);
-    await loadRows();
+    await refreshRows();
   };
 
   const handleUpdate = async (row: LinkRow, updates: LinkUpdate) => {
@@ -209,7 +225,7 @@ const LinkedRecordsSection = ({
       return;
     }
     await source.updateLink(row, updates);
-    await loadRows();
+    await refreshRows();
   };
 
   const handleRemove = async (row: LinkRow) => {
@@ -218,7 +234,7 @@ const LinkedRecordsSection = ({
       return;
     }
     await source.removeLink(row);
-    await loadRows();
+    await refreshRows();
   };
 
   // The newest pending list, so a record created later in the sub-dialog never overwrites changes
@@ -255,7 +271,7 @@ const LinkedRecordsSection = ({
         );
         if (isSaved) {
           await source.createLinks([record.id], null, null);
-          await loadRows();
+          await refreshRows();
           return 'linked';
         }
         // The parent isn't saved yet: hold the link until it is
