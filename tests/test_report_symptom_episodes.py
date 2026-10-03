@@ -204,5 +204,26 @@ class TestSymptomRecordsIncludeOccurrences:
             ["Nausea"],
         ]
 
+    def test_same_day_occurrences_ordered_by_time(self, db_session, symptom):
+        for label, occurrence_time in (
+            ("untimed", None),
+            ("morning", time(8, 0)),
+            ("evening", time(20, 0)),
+        ):
+            symptom_occurrence.create(
+                db_session,
+                obj_in=SymptomOccurrenceCreate(
+                    symptom_id=symptom.id,
+                    occurrence_date=date.today(),
+                    occurrence_time=occurrence_time,
+                    severity="mild",
+                    location=label,
+                ),
+            )
+
+        occurrences = self._occurrences(db_session, symptom)
+
+        assert [o["location"] for o in occurrences] == ["evening", "morning", "untimed"]
+
     def test_symptom_without_occurrences_gets_empty_list(self, db_session, symptom):
         assert self._occurrences(db_session, symptom) == []
