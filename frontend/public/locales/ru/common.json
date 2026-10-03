@@ -529,6 +529,7 @@
     "linkedLabResults": "Связанные результаты анализов",
     "linkedMedications": "Связанные лекарства",
     "loading": "Загрузка...",
+    "verifyingAuthentication": "Проверка аутентификации...",
     "loadingLabResults": "Загрузка результатов анализов...",
     "loadingOption": "Загрузка {{option}}...",
     "loadingRelatedConditions": "Загрузка связанных заболеваний...",

@@ -518,6 +518,7 @@
     "linkedLabResults": "ผลแลปที่เชื่อมโยง",
     "linkedMedications": "ยาที่เชื่อมโยง",
     "loading": "กำลังโหลด...",
+    "verifyingAuthentication": "กำลังตรวจสอบการยืนยันตัวตน...",
     "loadingLabResults": "กำลังโหลดผลแลป...",
     "loadingOption": "กำลังโหลด {{option}}...",
     "loadingRelatedConditions": "กำลังโหลดโรคที่เกี่ยวข้อง...",

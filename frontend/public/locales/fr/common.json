@@ -529,6 +529,7 @@
     "linkedLabResults": "Résultats de laboratoire connectés",
     "linkedMedications": "Médicaments connectés",
     "loading": "Chargement...",
+    "verifyingAuthentication": "Vérification de l'authentification...",
     "loadingLabResults": "Chargement des résultats de laboratoire...",
     "loadingOption": "Chargement : {{option}}...",
     "loadingRelatedConditions": "Chargement des conditions connectées...",

@@ -529,6 +529,7 @@
     "linkedLabResults": "Gekoppelde labresultaten",
     "linkedMedications": "Gekoppelde medicatie",
     "loading": "Laden...",
+    "verifyingAuthentication": "Authenticatie wordt gecontroleerd...",
     "loadingLabResults": "Labresultaten laden...",
     "loadingOption": "{{option}} laden...",
     "loadingRelatedConditions": "Gerelateerde aandoeningen laden...",

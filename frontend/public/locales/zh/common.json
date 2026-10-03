@@ -528,6 +528,7 @@
     "linkedLabResults": "关联化验结果",
     "linkedMedications": "关联药物",
     "loading": "正在加载...",
+    "verifyingAuthentication": "正在验证身份...",
     "loadingLabResults": "正在加载化验结果...",
     "loadingOption": "正在加载{{option}}...",
     "loadingRelatedConditions": "正在加载相关疾病...",

@@ -529,6 +529,7 @@
     "linkedLabResults": "Linked Lab Results",
     "linkedMedications": "Linked Medications",
     "loading": "Loading...",
+    "verifyingAuthentication": "Verifying authentication...",
     "loadingLabResults": "Loading lab results...",
     "loadingOption": "Loading {{option}}...",
     "loadingRelatedConditions": "Loading related conditions...",

@@ -89,6 +89,15 @@
   text-align: center;
 }
 
+/* Centered in the viewport without covering the page */
+.loading-spinner__page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
 /* Full screen overlay */
 .loading-spinner__overlay {
   position: fixed;
