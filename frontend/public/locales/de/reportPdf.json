@@ -153,7 +153,13 @@
     "category": "Kategorie",
     "triggers": "Auslöser",
     "chronic": "Chronisch",
-    "primary": "Primär"
+    "primary": "Primär",
+    "episodes": "Episoden",
+    "time": "Uhrzeit",
+    "impact": "Auswirkung",
+    "reliefMethods": "Linderungsmethoden",
+    "associatedSymptoms": "Begleitsymptome",
+    "resolutionNotes": "Notizen zum Abklingen"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Hausarzt",
@@ -361,6 +367,8 @@
     "undetected": "Nicht nachgewiesen",
     "normal": "Normal",
     "high": "Hoch",
-    "low": "Niedrig"
+    "low": "Niedrig",
+    "noImpact": "Keine Auswirkung",
+    "debilitating": "Stark einschränkend"
   }
 }

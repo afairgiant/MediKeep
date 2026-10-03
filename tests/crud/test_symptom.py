@@ -5,7 +5,7 @@ Tests both symptom_parent (symptom definitions) and symptom_occurrence (individu
 """
 
 import pytest
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 from sqlalchemy.orm import Session
 
 from app.crud.symptom import symptom_parent, symptom_occurrence
@@ -539,3 +539,60 @@ class TestSymptomOccurrenceCRUD:
         # Refresh and check parent symptom
         db_session.refresh(test_symptom)
         assert test_symptom.last_occurrence_date == date.today()
+
+    def test_get_timeline_data_includes_episode_detail(
+        self, db_session: Session, test_patient, test_symptom
+    ):
+        """Timeline rows carry every field the episode popup displays."""
+        symptom_occurrence.create(
+            db_session,
+            obj_in=SymptomOccurrenceCreate(
+                symptom_id=test_symptom.id,
+                occurrence_date=date.today() - timedelta(days=1),
+                occurrence_time=time(14, 30),
+                severity="severe",
+                impact_level="moderate",
+                triggers=["Stress"],
+                relief_methods=["Rest"],
+                associated_symptoms=["Nausea", "Dizziness"],
+                resolved_date=date.today(),
+                resolved_time=time(9, 5),
+                resolution_notes="Faded after sleep",
+            ),
+        )
+
+        rows = symptom_occurrence.get_timeline_data(
+            db_session, patient_id=test_patient.id
+        )
+
+        assert len(rows) == 1
+        row = rows[0]
+        assert row["occurrence_time"] == "14:30:00"
+        assert row["triggers"] == ["Stress"]
+        assert row["relief_methods"] == ["Rest"]
+        assert row["associated_symptoms"] == ["Nausea", "Dizziness"]
+        assert row["resolved_time"] == "09:05:00"
+        assert row["resolution_notes"] == "Faded after sleep"
+
+    def test_get_timeline_data_empty_episode_detail(
+        self, db_session: Session, test_patient, test_symptom
+    ):
+        """Unset detail fields come back empty rather than missing."""
+        symptom_occurrence.create(
+            db_session,
+            obj_in=SymptomOccurrenceCreate(
+                symptom_id=test_symptom.id,
+                occurrence_date=date.today(),
+                severity="mild",
+            ),
+        )
+
+        row = symptom_occurrence.get_timeline_data(
+            db_session, patient_id=test_patient.id
+        )[0]
+
+        assert row["occurrence_time"] is None
+        assert row["resolved_time"] is None
+        assert row["resolution_notes"] is None
+        for list_field in ("triggers", "relief_methods", "associated_symptoms"):
+            assert not row[list_field]

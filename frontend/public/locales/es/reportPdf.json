@@ -153,7 +153,13 @@
     "category": "Categoría",
     "triggers": "Desencadenantes",
     "chronic": "Crónico",
-    "primary": "Principal"
+    "primary": "Principal",
+    "episodes": "Episodios",
+    "time": "Hora",
+    "impact": "Impacto",
+    "reliefMethods": "Métodos de alivio",
+    "associatedSymptoms": "Síntomas asociados",
+    "resolutionNotes": "Notas de resolución"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Médico de Atención Primaria",
@@ -361,6 +367,8 @@
     "undetected": "No detectado",
     "normal": "Normal",
     "high": "Alto",
-    "low": "Bajo"
+    "low": "Bajo",
+    "noImpact": "Sin impacto",
+    "debilitating": "Incapacitante"
   }
 }

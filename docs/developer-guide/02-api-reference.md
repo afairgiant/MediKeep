@@ -2682,7 +2682,40 @@ Base path: `/api/v1/symptoms`
   - `start_date`: Start date (YYYY-MM-DD)
   - `end_date`: End date (YYYY-MM-DD)
 - **Purpose**: Get timeline data formatted for visualization
-- **Success Response** (200): Array of timeline data points
+- **Success Response** (200): Array of timeline data points, one per episode, newest first:
+
+```json
+[
+  {
+    "occurrence_id": 12,
+    "date": "2026-03-01",
+    "symptom_name": "Migraine",
+    "symptom_id": 3,
+    "symptom_status": "active",
+    "severity": "severe",
+    "pain_scale": 8,
+    "duration": "2 hours",
+    "location": "Left temple",
+    "time_of_day": null,
+    "occurrence_time": "14:30:00",
+    "impact_level": "moderate",
+    "triggers": ["Stress"],
+    "relief_methods": ["Rest"],
+    "associated_symptoms": ["Nausea"],
+    "notes": null,
+    "resolved_date": "2026-03-02",
+    "resolved_time": "09:05:00",
+    "resolution_notes": null,
+    "created_at": "2026-03-01T15:02:11",
+    "updated_at": "2026-03-02T09:10:45"
+  }
+]
+```
+
+  Each point carries every column of the occurrence (`id` and `occurrence_date` are
+  returned as `occurrence_id` and `date`) plus the parent symptom's name and status.
+  Unset fields are `null`; list fields may be `null` or empty.
+  `time_of_day` is a legacy field; use `occurrence_time`.
 
 #### Log Symptom Occurrence
 
