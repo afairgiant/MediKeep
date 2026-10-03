@@ -529,6 +529,7 @@
     "linkedLabResults": "Verknüpfte Laborergebnisse",
     "linkedMedications": "Verknüpfte Medikamente",
     "loading": "Lädt...",
+    "verifyingAuthentication": "Authentifizierung wird überprüft...",
     "loadingLabResults": "Laborergebnisse werden geladen...",
     "loadingOption": "{{option}} wird geladen...",
     "loadingRelatedConditions": "Verknüpfte Erkrankungen werden geladen...",

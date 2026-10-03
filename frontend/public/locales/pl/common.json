@@ -529,6 +529,7 @@
     "linkedLabResults": "Powiązane wyniki badań",
     "linkedMedications": "Powiązane leki",
     "loading": "Ładowanie...",
+    "verifyingAuthentication": "Weryfikowanie uwierzytelnienia...",
     "loadingLabResults": "Ładowanie wyników badań...",
     "loadingOption": "Ładowanie {{option}}...",
     "loadingRelatedConditions": "Ładowanie powiązanych schorzeń...",

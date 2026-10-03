@@ -529,6 +529,7 @@
     "linkedLabResults": "Resultados de Laboratório Vinculados",
     "linkedMedications": "Medicamentos Vinculados",
     "loading": "Carregando...",
+    "verifyingAuthentication": "A verificar a autenticação...",
     "loadingLabResults": "Carregando resultados de laboratório...",
     "loadingOption": "Carregando {{option}}...",
     "loadingRelatedConditions": "Carregando condições relacionadas...",

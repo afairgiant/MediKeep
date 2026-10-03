@@ -529,6 +529,7 @@
     "linkedLabResults": "Συνδεδεμένα Εργαστηριακά Αποτελέσματα",
     "linkedMedications": "Συνδεδεμένα Φάρμακα",
     "loading": "Φόρτωση...",
+    "verifyingAuthentication": "Επαλήθευση ταυτότητας...",
     "loadingLabResults": "Φόρτωση εργαστηριακών αποτελεσμάτων...",
     "loadingOption": "Φόρτωση {{option}}...",
     "loadingRelatedConditions": "Φόρτωση σχετικών παθήσεων...",

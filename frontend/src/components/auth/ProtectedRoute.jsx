@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { isUserAdmin } from '../../utils/authUtils';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -27,6 +28,7 @@ function ProtectedRoute({
     mustChangePassword,
     sessionEndedReason,
   } = useAuth();
+  const { t } = useTranslation('common');
   const location = useLocation();
   const toastShownRef = useRef(false);
 
@@ -122,7 +124,13 @@ function ProtectedRoute({
   if (isLoading) {
     return (
       fallback || (
-        <LoadingSpinner message="Verifying authentication..." fullPage />
+        <LoadingSpinner
+          message={t(
+            'labels.verifyingAuthentication',
+            'Verifying authentication...'
+          )}
+          fullPage
+        />
       )
     );
   }
@@ -171,6 +179,7 @@ export function PublicRoute({
   redirectTo = '/dashboard',
   requiresRegistration = false,
 }) {
+  const { t } = useTranslation('common');
   const { isAuthenticated, isLoading, mustChangePassword } = useAuth();
   // Opt-in, and skipped entirely for a signed-in user: they are being sent to
   // the dashboard below and should not wait on a request that cannot change
@@ -180,7 +189,9 @@ export function PublicRoute({
   );
 
   if (isLoading || registration.loading) {
-    return <LoadingSpinner message="Loading..." fullPage />;
+    return (
+      <LoadingSpinner message={t('labels.loading', 'Loading...')} fullPage />
+    );
   }
 
   if (isAuthenticated) {
