@@ -1035,7 +1035,9 @@
       "diagnosed": "Zdiagnozowano",
       "given": "Podano",
       "identified": "Zidentyfikowano",
+      "injured": "Uraz z dnia",
       "performed": "Wykonano",
+      "prescribed": "Przepisano",
       "recorded": "Zarejestrowano",
       "started": "Rozpoczęto",
       "tested": "Badano",
@@ -1048,10 +1050,13 @@
     "fallbacks": {
       "allergy": "Alergia",
       "encounter": "Wizyta",
+      "equipment": "Sprzęt",
       "immunization": "Szczepienie",
+      "injury": "Uraz",
       "medication": "Lek",
       "procedure": "Procedura",
-      "record": "Rekord"
+      "record": "Rekord",
+      "symptom": "Objaw"
     },
     "filterByTag": "Filtruj według tagu: {{tag}}",
     "filtered": "(przefiltrowano)",

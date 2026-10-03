@@ -1035,7 +1035,9 @@
       "diagnosed": "Διαγνώστηκε",
       "given": "Χορηγήθηκε",
       "identified": "Εντοπίστηκε",
+      "injured": "Τραυματισμός",
       "performed": "Πραγματοποιήθηκε",
+      "prescribed": "Συνταγογραφήθηκε",
       "recorded": "Καταγράφηκε",
       "started": "Ξεκίνησε",
       "tested": "Εξετάστηκε",
@@ -1048,10 +1050,13 @@
     "fallbacks": {
       "allergy": "Αλλεργία",
       "encounter": "Επίσκεψη",
+      "equipment": "Εξοπλισμός",
       "immunization": "Εμβολιασμός",
+      "injury": "Τραυματισμός",
       "medication": "Φάρμακο",
       "procedure": "Επέμβαση",
-      "record": "Εγγραφή"
+      "record": "Εγγραφή",
+      "symptom": "Σύμπτωμα"
     },
     "filterByTag": "Φιλτράρισμα κατά ετικέτα: {{tag}}",
     "filtered": "(φιλτραρισμένο)",

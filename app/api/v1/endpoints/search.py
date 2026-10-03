@@ -14,9 +14,12 @@ from app.models.models import (
     Condition,
     Encounter,
     Immunization,
+    Injury,
     LabResult,
+    MedicalEquipment,
     Medication,
     Procedure,
+    Symptom,
     Treatment,
     Vitals,
 )
@@ -65,16 +68,25 @@ def _apply_date_filter(query_obj, date_col, date_from, date_to):
     return query_obj
 
 
-def _apply_sort(query_obj, sort: str, date_col, title_col=None):
-    """Apply sorting to a query. Falls back to date desc for unknown sort values."""
+def _apply_sort(query_obj, sort: str, date_col, title_col=None, nulls_last=False):
+    """Apply sorting to a query. Falls back to date desc for unknown sort values.
+
+    Set nulls_last for nullable date columns so undated records sort after
+    dated ones in both directions (PostgreSQL otherwise puts NULLs first on DESC).
+    """
+    date_asc = date_col.asc()
+    date_desc = date_col.desc()
+    if nulls_last:
+        date_asc = date_asc.nulls_last()
+        date_desc = date_desc.nulls_last()
     if sort == "date_asc":
-        return query_obj.order_by(date_col.asc())
+        return query_obj.order_by(date_asc)
     if sort == "title" and title_col is not None:
         return query_obj.order_by(title_col.asc())
     if sort == "title_desc" and title_col is not None:
         return query_obj.order_by(title_col.desc())
     # date_desc is the default (including for "relevance")
-    return query_obj.order_by(date_col.desc())
+    return query_obj.order_by(date_desc)
 
 
 def _windowed_query(query_obj, model_id_col, skip: int, limit: int):
@@ -170,6 +182,29 @@ class AllergySearchItem(SearchItemBase):
     identified_date: Optional[str]
 
 
+class InjurySearchItem(SearchItemBase):
+    injury_name: str
+    body_part: Optional[str]
+    severity: Optional[str]
+    status: Optional[str]
+    date_of_injury: Optional[str]
+
+
+class SymptomSearchItem(SearchItemBase):
+    symptom_name: str
+    category: Optional[str]
+    status: Optional[str]
+    first_occurrence_date: Optional[str]
+
+
+class MedicalEquipmentSearchItem(SearchItemBase):
+    equipment_name: str
+    equipment_type: Optional[str]
+    manufacturer: Optional[str]
+    status: Optional[str]
+    prescribed_date: Optional[str]
+
+
 class VitalSearchItem(SearchItemBase):
     systolic_bp: Optional[int]
     diastolic_bp: Optional[int]
@@ -259,6 +294,9 @@ def search_patient_records(
         "treatments",
         "encounters",
         "allergies",
+        "injuries",
+        "symptoms",
+        "medical_equipment",
         "vitals",
     ]
 
@@ -664,6 +702,171 @@ def search_patient_records(
             ],
         )
         total_count += allergy_count
+
+    # Search injuries (date_of_injury is nullable, so undated records sort last)
+    if "injuries" in search_types:
+        injuries_query = db.query(Injury).filter(Injury.patient_id == target_patient_id)
+        if query_lower:
+            injuries_query = injuries_query.filter(
+                or_(
+                    func.lower(Injury.injury_name).contains(query_lower),
+                    func.lower(Injury.body_part).contains(query_lower),
+                    func.lower(Injury.mechanism).contains(query_lower),
+                    func.lower(Injury.notes).contains(query_lower),
+                    _tag_text_filter(db, "injuries", query_lower),
+                )
+            )
+
+        injuries_query = _apply_date_filter(
+            injuries_query, Injury.date_of_injury, parsed_date_from, parsed_date_to
+        )
+        injuries_query = _apply_sort(
+            injuries_query,
+            sort,
+            Injury.date_of_injury,
+            title_col=Injury.injury_name,
+            nulls_last=True,
+        )
+
+        injuries, injury_count = _windowed_query(injuries_query, Injury.id, skip, limit)
+
+        results["injuries"] = SearchResultGroup(
+            count=injury_count,
+            items=[
+                InjurySearchItem(
+                    id=injury.id,
+                    type="injury",
+                    injury_name=injury.injury_name,
+                    body_part=injury.body_part,
+                    severity=injury.severity,
+                    status=injury.status,
+                    date_of_injury=(
+                        injury.date_of_injury.isoformat()
+                        if injury.date_of_injury
+                        else None
+                    ),
+                    tags=injury.tags or [],
+                    highlight=injury.injury_name,
+                    score=DEFAULT_SEARCH_SCORE,
+                ).model_dump()
+                for injury in injuries
+            ],
+        )
+        total_count += injury_count
+
+    # Search symptoms
+    if "symptoms" in search_types:
+        symptoms_query = db.query(Symptom).filter(
+            Symptom.patient_id == target_patient_id
+        )
+        if query_lower:
+            symptoms_query = symptoms_query.filter(
+                or_(
+                    func.lower(Symptom.symptom_name).contains(query_lower),
+                    func.lower(Symptom.general_notes).contains(query_lower),
+                    _tag_text_filter(db, "symptoms", query_lower),
+                )
+            )
+
+        symptoms_query = _apply_date_filter(
+            symptoms_query,
+            Symptom.first_occurrence_date,
+            parsed_date_from,
+            parsed_date_to,
+        )
+        symptoms_query = _apply_sort(
+            symptoms_query,
+            sort,
+            Symptom.first_occurrence_date,
+            title_col=Symptom.symptom_name,
+        )
+
+        symptoms, symptom_count = _windowed_query(
+            symptoms_query, Symptom.id, skip, limit
+        )
+
+        results["symptoms"] = SearchResultGroup(
+            count=symptom_count,
+            items=[
+                SymptomSearchItem(
+                    id=symptom.id,
+                    type="symptom",
+                    symptom_name=symptom.symptom_name,
+                    category=symptom.category,
+                    status=symptom.status,
+                    first_occurrence_date=(
+                        symptom.first_occurrence_date.isoformat()
+                        if symptom.first_occurrence_date
+                        else None
+                    ),
+                    tags=symptom.tags or [],
+                    highlight=symptom.symptom_name,
+                    score=DEFAULT_SEARCH_SCORE,
+                ).model_dump()
+                for symptom in symptoms
+            ],
+        )
+        total_count += symptom_count
+
+    # Search medical equipment (prescribed_date is nullable, so undated sort last)
+    if "medical_equipment" in search_types:
+        equipment_query = db.query(MedicalEquipment).filter(
+            MedicalEquipment.patient_id == target_patient_id
+        )
+        if query_lower:
+            equipment_query = equipment_query.filter(
+                or_(
+                    func.lower(MedicalEquipment.equipment_name).contains(query_lower),
+                    func.lower(MedicalEquipment.equipment_type).contains(query_lower),
+                    func.lower(MedicalEquipment.manufacturer).contains(query_lower),
+                    func.lower(MedicalEquipment.model_number).contains(query_lower),
+                    func.lower(MedicalEquipment.supplier).contains(query_lower),
+                    func.lower(MedicalEquipment.notes).contains(query_lower),
+                    _tag_text_filter(db, "medical_equipment", query_lower),
+                )
+            )
+
+        equipment_query = _apply_date_filter(
+            equipment_query,
+            MedicalEquipment.prescribed_date,
+            parsed_date_from,
+            parsed_date_to,
+        )
+        equipment_query = _apply_sort(
+            equipment_query,
+            sort,
+            MedicalEquipment.prescribed_date,
+            title_col=MedicalEquipment.equipment_name,
+            nulls_last=True,
+        )
+
+        equipment_items, equipment_count = _windowed_query(
+            equipment_query, MedicalEquipment.id, skip, limit
+        )
+
+        results["medical_equipment"] = SearchResultGroup(
+            count=equipment_count,
+            items=[
+                MedicalEquipmentSearchItem(
+                    id=equipment.id,
+                    type="medical_equipment",
+                    equipment_name=equipment.equipment_name,
+                    equipment_type=equipment.equipment_type,
+                    manufacturer=equipment.manufacturer,
+                    status=equipment.status,
+                    prescribed_date=(
+                        equipment.prescribed_date.isoformat()
+                        if equipment.prescribed_date
+                        else None
+                    ),
+                    tags=equipment.tags or [],
+                    highlight=equipment.equipment_name,
+                    score=DEFAULT_SEARCH_SCORE,
+                ).model_dump()
+                for equipment in equipment_items
+            ],
+        )
+        total_count += equipment_count
 
     # Search vitals (no tags column, no title sort)
     if "vitals" in search_types:

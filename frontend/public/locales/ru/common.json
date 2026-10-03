@@ -1035,7 +1035,9 @@
       "diagnosed": "Диагностировано",
       "given": "Введено",
       "identified": "Обнаружено",
+      "injured": "Получена",
       "performed": "Выполнено",
+      "prescribed": "Назначено",
       "recorded": "Записано",
       "started": "Начато",
       "tested": "Проведён тест",
@@ -1048,10 +1050,13 @@
     "fallbacks": {
       "allergy": "Аллергия",
       "encounter": "Визит",
+      "equipment": "Оборудование",
       "immunization": "Прививка",
+      "injury": "Травма",
       "medication": "Лекарство",
       "procedure": "Процедура",
-      "record": "Запись"
+      "record": "Запись",
+      "symptom": "Симптом"
     },
     "filterByTag": "Фильтр по тегу: {{tag}}",
     "filtered": "(отфильтровано)",

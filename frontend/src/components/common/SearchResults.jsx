@@ -19,13 +19,16 @@ import {
 } from '@mantine/core';
 import {
   IconAlertTriangle,
+  IconBandage,
   IconStethoscope,
   IconPill,
+  IconThermometer,
   IconVaccine,
   IconMedicalCross,
   IconHeartbeat,
   IconCalendarEvent,
   IconFlask,
+  IconHeartRateMonitor,
   IconSearch,
   IconX,
   IconChevronRight,
@@ -34,6 +37,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { searchService } from '../../services/searchService';
+import { getTypeLabel } from '../search/searchResultHelpers';
 
 const SearchResults = ({
   results = [],
@@ -49,13 +53,16 @@ const SearchResults = ({
   // Icon mapping
   const iconMap = {
     IconAlertTriangle,
+    IconBandage,
     IconStethoscope,
     IconPill,
+    IconThermometer,
     IconVaccine,
     IconMedicalCross,
     IconHeartbeat,
     IconCalendarEvent,
     IconFlask,
+    IconHeartRateMonitor,
   };
 
   const handleResultClick = result => {
@@ -172,7 +179,7 @@ const SearchResults = ({
                           {result.title}
                         </Text>
                         <Badge size="xs" color={result.color} variant="light">
-                          {result.type.replace('_', ' ')}
+                          {getTypeLabel(t, result.type)}
                         </Badge>
                       </Group>
 

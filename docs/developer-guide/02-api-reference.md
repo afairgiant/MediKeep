@@ -4466,25 +4466,44 @@ Base path: `/api/v1/search`
 
 `GET /search/`
 
+- **Purpose**: Search the active (or specified) patient's records in one request. Results are grouped by record type.
 - **Query Parameters**:
-  - `q` (string, required): Search query
-  - `type` (string, optional): Filter by record type
-  - `patient_id` (integer, optional): Filter by patient
+  - `q` (string, optional): Search text. Omit it to list records.
+  - `types` (array, optional): Record types to search; repeat the parameter for several. Default: all of `medications`, `conditions`, `lab_results`, `procedures`, `immunizations`, `treatments`, `encounters`, `allergies`, `injuries`, `symptoms`, `medical_equipment`, `vitals`
+  - `patient_id` (integer, optional): Patient to search (must be accessible to the caller)
+  - `sort` (string, default: `relevance`): `relevance`, `date_desc`, `date_asc`, `title`
+  - `date_from`, `date_to` (ISO date, optional): Restrict to records dated within the range
+  - `skip` (integer, default: 0), `limit` (integer, default: 20, max: 100): Pagination, applied per record type
 - **Success Response** (200):
 
 ```json
 {
-  "results": [
-    {
-      "type": "medication",
-      "id": 1,
-      "name": "Aspirin 100mg",
-      "patient_id": 1
+  "query": "ankle",
+  "total_count": 1,
+  "results": {
+    "injuries": {
+      "count": 1,
+      "items": [
+        {
+          "id": 3,
+          "type": "injury",
+          "injury_name": "Sprained ankle",
+          "body_part": "Ankle",
+          "severity": "moderate",
+          "status": "active",
+          "date_of_injury": "2026-09-01",
+          "tags": [],
+          "highlight": "Sprained ankle",
+          "score": 0.9
+        }
+      ]
     }
-  ],
-  "total": 1
+  },
+  "pagination": { "skip": 0, "limit": 20, "has_more": false }
 }
 ```
+
+Only the groups for the requested `types` appear in `results`. Injuries without a `date_of_injury` and equipment without a `prescribed_date` sort after dated records in both date directions.
 
 ### 11.2 Tags
 
@@ -4501,7 +4520,7 @@ Base path: `/api/v1/tags`
 - **Purpose**: Get the calling user's tags, ordered by usage across their owned patients
 - **Authentication**: Yes
 - **Query Parameters**:
-  - `entity_types` (array, default: all types): Entity types to count usage in (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy)
+  - `entity_types` (array, default: all types): Entity types to count usage in (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy, injury, symptom, medical_equipment)
   - `limit` (integer, default: 20, max: 50): Maximum number of tags
 - **Success Response** (200): Each tag name appears at most once.
 
@@ -4532,7 +4551,7 @@ Base path: `/api/v1/tags`
 - **Authentication**: Yes
 - **Query Parameters**:
   - `tags` (array, required): Tags to search for
-  - `entity_types` (array, default: all types): Entity types to search
+  - `entity_types` (array, default: all types): Entity types to search (same values as `/tags/popular`)
   - `limit_per_entity` (integer, default: 10, max: 20): Max results per entity type
 - **Success Response** (200):
 
