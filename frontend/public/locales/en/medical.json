@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "allergy",
+    "condition": "condition",
+    "equipment": "equipment",
+    "familyMember": "family member",
+    "immunization": "immunization",
+    "injury": "injury",
+    "insurance": "insurance",
+    "labResult": "lab result",
+    "medication": "medication",
+    "pharmacy": "pharmacy",
+    "practitioner": "practitioner",
+    "procedure": "procedure",
+    "treatment": "treatment",
+    "visit": "visit",
+    "vitals": "vitals record"
+  },
   "allergies": {
     "allergen": {
       "description": "Name of the allergen",

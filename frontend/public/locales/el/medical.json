@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "αλλεργία",
+    "condition": "πάθηση",
+    "equipment": "εξοπλισμός",
+    "familyMember": "μέλος οικογένειας",
+    "immunization": "εμβολιασμός",
+    "injury": "τραυματισμός",
+    "insurance": "ασφάλιση",
+    "labResult": "εργαστηριακό αποτέλεσμα",
+    "medication": "φάρμακο",
+    "pharmacy": "φαρμακείο",
+    "practitioner": "επαγγελματίας υγείας",
+    "procedure": "διαδικασία",
+    "treatment": "θεραπεία",
+    "visit": "επίσκεψη",
+    "vitals": "καταγραφή ζωτικών σημείων"
+  },
   "allergies": {
     "allergen": {
       "description": "Όνομα του αλλεργιογόνου",

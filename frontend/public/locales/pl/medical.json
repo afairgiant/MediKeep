@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "alergia",
+    "condition": "schorzenie",
+    "equipment": "sprzęt",
+    "familyMember": "członek rodziny",
+    "immunization": "szczepienie",
+    "injury": "uraz",
+    "insurance": "ubezpieczenie",
+    "labResult": "wynik badania laboratoryjnego",
+    "medication": "lek",
+    "pharmacy": "apteka",
+    "practitioner": "specjalista",
+    "procedure": "procedura",
+    "treatment": "leczenie",
+    "visit": "wizyta",
+    "vitals": "pomiar parametrów życiowych"
+  },
   "allergies": {
     "allergen": {
       "description": "Nazwa alergenu",

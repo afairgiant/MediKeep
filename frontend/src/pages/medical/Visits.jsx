@@ -77,6 +77,7 @@ const Visits = () => {
     setError,
   } = useMedicalData({
     entityName: 'encounter',
+    entityLabel: t('medical:entityNames.visit'),
     apiMethodsConfig: {
       getAll: signal => apiService.getEncounters(signal),
       getByPatient: (patientId, signal) =>

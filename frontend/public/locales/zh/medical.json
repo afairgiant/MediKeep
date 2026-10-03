@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "过敏",
+    "condition": "病症",
+    "equipment": "设备",
+    "familyMember": "家庭成员",
+    "immunization": "疫苗接种",
+    "injury": "损伤",
+    "insurance": "保险",
+    "labResult": "化验结果",
+    "medication": "药物",
+    "pharmacy": "药房",
+    "practitioner": "医疗人员",
+    "procedure": "操作",
+    "treatment": "治疗",
+    "visit": "就诊",
+    "vitals": "生命体征记录"
+  },
   "allergies": {
     "allergen": {
       "description": "过敏原名称",

@@ -213,7 +213,11 @@ const VitalsList = ({
   const handleDelete = async (vitalsId, skipConfirm = false) => {
     if (
       !skipConfirm &&
-      !window.confirm('Are you sure you want to delete this vitals record?')
+      !window.confirm(
+        t('messages.confirmDeleteEntity', {
+          entity: t('medical:entityNames.vitals'),
+        })
+      )
     ) {
       return;
     }

@@ -87,4 +87,26 @@ describe('useMedicalData delete confirmation', () => {
     expect(outcome).toBe(false);
     expect(mockExecute).not.toHaveBeenCalled();
   });
+
+  it('uses translated success messages with the entity label', async () => {
+    mockExecute.mockResolvedValue({ id: 5 });
+    confirmSpy.mockReturnValue(true);
+    const { result } = renderHook(() =>
+      useMedicalData({
+        entityName: 'encounter',
+        entityLabel: 'visit',
+        apiMethodsConfig: { update: vi.fn(), delete: vi.fn() },
+      })
+    );
+
+    await act(async () => {
+      await result.current.updateItem(5, {});
+    });
+    expect(result.current.successMessage).toBe('messages.entityUpdated|visit');
+
+    await act(async () => {
+      await result.current.deleteItem(5);
+    });
+    expect(result.current.successMessage).toBe('messages.entityDeleted|visit');
+  });
 });
