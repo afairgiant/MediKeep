@@ -1,20 +1,13 @@
-"""Tests for GitHub login routing by ``external_id`` (spec 8.13, criterion 16).
+"""Tests for SSO login routing by ``external_id``.
 
-Manual linking has always *written* the GitHub identity onto the account -
-``_link_existing_user`` sets ``external_id`` and ``sso_provider`` - but nothing
-ever read it back. ``_find_or_create_user`` routes on the *absence* of an email
-before any lookup runs, so a GitHub user whose email the provider does not expose
-completed the link once and was re-prompted for their local password on every
-login afterwards. Under ``SSO_ONLY_MODE`` they have no local password to answer
-with, which turns a working prompt into a lockout.
-
-Criterion 16 is "can complete manual account linking *and sign in*", so the shape
-that matters is: link once, then sign in twice. These tests drive the real service
-against real ``User`` rows - nothing here may patch the method under test, which is
-how the credential bug underneath this same flow (8.5) survived earlier coverage.
+A returning user is identified by the provider's subject, for every provider, and
+by email only when no account carries that subject. These tests drive the real
+service against real ``User`` rows - nothing here may patch the method under test.
 """
 
+import logging
 from datetime import timedelta
+from typing import Optional
 
 import pytest
 
@@ -24,11 +17,13 @@ from app.core.config import settings
 from app.crud.user import user as user_crud
 from app.models.models import User
 from app.services.sso_service import SSOService, _state_storage, _store_state_entry
+from app.services.sso_service import logger as sso_logger
 from tests.api.conftest import LOCAL_PASSWORD
 from tests.utils.sso import store_github_link_token
 
 GITHUB_ID = "github-99881"
 TEMP_TOKEN = "github-routing-token"
+AUTHENTIK_SUB = "authentik-sub-1"
 
 
 pytestmark = pytest.mark.usefixtures("clean_sso_state")
@@ -65,10 +60,10 @@ def linked_user(service, db_session, local_user, github_provider) -> User:
     return local_user
 
 
-def github_login(sub: str = GITHUB_ID) -> SSOUserInfo:
-    """What the provider hands us for an account with a private email."""
+def github_login(sub: str = GITHUB_ID, email: Optional[str] = None) -> SSOUserInfo:
+    """What the provider hands us; no email means the account keeps it private."""
     return SSOUserInfo(
-        sub=sub, email=None, username="githubrouter", name="GitHub Router"
+        sub=sub, email=email, username="githubrouter", name="GitHub Router"
     )
 
 
@@ -93,6 +88,40 @@ def stub_sso_provider(monkeypatch):
         )
 
     return install
+
+
+@pytest.fixture
+def authentik_user(db_session, make_sso_user, monkeypatch) -> User:
+    """A pure-SSO account as its first authentik login left it."""
+    monkeypatch.setattr(settings, "SSO_PROVIDER_TYPE", "authentik")
+    user = make_sso_user(username="alice", auth_method="sso", link_sso_identity=False)
+    user.external_id = AUTHENTIK_SUB
+    user.sso_provider = "authentik"
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
+
+@pytest.fixture
+def renamed_authentik_user(db_session, authentik_user) -> User:
+    """``authentik_user`` after changing their email inside MediKeep."""
+    authentik_user.email = "alice@other.example"
+    db_session.commit()
+    return authentik_user
+
+
+def subject_replaced_records(caplog):
+    return [
+        record
+        for record in caplog.records
+        if getattr(record, "event", None) == "sso_subject_replaced"
+    ]
+
+
+def authentik_login(
+    sub: str = AUTHENTIK_SUB, email: str = "alice@example.com"
+) -> SSOUserInfo:
+    return SSOUserInfo(sub=sub, email=email, name="Alice Example")
 
 
 def link_identity(db_session, user: User, *, sso_provider: str, external_id=GITHUB_ID):
@@ -172,26 +201,31 @@ class TestUnlinkedUsersStillGetThePrompt:
         assert result["github_manual_link"] is True
 
 
-class TestUnrelatedPathsAreUnaffected:
-    def test_github_user_with_an_email_still_routes_by_email(
+class TestProvidersThatExposeAnEmail:
+    def test_linked_github_user_with_an_email_is_matched_by_subject(
         self, service, db_session, local_user, github_provider
     ):
         link_identity(db_session, local_user, sso_provider="github")
 
         result = service._find_or_create_user(
-            SSOUserInfo(
-                sub=GITHUB_ID,
-                email=local_user.email,
-                username="githubrouter",
-                name="GitHub Router",
-            ),
-            db_session,
+            github_login(email=local_user.email), db_session
         )
 
         assert "github_manual_link" not in result
         assert result["user"].id == local_user.id
 
-    def test_non_github_provider_never_enters_the_branch(
+    def test_unlinked_github_user_with_an_email_still_routes_by_email(
+        self, service, db_session, local_user, github_provider
+    ):
+        result = service._find_or_create_user(
+            github_login(email=local_user.email), db_session
+        )
+
+        assert "github_manual_link" not in result
+        assert result["conflict"] is True
+        assert result["existing_user_info"]["username"] == local_user.username
+
+    def test_linked_oidc_user_is_matched_by_subject(
         self, service, db_session, local_user, monkeypatch
     ):
         monkeypatch.setattr(settings, "SSO_PROVIDER_TYPE", "oidc")
@@ -204,6 +238,101 @@ class TestUnrelatedPathsAreUnaffected:
 
         assert "github_manual_link" not in result
         assert result["user"].id == local_user.id
+
+
+class TestReturningUserWithChangedEmail:
+    """Issue #1114: the provider's subject identifies a returning user, not the email."""
+
+    def test_email_changed_in_medikeep_still_signs_in(
+        self, service, db_session, renamed_authentik_user
+    ):
+        result = service._find_or_create_user(authentik_login(), db_session)
+
+        assert result["user"].id == renamed_authentik_user.id
+        assert result["is_new_user"] is False
+        assert db_session.query(User).count() == 1
+
+    def test_signs_in_with_registration_disabled(
+        self, service, db_session, renamed_authentik_user, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "ALLOW_USER_REGISTRATION", False)
+
+        result = service._find_or_create_user(authentik_login(), db_session)
+
+        assert result["user"].id == renamed_authentik_user.id
+
+    def test_email_changed_at_the_provider_leaves_the_stored_email_alone(
+        self, service, db_session, authentik_user
+    ):
+        stored_email = authentik_user.email
+
+        result = service._find_or_create_user(
+            authentik_login(email="alice@renamed.example"), db_session
+        )
+        db_session.refresh(authentik_user)
+
+        assert result["user"].id == authentik_user.id
+        assert authentik_user.email == stored_email
+
+    def test_subject_wins_over_another_users_email(
+        self, service, db_session, authentik_user, local_user
+    ):
+        result = service._find_or_create_user(
+            authentik_login(email=local_user.email), db_session
+        )
+
+        assert result["user"].id == authentik_user.id
+        assert not _state_storage, "no conflict prompt should have been minted"
+
+    def test_unknown_subject_and_email_still_creates_a_user(
+        self, service, db_session, authentik_user
+    ):
+        result = service._find_or_create_user(
+            authentik_login(sub="authentik-sub-new", email="bob@example.com"),
+            db_session,
+        )
+
+        assert result["is_new_user"] is True
+        assert result["user"].id != authentik_user.id
+
+    def test_unknown_subject_with_an_unlinked_email_still_prompts(
+        self, service, db_session, authentik_user, local_user
+    ):
+        result = service._find_or_create_user(
+            authentik_login(sub="authentik-sub-new", email=local_user.email),
+            db_session,
+        )
+
+        assert result["conflict"] is True
+        assert result["existing_user_info"]["username"] == local_user.username
+
+
+class TestSubjectReplacedOnALinkedAccount:
+    """An email match that re-points a linked account must not happen silently."""
+
+    def test_a_different_subject_with_the_same_email_is_logged(
+        self, service, db_session, authentik_user, caplog
+    ):
+        with caplog.at_level(logging.WARNING, logger=sso_logger.name):
+            result = service._find_or_create_user(
+                authentik_login(sub="authentik-sub-rebuilt"), db_session
+            )
+        db_session.refresh(authentik_user)
+
+        assert result["user"].id == authentik_user.id
+        assert authentik_user.external_id == "authentik-sub-rebuilt"
+        replaced = subject_replaced_records(caplog)
+        assert len(replaced) == 1
+        assert replaced[0].user_id == authentik_user.id
+        assert replaced[0].category == "security"
+
+    def test_the_same_subject_is_not_logged_as_a_replacement(
+        self, service, db_session, authentik_user, caplog
+    ):
+        with caplog.at_level(logging.WARNING, logger=sso_logger.name):
+            service._find_or_create_user(authentik_login(), db_session)
+
+        assert subject_replaced_records(caplog) == []
 
 
 class TestGetByExternalId:
@@ -321,6 +450,22 @@ class TestThroughCompleteAuthentication:
         assert result["is_new_user"] is False
         assert result["user"].id == linked_user.id
         assert result["return_url"] == "/patients/42"
+
+    @pytest.mark.asyncio
+    async def test_a_user_with_a_changed_email_completes_authentication(
+        self,
+        service,
+        db_session,
+        renamed_authentik_user,
+        stub_sso_provider,
+        valid_state,
+    ):
+        stub_sso_provider(authentik_login())
+
+        result = await service.complete_authentication("code", valid_state, db_session)
+
+        assert result["user"].id == renamed_authentik_user.id
+        assert result["is_new_user"] is False
 
 
 class TestAllowedDomainsWithNoEmail:

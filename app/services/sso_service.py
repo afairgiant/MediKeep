@@ -430,39 +430,32 @@ class SSOService:
         db.commit()
 
     def _find_or_create_user(self, user_info, db: Session) -> Dict:
-        """Find existing user or create new one with corruption detection and clean preferences logic"""
-        # Special handling for GitHub users without accessible email
-        is_github_no_email = (
-            settings.SSO_PROVIDER_TYPE == "github" and not user_info.email
+        """Resolve an SSO identity to a user: by provider subject, then by email, else create.
+
+        Returns a conflict or GitHub manual-link payload, with no "user" key, when
+        the match needs the user's confirmation first.
+        """
+        # The provider's subject survives an email change on either side
+        linked_user = user_crud.get_by_external_id(
+            db,
+            external_id=user_info.sub,
+            sso_provider=settings.SSO_PROVIDER_TYPE,
         )
-
-        if is_github_no_email:
-            # A previous manual link already recorded this GitHub identity, so
-            # there is nothing left to ask. Without this lookup the branch below
-            # fires on every login: the link writes external_id but nothing ever
-            # read it back, so a private-email GitHub user re-entered their local
-            # password each time - and under SSO_ONLY_MODE they have none to
-            # enter, which makes a working prompt a lockout.
-            linked_user = user_crud.get_by_external_id(
-                db,
-                external_id=user_info.sub,
-                sso_provider=settings.SSO_PROVIDER_TYPE,
+        if linked_user:
+            logger.info(
+                "SSO login matched by external_id",
+                extra={
+                    "category": "sso",
+                    "event": "sso_external_id_login",
+                    "user_id": linked_user.id,
+                },
             )
-            if linked_user:
-                logger.info(
-                    f"SSO login for GitHub account linked by external_id: {linked_user.username}",
-                    extra={
-                        "category": "sso",
-                        "event": "github_external_id_login",
-                        "user_id": linked_user.id,
-                    },
-                )
-                return self._link_existing_user(linked_user, user_info, db)
+            return self._link_existing_user(linked_user, user_info, db)
 
-            # No account carries this identity yet - show the manual linking modal
+        # A private-email GitHub account gives no email to match on
+        if settings.SSO_PROVIDER_TYPE == "github" and not user_info.email:
             return self._return_github_manual_linking(user_info)
 
-        # Check for existing user by email
         existing_user = user_crud.get_by_email(db, email=user_info.email)
 
         if existing_user:
@@ -474,11 +467,15 @@ class SSOService:
 
             # STEP 2: Check if account is already cleanly linked
             elif existing_user.external_id and existing_user.sso_provider:
-                # Already linked - proceed with login regardless of preference
-                logger.info(
-                    f"SSO login for already linked account: {user_info.email}",
-                    extra={"category": "sso", "event": "linked_account_login"},
-                )
+                if existing_user.external_id != user_info.sub:
+                    logger.warning(
+                        "SSO subject replaced on an already linked account",
+                        extra={
+                            "category": "security",
+                            "event": "sso_subject_replaced",
+                            "user_id": existing_user.id,
+                        },
+                    )
                 return self._link_existing_user(existing_user, user_info, db)
 
             # STEP 3: Account not linked - check user preference
