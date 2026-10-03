@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.api.v1.endpoints.encounter_links import register_encounter_link_routes
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -497,3 +498,6 @@ def delete_encounter_lab_result(
 
         encounter_lab_result.delete(db, id=relationship_id)
         return {"message": "Encounter lab result relationship deleted successfully"}
+
+
+register_encounter_link_routes(router)

@@ -31,6 +31,7 @@ import { useTagColors } from '../../../hooks/useTagColors';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
 
 const AllergyViewModal = ({
   isOpen,
@@ -124,6 +125,7 @@ const AllergyViewModal = ({
 
   const handleEdit = () => {
     try {
+      rememberEditTab('allergies', activeTab);
       onEdit(allergy);
       onClose();
     } catch (error) {
@@ -198,14 +200,14 @@ const AllergyViewModal = ({
               >
                 {t('allergies.tabs.reactionDetails')}
               </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes')}
-              </Tabs.Tab>
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
               >
                 {t('shared:tabs.documents')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 

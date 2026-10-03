@@ -165,10 +165,6 @@
   "loadingHint": "Falls dies zu lange dauert, aktualisieren Sie bitte die Seite",
   "messages": {
     "confirmDiscardAdvancedForm": "Beim Wechseln des Modus gehen die bisher eingegebenen Daten verloren. Fortfahren?",
-    "noRelationshipsAvailable": "Keine medizinischen Erkrankungen oder Besuche vorhanden. Fügen Sie diese zuerst hinzu, um sie hier zu verknüpfen.",
-    "noRelationshipsOnRecord": "Für diesen Patienten sind keine Erkrankungen, Besuche, Medikamente, Eingriffe oder Behandlungen erfasst.",
-    "relationshipsCreateInfo": "Verknüpfungen können nach dem Speichern des Laborergebnisses hinzugefügt werden.",
-    "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Verknüpfungen zu erstellen.",
     "testComponentsEditInfo": "Testkomponenten können nach dem Speichern über die Ansichtsseite verwaltet werden."
   },
   "modal": {
@@ -218,9 +214,7 @@
   "patientIdRequired": "Patienten-ID ist erforderlich. Bitte wählen Sie zuerst einen Patienten aus.",
   "pendingRelationships": {
     "addCondition": "Erkrankung hinzufügen",
-    "addVisit": "Besuch hinzufügen",
     "removeCondition": "Erkrankung entfernen",
-    "removeVisit": "Besuch entfernen",
     "addMedication": "Medikament hinzufügen",
     "addProcedure": "Eingriff hinzufügen",
     "addTreatment": "Behandlung hinzufügen",
@@ -336,7 +330,6 @@
     "bulkEntry": "Masseneingabe",
     "noComponentsDescription": "Fügen Sie Testergebnisse mit den Vorlagen oder Masseneingabe-Tools unten hinzu, um einzelne Laborwerte und Trends zu verfolgen.",
     "noComponentsYet": "Noch keine Testergebnisse",
-    "relationships": "Verknüpfungen",
     "resultsStatus": "Ergebnisse & Status",
     "templates": "Vorlagen"
   },

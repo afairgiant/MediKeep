@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { usePractitioners } from '../../../hooks/useGlobalData';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
+import { useNestedDialog } from '../../../hooks/useNestedDialog';
 import { cleanPractitionerFormData } from '../../../utils/practitionerFormUtils';
 import PractitionerFormWrapper from './PractitionerFormWrapper';
 
@@ -101,6 +102,11 @@ const PractitionerSelectWithCreate = ({
     setIsLoading(false);
     setFormData(INITIAL_FORM_DATA);
   };
+
+  // Escape closes this sub-dialog only, not the form it was opened from
+  useNestedDialog(subModalOpen, () => {
+    if (!isLoading) handleClose();
+  });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

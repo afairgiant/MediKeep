@@ -36,6 +36,11 @@ import {
   Alert,
   Paper,
 } from '@mantine/core';
+import {
+  INITIAL_TREATMENT_FORM_DATA,
+  buildTreatmentPayload,
+  validateTreatmentForm,
+} from '../../utils/treatmentFormUtils';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
@@ -163,21 +168,7 @@ const Treatments = () => {
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState(null);
-  const [formData, setFormData] = useState({
-    treatment_name: '',
-    treatment_type: '',
-    description: '',
-    start_date: '',
-    end_date: '',
-    status: 'planned',
-    dosage: '',
-    frequency: '',
-    mode: 'simple',
-    notes: '',
-    condition_id: '',
-    practitioner_id: '',
-    tags: [],
-  });
+  const [formData, setFormData] = useState(INITIAL_TREATMENT_FORM_DATA);
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -200,21 +191,7 @@ const Treatments = () => {
     onSuccess: () => {
       setShowModal(false);
       setEditingTreatment(null);
-      setFormData({
-        treatment_name: '',
-        treatment_type: '',
-        description: '',
-        start_date: '',
-        end_date: '',
-        status: 'planned',
-        dosage: '',
-        frequency: '',
-        mode: 'simple',
-        notes: '',
-        condition_id: '',
-        practitioner_id: '',
-        tags: [],
-      });
+      setFormData(INITIAL_TREATMENT_FORM_DATA);
       setDocumentManagerMethods(null);
 
       if (needsRefreshAfterSubmissionRef.current) {
@@ -236,21 +213,7 @@ const Treatments = () => {
     resetSubmission();
     setDocumentManagerMethods(null);
     setEditingTreatment(null);
-    setFormData({
-      treatment_name: '',
-      treatment_type: '',
-      description: '',
-      start_date: '',
-      end_date: '',
-      status: 'planned',
-      dosage: '',
-      frequency: '',
-      mode: 'simple',
-      notes: '',
-      condition_id: '',
-      practitioner_id: '',
-      tags: [],
-    });
+    setFormData(INITIAL_TREATMENT_FORM_DATA);
     setShowModal(true);
   };
 
@@ -290,22 +253,9 @@ const Treatments = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!formData.treatment_name.trim()) {
-      setError('Treatment name is required');
-      return;
-    }
-
-    if (
-      formData.end_date &&
-      formData.start_date &&
-      new Date(formData.end_date) < new Date(formData.start_date)
-    ) {
-      setError('End date cannot be before start date');
-      return;
-    }
-
-    if (!currentPatient?.id) {
-      setError('Patient information not available');
+    const validationError = validateTreatmentForm(formData, currentPatient?.id);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -315,22 +265,7 @@ const Treatments = () => {
       return;
     }
 
-    const treatmentData = {
-      treatment_name: formData.treatment_name,
-      treatment_type: formData.treatment_type || null,
-      description: formData.description || null,
-      start_date: formData.start_date || null,
-      end_date: formData.end_date || null,
-      status: formData.status,
-      dosage: formData.dosage || null,
-      frequency: formData.frequency || null,
-      mode: formData.mode || 'simple',
-      notes: formData.notes || null,
-      tags: formData.tags || [],
-      patient_id: currentPatient.id,
-      condition_id: formData.condition_id || null,
-      practitioner_id: formData.practitioner_id || null,
-    };
+    const treatmentData = buildTreatmentPayload(formData, currentPatient.id);
 
     try {
       let success;
@@ -697,6 +632,7 @@ const Treatments = () => {
         onClose={() => !isBlocking && setShowModal(false)}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
         editingTreatment={editingTreatment}
+        patientId={currentPatient?.id}
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}

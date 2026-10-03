@@ -25,23 +25,13 @@ import {
 } from '../../constants/equipmentConstants';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { Button, Stack, Container } from '@mantine/core';
+import {
+  INITIAL_EQUIPMENT_FORM_DATA,
+  buildEquipmentPayload,
+  validateEquipmentForm,
+} from '../../utils/equipmentFormUtils';
 
-const EMPTY_FORM_DATA = {
-  equipment_name: '',
-  equipment_type: '',
-  manufacturer: '',
-  model_number: '',
-  serial_number: '',
-  prescribed_date: '',
-  last_service_date: '',
-  next_service_date: '',
-  usage_instructions: '',
-  status: 'active',
-  supplier: '',
-  notes: '',
-  practitioner_id: '',
-  tags: [],
-};
+const EMPTY_FORM_DATA = INITIAL_EQUIPMENT_FORM_DATA;
 
 // Simple filter/search configuration for equipment
 const equipmentConfig = {
@@ -218,40 +208,13 @@ const MedicalEquipment = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!formData.equipment_name.trim()) {
-      setError('Equipment name is required');
+    const validationError = validateEquipmentForm(formData, currentPatient?.id);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    if (!formData.equipment_type) {
-      setError('Equipment type is required');
-      return;
-    }
-
-    if (!currentPatient?.id) {
-      setError('Patient information not available');
-      return;
-    }
-
-    const equipmentData = {
-      equipment_name: formData.equipment_name,
-      equipment_type: formData.equipment_type,
-      manufacturer: formData.manufacturer || null,
-      model_number: formData.model_number || null,
-      serial_number: formData.serial_number || null,
-      prescribed_date: formData.prescribed_date || null,
-      last_service_date: formData.last_service_date || null,
-      next_service_date: formData.next_service_date || null,
-      usage_instructions: formData.usage_instructions || null,
-      status: formData.status || 'active',
-      supplier: formData.supplier || null,
-      notes: formData.notes || null,
-      tags: formData.tags || [],
-      patient_id: currentPatient.id,
-      practitioner_id: formData.practitioner_id
-        ? parseInt(formData.practitioner_id)
-        : null,
-    };
+    const equipmentData = buildEquipmentPayload(formData, currentPatient.id);
 
     let success;
     if (editingEquipment) {

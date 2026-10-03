@@ -32,6 +32,8 @@ import {
   TestNameFields,
 } from '../../../hooks/useTestNameAutocomplete';
 import logger from '../../../services/logger';
+import { useSubDialog } from '../../../contexts/SubDialogContext';
+import { useNestedDialog } from '../../../hooks/useNestedDialog';
 
 interface Practitioner {
   id: number;
@@ -52,11 +54,12 @@ interface LabResult {
 interface TestPanelCreateDialogProps {
   opened: boolean;
   onClose: () => void;
-  onCreateSuccess: (_labResult: LabResult) => void;
+  onCreateSuccess: (_labResult: LabResult) => void | Promise<void>;
   practitioners: Practitioner[];
   currentPatient: Patient | null;
-  advancedMode: boolean;
-  onAdvancedModeChange: (_checked: boolean) => void;
+  /** Omit both to hide the Simple/Advanced switch (e.g. when opened from another dialog) */
+  advancedMode?: boolean;
+  onAdvancedModeChange?: (_checked: boolean) => void;
 }
 
 interface FormData {
@@ -90,6 +93,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
 }) => {
   const { t } = useTranslation(['medical', 'shared', 'common', 'labresults']);
   const { dateInputFormat, dateParser } = useDateFormat();
+  const subDialog = useSubDialog();
 
   const categoryOptions = [
     { value: 'blood work', label: t('labresults:category.bloodWork') },
@@ -137,6 +141,9 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
     onClose();
   }, [isSubmitting, onClose, resetAutoPopulate]);
 
+  // Opened from inside another dialog: Escape closes this one only, through the guarded close
+  useNestedDialog(opened && !!subDialog, handleClose);
+
   const handleCreate = useCallback(async () => {
     if (!formData.test_name.trim()) {
       setError(
@@ -167,6 +174,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
     setIsSubmitting(true);
     setError(null);
 
+    let createdLabResult: LabResult;
     try {
       const payload = {
         test_name: formData.test_name.trim(),
@@ -184,6 +192,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       };
 
       const labResult = await apiService.createLabResult(payload);
+      createdLabResult = labResult;
 
       await submitPendingTestComponents(
         labResult.id,
@@ -204,7 +213,6 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       setError(null);
       resetAutoPopulate();
       inlineTestRef.current?.clearComponents();
-      onCreateSuccess(labResult);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error('test_panel_create_error', {
@@ -213,6 +221,20 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         component: 'TestPanelCreateDialog',
       });
       setError(message || t('medical:labResults.addPanel.createError'));
+      setIsSubmitting(false);
+      return;
+    }
+
+    // The panel exists now, so a failing callback must not read as "create failed" (a retry
+    // would duplicate it). Staying busy until it settles stops a second submit meanwhile.
+    try {
+      await onCreateSuccess(createdLabResult);
+    } catch (err: unknown) {
+      logger.error('test_panel_create_success_callback_failed', {
+        message: 'Panel created but the follow-up step failed',
+        error: err instanceof Error ? err.message : String(err),
+        component: 'TestPanelCreateDialog',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -231,7 +253,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       centered
       closeOnClickOutside={!isSubmitting}
       closeOnEscape={!isSubmitting}
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       scrollAreaComponent="div"
     >
       <FormLoadingOverlay
@@ -380,11 +402,15 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         />
 
         <Group justify="space-between" gap="sm" mt="sm">
-          <AdvancedModeSwitch
-            checked={advancedMode}
-            onChange={onAdvancedModeChange}
-            disabled={isSubmitting}
-          />
+          {onAdvancedModeChange ? (
+            <AdvancedModeSwitch
+              checked={!!advancedMode}
+              onChange={onAdvancedModeChange}
+              disabled={isSubmitting}
+            />
+          ) : (
+            <span />
+          )}
           <Group gap="sm">
             <Button variant="default" onClick={handleClose} disabled={isSubmitting}>
               {t('shared:fields.cancel', 'Cancel')}

@@ -26,6 +26,7 @@ import {
 import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import logger from '../../services/logger';
+import { useNestedDialog } from '../../hooks/useNestedDialog';
 
 // Direction-specific configuration to avoid scattered ternaries throughout the component
 const DIRECTION_CONFIG = {
@@ -120,6 +121,9 @@ const MedicationRelationships = ({
     setNewRelationship(config.initialState);
     setError(null);
   };
+
+  // Escape closes this modal only, not the dialog it sits in
+  useNestedDialog(showAddModal, resetAndCloseModal);
 
   // Refresh relationships after a mutation, using the appropriate fetch strategy per direction
   const refreshRelationships = async () => {

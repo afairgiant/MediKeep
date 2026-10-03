@@ -427,6 +427,26 @@
       "vaccineInfo": "Vaccininformatie"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Aandoening toevoegen",
+      "injury": "Verwonding toevoegen",
+      "medication": "Medicatie toevoegen",
+      "treatment": "Behandeling toevoegen",
+      "labResult": "Laboratoriumuitslag toevoegen",
+      "equipment": "Hulpmiddel toevoegen",
+      "procedure": "Procedure toevoegen",
+      "symptom": "Symptoom toevoegen",
+      "visit": "Consult toevoegen"
+    },
+    "createError": "Aanmaken is niet gelukt. Probeer het opnieuw.",
+    "created": "Aangemaakt.",
+    "createdLinked": "Aangemaakt en gekoppeld.",
+    "createdPending": "Aangemaakt. Het wordt gekoppeld wanneer u opslaat.",
+    "linkFailed": "Aangemaakt, maar kon niet worden gekoppeld. U kunt het koppelen vanuit de lijst.",
+    "loadError": "Dit formulier kon niet worden geopend. Er is niets gewijzigd in het venster erachter. Probeer het opnieuw.",
+    "uploadFailed": "Aangemaakt, maar sommige bestanden konden niet worden geüpload. U kunt ze toevoegen door het te bewerken."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Nieuwe verzekering toevoegen"
@@ -992,6 +1012,9 @@
       "title": "Proceduredetails"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "Het record is aangemaakt, maar sommige koppelingen met consulten konden niet worden opgeslagen. U kunt ze toevoegen door het record te bewerken."
+  },
   "search": {
     "activeFilterCount": "{{count}} actieve filters",
     "activeFilterCount_one": "{{count}} actief filter",
@@ -1290,7 +1313,6 @@
     "createNew": "Nieuw aanmaken",
     "form": {
       "createTreatment": "Behandeling aanmaken",
-      "createWithLinks": "Behandelplan aanmaken en items koppelen...",
       "creatingWithLinks": "Behandeling aanmaken en items koppelen...",
       "descriptionDesc": "Korte beschrijving van de behandeling",
       "descriptionPlaceholder": "Beschrijf de behandeling",
@@ -1382,10 +1404,7 @@
     "editVisit": "Consult bewerken",
     "form": {
       "addVisit": "Consult toevoegen",
-      "chooseLabResultsToLink": "Kies laboratoriumuitslagen om te koppelen",
-      "labResultsDescription": "Koppel laboratoriumuitslagen die relevant zijn voor dit consult. U kunt het doel en notities instellen nadat u het consult hebt aangemaakt.",
       "savingVisit": "Consult opslaan...",
-      "selectLabResults": "Laboratoriumuitslagen selecteren",
       "tabs": {
         "clinical": "Klinisch",
         "visitInfo": "Consultinfo"
@@ -1394,8 +1413,8 @@
     },
     "loadingVisits": "Consulten laden...",
     "notifications": {
-      "labResultLinkFailed": "Het consult is aangemaakt, maar sommige laboratoriumuitslagen konden niet worden gekoppeld. U kunt ze handmatig koppelen door het consult te bewerken.",
-      "labResultLinkWarning": "Probleem bij koppelen van laboratoriumuitslagen"
+      "relationshipLinkFailed": "Het consult is aangemaakt, maar sommige relaties konden niet worden opgeslagen. U kunt ze toevoegen door het consult te bewerken.",
+      "relationshipLinkWarning": "Probleem bij het koppelen van relaties"
     },
     "noVisitsFound": "Geen medische consulten gevonden",
     "table": {
@@ -1418,6 +1437,17 @@
       "title": "Consult - {{date}}",
       "treatmentPlan": "Behandelplan",
       "visitInformation": "Consultinformatie"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} beschikbaar om te koppelen",
+      "confirmRemove": "Deze koppeling verwijderen?",
+      "editLink": "Koppelingsnotitie bewerken",
+      "linkSelected": "Selectie koppelen",
+      "modalTitle": "Koppelen: {{section}}",
+      "none": "Nog niets gekoppeld.",
+      "purpose": "Doel",
+      "removeLink": "Koppeling verwijderen",
+      "selectPlaceholder": "Kies records om te koppelen"
     }
   },
   "vitals": {

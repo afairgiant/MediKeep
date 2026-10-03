@@ -45,6 +45,7 @@ import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
 import { translateField } from '../../../utils/translateField';
+import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 
 const InsuranceFormWrapper = ({
   isOpen,
@@ -116,7 +117,7 @@ const InsuranceFormWrapper = ({
   // Reset tab and clear errors when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(getRememberedEditTab('insurance', 'basic'));
       setFieldErrors({});
     } else {
       setFieldErrors({});

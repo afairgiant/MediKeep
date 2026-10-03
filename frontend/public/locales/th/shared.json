@@ -325,13 +325,14 @@
     "episodesCount": "ตอน ({{count}})",
     "episodesCount_one": "ตอน ({{count}})",
     "episodesCount_other": "ตอน ({{count}})",
-    "notes": "หมายเหตุ",
     "labResults": "ผลการตรวจทางห้องปฏิบัติการ",
-    "overview": "ภาพรวม",
-    "visits": "การมาพบแพทย์",
     "medications": "ยา",
+    "notes": "หมายเหตุ",
+    "overview": "ภาพรวม",
     "procedures": "หัตถการ",
-    "treatments": "การรักษา"
+    "treatments": "การรักษา",
+    "visits": "การมาพบแพทย์",
+    "withCount": "{{label}} ({{count}})"
   },
   "buttons": {
     "delete": "ลบ",

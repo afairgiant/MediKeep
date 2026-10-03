@@ -19,7 +19,7 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import { ERROR_MESSAGES } from '../../constants/errorMessages';
+import { savePendingEncounterLinks } from '../../utils/encounterLinks';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -34,6 +34,11 @@ import VisitCard from '../../components/medical/visits/VisitCard';
 import VisitViewModal from '../../components/medical/visits/VisitViewModal';
 import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import {
+  INITIAL_VISIT_FORM_DATA,
+  buildVisitPayload,
+  validateVisitForm,
+} from '../../utils/visitFormUtils';
 
 const Visits = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -164,10 +169,6 @@ const Visits = () => {
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
 
-  // Lab results for encounter-lab result linking
-  const [patientLabResults, setPatientLabResults] = useState([]);
-  const [encounterLabResults, setEncounterLabResults] = useState({});
-
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
 
@@ -190,40 +191,8 @@ const Visits = () => {
           });
           setConditions([]);
         });
-
-      apiService
-        .getPatientLabResults(currentPatient.id)
-        .then(response => {
-          setPatientLabResults(response || []);
-        })
-        .catch(err => {
-          logger.error('medical_lab_results_fetch_error', {
-            message: 'Failed to fetch lab results for visits',
-            patientId: currentPatient.id,
-            error: err.message,
-            component: 'Visits',
-          });
-          setPatientLabResults([]);
-        });
     }
   }, [currentPatient?.id]);
-
-  const fetchEncounterLabResults = async encounterId => {
-    try {
-      const response = await apiService.getEncounterLabResults(encounterId);
-      setEncounterLabResults(prev => ({
-        ...prev,
-        [encounterId]: response || [],
-      }));
-    } catch (err) {
-      logger.error('medical_encounter_lab_results_fetch_error', {
-        message: 'Failed to fetch encounter lab results',
-        encounterId,
-        error: err.message,
-        component: 'Visits',
-      });
-    }
-  };
 
   const getConditionDetails = conditionId => {
     if (!conditionId || conditions.length === 0) return null;
@@ -250,21 +219,8 @@ const Visits = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingVisit, setEditingVisit] = useState(null);
   const [formData, setFormData] = useState({
-    reason: '',
-    date: '',
-    notes: '',
-    practitioner_id: '',
-    condition_id: '',
-    visit_type: '',
-    chief_complaint: '',
-    diagnosis: '',
-    treatment_plan: '',
-    follow_up_instructions: '',
-    duration_minutes: '',
-    location: '',
-    priority: '',
-    tags: [],
-    pending_lab_result_ids: [],
+    ...INITIAL_VISIT_FORM_DATA,
+    pending_links: {},
   });
 
   const handleAddVisit = () => {
@@ -272,21 +228,8 @@ const Visits = () => {
     setEditingVisit(null);
     setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
-      reason: '',
-      date: '',
-      notes: '',
-      practitioner_id: '',
-      condition_id: '',
-      visit_type: '',
-      chief_complaint: '',
-      diagnosis: '',
-      treatment_plan: '',
-      follow_up_instructions: '',
-      duration_minutes: '',
-      location: '',
-      priority: '',
-      tags: [],
-      pending_lab_result_ids: [],
+      ...INITIAL_VISIT_FORM_DATA,
+      pending_links: {},
     });
     setShowModal(true);
   };
@@ -329,18 +272,9 @@ const Visits = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!formData.reason.trim()) {
-      setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
-      return;
-    }
-
-    if (!formData.date) {
-      setError(ERROR_MESSAGES.INVALID_DATE);
-      return;
-    }
-
-    if (!currentPatient?.id) {
-      setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+    const validationError = validateVisitForm(formData, currentPatient?.id);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -355,25 +289,7 @@ const Visits = () => {
       return;
     }
 
-    const visitData = {
-      reason: formData.reason,
-      date: formData.date,
-      notes: formData.notes || null,
-      practitioner_id: formData.practitioner_id || null,
-      condition_id: formData.condition_id
-        ? parseInt(formData.condition_id)
-        : null,
-      visit_type: formData.visit_type || null,
-      chief_complaint: formData.chief_complaint || null,
-      diagnosis: formData.diagnosis || null,
-      treatment_plan: formData.treatment_plan || null,
-      follow_up_instructions: formData.follow_up_instructions || null,
-      duration_minutes: formData.duration_minutes || null,
-      location: formData.location || null,
-      priority: formData.priority || null,
-      tags: formData.tags || [],
-      patient_id: currentPatient.id,
-    };
+    const visitData = buildVisitPayload(formData, currentPatient.id);
 
     try {
       let success;
@@ -394,39 +310,26 @@ const Visits = () => {
         }
       }
 
-      // Link pending lab results for new visits before completing submission,
+      // Link pending relationships for new visits before completing submission,
       // so the form stays in a blocking state until linking finishes.
       if (success && resultId && !editingVisit) {
-        const labResultIds = (formData.pending_lab_result_ids || [])
-          .map(id => parseInt(id, 10))
-          .filter(id => Number.isInteger(id) && id > 0);
+        const failedLinks = await savePendingEncounterLinks(
+          resultId,
+          formData.pending_links
+        );
 
-        if (labResultIds.length > 0) {
-          try {
-            await apiService.linkEncounterLabResultsBulk(resultId, {
-              lab_result_ids: labResultIds,
-              purpose: null,
-              relevance_note: null,
-            });
-          } catch (err) {
-            logger.error('visits_lab_result_link_failed', {
-              message: 'Failed to link lab results to new visit',
-              visitId: resultId,
-              error: err.message,
-              component: 'Visits',
-            });
-            notifications.show({
-              title: t(
-                'visits.notifications.labResultLinkWarning',
-                'Lab Result Linking Issue'
-              ),
-              message: t(
-                'visits.notifications.labResultLinkFailed',
-                'Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.'
-              ),
-              color: 'yellow',
-            });
-          }
+        if (failedLinks > 0) {
+          notifications.show({
+            title: t(
+              'visits.notifications.relationshipLinkWarning',
+              'Relationship Linking Issue'
+            ),
+            message: t(
+              'visits.notifications.relationshipLinkFailed',
+              'Visit was created, but some relationships could not be saved. You can add them by editing the visit.'
+            ),
+            color: 'yellow',
+          });
         }
       }
 
@@ -683,9 +586,7 @@ const Visits = () => {
             refreshFileCount(editingVisit.id);
           }
         }}
-        labResults={patientLabResults}
-        encounterLabResults={encounterLabResults}
-        fetchEncounterLabResults={fetchEncounterLabResults}
+        patientId={currentPatient?.id}
         navigate={navigate}
       >
         <FormLoadingOverlay
@@ -712,9 +613,7 @@ const Visits = () => {
             refreshFileCount(viewingVisit.id);
           }
         }}
-        labResults={patientLabResults}
-        encounterLabResults={encounterLabResults}
-        fetchEncounterLabResults={fetchEncounterLabResults}
+        patientId={currentPatient?.id}
       />
     </>
   );

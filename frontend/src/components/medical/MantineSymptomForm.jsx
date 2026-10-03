@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
+  Alert,
   Modal,
   Tabs,
   Box,
@@ -33,6 +35,10 @@ import {
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
+import RecordVisitsTab from '../shared/RecordVisitsTab';
+import { getRememberedEditTab } from '../../utils/editTabHandoff';
+import { useSubDialog } from '../../contexts/SubDialogContext';
+import RecordVisitsTabButton from '../shared/RecordVisitsTabButton';
 
 /**
  * Form for creating/editing a symptom definition (parent record).
@@ -55,6 +61,9 @@ import logger from '../../services/logger';
  *   />
  */
 const MantineSymptomForm = ({
+  formError,
+  patientId,
+  navigate,
   isOpen,
   onClose,
   title,
@@ -69,6 +78,8 @@ const MantineSymptomForm = ({
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  // Set when this dialog was opened from inside another one (inline create)
+  const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
@@ -119,12 +130,14 @@ const MantineSymptomForm = ({
   // Reset tab when modal opens; clear submitting flag when it closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('symptoms', 'basic')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -153,7 +166,7 @@ const MantineSymptomForm = ({
       title={title}
       size="xl"
       centered
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
@@ -180,6 +193,9 @@ const MantineSymptomForm = ({
               >
                 {t('shared:tabs.details')}
               </Tabs.Tab>
+              {!subDialog && (
+                <RecordVisitsTabButton recordType="symptoms" recordId={editingSymptom?.id} pendingLinks={formData.pending_visit_links} />
+              )}
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -352,6 +368,28 @@ const MantineSymptomForm = ({
               </Box>
             </Tabs.Panel>
 
+            {/* Visits Tab (not offered in a sub-dialog: nesting stays one level deep) */}
+            {!subDialog && (
+              <Tabs.Panel value="visits">
+                <Box mt="md">
+                  {activeTab === 'visits' && (
+                    <RecordVisitsTab
+                      recordType="symptoms"
+                      recordId={editingSymptom?.id}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_visit_links}
+                      onPendingChange={next =>
+                        onInputChange({
+                          target: { name: 'pending_visit_links', value: next },
+                        })
+                      }
+                      navigate={navigate}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
+
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
@@ -394,6 +432,12 @@ const MantineSymptomForm = ({
             </Tabs.Panel>
           </Tabs>
 
+          {formError && (
+            <Alert color="red" variant="light" role="alert">
+              {formError}
+            </Alert>
+          )}
+
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button
@@ -417,6 +461,12 @@ const MantineSymptomForm = ({
       </form>
     </Modal>
   );
+};
+
+MantineSymptomForm.propTypes = {
+  formError: PropTypes.string,
+  patientId: PropTypes.number,
+  navigate: PropTypes.func,
 };
 
 export default MantineSymptomForm;

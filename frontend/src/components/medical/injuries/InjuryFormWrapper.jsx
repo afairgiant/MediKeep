@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
+  Alert,
   Modal,
   Tabs,
   Box,
@@ -29,8 +31,15 @@ import { TagInput } from '../../common/TagInput';
 import InjuryTypeSelect from './InjuryTypeSelect';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import logger from '../../../services/logger';
+import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import { getRememberedEditTab } from '../../../utils/editTabHandoff';
+import { useSubDialog } from '../../../contexts/SubDialogContext';
+import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const InjuryFormWrapper = ({
+  formError,
+  patientId,
+  navigate,
   isOpen,
   onClose,
   title,
@@ -51,6 +60,8 @@ const InjuryFormWrapper = ({
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  // Set when this dialog was opened from inside another one (inline create)
+  const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
@@ -105,12 +116,14 @@ const InjuryFormWrapper = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('injuries', 'basic')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   // Handle form submission
   const handleSubmit = async e => {
@@ -140,7 +153,7 @@ const InjuryFormWrapper = ({
       title={title}
       size="xl"
       centered
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
@@ -171,6 +184,9 @@ const InjuryFormWrapper = ({
               >
                 {t('shared:labels.treatment', 'Treatment')}
               </Tabs.Tab>
+              {!subDialog && (
+                <RecordVisitsTabButton recordType="injuries" recordId={editingInjury?.id} pendingLinks={formData.pending_visit_links} />
+              )}
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -509,6 +525,28 @@ const InjuryFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
+            {/* Visits Tab (not offered in a sub-dialog: nesting stays one level deep) */}
+            {!subDialog && (
+              <Tabs.Panel value="visits">
+                <Box mt="md">
+                  {activeTab === 'visits' && (
+                    <RecordVisitsTab
+                      recordType="injuries"
+                      recordId={editingInjury?.id}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_visit_links}
+                      onPendingChange={next =>
+                        onInputChange({
+                          target: { name: 'pending_visit_links', value: next },
+                        })
+                      }
+                      navigate={navigate}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
+
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
@@ -558,6 +596,12 @@ const InjuryFormWrapper = ({
             </Tabs.Panel>
           </Tabs>
 
+          {formError && (
+            <Alert color="red" variant="light" role="alert">
+              {formError}
+            </Alert>
+          )}
+
           {/* Form Actions */}
           <Group justify="flex-end" mt="xl">
             <Button variant="subtle" onClick={onClose} disabled={isSubmitting}>
@@ -573,6 +617,12 @@ const InjuryFormWrapper = ({
       </form>
     </Modal>
   );
+};
+
+InjuryFormWrapper.propTypes = {
+  formError: PropTypes.string,
+  patientId: PropTypes.number,
+  navigate: PropTypes.func,
 };
 
 export default InjuryFormWrapper;

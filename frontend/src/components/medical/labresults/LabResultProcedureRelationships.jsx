@@ -24,6 +24,7 @@ import {
   IconMedicalCross,
   IconInfoCircle,
 } from '@tabler/icons-react';
+import { useNestedDialog } from '../../../hooks/useNestedDialog';
 
 const LabResultProcedureRelationships = ({
   labResultId,
@@ -43,6 +44,15 @@ const LabResultProcedureRelationships = ({
     relevance_note: '',
   });
   const [error, setError] = useState(null);
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setNewRelationship({ procedure_id: '', relevance_note: '' });
+    setError(null);
+  };
+
+  // Escape closes this modal only, not the dialog it sits in
+  useNestedDialog(showAddModal, closeAddModal);
 
   useEffect(() => {
     const rels = labResultProcedures[labResultId];
@@ -343,11 +353,7 @@ const LabResultProcedureRelationships = ({
 
       <Modal
         opened={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          setNewRelationship({ procedure_id: '', relevance_note: '' });
-          setError(null);
-        }}
+        onClose={closeAddModal}
         title={t(
           'common:modals.linkProcedureToLabResult',
           'Link Procedure to Lab Result'

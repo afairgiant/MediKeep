@@ -1,15 +1,33 @@
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
-from app.models.models import Encounter, EncounterLabResult, LabResult
+from app.models.base import Base
+from app.models.models import (
+    Condition,
+    Encounter,
+    EncounterCondition,
+    EncounterInjury,
+    EncounterLabResult,
+    EncounterMedication,
+    EncounterProcedure,
+    EncounterSymptom,
+    Injury,
+    LabResult,
+    Medication,
+    Procedure,
+    Symptom,
+    Treatment,
+    TreatmentEncounter,
+)
 from app.schemas.encounter import (
     EncounterCreate,
     EncounterLabResultCreate,
     EncounterLabResultUpdate,
+    EncounterLinkUpdate,
     EncounterUpdate,
 )
 
@@ -138,7 +156,7 @@ class CRUDEncounterLabResult(
         encounter_id: int,
         lab_result_ids: List[int],
         purpose: Optional[str] = None,
-        relevance_note: Optional[str] = None
+        relevance_note: Optional[str] = None,
     ) -> List[EncounterLabResult]:
         """Bulk create relationships, skipping existing ones"""
         created = []
@@ -162,6 +180,112 @@ class CRUDEncounterLabResult(
         return created
 
 
+class CRUDEncounterLink(CRUDBase[Base, EncounterLinkUpdate, EncounterLinkUpdate]):
+    """CRUD for a note-only encounter link junction table.
+
+    One instance per linked record type. ``entity_model``/``entity_fk`` name the
+    linked record's model and the junction column pointing at it.
+    """
+
+    def __init__(
+        self, link_model: Type[Base], entity_model: Type[Base], entity_fk: str
+    ):
+        super().__init__(link_model)
+        self.entity_model = entity_model
+        self.entity_fk = entity_fk
+
+    def _entity_col(self):
+        return getattr(self.model, self.entity_fk)
+
+    def get_by_encounter_with_details(self, db: Session, *, encounter_id: int) -> List:
+        """Return (link, record) tuples for an encounter in one query."""
+        return (
+            db.query(self.model, self.entity_model)
+            .join(self.entity_model, self._entity_col() == self.entity_model.id)
+            .filter(self.model.encounter_id == encounter_id)
+            .order_by(self.model.id)
+            .all()
+        )
+
+    def get_by_entity_with_details(self, db: Session, *, entity_id: int) -> List:
+        """Return (link, encounter) tuples for a record in one query."""
+        return (
+            db.query(self.model, Encounter)
+            .join(Encounter, self.model.encounter_id == Encounter.id)
+            .filter(self._entity_col() == entity_id)
+            .order_by(Encounter.date.desc(), self.model.id)
+            .all()
+        )
+
+    def get_by_encounter_and_entity(
+        self, db: Session, *, encounter_id: int, entity_id: int
+    ) -> Optional[Base]:
+        return (
+            db.query(self.model)
+            .filter(
+                and_(
+                    self.model.encounter_id == encounter_id,
+                    self._entity_col() == entity_id,
+                )
+            )
+            .first()
+        )
+
+    def create_link(
+        self,
+        db: Session,
+        *,
+        encounter_id: int,
+        entity_id: int,
+        relevance_note: Optional[str] = None,
+    ) -> Base:
+        obj = self.model(
+            encounter_id=encounter_id,
+            relevance_note=relevance_note,
+            **{self.entity_fk: entity_id},
+        )
+        db.add(obj)
+        db.commit()
+        db.refresh(obj)
+        return obj
+
+    def create_bulk(
+        self,
+        db: Session,
+        *,
+        encounter_id: int,
+        entity_ids: List[int],
+        relevance_note: Optional[str] = None,
+    ) -> List[Base]:
+        """Create links, skipping pairs that are already linked."""
+        created = []
+        for entity_id in entity_ids:
+            if self.get_by_encounter_and_entity(
+                db, encounter_id=encounter_id, entity_id=entity_id
+            ):
+                continue
+            obj = self.model(
+                encounter_id=encounter_id,
+                relevance_note=relevance_note,
+                **{self.entity_fk: entity_id},
+            )
+            db.add(obj)
+            created.append(obj)
+        if created:
+            db.commit()
+            for obj in created:
+                db.refresh(obj)
+        return created
+
+
 # Create the encounter CRUD instances
 encounter = CRUDEncounter(Encounter)
 encounter_lab_result = CRUDEncounterLabResult()
+encounter_procedure = CRUDEncounterLink(EncounterProcedure, Procedure, "procedure_id")
+encounter_symptom = CRUDEncounterLink(EncounterSymptom, Symptom, "symptom_id")
+encounter_injury = CRUDEncounterLink(EncounterInjury, Injury, "injury_id")
+encounter_medication = CRUDEncounterLink(
+    EncounterMedication, Medication, "medication_id"
+)
+encounter_condition = CRUDEncounterLink(EncounterCondition, Condition, "condition_id")
+encounter_treatment = CRUDEncounterLink(TreatmentEncounter, Treatment, "treatment_id")

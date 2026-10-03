@@ -165,10 +165,6 @@
   "loadingHint": "Se l'operazione richiede troppo tempo, aggiorna la pagina",
   "messages": {
     "confirmDiscardAdvancedForm": "Il cambio di modalità comporterà la perdita dei dati inseriti finora. Continuare?",
-    "noRelationshipsAvailable": "Nessuna condizione medica o visita registrata. Aggiungile prima per collegarle qui.",
-    "noRelationshipsOnRecord": "Nessuna condizione medica, visita, farmaco, procedura o trattamento registrato per questo paziente.",
-    "relationshipsCreateInfo": "Le relazioni possono essere aggiunte dopo aver salvato il risultato di laboratorio.",
-    "relationshipsSaveFirst": "Salva prima il risultato di laboratorio per creare i collegamenti alle relazioni.",
     "testComponentsEditInfo": "I componenti dell'esame possono essere gestiti dalla pagina di visualizzazione dopo il salvataggio."
   },
   "modal": {
@@ -218,9 +214,7 @@
   "patientIdRequired": "L'ID del paziente è obbligatorio. Seleziona prima un paziente.",
   "pendingRelationships": {
     "addCondition": "Aggiungi condizione",
-    "addVisit": "Aggiungi visita",
     "removeCondition": "Rimuovi condizione",
-    "removeVisit": "Rimuovi visita",
     "addMedication": "Aggiungi farmaco",
     "addProcedure": "Aggiungi procedura",
     "addTreatment": "Aggiungi trattamento",
@@ -336,7 +330,6 @@
     "bulkEntry": "Inserimento massivo",
     "noComponentsDescription": "Aggiungi risultati dell'esame utilizzando i modelli o gli strumenti di inserimento massivo qui sotto per monitorare i singoli valori di laboratorio e le tendenze.",
     "noComponentsYet": "Nessun risultato dell'esame ancora",
-    "relationships": "Relazioni",
     "resultsStatus": "Risultati e stato",
     "templates": "Modelli"
   },

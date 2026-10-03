@@ -148,3 +148,17 @@ describe('ProcedureFormWrapper', () => {
     });
   });
 });
+
+describe('ProcedureFormWrapper - required fields', () => {
+  test('marks the procedure date as required, like the name (the page requires both)', () => {
+    render(<ProcedureFormWrapper {...defaultProps} />);
+    const name = screen.getByLabelText(/Procedure Name/);
+    const date = screen.getByLabelText(/Procedure Date/);
+    expect(name).toBeRequired();
+    expect(date).toBeRequired();
+    // The asterisk the user sees next to the label
+    expect(screen.getByText('Procedure Date').closest('label')).toHaveTextContent(
+      '*'
+    );
+  });
+});

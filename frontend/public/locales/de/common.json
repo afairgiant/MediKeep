@@ -427,6 +427,26 @@
       "vaccineInfo": "Impfstoffinformationen"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Erkrankung hinzufügen",
+      "injury": "Verletzung hinzufügen",
+      "medication": "Medikament hinzufügen",
+      "treatment": "Behandlung hinzufügen",
+      "labResult": "Laborergebnis hinzufügen",
+      "equipment": "Hilfsmittel hinzufügen",
+      "procedure": "Eingriff hinzufügen",
+      "symptom": "Symptom hinzufügen",
+      "visit": "Termin hinzufügen"
+    },
+    "createError": "Erstellen nicht möglich. Bitte erneut versuchen.",
+    "created": "Erstellt.",
+    "createdLinked": "Erstellt und verknüpft.",
+    "createdPending": "Erstellt. Die Verknüpfung erfolgt beim Speichern.",
+    "linkFailed": "Erstellt, konnte aber nicht verknüpft werden. Sie können es in der Liste verknüpfen.",
+    "loadError": "Das Formular konnte nicht geöffnet werden. Im Dialog dahinter wurde nichts geändert. Bitte erneut versuchen.",
+    "uploadFailed": "Erstellt, aber einige Dateien konnten nicht hochgeladen werden. Sie können sie durch Bearbeiten hinzufügen."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Neue Versicherung hinzufügen"
@@ -992,6 +1012,9 @@
       "title": "Eingriffsdetails"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "Der Eintrag wurde erstellt, aber einige Terminverknüpfungen konnten nicht gespeichert werden. Sie können sie durch Bearbeiten des Eintrags hinzufügen."
+  },
   "search": {
     "activeFilterCount": "{{count}} aktive Filter",
     "activeFilterCount_one": "{{count}} aktiver Filter",
@@ -1290,7 +1313,6 @@
     "createNew": "Neu erstellen",
     "form": {
       "createTreatment": "Behandlung erstellen",
-      "createWithLinks": "Behandlungsplan wird erstellt und Elemente verknüpft...",
       "creatingWithLinks": "Behandlung wird erstellt und Elemente verknüpft...",
       "descriptionDesc": "Kurze Beschreibung der Behandlung",
       "descriptionPlaceholder": "Behandlung beschreiben",
@@ -1382,10 +1404,7 @@
     "editVisit": "Termin bearbeiten",
     "form": {
       "addVisit": "Termin hinzufügen",
-      "chooseLabResultsToLink": "Laborergebnisse zum Verknüpfen auswählen",
-      "labResultsDescription": "Verknüpfen Sie Laborergebnisse, die für diesen Besuch relevant sind. Zweck und Notizen können Sie nach dem Erstellen des Besuchs festlegen.",
       "savingVisit": "Termin wird gespeichert...",
-      "selectLabResults": "Laborergebnisse auswählen",
       "tabs": {
         "clinical": "Klinisch",
         "visitInfo": "Termininfo"
@@ -1394,8 +1413,8 @@
     },
     "loadingVisits": "Arzttermine werden geladen...",
     "notifications": {
-      "labResultLinkFailed": "Der Besuch wurde erstellt, aber einige Laborergebnisse konnten nicht verknüpft werden. Sie können sie manuell verknüpfen, indem Sie den Besuch bearbeiten.",
-      "labResultLinkWarning": "Problem beim Verknüpfen von Laborergebnissen"
+      "relationshipLinkFailed": "Der Termin wurde erstellt, aber einige Beziehungen konnten nicht gespeichert werden. Sie können sie durch Bearbeiten des Termins hinzufügen.",
+      "relationshipLinkWarning": "Problem beim Verknüpfen von Beziehungen"
     },
     "noVisitsFound": "Keine Arzttermine gefunden",
     "table": {
@@ -1418,6 +1437,17 @@
       "title": "Termin - {{date}}",
       "treatmentPlan": "Behandlungsplan",
       "visitInformation": "Termininformationen"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} zum Verknüpfen verfügbar",
+      "confirmRemove": "Diese Verknüpfung entfernen?",
+      "editLink": "Verknüpfungsnotiz bearbeiten",
+      "linkSelected": "Auswahl verknüpfen",
+      "modalTitle": "{{section}} verknüpfen",
+      "none": "Noch nichts verknüpft.",
+      "purpose": "Zweck",
+      "removeLink": "Verknüpfung entfernen",
+      "selectPlaceholder": "Einträge zum Verknüpfen auswählen"
     }
   },
   "vitals": {

@@ -32,6 +32,9 @@ import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgres
 import MedicationTreatmentsList from './MedicationTreatmentsList';
 import MedicationRelationships from '../MedicationRelationships';
 import logger from '../../../services/logger';
+import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
+import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const MedicationViewModal = ({
   isOpen,
@@ -161,14 +164,15 @@ const MedicationViewModal = ({
             <Tabs.Tab value="reminders" leftSection={<IconBell size={16} />}>
               {t('medical:medications.reminders.tabLabel', 'Reminders')}
             </Tabs.Tab>
-            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('shared:tabs.notes', 'Notes')}
-            </Tabs.Tab>
+            <RecordVisitsTabButton recordType="medications" recordId={medication.id} />
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}
             >
               {t('shared:tabs.documents', 'Documents')}
+            </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -561,6 +565,20 @@ const MedicationViewModal = ({
             </Box>
           </Tabs.Panel>
 
+          {/* Visits Tab */}
+          <Tabs.Panel value="visits">
+            <Box mt="md">
+              {activeTab === 'visits' && (
+                <RecordVisitsTab
+                  recordType="medications"
+                  recordId={medication.id}
+                  isViewMode
+                  navigate={navigate}
+                />
+              )}
+            </Box>
+          </Tabs.Panel>
+
           {/* Notes Tab */}
           <Tabs.Panel value="notes">
             <Box mt="md">
@@ -652,6 +670,7 @@ const MedicationViewModal = ({
               <Button
                 variant="light"
                 onClick={() => {
+                  rememberEditTab('medications', activeTab);
                   onClose();
                   setTimeout(() => {
                     onEdit(medication);

@@ -44,6 +44,8 @@ import {
   getEquipmentStatusColor,
   formatEquipmentLabel,
 } from '../../../constants/equipmentConstants';
+import { useNestedDialog } from '../../../hooks/useNestedDialog';
+import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
 
 const INITIAL_RELATIONSHIP_STATE = {
   equipment_ids: [],
@@ -108,6 +110,9 @@ function TreatmentEquipmentRelationships({
     setError(null);
   }, []);
 
+  // Escape closes this modal only, not the dialog it sits in
+  useNestedDialog(showAddModal, resetAndCloseModal);
+
   // Fetch relationships
   const fetchRelationships = useCallback(
     async signal => {
@@ -154,6 +159,24 @@ function TreatmentEquipmentRelationships({
       controller.abort();
     };
   }, [fetchRelationships]);
+
+  const { onCreateNew, createLabel } = useTreatmentInlineCreate({
+    createType: 'equipment',
+    patientId,
+    isViewMode,
+    onCreated: async record => {
+      // Known to the list first: if linking fails, it is still offered in "Link"
+      onEquipmentCreated?.(record);
+      await apiService.linkTreatmentEquipment(treatmentId, {
+        equipment_id: record.id,
+        usage_frequency: null,
+        specific_settings: null,
+        relevance_note: null,
+      });
+      await fetchRelationships();
+      return 'linked';
+    },
+  });
 
   // Create new equipment and link it
   const handleCreateAndLinkEquipment = async () => {
@@ -615,14 +638,26 @@ function TreatmentEquipmentRelationships({
                 count: availableOptions.length,
               })}
             </Text>
-            <Button
-              variant="light"
-              leftSection={<IconPlus size={16} />}
-              onClick={() => setShowAddModal(true)}
-              disabled={loading}
-            >
-              {t('buttons.linkEquipment', 'Link Equipment')}
-            </Button>
+            <Group gap="xs">
+              {onCreateNew && (
+                <Button
+                  variant="light"
+                  leftSection={<IconPlus size={16} />}
+                  onClick={onCreateNew}
+                  disabled={loading}
+                >
+                  {createLabel}
+                </Button>
+              )}
+              <Button
+                variant="light"
+                leftSection={<IconPlus size={16} />}
+                onClick={() => setShowAddModal(true)}
+                disabled={loading}
+              >
+                {t('buttons.linkEquipment', 'Link Equipment')}
+              </Button>
+            </Group>
           </Group>
         )}
 

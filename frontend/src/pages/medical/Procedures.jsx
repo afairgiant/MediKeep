@@ -32,26 +32,18 @@ import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import {
+  INITIAL_PROCEDURE_FORM_DATA,
+  buildProcedurePayload,
+  validateProcedureForm,
+} from '../../utils/procedureFormUtils';
 import { Button, Stack, Container, Paper } from '@mantine/core';
 
 const INITIAL_FORM_DATA = {
-  procedure_name: '',
-  procedure_type: '',
-  procedure_code: '',
-  description: '',
-  procedure_date: '',
-  status: 'scheduled',
-  outcome: '',
-  notes: '',
-  facility: '',
-  procedure_setting: '',
-  procedure_complications: '',
-  procedure_duration: '',
-  practitioner_id: '',
-  anesthesia_type: '',
-  anesthesia_notes: '',
-  tags: [],
+  ...INITIAL_PROCEDURE_FORM_DATA,
+  pending_visit_links: [],
 };
 
 const Procedures = () => {
@@ -247,18 +239,9 @@ const Procedures = () => {
     e.preventDefault();
 
     // Basic validation
-    if (!formData.procedure_name.trim()) {
-      setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
-      return;
-    }
-
-    if (!formData.procedure_date) {
-      setError(ERROR_MESSAGES.INVALID_DATE);
-      return;
-    }
-
-    if (!currentPatient?.id) {
-      setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+    const validationError = validateProcedureForm(formData, currentPatient?.id);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -270,29 +253,7 @@ const Procedures = () => {
       return;
     }
 
-    const procedureData = {
-      procedure_name: formData.procedure_name,
-      procedure_type: formData.procedure_type || null,
-      procedure_code: formData.procedure_code || null,
-      description: formData.description,
-      date: formData.procedure_date || null,
-      status: formData.status,
-      outcome: formData.outcome || null,
-      notes: formData.notes || null,
-      facility: formData.facility || null,
-      procedure_setting: formData.procedure_setting || null,
-      procedure_complications: formData.procedure_complications || null,
-      procedure_duration: formData.procedure_duration
-        ? parseInt(formData.procedure_duration)
-        : null,
-      practitioner_id: formData.practitioner_id
-        ? parseInt(formData.practitioner_id)
-        : null,
-      anesthesia_type: formData.anesthesia_type || null,
-      anesthesia_notes: formData.anesthesia_notes || null,
-      tags: formData.tags || [],
-      patient_id: currentPatient.id,
-    };
+    const procedureData = buildProcedurePayload(formData, currentPatient.id);
 
     try {
       let success;
@@ -311,6 +272,15 @@ const Procedures = () => {
         if (success) {
           needsRefreshAfterSubmissionRef.current = true;
         }
+      }
+
+      // Link visits chosen in the Add form now that the record exists
+      if (success && resultId && !editingProcedure) {
+        await linkPendingVisitsOrWarn(
+          'procedures',
+          resultId,
+          formData.pending_visit_links
+        );
       }
 
       // Complete form submission
@@ -579,6 +549,8 @@ const Procedures = () => {
         onSubmit={handleSubmit}
         editingItem={editingProcedure}
         practitioners={practitioners}
+        patientId={currentPatient?.id}
+        navigate={navigate}
         isLoading={isBlocking}
         statusMessage={statusMessage}
         onDocumentManagerRef={setDocumentManagerMethods}

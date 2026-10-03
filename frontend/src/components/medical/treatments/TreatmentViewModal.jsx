@@ -34,6 +34,9 @@ import TreatmentMedicationsViewTab from './TreatmentMedicationsViewTab';
 import TreatmentEncounterRelationships from './TreatmentEncounterRelationships';
 import TreatmentLabResultRelationships from './TreatmentLabResultRelationships';
 import TreatmentEquipmentRelationships from './TreatmentEquipmentRelationships';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
+import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
+import CollapsibleLinkTabs from '../../shared/CollapsibleLinkTabs';
 
 const TreatmentViewModal = ({
   isOpen,
@@ -55,6 +58,7 @@ const TreatmentViewModal = ({
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
+  const counts = useTreatmentLinkCounts(treatment?.id, isOpen);
 
   // Reset tab when modal opens or treatment changes
   useEffect(() => {
@@ -66,6 +70,7 @@ const TreatmentViewModal = ({
   if (!isOpen || !treatment) return null;
 
   const handleEdit = () => {
+    rememberEditTab('treatments', activeTab);
     onEdit(treatment);
     onClose();
   };
@@ -112,6 +117,55 @@ const TreatmentViewModal = ({
     if (!type) return null;
     return TREATMENT_CATEGORY_LABELS[type] || type; // Return mapped label or raw value for custom entries
   };
+
+  // The Visits tab is available in both Simple and Treatment Plan modes; the other link
+  // tabs only in Treatment Plan mode. Only types that have links get a tab.
+  const linkTabItems = [
+    ...(treatment.mode === 'advanced'
+      ? [
+          {
+            key: 'medications',
+            label: t('shared:categories.medications', 'Medications'),
+            icon: IconPill,
+            count: counts.medications,
+          },
+        ]
+      : []),
+    {
+      key: 'visits',
+      label: t('shared:tabs.visits', 'Visits'),
+      icon: IconStethoscope,
+      count: counts.encounters,
+    },
+    ...(treatment.mode === 'advanced'
+      ? [
+          {
+            key: 'labs',
+            label: t('treatments.viewModal.tabs.labs', 'Labs'),
+            icon: IconTestPipe,
+            count: counts.labResults,
+          },
+          {
+            key: 'equipment',
+            label: t('treatments.viewModal.tabs.equipment', 'Equipment'),
+            icon: IconDeviceDesktop,
+            count: counts.equipment,
+          },
+        ]
+      : []),
+  ];
+  const visitsPanel = (
+    <Tabs.Panel value="visits">
+      <Box mt="md">
+        <TreatmentEncounterRelationships
+          treatmentId={treatment.id}
+          encounters={[]}
+          isViewMode={true}
+          onEntityClick={onEncounterClick}
+        />
+      </Box>
+    </Tabs.Panel>
+  );
 
   return (
     <Modal
@@ -167,31 +221,7 @@ const TreatmentViewModal = ({
                 {t('treatments.viewModal.tabs.schedule', 'Schedule & Dosage')}
               </Tabs.Tab>
             )}
-            {treatment.mode === 'advanced' && (
-              <>
-                <Tabs.Tab
-                  value="medications"
-                  leftSection={<IconPill size={16} />}
-                >
-                  {t('shared:categories.medications', 'Medications')}
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="visits"
-                  leftSection={<IconStethoscope size={16} />}
-                >
-                  {t('shared:tabs.visits', 'Visits')}
-                </Tabs.Tab>
-                <Tabs.Tab value="labs" leftSection={<IconTestPipe size={16} />}>
-                  {t('treatments.viewModal.tabs.labs', 'Labs')}
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="equipment"
-                  leftSection={<IconDeviceDesktop size={16} />}
-                >
-                  {t('treatments.viewModal.tabs.equipment', 'Equipment')}
-                </Tabs.Tab>
-              </>
-            )}
+            <CollapsibleLinkTabs items={linkTabItems} mode="view" />
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}
@@ -524,6 +554,9 @@ const TreatmentViewModal = ({
             </Tabs.Panel>
           )}
 
+          {/* Visits (Simple mode; Treatment Plan mode renders it with the other relationship tabs) */}
+          {treatment.mode !== 'advanced' && visitsPanel}
+
           {/* Advanced mode: Relationship Tabs */}
           {treatment.mode === 'advanced' && (
             <>
@@ -536,16 +569,7 @@ const TreatmentViewModal = ({
                 </Box>
               </Tabs.Panel>
 
-              <Tabs.Panel value="visits">
-                <Box mt="md">
-                  <TreatmentEncounterRelationships
-                    treatmentId={treatment.id}
-                    encounters={[]}
-                    isViewMode={true}
-                    onEntityClick={onEncounterClick}
-                  />
-                </Box>
-              </Tabs.Panel>
+              {visitsPanel}
 
               <Tabs.Panel value="labs">
                 <Box mt="md">

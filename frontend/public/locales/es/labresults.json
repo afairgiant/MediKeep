@@ -165,10 +165,6 @@
   "loadingHint": "Si esto tarda demasiado, por favor actualice la página",
   "messages": {
     "confirmDiscardAdvancedForm": "Cambiar de modo descartará lo que has introducido hasta ahora. ¿Continuar?",
-    "noRelationshipsAvailable": "No hay condiciones médicas ni visitas registradas. Agréguelas primero para vincularlas aquí.",
-    "noRelationshipsOnRecord": "No hay afecciones médicas, visitas, medicamentos, procedimientos ni tratamientos registrados para este paciente.",
-    "relationshipsCreateInfo": "Las relaciones se pueden agregar después de guardar el resultado de laboratorio.",
-    "relationshipsSaveFirst": "Guarde el resultado de laboratorio primero para crear vínculos de relación.",
     "testComponentsEditInfo": "Los componentes de prueba se pueden gestionar desde la página de visualización después de guardar."
   },
   "modal": {
@@ -218,9 +214,7 @@
   "patientIdRequired": "Se requiere el ID del paciente. Por favor, seleccione un paciente primero.",
   "pendingRelationships": {
     "addCondition": "Agregar afección",
-    "addVisit": "Agregar visita",
     "removeCondition": "Eliminar afección",
-    "removeVisit": "Eliminar visita",
     "addMedication": "Agregar medicamento",
     "addProcedure": "Agregar procedimiento",
     "addTreatment": "Agregar tratamiento",
@@ -336,7 +330,6 @@
     "bulkEntry": "Entrada masiva",
     "noComponentsDescription": "Agregue resultados de prueba usando las plantillas o las herramientas de entrada masiva a continuación para rastrear valores de laboratorio individuales y tendencias.",
     "noComponentsYet": "Aún no hay resultados de prueba",
-    "relationships": "Relaciones",
     "resultsStatus": "Resultados y estado",
     "templates": "Plantillas"
   },

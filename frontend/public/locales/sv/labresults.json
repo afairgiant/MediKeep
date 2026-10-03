@@ -165,10 +165,6 @@
   "loadingHint": "Om detta tar för lång tid, uppdatera sidan",
   "messages": {
     "confirmDiscardAdvancedForm": "Om du byter läge kommer det du har angett hittills att gå förlorat. Fortsätta?",
-    "noRelationshipsAvailable": "Inga medicinska tillstånd eller besök registrerade. Lägg till dem först för att länka dem här.",
-    "noRelationshipsOnRecord": "Inga tillstånd, besök, läkemedel, ingrepp eller behandlingar finns registrerade för denna patient.",
-    "relationshipsCreateInfo": "Relationer kan läggas till efter att laboratorieresultatet sparats.",
-    "relationshipsSaveFirst": "Spara laboratorieresultatet först för att skapa relationslänkar.",
     "testComponentsEditInfo": "Testkomponenter kan hanteras från visningssidan efter sparande."
   },
   "modal": {
@@ -218,9 +214,7 @@
   "patientIdRequired": "Patient-ID krävs. Välj en patient först.",
   "pendingRelationships": {
     "addCondition": "Lägg till tillstånd",
-    "addVisit": "Lägg till besök",
     "removeCondition": "Ta bort tillstånd",
-    "removeVisit": "Ta bort besök",
     "addMedication": "Lägg till läkemedel",
     "addProcedure": "Lägg till ingrepp",
     "addTreatment": "Lägg till behandling",
@@ -336,7 +330,6 @@
     "bulkEntry": "Bulkinmatning",
     "noComponentsDescription": "Lägg till testresultat med hjälp av mallar eller bulkinmatningsverktygen nedan för att spåra individuella labvärden och trender.",
     "noComponentsYet": "Inga testresultat ännu",
-    "relationships": "Relationer",
     "resultsStatus": "Resultat & status",
     "templates": "Mallar"
   },

@@ -37,6 +37,7 @@ import {
 
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useTranslation } from 'react-i18next';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
 
 const InsuranceViewModal = ({
   isOpen,
@@ -392,6 +393,7 @@ const InsuranceViewModal = ({
               <Button
                 leftSection={<IconEdit size={16} />}
                 onClick={() => {
+                  rememberEditTab('insurance', activeTab);
                   onClose();
                   onEdit && onEdit(insurance);
                 }}

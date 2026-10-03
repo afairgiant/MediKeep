@@ -336,6 +336,7 @@
     "overview": "Обзор",
     "procedures": "Процедуры",
     "treatments": "Лечение",
-    "visits": "Визиты"
+    "visits": "Визиты",
+    "withCount": "{{label}} ({{count}})"
   }
 }

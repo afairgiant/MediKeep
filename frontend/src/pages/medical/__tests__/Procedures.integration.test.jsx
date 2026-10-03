@@ -119,6 +119,7 @@ vi.mock('../../../services/api', () => ({
     createProcedure: vi.fn(() => Promise.resolve({})),
     updateProcedure: vi.fn(() => Promise.resolve({})),
     deleteProcedure: vi.fn(() => Promise.resolve({})),
+    createRecordEncounterLinksBulk: vi.fn(() => Promise.resolve([])),
   },
 }));
 vi.mock('../../../services/logger', () => ({
@@ -359,6 +360,16 @@ vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
       <div data-testid="form-modal">
         <h2>{title}</h2>
         {children}
+        <button
+          type="button"
+          onClick={() =>
+            handleChange('pending_visit_links', [
+              { entityId: 5, relevanceNote: 'n', purpose: null },
+            ])
+          }
+        >
+          add-pending-visit
+        </button>
         <form data-testid="procedure-form" onSubmit={onSubmit}>
           <label>
             procedures.form.procedureName
@@ -522,6 +533,7 @@ vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
 /*  Import the component under test (AFTER all mocks)                 */
 /* ------------------------------------------------------------------ */
 import render from '../../../test-utils/render';
+import { apiService } from '../../../services/api';
 import Procedures from '../Procedures';
 
 /* ------------------------------------------------------------------ */
@@ -779,6 +791,64 @@ describe('Procedures Page Integration Tests', () => {
 
       // startSubmission should be called
       expect(mockStartSubmission).toHaveBeenCalled();
+    });
+
+    it('links the visits chosen in the Add form once the procedure is created', async () => {
+      render(<Procedures />);
+      await userEvent.click(screen.getByText('procedures.addProcedure'));
+      const form = screen.getByTestId('form-modal');
+
+      fireEvent.change(
+        within(form).getByRole('textbox', {
+          name: /procedures\.form\.procedureName/i,
+        }),
+        { target: { name: 'procedure_name', value: 'Blood Test' } }
+      );
+      fireEvent.change(
+        within(form).getByLabelText(/procedures\.form\.procedureDate/i),
+        { target: { name: 'procedure_date', value: '2024-02-15' } }
+      );
+      await userEvent.click(within(form).getByText('add-pending-visit'));
+      await userEvent.click(within(form).getByText('buttons.submit'));
+
+      await vi.waitFor(() =>
+        expect(apiService.createRecordEncounterLinksBulk).toHaveBeenCalledWith(
+          'procedures',
+          99,
+          { encounter_ids: [5], relevance_note: 'n' }
+        )
+      );
+      // The pending visit list is form state only and never part of the create payload
+      expect(mockCreateItem.mock.calls[0][0]).not.toHaveProperty(
+        'pending_visit_links'
+      );
+      // Linking finishes before the form completes
+      expect(
+        apiService.createRecordEncounterLinksBulk.mock.invocationCallOrder[0]
+      ).toBeLessThan(mockCompleteFormSubmission.mock.invocationCallOrder[0]);
+    });
+
+    it('does not link visits when editing an existing procedure', async () => {
+      render(<Procedures />);
+      const card1 = screen.getByTestId('card-wrapper-1');
+      await userEvent.click(within(card1).getByText('buttons.edit'));
+
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(
+        within(form).getByRole('textbox', {
+          name: /procedures\.form\.procedureName/i,
+        }),
+        { target: { name: 'procedure_name', value: 'Renamed' } }
+      );
+      fireEvent.change(
+        within(form).getByLabelText(/procedures\.form\.procedureDate/i),
+        { target: { name: 'procedure_date', value: '2024-02-15' } }
+      );
+      await userEvent.click(within(form).getByText('add-pending-visit'));
+      await userEvent.click(within(form).getByText('buttons.update'));
+
+      await vi.waitFor(() => expect(mockUpdateItem).toHaveBeenCalled());
+      expect(apiService.createRecordEncounterLinksBulk).not.toHaveBeenCalled();
     });
 
     it('opens edit form with pre-filled data when edit button is clicked', async () => {
