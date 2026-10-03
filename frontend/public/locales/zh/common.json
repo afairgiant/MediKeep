@@ -1012,8 +1012,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "记录已创建，但部分就诊关联未能保存。您可以通过编辑记录来添加。",
-    "saveFirstInfo": "在此关联的就诊将在保存此记录时一并保存。"
+    "linkFailed": "记录已创建，但部分就诊关联未能保存。您可以通过编辑记录来添加。"
   },
   "search": {
     "activeFilterCount": "{{count}}个激活筛选",
@@ -1313,7 +1312,6 @@
     "createNew": "创建新项",
     "form": {
       "createTreatment": "创建治疗",
-      "createWithLinks": "正在创建治疗计划并关联项目...",
       "creatingWithLinks": "正在创建治疗并关联项目...",
       "descriptionDesc": "治疗简要描述",
       "descriptionPlaceholder": "描述治疗",
@@ -1448,7 +1446,6 @@
       "none": "尚未关联任何内容。",
       "purpose": "目的",
       "removeLink": "移除关联",
-      "saveFirstInfo": "在此添加的关联将在保存就诊时一并保存。",
       "selectPlaceholder": "选择要关联的记录"
     }
   },

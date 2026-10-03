@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "Il record è stato creato, ma non è stato possibile salvare alcuni collegamenti alle visite. Puoi aggiungerli modificando il record.",
-    "saveFirstInfo": "Le visite collegate qui vengono salvate quando questo record viene salvato."
+    "linkFailed": "Il record è stato creato, ma non è stato possibile salvare alcuni collegamenti alle visite. Puoi aggiungerli modificando il record."
   },
   "search": {
     "activeFilterCount": "{{count}} filtri attivi",
@@ -1314,7 +1313,6 @@
     "createNew": "Crea nuovo",
     "form": {
       "createTreatment": "Crea trattamento",
-      "createWithLinks": "Creazione del piano di trattamento e collegamento degli elementi...",
       "creatingWithLinks": "Creazione trattamento e collegamento elementi...",
       "descriptionDesc": "Breve descrizione del trattamento",
       "descriptionPlaceholder": "Descrivi il trattamento",
@@ -1449,7 +1447,6 @@
       "none": "Nessun elemento ancora collegato.",
       "purpose": "Scopo",
       "removeLink": "Rimuovi collegamento",
-      "saveFirstInfo": "Le relazioni aggiunte qui vengono salvate quando la visita viene salvata.",
       "selectPlaceholder": "Scegli i record da collegare"
     }
   },

@@ -165,7 +165,6 @@
   "loadingHint": "Om detta tar för lång tid, uppdatera sidan",
   "messages": {
     "confirmDiscardAdvancedForm": "Om du byter läge kommer det du har angett hittills att gå förlorat. Fortsätta?",
-    "relationshipsSaveFirst": "Spara laboratorieresultatet först för att skapa relationslänkar.",
     "testComponentsEditInfo": "Testkomponenter kan hanteras från visningssidan efter sparande."
   },
   "modal": {

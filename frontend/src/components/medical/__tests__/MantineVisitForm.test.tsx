@@ -179,29 +179,76 @@ describe('MantineVisitForm — linked record tabs', () => {
     'shared:categories.lab_results',
   ];
 
-  const openTab = async (name: string) => {
-    const user = userEvent.setup();
-    await user.click(screen.getByRole('tab', { name: withCount(name) }));
-    return user;
-  };
+  const linkMenuButton = () =>
+    screen
+      .getAllByRole('button', { name: 'common:buttons.link' })
+      .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
 
-  test('has a tab per linked record type and no Relationships tab', () => {
+  test('add mode shows no link tabs until a type is chosen from the Link menu', async () => {
     render(<LooseVisitForm {...defaultProps} />);
+    LINK_TABS.forEach(name =>
+      expect(screen.queryByRole('tab', { name: withCount(name) })).toBeNull()
+    );
+    expect(screen.queryByRole('tab', { name: /elationships/ })).toBeNull();
+
+    const user = userEvent.setup();
+    await user.click(linkMenuButton());
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map(item => item.textContent)).toEqual(LINK_TABS);
+  });
+
+  test('add mode shows a tab for each type that already has pending links', () => {
+    render(
+      <LooseVisitForm
+        {...defaultProps}
+        formData={{
+          ...defaultProps.formData,
+          pending_links: {
+            procedures: [{ entityId: 4, relevanceNote: null, purpose: null }],
+          },
+        }}
+      />
+    );
+    expect(
+      screen.getByRole('tab', { name: 'shared:categories.procedures (1)' })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('tab', {
+        name: withCount('shared:categories.injuries'),
+      })
+    ).toBeNull();
+  });
+
+  test('editing a saved visit keeps a tab for every linked record type and no Link menu', () => {
+    render(
+      <LooseVisitForm {...defaultProps} editingVisit={{ id: 55 } as never} />
+    );
     LINK_TABS.forEach(name =>
       expect(
         screen.getByRole('tab', { name: withCount(name) })
       ).toBeInTheDocument()
     );
     expect(screen.queryByRole('tab', { name: /elationships/ })).toBeNull();
+    expect(
+      screen
+        .queryAllByRole('button', { name: 'common:buttons.link' })
+        .some(button => button.hasAttribute('aria-haspopup'))
+    ).toBe(false);
   });
 
-  test('tells the panels which tab is open so they load on demand', async () => {
+  test('choosing a type from the Link menu opens its tab, so the panel loads on demand', async () => {
     render(<LooseVisitForm {...defaultProps} />);
     expect(screen.getByTestId('visit-link-panels')).toHaveAttribute(
       'data-active-tab',
       'info'
     );
-    await openTab('shared:categories.lab_results');
+    const user = userEvent.setup();
+    await user.click(linkMenuButton());
+    await user.click(
+      await screen.findByRole('menuitem', {
+        name: 'shared:categories.lab_results',
+      })
+    );
     expect(screen.getByTestId('visit-link-panels')).toHaveAttribute(
       'data-active-tab',
       'link-labResults'

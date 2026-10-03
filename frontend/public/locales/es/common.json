@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "El registro se creó, pero no se pudieron guardar algunos vínculos con visitas. Puede añadirlos editando el registro.",
-    "saveFirstInfo": "Las visitas que vincule aquí se guardan cuando se guarda este registro."
+    "linkFailed": "El registro se creó, pero no se pudieron guardar algunos vínculos con visitas. Puede añadirlos editando el registro."
   },
   "search": {
     "activeFilterCount": "{{count}} filtros activos",
@@ -1314,7 +1313,6 @@
     "createNew": "Crear nuevo",
     "form": {
       "createTreatment": "Crear tratamiento",
-      "createWithLinks": "Creando plan de tratamiento y vinculando elementos...",
       "creatingWithLinks": "Creando tratamiento y vinculando elementos...",
       "descriptionDesc": "Descripción breve del tratamiento",
       "descriptionPlaceholder": "Describa el tratamiento",
@@ -1449,7 +1447,6 @@
       "none": "Aún no hay nada vinculado.",
       "purpose": "Propósito",
       "removeLink": "Quitar vínculo",
-      "saveFirstInfo": "Las relaciones que añada aquí se guardan cuando se guarda la visita.",
       "selectPlaceholder": "Elija registros para vincular"
     }
   },

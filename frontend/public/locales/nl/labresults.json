@@ -165,7 +165,6 @@
   "loadingHint": "Als dit te lang duurt, vernieuw dan de pagina",
   "messages": {
     "confirmDiscardAdvancedForm": "Als u van modus wisselt, gaat wat u tot nu toe hebt ingevoerd verloren. Doorgaan?",
-    "relationshipsSaveFirst": "Sla het labresultaat eerst op om koppelingen aan te maken.",
     "testComponentsEditInfo": "Testcomponenten kunnen na het opslaan worden beheerd via de weergavepagina."
   },
   "modal": {

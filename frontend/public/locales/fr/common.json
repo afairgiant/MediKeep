@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "L'enregistrement a été créé, mais certaines associations de visites n'ont pas pu être enregistrées. Vous pouvez les ajouter en modifiant l'enregistrement.",
-    "saveFirstInfo": "Les visites associées ici sont enregistrées en même temps que cet enregistrement."
+    "linkFailed": "L'enregistrement a été créé, mais certaines associations de visites n'ont pas pu être enregistrées. Vous pouvez les ajouter en modifiant l'enregistrement."
   },
   "search": {
     "activeFilterCount": "{{count}} filtre(s) actif(s)",
@@ -1314,7 +1313,6 @@
     "createNew": "Créer nouveau",
     "form": {
       "createTreatment": "Créer un traitement",
-      "createWithLinks": "Création du plan de traitement et connexion des objets...",
       "creatingWithLinks": "Création du traitement et connexion des objets...",
       "descriptionDesc": "Brève description du traitement",
       "descriptionPlaceholder": "Décrivez le traitement",
@@ -1449,7 +1447,6 @@
       "none": "Rien n'est encore associé.",
       "purpose": "Objectif",
       "removeLink": "Supprimer l'association",
-      "saveFirstInfo": "Les relations ajoutées ici sont enregistrées lorsque la visite est enregistrée.",
       "selectPlaceholder": "Choisissez les éléments à associer"
     }
   },

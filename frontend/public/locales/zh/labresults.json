@@ -165,7 +165,6 @@
   "loadingHint": "如果加载时间过长，请刷新页面",
   "messages": {
     "confirmDiscardAdvancedForm": "切换模式将丢弃您目前输入的内容。是否继续？",
-    "relationshipsSaveFirst": "请先保存检验结果以创建关系链接。",
     "testComponentsEditInfo": "保存后可以从查看页面管理检验组件。"
   },
   "modal": {

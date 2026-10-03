@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "O registo foi criado, mas alguns vínculos com consultas não puderam ser guardados. Pode adicioná-los editando o registo.",
-    "saveFirstInfo": "As consultas vinculadas aqui são guardadas quando este registo for guardado."
+    "linkFailed": "O registo foi criado, mas alguns vínculos com consultas não puderam ser guardados. Pode adicioná-los editando o registo."
   },
   "search": {
     "activeFilterCount": "{{count}} filtro ativo",
@@ -1314,7 +1313,6 @@
     "createNew": "Criar Novo",
     "form": {
       "createTreatment": "Criar Tratamento",
-      "createWithLinks": "Criando plano de tratamento e vinculando itens...",
       "creatingWithLinks": "Criando tratamento e vinculando itens...",
       "descriptionDesc": "Breve descrição do tratamento",
       "descriptionPlaceholder": "Descreva o tratamento",
@@ -1449,7 +1447,6 @@
       "none": "Nada vinculado ainda.",
       "purpose": "Finalidade",
       "removeLink": "Remover vínculo",
-      "saveFirstInfo": "As relações adicionadas aqui são guardadas quando a consulta for guardada.",
       "selectPlaceholder": "Escolha registos para vincular"
     }
   },

@@ -14,6 +14,7 @@ import MantineSymptomForm from '../../medical/MantineSymptomForm';
 import SymptomViewModal from '../../medical/symptoms/SymptomViewModal';
 import MantineVisitForm from '../../medical/MantineVisitForm';
 import VisitViewModal from '../../medical/visits/VisitViewModal';
+import { apiService } from '../../../services/api';
 
 vi.mock('../../medical/practitioners/PractitionerSelectWithCreate', () => ({
   default: () => <div data-testid="practitioner-select" />,
@@ -164,11 +165,25 @@ const clickEdit = async () => {
   await userEvent.click(edit as HTMLElement);
 };
 
+// View mode only shows link tabs that have links; the visit under test has lab results
+let linksSpy: ReturnType<typeof vi.spyOn>;
+beforeEach(() => {
+  linksSpy = vi
+    .spyOn(apiService, 'getEncounterLinks')
+    .mockImplementation((_visitId: number, linkType: string) =>
+      Promise.resolve(linkType === 'lab-results' ? [{ id: 1 }] : [])
+    );
+});
+afterEach(() => {
+  linksSpy.mockRestore();
+});
+
 describe.each(cases)('View to Edit keeps the tab - $name', c => {
   it('opens the Edit form on the tab that was open in View mode', async () => {
     const onEdit = vi.fn();
     const { unmount } = render(c.view(onEdit));
 
+    await waitFor(() => expect(tabByValue(c.viewTab)).toBeTruthy());
     await userEvent.click(tabByValue(c.viewTab));
     expect(tabByValue(c.viewTab)).toHaveAttribute('aria-selected', 'true');
     await clickEdit();

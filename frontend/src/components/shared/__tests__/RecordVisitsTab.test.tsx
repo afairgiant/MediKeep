@@ -32,7 +32,6 @@ const I18N = {
   link: 'common:buttons.link',
   linkSelected: 'common:visits.relationships.linkSelected',
   none: 'common:visits.relationships.none',
-  saveFirst: 'common:recordRelationships.saveFirstInfo',
   placeholder: 'common:visits.relationships.selectPlaceholder',
   editLink: 'common:visits.relationships.editLink',
   removeLink: 'common:visits.relationships.removeLink',
@@ -150,7 +149,8 @@ describe('RecordVisitsTab - add mode (record not saved yet)', () => {
       />
     );
 
-    expect(screen.getByText(I18N.saveFirst)).toBeInTheDocument();
+    // No note about links being saved later: they are shown as chosen
+    expect(screen.queryByText(/saveFirstInfo/)).toBeNull();
     const dialog = await linkVisit('Annual checkup (2026-03-01, routine)');
     await userEvent.type(
       within(dialog).getByLabelText(I18N.noteLabel),

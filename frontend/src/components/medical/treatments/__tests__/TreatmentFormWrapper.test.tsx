@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
 
 /**
  * @jest-environment jsdom
@@ -54,7 +55,10 @@ vi.mock('../TreatmentRelationshipsManager', () => ({
 
 vi.mock('../TreatmentPlanSetup', () => ({
   default: (props: { activeSection?: string }) => (
-    <div data-testid="treatment-plan-setup" data-section={props.activeSection} />
+    <div
+      data-testid="treatment-plan-setup"
+      data-section={props.activeSection}
+    />
   ),
 }));
 
@@ -172,10 +176,7 @@ describe('TreatmentFormWrapper', () => {
 
     test('handles empty practitionersOptions gracefully', () => {
       render(
-        <TreatmentFormWrapper
-          {...defaultProps}
-          practitionersOptions={[]}
-        />
+        <TreatmentFormWrapper {...defaultProps} practitionersOptions={[]} />
       );
       expect(
         screen.getByTestId('practitioner-select-with-create')
@@ -190,13 +191,32 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
     formData: { ...defaultProps.formData, mode: 'advanced' },
   };
   const tabNames = () => screen.getAllByRole('tab').map(t => t.textContent);
-  const visitsTab = () => screen.getByRole('tab', { name: /shared:tabs.visits/ });
+  const visitsTab = () =>
+    screen.getByRole('tab', { name: /shared:tabs.visits/ });
+  // A new treatment shows only link tabs that hold links; the rest sit in the Link menu
+  const linkMenuButton = () =>
+    screen
+      .getAllByRole('button', { name: 'common:buttons.link' })
+      .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
+  const revealTab = async (name: RegExp) => {
+    const user = userEvent.setup();
+    await user.click(linkMenuButton());
+    await user.click(await screen.findByRole('menuitem', { name }));
+    return user;
+  };
 
-  test('Simple mode shows a Visits tab but not the other relationship tabs', () => {
+  test('Simple mode starts with no link tabs; the Link menu offers only Visits', async () => {
     render(<TreatmentFormWrapper {...defaultProps} />);
-    expect(visitsTab()).toBeInTheDocument();
+    expect(
+      screen.queryByRole('tab', { name: /shared:tabs.visits/ })
+    ).toBeNull();
     expect(tabNames().join('|')).not.toMatch(/medications|medical_equipment/);
     expect(screen.queryByRole('tab', { name: /lab_results/ })).toBeNull();
+
+    await userEvent.click(linkMenuButton());
+    expect(
+      (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+    ).toEqual(['shared:tabs.visits']);
   });
 
   test('Simple mode loads the relationship content only when Visits is opened', async () => {
@@ -204,7 +224,7 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
     expect(screen.queryByTestId('treatment-plan-setup')).toBeNull();
     expect(screen.queryByTestId('treatment-relationships-manager')).toBeNull();
 
-    fireEvent.click(visitsTab());
+    await revealTab(/shared:tabs.visits/);
     expect(await screen.findByTestId('treatment-plan-setup')).toHaveAttribute(
       'data-section',
       'encounters'
@@ -219,21 +239,32 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
       />
     );
     fireEvent.click(visitsTab());
-    const manager = await screen.findByTestId('treatment-relationships-manager');
+    const manager = await screen.findByTestId(
+      'treatment-relationships-manager'
+    );
     expect(manager).toHaveAttribute('data-section', 'encounters');
     expect(manager).toHaveAttribute('data-treatment-id', '42');
   });
 
-  test('Treatment Plan mode keeps all four relationship tabs and mounts content up front', () => {
+  test('Treatment Plan mode offers all four relationship types in the Link menu and mounts content up front', async () => {
     render(<TreatmentFormWrapper {...advancedProps} />);
-    expect(visitsTab()).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /shared:categories.medications/ })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /lab_results/ })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /medical_equipment/ })).toBeInTheDocument();
     expect(screen.getByTestId('treatment-plan-setup')).toBeInTheDocument();
+    expect(tabNames().join('|')).not.toMatch(
+      /medications|medical_equipment|lab_results|visits/
+    );
+
+    await userEvent.click(linkMenuButton());
+    expect(
+      (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+    ).toEqual([
+      'shared:categories.medications',
+      'shared:tabs.visits',
+      'shared:categories.lab_results',
+      'shared:categories.medical_equipment',
+    ]);
   });
 
-  test('switching to Simple mode keeps the Visits tab selected but leaves other relationship tabs', () => {
+  test('switching to Simple mode keeps the Visits tab selected but leaves other relationship tabs', async () => {
     const Stateful = () => {
       const [mode, setMode] = useState('advanced');
       return (
@@ -249,20 +280,17 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
 
     // From the Visits tab: stays on Visits after switching to Simple
     const { unmount } = render(<Stateful />);
-    fireEvent.click(visitsTab());
+    await revealTab(/shared:tabs.visits/);
     fireEvent.click(screen.getByText('Simple'));
     expect(visitsTab()).toHaveAttribute('aria-selected', 'true');
     unmount();
 
     // From the Medications tab: falls back to Basic Info
     render(<Stateful />);
-    fireEvent.click(
-      screen.getByRole('tab', { name: /shared:categories.medications/ })
-    );
+    await revealTab(/shared:categories.medications/);
     fireEvent.click(screen.getByText('Simple'));
-    expect(screen.getByRole('tab', { name: /shared:tabs.basicInfo|Basic Info/ })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(
+      screen.getByRole('tab', { name: /shared:tabs.basicInfo|Basic Info/ })
+    ).toHaveAttribute('aria-selected', 'true');
   });
 });

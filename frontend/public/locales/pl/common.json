@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "Rekord został utworzony, ale nie udało się zapisać niektórych powiązań z wizytami. Możesz je dodać, edytując rekord.",
-    "saveFirstInfo": "Wizyty powiązane tutaj zostaną zapisane po zapisaniu tego rekordu."
+    "linkFailed": "Rekord został utworzony, ale nie udało się zapisać niektórych powiązań z wizytami. Możesz je dodać, edytując rekord."
   },
   "search": {
     "activeFilterCount": "{{count}} aktywnych filtrów",
@@ -1314,7 +1313,6 @@
     "createNew": "Utwórz nowe",
     "form": {
       "createTreatment": "Utwórz leczenie",
-      "createWithLinks": "Tworzenie planu leczenia i łączenie elementów...",
       "creatingWithLinks": "Tworzenie leczenia i łączenie elementów...",
       "descriptionDesc": "Krótki opis leczenia",
       "descriptionPlaceholder": "Opisz leczenie",
@@ -1449,7 +1447,6 @@
       "none": "Nic jeszcze nie powiązano.",
       "purpose": "Cel",
       "removeLink": "Usuń powiązanie",
-      "saveFirstInfo": "Powiązania dodane tutaj zostaną zapisane po zapisaniu wizyty.",
       "selectPlaceholder": "Wybierz rekordy do powiązania"
     }
   },

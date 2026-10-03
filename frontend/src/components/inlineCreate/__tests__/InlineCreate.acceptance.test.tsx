@@ -222,13 +222,26 @@ const renderWithHost = (editing: boolean, onFormData?: (_f: unknown) => void) =>
     </InlineCreateProvider>
   );
 
-const openProceduresTab = async () => {
+/**
+ * Open a link tab. An unsaved Add Visit only shows tabs for types that already have
+ * links, so the others are reached through the tab bar's "Link" menu.
+ */
+const openLinkTab = async (name: string) => {
   const user = userEvent.setup();
-  await user.click(
-    screen.getByRole('tab', { name: withCount('shared:categories.procedures') })
-  );
+  const tab = screen.queryByRole('tab', { name: withCount(name) });
+  if (tab) {
+    await user.click(tab);
+    return user;
+  }
+  const menuButton = screen
+    .getAllByRole('button', { name: 'common:buttons.link' })
+    .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
+  await user.click(menuButton);
+  await user.click(await screen.findByRole('menuitem', { name }));
   return user;
 };
+
+const openProceduresTab = () => openLinkTab('shared:categories.procedures');
 
 const fillAndSubmitSubDialog = async (
   user: ReturnType<typeof userEvent.setup>
@@ -532,11 +545,7 @@ describe('negative control', () => {
   });
 });
 
-const openTab = async (name: string) => {
-  const user = userEvent.setup();
-  await user.click(screen.getByRole('tab', { name: withCount(name) }));
-  return user;
-};
+const openTab = openLinkTab;
 
 describe.each([
   {

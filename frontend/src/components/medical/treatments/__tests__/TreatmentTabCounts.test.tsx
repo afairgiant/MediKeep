@@ -2,6 +2,8 @@ import type { ComponentType, ReactNode } from 'react';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 
+import userEvent from '@testing-library/user-event';
+
 import render, { screen } from '../../../../test-utils/render';
 import RawViewModal from '../TreatmentViewModal';
 import RawFormWrapper from '../TreatmentFormWrapper';
@@ -89,7 +91,7 @@ describe('Treatment tabs show how many items are linked', () => {
     ).toBeInTheDocument();
   });
 
-  it('View, Treatment Plan mode: every link tab shows its count, zero included', async () => {
+  it('View, Treatment Plan mode: each linked type shows its count; a type without links has no tab', async () => {
     render(
       <ViewModal
         isOpen
@@ -102,13 +104,14 @@ describe('Treatment tabs show how many items are linked', () => {
       await screen.findByRole('tab', { name: /Medications \(3\)/ })
     ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Visits (2)' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Labs \(0\)/ })).toBeInTheDocument();
     expect(
       screen.getByRole('tab', { name: /Equipment \(1\)/ })
     ).toBeInTheDocument();
+    // No lab results are linked
+    expect(screen.queryByRole('tab', { name: /Labs/ })).toBeNull();
   });
 
-  it('View: a count that cannot be loaded leaves just the label', async () => {
+  it('View: a count that cannot be loaded gives no tab for that type', async () => {
     api.getTreatmentEncounters.mockRejectedValue(new Error('boom'));
     render(
       <ViewModal
@@ -121,7 +124,7 @@ describe('Treatment tabs show how many items are linked', () => {
     expect(
       await screen.findByRole('tab', { name: /Medications \(3\)/ })
     ).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Visits' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /Visits/ })).toBeNull();
   });
 
   const editProps = (mode: string, extra = {}) => ({
@@ -162,13 +165,31 @@ describe('Treatment tabs show how many items are linked', () => {
     ).toBeInTheDocument();
   });
 
-  it('Add: tabs show the number of items held until the treatment is saved', () => {
+  it('Add: no link tabs until something is linked, and no saved links are loaded', async () => {
     render(
       <FormWrapper {...editProps('advanced', { editingTreatment: null })} />
     );
     expect(
-      screen.getByRole('tab', { name: 'shared:categories.medications (0)' })
-    ).toBeInTheDocument();
+      screen.queryByRole('tab', { name: /shared:categories\.medications/ })
+    ).toBeNull();
+    expect(
+      screen.queryByRole('tab', { name: /shared:tabs\.visits/ })
+    ).toBeNull();
     expect(api.getTreatmentMedications).not.toHaveBeenCalled();
+
+    // The Link menu offers every type for this mode
+    await userEvent.click(
+      screen
+        .getAllByRole('button', { name: 'common:buttons.link' })
+        .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement
+    );
+    expect(
+      (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+    ).toEqual([
+      'shared:categories.medications',
+      'shared:tabs.visits',
+      'shared:categories.lab_results',
+      'shared:categories.medical_equipment',
+    ]);
   });
 });

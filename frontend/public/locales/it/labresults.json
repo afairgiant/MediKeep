@@ -165,7 +165,6 @@
   "loadingHint": "Se l'operazione richiede troppo tempo, aggiorna la pagina",
   "messages": {
     "confirmDiscardAdvancedForm": "Il cambio di modalità comporterà la perdita dei dati inseriti finora. Continuare?",
-    "relationshipsSaveFirst": "Salva prima il risultato di laboratorio per creare i collegamenti alle relazioni.",
     "testComponentsEditInfo": "I componenti dell'esame possono essere gestiti dalla pagina di visualizzazione dopo il salvataggio."
   },
   "modal": {

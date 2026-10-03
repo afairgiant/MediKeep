@@ -165,7 +165,6 @@
   "loadingHint": "Jeśli to trwa zbyt długo, odśwież stronę",
   "messages": {
     "confirmDiscardAdvancedForm": "Zmiana trybu spowoduje utratę dotychczas wprowadzonych danych. Kontynuować?",
-    "relationshipsSaveFirst": "Najpierw zapisz wynik laboratoryjny aby utworzyć linki powiązań.",
     "testComponentsEditInfo": "Składniki badania można zarządzać ze strony podglądu po zapisaniu."
   },
   "modal": {

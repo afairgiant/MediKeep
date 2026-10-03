@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "The record was created, but some visit links could not be saved. You can add them by editing the record.",
-    "saveFirstInfo": "Visits you link here are saved when this record is saved."
+    "linkFailed": "The record was created, but some visit links could not be saved. You can add them by editing the record."
   },
   "search": {
     "activeFilterCount": "{{count}} active filters",
@@ -1314,7 +1313,6 @@
     "createNew": "Create New",
     "form": {
       "createTreatment": "Create Treatment",
-      "createWithLinks": "Creating treatment plan and linking items...",
       "creatingWithLinks": "Creating treatment and linking items...",
       "descriptionDesc": "Brief description of the treatment",
       "descriptionPlaceholder": "Describe the treatment",
@@ -1449,7 +1447,6 @@
       "none": "None linked yet.",
       "purpose": "Purpose",
       "removeLink": "Remove link",
-      "saveFirstInfo": "Relationships you add here are saved when the visit is saved.",
       "selectPlaceholder": "Choose records to link"
     }
   },

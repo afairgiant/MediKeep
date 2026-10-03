@@ -205,10 +205,6 @@ const PendingRelationshipsPicker = ({
 
   return (
     <Stack gap="md">
-      <Text size="sm" c="dimmed">
-        {t('labresults:messages.relationshipsSaveFirst')}
-      </Text>
-
       {/* Conditions section */}
       {section === 'conditions' && (
         <Paper withBorder p="md">
@@ -1056,6 +1052,7 @@ const LabResultFormWrapper = ({
                   labResultId={savedLabResultId}
                   counts={linkCounts}
                   pendingVisitLinks={pendingVisitLinks}
+                  onSelectTab={setActiveTab}
                 />
               )}
               <Tabs.Tab

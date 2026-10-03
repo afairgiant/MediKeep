@@ -108,7 +108,6 @@ vi.mock('../../../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), debug: vi.fn(), warn: vi.fn() },
 }));
 
-
 const defaultProps = {
   isOpen: true,
   onClose: vi.fn(),
@@ -131,6 +130,25 @@ const defaultProps = {
   onSubmit: vi.fn(),
   editingItem: null,
   practitioners: [{ id: 1, name: 'Dr. Smith', specialty: 'Internal Medicine' }],
+};
+
+/**
+ * Open a linked-record tab. When creating, only types that already have links are tabs;
+ * the others are reached through the tab bar's "Link" menu.
+ */
+const openLinkTab = async (name: string) => {
+  const user = userEvent.setup();
+  const tab = screen.queryByRole('tab', { name: withCount(name) });
+  if (tab) {
+    await user.click(tab);
+    return user;
+  }
+  const menuButton = screen
+    .getAllByRole('button', { name: 'common:buttons.link' })
+    .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
+  await user.click(menuButton);
+  await user.click(await screen.findByRole('menuitem', { name }));
+  return user;
 };
 
 describe('LabResultFormWrapper', () => {
@@ -185,14 +203,17 @@ describe('LabResultFormWrapper', () => {
     test.each([
       ['edit mode', { editingItem: { id: 5, test_name: 'x' } }],
       ['post-create mode', { postCreate: true }],
-    ])('keeps a plain input with no suggestions in %s', async (_label, extra) => {
-      render(<StatefulForm {...extra} />);
-      await userEvent.type(testNameInput(), 'Comprehensive Metab');
+    ])(
+      'keeps a plain input with no suggestions in %s',
+      async (_label, extra) => {
+        render(<StatefulForm {...extra} />);
+        await userEvent.type(testNameInput(), 'Comprehensive Metab');
 
-      expect(
-        screen.queryByText('Comprehensive Metabolic Panel (CMP)')
-      ).not.toBeInTheDocument();
-    });
+        expect(
+          screen.queryByText('Comprehensive Metabolic Panel (CMP)')
+        ).not.toBeInTheDocument();
+      }
+    );
   });
 
   describe('Basic Info tab (default)', () => {
@@ -221,7 +242,9 @@ describe('LabResultFormWrapper', () => {
 
     test('renders PractitionerSelectWithCreate for the practitioner field', () => {
       render(<LabResultFormWrapper {...defaultProps} />);
-      expect(screen.getByTestId('practitioner-select-with-create')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('practitioner-select-with-create')
+      ).toBeInTheDocument();
     });
 
     test('shows Tags field on the Basic Info tab', () => {
@@ -233,8 +256,12 @@ describe('LabResultFormWrapper', () => {
 
     test('reports a newly entered tag through onInputChange', async () => {
       const onInputChange = vi.fn();
-      render(<LabResultFormWrapper {...defaultProps} onInputChange={onInputChange} />);
-      const input = screen.getByPlaceholderText('common:fields.tags.placeholder');
+      render(
+        <LabResultFormWrapper {...defaultProps} onInputChange={onInputChange} />
+      );
+      const input = screen.getByPlaceholderText(
+        'common:fields.tags.placeholder'
+      );
       await userEvent.type(input, 'fasting{Enter}');
       expect(onInputChange).toHaveBeenCalledWith({
         target: { name: 'tags', value: ['fasting'] },
@@ -372,11 +399,7 @@ describe('LabResultFormWrapper', () => {
       'shared:categories.treatments',
     ];
 
-    const openTab = async (name: string) => {
-      const user = userEvent.setup();
-      await user.click(screen.getByRole('tab', { name: withCount(name) }));
-      return user;
-    };
+    const openTab = openLinkTab;
     const openRelationships = () => openTab('Visits');
 
     test('edit mode has a tab per linked record type and no Relationships tab', () => {
@@ -387,7 +410,9 @@ describe('LabResultFormWrapper', () => {
         />
       );
       LINK_TABS.forEach(name =>
-        expect(screen.getByRole('tab', { name: withCount(name) })).toBeInTheDocument()
+        expect(
+          screen.getByRole('tab', { name: withCount(name) })
+        ).toBeInTheDocument()
       );
       expect(
         screen.queryByRole('tab', { name: 'labresults:tabs.relationships' })
@@ -430,7 +455,7 @@ describe('LabResultFormWrapper', () => {
       );
     });
 
-    test('does not load saved links for a lab result that is not saved yet', () => {
+    test('does not load saved links for a lab result that is not saved yet', async () => {
       const fetchLabResultConditions = vi.fn();
       render(
         <LabResultFormWrapper
@@ -440,11 +465,19 @@ describe('LabResultFormWrapper', () => {
         />
       );
       expect(fetchLabResultConditions).not.toHaveBeenCalled();
-      // Nothing chosen yet: zero on each tab
+      // Nothing chosen yet: no link tabs, but a Link menu offers every type
+      LINK_TABS.forEach(name =>
+        expect(
+          screen.queryByRole('tab', { name: withCount(name) })
+        ).not.toBeInTheDocument()
+      );
+      const menuButton = screen
+        .getAllByRole('button', { name: 'common:buttons.link' })
+        .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
+      await userEvent.click(menuButton);
       expect(
-        screen.getByRole('tab', { name: 'shared:categories.conditions (0)' })
-      ).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: 'Visits (0)' })).toBeInTheDocument();
+        (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+      ).toEqual(LINK_TABS);
     });
 
     test('each linked-record tab shows its own section', async () => {
@@ -487,7 +520,9 @@ describe('LabResultFormWrapper', () => {
     test('are not shown in a plain (quick) create', () => {
       render(<LabResultFormWrapper {...defaultProps} patientId={7} />);
       LINK_TABS.forEach(name =>
-        expect(screen.queryByRole('tab', { name: withCount(name) })).not.toBeInTheDocument()
+        expect(
+          screen.queryByRole('tab', { name: withCount(name) })
+        ).not.toBeInTheDocument()
       );
     });
 
@@ -600,7 +635,9 @@ describe('LabResultFormWrapper', () => {
     test('are not shown when creating a lab result without advanced mode', () => {
       render(<LabResultFormWrapper {...defaultProps} />);
       expect(
-        screen.queryByRole('tab', { name: withCount('shared:categories.conditions') })
+        screen.queryByRole('tab', {
+          name: withCount('shared:categories.conditions'),
+        })
       ).not.toBeInTheDocument();
       expect(
         screen.queryByRole('tab', { name: 'labresults:tabs.relationships' })
@@ -616,13 +653,11 @@ describe('LabResultFormWrapper', () => {
           conditions={conditions}
         />
       );
-      await userEvent.click(
-        screen.getByRole('tab', { name: withCount('shared:categories.conditions') })
-      );
+      await openLinkTab('shared:categories.conditions');
 
       // Pending picker (create mode), not the edit-mode API-backed components
       expect(
-        screen.getByText('labresults:messages.relationshipsSaveFirst')
+        screen.getByPlaceholderText('common:modals.chooseConditionToLink')
       ).toBeInTheDocument();
       expect(
         screen.queryByTestId('condition-relationships')
@@ -638,13 +673,11 @@ describe('LabResultFormWrapper', () => {
           conditions={conditions}
         />
       );
-      await userEvent.click(
-        screen.getByRole('tab', { name: withCount('shared:categories.conditions') })
-      );
+      await openLinkTab('shared:categories.conditions');
 
       expect(screen.getByTestId('condition-relationships')).toBeInTheDocument();
       expect(
-        screen.queryByText('labresults:messages.relationshipsSaveFirst')
+        screen.queryByPlaceholderText('common:modals.chooseConditionToLink')
       ).not.toBeInTheDocument();
     });
 
@@ -674,36 +707,39 @@ describe('LabResultFormWrapper', () => {
       const medications = [{ id: 1, medication_name: 'Metformin' }];
       const procedures = [{ id: 1, procedure_name: 'Colonoscopy' }];
       const treatments = [{ id: 1, treatment_name: 'Physical Therapy' }];
-      render(
-        <LabResultFormWrapper
-          {...defaultProps}
-          advancedCreate
-          medications={medications}
-          procedures={procedures}
-          treatments={treatments}
-        />
-      );
-      for (const tab of [
-        'shared:categories.medications',
-        'shared:categories.procedures',
-        'shared:categories.treatments',
-      ]) {
-        await userEvent.click(screen.getByRole('tab', { name: withCount(tab) }));
+      for (const [tab, placeholder] of [
+        ['shared:categories.medications', /chooseOneMedicationToLink/],
+        ['shared:categories.procedures', /chooseProcedureToLink/],
+        [
+          'shared:categories.treatments',
+          /chooseTreatmentToLink|Choose a treatment to link/,
+        ],
+      ] as Array<[string, RegExp]>) {
+        // A fresh form each time: the Link menu reveals one type per form here
+        const { unmount } = render(
+          <LabResultFormWrapper
+            {...defaultProps}
+            advancedCreate
+            medications={medications}
+            procedures={procedures}
+            treatments={treatments}
+          />
+        );
+        await openLinkTab(tab);
         // The pending picker shows this tab's section, never the API-backed one
+        expect(screen.getByPlaceholderText(placeholder)).toBeInTheDocument();
         expect(
-          screen.getByText('labresults:messages.relationshipsSaveFirst')
-        ).toBeInTheDocument();
+          screen.queryByTestId('medication-relationships')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('procedure-relationships')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('treatment-relationships')
+        ).not.toBeInTheDocument();
+        unmount();
       }
-      expect(
-        screen.queryByTestId('medication-relationships')
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('procedure-relationships')
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByTestId('treatment-relationships')
-      ).not.toBeInTheDocument();
-    });
+    }, 15000);
 
     test('uses the API-backed medication/procedure/treatment components when editing an existing lab result', async () => {
       const medications = [{ id: 1, medication_name: 'Metformin' }];
@@ -724,7 +760,9 @@ describe('LabResultFormWrapper', () => {
         ['shared:categories.treatments', 'treatment-relationships'],
       ];
       for (const [tab, testId] of sections) {
-        await userEvent.click(screen.getByRole('tab', { name: withCount(tab) }));
+        await userEvent.click(
+          screen.getByRole('tab', { name: withCount(tab) })
+        );
         expect(screen.getByTestId(testId)).toBeInTheDocument();
       }
     });
@@ -787,7 +825,9 @@ describe('LabResultFormWrapper', () => {
       // empty-state block (icon/title/description/Add Tests button) below the
       // one flat value being edited - reads as broken/extraneous rather than
       // useful for a legacy result reached via Test Results mode's trend panel.
-      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('test-components-tab')
+      ).not.toBeInTheDocument();
     });
 
     test('hides the Tests/components editor for a legacy result with a flat labs_result and no components', () => {
@@ -799,7 +839,9 @@ describe('LabResultFormWrapper', () => {
           isGroupedResult={false}
         />
       );
-      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('test-components-tab')
+      ).not.toBeInTheDocument();
     });
 
     test('still shows the Tests/components editor for a new-style result with no components and no flat value yet (none added, or all deleted)', () => {
@@ -840,7 +882,9 @@ describe('LabResultFormWrapper', () => {
           formData={{ ...defaultProps.formData, labs_result: '', value: '' }}
         />
       );
-      expect(screen.queryByTestId('test-components-tab')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('test-components-tab')
+      ).not.toBeInTheDocument();
     });
 
     test('stays visible for a new-style empty result even after the user types a value into the live form (regression: must read the saved record, not live formData)', () => {

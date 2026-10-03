@@ -165,7 +165,6 @@
   "loadingHint": "Si esto tarda demasiado, por favor actualice la página",
   "messages": {
     "confirmDiscardAdvancedForm": "Cambiar de modo descartará lo que has introducido hasta ahora. ¿Continuar?",
-    "relationshipsSaveFirst": "Guarde el resultado de laboratorio primero para crear vínculos de relación.",
     "testComponentsEditInfo": "Los componentes de prueba se pueden gestionar desde la página de visualización después de guardar."
   },
   "modal": {

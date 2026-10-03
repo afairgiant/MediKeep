@@ -45,6 +45,19 @@ export const useLinkCount = (key: string): number | undefined =>
     () => undefined
   );
 
+/** The latest known counts for several keys, in order (undefined while not known yet). */
+export const useLinkCounts = (keys: string[]): Array<number | undefined> => {
+  // A primitive snapshot, so React can tell whether anything changed
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    () => keys.map(key => counts.get(key) ?? '').join(','),
+    () => ''
+  );
+  return snapshot
+    .split(',')
+    .map(value => (value === '' ? undefined : Number(value)));
+};
+
 export interface LinkCountLoader {
   key: string;
   /** Resolves to the number of links */

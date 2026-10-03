@@ -227,7 +227,7 @@ const VisitViewModal = ({
               >
                 {t('visits.viewModal.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
-              <VisitLinkTabButtons visitId={visit.id} />
+              <VisitLinkTabButtons visitId={visit.id} isViewMode />
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}

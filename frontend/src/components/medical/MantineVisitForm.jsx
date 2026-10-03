@@ -323,6 +323,7 @@ const MantineVisitForm = ({
                 <VisitLinkTabButtons
                   visitId={editingVisit?.id}
                   pendingLinks={formData.pending_links}
+                  onSelectTab={setActiveTab}
                 />
               )}
               <Tabs.Tab

@@ -166,7 +166,6 @@
   "loadingHint": "If this takes too long, please refresh the page",
   "messages": {
     "confirmDiscardAdvancedForm": "Switching modes will discard what you've entered so far. Continue?",
-    "relationshipsSaveFirst": "Save the lab result first to create relationship links.",
     "testComponentsEditInfo": "Test components can be managed from the view page after saving."
   },
   "modal": {

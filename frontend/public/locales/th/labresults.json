@@ -165,7 +165,6 @@
   "loadingHint": "หากใช้เวลานานเกินไป กรุณาโหลดหน้าใหม่",
   "messages": {
     "confirmDiscardAdvancedForm": "การสลับโหมดจะทำให้ข้อมูลที่คุณกรอกไว้หายไป ต้องการดำเนินการต่อหรือไม่?",
-    "relationshipsSaveFirst": "บันทึกผลแลปก่อนเพื่อสร้างลิงก์ความสัมพันธ์",
     "testComponentsEditInfo": "สามารถจัดการรายการตรวจจากหน้าดูรายละเอียดหลังจากบันทึก"
   },
   "pendingRelationships": {

@@ -165,7 +165,6 @@
   "loadingHint": "Si cela prend trop longtemps, veuillez rafraîchir la page",
   "messages": {
     "confirmDiscardAdvancedForm": "Changer de mode annulera ce que vous avez saisi jusqu'à présent. Continuer ?",
-    "relationshipsSaveFirst": "Sauvegardez d'abord le résultat d'analyse pour pouvoir le connecter.",
     "testComponentsEditInfo": "Les composants d'analyse peuvent être gérés depuis la page d'aperçu après sauvegarde."
   },
   "modal": {

@@ -1,8 +1,9 @@
 import type { ComponentType } from 'react';
 import { vi } from 'vitest';
-import render, { screen } from '../../../../test-utils/render';
+import render, { screen, waitFor } from '../../../../test-utils/render';
 import '@testing-library/jest-dom';
 import RawLabResultViewModal from '../LabResultViewModal';
+import { apiService } from '../../../../services/api';
 
 /** A link tab's name, with or without its "(n)" count. */
 const withCount = (name: string) =>
@@ -32,6 +33,19 @@ vi.mock('../../../shared/RecordVisitsCard', () => ({
   ),
 }));
 
+// Visits the lab result is linked to (the Visits count comes from this request)
+let visitRows: unknown[] = [];
+let visitsSpy: ReturnType<typeof vi.spyOn>;
+beforeEach(() => {
+  visitRows = [];
+  visitsSpy = vi
+    .spyOn(apiService, 'getLabResultEncounters')
+    .mockImplementation(() => Promise.resolve(visitRows));
+});
+afterEach(() => {
+  visitsSpy.mockRestore();
+});
+
 const renderModal = (initialTab: string) =>
   render(
     <LabResultViewModal
@@ -50,20 +64,52 @@ const renderModal = (initialTab: string) =>
   );
 
 describe('LabResultViewModal - linked-record tabs', () => {
-  it('has a tab per linked record type and no Relationships tab', () => {
-    renderModal('overview');
-    [
-      'shared:categories.conditions',
-      'Visits',
-      'shared:categories.medications',
-      'shared:categories.procedures',
-      'shared:categories.treatments',
-    ].forEach(name =>
+  it('shows a tab only for the linked record types that have links, and no Relationships tab', async () => {
+    visitRows = [{ id: 1 }];
+    render(
+      <LabResultViewModal
+        isOpen
+        onClose={vi.fn()}
+        labResult={{ id: 5, test_name: 'CBC', status: 'completed', tags: [] }}
+        practitioners={[]}
+        isGroupedResult
+        initialTab="overview"
+        labResultConditions={{ 5: [{ id: 1 }] }}
+        labResultMedications={{ 5: [] }}
+      />
+    );
+    expect(
+      await screen.findByRole('tab', {
+        name: 'shared:categories.conditions (1)',
+      })
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole('tab', { name: 'Visits (1)' })
+    ).toBeInTheDocument();
+    ['medications', 'procedures', 'treatments'].forEach(name =>
       expect(
-        screen.getByRole('tab', { name: withCount(name) })
-      ).toBeInTheDocument()
+        screen.queryByRole('tab', {
+          name: withCount(`shared:categories.${name}`),
+        })
+      ).toBeNull()
     );
     expect(screen.queryByRole('tab', { name: /elationships/ })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'common:buttons.link' })
+    ).toBeNull();
+  });
+
+  it('shows no linked-record tabs for a lab result without links', async () => {
+    renderModal('overview');
+    await waitFor(() => expect(visitsSpy).toHaveBeenCalled());
+    ['conditions', 'medications', 'procedures', 'treatments'].forEach(name =>
+      expect(
+        screen.queryByRole('tab', {
+          name: withCount(`shared:categories.${name}`),
+        })
+      ).toBeNull()
+    );
+    expect(screen.queryByRole('tab', { name: /^Visits/ })).toBeNull();
   });
 
   it('shows a read-only Visits card for the viewed lab result on the Visits tab', () => {
@@ -119,9 +165,12 @@ describe('LabResultViewModal - tab numbers', () => {
     expect(
       screen.getByRole('tab', { name: 'shared:categories.medications (2)' })
     ).toBeInTheDocument();
+    // A type without links has no tab
     expect(
-      screen.getByRole('tab', { name: 'shared:categories.procedures (0)' })
-    ).toBeInTheDocument();
+      screen.queryByRole('tab', {
+        name: withCount('shared:categories.procedures'),
+      })
+    ).toBeNull();
     Object.values(fetchers).forEach(fetcher =>
       expect(fetcher).toHaveBeenCalledWith(5)
     );

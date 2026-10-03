@@ -43,7 +43,6 @@ const I18N = {
   link: 'common:buttons.link',
   linkSelected: 'common:visits.relationships.linkSelected',
   none: 'common:visits.relationships.none',
-  saveFirst: 'common:visits.relationships.saveFirstInfo',
   placeholder: 'common:visits.relationships.selectPlaceholder',
   editLink: 'common:visits.relationships.editLink',
   removeLink: 'common:visits.relationships.removeLink',
@@ -117,21 +116,29 @@ interface TabProps {
   pendingLinks?: PendingLinks;
   onPendingChange?: (_next: PendingLinks) => void;
   navigate?: (_path: string) => void;
+  onSelectTab?: (_tab: string) => void;
 }
 
-/** Renders the tab buttons and panels with one type's tab open. */
-const renderTab = (key: TypeKey, props: TabProps = {}) =>
-  render(
+const buildTree = (key: TypeKey, props: TabProps = {}) => {
+  const { onSelectTab, ...panelProps } = props;
+  return (
     <Tabs value={tabValue(key)}>
       <Tabs.List>
         <VisitLinkTabButtons
           visitId={props.visitId}
           pendingLinks={props.pendingLinks}
+          isViewMode={props.isViewMode}
+          onSelectTab={onSelectTab}
         />
       </Tabs.List>
-      <VisitLinkTabPanels activeTab={tabValue(key)} {...props} />
+      <VisitLinkTabPanels activeTab={tabValue(key)} {...panelProps} />
     </Tabs>
   );
+};
+
+/** Renders the tab buttons and panels with one type's tab open. */
+const renderTab = (key: TypeKey, props: TabProps = {}) =>
+  render(buildTree(key, props));
 
 /** Per-type visit-side rows returned by getEncounterLinks. */
 let linkRows: Record<string, unknown[]>;
@@ -158,7 +165,10 @@ beforeEach(() => {
 
 /** Open the Link modal in the open tab and choose a record by its label. */
 async function linkRecord(optionLabel: string) {
-  const linkButton = await screen.findByRole('button', { name: I18N.link });
+  // The tab bar's "Link" menu (add mode) has the same name; it is the one with a popup
+  const linkButton = (
+    await screen.findAllByRole('button', { name: I18N.link })
+  ).find(button => !button.hasAttribute('aria-haspopup'))!;
   await waitFor(() => expect(linkButton).toBeEnabled());
   await userEvent.click(linkButton);
   const dialog = await screen.findByRole('dialog');
@@ -169,12 +179,21 @@ async function linkRecord(optionLabel: string) {
   return dialog;
 }
 
+/** Open the tab bar's "Link" menu (add mode). */
+async function openLinkMenu() {
+  const menuButton = screen
+    .getAllByRole('button', { name: I18N.link })
+    .find(button => button.hasAttribute('aria-haspopup'))!;
+  await userEvent.click(menuButton);
+}
+
 describe('VisitLinkTabButtons', () => {
-  it('has one tab per linked record type, named after it, and no Relationships tab', () => {
-    renderTab('procedures');
-    const names = screen.getAllByRole('tab').map(tab => tab.textContent);
-    // A visit that is not saved yet has nothing linked: "(0)" on each
-    expect(names).toEqual([
+  it('editing a saved visit shows a tab for every linked record type, and no Link menu', async () => {
+    renderTab('procedures', { visitId: VISIT_ID, patientId: PATIENT_ID });
+    await screen.findByRole('tab', {
+      name: 'shared:categories.lab_results (0)',
+    });
+    expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual([
       'shared:categories.procedures (0)',
       'shared:categories.treatments (0)',
       'shared:categories.injuries (0)',
@@ -184,9 +203,92 @@ describe('VisitLinkTabButtons', () => {
       'shared:categories.lab_results (0)',
     ]);
     expect(screen.queryByRole('tab', { name: /elationships/ })).toBeNull();
+    // Opening the panel's own Link button is separate; there is no tab-bar menu
+    expect(
+      screen
+        .getAllByRole('button', { name: I18N.link })
+        .some(button => button.hasAttribute('aria-haspopup'))
+    ).toBe(false);
   });
 
-  it('counts the links chosen in the Add form', () => {
+  it('view mode shows only the types that have links, and no Link menu', async () => {
+    linkRows = {
+      procedures: [procedureLink],
+      'lab-results': [labResultLink],
+    };
+    renderTab('procedures', {
+      visitId: VISIT_ID,
+      patientId: PATIENT_ID,
+      isViewMode: true,
+    });
+    await screen.findByRole('tab', {
+      name: 'shared:categories.procedures (1)',
+    });
+    await screen.findByRole('tab', {
+      name: 'shared:categories.lab_results (1)',
+    });
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: I18N.link })).toBeNull();
+  });
+
+  it('view mode shows no link tabs for a visit without links', async () => {
+    renderTab('procedures', {
+      visitId: VISIT_ID,
+      patientId: PATIENT_ID,
+      isViewMode: true,
+    });
+    await waitFor(() => expect(api.getEncounterLinks).toHaveBeenCalled());
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+  });
+
+  it('add mode starts with no link tabs and a Link menu listing every type', async () => {
+    renderTab('procedures');
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+
+    await openLinkMenu();
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map(item => item.textContent)).toEqual([
+      'shared:categories.procedures',
+      'shared:categories.treatments',
+      'shared:categories.injuries',
+      'shared:categories.symptoms',
+      'shared:categories.conditions',
+      'shared:categories.medications',
+      'shared:categories.lab_results',
+    ]);
+  });
+
+  it('add mode: choosing a type from the menu shows its tab and opens it', async () => {
+    const onSelectTab = vi.fn();
+    renderTab('conditions', { onSelectTab });
+    await openLinkMenu();
+    await userEvent.click(
+      await screen.findByRole('menuitem', {
+        name: 'shared:categories.injuries',
+      })
+    );
+
+    expect(onSelectTab).toHaveBeenCalledWith('link-injuries');
+    expect(
+      screen.getByRole('tab', { name: 'shared:categories.injuries (0)' })
+    ).toBeInTheDocument();
+  });
+
+  it('add mode: a type that already has links is not offered in the Link menu', async () => {
+    renderTab('procedures', {
+      pendingLinks: {
+        injuries: [{ entityId: 1, relevanceNote: null, purpose: null }],
+      },
+    });
+    await openLinkMenu();
+    const names = (await screen.findAllByRole('menuitem')).map(
+      item => item.textContent
+    );
+    expect(names).toHaveLength(6);
+    expect(names).not.toContain('shared:categories.injuries');
+  });
+
+  it('add mode counts the links chosen in the form and shows only those tabs', () => {
     renderTab('procedures', {
       pendingLinks: {
         procedures: [
@@ -198,14 +300,25 @@ describe('VisitLinkTabButtons', () => {
         ],
       },
     });
+    expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual([
+      'shared:categories.procedures (2)',
+      'shared:categories.lab_results (1)',
+    ]);
+    expect(screen.queryByRole('tab', { name: /injuries/ })).toBeNull();
+  });
+
+  it('add mode keeps a tab once shown, even after its last pending link is removed', () => {
+    const withLink: PendingLinks = {
+      procedures: [{ entityId: 1, relevanceNote: null, purpose: null }],
+    };
+    const { rerender } = renderTab('procedures', { pendingLinks: withLink });
     expect(
-      screen.getByRole('tab', { name: 'shared:categories.procedures (2)' })
+      screen.getByRole('tab', { name: 'shared:categories.procedures (1)' })
     ).toBeInTheDocument();
+
+    rerender(buildTree('procedures', { pendingLinks: { procedures: [] } }));
     expect(
-      screen.getByRole('tab', { name: 'shared:categories.lab_results (1)' })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('tab', { name: 'shared:categories.injuries (0)' })
+      screen.getByRole('tab', { name: 'shared:categories.procedures (0)' })
     ).toBeInTheDocument();
   });
 
@@ -378,7 +491,8 @@ describe('VisitLinkTabPanels - add mode (visit not saved yet)', () => {
       onPendingChange,
     });
 
-    expect(screen.getByText(I18N.saveFirst)).toBeInTheDocument();
+    // No note about links being saved later: they are shown as chosen
+    expect(screen.queryByText(/saveFirstInfo/)).toBeNull();
     const dialog = await linkRecord('Appendectomy (2025-05-02, completed)');
     await userEvent.type(
       within(dialog).getByLabelText(I18N.noteLabel),

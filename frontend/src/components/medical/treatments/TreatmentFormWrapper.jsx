@@ -44,8 +44,8 @@ import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
-import { useTabLabel } from '../../../hooks/useTabLabel';
 import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
+import CollapsibleLinkTabs from '../../shared/CollapsibleLinkTabs';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 
 const EMPTY_PENDING_RELATIONSHIPS = {
@@ -86,7 +86,6 @@ const TreatmentFormWrapper = ({
   // Track relationship counts for badge display (edit mode)
   // null until the relationship manager reports; until then the preloaded counts are used
   const [relationshipCounts, setRelationshipCounts] = useState(null);
-  const tabLabel = useTabLabel();
   const loadedCounts = useTreatmentLinkCounts(editingTreatment?.id, isOpen);
 
   // Track pending relationships for creation mode
@@ -318,15 +317,41 @@ const TreatmentFormWrapper = ({
     return (pendingRelationships[countKey] || []).length;
   };
 
-  // The Visits tab is available in both Simple and Treatment Plan modes
-  const visitsTab = (
-    <Tabs.Tab
-      value="visits"
-      leftSection={<IconStethoscope size={16} />}
-    >
-      {tabLabel(t('shared:tabs.visits'), getTabCount('visits'))}
-    </Tabs.Tab>
-  );
+  // The Visits tab is available in both Simple and Treatment Plan modes; the other link
+  // tabs only in Treatment Plan mode (and never in a sub-dialog). A new treatment shows
+  // only the types that already hold links and a "Link" menu for the rest; editing a
+  // saved treatment shows them all.
+  const visitsItem = {
+    key: 'visits',
+    label: t('shared:tabs.visits'),
+    icon: IconStethoscope,
+    count: getTabCount('visits'),
+  };
+  const linkTabItems =
+    formData.mode === 'advanced'
+      ? [
+          {
+            key: 'medications',
+            label: t('shared:categories.medications'),
+            icon: IconPill,
+            count: getTabCount('medications'),
+          },
+          visitsItem,
+          {
+            key: 'labs',
+            label: t('shared:categories.lab_results'),
+            icon: IconTestPipe,
+            count: getTabCount('labs'),
+          },
+          {
+            key: 'equipment',
+            label: t('shared:categories.medical_equipment'),
+            icon: IconDeviceDesktop,
+            count: getTabCount('equipment'),
+          },
+        ]
+      : [visitsItem];
+  const linkTabMode = editingTreatment ? 'edit' : 'add';
 
   // Total badge count for Basic Info alert
   const totalBadgeCount = editingTreatment
@@ -373,50 +398,19 @@ const TreatmentFormWrapper = ({
                 {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               {formData.mode !== 'advanced' && (
-                <>
-                  <Tabs.Tab
-                    value="schedule"
-                    leftSection={<IconCalendar size={16} />}
-                  >
-                    {t(
-                      'treatments.form.tabs.scheduleDosage',
-                      'Schedule & Dosage'
-                    )}
-                  </Tabs.Tab>
-                  {!subDialog && visitsTab}
-                </>
+                <Tabs.Tab
+                  value="schedule"
+                  leftSection={<IconCalendar size={16} />}
+                >
+                  {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
+                </Tabs.Tab>
               )}
-              {formData.mode === 'advanced' && (
-                <>
-                  <Tabs.Tab
-                    value="medications"
-                    leftSection={<IconPill size={16} />}
-                  >
-                    {tabLabel(
-                      t('shared:categories.medications'),
-                      getTabCount('medications')
-                    )}
-                  </Tabs.Tab>
-                  {visitsTab}
-                  <Tabs.Tab
-                    value="labs"
-                    leftSection={<IconTestPipe size={16} />}
-                  >
-                    {tabLabel(
-                      t('shared:categories.lab_results'),
-                      getTabCount('labs')
-                    )}
-                  </Tabs.Tab>
-                  <Tabs.Tab
-                    value="equipment"
-                    leftSection={<IconDeviceDesktop size={16} />}
-                  >
-                    {tabLabel(
-                      t('shared:categories.medical_equipment'),
-                      getTabCount('equipment')
-                    )}
-                  </Tabs.Tab>
-                </>
+              {!subDialog && (
+                <CollapsibleLinkTabs
+                  items={linkTabItems}
+                  mode={linkTabMode}
+                  onSelectTab={setActiveTab}
+                />
               )}
               <Tabs.Tab
                 value="documents"
@@ -937,12 +931,7 @@ const TreatmentFormWrapper = ({
             >
               {editingTreatment
                 ? t('treatments.form.updateTreatment', 'Update Treatment')
-                : pendingCount > 0
-                  ? t(
-                      'treatments.form.createWithLinks',
-                      `Create Treatment & Link ${pendingCount} Item${pendingCount !== 1 ? 's' : ''}`
-                    )
-                  : t('treatments.form.createTreatment', 'Create Treatment')}
+                : t('treatments.form.createTreatment', 'Create Treatment')}
             </SubmitButton>
           </Group>
         </Stack>

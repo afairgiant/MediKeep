@@ -165,7 +165,6 @@
   "loadingHint": "Se isso demorar muito, atualize a página",
   "messages": {
     "confirmDiscardAdvancedForm": "Mudar de modo descartará o que você inseriu até agora. Continuar?",
-    "relationshipsSaveFirst": "Salve o resultado laboratorial primeiro para criar vínculos de relacionamento.",
     "testComponentsEditInfo": "Componentes do exame podem ser gerenciados na página de visualização após salvar."
   },
   "modal": {

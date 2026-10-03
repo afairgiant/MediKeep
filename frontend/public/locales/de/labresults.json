@@ -165,7 +165,6 @@
   "loadingHint": "Falls dies zu lange dauert, aktualisieren Sie bitte die Seite",
   "messages": {
     "confirmDiscardAdvancedForm": "Beim Wechseln des Modus gehen die bisher eingegebenen Daten verloren. Fortfahren?",
-    "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Verknüpfungen zu erstellen.",
     "testComponentsEditInfo": "Testkomponenten können nach dem Speichern über die Ansichtsseite verwaltet werden."
   },
   "modal": {

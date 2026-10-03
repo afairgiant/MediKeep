@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "Der Eintrag wurde erstellt, aber einige Terminverknüpfungen konnten nicht gespeichert werden. Sie können sie durch Bearbeiten des Eintrags hinzufügen.",
-    "saveFirstInfo": "Hier verknüpfte Termine werden gespeichert, wenn dieser Eintrag gespeichert wird."
+    "linkFailed": "Der Eintrag wurde erstellt, aber einige Terminverknüpfungen konnten nicht gespeichert werden. Sie können sie durch Bearbeiten des Eintrags hinzufügen."
   },
   "search": {
     "activeFilterCount": "{{count}} aktive Filter",
@@ -1314,7 +1313,6 @@
     "createNew": "Neu erstellen",
     "form": {
       "createTreatment": "Behandlung erstellen",
-      "createWithLinks": "Behandlungsplan wird erstellt und Elemente verknüpft...",
       "creatingWithLinks": "Behandlung wird erstellt und Elemente verknüpft...",
       "descriptionDesc": "Kurze Beschreibung der Behandlung",
       "descriptionPlaceholder": "Behandlung beschreiben",
@@ -1449,7 +1447,6 @@
       "none": "Noch nichts verknüpft.",
       "purpose": "Zweck",
       "removeLink": "Verknüpfung entfernen",
-      "saveFirstInfo": "Hier hinzugefügte Beziehungen werden gespeichert, wenn der Termin gespeichert wird.",
       "selectPlaceholder": "Einträge zum Verknüpfen auswählen"
     }
   },

@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "Posten skapades, men vissa besökslänkar kunde inte sparas. Du kan lägga till dem genom att redigera posten.",
-    "saveFirstInfo": "Besök som du länkar här sparas när posten sparas."
+    "linkFailed": "Posten skapades, men vissa besökslänkar kunde inte sparas. Du kan lägga till dem genom att redigera posten."
   },
   "search": {
     "activeFilterCount": "{{count}} aktiva filter",
@@ -1314,7 +1313,6 @@
     "createNew": "Skapa ny",
     "form": {
       "createTreatment": "Skapa behandling",
-      "createWithLinks": "Skapar behandlingsplan och länkar objekt...",
       "creatingWithLinks": "Skapar behandling och länkar objekt...",
       "descriptionDesc": "Kort beskrivning av behandlingen",
       "descriptionPlaceholder": "Beskriv behandlingen",
@@ -1449,7 +1447,6 @@
       "none": "Inget länkat ännu.",
       "purpose": "Syfte",
       "removeLink": "Ta bort länk",
-      "saveFirstInfo": "Relationer som du lägger till här sparas när besöket sparas.",
       "selectPlaceholder": "Välj poster att länka"
     }
   },

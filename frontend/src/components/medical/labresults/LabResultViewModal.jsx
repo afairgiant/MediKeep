@@ -207,6 +207,7 @@ const LabResultViewModal = ({
               )}
               <LabResultLinkTabButtons
                 labResultId={labResult.id}
+                isViewMode
                 counts={{
                   conditions: labResultConditions[labResult.id]?.length,
                   medications: labResultMedications[labResult.id]?.length,

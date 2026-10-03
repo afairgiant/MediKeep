@@ -1013,8 +1013,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "Het record is aangemaakt, maar sommige koppelingen met consulten konden niet worden opgeslagen. U kunt ze toevoegen door het record te bewerken.",
-    "saveFirstInfo": "Consulten die u hier koppelt, worden opgeslagen wanneer dit record wordt opgeslagen."
+    "linkFailed": "Het record is aangemaakt, maar sommige koppelingen met consulten konden niet worden opgeslagen. U kunt ze toevoegen door het record te bewerken."
   },
   "search": {
     "activeFilterCount": "{{count}} actieve filters",
@@ -1314,7 +1313,6 @@
     "createNew": "Nieuw aanmaken",
     "form": {
       "createTreatment": "Behandeling aanmaken",
-      "createWithLinks": "Behandelplan aanmaken en items koppelen...",
       "creatingWithLinks": "Behandeling aanmaken en items koppelen...",
       "descriptionDesc": "Korte beschrijving van de behandeling",
       "descriptionPlaceholder": "Beschrijf de behandeling",
@@ -1449,7 +1447,6 @@
       "none": "Nog niets gekoppeld.",
       "purpose": "Doel",
       "removeLink": "Koppeling verwijderen",
-      "saveFirstInfo": "Relaties die u hier toevoegt, worden opgeslagen wanneer het consult wordt opgeslagen.",
       "selectPlaceholder": "Kies records om te koppelen"
     }
   },
