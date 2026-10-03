@@ -9,6 +9,7 @@ function LoadingSpinner({
   size = 'medium',
   variant = 'primary',
   fullScreen = false,
+  fullPage = false,
 }) {
   const spinnerClasses = [
     'loading-spinner',
@@ -30,6 +31,10 @@ function LoadingSpinner({
 
   if (fullScreen) {
     return <div className="loading-spinner__overlay">{content}</div>;
+  }
+
+  if (fullPage) {
+    return <div className="loading-spinner__page">{content}</div>;
   }
 
   return content;

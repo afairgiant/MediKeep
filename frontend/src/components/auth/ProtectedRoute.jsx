@@ -120,7 +120,11 @@ function ProtectedRoute({
 
   // Show loading spinner while checking authentication
   if (isLoading) {
-    return fallback || <LoadingSpinner message="Verifying authentication..." />;
+    return (
+      fallback || (
+        <LoadingSpinner message="Verifying authentication..." fullPage />
+      )
+    );
   }
 
   // If we need to redirect, do it without showing toast (toast handled in useEffect)
@@ -176,7 +180,7 @@ export function PublicRoute({
   );
 
   if (isLoading || registration.loading) {
-    return <LoadingSpinner message="Loading..." />;
+    return <LoadingSpinner message="Loading..." fullPage />;
   }
 
   if (isAuthenticated) {
