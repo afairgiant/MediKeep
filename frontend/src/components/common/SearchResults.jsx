@@ -37,6 +37,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { searchService } from '../../services/searchService';
+import { getTypeLabel } from '../search/searchResultHelpers';
 
 const SearchResults = ({
   results = [],
@@ -178,7 +179,7 @@ const SearchResults = ({
                           {result.title}
                         </Text>
                         <Badge size="xs" color={result.color} variant="light">
-                          {result.type.replace('_', ' ')}
+                          {getTypeLabel(t, result.type)}
                         </Badge>
                       </Group>
 

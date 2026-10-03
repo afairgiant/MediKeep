@@ -135,7 +135,7 @@ describe('injury search results', () => {
     expect(
       getItemDateWithLabel('injury', { ...tagRow, date_of_injury: null }, t)
         .value
-    ).toBe(tagRow.created_at);
+    ).toBeNull();
     expect(getItemTitle('injury', {}, t)).toBe('search.fallbacks.injury');
   });
 

@@ -329,19 +329,17 @@ export function getItemDateWithLabel(
     case 'injury':
       return {
         label: t('search.dateLabels.injured'),
-        value: (item.date_of_injury || item.created_at) as string | undefined,
+        value: item.date_of_injury as string | undefined,
       };
     case 'symptom':
       return {
         label: t('search.dateLabels.started'),
-        value: (item.first_occurrence_date || item.created_at) as
-          | string
-          | undefined,
+        value: item.first_occurrence_date as string | undefined,
       };
     case 'medical_equipment':
       return {
         label: t('search.dateLabels.prescribed'),
-        value: (item.prescribed_date || item.created_at) as string | undefined,
+        value: item.prescribed_date as string | undefined,
       };
     case 'vital':
       return {
