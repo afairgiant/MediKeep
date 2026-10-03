@@ -135,6 +135,17 @@
     overflow: visible !important;
   }
 
+  /* ResponsiveTable caps its screen wrapper at a viewport-relative height and
+     scrolls inside it; on paper that clips every row past the cap (the last
+     rows of a long table). Let the wrapper grow to fit all printed rows. */
+  .responsive-table-scroll,
+  .responsive-table-scroll [class*='mantine-ScrollArea-root'],
+  .responsive-table-scroll [class*='mantine-ScrollArea-viewport'] {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
   /* Expanded history rows use a smaller font on screen for visual hierarchy;
      bump them up for print so they stay legible on paper. */
   .lab-history-row [class*='mantine-Text-root'],
