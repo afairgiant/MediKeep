@@ -1033,7 +1033,9 @@
       "diagnosed": "诊断",
       "given": "接种",
       "identified": "识别",
+      "injured": "受伤日期",
       "performed": "执行",
+      "prescribed": "开具日期",
       "recorded": "记录",
       "started": "开始",
       "tested": "检测",
@@ -1046,10 +1048,13 @@
     "fallbacks": {
       "allergy": "过敏",
       "encounter": "就诊",
+      "equipment": "设备",
       "immunization": "疫苗",
+      "injury": "损伤",
       "medication": "药物",
       "procedure": "手术",
-      "record": "记录"
+      "record": "记录",
+      "symptom": "症状"
     },
     "filterByTag": "按标签筛选：{{tag}}",
     "filtered": "（已筛选）",

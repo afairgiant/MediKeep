@@ -7,13 +7,16 @@
 import React from 'react';
 import {
   IconAlertTriangle,
+  IconBandage,
   IconStethoscope,
   IconPill,
+  IconThermometer,
   IconVaccine,
   IconMedicalCross,
   IconHeartbeat,
   IconCalendarEvent,
   IconFlask,
+  IconHeartRateMonitor,
   IconSearch,
 } from '@tabler/icons-react';
 
@@ -103,6 +106,24 @@ export const TAG_ENTITY_CONFIG: Record<string, EntityConfig> = {
     labelKey: 'shared:categories.allergies',
     route: '/allergies',
   },
+  injury: {
+    icon: IconBandage,
+    color: 'lime',
+    labelKey: 'shared:categories.injuries',
+    route: '/injuries',
+  },
+  symptom: {
+    icon: IconThermometer,
+    color: 'grape',
+    labelKey: 'shared:categories.symptoms',
+    route: '/symptoms',
+  },
+  medical_equipment: {
+    icon: IconHeartRateMonitor,
+    color: 'yellow',
+    labelKey: 'shared:categories.medical_equipment',
+    route: '/medical-equipment',
+  },
 };
 
 /** Map sidebar record type values (plural) to tag entity keys (singular). */
@@ -115,6 +136,9 @@ export const RECORD_TYPE_TO_TAG_ENTITY: Record<string, string> = {
   treatments: 'treatment',
   encounters: 'encounter',
   allergies: 'allergy',
+  injuries: 'injury',
+  symptoms: 'symptom',
+  medical_equipment: 'medical_equipment',
   // vitals omitted — no tag support
 };
 
@@ -124,13 +148,16 @@ export const ICON_MAP: Record<
   React.ComponentType<{ size?: string | number }>
 > = {
   IconAlertTriangle,
+  IconBandage,
   IconStethoscope,
   IconPill,
+  IconThermometer,
   IconVaccine,
   IconMedicalCross,
   IconHeartbeat,
   IconCalendarEvent,
   IconFlask,
+  IconHeartRateMonitor,
 };
 
 /** Fallback icon when the backend icon name is unknown. */
@@ -146,6 +173,9 @@ export const TYPE_LABEL_KEY_MAP: Record<string, string> = {
   treatment: 'search.types.treatments',
   encounter: 'search.types.encounters',
   allergy: 'search.types.allergies',
+  injury: 'shared:categories.injuries',
+  symptom: 'shared:categories.symptoms',
+  medical_equipment: 'shared:categories.medical_equipment',
   vital: 'search.types.vitals',
 };
 
@@ -199,6 +229,12 @@ export function getItemTitle(
       );
     case 'allergy':
       return (item.allergen as string) || t('search.fallbacks.allergy');
+    case 'injury':
+      return (item.injury_name as string) || t('search.fallbacks.injury');
+    case 'symptom':
+      return (item.symptom_name as string) || t('search.fallbacks.symptom');
+    case 'medical_equipment':
+      return (item.equipment_name as string) || t('search.fallbacks.equipment');
     default:
       return t('search.fallbacks.record');
   }
@@ -230,6 +266,12 @@ export function getItemSubtitle(
       return (item.reason as string) || (item.chief_complaint as string) || '';
     case 'allergy':
       return [item.severity, item.reaction].filter(Boolean).join(' - ');
+    case 'injury':
+      return [item.body_part, item.status].filter(Boolean).join(' - ');
+    case 'symptom':
+      return [item.category, item.status].filter(Boolean).join(' - ');
+    case 'medical_equipment':
+      return [item.equipment_type, item.status].filter(Boolean).join(' - ');
     default:
       return (item.status as string) || '';
   }
@@ -283,6 +325,23 @@ export function getItemDateWithLabel(
       return {
         label: t('search.dateLabels.identified'),
         value: (item.identified_date || item.created_at) as string | undefined,
+      };
+    case 'injury':
+      return {
+        label: t('search.dateLabels.injured'),
+        value: (item.date_of_injury || item.created_at) as string | undefined,
+      };
+    case 'symptom':
+      return {
+        label: t('search.dateLabels.started'),
+        value: (item.first_occurrence_date || item.created_at) as
+          | string
+          | undefined,
+      };
+    case 'medical_equipment':
+      return {
+        label: t('search.dateLabels.prescribed'),
+        value: (item.prescribed_date || item.created_at) as string | undefined,
       };
     case 'vital':
       return {

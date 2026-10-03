@@ -19,13 +19,16 @@ import {
 } from '@mantine/core';
 import {
   IconAlertTriangle,
+  IconBandage,
   IconStethoscope,
   IconPill,
+  IconThermometer,
   IconVaccine,
   IconMedicalCross,
   IconHeartbeat,
   IconCalendarEvent,
   IconFlask,
+  IconHeartRateMonitor,
   IconSearch,
   IconX,
   IconChevronRight,
@@ -49,13 +52,16 @@ const SearchResults = ({
   // Icon mapping
   const iconMap = {
     IconAlertTriangle,
+    IconBandage,
     IconStethoscope,
     IconPill,
+    IconThermometer,
     IconVaccine,
     IconMedicalCross,
     IconHeartbeat,
     IconCalendarEvent,
     IconFlask,
+    IconHeartRateMonitor,
   };
 
   const handleResultClick = result => {

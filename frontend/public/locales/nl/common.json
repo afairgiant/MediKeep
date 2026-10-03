@@ -1034,7 +1034,9 @@
       "diagnosed": "Gediagnosticeerd",
       "given": "Toegediend",
       "identified": "Geïdentificeerd",
+      "injured": "Gewond",
       "performed": "Uitgevoerd",
+      "prescribed": "Voorgeschreven",
       "recorded": "Geregistreerd",
       "started": "Gestart",
       "tested": "Getest",
@@ -1047,10 +1049,13 @@
     "fallbacks": {
       "allergy": "Allergie",
       "encounter": "Consult",
+      "equipment": "Apparatuur",
       "immunization": "Vaccinatie",
+      "injury": "Letsel",
       "medication": "Medicatie",
       "procedure": "Procedure",
-      "record": "Dossier"
+      "record": "Dossier",
+      "symptom": "Symptoom"
     },
     "filterByTag": "Filteren op tag: {{tag}}",
     "filtered": "(gefilterd)",

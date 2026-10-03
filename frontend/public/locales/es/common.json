@@ -1034,7 +1034,9 @@
       "diagnosed": "Diagnosticado",
       "given": "Administrado",
       "identified": "Identificado",
+      "injured": "Lesionado",
       "performed": "Realizado",
+      "prescribed": "Prescrito",
       "recorded": "Registrado",
       "started": "Iniciado",
       "tested": "Analizado",
@@ -1047,10 +1049,13 @@
     "fallbacks": {
       "allergy": "Alergia",
       "encounter": "Consulta",
+      "equipment": "Equipo",
       "immunization": "Inmunización",
+      "injury": "Lesión",
       "medication": "Medicamento",
       "procedure": "Procedimiento",
-      "record": "Registro"
+      "record": "Registro",
+      "symptom": "Síntoma"
     },
     "filterByTag": "Filtrar por etiqueta: {{tag}}",
     "filtered": "(filtrado)",

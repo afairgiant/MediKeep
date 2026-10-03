@@ -1029,7 +1029,9 @@
       "diagnosed": "วินิจฉัย",
       "given": "ให้",
       "identified": "ระบุ",
+      "injured": "บาดเจ็บเมื่อ",
       "performed": "ทำ",
+      "prescribed": "สั่งจ่ายเมื่อ",
       "recorded": "บันทึก",
       "started": "เริ่มต้น",
       "tested": "ตรวจ",
@@ -1042,10 +1044,13 @@
     "fallbacks": {
       "allergy": "แพ้",
       "encounter": "การเยี่ยม",
+      "equipment": "อุปกรณ์",
       "immunization": "การฉีดวัคซีน",
+      "injury": "การบาดเจ็บ",
       "medication": "ยา",
       "procedure": "หัตถการ",
-      "record": "บันทึก"
+      "record": "บันทึก",
+      "symptom": "อาการ"
     },
     "filterByTag": "ฟิลเตอร์ตามแท็ก: {{tag}}",
     "filtered": "(ถูกกรอง)",

@@ -1034,7 +1034,9 @@
       "diagnosed": "Diagnosed",
       "given": "Given",
       "identified": "Identified",
+      "injured": "Injured",
       "performed": "Performed",
+      "prescribed": "Prescribed",
       "recorded": "Recorded",
       "started": "Started",
       "tested": "Tested",
@@ -1047,10 +1049,13 @@
     "fallbacks": {
       "allergy": "Allergy",
       "encounter": "Encounter",
+      "equipment": "Equipment",
       "immunization": "Immunization",
+      "injury": "Injury",
       "medication": "Medication",
       "procedure": "Procedure",
-      "record": "Record"
+      "record": "Record",
+      "symptom": "Symptom"
     },
     "filterByTag": "Filter by tag: {{tag}}",
     "filtered": "(filtered)",

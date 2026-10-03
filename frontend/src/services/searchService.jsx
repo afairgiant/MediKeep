@@ -142,6 +142,41 @@ class SearchService {
           color: 'red',
         };
 
+      case 'injuries':
+        return {
+          ...baseItem,
+          title: item.injury_name,
+          subtitle: [item.body_part, item.status].filter(Boolean).join(' - '),
+          description: item.notes || '',
+          date: item.date_of_injury || item.created_at,
+          icon: 'IconBandage',
+          color: 'lime',
+        };
+
+      case 'symptoms':
+        return {
+          ...baseItem,
+          title: item.symptom_name,
+          subtitle: [item.category, item.status].filter(Boolean).join(' - '),
+          description: item.general_notes || '',
+          date: item.first_occurrence_date || item.created_at,
+          icon: 'IconThermometer',
+          color: 'grape',
+        };
+
+      case 'medical_equipment':
+        return {
+          ...baseItem,
+          title: item.equipment_name,
+          subtitle: [item.equipment_type, item.status]
+            .filter(Boolean)
+            .join(' - '),
+          description: item.notes || '',
+          date: item.prescribed_date || item.created_at,
+          icon: 'IconHeartRateMonitor',
+          color: 'yellow',
+        };
+
       case 'vitals':
         return {
           ...baseItem,
@@ -208,6 +243,9 @@ class SearchService {
       vital: `/vitals?view=${id}`,
       encounter: `/visits?view=${id}`,
       lab_result: `/lab-results?view=${id}`,
+      injury: `/injuries?view=${id}`,
+      symptom: `/symptoms?view=${id}`,
+      medical_equipment: `/medical-equipment?view=${id}`,
     };
 
     return routeMap[type] || `/dashboard`;

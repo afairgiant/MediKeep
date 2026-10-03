@@ -5,7 +5,7 @@
  * popular tag chips, and a date range picker with quick presets.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Paper,
   Stack,
@@ -28,13 +28,16 @@ import {
   IconFilter,
   IconTag,
   IconAlertTriangle,
+  IconBandage,
   IconStethoscope,
   IconPill,
+  IconThermometer,
   IconVaccine,
   IconMedicalCross,
   IconHeartbeat,
   IconCalendarEvent,
   IconFlask,
+  IconHeartRateMonitor,
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-react';
@@ -96,6 +99,24 @@ export const RECORD_TYPES = [
     color: 'red',
   },
   {
+    value: 'injuries',
+    labelKey: 'shared:categories.injuries',
+    icon: IconBandage,
+    color: 'lime',
+  },
+  {
+    value: 'symptoms',
+    labelKey: 'shared:categories.symptoms',
+    icon: IconThermometer,
+    color: 'grape',
+  },
+  {
+    value: 'medical_equipment',
+    labelKey: 'shared:categories.medical_equipment',
+    icon: IconHeartRateMonitor,
+    color: 'yellow',
+  },
+  {
     value: 'vitals',
     labelKey: 'shared:categories.vitals',
     icon: IconHeartbeat,
@@ -103,9 +124,31 @@ export const RECORD_TYPES = [
   },
 ] as const;
 
+/**
+ * Return record types ordered alphabetically by their translated label, using
+ * the user's locale so non-Latin and accented labels sort correctly.
+ */
+export function sortRecordTypesByLabel(
+  recordTypes: readonly RecordTypeOption[],
+  getLabel: (_labelKey: RecordTypeOption['labelKey']) => string,
+  language: string
+): RecordTypeOption[] {
+  let collator: Intl.Collator;
+  try {
+    collator = new Intl.Collator(language, { sensitivity: 'base' });
+  } catch {
+    collator = new Intl.Collator(undefined, { sensitivity: 'base' });
+  }
+  return [...recordTypes].sort((a, b) =>
+    collator.compare(getLabel(a.labelKey), getLabel(b.labelKey))
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+export type RecordTypeOption = (typeof RECORD_TYPES)[number];
 
 export interface PopularTag {
   tag: string;
@@ -178,7 +221,11 @@ export function SearchFilterSidebar({
   dateRange,
   onDateRangeChange,
 }: SearchFilterSidebarProps) {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t, i18n } = useTranslation(['common', 'shared']);
+  const sortedRecordTypes = useMemo(
+    () => sortRecordTypesByLabel(RECORD_TYPES, key => t(key), i18n.language),
+    [t, i18n.language]
+  );
   const [collapsed, setCollapsed] = usePersistedToggle(
     'search_sidebar_collapsed',
     false
@@ -346,7 +393,7 @@ export function SearchFilterSidebar({
         <Text size="sm" fw={500} c="dimmed">
           {t('search.recordTypes')}
         </Text>
-        {RECORD_TYPES.map(recordType => {
+        {sortedRecordTypes.map(recordType => {
           const IconComponent = recordType.icon;
           return (
             <Checkbox

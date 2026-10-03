@@ -1034,7 +1034,9 @@
       "diagnosed": "Diagnostiserad",
       "given": "Givet",
       "identified": "Identifierad",
+      "injured": "Skadad",
       "performed": "Utförd",
+      "prescribed": "Ordinerad",
       "recorded": "Registrerad",
       "started": "Påbörjad",
       "tested": "Testad",
@@ -1047,10 +1049,13 @@
     "fallbacks": {
       "allergy": "Allergi",
       "encounter": "Besök",
+      "equipment": "Utrustning",
       "immunization": "Vaccination",
+      "injury": "Skada",
       "medication": "Medicin",
       "procedure": "Ingrepp",
-      "record": "Post"
+      "record": "Post",
+      "symptom": "Symptom"
     },
     "filterByTag": "Filtrera efter tagg: {{tag}}",
     "filtered": "(filtrerat)",
