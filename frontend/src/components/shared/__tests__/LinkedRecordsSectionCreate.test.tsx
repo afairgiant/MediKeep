@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { IconScissors } from '@tabler/icons-react';
 
-import render, { screen, waitFor } from '../../../test-utils/render';
+import render, { fireEvent, screen, waitFor, within } from '../../../test-utils/render';
 import LinkedRecordsSection from '../LinkedRecordsSection';
 import { InlineCreateProvider } from '../../../contexts/InlineCreateContext';
 import {
@@ -246,6 +246,46 @@ describe('LinkedRecordsSection - failure and navigation safety', () => {
         hidden: true,
       })
     ).toBeInTheDocument();
+  });
+
+  it('shows a failed bulk link inside the add modal, which stays open', async () => {
+    const source = makeSource();
+    (source.fetchCandidates as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { id: 5, label: 'Knee scope (2026-01-15)' },
+    ]);
+    (source.createLinks as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error('bulk link failed')
+    );
+    renderSection({ source });
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'common:buttons.link' })
+      ).toBeEnabled()
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'common:buttons.link' })
+    );
+    await userEvent.click(
+      await screen.findByPlaceholderText(
+        'common:visits.relationships.selectPlaceholder'
+      )
+    );
+    fireEvent.click(
+      await screen.findByRole('option', {
+        name: 'Knee scope (2026-01-15)',
+        hidden: true,
+      })
+    );
+    fireEvent.click(
+      await screen.findByText('common:visits.relationships.linkSelected')
+    );
+
+    const modal = await screen.findByRole('dialog', { hidden: true });
+    expect(
+      await within(modal).findByText('bulk link failed')
+    ).toBeInTheDocument();
+    // Shown once, in the modal, not also behind it
+    expect(screen.getAllByText('bulk link failed')).toHaveLength(1);
   });
 
   it('closes an open create dialog when the route changes', async () => {

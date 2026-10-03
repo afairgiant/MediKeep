@@ -337,6 +337,56 @@ describe('TestPanelCreateDialog', () => {
     expect(defaultProps.onCreateSuccess).not.toHaveBeenCalled();
   });
 
+  const fillSubmittablePanel = async () => {
+    await userEvent.type(
+      screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
+      'CBC Panel'
+    );
+    await userEvent.type(screen.getByPlaceholderText('Type to search tests...'), 'Glucose');
+    await userEvent.type(screen.getByRole('spinbutton', { name: 'Value' }), '95');
+    await userEvent.type(screen.getByPlaceholderText('Unit'), 'mg/dL');
+  };
+
+  it('stays busy until an async onCreateSuccess settles, so it cannot be submitted twice', async () => {
+    mockCreateLabResult.mockResolvedValue({ id: 99, test_name: 'CBC Panel' });
+    mockCreateBulkForLabResult.mockResolvedValue({ created_count: 1, components: [], errors: [] });
+    let finish: () => void = () => {};
+    const onCreateSuccess = vi.fn(
+      () => new Promise<void>(resolve => { finish = resolve; })
+    );
+
+    render(<TestPanelCreateDialog {...defaultProps} onCreateSuccess={onCreateSuccess} />);
+    await fillSubmittablePanel();
+    await userEvent.click(screen.getByText('Save Results'));
+    await waitFor(() => expect(onCreateSuccess).toHaveBeenCalledTimes(1));
+
+    await userEvent.click(screen.getByText('Save Results'));
+    expect(mockCreateLabResult).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('loading-overlay')).toBeInTheDocument();
+
+    finish();
+    await waitFor(() =>
+      expect(screen.queryByTestId('loading-overlay')).toBeNull()
+    );
+  });
+
+  it('does not report "create failed" when onCreateSuccess throws after the panel exists', async () => {
+    mockCreateLabResult.mockResolvedValue({ id: 99, test_name: 'CBC Panel' });
+    mockCreateBulkForLabResult.mockResolvedValue({ created_count: 1, components: [], errors: [] });
+    const onCreateSuccess = vi.fn().mockRejectedValue(new Error('follow-up failed'));
+
+    render(<TestPanelCreateDialog {...defaultProps} onCreateSuccess={onCreateSuccess} />);
+    await fillSubmittablePanel();
+    await userEvent.click(screen.getByText('Save Results'));
+
+    await waitFor(() => expect(onCreateSuccess).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(screen.queryByTestId('loading-overlay')).toBeNull()
+    );
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(mockCreateLabResult).toHaveBeenCalledTimes(1);
+  });
+
   it('creates panel with components when a submittable row is filled', async () => {
     const newLabResult = { id: 99, test_name: 'CBC Panel' };
     mockCreateLabResult.mockResolvedValueOnce(newLabResult);

@@ -25,7 +25,7 @@ const LabResultCreateDialog = ({
   const handleCreateSuccess = useCallback(
     async (record: CreatedRecord) => {
       // The lab result and its components exist now: whatever happens next, the dialog
-      // closes, so it can never be submitted twice
+      // closes, and the panel dialog stays busy until this settles, so it cannot be submitted twice
       let outcome: Awaited<ReturnType<typeof onCreated>> = undefined;
       let linkFailed = false;
       try {

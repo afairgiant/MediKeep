@@ -133,6 +133,7 @@ const LinkSection = ({
 
   const closeAddModal = () => {
     setShowAddModal(false);
+    setError(null);
     setSelectedIds([]);
     setNote('');
     setPurpose(null);
@@ -312,7 +313,7 @@ const LinkSection = ({
 
   return (
     <Stack gap="md">
-      {error && (
+      {error && !showAddModal && (
         <Alert icon={<IconInfoCircle size={16} />} color="red" variant="light">
           {error}
         </Alert>
@@ -403,6 +404,15 @@ const LinkSection = ({
         zIndex={3000}
       >
         <Stack gap="md">
+          {error && (
+            <Alert
+              icon={<IconInfoCircle size={16} />}
+              color="red"
+              variant="light"
+            >
+              {error}
+            </Alert>
+          )}
           <MultiSelect
             label={title}
             placeholder={t('common:visits.relationships.selectPlaceholder')}

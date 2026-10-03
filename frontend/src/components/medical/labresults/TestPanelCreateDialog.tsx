@@ -54,7 +54,7 @@ interface LabResult {
 interface TestPanelCreateDialogProps {
   opened: boolean;
   onClose: () => void;
-  onCreateSuccess: (_labResult: LabResult) => void;
+  onCreateSuccess: (_labResult: LabResult) => void | Promise<void>;
   practitioners: Practitioner[];
   currentPatient: Patient | null;
   /** Omit both to hide the Simple/Advanced switch (e.g. when opened from another dialog) */
@@ -174,6 +174,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
     setIsSubmitting(true);
     setError(null);
 
+    let createdLabResult: LabResult;
     try {
       const payload = {
         test_name: formData.test_name.trim(),
@@ -191,6 +192,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       };
 
       const labResult = await apiService.createLabResult(payload);
+      createdLabResult = labResult;
 
       await submitPendingTestComponents(
         labResult.id,
@@ -211,7 +213,6 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       setError(null);
       resetAutoPopulate();
       inlineTestRef.current?.clearComponents();
-      onCreateSuccess(labResult);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error('test_panel_create_error', {
@@ -220,6 +221,20 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         component: 'TestPanelCreateDialog',
       });
       setError(message || t('medical:labResults.addPanel.createError'));
+      setIsSubmitting(false);
+      return;
+    }
+
+    // The panel exists now, so a failing callback must not read as "create failed" (a retry
+    // would duplicate it). Staying busy until it settles stops a second submit meanwhile.
+    try {
+      await onCreateSuccess(createdLabResult);
+    } catch (err: unknown) {
+      logger.error('test_panel_create_success_callback_failed', {
+        message: 'Panel created but the follow-up step failed',
+        error: err instanceof Error ? err.message : String(err),
+        component: 'TestPanelCreateDialog',
+      });
     } finally {
       setIsSubmitting(false);
     }
