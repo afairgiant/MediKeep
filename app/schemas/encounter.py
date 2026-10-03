@@ -464,3 +464,122 @@ class LabResultEncounterBulkCreate(BaseModel):
         if v and len(v.strip()) > 500:
             raise ValueError("Relevance note must be less than 500 characters")
         return v.strip() if v else None
+
+
+# =============================================================================
+# Note-only encounter links (procedures, symptoms, injuries, medications,
+# conditions, treatments). The visit side names the linked record `entity_id`;
+# the record side names the visit `encounter_id`.
+# =============================================================================
+
+
+def _validate_link_note(v: Optional[str]) -> Optional[str]:
+    if v and len(v.strip()) > 500:
+        raise ValueError("Relevance note must be less than 500 characters")
+    return v.strip() if v else None
+
+
+def _validate_link_ids(v: List[int], label: str) -> List[int]:
+    if not v:
+        raise ValueError(f"At least one {label} ID is required")
+    for id_val in v:
+        if id_val <= 0:
+            raise ValueError(f"All {label} IDs must be positive integers")
+    return list(dict.fromkeys(v))
+
+
+class EncounterLinkCreate(BaseModel):
+    """Link one record to an encounter (visit side)."""
+
+    entity_id: int
+    relevance_note: Optional[str] = None
+
+    @field_validator("entity_id")
+    @classmethod
+    def validate_entity_id(cls, v):
+        return validate_positive_id(v, field_name="Record ID", required=True)
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_link_note(v)
+
+
+class EncounterLinkBulkCreate(BaseModel):
+    """Link several records to an encounter (visit side)."""
+
+    entity_ids: List[int]
+    relevance_note: Optional[str] = None
+
+    @field_validator("entity_ids")
+    @classmethod
+    def validate_entity_ids(cls, v):
+        return _validate_link_ids(v, "record")
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_link_note(v)
+
+
+class RecordEncounterLinkCreate(BaseModel):
+    """Link one encounter to a record (record side)."""
+
+    encounter_id: int
+    relevance_note: Optional[str] = None
+
+    @field_validator("encounter_id")
+    @classmethod
+    def validate_encounter_id(cls, v):
+        return validate_positive_id(v, field_name="Encounter ID", required=True)
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_link_note(v)
+
+
+class RecordEncounterLinkBulkCreate(BaseModel):
+    """Link several encounters to a record (record side)."""
+
+    encounter_ids: List[int]
+    relevance_note: Optional[str] = None
+
+    @field_validator("encounter_ids")
+    @classmethod
+    def validate_encounter_ids(cls, v):
+        return _validate_link_ids(v, "encounter")
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_link_note(v)
+
+
+class EncounterLinkUpdate(BaseModel):
+    """Update the note on a link. Only fields that are sent are changed."""
+
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_link_note(v)
+
+
+class EncounterLinkResponse(BaseModel):
+    """A link plus display fields for both the record and the encounter."""
+
+    id: int
+    encounter_id: int
+    entity_id: int
+    relevance_note: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    entity_name: Optional[str] = None
+    entity_date: Optional[DateType] = None
+    entity_status: Optional[str] = None
+    encounter_reason: Optional[str] = None
+    encounter_date: Optional[DateType] = None
+
+    model_config = ConfigDict(from_attributes=True)

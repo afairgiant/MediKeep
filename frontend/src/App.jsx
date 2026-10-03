@@ -47,6 +47,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AppDataProvider } from './contexts/AppDataContext';
 import { UserPreferencesProvider } from './contexts/UserPreferencesContext';
+import { InlineCreateProvider } from './contexts/InlineCreateContext';
 import ProtectedRoute, {
   AdminRoute,
   PublicRoute,
@@ -337,10 +338,12 @@ function ThemedMantineProvider({ children }) {
       forceColorScheme={colorScheme}
       cssVariablesResolver={cssVariablesResolver}
     >
-      <Notifications />
+      {/* Above every dialog (2000-4000), so a message raised while one is open is seen */}
+      <Notifications zIndex={5000} />
       <ResponsiveProvider>
         <DatesProvider settings={{ locale: i18n.language }}>
-          {children}
+          {/* Hosts create dialogs opened from inside other dialogs */}
+          <InlineCreateProvider>{children}</InlineCreateProvider>
         </DatesProvider>
       </ResponsiveProvider>
     </MantineProvider>

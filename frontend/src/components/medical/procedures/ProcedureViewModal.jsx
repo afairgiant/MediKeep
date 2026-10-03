@@ -28,6 +28,9 @@ import { useTagColors } from '../../../hooks/useTagColors';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
+import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
+import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const ProcedureViewModal = ({
   isOpen,
@@ -91,6 +94,7 @@ const ProcedureViewModal = ({
 
   const handleEditClick = () => {
     try {
+      rememberEditTab('procedures', activeTab);
       onClose();
       onEdit(procedure);
     } catch (error) {
@@ -160,14 +164,15 @@ const ProcedureViewModal = ({
               >
                 {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes', 'Notes')}
-              </Tabs.Tab>
+              <RecordVisitsTabButton recordType="procedures" recordId={procedure.id} />
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
               >
                 {t('shared:tabs.documents', 'Documents')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -450,6 +455,20 @@ const ProcedureViewModal = ({
                     </Text>
                   </div>
                 </Stack>
+              </Box>
+            </Tabs.Panel>
+
+            {/* Visits Tab */}
+            <Tabs.Panel value="visits">
+              <Box mt="md">
+                {activeTab === 'visits' && (
+                  <RecordVisitsTab
+                    recordType="procedures"
+                    recordId={procedure.id}
+                    isViewMode
+                    navigate={navigate}
+                  />
+                )}
               </Box>
             </Tabs.Panel>
 

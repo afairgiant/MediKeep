@@ -99,6 +99,8 @@ export function RelationshipAddFooter({
   entityNamePlural: _entityNamePlural,
   buttonLabel,
   onAdd,
+  onCreateNew,
+  createLabel,
   loading,
 }) {
   const { t } = useTranslation(['common', 'shared']);
@@ -107,14 +109,27 @@ export function RelationshipAddFooter({
       <Text size="sm" c="dimmed">
         {t('shared:labels.countTotal', { count: availableCount })}
       </Text>
-      <Button
-        variant="light"
-        leftSection={<IconPlus size={16} />}
-        onClick={onAdd}
-        disabled={loading || availableCount === 0}
-      >
-        {buttonLabel || t('buttons.link', 'Link')}
-      </Button>
+      <Group gap="xs">
+        {onCreateNew && (
+          // Enabled even with nothing to link: that is when creating matters most
+          <Button
+            variant="light"
+            leftSection={<IconPlus size={16} />}
+            onClick={onCreateNew}
+            disabled={loading}
+          >
+            {createLabel}
+          </Button>
+        )}
+        <Button
+          variant="light"
+          leftSection={<IconPlus size={16} />}
+          onClick={onAdd}
+          disabled={loading || availableCount === 0}
+        >
+          {buttonLabel || t('buttons.link', 'Link')}
+        </Button>
+      </Group>
     </Group>
   );
 }
@@ -125,6 +140,8 @@ RelationshipAddFooter.propTypes = {
   entityNamePlural: PropTypes.string,
   buttonLabel: PropTypes.string,
   onAdd: PropTypes.func.isRequired,
+  onCreateNew: PropTypes.func,
+  createLabel: PropTypes.string,
   loading: PropTypes.bool,
 };
 

@@ -165,9 +165,6 @@
   "loadingHint": "Als dit te lang duurt, vernieuw dan de pagina",
   "messages": {
     "confirmDiscardAdvancedForm": "Als u van modus wisselt, gaat wat u tot nu toe hebt ingevoerd verloren. Doorgaan?",
-    "noRelationshipsAvailable": "Geen medische aandoeningen of bezoeken geregistreerd. Voeg deze eerst toe om ze hier te koppelen.",
-    "noRelationshipsOnRecord": "Er zijn geen aandoeningen, consulten, medicatie, ingrepen of behandelingen vastgelegd voor deze patiënt.",
-    "relationshipsCreateInfo": "Koppelingen kunnen worden toegevoegd na het opslaan van het labresultaat.",
     "relationshipsSaveFirst": "Sla het labresultaat eerst op om koppelingen aan te maken.",
     "testComponentsEditInfo": "Testcomponenten kunnen na het opslaan worden beheerd via de weergavepagina."
   },
@@ -218,9 +215,7 @@
   "patientIdRequired": "Patiënt-ID is vereist. Selecteer eerst een patiënt.",
   "pendingRelationships": {
     "addCondition": "Aandoening toevoegen",
-    "addVisit": "Bezoek toevoegen",
     "removeCondition": "Aandoening verwijderen",
-    "removeVisit": "Bezoek verwijderen",
     "addMedication": "Medicatie toevoegen",
     "addProcedure": "Ingreep toevoegen",
     "addTreatment": "Behandeling toevoegen",
@@ -336,7 +331,6 @@
     "bulkEntry": "Bulkinvoer",
     "noComponentsDescription": "Voeg testresultaten toe met behulp van de sjablonen of bulkinvoerhulpmiddelen hieronder om individuele labwaarden en trends bij te houden.",
     "noComponentsYet": "Nog geen testresultaten",
-    "relationships": "Koppelingen",
     "resultsStatus": "Resultaten en status",
     "templates": "Sjablonen"
   },

@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { vi } from 'vitest';
 
 /**
@@ -5,7 +6,12 @@ import { vi } from 'vitest';
  */
 import render, { screen, fireEvent } from '../../../test-utils/render';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 import MantineVisitForm from '../MantineVisitForm';
+
+/** A link tab's name, with or without its "(n)" count. */
+const withCount = (name: string) =>
+  new RegExp(`^${name.replace(/\./g, '\\.')}( \\(\\d+\\))?$`);
 
 vi.mock('../practitioners/PractitionerSelectWithCreate', () => ({
   default: ({
@@ -39,8 +45,31 @@ vi.mock('../../shared/DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
 
-vi.mock('../visits/EncounterLabResultRelationships', () => ({
-  default: () => <div data-testid="encounter-lab-results" />,
+// Keep the real tab buttons; replace the panels with a probe that exposes their props
+vi.mock('../visits/VisitLinkTabs', async importOriginal => ({
+  ...(await importOriginal<typeof import('../visits/VisitLinkTabs')>()),
+  VisitLinkTabPanels: (props: {
+    activeTab: string;
+    visitId?: number | null;
+    patientId?: number;
+    pendingLinks?: unknown;
+    onPendingChange?: (_next: unknown) => void;
+  }) => (
+    <div
+      data-testid="visit-link-panels"
+      data-active-tab={props.activeTab}
+      data-visit-id={props.visitId ?? ''}
+      data-patient-id={props.patientId ?? ''}
+      data-pending={JSON.stringify(props.pendingLinks ?? null)}
+    >
+      <button
+        type="button"
+        onClick={() => props.onPendingChange?.({ procedures: [] })}
+      >
+        change-pending
+      </button>
+    </div>
+  ),
 }));
 
 const defaultProps = {
@@ -62,7 +91,7 @@ const defaultProps = {
     treatment_plan: '',
     follow_up_instructions: '',
     notes: '',
-    pending_lab_result_ids: [],
+    pending_links: {},
   },
   onInputChange: vi.fn(),
   onSubmit: vi.fn().mockResolvedValue({}),
@@ -73,8 +102,7 @@ const defaultProps = {
   conditionsOptions: [],
   editingVisit: null,
   isLoading: false,
-  labResults: [],
-  encounterLabResults: {},
+  patientId: 1,
 };
 
 beforeEach(() => {
@@ -131,6 +159,91 @@ describe('MantineVisitForm — Add Practitioner', () => {
       const container = screen.getByTestId('practitioner-select-with-create');
       const select = container.querySelector('select') as HTMLSelectElement;
       expect(select.value).toBe('');
+    });
+  });
+});
+
+// The JS form infers every destructured prop as required; these tests pass a subset.
+const LooseVisitForm = MantineVisitForm as unknown as ComponentType<
+  Record<string, unknown>
+>;
+
+describe('MantineVisitForm — linked record tabs', () => {
+  const LINK_TABS = [
+    'shared:categories.procedures',
+    'shared:categories.treatments',
+    'shared:categories.injuries',
+    'shared:categories.symptoms',
+    'shared:categories.conditions',
+    'shared:categories.medications',
+    'shared:categories.lab_results',
+  ];
+
+  const openTab = async (name: string) => {
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: withCount(name) }));
+    return user;
+  };
+
+  test('has a tab per linked record type and no Relationships tab', () => {
+    render(<LooseVisitForm {...defaultProps} />);
+    LINK_TABS.forEach(name =>
+      expect(
+        screen.getByRole('tab', { name: withCount(name) })
+      ).toBeInTheDocument()
+    );
+    expect(screen.queryByRole('tab', { name: /elationships/ })).toBeNull();
+  });
+
+  test('tells the panels which tab is open so they load on demand', async () => {
+    render(<LooseVisitForm {...defaultProps} />);
+    expect(screen.getByTestId('visit-link-panels')).toHaveAttribute(
+      'data-active-tab',
+      'info'
+    );
+    await openTab('shared:categories.lab_results');
+    expect(screen.getByTestId('visit-link-panels')).toHaveAttribute(
+      'data-active-tab',
+      'link-labResults'
+    );
+  });
+
+  test('add mode passes no visit id and the pending links from form data', () => {
+    render(
+      <LooseVisitForm
+        {...defaultProps}
+        formData={{
+          ...defaultProps.formData,
+          pending_links: {
+            procedures: [{ entityId: 4, relevanceNote: null, purpose: null }],
+          },
+        }}
+      />
+    );
+    const panels = screen.getByTestId('visit-link-panels');
+    expect(panels).toHaveAttribute('data-visit-id', '');
+    expect(panels).toHaveAttribute('data-patient-id', '1');
+    expect(JSON.parse(panels.getAttribute('data-pending') as string)).toEqual({
+      procedures: [{ entityId: 4, relevanceNote: null, purpose: null }],
+    });
+  });
+
+  test('edit mode passes the saved visit id', () => {
+    render(
+      <LooseVisitForm {...defaultProps} editingVisit={{ id: 55 } as never} />
+    );
+    expect(screen.getByTestId('visit-link-panels')).toHaveAttribute(
+      'data-visit-id',
+      '55'
+    );
+  });
+
+  test('stores pending link changes in the form data under pending_links', async () => {
+    render(<LooseVisitForm {...defaultProps} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByText('change-pending'));
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+      target: { name: 'pending_links', value: { procedures: [] } },
     });
   });
 });

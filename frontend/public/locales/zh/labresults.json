@@ -165,9 +165,6 @@
   "loadingHint": "如果加载时间过长，请刷新页面",
   "messages": {
     "confirmDiscardAdvancedForm": "切换模式将丢弃您目前输入的内容。是否继续？",
-    "noRelationshipsAvailable": "没有记录的医疗状况或就诊记录。请先添加它们，然后再在此处链接。",
-    "noRelationshipsOnRecord": "此患者没有任何疾病、就诊、药物、手术或治疗记录。",
-    "relationshipsCreateInfo": "保存检验结果后可以添加关系。",
     "relationshipsSaveFirst": "请先保存检验结果以创建关系链接。",
     "testComponentsEditInfo": "保存后可以从查看页面管理检验组件。"
   },
@@ -218,9 +215,7 @@
   "patientIdRequired": "需要患者ID。请先选择患者。",
   "pendingRelationships": {
     "addCondition": "添加病症",
-    "addVisit": "添加就诊",
     "removeCondition": "移除病症",
-    "removeVisit": "移除就诊",
     "addMedication": "添加药物",
     "addProcedure": "添加手术",
     "addTreatment": "添加治疗",
@@ -335,7 +330,6 @@
     "bulkEntry": "批量输入",
     "noComponentsDescription": "使用下方的模板或批量输入工具添加检验结果，以跟踪单个检验值和趋势。",
     "noComponentsYet": "尚无检验结果",
-    "relationships": "关系",
     "resultsStatus": "结果和状态",
     "templates": "模板"
   },

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import {
   Modal,
   Tabs,
@@ -47,6 +48,10 @@ import logger from '../../services/logger';
 import { apiService } from '../../services/api';
 import notificationApi from '../../services/api/notificationApi';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
+import RecordVisitsTab from '../shared/RecordVisitsTab';
+import { getRememberedEditTab } from '../../utils/editTabHandoff';
+import RecordVisitsTabButton from '../shared/RecordVisitsTabButton';
+import { useSubDialog } from '../../contexts/SubDialogContext';
 
 const REMINDER_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 // Mirrors MAX_REMINDER_TIMES in app/schemas/medication.py
@@ -55,6 +60,8 @@ const MAX_REMINDER_TIMES = 12;
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 const MantineMedicationForm = ({
+  formError,
+  patientId,
   isOpen,
   onClose,
   title,
@@ -75,6 +82,8 @@ const MantineMedicationForm = ({
 }) => {
   // Translation
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  // Set when this dialog was opened from inside another one (inline create)
+  const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
@@ -202,7 +211,7 @@ const MantineMedicationForm = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(getRememberedEditTab('medications', 'basic'));
     }
     if (!isOpen) {
       setIsSubmitting(false);
@@ -548,7 +557,7 @@ const MantineMedicationForm = ({
       title={title}
       size="xl"
       centered
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
       styles={{
@@ -579,12 +588,14 @@ const MantineMedicationForm = ({
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
                 {t('shared:tabs.details')}
               </Tabs.Tab>
-              <Tabs.Tab
-                value="conditions"
-                leftSection={<IconStethoscope size={16} />}
-              >
-                {t('shared:categories.conditions')}
-              </Tabs.Tab>
+              {!subDialog && (
+                <Tabs.Tab
+                  value="conditions"
+                  leftSection={<IconStethoscope size={16} />}
+                >
+                  {t('shared:categories.conditions')}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab
                 value="reminders"
                 leftSection={<IconBell size={16} />}
@@ -604,9 +615,13 @@ const MantineMedicationForm = ({
               >
                 {t('medications.reminders.tabLabel', 'Reminders')}
               </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes')}
-              </Tabs.Tab>
+              {!subDialog && (
+                <RecordVisitsTabButton
+                  recordType="medications"
+                  recordId={editingMedication?.id}
+                  pendingLinks={formData.pending_visit_links}
+                />
+              )}
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -614,6 +629,9 @@ const MantineMedicationForm = ({
                 {editingMedication
                   ? t('shared:tabs.documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -650,40 +668,42 @@ const MantineMedicationForm = ({
             </Tabs.Panel>
 
             {/* Conditions Tab */}
-            <Tabs.Panel value="conditions">
-              <Box mt="md">
-                {editingMedication ? (
-                  <MedicationRelationships
-                    direction="medication"
-                    medicationId={editingMedication.id}
-                    conditions={conditions}
-                    navigate={navigate}
-                    isViewMode={false}
-                  />
-                ) : (
-                  <MultiSelect
-                    label={t('common:buttons.linkConditions')}
-                    description={t(
-                      'medications.form.linkConditionsDescription'
-                    )}
-                    placeholder={t('common:modals.chooseConditionsToLink')}
-                    data={conditionOptions}
-                    value={formData.condition_ids || []}
-                    onChange={values => {
-                      onInputChange({
-                        target: { name: 'condition_ids', value: values },
-                      });
-                    }}
-                    searchable
-                    clearable
-                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                    nothingFoundMessage={t(
-                      'medications.form.noConditionsFound'
-                    )}
-                  />
-                )}
-              </Box>
-            </Tabs.Panel>
+            {!subDialog && (
+              <Tabs.Panel value="conditions">
+                <Box mt="md">
+                  {editingMedication ? (
+                    <MedicationRelationships
+                      direction="medication"
+                      medicationId={editingMedication.id}
+                      conditions={conditions}
+                      navigate={navigate}
+                      isViewMode={false}
+                    />
+                  ) : (
+                    <MultiSelect
+                      label={t('common:buttons.linkConditions')}
+                      description={t(
+                        'medications.form.linkConditionsDescription'
+                      )}
+                      placeholder={t('common:modals.chooseConditionsToLink')}
+                      data={conditionOptions}
+                      value={formData.condition_ids || []}
+                      onChange={values => {
+                        onInputChange({
+                          target: { name: 'condition_ids', value: values },
+                        });
+                      }}
+                      searchable
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                      nothingFoundMessage={t(
+                        'medications.form.noConditionsFound'
+                      )}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
 
             {/* Reminders Tab */}
             <Tabs.Panel value="reminders">
@@ -770,6 +790,28 @@ const MantineMedicationForm = ({
               </Box>
             </Tabs.Panel>
 
+            {/* Visits Tab */}
+            {!subDialog && (
+              <Tabs.Panel value="visits">
+                <Box mt="md">
+                  {activeTab === 'visits' && (
+                    <RecordVisitsTab
+                      recordType="medications"
+                      recordId={editingMedication?.id}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_visit_links}
+                      onPendingChange={next =>
+                        onInputChange({
+                          target: { name: 'pending_visit_links', value: next },
+                        })
+                      }
+                      navigate={navigate}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
+
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
@@ -812,6 +854,12 @@ const MantineMedicationForm = ({
           {/* Custom children content */}
           {children}
 
+          {formError && (
+            <Alert color="red" variant="light" role="alert">
+              {formError}
+            </Alert>
+          )}
+
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button
@@ -831,6 +879,11 @@ const MantineMedicationForm = ({
       </form>
     </Modal>
   );
+};
+
+MantineMedicationForm.propTypes = {
+  formError: PropTypes.string,
+  patientId: PropTypes.number,
 };
 
 export default MantineMedicationForm;

@@ -28,6 +28,7 @@ import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
+import { useNestedDialog } from '../../hooks/useNestedDialog';
 
 function getLabResultColor(labsResult) {
   switch (labsResult) {
@@ -119,6 +120,9 @@ const LabResultRelationships = ({
     setNewRelationship({ lab_result_ids: [], relevance_note: '' });
     setModalError(null); // only clear modal-scoped error
   };
+
+  // Escape closes this modal only, not the dialog it sits in
+  useNestedDialog(showAddModal, resetAndCloseModal);
 
   const handleAddRelationship = async () => {
     const { lab_result_ids, relevance_note } = newRelationship;

@@ -25,6 +25,9 @@ import { useTranslation } from 'react-i18next';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
+import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const InjuryViewModal = ({
   isOpen,
@@ -178,6 +181,7 @@ const InjuryViewModal = ({
             <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
               {t('shared:labels.treatment', 'Treatment')}
             </Tabs.Tab>
+            <RecordVisitsTabButton recordType="injuries" recordId={injury.id} />
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}
@@ -320,6 +324,20 @@ const InjuryViewModal = ({
             </Box>
           </Tabs.Panel>
 
+          {/* Visits Tab */}
+          <Tabs.Panel value="visits">
+            <Box mt="md">
+              {activeTab === 'visits' && (
+                <RecordVisitsTab
+                  recordType="injuries"
+                  recordId={injury.id}
+                  isViewMode
+                  navigate={navigate}
+                />
+              )}
+            </Box>
+          </Tabs.Panel>
+
           {/* Notes Tab */}
           <Tabs.Panel value="notes">
             <Box mt="md">
@@ -346,7 +364,10 @@ const InjuryViewModal = ({
             <span>
               <Button
                 leftSection={<IconEdit size={16} />}
-                onClick={() => onEdit(injury)}
+                onClick={() => {
+                  rememberEditTab('injuries', activeTab);
+                  onEdit(injury);
+                }}
                 disabled={disableEdit}
               >
                 {t('shared:labels.edit', 'Edit')}

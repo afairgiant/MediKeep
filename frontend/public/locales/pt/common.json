@@ -427,6 +427,26 @@
       "vaccineInfo": "Informações da Vacina"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Adicionar condição",
+      "injury": "Adicionar lesão",
+      "medication": "Adicionar medicamento",
+      "treatment": "Adicionar tratamento",
+      "labResult": "Adicionar resultado laboratorial",
+      "equipment": "Adicionar equipamento",
+      "procedure": "Adicionar procedimento",
+      "symptom": "Adicionar sintoma",
+      "visit": "Adicionar consulta"
+    },
+    "createError": "Não foi possível criar. Tente novamente.",
+    "created": "Criado.",
+    "createdLinked": "Criado e vinculado.",
+    "createdPending": "Criado. Será vinculado quando guardar.",
+    "linkFailed": "Criado, mas não foi possível vincular. Pode vinculá-lo a partir da lista.",
+    "loadError": "Não foi possível abrir este formulário. Nada foi alterado na janela por trás. Tente novamente.",
+    "uploadFailed": "Criado, mas alguns ficheiros não puderam ser enviados. Pode adicioná-los editando."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Adicionar Novo Seguro"
@@ -992,6 +1012,10 @@
       "title": "Detalhes do Procedimento"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "O registo foi criado, mas alguns vínculos com consultas não puderam ser guardados. Pode adicioná-los editando o registo.",
+    "saveFirstInfo": "As consultas vinculadas aqui são guardadas quando este registo for guardado."
+  },
   "search": {
     "activeFilterCount": "{{count}} filtro ativo",
     "activeFilterCount_one": "{{count}} filtro ativo",
@@ -1382,10 +1406,7 @@
     "editVisit": "Editar Consulta",
     "form": {
       "addVisit": "Adicionar Consulta",
-      "chooseLabResultsToLink": "Escolha os resultados laboratoriais a vincular",
-      "labResultsDescription": "Vincule resultados laboratoriais relevantes para esta consulta. Você pode definir a finalidade e as observações depois de criar a consulta.",
       "savingVisit": "Salvando consulta...",
-      "selectLabResults": "Selecionar resultados laboratoriais",
       "tabs": {
         "clinical": "Clínico",
         "visitInfo": "Informações da Consulta"
@@ -1394,8 +1415,8 @@
     },
     "loadingVisits": "Carregando consultas...",
     "notifications": {
-      "labResultLinkFailed": "A consulta foi criada, mas alguns resultados laboratoriais não puderam ser vinculados. Você pode vinculá-los manualmente editando a consulta.",
-      "labResultLinkWarning": "Problema ao vincular resultados laboratoriais"
+      "relationshipLinkFailed": "A consulta foi criada, mas algumas relações não puderam ser guardadas. Pode adicioná-las editando a consulta.",
+      "relationshipLinkWarning": "Problema ao vincular relações"
     },
     "noVisitsFound": "Nenhuma consulta médica encontrada",
     "table": {
@@ -1418,6 +1439,18 @@
       "title": "Consulta - {{date}}",
       "treatmentPlan": "Plano de Tratamento",
       "visitInformation": "Informações da Consulta"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} disponíveis para vincular",
+      "confirmRemove": "Remover este vínculo?",
+      "editLink": "Editar nota do vínculo",
+      "linkSelected": "Vincular selecionados",
+      "modalTitle": "Vincular {{section}}",
+      "none": "Nada vinculado ainda.",
+      "purpose": "Finalidade",
+      "removeLink": "Remover vínculo",
+      "saveFirstInfo": "As relações adicionadas aqui são guardadas quando a consulta for guardada.",
+      "selectPlaceholder": "Escolha registos para vincular"
     }
   },
   "vitals": {

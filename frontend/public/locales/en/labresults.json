@@ -166,9 +166,6 @@
   "loadingHint": "If this takes too long, please refresh the page",
   "messages": {
     "confirmDiscardAdvancedForm": "Switching modes will discard what you've entered so far. Continue?",
-    "noRelationshipsAvailable": "No medical conditions or visits on record. Add them first to link them here.",
-    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
-    "relationshipsCreateInfo": "Relationships can be added after saving the lab result.",
     "relationshipsSaveFirst": "Save the lab result first to create relationship links.",
     "testComponentsEditInfo": "Test components can be managed from the view page after saving."
   },
@@ -222,12 +219,10 @@
     "addMedication": "Add medication",
     "addProcedure": "Add procedure",
     "addTreatment": "Add treatment",
-    "addVisit": "Add visit",
     "removeCondition": "Remove condition",
     "removeMedication": "Remove medication",
     "removeProcedure": "Remove procedure",
-    "removeTreatment": "Remove treatment",
-    "removeVisit": "Remove visit"
+    "removeTreatment": "Remove treatment"
   },
   "quickFormInstructions": "Enter a name for this lab result, then you'll be able to upload and parse your PDF.",
   "quickImportModalTitle": "Quick PDF Import - Step {{step}} of 2",
@@ -337,7 +332,6 @@
     "bulkEntry": "Bulk Entry",
     "noComponentsDescription": "Add test results using the templates or bulk entry tools below to track individual lab values and trends.",
     "noComponentsYet": "No test results yet",
-    "relationships": "Relationships",
     "resultsStatus": "Results & Status",
     "templates": "Templates"
   },

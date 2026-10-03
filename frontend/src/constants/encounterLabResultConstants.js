@@ -2,7 +2,7 @@
  * Encounter-Lab Result Relationship Constants
  *
  * Shared purpose options and helpers used by both
- * EncounterLabResultRelationships and LabResultEncounterRelationships components.
+ * VisitRelationshipsTab (via LinkSection) and LabResultEncounterRelationships components.
  */
 
 export const PURPOSE_OPTIONS = [

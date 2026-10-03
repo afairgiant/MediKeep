@@ -427,6 +427,26 @@
       "vaccineInfo": "Informations sur le vaccin"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Ajouter une pathologie",
+      "injury": "Ajouter une blessure",
+      "medication": "Ajouter un médicament",
+      "treatment": "Ajouter un traitement",
+      "labResult": "Ajouter un résultat de laboratoire",
+      "equipment": "Ajouter un équipement",
+      "procedure": "Ajouter une procédure",
+      "symptom": "Ajouter un symptôme",
+      "visit": "Ajouter une visite"
+    },
+    "createError": "Impossible de le créer. Veuillez réessayer.",
+    "created": "Créé.",
+    "createdLinked": "Créé et associé.",
+    "createdPending": "Créé. Il sera associé lors de l'enregistrement.",
+    "linkFailed": "Créé, mais il n'a pas pu être associé. Vous pouvez l'associer depuis la liste.",
+    "loadError": "Impossible d'ouvrir ce formulaire. Rien n'a été modifié dans la fenêtre située derrière. Veuillez réessayer.",
+    "uploadFailed": "Créé, mais certains fichiers n'ont pas pu être téléversés. Vous pouvez les ajouter en le modifiant."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Ajouter une assurance"
@@ -992,6 +1012,10 @@
       "title": "Détails de la procédure"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "L'enregistrement a été créé, mais certaines associations de visites n'ont pas pu être enregistrées. Vous pouvez les ajouter en modifiant l'enregistrement.",
+    "saveFirstInfo": "Les visites associées ici sont enregistrées en même temps que cet enregistrement."
+  },
   "search": {
     "activeFilterCount": "{{count}} filtre(s) actif(s)",
     "activeFilterCount_one": "{{count}} filtre actif",
@@ -1382,10 +1406,7 @@
     "editVisit": "Editer la visite",
     "form": {
       "addVisit": "Ajouter une visite",
-      "chooseLabResultsToLink": "Choisissez les résultats d'analyse à associer",
-      "labResultsDescription": "Associez les résultats d'analyse pertinents pour cette visite. Vous pourrez définir l'objet et les notes après avoir créé la visite.",
       "savingVisit": "Sauvegarde de la visite...",
-      "selectLabResults": "Sélectionner des résultats d'analyse",
       "tabs": {
         "clinical": "Données cliniques",
         "visitInfo": "Informations sur la visite"
@@ -1394,8 +1415,8 @@
     },
     "loadingVisits": "Chargement des visites...",
     "notifications": {
-      "labResultLinkFailed": "La visite a été créée, mais certains résultats d'analyse n'ont pas pu être associés. Vous pouvez les associer manuellement en modifiant la visite.",
-      "labResultLinkWarning": "Problème d'association des résultats d'analyse"
+      "relationshipLinkFailed": "La visite a été créée, mais certaines relations n'ont pas pu être enregistrées. Vous pouvez les ajouter en modifiant la visite.",
+      "relationshipLinkWarning": "Problème d'association des relations"
     },
     "noVisitsFound": "Aucune visite médicale trouvée",
     "table": {
@@ -1418,6 +1439,18 @@
       "title": "Visite - {{date}}",
       "treatmentPlan": "Plan de traitement",
       "visitInformation": "Informations sur la visite"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} disponible(s) à associer",
+      "confirmRemove": "Supprimer cette association ?",
+      "editLink": "Modifier la note de l'association",
+      "linkSelected": "Associer la sélection",
+      "modalTitle": "Associer : {{section}}",
+      "none": "Rien n'est encore associé.",
+      "purpose": "Objectif",
+      "removeLink": "Supprimer l'association",
+      "saveFirstInfo": "Les relations ajoutées ici sont enregistrées lorsque la visite est enregistrée.",
+      "selectPlaceholder": "Choisissez les éléments à associer"
     }
   },
   "vitals": {

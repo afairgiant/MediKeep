@@ -11,7 +11,6 @@ import {
   Textarea,
   Select,
   Text,
-  Badge,
   Alert,
   SegmentedControl,
 } from '@mantine/core';
@@ -44,6 +43,10 @@ import TreatmentPlanSetup from './TreatmentPlanSetup';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
+import { getRememberedEditTab } from '../../../utils/editTabHandoff';
+import { useTabLabel } from '../../../hooks/useTabLabel';
+import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
+import { useSubDialog } from '../../../contexts/SubDialogContext';
 
 const EMPTY_PENDING_RELATIONSHIPS = {
   medications: [],
@@ -68,8 +71,12 @@ const TreatmentFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
+  formError = undefined,
+  patientId = undefined,
+  onPractitionerCreated = undefined,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
+  const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
@@ -77,12 +84,10 @@ const TreatmentFormWrapper = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Track relationship counts for badge display (edit mode)
-  const [relationshipCounts, setRelationshipCounts] = useState({
-    medications: 0,
-    encounters: 0,
-    labResults: 0,
-    equipment: 0,
-  });
+  // null until the relationship manager reports; until then the preloaded counts are used
+  const [relationshipCounts, setRelationshipCounts] = useState(null);
+  const tabLabel = useTabLabel();
+  const loadedCounts = useTreatmentLinkCounts(editingTreatment?.id, isOpen);
 
   // Track pending relationships for creation mode
   const [pendingRelationships, setPendingRelationships] = useState(
@@ -133,20 +138,18 @@ const TreatmentFormWrapper = ({
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      // A sub-dialog has no link tabs, so a remembered one would show a blank panel
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('treatments', 'basic')
+      );
       setPendingRelationships(EMPTY_PENDING_RELATIONSHIPS);
     }
     if (!isOpen) {
       setIsSubmitting(false);
-      setRelationshipCounts({
-        medications: 0,
-        encounters: 0,
-        labResults: 0,
-        equipment: 0,
-      });
+      setRelationshipCounts(null);
       setPendingRelationships(EMPTY_PENDING_RELATIONSHIPS);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   // Calculate pending relationship count for badge
   const pendingCount =
@@ -287,7 +290,11 @@ const TreatmentFormWrapper = ({
   if (!isOpen) return null;
 
   // Relationship tab values and their corresponding child activeSection values
-  const RELATIONSHIP_TABS = ['medications', 'visits', 'labs', 'equipment'];
+  // Simple mode only has the Visits relationship tab; Treatment Plan mode has all four
+  const RELATIONSHIP_TABS =
+    formData.mode === 'advanced'
+      ? ['medications', 'visits', 'labs', 'equipment']
+      : ['visits'];
   const TAB_TO_SECTION = {
     medications: 'medications',
     visits: 'encounters',
@@ -301,21 +308,32 @@ const TreatmentFormWrapper = ({
     equipment: 'equipment',
   };
 
-  // Get badge count for a specific relationship tab
-  const getTabBadgeCount = tabValue => {
+  // Count shown on a relationship tab: what is held for a new treatment, or what a saved
+  // one is linked to (undefined until known, so the tab shows only its label)
+  const getTabCount = tabValue => {
     const countKey = TAB_TO_COUNT_KEY[tabValue];
     if (editingTreatment) {
-      return relationshipCounts[countKey] || 0;
+      return (relationshipCounts ?? loadedCounts)[countKey];
     }
     return (pendingRelationships[countKey] || []).length;
   };
 
+  // The Visits tab is available in both Simple and Treatment Plan modes
+  const visitsTab = (
+    <Tabs.Tab
+      value="visits"
+      leftSection={<IconStethoscope size={16} />}
+    >
+      {tabLabel(t('shared:tabs.visits'), getTabCount('visits'))}
+    </Tabs.Tab>
+  );
+
   // Total badge count for Basic Info alert
   const totalBadgeCount = editingTreatment
-    ? relationshipCounts.medications +
-      relationshipCounts.encounters +
-      relationshipCounts.labResults +
-      relationshipCounts.equipment
+    ? ['medications', 'encounters', 'labResults', 'equipment'].reduce(
+        (sum, key) => sum + ((relationshipCounts ?? loadedCounts)[key] || 0),
+        0
+      )
     : pendingCount;
 
   return (
@@ -325,7 +343,7 @@ const TreatmentFormWrapper = ({
       title={title}
       size="xl"
       centered
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
@@ -355,69 +373,48 @@ const TreatmentFormWrapper = ({
                 {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               {formData.mode !== 'advanced' && (
-                <Tabs.Tab
-                  value="schedule"
-                  leftSection={<IconCalendar size={16} />}
-                >
-                  {t(
-                    'treatments.form.tabs.scheduleDosage',
-                    'Schedule & Dosage'
-                  )}
-                </Tabs.Tab>
+                <>
+                  <Tabs.Tab
+                    value="schedule"
+                    leftSection={<IconCalendar size={16} />}
+                  >
+                    {t(
+                      'treatments.form.tabs.scheduleDosage',
+                      'Schedule & Dosage'
+                    )}
+                  </Tabs.Tab>
+                  {!subDialog && visitsTab}
+                </>
               )}
-              {formData.mode === 'advanced' && (
+              {formData.mode === 'advanced' && !subDialog && (
                 <>
                   <Tabs.Tab
                     value="medications"
                     leftSection={<IconPill size={16} />}
-                    rightSection={
-                      getTabBadgeCount('medications') > 0 ? (
-                        <Badge size="sm" variant="filled" color="teal" circle>
-                          {getTabBadgeCount('medications')}
-                        </Badge>
-                      ) : null
-                    }
                   >
-                    {t('shared:categories.medications')}
+                    {tabLabel(
+                      t('shared:categories.medications'),
+                      getTabCount('medications')
+                    )}
                   </Tabs.Tab>
-                  <Tabs.Tab
-                    value="visits"
-                    leftSection={<IconStethoscope size={16} />}
-                    rightSection={
-                      getTabBadgeCount('visits') > 0 ? (
-                        <Badge size="sm" variant="filled" color="blue" circle>
-                          {getTabBadgeCount('visits')}
-                        </Badge>
-                      ) : null
-                    }
-                  >
-                    {t('shared:tabs.visits')}
-                  </Tabs.Tab>
+                  {visitsTab}
                   <Tabs.Tab
                     value="labs"
                     leftSection={<IconTestPipe size={16} />}
-                    rightSection={
-                      getTabBadgeCount('labs') > 0 ? (
-                        <Badge size="sm" variant="filled" color="violet" circle>
-                          {getTabBadgeCount('labs')}
-                        </Badge>
-                      ) : null
-                    }
                   >
-                    {t('shared:categories.lab_results')}
+                    {tabLabel(
+                      t('shared:categories.lab_results'),
+                      getTabCount('labs')
+                    )}
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="equipment"
                     leftSection={<IconDeviceDesktop size={16} />}
-                    rightSection={
-                      getTabBadgeCount('equipment') > 0 ? (
-                        <Badge size="sm" variant="filled" color="orange" circle>
-                          {getTabBadgeCount('equipment')}
-                        </Badge>
-                      ) : null
-                    }
                   >
-                    {t('shared:categories.medical_equipment')}
+                    {tabLabel(
+                      t('shared:categories.medical_equipment'),
+                      getTabCount('equipment')
+                    )}
                   </Tabs.Tab>
                 </>
               )}
@@ -450,6 +447,7 @@ const TreatmentFormWrapper = ({
                           // Reset to basic tab when hiding current tab
                           if (
                             value === 'simple' &&
+                            activeTab !== 'visits' &&
                             RELATIONSHIP_TABS.includes(activeTab)
                           ) {
                             setActiveTab('basic');
@@ -677,6 +675,7 @@ const TreatmentFormWrapper = ({
                         })
                       }
                       practitioners={practitionersOptions}
+                      onPractitionerCreated={onPractitionerCreated}
                       label={t('shared:fields.practitioner', 'Practitioner')}
                       placeholder={t(
                         'shared:fields.selectPractitioner',
@@ -883,8 +882,9 @@ const TreatmentFormWrapper = ({
             </Tabs.Panel>
           </Tabs>
 
-          {/* Relationship content - rendered outside Tabs to preserve state across tab switches */}
-          {formData.mode === 'advanced' && (
+          {/* Relationship content - rendered outside Tabs to preserve state across tab switches.
+              Simple mode only has the Visits tab, so it mounts only while that tab is active. */}
+          {!subDialog && (formData.mode === 'advanced' || activeTab === 'visits') && (
             <Box
               mt="md"
               style={{
@@ -905,10 +905,17 @@ const TreatmentFormWrapper = ({
                 <TreatmentPlanSetup
                   activeSection={TAB_TO_SECTION[activeTab] || 'medications'}
                   pendingRelationships={pendingRelationships}
+                  patientId={patientId}
                   onRelationshipsChange={setPendingRelationships}
                 />
               )}
             </Box>
+          )}
+
+          {formError && (
+            <Alert color="red" variant="light" role="alert">
+              {formError}
+            </Alert>
           )}
 
           {/* Form Actions */}

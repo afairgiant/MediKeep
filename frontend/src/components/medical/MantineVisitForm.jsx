@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
+  Alert,
   Modal,
   Tabs,
   Box,
@@ -12,7 +14,6 @@ import {
   Textarea,
   NumberInput,
   Text,
-  MultiSelect,
 } from '@mantine/core';
 import { DateInput } from '../adapters/DateInput';
 import {
@@ -20,7 +21,6 @@ import {
   IconStethoscope,
   IconNotes,
   IconFileText,
-  IconFlask,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { visitFormFields } from '../../utils/medicalFormFields';
@@ -30,12 +30,18 @@ import { translateField } from '../../utils/translateField';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
-import EncounterLabResultRelationships from './visits/EncounterLabResultRelationships';
+import {
+  VisitLinkTabButtons,
+  VisitLinkTabPanels,
+} from './visits/VisitLinkTabs';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
 import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
+import { getRememberedEditTab } from '../../utils/editTabHandoff';
+import { useSubDialog } from '../../contexts/SubDialogContext';
 
 const MantineVisitForm = ({
+  formError,
   isOpen,
   onClose,
   title,
@@ -48,9 +54,7 @@ const MantineVisitForm = ({
   editingVisit = null,
   isLoading = false,
   statusMessage: _statusMessage,
-  labResults = [],
-  encounterLabResults = {},
-  fetchEncounterLabResults,
+  patientId,
   navigate,
   onDocumentManagerRef,
   onFileUploadComplete,
@@ -59,6 +63,8 @@ const MantineVisitForm = ({
 }) => {
   // Translation hooks - medical for field translations, common for UI elements
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  // Set when this dialog was opened from inside another one (inline create)
+  const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
@@ -71,7 +77,7 @@ const MantineVisitForm = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('info');
+      setActiveTab(getRememberedEditTab('visits', 'info'));
     }
     if (!isOpen) {
       setIsSubmitting(false);
@@ -284,7 +290,7 @@ const MantineVisitForm = ({
       title={title}
       size="xl"
       centered
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
@@ -311,6 +317,12 @@ const MantineVisitForm = ({
               >
                 {t('common:visits.form.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
+              {!subDialog && (
+                <VisitLinkTabButtons
+                  visitId={editingVisit?.id}
+                  pendingLinks={formData.pending_links}
+                />
+              )}
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -318,12 +330,6 @@ const MantineVisitForm = ({
                 {editingVisit
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="lab-results"
-                leftSection={<IconFlask size={16} />}
-              >
-                {t('shared:categories.lab_results', 'Lab Results')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
@@ -370,51 +376,21 @@ const MantineVisitForm = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Lab Results Tab */}
-            <Tabs.Panel value="lab-results">
-              <Box mt="md">
-                {editingVisit && fetchEncounterLabResults ? (
-                  <EncounterLabResultRelationships
-                    encounterId={editingVisit.id}
-                    encounterLabResults={encounterLabResults}
-                    labResults={labResults}
-                    fetchEncounterLabResults={fetchEncounterLabResults}
-                    navigate={navigate}
-                  />
-                ) : (
-                  <MultiSelect
-                    label={t(
-                      'common:visits.form.selectLabResults',
-                      'Select Lab Results'
-                    )}
-                    placeholder={t(
-                      'common:visits.form.chooseLabResultsToLink',
-                      'Choose lab results to link'
-                    )}
-                    description={t(
-                      'common:visits.form.labResultsDescription',
-                      'Link lab results relevant to this visit. You can set purpose and notes after creating the visit.'
-                    )}
-                    data={(labResults || []).map(lr => ({
-                      value: lr.id.toString(),
-                      label: `${lr.test_name}${lr.ordered_date ? ` (${lr.ordered_date})` : ''}${lr.status ? ` - ${lr.status}` : ''}`,
-                    }))}
-                    value={formData.pending_lab_result_ids || []}
-                    onChange={values => {
-                      onInputChange({
-                        target: {
-                          name: 'pending_lab_result_ids',
-                          value: values,
-                        },
-                      });
-                    }}
-                    searchable
-                    clearable
-                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                  />
-                )}
-              </Box>
-            </Tabs.Panel>
+            {/* One tab per linked record type (not offered in a sub-dialog: nesting stays one level deep) */}
+            {!subDialog && (
+              <VisitLinkTabPanels
+                activeTab={activeTab}
+                visitId={editingVisit?.id}
+                patientId={patientId}
+                pendingLinks={formData.pending_links}
+                onPendingChange={next =>
+                  onInputChange({
+                    target: { name: 'pending_links', value: next },
+                  })
+                }
+                navigate={navigate}
+              />
+            )}
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
@@ -424,6 +400,12 @@ const MantineVisitForm = ({
 
           {/* Custom children content */}
           {children}
+
+          {formError && (
+            <Alert color="red" variant="light" role="alert">
+              {formError}
+            </Alert>
+          )}
 
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
@@ -444,6 +426,28 @@ const MantineVisitForm = ({
       </form>
     </Modal>
   );
+};
+
+MantineVisitForm.propTypes = {
+  formError: PropTypes.string,
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  title: PropTypes.string,
+  formData: PropTypes.object,
+  onInputChange: PropTypes.func,
+  onSubmit: PropTypes.func,
+  practitioners: PropTypes.array,
+  conditionsOptions: PropTypes.array,
+  conditionsLoading: PropTypes.bool,
+  editingVisit: PropTypes.object,
+  isLoading: PropTypes.bool,
+  statusMessage: PropTypes.object,
+  patientId: PropTypes.number,
+  navigate: PropTypes.func,
+  onDocumentManagerRef: PropTypes.func,
+  onFileUploadComplete: PropTypes.func,
+  onDocumentError: PropTypes.func,
+  children: PropTypes.node,
 };
 
 export default MantineVisitForm;

@@ -30,6 +30,7 @@ import {
   getPurposeLabel,
   getPurposeColor,
 } from '../../../constants/treatmentLabResultConstants';
+import { useNestedDialog } from '../../../hooks/useNestedDialog';
 
 const LabResultTreatmentRelationships = ({
   labResultId,
@@ -51,6 +52,20 @@ const LabResultTreatmentRelationships = ({
     relevance_note: '',
   });
   const [error, setError] = useState(null);
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setNewRelationship({
+      treatment_id: '',
+      purpose: '',
+      expected_frequency: '',
+      relevance_note: '',
+    });
+    setError(null);
+  };
+
+  // Escape closes this modal only, not the dialog it sits in
+  useNestedDialog(showAddModal, closeAddModal);
 
   useEffect(() => {
     const rels = labResultTreatments[labResultId];
@@ -417,16 +432,7 @@ const LabResultTreatmentRelationships = ({
 
       <Modal
         opened={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          setNewRelationship({
-            treatment_id: '',
-            purpose: '',
-            expected_frequency: '',
-            relevance_note: '',
-          });
-          setError(null);
-        }}
+        onClose={closeAddModal}
         title={t(
           'common:modals.linkTreatmentToLabResult',
           'Link Treatment to Lab Result'

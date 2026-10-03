@@ -1440,6 +1440,54 @@ class ApiService {
     );
   }
 
+  // Encounter - generic link methods (visit side). linkType is the URL segment:
+  // procedures, symptoms, injuries, medications, conditions, treatments, lab-results
+  getEncounterLinks(encounterId, linkType, signal) {
+    return this.get(`/encounters/${encounterId}/${linkType}`, { signal });
+  }
+  createEncounterLinksBulk(encounterId, linkType, data, signal) {
+    return this.post(`/encounters/${encounterId}/${linkType}/bulk`, data, {
+      signal,
+    });
+  }
+  updateEncounterLink(encounterId, linkType, relationshipId, data, signal) {
+    return this.put(
+      `/encounters/${encounterId}/${linkType}/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  deleteEncounterLink(encounterId, linkType, relationshipId, signal) {
+    return this.delete(
+      `/encounters/${encounterId}/${linkType}/${relationshipId}`,
+      { signal }
+    );
+  }
+
+  // Generic link methods (record side). recordPath is the record's URL segment:
+  // procedures, symptoms, injuries, medications, conditions
+  getRecordEncounterLinks(recordPath, recordId, signal) {
+    return this.get(`/${recordPath}/${recordId}/encounters`, { signal });
+  }
+  createRecordEncounterLinksBulk(recordPath, recordId, data, signal) {
+    return this.post(`/${recordPath}/${recordId}/encounters/bulk`, data, {
+      signal,
+    });
+  }
+  updateRecordEncounterLink(recordPath, recordId, relationshipId, data, signal) {
+    return this.put(
+      `/${recordPath}/${recordId}/encounters/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  deleteRecordEncounterLink(recordPath, recordId, relationshipId, signal) {
+    return this.delete(
+      `/${recordPath}/${recordId}/encounters/${relationshipId}`,
+      { signal }
+    );
+  }
+
   // Lab Result - Encounter Relationship methods (lab result side)
   getLabResultEncounters(labResultId, signal) {
     return this.get(`/lab-results/${labResultId}/encounters`, { signal });

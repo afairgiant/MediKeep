@@ -68,6 +68,11 @@ class Medication(Base):
     reminder_days = Column(JSON, nullable=True)
 
     # Table Relationships
+    # Many-to-Many relationship with encounters (visits) through junction table
+    encounter_relationships = orm_relationship(
+        "EncounterMedication", back_populates="medication", cascade="all, delete-orphan"
+    )
+
     patient = orm_relationship("Patient", back_populates="medications")
     practitioner = orm_relationship("Practitioner", back_populates="medications")
     pharmacy = orm_relationship("Pharmacy", back_populates="medications")
@@ -177,6 +182,31 @@ class Encounter(Base):
         "EncounterLabResult", back_populates="encounter", cascade="all, delete-orphan"
     )
 
+    # Many-to-Many relationship with procedures through junction table
+    procedure_relationships = orm_relationship(
+        "EncounterProcedure", back_populates="encounter", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with symptoms through junction table
+    symptom_relationships = orm_relationship(
+        "EncounterSymptom", back_populates="encounter", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with injurys through junction table
+    injury_relationships = orm_relationship(
+        "EncounterInjury", back_populates="encounter", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with medications through junction table
+    medication_relationships = orm_relationship(
+        "EncounterMedication", back_populates="encounter", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with conditions through junction table
+    condition_relationships = orm_relationship(
+        "EncounterCondition", back_populates="encounter", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (Index("idx_encounters_patient_id", "patient_id"),)
 
@@ -220,6 +250,11 @@ class Condition(Base):
     tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
+    # Many-to-Many relationship with encounters (visits) through junction table
+    encounter_relationships = orm_relationship(
+        "EncounterCondition", back_populates="condition", cascade="all, delete-orphan"
+    )
+
     patient = orm_relationship("Patient", back_populates="conditions")
     practitioner = orm_relationship("Practitioner", back_populates="conditions")
     # Note: medication relationship removed - use medication_relationships instead
@@ -490,6 +525,11 @@ class Symptom(Base):
     )
 
     # Table Relationships
+    # Many-to-Many relationship with encounters (visits) through junction table
+    encounter_relationships = orm_relationship(
+        "EncounterSymptom", back_populates="symptom", cascade="all, delete-orphan"
+    )
+
     patient = orm_relationship("Patient", back_populates="symptoms")
 
     # One-to-Many relationship with occurrences

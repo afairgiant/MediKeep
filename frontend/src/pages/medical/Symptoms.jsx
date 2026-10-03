@@ -1,7 +1,9 @@
 import logger from '../../services/logger';
 import { getTodayString } from '../../utils/dateUtils';
+import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
@@ -44,6 +46,12 @@ import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { applyOccurrenceSeverityAutoFill } from '../../utils/anticipatoryAutoFill';
+import {
+  applySymptomInputChange,
+  buildSymptomPayload,
+  createInitialSymptomFormData,
+  validateSymptomForm,
+} from '../../utils/symptomFormUtils';
 
 const Symptoms = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -59,6 +67,8 @@ const Symptoms = () => {
     clampPage,
     PAGE_SIZE_OPTIONS,
   } = usePagination();
+
+  const navigate = useNavigate();
 
   // Get current patient from global hook (same as Medication.js)
   const { patient } = usePatientWithStaticData();
@@ -77,15 +87,8 @@ const Symptoms = () => {
   const [showSymptomForm, setShowSymptomForm] = useState(false);
   const [editingSymptom, setEditingSymptom] = useState(null);
   const [symptomFormData, setSymptomFormData] = useState({
-    symptom_name: '',
-    category: '',
-    first_occurrence_date: '',
-    status: 'active',
-    is_chronic: false,
-    resolved_date: '',
-    typical_triggers: [],
-    general_notes: '',
-    tags: [],
+    ...createInitialSymptomFormData(),
+    pending_visit_links: [],
   });
 
   // Default occurrence form state - used for both initial state and reset
@@ -221,15 +224,8 @@ const Symptoms = () => {
     resetSubmission();
     setDocumentManagerMethods(null);
     setSymptomFormData({
-      symptom_name: '',
-      category: '',
-      first_occurrence_date: getTodayString(),
-      status: 'active',
-      is_chronic: false,
-      resolved_date: '',
-      typical_triggers: [],
-      general_notes: '',
-      tags: [],
+      ...createInitialSymptomFormData(),
+      pending_visit_links: [],
     });
     setEditingSymptom(null);
     setShowSymptomForm(true);
@@ -254,41 +250,30 @@ const Symptoms = () => {
   };
 
   const handleSymptomInputChange = e => {
-    const { name, value, type, checked } = e.target;
-    setSymptomFormData(prev => {
-      const updated = {
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value,
-      };
-      if (name === 'status') {
-        if (value === 'resolved' && !prev.resolved_date) {
-          // Auto-fill resolved_date with today when status changes to resolved
-          updated.resolved_date = getTodayString();
-        } else if (value !== 'resolved') {
-          // Clear resolved_date when status changes away from resolved
-          updated.resolved_date = '';
-        }
-      }
-      return updated;
-    });
+    setSymptomFormData(prev => applySymptomInputChange(prev, e.target));
   };
 
   const handleSymptomSubmit = async e => {
     e.preventDefault();
 
-    if (!currentPatient?.id) {
-      setError('Patient information not available');
+    const validationError = validateSymptomForm(
+      symptomFormData,
+      currentPatient?.id
+    );
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     startSubmission();
 
     try {
-      const submitData = {
-        ...symptomFormData,
-        patient_id: currentPatient.id,
-        resolved_date: symptomFormData.resolved_date || null,
-      };
+      // pending_visit_links is form-only state and is saved separately below
+      const pendingVisitLinks = symptomFormData.pending_visit_links;
+      const submitData = buildSymptomPayload(
+        symptomFormData,
+        currentPatient.id
+      );
 
       let success;
       let resultId;
@@ -301,6 +286,11 @@ const Symptoms = () => {
         const result = await symptomApi.create(submitData);
         success = !!result;
         resultId = result?.id;
+      }
+
+      // Link visits chosen in the Add form now that the record exists
+      if (success && resultId && !editingSymptom) {
+        await linkPendingVisitsOrWarn('symptoms', resultId, pendingVisitLinks);
       }
 
       completeFormSubmission(success, resultId);
@@ -796,6 +786,7 @@ const Symptoms = () => {
         onLogEpisode={handleLogEpisode}
         onEditOccurrence={handleEditOccurrence}
         onRefresh={fetchSymptoms}
+        navigate={navigate}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
       />
@@ -818,6 +809,8 @@ const Symptoms = () => {
         onInputChange={handleSymptomInputChange}
         onSubmit={handleSymptomSubmit}
         editingSymptom={editingSymptom}
+        patientId={currentPatient?.id}
+        navigate={navigate}
         isLoading={isBlocking}
         statusMessage={statusMessage}
         onDocumentManagerRef={setDocumentManagerMethods}

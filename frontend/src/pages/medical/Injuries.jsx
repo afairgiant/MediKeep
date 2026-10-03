@@ -31,8 +31,14 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
+import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
 import logger from '../../services/logger';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import {
+  INITIAL_INJURY_FORM_DATA,
+  buildInjuryPayload,
+  validateInjuryForm,
+} from '../../utils/injuryFormUtils';
 
 const Injuries = () => {
   const navigate = useNavigate();
@@ -171,19 +177,8 @@ const Injuries = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingInjury, setEditingInjury] = useState(null);
   const [formData, setFormData] = useState({
-    injury_name: '',
-    injury_type_id: null,
-    body_part: '',
-    laterality: '',
-    date_of_injury: '',
-    mechanism: '',
-    severity: '',
-    status: 'active',
-    treatment_received: '',
-    recovery_notes: '',
-    practitioner_id: null,
-    notes: '',
-    tags: [],
+    ...INITIAL_INJURY_FORM_DATA,
+    pending_visit_links: [],
   });
 
   // Document management state
@@ -229,19 +224,8 @@ const Injuries = () => {
 
   const resetForm = () => {
     setFormData({
-      injury_name: '',
-      injury_type_id: null,
-      body_part: '',
-      laterality: '',
-      date_of_injury: '',
-      mechanism: '',
-      severity: '',
-      status: 'active',
-      treatment_received: '',
-      recovery_notes: '',
-      practitioner_id: null,
-      notes: '',
-      tags: [],
+      ...INITIAL_INJURY_FORM_DATA,
+      pending_visit_links: [],
     });
     setEditingInjury(null);
     setShowAddForm(false);
@@ -278,8 +262,9 @@ const Injuries = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!currentPatient?.id) {
-      setError('Patient information not available');
+    const validationError = validateInjuryForm(formData, currentPatient?.id);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -289,19 +274,7 @@ const Injuries = () => {
       return;
     }
 
-    const injuryData = {
-      ...formData,
-      date_of_injury: formData.date_of_injury || null,
-      mechanism: formData.mechanism || null,
-      severity: formData.severity || null,
-      laterality: formData.laterality || null,
-      treatment_received: formData.treatment_received || null,
-      recovery_notes: formData.recovery_notes || null,
-      practitioner_id: formData.practitioner_id || null,
-      injury_type_id: formData.injury_type_id || null,
-      notes: formData.notes || null,
-      patient_id: currentPatient.id,
-    };
+    const injuryData = buildInjuryPayload(formData, currentPatient.id);
 
     try {
       let success;
@@ -317,6 +290,15 @@ const Injuries = () => {
         if (success) {
           needsRefreshAfterSubmissionRef.current = true;
         }
+      }
+
+      // Link visits chosen in the Add form now that the record exists
+      if (success && resultId && !editingInjury) {
+        await linkPendingVisitsOrWarn(
+          'injuries',
+          resultId,
+          formData.pending_visit_links
+        );
       }
 
       completeFormSubmission(success, resultId);
@@ -426,6 +408,8 @@ const Injuries = () => {
         {/* Form Modal */}
         <InjuryFormWrapper
           isOpen={showAddForm}
+          patientId={currentPatient?.id}
+          navigate={navigate}
           onClose={() => !isBlocking && resetForm()}
           title={
             editingInjury

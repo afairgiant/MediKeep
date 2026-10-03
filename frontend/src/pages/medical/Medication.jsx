@@ -58,6 +58,12 @@ import {
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import logger from '../../services/logger';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
+import {
+  INITIAL_MEDICATION_FORM_DATA,
+  buildMedicationPayload,
+  validateMedicationForm,
+} from '../../utils/medicationFormUtils';
 
 // The "active" sort field (sort dropdown's "Status (Active First)" option)
 // groups by status, so a click on the table's Status column should reuse it
@@ -224,25 +230,9 @@ const Medication = () => {
 
   // Form data state
   const [formData, setFormData] = useState({
-    medication_name: '',
-    alternative_name: '',
-    medication_type: 'prescription',
-    dosage: '',
-    frequency: '',
-    route: '',
-    indication: '',
-    effective_period_start: '',
-    effective_period_end: '',
-    status: 'active',
-    practitioner_id: null,
-    pharmacy_id: null,
-    notes: '',
-    side_effects: '',
+    ...INITIAL_MEDICATION_FORM_DATA,
     condition_ids: [],
-    reminder_enabled: false,
-    reminder_times: [],
-    reminder_days: null,
-    reminder_message: '',
+    pending_visit_links: [],
   });
 
   const {
@@ -296,26 +286,9 @@ const Medication = () => {
 
   const resetForm = useCallback(() => {
     setFormData({
-      medication_name: '',
-      alternative_name: '',
-      medication_type: 'prescription',
-      dosage: '',
-      frequency: '',
-      route: '',
-      indication: '',
-      effective_period_start: '',
-      effective_period_end: '',
-      status: 'active',
-      practitioner_id: null,
-      pharmacy_id: null,
-      notes: '',
-      side_effects: '',
-      tags: [],
+      ...INITIAL_MEDICATION_FORM_DATA,
       condition_ids: [],
-      reminder_enabled: false,
-      reminder_times: [],
-      reminder_days: null,
-      reminder_message: '',
+      pending_visit_links: [],
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -381,19 +354,12 @@ const Medication = () => {
     async e => {
       e.preventDefault();
 
-      if (!currentPatient?.id) {
-        setError('Patient information not available');
-        return;
-      }
-
-      const medicationName = formData.medication_name?.trim() || '';
-      if (!medicationName) {
-        setError('Medication name is required');
-        return;
-      }
-
-      if (medicationName.length < 2) {
-        setError('Medication name must be at least 2 characters long');
+      const validationError = validateMedicationForm(
+        formData,
+        currentPatient?.id
+      );
+      if (validationError) {
+        setError(validationError);
         return;
       }
 
@@ -403,41 +369,10 @@ const Medication = () => {
         return;
       }
 
-      const medicationData = {
-        medication_name: medicationName,
-        alternative_name: formData.alternative_name?.trim() || null,
-        medication_type: formData.medication_type || 'prescription',
-        dosage: formData.dosage?.trim() || null,
-        frequency: formData.frequency?.trim() || null,
-        route: formData.route?.trim() || null,
-        indication: formData.indication?.trim() || null,
-        status: formData.status || 'active',
-        patient_id: currentPatient.id,
-        practitioner_id: formData.practitioner_id
-          ? parseInt(formData.practitioner_id)
-          : null,
-        pharmacy_id: formData.pharmacy_id
-          ? parseInt(formData.pharmacy_id)
-          : null,
-        notes: formData.notes?.trim() || null,
-        side_effects: formData.side_effects?.trim() || null,
-        tags: formData.tags || [],
-        reminder_enabled: Boolean(formData.reminder_enabled),
-        reminder_times: Array.isArray(formData.reminder_times)
-          ? formData.reminder_times.filter(Boolean)
-          : [],
-        reminder_days: Array.isArray(formData.reminder_days) && formData.reminder_days.length
-          ? formData.reminder_days
-          : null,
-        reminder_message: formData.reminder_message?.trim() || null,
-      };
-
-      if (formData.effective_period_start) {
-        medicationData.effective_period_start = formData.effective_period_start;
-      }
-      if (formData.effective_period_end) {
-        medicationData.effective_period_end = formData.effective_period_end;
-      }
+      const medicationData = buildMedicationPayload(
+        formData,
+        currentPatient.id
+      );
 
       try {
         let success;
@@ -453,6 +388,15 @@ const Medication = () => {
           if (success) {
             needsRefreshAfterSubmissionRef.current = true;
           }
+        }
+
+        // Link visits chosen in the Add form now that the record exists
+        if (success && resultId && !editingMedication) {
+          await linkPendingVisitsOrWarn(
+            'medications',
+            resultId,
+            formData.pending_visit_links
+          );
         }
 
         completeFormSubmission(success, resultId);
@@ -763,6 +707,7 @@ const Medication = () => {
           pharmacies={pharmacies}
           editingMedication={editingMedication}
           conditions={conditions}
+          patientId={currentPatient?.id}
           navigate={navigate}
           isLoading={isBlocking}
           statusMessage={statusMessage}

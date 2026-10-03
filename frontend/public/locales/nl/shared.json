@@ -336,6 +336,7 @@
     "overview": "Overzicht",
     "procedures": "Ingrepen",
     "treatments": "Behandelingen",
-    "visits": "Consulten"
+    "visits": "Consulten",
+    "withCount": "{{label}} ({{count}})"
   }
 }

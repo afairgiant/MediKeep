@@ -238,10 +238,6 @@ const LabResults = () => {
   const [conditions, setConditions] = useState([]);
   const [labResultConditions, setLabResultConditions] = useState({});
 
-  // Encounters for lab result-encounter linking
-  const [patientEncounters, setPatientEncounters] = useState([]);
-  const [labResultEncounters, setLabResultEncounters] = useState({});
-
   // Medications, procedures, treatments for lab result relationship linking
   const [patientMedications, setPatientMedications] = useState([]);
   const [labResultMedications, setLabResultMedications] = useState({});
@@ -265,21 +261,6 @@ const LabResults = () => {
             component: 'LabResults',
           });
           setConditions([]);
-        });
-
-      apiService
-        .getPatientEncounters(currentPatient.id)
-        .then(response => {
-          setPatientEncounters(response || []);
-        })
-        .catch(err => {
-          logger.error('medical_encounters_fetch_error', {
-            message: 'Failed to fetch encounters for lab results',
-            patientId: currentPatient.id,
-            error: err.message,
-            component: 'LabResults',
-          });
-          setPatientEncounters([]);
         });
 
       apiService
@@ -342,27 +323,6 @@ const LabResults = () => {
     } catch (err) {
       logger.error('medical_conditions_fetch_error', {
         message: 'Failed to fetch lab result conditions',
-        labResultId,
-        error: err.message,
-        component: 'LabResults',
-      });
-      return [];
-    }
-  };
-
-  // Helper function to fetch encounter relationships for a lab result
-  const fetchLabResultEncounters = async labResultId => {
-    try {
-      const relationships =
-        await apiService.getLabResultEncounters(labResultId);
-      setLabResultEncounters(prev => ({
-        ...prev,
-        [labResultId]: relationships || [],
-      }));
-      return relationships || [];
-    } catch (err) {
-      logger.error('medical_encounters_fetch_error', {
-        message: 'Failed to fetch lab result encounters',
         labResultId,
         error: err.message,
         component: 'LabResults',
@@ -1817,12 +1777,10 @@ const LabResults = () => {
           onSubmit={handleSubmit}
           practitioners={practitioners}
           editingItem={editingLabResult}
+          patientId={currentPatient?.id}
           conditions={conditions}
           labResultConditions={labResultConditions}
           fetchLabResultConditions={fetchLabResultConditions}
-          encounters={patientEncounters}
-          labResultEncounters={labResultEncounters}
-          fetchLabResultEncounters={fetchLabResultEncounters}
           medications={patientMedications}
           labResultMedications={labResultMedications}
           fetchLabResultMedications={fetchLabResultMedications}
@@ -1879,9 +1837,6 @@ const LabResults = () => {
           }
         }}
         onLabResultUpdated={handleLabResultUpdated}
-        encounters={patientEncounters}
-        labResultEncounters={labResultEncounters}
-        fetchLabResultEncounters={fetchLabResultEncounters}
         medications={patientMedications}
         labResultMedications={labResultMedications}
         fetchLabResultMedications={fetchLabResultMedications}

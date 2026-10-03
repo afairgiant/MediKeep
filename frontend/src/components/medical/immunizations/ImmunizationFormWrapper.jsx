@@ -40,6 +40,7 @@ import {
   getVaccineByName,
   extractVaccineName,
 } from '../../../constants/vaccineLibrary';
+import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 
 const ImmunizationFormWrapper = ({
   isOpen,
@@ -169,7 +170,7 @@ const ImmunizationFormWrapper = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(getRememberedEditTab('immunizations', 'basic'));
     }
     if (!isOpen) {
       setIsSubmitting(false);
@@ -235,9 +236,6 @@ const ImmunizationFormWrapper = ({
               >
                 {t('shared:tabs.administration', 'Administration')}
               </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes', 'Notes')}
-              </Tabs.Tab>
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -245,6 +243,9 @@ const ImmunizationFormWrapper = ({
                 {editingImmunization
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 

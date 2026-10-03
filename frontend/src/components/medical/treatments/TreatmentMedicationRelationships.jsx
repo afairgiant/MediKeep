@@ -17,7 +17,9 @@ import {
   parseDateInput,
   formatDateInputChange,
 } from '../../../utils/dateUtils';
+import { apiService } from '../../../services/api';
 import { useTreatmentRelationships } from '../../../hooks/useTreatmentRelationships';
+import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
 import {
   RelationshipContainer,
   RelationshipErrorAlert,
@@ -97,6 +99,8 @@ function TreatmentMedicationRelationships({
   practitioners = [],
   pharmacies = [],
   isViewMode = false,
+  patientId,
+  onEntityCreated,
   onRelationshipsChange,
   onEntityClick,
 }) {
@@ -112,6 +116,7 @@ function TreatmentMedicationRelationships({
     editingRelationship,
     newRelationship,
     error,
+    fetchRelationships,
     handleAddRelationship,
     handleEditRelationship,
     handleDeleteRelationship,
@@ -129,6 +134,25 @@ function TreatmentMedicationRelationships({
     onRelationshipsChange,
     buildSinglePayload,
     buildBulkPayload,
+  });
+
+  const { onCreateNew, createLabel } = useTreatmentInlineCreate({
+    createType: 'medications',
+    patientId,
+    isViewMode,
+    onCreated: async record => {
+      // Known to the lists first: if linking fails, it is still offered in "Link"
+      onEntityCreated?.(record);
+      await apiService.linkTreatmentMedication(
+        treatmentId,
+        buildSinglePayload({
+          ...INITIAL_RELATIONSHIP_STATE,
+          medication_ids: [String(record.id)],
+        })
+      );
+      await fetchRelationships();
+      return 'linked';
+    },
   });
 
   const getMedicationById = medicationId => {
@@ -395,6 +419,8 @@ function TreatmentMedicationRelationships({
             entityName="medication"
             buttonLabel={t('buttons.linkMedication', 'Link Medication')}
             onAdd={openAddModal}
+            onCreateNew={onCreateNew}
+            createLabel={createLabel}
             loading={loading}
           />
         )}
@@ -544,6 +570,8 @@ function TreatmentMedicationRelationships({
 
 TreatmentMedicationRelationships.propTypes = {
   treatmentId: PropTypes.number,
+  patientId: PropTypes.number,
+  onEntityCreated: PropTypes.func,
   medications: PropTypes.array,
   practitioners: PropTypes.array,
   pharmacies: PropTypes.array,

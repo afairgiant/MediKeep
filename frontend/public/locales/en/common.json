@@ -427,6 +427,26 @@
       "vaccineInfo": "Vaccine Information"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Add Condition",
+      "injury": "Add Injury",
+      "medication": "Add Medication",
+      "treatment": "Add Treatment",
+      "labResult": "Add Lab Result",
+      "equipment": "Add Equipment",
+      "procedure": "Add Procedure",
+      "symptom": "Add Symptom",
+      "visit": "Add Visit"
+    },
+    "createError": "Could not create it. Please try again.",
+    "created": "Created.",
+    "createdLinked": "Created and linked.",
+    "createdPending": "Created. It will be linked when you save.",
+    "linkFailed": "Created, but it could not be linked. You can link it from the list.",
+    "loadError": "Could not open this form. Nothing in the dialog behind it was changed. Please try again.",
+    "uploadFailed": "Created, but some files could not be uploaded. You can add them by editing it."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Add New Insurance"
@@ -992,6 +1012,10 @@
       "title": "Procedure Details"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "The record was created, but some visit links could not be saved. You can add them by editing the record.",
+    "saveFirstInfo": "Visits you link here are saved when this record is saved."
+  },
   "search": {
     "activeFilterCount": "{{count}} active filters",
     "activeFilterCount_one": "{{count}} active filter",
@@ -1382,10 +1406,7 @@
     "editVisit": "Edit Visit",
     "form": {
       "addVisit": "Add Visit",
-      "chooseLabResultsToLink": "Choose lab results to link",
-      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
       "savingVisit": "Saving visit...",
-      "selectLabResults": "Select Lab Results",
       "tabs": {
         "clinical": "Clinical",
         "visitInfo": "Visit Info"
@@ -1394,8 +1415,8 @@
     },
     "loadingVisits": "Loading visits...",
     "notifications": {
-      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
-      "labResultLinkWarning": "Lab Result Linking Issue"
+      "relationshipLinkFailed": "Visit was created, but some relationships could not be saved. You can add them by editing the visit.",
+      "relationshipLinkWarning": "Relationship Linking Issue"
     },
     "noVisitsFound": "No medical visits found",
     "table": {
@@ -1418,6 +1439,18 @@
       "title": "Visit - {{date}}",
       "treatmentPlan": "Treatment Plan",
       "visitInformation": "Visit Information"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} available to link",
+      "confirmRemove": "Remove this link?",
+      "editLink": "Edit link note",
+      "linkSelected": "Link selected",
+      "modalTitle": "Link {{section}}",
+      "none": "None linked yet.",
+      "purpose": "Purpose",
+      "removeLink": "Remove link",
+      "saveFirstInfo": "Relationships you add here are saved when the visit is saved.",
+      "selectPlaceholder": "Choose records to link"
     }
   },
   "vitals": {

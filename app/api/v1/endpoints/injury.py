@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.api.v1.endpoints.encounter_links import register_record_encounter_routes
 from app.api.deps import BusinessLogicException, NotFoundException
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
@@ -970,3 +971,6 @@ def get_active_injuries(
         )
 
         return injuries
+
+
+register_record_encounter_routes(router, "injuries")

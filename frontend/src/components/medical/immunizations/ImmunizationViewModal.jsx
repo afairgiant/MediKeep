@@ -26,6 +26,7 @@ import { useTagColors } from '../../../hooks/useTagColors';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
 
 const ImmunizationViewModal = ({
   isOpen,
@@ -53,6 +54,7 @@ const ImmunizationViewModal = ({
   if (!isOpen || !immunization) return null;
 
   const handleEdit = () => {
+    rememberEditTab('immunizations', activeTab);
     onEdit(immunization);
     onClose();
   };
@@ -139,14 +141,14 @@ const ImmunizationViewModal = ({
             >
               {t('shared:tabs.administration', 'Administration')}
             </Tabs.Tab>
-            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('shared:tabs.notes', 'Notes')}
-            </Tabs.Tab>
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}
             >
               {t('shared:tabs.documents', 'Documents')}
+            </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
           </Tabs.List>
 

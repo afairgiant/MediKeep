@@ -427,6 +427,26 @@
       "vaccineInfo": "疫苗信息"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "添加疾病状况",
+      "injury": "添加外伤",
+      "medication": "添加药物",
+      "treatment": "添加治疗",
+      "labResult": "添加化验结果",
+      "equipment": "添加设备",
+      "procedure": "添加手术",
+      "symptom": "添加症状",
+      "visit": "添加就诊"
+    },
+    "createError": "无法创建，请重试。",
+    "created": "已创建。",
+    "createdLinked": "已创建并关联。",
+    "createdPending": "已创建，保存后将自动关联。",
+    "linkFailed": "已创建，但无法关联。您可以从列表中关联。",
+    "loadError": "无法打开此表单。其后的对话框中没有任何内容被更改。请重试。",
+    "uploadFailed": "已创建，但部分文件无法上传。您可以通过编辑来添加。"
+  },
   "insurance": {
     "actions": {
       "addNew": "+ 添加新保险"
@@ -991,6 +1011,10 @@
       "title": "手术详情"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "记录已创建，但部分就诊关联未能保存。您可以通过编辑记录来添加。",
+    "saveFirstInfo": "在此关联的就诊将在保存此记录时一并保存。"
+  },
   "search": {
     "activeFilterCount": "{{count}}个激活筛选",
     "activeFilterCount_one": "{{count}}个激活筛选",
@@ -1381,10 +1405,7 @@
     "editVisit": "编辑就诊",
     "form": {
       "addVisit": "添加就诊",
-      "chooseLabResultsToLink": "选择要关联的检验结果",
-      "labResultsDescription": "关联与本次就诊相关的检验结果。创建就诊后可设置用途和备注。",
       "savingVisit": "正在保存就诊...",
-      "selectLabResults": "选择检验结果",
       "tabs": {
         "clinical": "临床",
         "visitInfo": "就诊信息"
@@ -1393,8 +1414,8 @@
     },
     "loadingVisits": "正在加载就诊记录...",
     "notifications": {
-      "labResultLinkFailed": "就诊已创建，但部分检验结果无法关联。您可以通过编辑就诊手动关联。",
-      "labResultLinkWarning": "检验结果关联问题"
+      "relationshipLinkFailed": "就诊已创建，但部分关联未能保存。您可以通过编辑就诊来添加。",
+      "relationshipLinkWarning": "关联问题"
     },
     "noVisitsFound": "未找到就诊记录",
     "table": {
@@ -1417,6 +1438,18 @@
       "title": "就诊 - {{date}}",
       "treatmentPlan": "治疗计划",
       "visitInformation": "就诊信息"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} 项可关联",
+      "confirmRemove": "确定移除此关联吗？",
+      "editLink": "编辑关联备注",
+      "linkSelected": "关联所选项",
+      "modalTitle": "关联{{section}}",
+      "none": "尚未关联任何内容。",
+      "purpose": "目的",
+      "removeLink": "移除关联",
+      "saveFirstInfo": "在此添加的关联将在保存就诊时一并保存。",
+      "selectPlaceholder": "选择要关联的记录"
     }
   },
   "vitals": {

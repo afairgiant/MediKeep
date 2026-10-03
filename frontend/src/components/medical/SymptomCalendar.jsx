@@ -19,6 +19,7 @@ import {
   IconStethoscope,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { symptomApi } from '../../services/api/symptomApi';
 import { OccurrenceDetailCard, SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
@@ -82,6 +83,8 @@ const getSeverityColor = occurrences => {
  */
 const SymptomCalendar = ({ patientId, hidden }) => {
   const { t } = useTranslation(['common', 'shared']);
+  // Lets the visits listed in the symptom's Visits tab open the visit
+  const navigate = useNavigate();
   const { locale } = useDateFormat();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [occurrences, setOccurrences] = useState([]);
@@ -505,6 +508,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
           onClose={handleCloseViewModal}
           symptom={viewingSymptom}
           onRefresh={fetchOccurrences}
+          navigate={navigate}
         />
       )}
     </Paper>

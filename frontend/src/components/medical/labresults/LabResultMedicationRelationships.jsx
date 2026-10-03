@@ -24,6 +24,7 @@ import {
   IconPill,
   IconInfoCircle,
 } from '@tabler/icons-react';
+import { useNestedDialog } from '../../../hooks/useNestedDialog';
 
 const LabResultMedicationRelationships = ({
   labResultId,
@@ -43,6 +44,15 @@ const LabResultMedicationRelationships = ({
     relevance_note: '',
   });
   const [error, setError] = useState(null);
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setNewRelationship({ medication_id: '', relevance_note: '' });
+    setError(null);
+  };
+
+  // Escape closes this modal only, not the dialog it sits in
+  useNestedDialog(showAddModal, closeAddModal);
 
   useEffect(() => {
     const rels = labResultMedications[labResultId];
@@ -343,11 +353,7 @@ const LabResultMedicationRelationships = ({
 
       <Modal
         opened={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          setNewRelationship({ medication_id: '', relevance_note: '' });
-          setError(null);
-        }}
+        onClose={closeAddModal}
         title={t(
           'common:modals.linkMedicationToLabResult',
           'Link Medication to Lab Result'

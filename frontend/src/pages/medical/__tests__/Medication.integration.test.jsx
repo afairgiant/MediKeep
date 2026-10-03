@@ -91,6 +91,7 @@ vi.mock('../../../services/api', () => ({
     deleteMedication: vi.fn(() => Promise.resolve()),
     getConditionsDropdown: vi.fn(() => Promise.resolve([])),
     createConditionMedication: vi.fn(() => Promise.resolve({})),
+    createRecordEncounterLinksBulk: vi.fn(() => Promise.resolve([])),
   },
 }));
 vi.mock('../../../services/logger', () => ({
@@ -331,6 +332,21 @@ vi.mock('../../../components/medical/medications', () => ({
             }}
           >
             Select Conditions
+          </button>
+
+          <button
+            type="button"
+            data-testid="add-pending-visit"
+            onClick={() => {
+              onInputChange({
+                target: {
+                  name: 'pending_visit_links',
+                  value: [{ entityId: 5, relevanceNote: 'n', purpose: null }],
+                },
+              });
+            }}
+          >
+            Add Pending Visit
           </button>
 
           <button type="submit">Submit</button>
@@ -966,6 +982,39 @@ describe('Medication Page Integration Tests', () => {
           screen.getByTestId('view-modal-conditions-count')
         ).toHaveTextContent('1');
       });
+    });
+
+    test('links the visits chosen in the Add form after creating a new medication', async () => {
+      const mockCreateItem = vi.fn().mockResolvedValue({ id: 10 });
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
+      });
+
+      const { apiService } = await import('../../../services/api');
+      apiService.createRecordEncounterLinksBulk.mockClear();
+
+      renderWithPatient(<Medication />);
+      await userEvent.click(screen.getByTestId('add-button'));
+
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Aspirin', name: 'medication_name' },
+      });
+      await userEvent.click(within(form).getByTestId('add-pending-visit'));
+      fireEvent.click(within(form).getByText('Submit'));
+
+      await waitFor(() => {
+        expect(apiService.createRecordEncounterLinksBulk).toHaveBeenCalledWith(
+          'medications',
+          10,
+          { encounter_ids: [5], relevance_note: 'n' }
+        );
+      });
+      // The pending visit list is form state only, never part of the create payload
+      expect(mockCreateItem.mock.calls[0][0]).not.toHaveProperty(
+        'pending_visit_links'
+      );
     });
 
     test('links selected conditions after creating a new medication', async () => {

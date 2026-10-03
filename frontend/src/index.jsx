@@ -1,3 +1,5 @@
+// Must run before any dialog mounts so its Escape handler runs first
+import './utils/nestedDialogStack';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';

@@ -11,6 +11,7 @@ import {
   Select,
   Tabs,
   Box,
+  Alert,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -34,6 +35,7 @@ import {
   EQUIPMENT_STATUS_OPTIONS,
 } from '../../../constants/equipmentConstants';
 import logger from '../../../services/logger';
+import { useSubDialog } from '../../../contexts/SubDialogContext';
 
 const EquipmentFormWrapper = ({
   isOpen,
@@ -47,8 +49,10 @@ const EquipmentFormWrapper = ({
   practitionersLoading = false,
   isLoading = false,
   statusMessage,
+  formError = undefined,
 }) => {
   const { t } = useTranslation(['common', 'medical', 'shared']);
+  const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
@@ -92,7 +96,7 @@ const EquipmentFormWrapper = ({
       title={title}
       size="xl"
       centered
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       closeOnClickOutside={!isLoading && !isSubmitting}
       closeOnEscape={!isLoading && !isSubmitting}
     >
@@ -389,6 +393,12 @@ const EquipmentFormWrapper = ({
             </Tabs.Panel>
           </Tabs>
 
+          {formError && (
+            <Alert color="red" variant="light" role="alert">
+              {formError}
+            </Alert>
+          )}
+
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button
@@ -416,6 +426,7 @@ const EquipmentFormWrapper = ({
 };
 
 EquipmentFormWrapper.propTypes = {
+  formError: PropTypes.string,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,

@@ -24,6 +24,7 @@ import {
   IconStethoscope,
   IconInfoCircle,
 } from '@tabler/icons-react';
+import { useNestedDialog } from '../../hooks/useNestedDialog';
 
 const ConditionRelationships = ({
   labResultId,
@@ -45,6 +46,15 @@ const ConditionRelationships = ({
   const [error, setError] = useState(null);
 
   // Get relationships for this lab result
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setNewRelationship({ condition_id: '', relevance_note: '' });
+    setError(null);
+  };
+
+  // Escape closes this modal only, not the dialog it sits in
+  useNestedDialog(showAddModal, closeAddModal);
+
   useEffect(() => {
     const labRelationships = labResultConditions[labResultId] || [];
     setRelationships(labRelationships);
@@ -339,11 +349,7 @@ const ConditionRelationships = ({
       {/* Add Relationship Modal */}
       <Modal
         opened={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          setNewRelationship({ condition_id: '', relevance_note: '' });
-          setError(null);
-        }}
+        onClose={closeAddModal}
         title={t('modals.linkConditionToLabResult')}
         size="md"
         centered

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.api.v1.endpoints.encounter_links import register_record_encounter_routes
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -452,3 +453,6 @@ def get_medication_treatments(
         )
 
         return result
+
+
+register_record_encounter_routes(router, "medications")

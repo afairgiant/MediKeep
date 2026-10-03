@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { vi } from 'vitest';
 
 /**
@@ -42,11 +43,19 @@ vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
 }));
 
 vi.mock('../TreatmentRelationshipsManager', () => ({
-  default: () => <div data-testid="treatment-relationships-manager" />,
+  default: (props: { activeSection?: string; treatmentId?: number }) => (
+    <div
+      data-testid="treatment-relationships-manager"
+      data-section={props.activeSection}
+      data-treatment-id={props.treatmentId}
+    />
+  ),
 }));
 
 vi.mock('../TreatmentPlanSetup', () => ({
-  default: () => <div data-testid="treatment-plan-setup" />,
+  default: (props: { activeSection?: string }) => (
+    <div data-testid="treatment-plan-setup" data-section={props.activeSection} />
+  ),
 }));
 
 vi.mock('../../../services/api', () => ({
@@ -172,5 +181,88 @@ describe('TreatmentFormWrapper', () => {
         screen.getByTestId('practitioner-select-with-create')
       ).toBeInTheDocument();
     });
+  });
+});
+
+describe('TreatmentFormWrapper - Visits tab in both modes', () => {
+  const advancedProps = {
+    ...defaultProps,
+    formData: { ...defaultProps.formData, mode: 'advanced' },
+  };
+  const tabNames = () => screen.getAllByRole('tab').map(t => t.textContent);
+  const visitsTab = () => screen.getByRole('tab', { name: /shared:tabs.visits/ });
+
+  test('Simple mode shows a Visits tab but not the other relationship tabs', () => {
+    render(<TreatmentFormWrapper {...defaultProps} />);
+    expect(visitsTab()).toBeInTheDocument();
+    expect(tabNames().join('|')).not.toMatch(/medications|medical_equipment/);
+    expect(screen.queryByRole('tab', { name: /lab_results/ })).toBeNull();
+  });
+
+  test('Simple mode loads the relationship content only when Visits is opened', async () => {
+    render(<TreatmentFormWrapper {...defaultProps} />);
+    expect(screen.queryByTestId('treatment-plan-setup')).toBeNull();
+    expect(screen.queryByTestId('treatment-relationships-manager')).toBeNull();
+
+    fireEvent.click(visitsTab());
+    expect(await screen.findByTestId('treatment-plan-setup')).toHaveAttribute(
+      'data-section',
+      'encounters'
+    );
+  });
+
+  test('Simple mode edit uses the saved treatment and shows only the visits section', async () => {
+    render(
+      <TreatmentFormWrapper
+        {...defaultProps}
+        editingTreatment={{ id: 42, patient_id: 7 }}
+      />
+    );
+    fireEvent.click(visitsTab());
+    const manager = await screen.findByTestId('treatment-relationships-manager');
+    expect(manager).toHaveAttribute('data-section', 'encounters');
+    expect(manager).toHaveAttribute('data-treatment-id', '42');
+  });
+
+  test('Treatment Plan mode keeps all four relationship tabs and mounts content up front', () => {
+    render(<TreatmentFormWrapper {...advancedProps} />);
+    expect(visitsTab()).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /shared:categories.medications/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /lab_results/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /medical_equipment/ })).toBeInTheDocument();
+    expect(screen.getByTestId('treatment-plan-setup')).toBeInTheDocument();
+  });
+
+  test('switching to Simple mode keeps the Visits tab selected but leaves other relationship tabs', () => {
+    const Stateful = () => {
+      const [mode, setMode] = useState('advanced');
+      return (
+        <TreatmentFormWrapper
+          {...defaultProps}
+          formData={{ ...defaultProps.formData, mode }}
+          onInputChange={(e: { target: { name: string; value: string } }) => {
+            if (e.target.name === 'mode') setMode(e.target.value);
+          }}
+        />
+      );
+    };
+
+    // From the Visits tab: stays on Visits after switching to Simple
+    const { unmount } = render(<Stateful />);
+    fireEvent.click(visitsTab());
+    fireEvent.click(screen.getByText('Simple'));
+    expect(visitsTab()).toHaveAttribute('aria-selected', 'true');
+    unmount();
+
+    // From the Medications tab: falls back to Basic Info
+    render(<Stateful />);
+    fireEvent.click(
+      screen.getByRole('tab', { name: /shared:categories.medications/ })
+    );
+    fireEvent.click(screen.getByText('Simple'));
+    expect(screen.getByRole('tab', { name: /shared:tabs.basicInfo|Basic Info/ })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 });

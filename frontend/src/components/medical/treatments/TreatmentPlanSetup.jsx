@@ -14,6 +14,7 @@ import {
   Group,
   Collapse,
   UnstyledButton,
+  Button,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -23,6 +24,7 @@ import {
   IconDeviceDesktop,
   IconChevronDown,
   IconChevronRight,
+  IconPlus,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
@@ -32,6 +34,7 @@ import {
   formatDateInputChange,
 } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
 import {
   createDateSortedOptions,
   formatDateDisplay,
@@ -107,6 +110,26 @@ ItemDetailsCard.propTypes = {
   defaultOpen: PropTypes.bool,
 };
 
+/** "Add <type>" next to a section's select; nothing when creating is not available. */
+const CreateButton = ({ onCreateNew, createLabel }) =>
+  onCreateNew ? (
+    <Group>
+      <Button
+        variant="light"
+        size="xs"
+        leftSection={<IconPlus size={14} />}
+        onClick={onCreateNew}
+      >
+        {createLabel}
+      </Button>
+    </Group>
+  ) : null;
+
+CreateButton.propTypes = {
+  onCreateNew: PropTypes.func,
+  createLabel: PropTypes.string,
+};
+
 /**
  * Treatment Plan Setup for creation mode.
  * Allows selecting relationships before the treatment exists.
@@ -116,6 +139,7 @@ const TreatmentPlanSetup = ({
   activeSection = 'medications',
   pendingRelationships,
   onRelationshipsChange,
+  patientId,
 }) => {
   const { t } = useTranslation('medical');
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -304,6 +328,39 @@ const TreatmentPlanSetup = ({
   const selectedLabIds = getSelectedIds('labResults');
   const selectedEquipIds = getSelectedIds('equipment');
 
+  // A record created here is offered in the list and held as selected, like a picked one,
+  // until the treatment is saved (ids are strings, as the select's values are)
+  const holdCreated = (type, setList) => async record => {
+    setList(prev =>
+      prev.some(item => item.id === record.id) ? prev : [...prev, record]
+    );
+    onRelationshipsChange(prev => ({
+      ...prev,
+      [type]: [...(prev[type] || []), { id: String(record.id) }],
+    }));
+    return 'pending';
+  };
+  const medicationCreate = useTreatmentInlineCreate({
+    createType: 'medications',
+    patientId,
+    onCreated: holdCreated('medications', setMedications),
+  });
+  const encounterCreate = useTreatmentInlineCreate({
+    createType: 'visits',
+    patientId,
+    onCreated: holdCreated('encounters', setEncounters),
+  });
+  const labResultCreate = useTreatmentInlineCreate({
+    createType: 'labResults',
+    patientId,
+    onCreated: holdCreated('labResults', setLabResults),
+  });
+  const equipmentCreate = useTreatmentInlineCreate({
+    createType: 'equipment',
+    patientId,
+    onCreated: holdCreated('equipment', setEquipment),
+  });
+
   return (
     <Box pos="relative">
       <LoadingOverlay
@@ -335,6 +392,7 @@ const TreatmentPlanSetup = ({
               disabled={medicationOptions.length === 0}
               comboboxProps={{ withinPortal: true, zIndex: 4000 }}
             />
+            <CreateButton {...medicationCreate} />
 
             {/* Show detail fields for each selected medication */}
             {selectedMedIds.length > 0 && (
@@ -544,6 +602,7 @@ const TreatmentPlanSetup = ({
               disabled={encounterOptions.length === 0}
               comboboxProps={{ withinPortal: true, zIndex: 4000 }}
             />
+            <CreateButton {...encounterCreate} />
 
             {/* Show detail fields for each selected visit */}
             {selectedEncIds.length > 0 && (
@@ -637,6 +696,7 @@ const TreatmentPlanSetup = ({
               disabled={labResultOptions.length === 0}
               comboboxProps={{ withinPortal: true, zIndex: 4000 }}
             />
+            <CreateButton {...labResultCreate} />
 
             {/* Show detail fields for each selected lab */}
             {selectedLabIds.length > 0 && (
@@ -731,6 +791,7 @@ const TreatmentPlanSetup = ({
               disabled={equipmentOptions.length === 0}
               comboboxProps={{ withinPortal: true, zIndex: 4000 }}
             />
+            <CreateButton {...equipmentCreate} />
 
             {/* Show detail fields for each selected equipment */}
             {selectedEquipIds.length > 0 && (
@@ -820,6 +881,7 @@ TreatmentPlanSetup.propTypes = {
     equipment: PropTypes.array,
   }).isRequired,
   onRelationshipsChange: PropTypes.func.isRequired,
+  patientId: PropTypes.number,
 };
 
 export default TreatmentPlanSetup;

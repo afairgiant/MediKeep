@@ -336,6 +336,7 @@
     "overview": "Επισκόπηση",
     "procedures": "Ιατρικές Πράξεις",
     "treatments": "Θεραπείες",
-    "visits": "Επισκέψεις"
+    "visits": "Επισκέψεις",
+    "withCount": "{{label}} ({{count}})"
   }
 }

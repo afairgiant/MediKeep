@@ -14,6 +14,7 @@ import {
 } from '@mantine/core';
 import { IconStethoscope } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { symptomApi } from '../../services/api/symptomApi';
 import { OccurrenceDetailCard, SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
@@ -31,6 +32,8 @@ import { capitalizeFirst } from '../../utils/dateFormatUtils';
  */
 const SymptomTimeline = ({ patientId, hidden }) => {
   const { t } = useTranslation(['common', 'shared']);
+  // Lets the visits listed in the symptom's Visits tab open the visit
+  const navigate = useNavigate();
   const { locale } = useDateFormat();
 
   const [timelineData, setTimelineData] = useState([]);
@@ -346,6 +349,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
           onClose={handleCloseViewModal}
           symptom={viewingSymptom}
           onRefresh={fetchTimelineData}
+          navigate={navigate}
         />
       )}
     </Paper>

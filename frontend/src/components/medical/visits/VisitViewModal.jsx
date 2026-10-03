@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Modal,
   Stack,
@@ -18,16 +19,16 @@ import {
   IconStethoscope,
   IconNotes,
   IconFileText,
-  IconFlask,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import EncounterLabResultRelationships from './EncounterLabResultRelationships';
+import { VisitLinkTabButtons, VisitLinkTabPanels } from './VisitLinkTabs';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTagColors } from '../../../hooks/useTagColors';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
 
 const VisitViewModal = ({
   isOpen,
@@ -40,9 +41,7 @@ const VisitViewModal = ({
   onFileUploadComplete,
   isBlocking,
   onError,
-  labResults,
-  encounterLabResults,
-  fetchEncounterLabResults,
+  patientId,
   disableEdit = false,
   disableEditTooltip,
 }) => {
@@ -228,22 +227,15 @@ const VisitViewModal = ({
               >
                 {t('visits.viewModal.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
-              {fetchEncounterLabResults && (
-                <Tabs.Tab
-                  value="lab-results"
-                  leftSection={<IconFlask size={16} />}
-                >
-                  {t('shared:categories.lab_results', 'Lab Results')}
-                </Tabs.Tab>
-              )}
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes', 'Notes')}
-              </Tabs.Tab>
+              <VisitLinkTabButtons visitId={visit.id} />
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
               >
                 {t('shared:tabs.documents', 'Documents')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -431,21 +423,15 @@ const VisitViewModal = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Lab Results Tab */}
-            {fetchEncounterLabResults && (
-              <Tabs.Panel value="lab-results">
-                <Box mt="md">
-                  <EncounterLabResultRelationships
-                    encounterId={visit.id}
-                    encounterLabResults={encounterLabResults}
-                    labResults={labResults}
-                    fetchEncounterLabResults={fetchEncounterLabResults}
-                    navigate={navigate}
-                    isViewMode={disableEdit}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            {/* One read-only tab per linked record type */}
+            <VisitLinkTabPanels
+              key={visit.id}
+              activeTab={activeTab}
+              visitId={visit.id}
+              patientId={patientId}
+              isViewMode
+              navigate={navigate}
+            />
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
@@ -534,6 +520,7 @@ const VisitViewModal = ({
                 <Button
                   variant="light"
                   onClick={() => {
+                    rememberEditTab('visits', activeTab);
                     onClose();
                     // Small delay to ensure view modal is closed before opening edit modal
                     setTimeout(() => {
@@ -557,6 +544,22 @@ const VisitViewModal = ({
     handleError(error, 'render');
     return null;
   }
+};
+
+VisitViewModal.propTypes = {
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  visit: PropTypes.object,
+  onEdit: PropTypes.func,
+  practitioners: PropTypes.array,
+  conditions: PropTypes.array,
+  navigate: PropTypes.func,
+  onFileUploadComplete: PropTypes.func,
+  isBlocking: PropTypes.bool,
+  onError: PropTypes.func,
+  patientId: PropTypes.number,
+  disableEdit: PropTypes.bool,
+  disableEditTooltip: PropTypes.string,
 };
 
 export default VisitViewModal;

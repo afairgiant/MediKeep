@@ -165,9 +165,6 @@
   "loadingHint": "Se isso demorar muito, atualize a página",
   "messages": {
     "confirmDiscardAdvancedForm": "Mudar de modo descartará o que você inseriu até agora. Continuar?",
-    "noRelationshipsAvailable": "Nenhuma condição médica ou visita registrada. Adicione-as primeiro para vinculá-las aqui.",
-    "noRelationshipsOnRecord": "Nenhuma condição médica, consulta, medicamento, procedimento ou tratamento registrado para este paciente.",
-    "relationshipsCreateInfo": "Relacionamentos podem ser adicionados após salvar o resultado laboratorial.",
     "relationshipsSaveFirst": "Salve o resultado laboratorial primeiro para criar vínculos de relacionamento.",
     "testComponentsEditInfo": "Componentes do exame podem ser gerenciados na página de visualização após salvar."
   },
@@ -218,9 +215,7 @@
   "patientIdRequired": "ID do paciente é obrigatório. Selecione um paciente primeiro.",
   "pendingRelationships": {
     "addCondition": "Adicionar condição",
-    "addVisit": "Adicionar visita",
     "removeCondition": "Remover condição",
-    "removeVisit": "Remover visita",
     "addMedication": "Adicionar medicamento",
     "addProcedure": "Adicionar procedimento",
     "addTreatment": "Adicionar tratamento",
@@ -336,7 +331,6 @@
     "bulkEntry": "Entrada em Massa",
     "noComponentsDescription": "Adicione resultados de exame usando os modelos ou ferramentas de entrada em massa abaixo para acompanhar valores laboratoriais individuais e tendências.",
     "noComponentsYet": "Ainda sem resultados de exame",
-    "relationships": "Relacionamentos",
     "resultsStatus": "Resultados e Status",
     "templates": "Modelos"
   },

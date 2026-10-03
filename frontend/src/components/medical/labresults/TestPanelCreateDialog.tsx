@@ -32,6 +32,8 @@ import {
   TestNameFields,
 } from '../../../hooks/useTestNameAutocomplete';
 import logger from '../../../services/logger';
+import { useSubDialog } from '../../../contexts/SubDialogContext';
+import { useNestedDialog } from '../../../hooks/useNestedDialog';
 
 interface Practitioner {
   id: number;
@@ -55,8 +57,9 @@ interface TestPanelCreateDialogProps {
   onCreateSuccess: (_labResult: LabResult) => void;
   practitioners: Practitioner[];
   currentPatient: Patient | null;
-  advancedMode: boolean;
-  onAdvancedModeChange: (_checked: boolean) => void;
+  /** Omit both to hide the Simple/Advanced switch (e.g. when opened from another dialog) */
+  advancedMode?: boolean;
+  onAdvancedModeChange?: (_checked: boolean) => void;
 }
 
 interface FormData {
@@ -90,6 +93,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
 }) => {
   const { t } = useTranslation(['medical', 'shared', 'common', 'labresults']);
   const { dateInputFormat, dateParser } = useDateFormat();
+  const subDialog = useSubDialog();
 
   const categoryOptions = [
     { value: 'blood work', label: t('labresults:category.bloodWork') },
@@ -136,6 +140,9 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
     inlineTestRef.current?.clearComponents();
     onClose();
   }, [isSubmitting, onClose, resetAutoPopulate]);
+
+  // Opened from inside another dialog: Escape closes this one only, through the guarded close
+  useNestedDialog(opened && !!subDialog, handleClose);
 
   const handleCreate = useCallback(async () => {
     if (!formData.test_name.trim()) {
@@ -231,7 +238,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       centered
       closeOnClickOutside={!isSubmitting}
       closeOnEscape={!isSubmitting}
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       scrollAreaComponent="div"
     >
       <FormLoadingOverlay
@@ -380,11 +387,15 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         />
 
         <Group justify="space-between" gap="sm" mt="sm">
-          <AdvancedModeSwitch
-            checked={advancedMode}
-            onChange={onAdvancedModeChange}
-            disabled={isSubmitting}
-          />
+          {onAdvancedModeChange ? (
+            <AdvancedModeSwitch
+              checked={!!advancedMode}
+              onChange={onAdvancedModeChange}
+              disabled={isSubmitting}
+            />
+          ) : (
+            <span />
+          )}
           <Group gap="sm">
             <Button variant="default" onClick={handleClose} disabled={isSubmitting}>
               {t('shared:fields.cancel', 'Cancel')}

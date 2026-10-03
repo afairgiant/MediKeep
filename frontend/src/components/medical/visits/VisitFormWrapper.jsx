@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import MantineVisitForm from '../MantineVisitForm';
 import logger from '../../../services/logger';
 
@@ -16,9 +17,7 @@ const VisitFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
-  labResults,
-  encounterLabResults,
-  fetchEncounterLabResults,
+  patientId,
   navigate,
   children,
 }) => {
@@ -61,9 +60,7 @@ const VisitFormWrapper = ({
       editingVisit={editingItem}
       isLoading={isLoading}
       statusMessage={statusMessage}
-      labResults={labResults}
-      encounterLabResults={encounterLabResults}
-      fetchEncounterLabResults={fetchEncounterLabResults}
+      patientId={patientId}
       navigate={navigate}
       onDocumentManagerRef={onDocumentManagerRef}
       onFileUploadComplete={handleDocumentUploadComplete}
@@ -72,6 +69,26 @@ const VisitFormWrapper = ({
       {children}
     </MantineVisitForm>
   );
+};
+
+VisitFormWrapper.propTypes = {
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  title: PropTypes.string,
+  formData: PropTypes.object,
+  onInputChange: PropTypes.func,
+  onSubmit: PropTypes.func,
+  editingItem: PropTypes.object,
+  practitioners: PropTypes.array,
+  conditions: PropTypes.array,
+  isLoading: PropTypes.bool,
+  statusMessage: PropTypes.object,
+  onDocumentManagerRef: PropTypes.func,
+  onFileUploadComplete: PropTypes.func,
+  onError: PropTypes.func,
+  patientId: PropTypes.number,
+  navigate: PropTypes.func,
+  children: PropTypes.node,
 };
 
 export default VisitFormWrapper;

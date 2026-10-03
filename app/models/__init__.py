@@ -1,7 +1,12 @@
 from .activity_log import ActivityLog
 from .associations import (
     ConditionMedication,
+    EncounterCondition,
+    EncounterInjury,
     EncounterLabResult,
+    EncounterMedication,
+    EncounterProcedure,
+    EncounterSymptom,
     InjuryCondition,
     InjuryMedication,
     InjuryProcedure,
@@ -147,4 +152,9 @@ __all__ = [
     "TreatmentLabResult",
     "TreatmentEquipment",
     "EncounterLabResult",
+    "EncounterProcedure",
+    "EncounterSymptom",
+    "EncounterInjury",
+    "EncounterMedication",
+    "EncounterCondition",
 ]

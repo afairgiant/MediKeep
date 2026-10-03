@@ -8,6 +8,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
+from sqlalchemy.orm import declared_attr
 from sqlalchemy.orm import relationship as orm_relationship
 
 from .base import Base, get_utc_now
@@ -551,6 +552,127 @@ class EncounterLabResult(Base):
         UniqueConstraint(
             "encounter_id", "lab_result_id", name="uq_encounter_lab_result"
         ),
+    )
+
+
+# =============================================================================
+# Encounter - Procedure / Symptom / Injury / Medication / Condition Link Tables
+# =============================================================================
+
+
+class EncounterLinkMixin:
+    """Columns shared by the note-only encounter link junction tables."""
+
+    id = Column(Integer, primary_key=True)
+    relevance_note = Column(String, nullable=True)
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    @declared_attr
+    def encounter_id(cls):  # pylint: disable=no-self-argument
+        return Column(
+            Integer, ForeignKey("encounters.id", ondelete="CASCADE"), nullable=False
+        )
+
+
+class EncounterProcedure(EncounterLinkMixin, Base):
+    """Junction table linking encounters (visits) to procedures."""
+
+    __tablename__ = "encounter_procedures"
+
+    procedure_id = Column(
+        Integer, ForeignKey("procedures.id", ondelete="CASCADE"), nullable=False
+    )
+
+    encounter = orm_relationship("Encounter", back_populates="procedure_relationships")
+    procedure = orm_relationship("Procedure", back_populates="encounter_relationships")
+
+    __table_args__ = (
+        Index("idx_encounter_procedure_encounter_id", "encounter_id"),
+        Index("idx_encounter_procedure_procedure_id", "procedure_id"),
+        UniqueConstraint("encounter_id", "procedure_id", name="uq_encounter_procedure"),
+    )
+
+
+class EncounterSymptom(EncounterLinkMixin, Base):
+    """Junction table linking encounters (visits) to symptoms."""
+
+    __tablename__ = "encounter_symptoms"
+
+    symptom_id = Column(
+        Integer, ForeignKey("symptoms.id", ondelete="CASCADE"), nullable=False
+    )
+
+    encounter = orm_relationship("Encounter", back_populates="symptom_relationships")
+    symptom = orm_relationship("Symptom", back_populates="encounter_relationships")
+
+    __table_args__ = (
+        Index("idx_encounter_symptom_encounter_id", "encounter_id"),
+        Index("idx_encounter_symptom_symptom_id", "symptom_id"),
+        UniqueConstraint("encounter_id", "symptom_id", name="uq_encounter_symptom"),
+    )
+
+
+class EncounterInjury(EncounterLinkMixin, Base):
+    """Junction table linking encounters (visits) to injuries."""
+
+    __tablename__ = "encounter_injuries"
+
+    injury_id = Column(
+        Integer, ForeignKey("injuries.id", ondelete="CASCADE"), nullable=False
+    )
+
+    encounter = orm_relationship("Encounter", back_populates="injury_relationships")
+    injury = orm_relationship("Injury", back_populates="encounter_relationships")
+
+    __table_args__ = (
+        Index("idx_encounter_injury_encounter_id", "encounter_id"),
+        Index("idx_encounter_injury_injury_id", "injury_id"),
+        UniqueConstraint("encounter_id", "injury_id", name="uq_encounter_injury"),
+    )
+
+
+class EncounterMedication(EncounterLinkMixin, Base):
+    """Junction table linking encounters (visits) to medications."""
+
+    __tablename__ = "encounter_medications"
+
+    medication_id = Column(
+        Integer, ForeignKey("medications.id", ondelete="CASCADE"), nullable=False
+    )
+
+    encounter = orm_relationship("Encounter", back_populates="medication_relationships")
+    medication = orm_relationship(
+        "Medication", back_populates="encounter_relationships"
+    )
+
+    __table_args__ = (
+        Index("idx_encounter_medication_encounter_id", "encounter_id"),
+        Index("idx_encounter_medication_medication_id", "medication_id"),
+        UniqueConstraint(
+            "encounter_id", "medication_id", name="uq_encounter_medication"
+        ),
+    )
+
+
+class EncounterCondition(EncounterLinkMixin, Base):
+    """Junction table linking encounters (visits) to conditions."""
+
+    __tablename__ = "encounter_conditions"
+
+    condition_id = Column(
+        Integer, ForeignKey("conditions.id", ondelete="CASCADE"), nullable=False
+    )
+
+    encounter = orm_relationship("Encounter", back_populates="condition_relationships")
+    condition = orm_relationship("Condition", back_populates="encounter_relationships")
+
+    __table_args__ = (
+        Index("idx_encounter_condition_encounter_id", "encounter_id"),
+        Index("idx_encounter_condition_condition_id", "condition_id"),
+        UniqueConstraint("encounter_id", "condition_id", name="uq_encounter_condition"),
     )
 
 

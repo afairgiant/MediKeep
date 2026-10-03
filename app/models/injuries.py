@@ -94,6 +94,11 @@ class Injury(Base):
     )
 
     # Table Relationships
+    # Many-to-Many relationship with encounters (visits) through junction table
+    encounter_relationships = orm_relationship(
+        "EncounterInjury", back_populates="injury", cascade="all, delete-orphan"
+    )
+
     patient = orm_relationship("Patient", back_populates="injuries")
     injury_type = orm_relationship("InjuryType", back_populates="injuries")
     practitioner = orm_relationship("Practitioner", back_populates="injuries")

@@ -336,6 +336,7 @@
     "overview": "概览",
     "procedures": "手术",
     "treatments": "治疗",
-    "visits": "就诊"
+    "visits": "就诊",
+    "withCount": "{{label}} ({{count}})"
   }
 }

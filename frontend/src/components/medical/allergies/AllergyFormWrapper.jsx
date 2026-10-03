@@ -32,6 +32,7 @@ import {
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
+import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 
 const AllergyFormWrapper = ({
   isOpen,
@@ -104,7 +105,7 @@ const AllergyFormWrapper = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(getRememberedEditTab('allergies', 'basic'));
     }
     if (!isOpen) {
       setIsSubmitting(false);
@@ -167,9 +168,6 @@ const AllergyFormWrapper = ({
               >
                 {t('allergies.tabs.reactionDetails')}
               </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes')}
-              </Tabs.Tab>
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -177,6 +175,9 @@ const AllergyFormWrapper = ({
                 {editingAllergy
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 

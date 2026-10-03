@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Modal,
   Badge,
@@ -35,8 +36,12 @@ import {
   SYMPTOM_STATUS_COLORS,
   SYMPTOM_SEVERITY_COLORS,
 } from '../../../constants/symptomEnums';
+import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
+import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const SymptomViewModal = ({
+  navigate,
   isOpen,
   onClose,
   symptom,
@@ -205,14 +210,15 @@ const SymptomViewModal = ({
                 count: occurrences.length,
               })}
             </Tabs.Tab>
-            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('shared:tabs.notes', 'Notes')}
-            </Tabs.Tab>
+            <RecordVisitsTabButton recordType="symptoms" recordId={symptom.id} />
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}
             >
               {t('shared:tabs.documents', 'Documents')}
+            </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -564,6 +570,20 @@ const SymptomViewModal = ({
             </Box>
           </Tabs.Panel>
 
+          {/* Visits Tab */}
+          <Tabs.Panel value="visits">
+            <Box mt="md">
+              {activeTab === 'visits' && (
+                <RecordVisitsTab
+                  recordType="symptoms"
+                  recordId={symptom.id}
+                  isViewMode
+                  navigate={navigate}
+                />
+              )}
+            </Box>
+          </Tabs.Panel>
+
           {/* Notes Tab */}
           <Tabs.Panel value="notes">
             <Box mt="md">
@@ -639,6 +659,7 @@ const SymptomViewModal = ({
                 <Button
                   variant="light"
                   onClick={() => {
+                    rememberEditTab('symptoms', activeTab);
                     onClose();
                     setTimeout(() => {
                       onEdit(symptom);
@@ -671,6 +692,10 @@ const SymptomViewModal = ({
       </Stack>
     </Modal>
   );
+};
+
+SymptomViewModal.propTypes = {
+  navigate: PropTypes.func,
 };
 
 export default SymptomViewModal;

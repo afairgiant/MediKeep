@@ -17,12 +17,6 @@ import { apiService } from '../../services/api';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import {
-  formatDateForAPI,
-  getTodayString,
-  isDateInFuture,
-  isEndDateBeforeStartDate,
-} from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
@@ -36,12 +30,18 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
 import {
   ConditionCard,
   ConditionViewModal,
   ConditionFormWrapper,
 } from '../../components/medical/conditions';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import {
+  INITIAL_CONDITION_FORM_DATA,
+  buildConditionPayload,
+  validateConditionForm,
+} from '../../utils/conditionFormUtils';
 
 const Conditions = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -129,19 +129,9 @@ const Conditions = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingCondition, setEditingCondition] = useState(null);
   const [formData, setFormData] = useState({
-    condition_name: '',
-    diagnosis: '',
-    notes: '',
-    status: 'active',
-    severity: '',
-    practitioner_id: '',
-    icd10_code: '',
-    snomed_code: '',
-    code_description: '',
-    onset_date: '', // Form field name
-    end_date: '', // Form field name
-    tags: [],
+    ...INITIAL_CONDITION_FORM_DATA,
     pending_medication_ids: [], // For linking medications during creation
+    pending_visit_links: [],
   });
 
   // Document management state
@@ -202,19 +192,9 @@ const Conditions = () => {
     setDocumentManagerMethods(null);
     setEditingCondition(null);
     setFormData({
-      condition_name: '',
-      diagnosis: '',
-      notes: '',
-      status: 'active',
-      severity: '',
-      practitioner_id: '',
-      icd10_code: '',
-      snomed_code: '',
-      code_description: '',
-      onset_date: '',
-      end_date: '',
-      tags: [],
+      ...INITIAL_CONDITION_FORM_DATA,
       pending_medication_ids: [],
+      pending_visit_links: [],
     });
     setShowModal(true);
   };
@@ -329,40 +309,9 @@ const Conditions = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!currentPatient?.id) {
-      setError('Patient information not available');
-      return;
-    }
-
-    // Existing validation
-    const todayString = getTodayString();
-
-    if (isDateInFuture(formData.onset_date)) {
-      setError(
-        `Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`
-      );
-      return;
-    }
-
-    if (isDateInFuture(formData.end_date)) {
-      setError(
-        `End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`
-      );
-      return;
-    }
-
-    if (isEndDateBeforeStartDate(formData.onset_date, formData.end_date)) {
-      setError('End date cannot be before onset date');
-      return;
-    }
-
-    if (!formData.status) {
-      setError('Status is required. Please select a status.');
-      return;
-    }
-
-    if (!formData.diagnosis) {
-      setError('Diagnosis is required.');
+    const validationError = validateConditionForm(formData, currentPatient?.id);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -372,23 +321,7 @@ const Conditions = () => {
       return;
     }
 
-    const conditionData = {
-      condition_name: formData.condition_name || null,
-      diagnosis: formData.diagnosis,
-      notes: formData.notes || null,
-      status: formData.status || 'active',
-      severity: formData.severity || null,
-      practitioner_id: formData.practitioner_id
-        ? parseInt(formData.practitioner_id)
-        : null,
-      icd10_code: formData.icd10_code || null,
-      snomed_code: formData.snomed_code || null,
-      code_description: formData.code_description || null,
-      onset_date: formatDateForAPI(formData.onset_date),
-      end_date: formatDateForAPI(formData.end_date),
-      tags: formData.tags || [],
-      patient_id: currentPatient.id,
-    };
+    const conditionData = buildConditionPayload(formData, currentPatient.id);
 
     const pendingMedications = formData.pending_medication_ids || [];
 
@@ -407,6 +340,15 @@ const Conditions = () => {
         if (success) {
           needsRefreshAfterSubmissionRef.current = true;
         }
+      }
+
+      // Link visits chosen in the Add form now that the record exists
+      if (success && resultId && !editingCondition) {
+        await linkPendingVisitsOrWarn(
+          'conditions',
+          resultId,
+          formData.pending_visit_links
+        );
       }
 
       completeFormSubmission(success, resultId);
@@ -539,6 +481,7 @@ const Conditions = () => {
         {/* Form Modal */}
         <ConditionFormWrapper
           isOpen={showModal}
+          patientId={currentPatient?.id}
           onClose={() => !isBlocking && setShowModal(false)}
           title={
             editingCondition

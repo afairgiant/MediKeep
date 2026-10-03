@@ -336,6 +336,7 @@
     "overview": "Översikt",
     "procedures": "Ingrepp",
     "treatments": "Behandlingar",
-    "visits": "Besök"
+    "visits": "Besök",
+    "withCount": "{{label}} ({{count}})"
   }
 }

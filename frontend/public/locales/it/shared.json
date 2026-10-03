@@ -336,6 +336,7 @@
     "overview": "Panoramica",
     "procedures": "Procedure",
     "treatments": "Trattamenti",
-    "visits": "Visite"
+    "visits": "Visite",
+    "withCount": "{{label}} ({{count}})"
   }
 }

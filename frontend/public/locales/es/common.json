@@ -427,6 +427,26 @@
       "vaccineInfo": "Información de la vacuna"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Añadir condición",
+      "injury": "Añadir lesión",
+      "medication": "Añadir medicamento",
+      "treatment": "Añadir tratamiento",
+      "labResult": "Añadir resultado de laboratorio",
+      "equipment": "Añadir equipo",
+      "procedure": "Añadir procedimiento",
+      "symptom": "Añadir síntoma",
+      "visit": "Añadir visita"
+    },
+    "createError": "No se pudo crear. Inténtelo de nuevo.",
+    "created": "Creado.",
+    "createdLinked": "Creado y vinculado.",
+    "createdPending": "Creado. Se vinculará cuando guarde.",
+    "linkFailed": "Creado, pero no se pudo vincular. Puede vincularlo desde la lista.",
+    "loadError": "No se pudo abrir el formulario. No se cambió nada en el cuadro de diálogo de atrás. Inténtelo de nuevo.",
+    "uploadFailed": "Creado, pero no se pudieron subir algunos archivos. Puede añadirlos editándolo."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Añadir nuevo seguro"
@@ -992,6 +1012,10 @@
       "title": "Detalles del procedimiento"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "El registro se creó, pero no se pudieron guardar algunos vínculos con visitas. Puede añadirlos editando el registro.",
+    "saveFirstInfo": "Las visitas que vincule aquí se guardan cuando se guarda este registro."
+  },
   "search": {
     "activeFilterCount": "{{count}} filtros activos",
     "activeFilterCount_one": "{{count}} filtro activo",
@@ -1382,10 +1406,7 @@
     "editVisit": "Editar visita",
     "form": {
       "addVisit": "Añadir visita",
-      "chooseLabResultsToLink": "Elija los resultados de laboratorio que desea vincular",
-      "labResultsDescription": "Vincule los resultados de laboratorio relevantes para esta visita. Puede definir el propósito y las notas después de crear la visita.",
       "savingVisit": "Guardando visita...",
-      "selectLabResults": "Seleccionar resultados de laboratorio",
       "tabs": {
         "clinical": "Clínico",
         "visitInfo": "Información de la visita"
@@ -1394,8 +1415,8 @@
     },
     "loadingVisits": "Cargando visitas...",
     "notifications": {
-      "labResultLinkFailed": "La visita se creó, pero no se pudieron vincular algunos resultados de laboratorio. Puede vincularlos manualmente editando la visita.",
-      "labResultLinkWarning": "Problema al vincular resultados de laboratorio"
+      "relationshipLinkFailed": "La visita se creó, pero no se pudieron guardar algunas relaciones. Puede añadirlas editando la visita.",
+      "relationshipLinkWarning": "Problema al vincular relaciones"
     },
     "noVisitsFound": "No se encontraron visitas médicas",
     "table": {
@@ -1418,6 +1439,18 @@
       "title": "Visita - {{date}}",
       "treatmentPlan": "Plan de tratamiento",
       "visitInformation": "Información de la visita"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} disponibles para vincular",
+      "confirmRemove": "¿Quitar este vínculo?",
+      "editLink": "Editar nota del vínculo",
+      "linkSelected": "Vincular seleccionados",
+      "modalTitle": "Vincular {{section}}",
+      "none": "Aún no hay nada vinculado.",
+      "purpose": "Propósito",
+      "removeLink": "Quitar vínculo",
+      "saveFirstInfo": "Las relaciones que añada aquí se guardan cuando se guarda la visita.",
+      "selectPlaceholder": "Elija registros para vincular"
     }
   },
   "vitals": {

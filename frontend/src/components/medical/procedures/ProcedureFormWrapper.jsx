@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
+  Alert,
   Modal,
   Tabs,
   Box,
@@ -33,8 +35,15 @@ import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgres
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
+import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import { getRememberedEditTab } from '../../../utils/editTabHandoff';
+import { useSubDialog } from '../../../contexts/SubDialogContext';
+import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const ProcedureFormWrapper = ({
+  formError,
+  patientId,
+  navigate,
   isOpen,
   onClose,
   title,
@@ -50,6 +59,8 @@ const ProcedureFormWrapper = ({
   onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
+  // Set when this dialog was opened from inside another one (inline create)
+  const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
@@ -62,7 +73,7 @@ const ProcedureFormWrapper = ({
   // Reset tab when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(getRememberedEditTab('procedures', 'basic'));
     }
     if (!isOpen) {
       setIsSubmitting(false);
@@ -135,7 +146,7 @@ const ProcedureFormWrapper = ({
       title={title}
       size="xl"
       centered
-      zIndex={2000}
+      zIndex={subDialog?.zIndex ?? 2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
@@ -166,9 +177,9 @@ const ProcedureFormWrapper = ({
               >
                 {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes', 'Notes')}
-              </Tabs.Tab>
+              {!subDialog && (
+                <RecordVisitsTabButton recordType="procedures" recordId={editingItem?.id} pendingLinks={formData.pending_visit_links} />
+              )}
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -176,6 +187,9 @@ const ProcedureFormWrapper = ({
                 {editingItem
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -245,6 +259,7 @@ const ProcedureFormWrapper = ({
                           },
                         });
                       }}
+                      required
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
                       dateParser={dateParser}
@@ -558,6 +573,28 @@ const ProcedureFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
+            {/* Visits Tab (not offered in a sub-dialog: nesting stays one level deep) */}
+            {!subDialog && (
+              <Tabs.Panel value="visits">
+                <Box mt="md">
+                  {activeTab === 'visits' && (
+                    <RecordVisitsTab
+                      recordType="procedures"
+                      recordId={editingItem?.id}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_visit_links}
+                      onPendingChange={next =>
+                        onInputChange({
+                          target: { name: 'pending_visit_links', value: next },
+                        })
+                      }
+                      navigate={navigate}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
+
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
@@ -596,6 +633,12 @@ const ProcedureFormWrapper = ({
             </Tabs.Panel>
           </Tabs>
 
+          {formError && (
+            <Alert color="red" variant="light" role="alert">
+              {formError}
+            </Alert>
+          )}
+
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button
@@ -618,6 +661,12 @@ const ProcedureFormWrapper = ({
       </form>
     </Modal>
   );
+};
+
+ProcedureFormWrapper.propTypes = {
+  formError: PropTypes.string,
+  patientId: PropTypes.number,
+  navigate: PropTypes.func,
 };
 
 export default ProcedureFormWrapper;

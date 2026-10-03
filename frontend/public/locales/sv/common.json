@@ -427,6 +427,26 @@
       "vaccineInfo": "Vaccininformation"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Lägg till tillstånd",
+      "injury": "Lägg till skada",
+      "medication": "Lägg till medicin",
+      "treatment": "Lägg till behandling",
+      "labResult": "Lägg till laboratorieresultat",
+      "equipment": "Lägg till utrustning",
+      "procedure": "Lägg till ingrepp",
+      "symptom": "Lägg till symtom",
+      "visit": "Lägg till besök"
+    },
+    "createError": "Det gick inte att skapa. Försök igen.",
+    "created": "Skapad.",
+    "createdLinked": "Skapad och länkad.",
+    "createdPending": "Skapad. Den länkas när du sparar.",
+    "linkFailed": "Skapad, men den kunde inte länkas. Du kan länka den från listan.",
+    "loadError": "Formuläret kunde inte öppnas. Inget har ändrats i dialogen bakom. Försök igen.",
+    "uploadFailed": "Skapad, men vissa filer kunde inte laddas upp. Du kan lägga till dem genom att redigera."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Lägg till ny försäkring"
@@ -992,6 +1012,10 @@
       "title": "Ingreppsinformation"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "Posten skapades, men vissa besökslänkar kunde inte sparas. Du kan lägga till dem genom att redigera posten.",
+    "saveFirstInfo": "Besök som du länkar här sparas när posten sparas."
+  },
   "search": {
     "activeFilterCount": "{{count}} aktiva filter",
     "activeFilterCount_one": "{{count}} aktivt filter",
@@ -1382,10 +1406,7 @@
     "editVisit": "Redigera besök",
     "form": {
       "addVisit": "Lägg till besök",
-      "chooseLabResultsToLink": "Välj laboratorieresultat att länka",
-      "labResultsDescription": "Länka laboratorieresultat som är relevanta för detta besök. Du kan ange syfte och anteckningar när besöket har skapats.",
       "savingVisit": "Sparar besök...",
-      "selectLabResults": "Välj laboratorieresultat",
       "tabs": {
         "clinical": "Kliniskt",
         "visitInfo": "Besöksinformation"
@@ -1394,8 +1415,8 @@
     },
     "loadingVisits": "Laddar besök...",
     "notifications": {
-      "labResultLinkFailed": "Besöket skapades, men vissa laboratorieresultat kunde inte länkas. Du kan länka dem manuellt genom att redigera besöket.",
-      "labResultLinkWarning": "Problem med länkning av laboratorieresultat"
+      "relationshipLinkFailed": "Besöket skapades, men vissa relationer kunde inte sparas. Du kan lägga till dem genom att redigera besöket.",
+      "relationshipLinkWarning": "Problem med att länka relationer"
     },
     "noVisitsFound": "Inga medicinska besök hittades",
     "table": {
@@ -1418,6 +1439,18 @@
       "title": "Besök - {{date}}",
       "treatmentPlan": "Behandlingsplan",
       "visitInformation": "Besöksinformation"
+    },
+    "relationships": {
+      "availableToLink": "{{count}} tillgängliga att länka",
+      "confirmRemove": "Ta bort den här länken?",
+      "editLink": "Redigera länkanteckning",
+      "linkSelected": "Länka valda",
+      "modalTitle": "Länka {{section}}",
+      "none": "Inget länkat ännu.",
+      "purpose": "Syfte",
+      "removeLink": "Ta bort länk",
+      "saveFirstInfo": "Relationer som du lägger till här sparas när besöket sparas.",
+      "selectPlaceholder": "Välj poster att länka"
     }
   },
   "vitals": {

@@ -29,6 +29,7 @@ const TreatmentRelationshipsManager = ({
   // Relationship counts for badges
   const [medicationCount, setMedicationCount] = useState(0);
   const [encounterCount, setEncounterCount] = useState(0);
+  const [countsLoaded, setCountsLoaded] = useState(false);
   const [labResultCount, setLabResultCount] = useState(0);
   const [equipmentCount, setEquipmentCount] = useState(0);
 
@@ -131,6 +132,7 @@ const TreatmentRelationshipsManager = ({
           setEncounterCount(toArray(encs).length);
           setLabResultCount(toArray(labs).length);
           setEquipmentCount(toArray(equip).length);
+          setCountsLoaded(true);
         }
       } catch (err) {
         if (err.name !== 'AbortError' && isMountedRef.current) {
@@ -179,6 +181,15 @@ const TreatmentRelationshipsManager = ({
     []
   );
 
+  // Records created from a tab's Add button join the lists the rows look their names up in
+  const addCreated = setList => record =>
+    setList(prev =>
+      prev.some(item => item.id === record.id) ? prev : [...prev, record]
+    );
+  const handleMedicationCreated = addCreated(setMedications);
+  const handleEncounterCreated = addCreated(setEncounters);
+  const handleLabResultCreated = addCreated(setLabResults);
+
   // When new equipment is created inline, refresh the equipment list
   const handleEquipmentCreated = useCallback(newEquip => {
     setEquipment(prev => [...prev, newEquip]);
@@ -186,7 +197,8 @@ const TreatmentRelationshipsManager = ({
 
   // Report per-type counts to parent when they change
   useEffect(() => {
-    if (onCountsChange) {
+    // Not before the real counts are known: the zeros of the first render are not counts
+    if (onCountsChange && countsLoaded) {
       onCountsChange({
         medications: medicationCount,
         encounters: encounterCount,
@@ -199,6 +211,7 @@ const TreatmentRelationshipsManager = ({
     encounterCount,
     labResultCount,
     equipmentCount,
+    countsLoaded,
     onCountsChange,
   ]);
 
@@ -217,6 +230,8 @@ const TreatmentRelationshipsManager = ({
           practitioners={practitioners}
           pharmacies={pharmacies}
           isViewMode={isViewMode}
+          patientId={patientId}
+          onEntityCreated={handleMedicationCreated}
           onRelationshipsChange={handleMedicationCountChange}
           onEntityClick={onMedicationClick}
         />
@@ -229,6 +244,8 @@ const TreatmentRelationshipsManager = ({
           treatmentId={treatmentId}
           encounters={encounters}
           isViewMode={isViewMode}
+          patientId={patientId}
+          onEntityCreated={handleEncounterCreated}
           onRelationshipsChange={handleEncounterCountChange}
           onEntityClick={onEncounterClick}
         />
@@ -239,6 +256,8 @@ const TreatmentRelationshipsManager = ({
           treatmentId={treatmentId}
           labResults={labResults}
           isViewMode={isViewMode}
+          patientId={patientId}
+          onEntityCreated={handleLabResultCreated}
           onRelationshipsChange={handleLabResultCountChange}
           onEntityClick={onLabResultClick}
         />

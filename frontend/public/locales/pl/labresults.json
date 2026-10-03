@@ -165,9 +165,6 @@
   "loadingHint": "Jeśli to trwa zbyt długo, odśwież stronę",
   "messages": {
     "confirmDiscardAdvancedForm": "Zmiana trybu spowoduje utratę dotychczas wprowadzonych danych. Kontynuować?",
-    "noRelationshipsAvailable": "Brak zarejestrowanych schorzeń ani wizyt. Dodaj je najpierw, aby połączyć je tutaj.",
-    "noRelationshipsOnRecord": "Brak zarejestrowanych schorzeń, wizyt, leków, procedur ani leczenia dla tego pacjenta.",
-    "relationshipsCreateInfo": "Powiązania można dodać po zapisaniu wyniku laboratoryjnego.",
     "relationshipsSaveFirst": "Najpierw zapisz wynik laboratoryjny aby utworzyć linki powiązań.",
     "testComponentsEditInfo": "Składniki badania można zarządzać ze strony podglądu po zapisaniu."
   },
@@ -218,9 +215,7 @@
   "patientIdRequired": "ID pacjenta jest wymagane. Najpierw wybierz pacjenta.",
   "pendingRelationships": {
     "addCondition": "Dodaj schorzenie",
-    "addVisit": "Dodaj wizytę",
     "removeCondition": "Usuń schorzenie",
-    "removeVisit": "Usuń wizytę",
     "addMedication": "Dodaj lek",
     "addProcedure": "Dodaj procedurę",
     "addTreatment": "Dodaj leczenie",
@@ -336,7 +331,6 @@
     "bulkEntry": "Import Grupowy",
     "noComponentsDescription": "Dodaj wyniki badania używając szablonów lub narzędzi importu grupowego poniżej aby śledzić poszczególne wartości laboratoryjne i trendy.",
     "noComponentsYet": "Jeszcze brak wyników badania",
-    "relationships": "Powiązania",
     "resultsStatus": "Wyniki i Status",
     "templates": "Szablony"
   },

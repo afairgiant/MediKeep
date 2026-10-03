@@ -427,6 +427,26 @@
       "vaccineInfo": "Informacje o szczepionce"
     }
   },
+  "inlineCreate": {
+    "add": {
+      "condition": "Dodaj schorzenie",
+      "injury": "Dodaj uraz",
+      "medication": "Dodaj lek",
+      "treatment": "Dodaj leczenie",
+      "labResult": "Dodaj wynik badania laboratoryjnego",
+      "equipment": "Dodaj sprzęt",
+      "procedure": "Dodaj procedurę",
+      "symptom": "Dodaj objaw",
+      "visit": "Dodaj wizytę"
+    },
+    "createError": "Nie udało się utworzyć. Spróbuj ponownie.",
+    "created": "Utworzono.",
+    "createdLinked": "Utworzono i powiązano.",
+    "createdPending": "Utworzono. Zostanie powiązane po zapisaniu.",
+    "linkFailed": "Utworzono, ale nie udało się powiązać. Możesz powiązać z listy.",
+    "loadError": "Nie udało się otworzyć tego formularza. Nic nie zmieniło się w oknie za nim. Spróbuj ponownie.",
+    "uploadFailed": "Utworzono, ale nie udało się przesłać niektórych plików. Możesz je dodać, edytując."
+  },
   "insurance": {
     "actions": {
       "addNew": "+ Dodaj nowe ubezpieczenie"
@@ -992,6 +1012,10 @@
       "title": "Szczegóły procedury"
     }
   },
+  "recordRelationships": {
+    "linkFailed": "Rekord został utworzony, ale nie udało się zapisać niektórych powiązań z wizytami. Możesz je dodać, edytując rekord.",
+    "saveFirstInfo": "Wizyty powiązane tutaj zostaną zapisane po zapisaniu tego rekordu."
+  },
   "search": {
     "activeFilterCount": "{{count}} aktywnych filtrów",
     "activeFilterCount_one": "{{count}} aktywny filtr",
@@ -1382,10 +1406,7 @@
     "editVisit": "Edytuj wizytę",
     "form": {
       "addVisit": "Dodaj wizytę",
-      "chooseLabResultsToLink": "Wybierz wyniki laboratoryjne do połączenia",
-      "labResultsDescription": "Połącz wyniki laboratoryjne istotne dla tej wizyty. Cel i notatki możesz ustawić po utworzeniu wizyty.",
       "savingVisit": "Zapisywanie wizyty...",
-      "selectLabResults": "Wybierz wyniki laboratoryjne",
       "tabs": {
         "clinical": "Kliniczne",
         "visitInfo": "Informacje o wizycie"
@@ -1394,8 +1415,8 @@
     },
     "loadingVisits": "Ładowanie wizyt...",
     "notifications": {
-      "labResultLinkFailed": "Wizyta została utworzona, ale nie udało się połączyć niektórych wyników laboratoryjnych. Możesz połączyć je ręcznie, edytując wizytę.",
-      "labResultLinkWarning": "Problem z łączeniem wyników laboratoryjnych"
+      "relationshipLinkFailed": "Wizyta została utworzona, ale nie udało się zapisać niektórych powiązań. Możesz je dodać, edytując wizytę.",
+      "relationshipLinkWarning": "Problem z powiązaniami"
     },
     "noVisitsFound": "Nie znaleziono wizyt medycznych",
     "table": {
@@ -1418,6 +1439,18 @@
       "title": "Wizyta - {{date}}",
       "treatmentPlan": "Plan leczenia",
       "visitInformation": "Informacje o wizycie"
+    },
+    "relationships": {
+      "availableToLink": "Dostępne do powiązania: {{count}}",
+      "confirmRemove": "Usunąć to powiązanie?",
+      "editLink": "Edytuj notatkę powiązania",
+      "linkSelected": "Powiąż wybrane",
+      "modalTitle": "Powiąż: {{section}}",
+      "none": "Nic jeszcze nie powiązano.",
+      "purpose": "Cel",
+      "removeLink": "Usuń powiązanie",
+      "saveFirstInfo": "Powiązania dodane tutaj zostaną zapisane po zapisaniu wizyty.",
+      "selectPlaceholder": "Wybierz rekordy do powiązania"
     }
   },
   "vitals": {

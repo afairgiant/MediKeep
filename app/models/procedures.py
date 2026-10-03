@@ -68,6 +68,11 @@ class Procedure(Base):
     tags = Column(JSON, nullable=True, default=list)
 
     # Table Relationships
+    # Many-to-Many relationship with encounters (visits) through junction table
+    encounter_relationships = orm_relationship(
+        "EncounterProcedure", back_populates="procedure", cascade="all, delete-orphan"
+    )
+
     patient = orm_relationship("Patient", back_populates="procedures")
     practitioner = orm_relationship("Practitioner", back_populates="procedures")
     condition = orm_relationship("Condition", back_populates="procedures")

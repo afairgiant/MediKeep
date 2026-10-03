@@ -14,6 +14,7 @@ const MedicationFormWrapper = memo(
     pharmacies,
     editingMedication,
     conditions,
+    patientId,
     navigate,
     isLoading,
     statusMessage,
@@ -33,6 +34,7 @@ const MedicationFormWrapper = memo(
         pharmacies={pharmacies}
         editingMedication={editingMedication}
         conditions={conditions}
+        patientId={patientId}
         navigate={navigate}
         isLoading={isLoading}
         statusMessage={statusMessage}
@@ -49,6 +51,7 @@ const MedicationFormWrapper = memo(
       'title',
       'formData',
       'editingMedication',
+      'patientId',
       'isLoading',
       'statusMessage',
     ];
