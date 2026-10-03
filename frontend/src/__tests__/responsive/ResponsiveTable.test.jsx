@@ -21,6 +21,7 @@ import {
 } from './ResponsiveTestUtils';
 
 import { useResponsive } from '../../hooks/useResponsive';
+import printCss from '../../styles/print.css?raw';
 
 // Mock logger to avoid console noise during tests
 vi.mock('../../services/logger', () => ({
@@ -189,6 +190,29 @@ describe('ResponsiveTable Component Tests', () => {
       const error = new Error('Test error');
       renderResponsive(<ResponsiveTable {...defaultProps} error={error} />);
       expect(screen.getByText(/test error/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Print clipping regression (#1081)', () => {
+    it('marks the scroll wrapper so print.css can lift its height cap', () => {
+      const { container } = renderResponsive(
+        <ResponsiveTable {...defaultProps} />
+      );
+      const wrapper = container.querySelector('.responsive-table-scroll');
+      expect(wrapper).not.toBeNull();
+      expect(wrapper.querySelector('.print-only')).not.toBeNull();
+    });
+
+    it('print.css removes the height cap and overflow on the wrapper', () => {
+      const css = printCss;
+      const printBlock = css.slice(css.indexOf('@media print'));
+      const rule = printBlock.match(
+        /\.responsive-table-scroll,[^{]*\{([^}]*)\}/
+      );
+      expect(rule).not.toBeNull();
+      expect(rule[1]).toMatch(/max-height:\s*none\s*!important/);
+      expect(rule[1]).toMatch(/overflow:\s*visible\s*!important/);
+      expect(rule[1]).toMatch(/height:\s*auto\s*!important/);
     });
   });
 

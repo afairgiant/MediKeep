@@ -1070,6 +1070,7 @@ export const ResponsiveTable = memo(
     // Wrap with ScrollArea if needed for table view only
     const wrappedContent = tableConfig.container.scrollable ? (
       <ScrollArea
+        className="responsive-table-scroll"
         h={tableConfig.container.maxHeight}
         scrollbarSize={8}
         {...tableConfig.container.scrollAreaProps}
@@ -1079,6 +1080,7 @@ export const ResponsiveTable = memo(
     ) : (
       <Box
         ref={tableRef}
+        className="responsive-table-scroll"
         mah={tableConfig.container.maxHeight}
         style={{ overflow: 'auto' }}
       >
