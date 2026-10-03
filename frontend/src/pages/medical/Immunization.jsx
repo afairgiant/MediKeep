@@ -78,6 +78,7 @@ const Immunization = () => {
     setError,
   } = useMedicalData({
     entityName: 'immunization',
+    entityLabel: t('medical:entityNames.immunization'),
     apiMethodsConfig: {
       getAll: signal => apiService.getImmunizations(signal),
       getByPatient: (patientId, signal) =>

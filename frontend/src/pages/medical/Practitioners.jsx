@@ -168,7 +168,9 @@ const Practitioners = () => {
   const handleDeletePractitioner = async practitionerId => {
     if (
       window.confirm(
-        'Are you sure you want to delete this practitioner? This action cannot be undone.'
+        t('messages.confirmDeleteEntity', {
+          entity: t('medical:entityNames.practitioner'),
+        })
       )
     ) {
       try {

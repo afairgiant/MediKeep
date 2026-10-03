@@ -628,7 +628,10 @@
   "messages": {
     "checkBackSoon": "Revenez bientôt pour des mises à jour !",
     "clearAll": "Tout effacer",
-    "confirmDeleteEntity": "Voulez-vous vraiment supprimer ce {{entity}} ?",
+    "confirmDeleteEntity": "Voulez-vous vraiment supprimer cet élément ({{entity}}) ?",
+    "entityCreated": "{{entity}} : création réussie !",
+    "entityUpdated": "{{entity}} : mise à jour réussie !",
+    "entityDeleted": "{{entity}} : suppression réussie !",
     "confirmRemoveConditionRelationship": "Voulez-vous vraiment supprimer cette connexion à une condition ?",
     "confirmRemoveEquipmentRelationship": "Voulez-vous vraiment supprimer cette connexion à un équipement ?",
     "confirmRemoveLabResultLink": "Supprimer cette connexion à un résultat d'analyse ?",

@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "allergi",
+    "condition": "tillstånd",
+    "equipment": "utrustning",
+    "familyMember": "familjemedlem",
+    "immunization": "vaccination",
+    "injury": "skada",
+    "insurance": "försäkring",
+    "labResult": "labbresultat",
+    "medication": "läkemedel",
+    "pharmacy": "apotek",
+    "practitioner": "vårdgivare",
+    "procedure": "ingrepp",
+    "treatment": "behandling",
+    "visit": "besök",
+    "vitals": "vitalvärdespost"
+  },
   "allergies": {
     "allergen": {
       "description": "Namn på allergenet",

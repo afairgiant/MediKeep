@@ -68,6 +68,7 @@ const Allergies = () => {
     setError,
   } = useMedicalData({
     entityName: 'allergy',
+    entityLabel: t('medical:entityNames.allergy'),
     apiMethodsConfig: {
       getAll: signal => apiService.getAllergies(signal),
       getByPatient: (patientId, signal) =>

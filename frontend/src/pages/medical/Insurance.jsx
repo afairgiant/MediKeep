@@ -84,6 +84,7 @@ const Insurance = () => {
     refreshData = () => {},
   } = useMedicalData({
     entityName: 'insurance',
+    entityLabel: t('medical:entityNames.insurance'),
     apiMethodsConfig: {
       getAll: signal => apiService.getInsurances(signal),
       getByPatient: (patientId, signal) =>
@@ -434,15 +435,10 @@ const Insurance = () => {
       return;
     }
 
-    if (
-      window.confirm(
-        `Are you sure you want to delete this ${insurance.insurance_type} insurance?`
-      )
-    ) {
-      const success = await deleteItem(insuranceId);
-      if (success) {
-        cleanupFileCount(insuranceId);
-      }
+    // deleteItem shows the confirmation prompt
+    const success = await deleteItem(insuranceId);
+    if (success) {
+      cleanupFileCount(insuranceId);
     }
   };
 

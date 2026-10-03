@@ -172,13 +172,15 @@ export const useMedicalData = config => {
       });
 
       if (result) {
-        setSuccessMessage(`${entityName} created successfully!`);
+        setSuccessMessage(
+          t('messages.entityCreated', { entity: entityLabel || entityName })
+        );
         setTimeout(() => setSuccessMessage(''), 3000);
         return result;
       }
       return false;
     },
-    [execute, apiMethodsConfig, entityName]
+    [execute, apiMethodsConfig, entityName, entityLabel, t]
   );
 
   // Update item
@@ -197,13 +199,15 @@ export const useMedicalData = config => {
           )
         );
 
-        setSuccessMessage(`${entityName} updated successfully!`);
+        setSuccessMessage(
+          t('messages.entityUpdated', { entity: entityLabel || entityName })
+        );
         setTimeout(() => setSuccessMessage(''), 3000);
         return result;
       }
       return false;
     },
-    [execute, apiMethodsConfig, entityName]
+    [execute, apiMethodsConfig, entityName, entityLabel, t]
   );
 
   // Delete item
@@ -245,7 +249,9 @@ export const useMedicalData = config => {
         // Update local state to remove the deleted item
         setItems(prevItems => prevItems.filter(item => item.id !== id));
 
-        setSuccessMessage(`${entityName} deleted successfully!`);
+        setSuccessMessage(
+          t('messages.entityDeleted', { entity: entityLabel || entityName })
+        );
         setTimeout(() => setSuccessMessage(''), 3000);
         return result;
       }

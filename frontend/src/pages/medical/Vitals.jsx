@@ -246,6 +246,7 @@ const Vitals = () => {
     clearError,
   } = useMedicalData({
     entityName: 'vitals',
+    entityLabel: t('medical:entityNames.vitals'),
     apiMethodsConfig: {
       getAll: signal => apiService.getEntities('vitals', signal),
       getByPatient: (patientId, signal) =>

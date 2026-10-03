@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "อาการแพ้",
+    "condition": "โรค/ภาวะ",
+    "equipment": "อุปกรณ์",
+    "familyMember": "สมาชิกครอบครัว",
+    "immunization": "การฉีดวัคซีน",
+    "injury": "การบาดเจ็บ",
+    "insurance": "ประกันภัย",
+    "labResult": "ผลตรวจทางห้องปฏิบัติการ",
+    "medication": "ยา",
+    "pharmacy": "ร้านขายยา",
+    "practitioner": "บุคลากรทางการแพทย์",
+    "procedure": "หัตถการ",
+    "treatment": "การรักษา",
+    "visit": "การเข้ารับบริการ",
+    "vitals": "บันทึกสัญญาณชีพ"
+  },
   "allergies": {
     "allergen": {
       "description": "ชื่อสารก่อภูมิแพ้",

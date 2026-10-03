@@ -190,7 +190,13 @@ const Pharmacies = () => {
   };
 
   const handleDeletePharmacy = async pharmacyId => {
-    if (!window.confirm('Are you sure you want to delete this pharmacy?')) {
+    if (
+      !window.confirm(
+        t('messages.confirmDeleteEntity', {
+          entity: t('medical:entityNames.pharmacy'),
+        })
+      )
+    ) {
       return;
     }
 

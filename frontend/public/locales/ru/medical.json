@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "аллергия",
+    "condition": "заболевание",
+    "equipment": "оборудование",
+    "familyMember": "член семьи",
+    "immunization": "вакцинация",
+    "injury": "травма",
+    "insurance": "страховка",
+    "labResult": "результат анализа",
+    "medication": "лекарство",
+    "pharmacy": "аптека",
+    "practitioner": "специалист",
+    "procedure": "процедура",
+    "treatment": "лечение",
+    "visit": "визит",
+    "vitals": "запись жизненных показателей"
+  },
   "allergies": {
     "allergen": {
       "description": "Название аллергена",

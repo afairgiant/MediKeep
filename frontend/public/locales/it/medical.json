@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "allergia",
+    "condition": "condizione",
+    "equipment": "attrezzatura",
+    "familyMember": "familiare",
+    "immunization": "vaccinazione",
+    "injury": "infortunio",
+    "insurance": "assicurazione",
+    "labResult": "risultato di laboratorio",
+    "medication": "farmaco",
+    "pharmacy": "farmacia",
+    "practitioner": "professionista",
+    "procedure": "procedura",
+    "treatment": "trattamento",
+    "visit": "visita",
+    "vitals": "registrazione dei parametri vitali"
+  },
   "allergies": {
     "allergen": {
       "description": "Nome dell'allergene",

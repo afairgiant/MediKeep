@@ -1,4 +1,21 @@
 {
+  "entityNames": {
+    "allergy": "allergie",
+    "condition": "aandoening",
+    "equipment": "apparatuur",
+    "familyMember": "familielid",
+    "immunization": "vaccinatie",
+    "injury": "letsel",
+    "insurance": "verzekering",
+    "labResult": "labuitslag",
+    "medication": "medicatie",
+    "pharmacy": "apotheek",
+    "practitioner": "zorgverlener",
+    "procedure": "ingreep",
+    "treatment": "behandeling",
+    "visit": "bezoek",
+    "vitals": "vitale-functiesmeting"
+  },
   "allergies": {
     "allergen": {
       "description": "Naam van het allergeen",

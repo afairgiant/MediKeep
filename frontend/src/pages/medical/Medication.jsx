@@ -133,6 +133,7 @@ const Medication = () => {
     setError,
   } = useMedicalData({
     entityName: 'medication',
+    entityLabel: t('medical:entityNames.medication'),
     apiMethodsConfig: {
       getAll: signal => apiService.getMedications(signal),
       getByPatient: (patientId, signal) =>

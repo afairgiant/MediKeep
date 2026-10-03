@@ -105,6 +105,7 @@ const FamilyHistory = () => {
     setError,
   } = useMedicalData({
     entityName: 'family_member',
+    entityLabel: t('medical:entityNames.familyMember'),
     apiMethodsConfig: {
       getAll: async _signal => {
         logger.debug('Getting organized family history (owned + shared)', {
