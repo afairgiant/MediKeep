@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import {
   Paper,
   Text,
@@ -9,41 +10,9 @@ import {
 } from '@mantine/core';
 import { IconEye } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { formatTimeToAmPm } from '../../../utils/dateUtils';
 import { SYMPTOM_SEVERITY_COLORS } from '../../../constants/symptomEnums';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-
-/**
- * Renders the resolved/ongoing status indicator for an occurrence.
- * Shows one of three states:
- * - Resolved date (green text with date) when resolved_date exists
- * - Resolved badge when parent symptom is resolved but no specific date
- * - Ongoing badge when parent symptom is not resolved
- */
-function OccurrenceStatusIndicator({ occurrence, t, formatDate }) {
-  if (occurrence.resolved_date) {
-    return (
-      <Text size="sm" c="green">
-        <strong>{t('shared:labels.resolved', 'Resolved')}:</strong>{' '}
-        {formatDate(occurrence.resolved_date)}
-      </Text>
-    );
-  }
-
-  if (occurrence.symptom_status === 'resolved') {
-    return (
-      <Badge size="sm" color="green" variant="light">
-        {t('shared:labels.resolved', 'Resolved')}
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge size="sm" color="blue" variant="light">
-      {t('shared:labels.ongoing', 'Ongoing')}
-    </Badge>
-  );
-}
+import { OCCURRENCE_SEVERITY_LABEL_KEYS } from '../../../utils/medicalFormFields/symptomOccurrence';
+import OccurrenceFields from './OccurrenceFields';
 
 /**
  * Shared card component for displaying occurrence details in modals.
@@ -51,7 +20,7 @@ function OccurrenceStatusIndicator({ occurrence, t, formatDate }) {
  */
 function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
   const { t } = useTranslation(['common', 'shared']);
-  const { formatDate } = useDateFormat();
+  const isSymptomResolved = occurrence.symptom_status === 'resolved';
 
   return (
     <Paper p="md" withBorder>
@@ -64,9 +33,11 @@ function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
             <Badge
               color={SYMPTOM_SEVERITY_COLORS[occurrence.severity]}
               size="sm"
-              tt="uppercase"
             >
-              {occurrence.severity}
+              {t(
+                OCCURRENCE_SEVERITY_LABEL_KEYS[occurrence.severity],
+                occurrence.severity
+              )}
             </Badge>
             {occurrence.pain_scale !== null &&
               occurrence.pain_scale !== undefined && (
@@ -86,35 +57,20 @@ function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
           </Button>
         </Group>
 
-        {occurrence.duration && (
-          <Text size="sm">
-            <strong>{t('shared:labels.duration', 'Duration')}:</strong>{' '}
-            {occurrence.duration}
-          </Text>
-        )}
-        {occurrence.location && (
-          <Text size="sm">
-            <strong>{t('shared:labels.location', 'Location')}:</strong>{' '}
-            {occurrence.location}
-          </Text>
-        )}
-        {occurrence.occurrence_time && (
-          <Text size="sm">
-            <strong>{t('shared:labels.time', 'Time')}:</strong>{' '}
-            {formatTimeToAmPm(occurrence.occurrence_time)}
-          </Text>
-        )}
+        <OccurrenceFields occurrence={occurrence} />
 
-        <OccurrenceStatusIndicator
-          occurrence={occurrence}
-          t={t}
-          formatDate={formatDate}
-        />
-
-        {occurrence.notes && (
-          <Text size="sm" c="dimmed">
-            {occurrence.notes}
-          </Text>
+        {!occurrence.resolved_date && (
+          <Group>
+            <Badge
+              size="sm"
+              variant="light"
+              color={isSymptomResolved ? 'green' : 'blue'}
+            >
+              {isSymptomResolved
+                ? t('shared:labels.resolved', 'Resolved')
+                : t('shared:labels.ongoing', 'Ongoing')}
+            </Badge>
+          </Group>
         )}
 
         <Divider />
@@ -126,5 +82,18 @@ function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
     </Paper>
   );
 }
+
+OccurrenceDetailCard.propTypes = {
+  occurrence: PropTypes.shape({
+    occurrence_id: PropTypes.number,
+    symptom_id: PropTypes.number,
+    symptom_name: PropTypes.string,
+    symptom_status: PropTypes.string,
+    severity: PropTypes.string,
+    pain_scale: PropTypes.number,
+    resolved_date: PropTypes.string,
+  }).isRequired,
+  onViewSymptom: PropTypes.func.isRequired,
+};
 
 export default OccurrenceDetailCard;

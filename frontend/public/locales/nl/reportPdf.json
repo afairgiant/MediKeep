@@ -153,7 +153,13 @@
     "category": "Categorie",
     "triggers": "Uitlokkers",
     "chronic": "Chronisch",
-    "primary": "Primair"
+    "primary": "Primair",
+    "episodes": "Episoden",
+    "time": "Tijd",
+    "impact": "Impact",
+    "reliefMethods": "Verlichtingsmethoden",
+    "associatedSymptoms": "Bijkomende symptomen",
+    "resolutionNotes": "Notities over herstel"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Huisarts",
@@ -361,6 +367,8 @@
     "undetected": "Niet aangetoond",
     "normal": "Normaal",
     "high": "Hoog",
-    "low": "Laag"
+    "low": "Laag",
+    "noImpact": "Geen impact",
+    "debilitating": "Invaliderend"
   }
 }

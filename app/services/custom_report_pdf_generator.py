@@ -3054,7 +3054,68 @@ class CustomReportPDFGenerator:
                 )
             )
 
+        occurrences = record.get("occurrences") or []
+        if occurrences:
+            story.append(
+                Paragraph(
+                    f"  <i>{self.translator.field('episodes')}</i>",
+                    self.styles["CustomBody"],
+                )
+            )
+            for occurrence in occurrences:
+                story.extend(self._format_symptom_occurrence(occurrence))
+
         story.append(Spacer(1, 0.08 * inch))
+        return story
+
+    @staticmethod
+    def _format_time(time_value: Any) -> str:
+        if hasattr(time_value, "strftime"):
+            return time_value.strftime("%H:%M")
+        return str(time_value)[:5]
+
+    def _format_symptom_occurrence(self, occurrence: Dict[str, Any]) -> List:
+        """Format one symptom episode as a headline plus one line per recorded field."""
+        field = self.translator.field
+        indent = "&nbsp;" * 4
+
+        headline = f"<b>{self._format_date(occurrence.get('occurrence_date'))}</b>"
+        if occurrence.get("occurrence_time"):
+            headline += f" {self._format_time(occurrence['occurrence_time'])}"
+        summary = []
+        if occurrence.get("severity"):
+            summary.append(
+                f"{field('severity')}: {self.translator.value(occurrence['severity'])}"
+            )
+        if occurrence.get("pain_scale") is not None:
+            summary.append(f"{field('pain_scale')}: {occurrence['pain_scale']}/10")
+        if summary:
+            headline += " - " + ", ".join(summary)
+
+        resolved = ""
+        if occurrence.get("resolved_date"):
+            resolved = self._format_date(occurrence["resolved_date"])
+            if occurrence.get("resolved_time"):
+                resolved += f" {self._format_time(occurrence['resolved_time'])}"
+
+        rows = [
+            ("duration", occurrence.get("duration")),
+            ("location", occurrence.get("location")),
+            ("impact", self.translator.value(occurrence.get("impact_level"))),
+            *(
+                (key, ", ".join(str(item) for item in occurrence.get(key) or []))
+                for key in ("triggers", "relief_methods", "associated_symptoms")
+            ),
+            ("resolved", resolved),
+            ("resolution_notes", occurrence.get("resolution_notes")),
+            ("notes", occurrence.get("notes")),
+        ]
+        lines = [f"{field(key)}: {value}" for key, value in rows if value]
+
+        story = [Paragraph(f"{indent}{headline}", self.styles["CustomBody"])]
+        story.extend(
+            Paragraph(f"{indent}{indent}{line}", self.styles["SmallText"]) for line in lines
+        )
         return story
 
     def _format_injuries(self, records: List[Dict[str, Any]]) -> List:

@@ -153,7 +153,13 @@
     "category": "Kategoria",
     "triggers": "Czynniki wyzwalające",
     "chronic": "Przewlekłe",
-    "primary": "Podstawowe"
+    "primary": "Podstawowe",
+    "episodes": "Epizody",
+    "time": "Godzina",
+    "impact": "Wpływ",
+    "reliefMethods": "Metody łagodzenia",
+    "associatedSymptoms": "Objawy towarzyszące",
+    "resolutionNotes": "Notatki o ustąpieniu"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Lekarz POZ",
@@ -361,6 +367,8 @@
     "undetected": "Nie wykryto",
     "normal": "Prawidłowy",
     "high": "Wysoki",
-    "low": "Niski"
+    "low": "Niski",
+    "noImpact": "Brak wpływu",
+    "debilitating": "Wyniszczający"
   }
 }
