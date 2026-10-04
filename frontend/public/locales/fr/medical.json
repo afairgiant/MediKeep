@@ -83,14 +83,14 @@
     "tabs": {
       "reactionDetails": "Détails de la réaction"
     },
-    "viewMedication": "Voir les détails du médicament"
+    "viewMedication": "Voir les détails du médicament",
     "filters": {
       "sort": {
         "severity": "Sévérité",
         "allergen": "Allergène",
         "onsetDate": "Date de survenue"
       }
-    }
+    },
   },
   "componentCatalog": {
     "fetchError": "Echec du chargement du catalogue de résultats d'analyse",
@@ -632,7 +632,7 @@
       },
       "claimsAddress": {
         "description": "Adresse pour les demandes",
-        "label": "Adresse de demandes",
+        "label": "Adresse d'envoi des demandes de remboursement",
         "placeholder": "Saisissez l'adresse physique de demandes..."
       },
       "companyName": {
