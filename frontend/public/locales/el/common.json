@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Ημερομηνία (Νεότερα Πρώτα)",
     "sortDateOldest": "Ημερομηνία (Παλαιότερα Πρώτα)",
     "sortRelevance": "Σχετικότητα",
-    "sortTitle": "Τίτλος",
     "subtitle": "Αναζήτηση σε όλα τα ιατρικά αρχεία",
     "subtitles": {
       "result": "Αποτέλεσμα: {{value}}"

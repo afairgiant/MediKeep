@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Data (più recente prima)",
     "sortDateOldest": "Data (più vecchia prima)",
     "sortRelevance": "Rilevanza",
-    "sortTitle": "Titolo",
     "subtitle": "Cerca in tutte le cartelle cliniche",
     "subtitles": {
       "result": "Risultato: {{value}}"

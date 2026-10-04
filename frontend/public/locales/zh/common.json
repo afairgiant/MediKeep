@@ -1097,7 +1097,6 @@
     "sortDateNewest": "日期（最新优先）",
     "sortDateOldest": "日期（最旧优先）",
     "sortRelevance": "相关性",
-    "sortTitle": "标题",
     "subtitle": "搜索所有医疗记录",
     "subtitles": {
       "result": "结果：{{value}}"

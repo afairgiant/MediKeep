@@ -166,17 +166,17 @@ export const FALLBACK_ICON = IconSearch;
 /** Mapping from singular type key to i18n translation key. */
 export const TYPE_LABEL_KEY_MAP: Record<string, string> = {
   medication: 'shared:categories.medications',
-  condition: 'search.types.conditions',
+  condition: 'shared:categories.conditions',
   lab_result: 'shared:categories.lab_results',
   procedure: 'shared:categories.procedures',
-  immunization: 'search.types.immunizations',
-  treatment: 'search.types.treatments',
+  immunization: 'shared:categories.immunizations',
+  treatment: 'shared:categories.treatments',
   encounter: 'search.types.encounters',
-  allergy: 'search.types.allergies',
+  allergy: 'shared:categories.allergies',
   injury: 'shared:categories.injuries',
   symptom: 'shared:categories.symptoms',
   medical_equipment: 'shared:categories.medical_equipment',
-  vital: 'search.types.vitals',
+  vital: 'shared:categories.vitals',
 };
 
 /** Resolve a type key to a translated label. */

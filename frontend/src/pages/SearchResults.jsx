@@ -68,7 +68,7 @@ const SearchResults = () => {
   const { patient: currentPatient } = useCurrentPatient();
   const { formatDate } = useDateFormat();
   const { getTagColor, tagEntries, isLoading: isLoadingTags } = useTagColors();
-  const { t } = useTranslation(['common', 'shared']);
+  const { t, i18n } = useTranslation(['common', 'shared']);
   const initialLoadDone = useRef(false);
   const initialTagSearchDone = useRef(false);
   const [viewMode, setViewMode] = usePersistedViewMode('search', 'table');
@@ -561,11 +561,27 @@ const SearchResults = () => {
         const bTitle = (b.title || '').toLowerCase();
         return bTitle.localeCompare(aTitle);
       }
+      if (sortBy === 'type' || sortBy === 'type_desc') {
+        const cmp = (a.typeLabel || '').localeCompare(
+          b.typeLabel || '',
+          i18n.language
+        );
+        return sortBy === 'type' ? cmp : -cmp;
+      }
       return 0;
     });
 
     return sorted;
-  }, [results, tagResults, selectedTags, query, sortBy, dateRange, t]);
+  }, [
+    results,
+    tagResults,
+    selectedTags,
+    query,
+    sortBy,
+    dateRange,
+    t,
+    i18n.language,
+  ]);
 
   // Client-side page slice
   const mergedResults = useMemo(() => {
@@ -812,10 +828,20 @@ const SearchResults = () => {
                   <Table highlightOnHover striped>
                     <Table.Thead>
                       <Table.Tr>
-                        <Table.Th style={{ width: 140 }}>
-                          <Text size="sm" fw={500}>
-                            {t('search.columnType', 'Type')}
-                          </Text>
+                        <Table.Th
+                          onClick={() => handleColumnSort('type', 'type_desc')}
+                          style={{
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            width: 140,
+                          }}
+                        >
+                          <Group gap={4} wrap="nowrap">
+                            <Text size="sm" fw={500}>
+                              {t('search.columnType', 'Type')}
+                            </Text>
+                            {getSortIcon('type', 'type_desc')}
+                          </Group>
                         </Table.Th>
                         <Table.Th
                           onClick={() =>

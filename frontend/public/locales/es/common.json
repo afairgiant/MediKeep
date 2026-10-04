@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Fecha (más reciente primero)",
     "sortDateOldest": "Fecha (más antiguo primero)",
     "sortRelevance": "Relevancia",
-    "sortTitle": "Título",
     "subtitle": "Buscar en todos los registros médicos",
     "subtitles": {
       "result": "Resultado: {{value}}"

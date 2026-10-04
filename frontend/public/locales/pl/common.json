@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Data (najnowsze pierwsze)",
     "sortDateOldest": "Data (najstarsze pierwsze)",
     "sortRelevance": "Trafność",
-    "sortTitle": "Tytuł",
     "subtitle": "Przeszukuj całą dokumentację medyczną",
     "subtitles": {
       "result": "Wynik: {{value}}"

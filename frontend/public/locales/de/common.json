@@ -1098,7 +1098,6 @@
     "sortDateNewest": "Datum (Neueste zuerst)",
     "sortDateOldest": "Datum (Älteste zuerst)",
     "sortRelevance": "Relevanz",
-    "sortTitle": "Titel",
     "subtitle": "Alle medizinischen Unterlagen durchsuchen",
     "subtitles": {
       "result": "Ergebnis: {{value}}"
