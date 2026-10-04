@@ -74,10 +74,8 @@ const GlobalSearch = ({
       setShowResults(true);
 
       try {
-        const searchResults = await searchService.searchPatientRecords(
-          debouncedQuery,
-          patientId
-        );
+        const { results: searchResults } =
+          await searchService.searchWithPagination(debouncedQuery, patientId);
         logger.info('global_search_success', 'Search completed successfully', {
           resultCount: searchResults.length,
           component: 'GlobalSearch',
