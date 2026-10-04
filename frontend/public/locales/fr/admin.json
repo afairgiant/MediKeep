@@ -435,7 +435,7 @@
     "backToModel": "Retour à {{modelName}}",
     "bulkDeleteAssociated": "Toutes les données associées (y compris {{types}}) seront également supprimées.",
     "bulkDeleteFailed": "Echec de la suppression de masse",
-    "bulkDeleteWarning": "Ceci supprimera définitivement cette entrée de type {{modelName}} et toutes les données associées.",
+    "bulkDeleteWarning": "Ceci supprimera définitivement {{count}} entrée(s) de type {{modelName}} et toutes les données associées.",
     "bulkDeleteWarning_one": "Vous êtes sur le point de supprimer définitivement {{count}} entrée de type {{modelName}}.",
     "bulkDeleteWarning_other": "Vous êtes sur le point de supprimer définitivement {{count}} entrées de type {{modelName}}.",
     "changeRole": "Changer le rôle",
@@ -507,7 +507,7 @@
     "locations": {
       "add": "Ajouter un emplacement",
       "empty": "Aucun emplacement défini.",
-      "labelField": "Label",
+      "labelField": "Dénomination",
       "labelPlaceholder": "Etablissement principal",
       "locationNumber": "Emplacement {{num}}",
       "moveDown": "Descendre",
