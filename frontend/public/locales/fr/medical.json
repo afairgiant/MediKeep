@@ -92,7 +92,7 @@
       }
     },
   },
-  "componentCatalog": {
+    "componentCatalog": {
     "fetchError": "Echec du chargement du catalogue de résultats d'analyse",
     "noData": "Ajoutez des résultats d'analyse avec des composants d'analyse pour les voir ici.",
     "noResults": "Aucun composant d'analyse trouvé",
