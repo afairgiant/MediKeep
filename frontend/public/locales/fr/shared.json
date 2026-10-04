@@ -249,7 +249,6 @@
     "relatedCondition": "Condition connectée",
     "relatedConditions": "Conditions connectées",
     "relationship": "Lien de parenté",
-    "resetPassword": "Réinitialiser le mot de passe",
     "remove": "Retirer",
     "resetPassword": "Réinitialiser le mot de passe",
     "resolved": "Résolu(e)",
@@ -314,7 +313,7 @@
     "warnings": "Avertissements",
     "website": "Site web",
     "weekly": "Hebdomadaire",
-    "weight": "Poids"
+    "weight": "Poids",
     "zip": "ZIP"
   },
   "permissions": {
@@ -336,7 +335,7 @@
     "overview": "Aperçu",
     "procedures": "Procédures",
     "treatments": "Traitements",
-    "visits": "Visites"
+    "visits": "Visites",
     "withCount": "{{label}} ({{count}})"
   }
 }
