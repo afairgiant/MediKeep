@@ -91,8 +91,8 @@
       "labels": {
         "endDate": "Fin",
         "onsetDate": "Survenue"
-      },
-      "noNotesAvailable": "Aucune note clinique disponible",
+	  },
+	  "noNotesAvailable": "Aucune note clinique disponible",
       "sections": {
         "medicalCodes": "Codes médicaux"
       },
@@ -544,6 +544,7 @@
     "noLabResultsLinked": "Aucun résultat d'analyse connecté à cette visite",
     "noLabResultsLinkedToCondition": "Aucun résultat d'analyse connecté à cette condition",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
+	"noMedicationsLinkedToLabResult": "Aucun médicament connecté à ce résultat d'analyse",
     "none": "Aucun",
     "noProceduresLinked": "Aucune procédure connectée à ce résultat d'analyse",
     "noRating": "Aucun avis",
@@ -1444,8 +1445,7 @@
       "title": "Visite - {{date}}",
       "treatmentPlan": "Plan de traitement",
       "visitInformation": "Informations sur la visite"
-    }
-  },
+    },
     "relationships": {
       "availableToLink": "{{count}} pouvant être connectés",
       "confirmRemove": "Supprimer cette connexion ?",
