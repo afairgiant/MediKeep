@@ -17,9 +17,9 @@
   },
   "manager": {
     "born": "Né(e) le : {{date}}",
-    "conditionsCount": "{{count}} pathologie(s)",
-    "conditionsCount_one": "{{count}} pathologie",
-    "conditionsCount_other": "{{count}} pathologies",
+    "conditionsCount": "{{count}} condition(s)",
+    "conditionsCount_one": "{{count}} condition",
+    "conditionsCount_other": "{{count}} conditions",
     "customPermissions": "Permissions personnalisées appliquées",
     "expires": "Expire le : {{date}}",
     "familyMembersSharedInfo": "{{count}} membre(s) de la famille partagé(s) avec vous par autrui.",
@@ -87,7 +87,7 @@
     "reject": "Rejeter",
     "relationship": "Lien de parenté :",
     "responseInfo": "Une fois que vous aurez répondu, l'expéditeur sera notifié et cette invitation sera marquée comme ayant reçu une réponse.",
-    "responseNote": "Note de réponse (Optionnelle)",
+    "responseNote": "Note de réponse (optionnelle)",
     "sent": "Envoyé le : {{date}}",
     "sharingDetails": "Détails de partage :",
     "title": "Réponse à l'invitation"
