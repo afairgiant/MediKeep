@@ -2,7 +2,7 @@
   "admin": {
     "createUser": {
       "linkPatient": {
-        "hint": "Au lieu de créer un nouveau dossier de patient, connectez le nouvel utilisateur à un patient existant (ex : un enfant qui a besoin de son propre compte).",
+        "hint": "Au lieu de créer un nouveau dossier de patient, connectez le nouvel utilisateur à un patient existant (ex : un enfant qui a désormais besoin de son propre compte).",
         "selfRecordBadge": "Dossier à soi",
         "selfRecordWarning": "Ceci est le dossier du propriétaire actuel. Un nouveau dossier à soi sera créé pour le propriétaire d'origine avec ses données démographiques copiées dedans. Le propriétaire d'origine recevra l'accès en édition à ce patient."
       },
@@ -65,8 +65,8 @@
   },
   "backup": {
     "existingBackups": {
-      "count_one": "{{count}} sauvegarde",
-      "count_other": "{{count}} sauvegardes",
+      "count_one": "{{count}} backup",
+      "count_other": "{{count}} backups",
       "download": "Télécharger",
       "noBackups": "Aucun backup trouvé",
       "previewRestore": "Aperçu de la restauration",
@@ -140,7 +140,7 @@
       "unknownType": "Type de backup inconnu"
     },
     "retention": {
-      "backupsUnit": "sauvegardes",
+      "backupsUnit": "backups",
       "currentStatus_one": "<strong>Statut actuel :</strong> {{count}} backup conservé (max : {{max}})",
       "currentStatus_other": "<strong>Statut actuel :</strong> {{count}} backups conservés (max : {{max}})",
       "daysUnit": "jours",
@@ -187,7 +187,7 @@
     },
     "subtitle": "Créez et gérez les backups système",
     "tabs": {
-      "backups": "Sauvegardes"
+      "backups": "Backups"
     },
     "unsavedBadge": "Non sauvegardé"
   },
@@ -214,7 +214,7 @@
       "checkbox": "Connecter à un dossier de patient existant",
       "currentOwner": "Propriétaire actuel",
       "dob": "Date de naissance",
-      "hint": "Au lieu de créer un nouveau dossier de patient, connectez le nouvel utilisateur à un patient existant (ex : un enfant qui a besoin de son propre compte).",
+      "hint": "Au lieu de créer un nouveau dossier de patient, connectez le nouvel utilisateur à un patient existant (ex : un enfant qui a désormais besoin de son propre compte).",
       "loading": "Chargement des patients...",
       "owner": "Propriétaire",
       "patientId": "ID",
@@ -246,7 +246,7 @@
     "loading": "Chargement du tableau de bord exhaustif...",
     "quickActions": {
       "auditLogDesc": "Voir le journal d'activité système",
-      "backups": "Sauvegardes",
+      "backups": "Backups",
       "backupsDesc": "Gestion des backups",
       "createUser": "Créer un nouvel utilisateur",
       "createUserDesc": "Créez un compte utilisateur avec un profil de patient",
@@ -306,28 +306,28 @@
       "injury_type": "Définitions de types de blessures réutilisables pour les listes déroulantes",
       "insurance": "Informations de couverture d'assurance des patients",
       "invitation": "Invitations système pour le partage et la collaboration",
-      "lab_result": "LRésultats d'analyse et valeurs",
+      "lab_result": "Résultats d'analyse et valeurs",
       "lab_result_file": "Documents et pièces jointes de résultats d'analyse",
       "medical_equipment": "Equipements et appareils médicaux prescrits aux patients",
-      "medical_specialty": "Spécialités médicales (p. ex. cardiologie) attribuées aux praticiens",
+      "medical_specialty": "Spécialités médicales (ex : cardiologie) assignées aux professionnels de santé",
       "medication": "Médicaments prescrits et dosages",
       "patient": "Données démographiques et informations de contact des patients",
       "patient_share": "Relations de partage de données de patients entre utilisateurs",
       "pharmacy": "Emplacements et informations de contact des pharmacies",
-      "practice": "Établissements médicaux — coordonnées et plusieurs emplacements",
+      "practice": "Etablissements médicaux - coordonnées et emplacements multiples",
       "practitioner": "Professionnels de santé et spécialistes",
       "procedure": "Procédures et opérations médicales",
       "symptom": "Définitions et suivi de symptômes",
-      "symptom_occurrence": "Entrées de crises symptômatiques individuelles",
+      "symptom_occurrence": "Entrées de crises symptomatiques individuelles",
       "treatment": "Plans de traitement et thérapies",
       "user": "Utilisateurs et administrateurs système",
       "vitals": "Tension artérielle, fréquence cardiaque, température"
     },
     "displayNames": {
       "medical_specialty": "Spécialités médicales",
-      "practice": "Établissements"
+      "practice": "Etablissements"
     },
-    "fallbackWarning": "Impossible de charger les modèles depuis le serveur. Affichage de la liste de modèle intégrée.",
+    "fallbackWarning": "Impossible de charger les modèles depuis le serveur. Affichage de la liste de modèles intégrée.",
     "filterAriaLabel": "Filtrer les modèles de données",
     "filterPlaceholder": "Filtrer les modèles...",
     "noMatchFilter": "Aucun modèle ne correspond à \"{{query}}\"",
@@ -341,7 +341,7 @@
   "fieldRenderer": {
     "autoGenerated": "Auto-généré(e)",
     "autoPopulated": "Auto-peuplé à partir de l'utilisateur actuel",
-    "computedField": "Calculé à partir de l'enregistrement associé (lecture seule)",
+    "computedField": "Calculé à partir d'une donnée s'y rapportant (lecture seule)",
     "enterField": "Saisissez {{field}}...",
     "enterPassword": "Saisissez le mot de passe pour le nouvel utilisateur...",
     "notApplicable": "Non applicable",
@@ -387,7 +387,7 @@
     "overallStatus": "Statut global du système",
     "performance": {
       "appMemory": "Mémoire de l'application (RSS)",
-      "cpuDetails": "App : {{appPercent}} % de {{cores}} coeurs (système : {{systemPercent}} %)",
+      "cpuDetails": "Appli : {{appPercent}} % de {{cores}} coeurs (système : {{systemPercent}} %)",
       "cpuUsage": "Utilisation du CPU",
       "memoryUsage": "Utilisation de la mémoire",
       "memoryUsed": "{{used}} Mb utilisé(s) (système : {{percent}} % de {{total}} Mb)",
@@ -415,7 +415,7 @@
       "providerType": "Type de fournisseur",
       "registrationViaSso": "Enregistrement via SSO",
       "ssoStatus": "Statut du SSO",
-      "title": "Authentification unique (SSO)"
+      "title": "Single Sign-On (SSO)"
     },
     "storage": {
       "appStorage": "Stockage de l'application",
@@ -435,7 +435,7 @@
     "backToModel": "Retour à {{modelName}}",
     "bulkDeleteAssociated": "Toutes les données associées (y compris {{types}}) seront également supprimées.",
     "bulkDeleteFailed": "Echec de la suppression de masse",
-    "bulkDeleteWarning": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrements {{modelName}}.",
+    "bulkDeleteWarning": "Ceci supprimera définitivement cette entrée de type {{modelName}} et toutes les données associées.",
     "bulkDeleteWarning_one": "Vous êtes sur le point de supprimer définitivement {{count}} entrée de type {{modelName}}.",
     "bulkDeleteWarning_other": "Vous êtes sur le point de supprimer définitivement {{count}} entrées de type {{modelName}}.",
     "changeRole": "Changer le rôle",
@@ -506,21 +506,21 @@
   "practices": {
     "locations": {
       "add": "Ajouter un emplacement",
-      "empty": "Aucun emplacement pour le moment.",
-      "labelField": "Libellé",
-      "labelPlaceholder": "Cabinet principal",
+      "empty": "Aucun emplacement défini.",
+      "labelField": "Label",
+      "labelPlaceholder": "Etablissement principal",
       "locationNumber": "Emplacement {{num}}",
       "moveDown": "Descendre",
-      "moveUp": "Monter",
+      "moveUp": "Remonter",
       "title": "Emplacements"
     },
-    "subtitle": "Gérez les établissements médicaux — coordonnées, emplacements, et plus encore.",
-    "title": "Établissements"
+    "subtitle": "Gérez les établissements médicaux - coordonnées, emplacements, et plus.+",
+    "title": "Etablissements"
   },
   "practitioner": {
-    "quickAddSpecialty": "+ Ajouter une nouvelle spécialité…",
+    "quickAddSpecialty": "+ Ajouter une nouvelle spécialité...",
     "specialtyPlaceholder": "Sélectionnez une spécialité",
-    "specialtySaved": "Spécialité prête à l'emploi"
+    "specialtySaved": "Spécialité prête à être utilisée"
   },
   "settings": {
     "dataRetention": {
@@ -533,23 +533,23 @@
     "saveAllChanges": "Sauvegarder tous les changements",
     "sso": {
       "autoRedirect": "Redirection automatique vers le fournisseur",
-      "envOnly": "Ces paramètres sont définis par des variables d'environnement et ne peuvent pas être modifiés ici.",
+      "envOnly": "Ces paramètres sont définis par des variables d'environnement et ne peuvent être modifiés ici.",
       "ssoDisabledInfo": "Le SSO est actuellement désactivé. Pour l'activer, configurez les variables d'environnement suivantes et redémarrez l'application :",
       "ssoOnly": "Mode SSO uniquement",
       "ssoRegistration": "Enregistrement via SSO",
       "testConnection": "Tester la connexion",
       "testConnectionDesc": "Testez la connexion et la configuration du fournisseur SSO",
       "testSsoConnection": "Tester la connexion SSO",
-      "title": "Authentification unique (SSO)"
+      "title": "Single Sign-On (SSO)"
     },
     "subtitle": "Configurez les paramètres système et la politique de rétention",
     "title": "Paramètres administrateur",
     "userManagement": {
       "allowRegistration": "Permettre l'enregistrement de nouveaux utilisateurs",
-      "allowRegistrationDesc": "Activer ou désactiver la possibilité pour les nouveaux utilisateurs de créer des comptes depuis la page de connexion"
+      "allowRegistrationDesc": "Activez ou désactivez la possibilité pour les nouveaux utilisateurs de créer des comptes depuis la page de connexion"
     },
     "warnings": {
-      "sso_only_no_registration_route": "Le mode SSO uniquement est activé et l'inscription des utilisateurs est désormais désactivée. Aucun nouveau compte ne peut être créé en libre-service - un administrateur doit les créer. Si ce n'était pas voulu, réactivez l'inscription ou désactivez le mode SSO uniquement."
+      "sso_only_no_registration_route": "Le mode SSO uniquement est activé et l'enregistrement de nouveaux utilisateurs est désormais désactivé. Aucun nouveau compte ne peut être créé indépendamment ; un administrateur devra les créer. Si ce n'était pas prévu, réactivez l'enregistrement de nouveaux utilisateurs ou désactivez le mode SSO uniquement."
     }
   },
   "shared": {
@@ -633,7 +633,7 @@
     "restoreTo": "vers",
     "restoreToOriginal": "Restaurer à l'emplacement d'origine",
     "searchAriaLabel": "Rechercher dans les fichiers de la corbeille",
-    "searchPlaceholder": "Rechercher par nom de fichier ou par chemin...",
+    "searchPlaceholder": "Rechercher par nom de fichier ou par arborescence...",
     "showingFiltered": "Affichage de {{shown}} sur {{total}} {{files}}",
     "subtitle": "Gérez les fichiers téléversés supprimés. Restaurez les fichiers à leur emplacement d'origine ou supprimez-les définitivement pour libérer de l'espace de stockage.",
     "tableHeaders": {
@@ -683,7 +683,7 @@
     "noUsersMatchFilters": "Aucun utilisateur ne correspond à vos filtres. Essayez d'ajuster ou d'effacer les filtres.",
     "passwordModal": {
       "bothFieldsRequired": "Les deux champs de mot de passe sont requis",
-      "confirmPlaceholder": "Confirmer le nouveau mot de passe",
+      "confirmPlaceholder": "Confirmez le nouveau mot de passe",
       "enterNewPassword": "Saisissez le nouveau mot de passe",
       "forceChange": "Forcer le changement de mot de passe à la prochaine connexion",
       "immediateReset": "Ceci réinitialisera immédiatement le mot de passe de l'utilisateur. Ce dernier devra utiliser le nouveau mot de passe pour se connecter.",
@@ -712,7 +712,7 @@
       "all": "Tous les statuts"
     },
     "tableHeaders": {
-      "auth": "Authentification",
+      "auth": "Auth",
       "lastLogin": "Dernière connexion"
     },
     "toggleActiveModal": {
