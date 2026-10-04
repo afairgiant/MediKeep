@@ -37,7 +37,7 @@
     "showMore": "Afficher plus",
     "tryAgain": "Réessayer",
     "update": "Mettre à jour",
-    "view": "Afficher",
+    "view": "Afficher"
   },
   "conditions": {
     "addNew": "Ajouter une nouvelle condition",
@@ -543,7 +543,6 @@
     "noEquipmentLinked": "Aucun équipement connecté à ce traitement",
     "noLabResultsLinked": "Aucun résultat d'analyse connecté à cette visite",
     "noLabResultsLinkedToCondition": "Aucun résultat d'analyse connecté à cette condition",
-    "noMedicationsLinked": "No medications linked to this condition",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
     "none": "Aucun",
     "noProceduresLinked": "Aucune procédure connectée à ce résultat d'analyse",
@@ -662,7 +661,7 @@
     "selectTreatment": "Veuillez sélectionner un traitement",
     "selectVisit": "Veuillez sélectionner une visite",
     "underDevelopment": "Cette section est actuellement en cours de développement.",
-    "updateSuccess": "Mise à jour réussie",
+    "updateSuccess": "Mise à jour réussie"
   },
   "modals": {
     "chooseConditionsToLink": "Choisissez des conditions à connecter",
@@ -1457,8 +1456,7 @@
       "purpose": "But",
       "removeLink": "Supprimer la connexion",
       "selectPlaceholder": "Choisissez les entrées à connecter"
-    }
-  },
+    },
   "vitals": {
     "form": {
       "dateTimePlaceholder": "Sélectionnez la date et l'heure",
