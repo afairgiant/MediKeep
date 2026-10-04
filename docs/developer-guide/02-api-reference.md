@@ -4739,7 +4739,31 @@ Base path: `/api/v1/paperless`
 
 ### 14.1 System
 
-Base path: `/api/v1/system`
+#### Liveness Check
+
+`GET /health`
+
+Served from the application root, not under `/api/v1`. Used by the Docker
+`HEALTHCHECK` and the compose healthcheck.
+
+- **Authentication**: No
+- **Purpose**: Confirm the process is serving requests; does not check the database
+- **Success Response** (200):
+
+```json
+{
+  "status": "ok",
+  "app": "MediKeep",
+  "version": "0.71.0"
+}
+```
+
+#### Unknown API Paths
+
+A `GET` to any `/api/...` path that matches no endpoint returns 404 in the
+standard error format with `error_code` `NOT-404`.
+
+Base path for the endpoints below: `/api/v1/system`
 
 #### Health Check
 

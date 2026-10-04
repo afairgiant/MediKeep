@@ -92,10 +92,8 @@ setup_error_handling(app)
 # Include API routers
 app.include_router(api_router, prefix="/api/v1")
 
-# Setup static files and get directory paths
-static_dir, html_dir = setup_static_files(app)
 
-
+# Must be registered before setup_static_files(), whose catch-all matches every GET
 @app.get("/health")
 def health():
     """Health check endpoint"""
@@ -103,3 +101,6 @@ def health():
         "Health check requested", extra={"category": "app", "event": "health_check"}
     )
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
+
+
+setup_static_files(app)

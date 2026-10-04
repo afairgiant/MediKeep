@@ -384,7 +384,7 @@ class TestUserWorkflows:
         assert health_response.status_code == 200
 
         health_data = health_response.json()
-        assert health_data["status"] == "healthy"
+        assert health_data["status"] == "ok"
 
         # Test version endpoint
         version_response = requests.get(

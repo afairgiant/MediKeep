@@ -1410,11 +1410,14 @@ Response:
 
 ```json
 {
-  "status": "healthy",
-  "version": "0.33.1",
-  "database": "connected"
+  "status": "ok",
+  "app": "MediKeep",
+  "version": "0.71.0"
 }
 ```
+
+This is a liveness check only: it confirms the process is serving requests and
+does not check the database.
 
 #### Docker Health Checks
 

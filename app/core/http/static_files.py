@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.types import Receive, Scope, Send
@@ -197,9 +197,9 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             directly with proper MIME types. All other paths get index.html
             for React Router client-side routing.
             """
-            # If path starts with /api, let it fall through to API routes
+            # No API route matched; a 200 here would hide the miss from clients
             if full_path.startswith("api/"):
-                return {"error": "API endpoint not found"}
+                raise HTTPException(status_code=404, detail="API endpoint not found")
 
             # Serve root-level static files (SVGs, favicons, etc.) directly.
             # Only single-segment names with no path separators are considered,
