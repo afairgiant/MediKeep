@@ -90,7 +90,7 @@
         "allergen": "Allergène",
         "onsetDate": "Date de survenue"
       }
-    },
+    }
   },
     "componentCatalog": {
     "fetchError": "Echec du chargement du catalogue de résultats d'analyse",
