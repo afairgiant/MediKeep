@@ -1456,47 +1456,47 @@
       "purpose": "But",
       "removeLink": "Supprimer la connexion",
       "selectPlaceholder": "Choisissez les entrées à connecter"
+	}
     },
-  "vitals": {
-    "form": {
-      "dateTimePlaceholder": "Sélectionnez la date et l'heure",
-      "devicePlaceholder": "ex : tensiomètre digital, modèle de thermomètre...",
-      "heightNotSet": "Taille non définie dans le profil du patient - calcul de l'IMC non disponible",
-      "locationPlaceholder": "En quel lieu ces mesures ont-elles été faites ?",
-      "lockedByImport": "Géré par l'importation système",
-      "missingPatientInfo": "Informations sur le patient manquantes",
-      "notesPlaceholder": "Notes supplémentaires sur les mesures des signes vitaux...",
-      "pasteDateTimeDescription": "Saisissez ou collez la date/l'heure, ou cliquez sur le calendrier pour la sélectionner",
-      "patientHeight": "Taille du patient : {{height}} pouces (d'après le profil)",
-      "validation": {
-        "a1cMax": "L'A1C ne peut pas dépasser 20 %",
-        "a1cMin": "L'A1C doit valoir au moins 0 %",
-        "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
-        "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
-        "dateInFuture": "La date ne peut pas se situer dans le futur",
-        "dateRequired": "La date et l'heure de la mesure sont requises",
-        "deviceMaxLength": "Le nom de l'appareil ne peut pas dépasser 100 caractères",
-        "diastolicMax": "La PAD ne peut pas dépasser 200 mmHg",
-        "diastolicMin": "La PAD doit valoir au moins 30 mmHg",
-        "heartRateMax": "La fréquence cardiaque ne peut pas dépasser 250 BPM",
-        "heartRateMin": "La fréquence cardiaque doit valoir au moins 30 BPM",
-        "notesMaxLength": "Les notes ne peuvent pas dépasser 5 000 caractères",
-        "oxygenMax": "La saturation en oxygène ne peut pas dépasser 100 %",
-        "oxygenMin": "La saturation en oxygène doit valoir au moins 50 %",
-        "painScaleMax": "L'échelle de la douleur ne peut pas dépasser 10",
-        "painScaleMin": "L'échelle de la douleur doit valoir au moins 0",
-        "respiratoryRateMax": "La fréquence respiratoire ne peut pas dépasser 100/min",
-        "respiratoryRateMin": "La fréquence respiratoire doit valoir au moins 5/min",
-        "systolicMax": "La PAS ne peut pas dépasser 300 mmHg",
-        "systolicMin": "La PAS doit valoir au moins 50 mmHg",
-        "temperatureMax": "La température ne peut pas dépasser {{max}}{{unit}}",
-        "temperatureMin": "La température doit valoir au moins {{min}}{{unit}}",
-        "timeInFuture": "L'heure sélectionnée ne peut pas se situer dans le futur",
-        "weightMax": "Le poids ne peut pas dépasser {{max}} {{unit}}",
-        "weightMin": "Le poids doit valoir au moins {{min}} {{unit}}"
+    "vitals": {
+      "form": {
+        "dateTimePlaceholder": "Sélectionnez la date et l'heure",
+        "devicePlaceholder": "ex : tensiomètre digital, modèle de thermomètre...",
+        "heightNotSet": "Taille non définie dans le profil du patient - calcul de l'IMC non disponible",
+        "locationPlaceholder": "En quel lieu ces mesures ont-elles été faites ?",
+        "lockedByImport": "Géré par l'importation système",
+        "missingPatientInfo": "Informations sur le patient manquantes",
+        "notesPlaceholder": "Notes supplémentaires sur les mesures des signes vitaux...",
+        "pasteDateTimeDescription": "Saisissez ou collez la date/l'heure, ou cliquez sur le calendrier pour la sélectionner",
+        "patientHeight": "Taille du patient : {{height}} pouces (d'après le profil)",
+        "validation": {
+          "a1cMax": "L'A1C ne peut pas dépasser 20 %",
+          "a1cMin": "L'A1C doit valoir au moins 0 %",
+          "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
+          "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
+          "dateInFuture": "La date ne peut pas se situer dans le futur",
+          "dateRequired": "La date et l'heure de la mesure sont requises",
+          "deviceMaxLength": "Le nom de l'appareil ne peut pas dépasser 100 caractères",
+          "diastolicMax": "La PAD ne peut pas dépasser 200 mmHg",
+          "diastolicMin": "La PAD doit valoir au moins 30 mmHg",
+          "heartRateMax": "La fréquence cardiaque ne peut pas dépasser 250 BPM",
+          "heartRateMin": "La fréquence cardiaque doit valoir au moins 30 BPM",
+          "notesMaxLength": "Les notes ne peuvent pas dépasser 5 000 caractères",
+          "oxygenMax": "La saturation en oxygène ne peut pas dépasser 100 %",
+          "oxygenMin": "La saturation en oxygène doit valoir au moins 50 %",
+          "painScaleMax": "L'échelle de la douleur ne peut pas dépasser 10",
+          "painScaleMin": "L'échelle de la douleur doit valoir au moins 0",
+          "respiratoryRateMax": "La fréquence respiratoire ne peut pas dépasser 100/min",
+          "respiratoryRateMin": "La fréquence respiratoire doit valoir au moins 5/min",
+          "systolicMax": "La PAS ne peut pas dépasser 300 mmHg",
+          "systolicMin": "La PAS doit valoir au moins 50 mmHg",
+          "temperatureMax": "La température ne peut pas dépasser {{max}}{{unit}}",
+          "temperatureMin": "La température doit valoir au moins {{min}}{{unit}}",
+          "timeInFuture": "L'heure sélectionnée ne peut pas se situer dans le futur",
+          "weightMax": "Le poids ne peut pas dépasser {{max}} {{unit}}",
+          "weightMin": "Le poids doit valoir au moins {{min}} {{unit}}"
+        }
       }
-    }
-  },
+    },
   "warning": "Avertissement"
-}
-}
+  }
