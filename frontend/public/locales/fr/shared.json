@@ -246,6 +246,7 @@
     "rating": "Avis",
     "reason": "Raison",
     "recordedBy": "Mesuré(e) par",
+	"recordedDate": "Date de mesure",
     "relatedCondition": "Condition connectée",
     "relatedConditions": "Conditions connectées",
     "relationship": "Lien de parenté",
