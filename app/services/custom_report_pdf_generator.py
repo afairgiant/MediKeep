@@ -10,7 +10,7 @@ import io
 import unicodedata
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from PIL import Image as PILImage
 from reportlab.lib import colors
@@ -35,7 +35,14 @@ from reportlab.platypus import (
 
 from app.core.logging.config import get_logger
 from app.services.export_service import UnitConverter
-from app.services.report_fonts import CJK_BOLD_FONT_PATHS, CJK_NORMAL_FONT_PATHS
+from app.services.report_fonts import (
+    CJK_BOLD_FONT_PATHS,
+    CJK_LANGUAGES,
+    CJK_NORMAL_FONT_PATHS,
+    THAI_BOLD_FONT_PATHS,
+    THAI_LANGUAGES,
+    THAI_NORMAL_FONT_PATHS,
+)
 from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
@@ -87,9 +94,10 @@ class CustomReportPDFGenerator:
     # Constants for photo handling
     PATIENT_PHOTO_PATTERN = "patient_{patient_id}_*.jpg"
 
-    # CJK languages that require dedicated CJK fonts for PDF rendering.
+    # Languages that require dedicated fonts for PDF rendering.
     # Latin-based fonts (DejaVu, Arial) lack glyphs for these scripts.
-    CJK_LANGUAGES = frozenset({"zh", "ja", "ko"})
+    CJK_LANGUAGES = CJK_LANGUAGES
+    THAI_LANGUAGES = THAI_LANGUAGES
 
     def __init__(self):
         self._register_fonts()
@@ -126,9 +134,10 @@ class CustomReportPDFGenerator:
         """
         Register Unicode-compatible fonts for international character support.
 
-        Registers two font families:
+        Registers three font families:
         1. Latin/Cyrillic fonts (UnicodeFont / UnicodeFont-Bold) for most languages
         2. CJK fonts (CJKFont / CJKFont-Bold) for Chinese, Japanese, and Korean
+        3. Thai fonts (ThaiFont / ThaiFont-Bold) for Thai
 
         Latin Font Priority:
             1. DejaVu Sans - Best Unicode coverage for Latin/Cyrillic/Greek
@@ -202,6 +211,27 @@ class CustomReportPDFGenerator:
             )
             self._has_cjk_font = cjk_registered
 
+            # --- Thai fonts ---
+            thai_registered = self._try_register_font(
+                "ThaiFont", THAI_NORMAL_FONT_PATHS
+            )
+            thai_bold_registered = self._try_register_font(
+                "ThaiFont-Bold", THAI_BOLD_FONT_PATHS
+            )
+            self.font_thai_normal = "ThaiFont" if thai_registered else self.font_normal
+            self.font_thai_bold = (
+                "ThaiFont-Bold" if thai_bold_registered else self.font_thai_normal
+            )
+            self._has_thai_font = thai_registered
+            if thai_registered:
+                pdfmetrics.registerFontFamily(
+                    "ThaiFont",
+                    normal="ThaiFont",
+                    bold=self.font_thai_bold,
+                    italic="ThaiFont",
+                    boldItalic=self.font_thai_bold,
+                )
+
         except Exception as e:
             logger.error(f"Error registering fonts: {e}")
             self.font_normal = "Helvetica"
@@ -209,6 +239,28 @@ class CustomReportPDFGenerator:
             self.font_cjk_normal = "Helvetica"
             self.font_cjk_bold = "Helvetica-Bold"
             self._has_cjk_font = False
+            self.font_thai_normal = "Helvetica"
+            self.font_thai_bold = "Helvetica-Bold"
+            self._has_thai_font = False
+
+    def _dedicated_fonts(self, language: str) -> Optional[Tuple[str, str]]:
+        """Return (normal, bold) fonts for languages needing one, else None."""
+        if language in self.CJK_LANGUAGES:
+            script, available = "CJK", self._has_cjk_font
+            fonts = (self.font_cjk_normal, self.font_cjk_bold)
+        elif language in self.THAI_LANGUAGES:
+            script, available = "Thai", self._has_thai_font
+            fonts = (self.font_thai_normal, self.font_thai_bold)
+        else:
+            return None
+        if not available:
+            logger.warning(
+                "No %s font available for language '%s'. "
+                "Characters may not render correctly in the PDF.",
+                script,
+                language,
+            )
+        return fonts
 
     def _create_styles(
         self,
@@ -422,17 +474,13 @@ class CustomReportPDFGenerator:
         self.translator = get_translator(language, date_format)
 
         # Rebuild styles per request so font selection is always correct
-        if language in self.CJK_LANGUAGES:
-            if not self._has_cjk_font:
-                logger.warning(
-                    "No CJK font available for language '%s'. "
-                    "Characters may not render correctly in the PDF.",
-                    language,
-                )
-            self.table_font_normal = self.font_cjk_normal
-            self.table_font_bold = self.font_cjk_bold
+        dedicated = self._dedicated_fonts(language)
+        if dedicated:
+            font_normal, font_bold = dedicated
+            self.table_font_normal = font_normal
+            self.table_font_bold = font_bold
             self.styles = self._create_styles(
-                font_normal=self.font_cjk_normal, font_bold=self.font_cjk_bold
+                font_normal=font_normal, font_bold=font_bold
             )
         else:
             self.table_font_normal = self.font_normal

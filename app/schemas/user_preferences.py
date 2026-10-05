@@ -18,6 +18,7 @@ SUPPORTED_LANGUAGES = [
     "pl",
     "zh",
     "el",
+    "th",
 ]
 
 # Supported date formats - single source of truth

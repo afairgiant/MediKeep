@@ -9,7 +9,7 @@ The module reads from: frontend/public/locales/{lang}/reportPdf.json
 Translation keys use camelCase to match the frontend i18next convention.
 Interpolation uses {{variable}} syntax matching i18next.
 
-Supports 12 languages: en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el
+Supports 13 languages: en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el, th
 """
 
 import json
@@ -21,23 +21,12 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from app.core.logging.config import get_logger
+from app.schemas.user_preferences import SUPPORTED_LANGUAGES as _SUPPORTED_LANGUAGES
 
 logger = get_logger(__name__, "app")
 
-SUPPORTED_LANGUAGES = (
-    "en",
-    "fr",
-    "de",
-    "es",
-    "it",
-    "pt",
-    "ru",
-    "sv",
-    "nl",
-    "pl",
-    "zh",
-    "el",
-)
+# Single source of truth lives in the preferences schema, so the two cannot drift.
+SUPPORTED_LANGUAGES = tuple(_SUPPORTED_LANGUAGES)
 
 
 def _resolve_locales_dir() -> Path:
@@ -284,7 +273,7 @@ def get_translator(language: str = "en", date_format: str = "mdy") -> ReportTran
     """Create a ReportTranslator for the given language and date format.
 
     Args:
-        language: ISO 639-1 language code (en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el)
+        language: ISO 639-1 language code (en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el, th)
         date_format: Date format preference (mdy, dmy, ymd)
 
     Returns:

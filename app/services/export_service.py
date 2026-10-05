@@ -1711,6 +1711,12 @@ class ExportService:
                 bottomMargin=18,
             )
             styles = getSampleStyleSheet()
+            font_normal, font_bold = self._pdf_fonts(metadata.get("language", "en"))
+            for base_style in styles.byName.values():
+                if isinstance(base_style, ParagraphStyle):
+                    base_style.fontName = (
+                        font_bold if "Bold" in base_style.fontName else font_normal
+                    )
             story = []
 
             # Title
@@ -1776,7 +1782,7 @@ class ExportService:
                             ("BACKGROUND", (0, 0), (0, -1), colors.grey),
                             ("TEXTCOLOR", (0, 0), (0, -1), colors.whitesmoke),
                             ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                            ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+                            ("FONTNAME", (0, 0), (-1, -1), font_normal),
                             ("FONTSIZE", (0, 0), (-1, -1), 10),
                             ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
                             ("BACKGROUND", (1, 0), (-1, -1), colors.beige),
@@ -1803,7 +1809,7 @@ class ExportService:
                     "SectionHeader",
                     parent=styles["Heading2"],
                     fontSize=14,
-                    fontName="Helvetica-Bold",
+                    fontName=font_bold,
                     textColor=colors.Color(0.2, 0.4, 0.6),  # Professional blue
                     spaceAfter=16,
                     spaceBefore=20,
@@ -1818,7 +1824,13 @@ class ExportService:
                 if isinstance(section_data, list) and len(section_data) > 0:
                     # Use card-based format for better readability with long text fields
                     self._add_card_based_section(
-                        story, section_data, section_name, styles, translator=t
+                        story,
+                        section_data,
+                        section_name,
+                        styles,
+                        translator=t,
+                        font_normal=font_normal,
+                        font_bold=font_bold,
                     )
 
                 else:
@@ -1904,8 +1916,24 @@ class ExportService:
             error_buffer.close()
             return error_pdf_bytes
 
+    @staticmethod
+    def _pdf_fonts(language: str) -> tuple:
+        """Return (normal, bold) PDF font names; Helvetica unless the script needs another."""
+        # Imported here: custom_report_pdf_generator imports this module (UnitConverter)
+        from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
+
+        dedicated = CustomReportPDFGenerator()._dedicated_fonts(language)
+        return dedicated or ("Helvetica", "Helvetica-Bold")
+
     def _add_card_based_section(
-        self, story, section_data, section_name, styles, translator=None
+        self,
+        story,
+        section_data,
+        section_name,
+        styles,
+        translator=None,
+        font_normal="Helvetica",
+        font_bold="Helvetica-Bold",
     ):
         """Add a section using card-based format instead of tables for better readability."""
         t = translator
@@ -1923,7 +1951,7 @@ class ExportService:
             parent=styles["Normal"],
             fontSize=9,
             leading=12,
-            fontName="Helvetica-Bold",
+            fontName=font_bold,
             textColor=colors.white,
             alignment=2,  # Right align
         )
@@ -2346,8 +2374,8 @@ class ExportService:
                             ("BACKGROUND", (1, 0), (1, -1), value_bg_color),
                             ("TEXTCOLOR", (0, 0), (0, -1), text_color),
                             ("TEXTCOLOR", (1, 0), (1, -1), value_text_color),
-                            ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-                            ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
+                            ("FONTNAME", (0, 0), (0, -1), font_bold),
+                            ("FONTNAME", (1, 0), (1, -1), font_normal),
                             ("FONTSIZE", (0, 0), (-1, -1), 9),
                             ("ALIGN", (0, 0), (0, -1), "RIGHT"),
                             ("ALIGN", (1, 0), (1, -1), "LEFT"),

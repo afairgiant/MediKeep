@@ -472,6 +472,13 @@ function AllergyCard({ allergy }) {
 `fallbackLng` is `en`, so a key missing from `public/locales/en` has nothing to
 fall back to and i18next renders the raw key into the UI.
 
+Adding a language to the UI: add it to `SUPPORTED_LANGUAGES` in
+`app/schemas/user_preferences.py` (also drives PDF reports) and to
+`frontend/src/constants/languages.ts`; `tests/test_supported_languages_sync.py`
+fails if they differ. A locale directory may exist before it is listed.
+Languages needing a non-Latin PDF font also need an entry in `app/services/report_fonts.py`
+and a font package in `docker/Dockerfile`.
+
 ```bash
 npm run i18n:check     # parity of the other 12 locales against English
 node scripts/check-exposed-keys.js --locale en   # keys used in code but absent from English
