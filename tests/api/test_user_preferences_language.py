@@ -297,6 +297,8 @@ class TestUserPreferencesLanguage:
             "nl",
             "pl",
             "zh",
+            "el",
+            "th",
         ]
 
         for lang in supported_languages:
