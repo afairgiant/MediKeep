@@ -1,6 +1,7 @@
 """Thai PDF/chart font selection."""
 
 import pytest
+from reportlab.lib.fonts import tt2ps
 
 from app.services import report_fonts
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
@@ -59,3 +60,9 @@ class TestGeneratorFonts:
         gen = CustomReportPDFGenerator()
         assert gen._has_thai_font is True
         assert gen.font_thai_normal == "ThaiFont"
+
+    @pytest.mark.skipif(find_thai_font_path() is None, reason="no Thai font installed")
+    def test_inline_bold_maps_to_thai_bold(self):
+        gen = CustomReportPDFGenerator()
+        assert tt2ps("ThaiFont", 1, 0) == gen.font_thai_bold
+        assert tt2ps("ThaiFont", 0, 0) == "ThaiFont"

@@ -223,6 +223,14 @@ class CustomReportPDFGenerator:
                 "ThaiFont-Bold" if thai_bold_registered else self.font_thai_normal
             )
             self._has_thai_font = thai_registered
+            if thai_registered:
+                pdfmetrics.registerFontFamily(
+                    "ThaiFont",
+                    normal="ThaiFont",
+                    bold=self.font_thai_bold,
+                    italic="ThaiFont",
+                    boldItalic=self.font_thai_bold,
+                )
 
         except Exception as e:
             logger.error(f"Error registering fonts: {e}")
