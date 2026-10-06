@@ -112,6 +112,10 @@ _INTERPOLATION_RE = re.compile(r"\{\{(\w+)\}\}")
 _VALUE_SEPARATOR_RE = re.compile(r"[\s_-]+")
 
 
+# Stored gender codes (see app/schemas/validators.py) -> choice value keys
+_GENDER_CODES = {"M": "male", "F": "female", "U": "unknown"}
+
+
 class ReportTranslator:
     """Translator for PDF report generation.
 
@@ -189,16 +193,30 @@ class ReportTranslator:
         return result or text
 
     def relationship(self, key: str) -> str:
-        """Get translated family relationship label.
+        """Get translated relationship label.
 
-        key is the backend enum value (e.g., 'paternal_grandfather'); unknown
-        values fall back to a title-cased version ('Paternal Grandfather').
+        key is a backend relationship value (family: 'paternal_grandfather';
+        emergency contact: 'spouse', 'neighbor'). Family-specific labels are
+        looked up first, then the shared choice values; unknown values fall back
+        to a title-cased version ('Paternal Grandfather').
         """
-        camel_key = self._to_camel_case(key)
-        result = self._data.get("relationships", {}).get(
-            camel_key
-        ) or self._en_data.get("relationships", {}).get(camel_key)
+        camel_key = self._to_camel_case(
+            _VALUE_SEPARATOR_RE.sub("_", str(key).strip().lower())
+        )
+        result = (
+            self._data.get("relationships", {}).get(camel_key)
+            or self._en_data.get("relationships", {}).get(camel_key)
+            or self._data.get("values", {}).get(camel_key)
+            or self._en_data.get("values", {}).get(camel_key)
+        )
         return result or key.replace("_", " ").title()
+
+    def gender(self, raw: Any) -> str:
+        """Get translated gender text from stored codes ('M', 'F', 'OTHER', 'U')."""
+        text = str(raw).strip() if raw is not None else ""
+        if not text:
+            return ""
+        return self.value(_GENDER_CODES.get(text.upper(), text))
 
     def text(self, key: str, **kwargs) -> str:
         """Get translated report text with optional interpolation.
