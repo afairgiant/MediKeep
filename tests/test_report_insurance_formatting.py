@@ -9,6 +9,7 @@ from app.services.report_translations import (
     ReportTranslator,
     get_translator,
 )
+from tests.utils.report_story import story_texts
 
 # Keys the Insurance form writes into coverage_details / contact_info
 # (frontend/src/utils/nestedFormUtils.js, insuranceFieldConfig).
@@ -50,7 +51,7 @@ CONTACT_KEYS = [
 
 
 def _extract_text(story) -> str:
-    return " ".join(str(el.text) for el in story if hasattr(el, "text"))
+    return " ".join(story_texts(story))
 
 
 @pytest.fixture
