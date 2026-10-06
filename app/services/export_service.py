@@ -50,38 +50,37 @@ UNIT_LABELS = {
 }
 
 
-# Card fields whose stored value is a choice (not free text) and is translated in PDFs
-_ENUM_VALUE_FIELDS = frozenset(
-    {
-        "status",
-        "severity",
-        "priority",
-        "gender",
-        "laterality",
-        "test_category",
-        "test_type",
-        "labs_result",
-        "insurance_type",
-        "medication_type",
-        "treatment_category",
-        "category",
-        "outcome",
-        "mode",
-        "visit_type",
-        "relationship_to_holder",
-        "route",
-        "glucose_context",
-        "location",
-        "procedure_type",
-        "procedure_setting",
-        "anesthesia_type",
-        "treatment_type",
-        "frequency",
-        "site",
-        "equipment_type",
-    }
-)
+# Card fields, per section, whose stored value comes from a fixed choice list and is
+# translated in PDFs. Other fields (including same-named ones in other sections, such
+# as vitals "location") are free text and must be rendered exactly as stored.
+_CHOICE_FIELDS_BY_SECTION = {
+    "medications": frozenset({"status", "medication_type", "route"}),
+    "lab_results": frozenset({"status", "test_category", "test_type", "labs_result"}),
+    "allergies": frozenset({"status", "severity"}),
+    "conditions": frozenset({"status", "severity"}),
+    "immunizations": frozenset({"route", "site"}),
+    "procedures": frozenset(
+        {"status", "outcome", "procedure_type", "procedure_setting", "anesthesia_type"}
+    ),
+    "treatments": frozenset(
+        {"status", "mode", "treatment_type", "treatment_category", "frequency"}
+    ),
+    "encounters": frozenset({"priority", "visit_type", "location"}),
+    "vitals": frozenset({"glucose_context"}),
+    "symptoms": frozenset({"status", "severity"}),
+    "injuries": frozenset({"status", "severity", "laterality"}),
+    "insurance": frozenset({"status", "insurance_type", "relationship_to_holder"}),
+    "medical_equipment": frozenset({"status", "equipment_type"}),
+}
 
+# Sections whose "relationship" / "gender" fields hold stored choice values
+_RELATIONSHIP_SECTIONS = frozenset({"family_history", "emergency_contacts"})
+_GENDER_SECTIONS = frozenset({"family_history"})
+
+# Insurance coverage_details keys that hold a choice (all other details are free text)
+_INSURANCE_CHOICE_DETAIL_KEYS = frozenset(
+    {"plan_type", "dental_plan_type", "vision_plan_type", "prescription_plan_type"}
+)
 
 # Vitals fields whose unit label is exported in a sibling field
 _VITAL_UNIT_FIELDS = {
@@ -2140,7 +2139,8 @@ class ExportService:
             if field_name in ("coverage_details", "contact_info"):
                 if isinstance(value, dict):
                     return "\n".join(
-                        f"{t.insurance_detail(key)}: {t.value(detail)}"
+                        f"{t.insurance_detail(key)}: "
+                        f"{t.value(detail) if key in _INSURANCE_CHOICE_DETAIL_KEYS else detail}"
                         for key, detail in value.items()
                         if detail not in (None, "")
                     ) or None
@@ -2148,14 +2148,16 @@ class ExportService:
             if field_name == "attached_files" and str_value == "No files attached":
                 return t.text("no_files_attached")
 
-            if field_name in ("relationship", "relationship_to_holder"):
+            if field_name == "relationship" and section_name in _RELATIONSHIP_SECTIONS:
                 return t.relationship(str_value)
 
-            if field_name == "gender":
+            if field_name == "gender" and section_name in _GENDER_SECTIONS:
                 return t.gender(str_value)
 
             # Translate stored choice values; free text is returned unchanged
-            if field_name in _ENUM_VALUE_FIELDS:
+            if field_name in _CHOICE_FIELDS_BY_SECTION.get(section_name, ()):
+                if field_name == "relationship_to_holder":
+                    return t.relationship(str_value)
                 return t.value(str_value)
 
             return str_value

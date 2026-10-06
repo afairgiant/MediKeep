@@ -309,3 +309,40 @@ class TestRelationshipAndGender:
         text = rows[t.field("coverage_details") + ":"]
         assert t.value("tiered_copay") in text
         assert "tiered_copay" not in text
+
+
+class TestFreeTextIsPreserved:
+    """Same-named fields outside their choice section are free text and stay as stored."""
+
+    @pytest.mark.parametrize(
+        "section,field,value",
+        [
+            ("vitals", "location", "home"),
+            ("treatments", "location", "office"),
+            ("immunizations", "location", "clinic"),
+            ("symptoms", "category", "vision"),
+            ("medications", "frequency", "weekly"),
+        ],
+    )
+    def test_free_text_field_not_translated(self, section, field, value):
+        rows = dict(_card_rows(section, {"name": "X", field: value}, language="de"))
+        label = get_translator("de").field(field) + ":"
+        assert rows[label] == value
+
+    def test_insurance_free_text_details_are_not_translated(self):
+        rows = dict(
+            _card_rows(
+                "insurance",
+                {
+                    "contact_info": {"notes": "OTHER"},
+                    "coverage_details": {"notes": "none", "plan_type": "other"},
+                },
+                language="de",
+            )
+        )
+        t = get_translator("de")
+        contact = rows[t.field("contact_info") + ":"]
+        coverage = rows[t.field("coverage_details") + ":"]
+        assert contact.endswith(": OTHER")
+        assert ": none" in coverage
+        assert t.value("other") in coverage
