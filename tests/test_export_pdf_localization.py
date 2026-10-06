@@ -150,3 +150,60 @@ class TestCardLocalization:
             "pharmacies", {"name": "P", "drive_through": True}, language="en"
         )
         assert ("Drive-through:", "Yes") in rows
+
+    def test_choice_fields_visit_type_and_holder_relationship_are_translated(self):
+        t = get_translator("de")
+        encounter = dict(_card_rows("encounters", {"visit_type": "follow_up"}))
+        insurance = dict(
+            _card_rows("insurance", {"relationship_to_holder": "spouse"})
+        )
+        assert encounter["Besuchsart:"] == t.value("follow_up") != "follow_up"
+        assert insurance["Beziehung zum Versicherungsnehmer:"] == t.value("spouse")
+        assert t.value("spouse") != "spouse"
+
+    @pytest.mark.parametrize("section", ["pharmacies", "emergency_contacts"])
+    def test_record_timestamps_are_shown(self, section):
+        rows = dict(
+            _card_rows(
+                section,
+                {
+                    "name": "X",
+                    "created_at": "2026-01-02T03:04:05",
+                    "updated_at": "2026-02-03T04:05:06",
+                },
+                language="en",
+            )
+        )
+        assert rows["Created:"] == "01/02/2026"
+        assert rows["Last updated:"] == "02/03/2026"
+
+    def test_lab_result_tags_are_shown(self):
+        rows = dict(
+            _card_rows(
+                "lab_results", {"test_name": "CBC", "tags": ["a", "b"]}, language="en"
+            )
+        )
+        assert rows["Tags:"] == "a, b"
+
+    def test_vitals_show_units(self):
+        rows = dict(
+            _card_rows(
+                "vitals",
+                {
+                    "temperature": 37.0,
+                    "temperature_unit": "°C",
+                    "weight": 70,
+                    "weight_unit": "kg",
+                    "height": 175,
+                    "height_unit": "cm",
+                },
+                language="en",
+            )
+        )
+        assert rows["Temperature:"] == "37.0 °C"
+        assert rows["Weight:"] == "70 kg"
+        assert rows["Height:"] == "175 cm"
+
+    def test_vitals_without_unit_show_bare_value(self):
+        rows = dict(_card_rows("vitals", {"weight": 70}, language="en"))
+        assert rows["Weight:"] == "70"

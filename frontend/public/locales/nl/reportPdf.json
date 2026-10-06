@@ -237,7 +237,9 @@
     "usageInstructions": "Gebruiksinstructies",
     "vaccineTradeName": "Handelsnaam vaccin",
     "visitType": "Type bezoek",
-    "zipCode": "Postcode"
+    "zipCode": "Postcode",
+    "createdAt": "Aangemaakt",
+    "updatedAt": "Laatst bijgewerkt"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Huisarts",

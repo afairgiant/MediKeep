@@ -237,7 +237,9 @@
     "usageInstructions": "Istruzioni per l'uso",
     "vaccineTradeName": "Nome commerciale del vaccino",
     "visitType": "Tipo di visita",
-    "zipCode": "CAP"
+    "zipCode": "CAP",
+    "createdAt": "Creato",
+    "updatedAt": "Ultimo aggiornamento"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Medico di base",

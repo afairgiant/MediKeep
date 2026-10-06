@@ -237,7 +237,9 @@
     "usageInstructions": "Οδηγίες χρήσης",
     "vaccineTradeName": "Εμπορική ονομασία εμβολίου",
     "visitType": "Τύπος επίσκεψης",
-    "zipCode": "Ταχυδρομικός κώδικας"
+    "zipCode": "Ταχυδρομικός κώδικας",
+    "createdAt": "Δημιουργήθηκε",
+    "updatedAt": "Τελευταία ενημέρωση"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Ιατρός Πρωτοβάθμιας Φροντίδας",

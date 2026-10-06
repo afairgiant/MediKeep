@@ -237,7 +237,9 @@
     "usageInstructions": "Instrukcja stosowania",
     "vaccineTradeName": "Nazwa handlowa szczepionki",
     "visitType": "Rodzaj wizyty",
-    "zipCode": "Kod pocztowy"
+    "zipCode": "Kod pocztowy",
+    "createdAt": "Utworzono",
+    "updatedAt": "Ostatnia aktualizacja"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Lekarz POZ",

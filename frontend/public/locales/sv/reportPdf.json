@@ -237,7 +237,9 @@
     "usageInstructions": "Bruksanvisning",
     "vaccineTradeName": "Vaccinets handelsnamn",
     "visitType": "Besökstyp",
-    "zipCode": "Postnummer"
+    "zipCode": "Postnummer",
+    "createdAt": "Skapad",
+    "updatedAt": "Senast uppdaterad"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primärvårdsläkare",

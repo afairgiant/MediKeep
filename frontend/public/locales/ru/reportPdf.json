@@ -237,7 +237,9 @@
     "usageInstructions": "Инструкция по применению",
     "vaccineTradeName": "Торговое название вакцины",
     "visitType": "Тип визита",
-    "zipCode": "Почтовый индекс"
+    "zipCode": "Почтовый индекс",
+    "createdAt": "Создано",
+    "updatedAt": "Последнее обновление"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Лечащий врач",

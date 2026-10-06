@@ -237,7 +237,9 @@
     "usageInstructions": "วิธีใช้",
     "vaccineTradeName": "ชื่อทางการค้าของวัคซีน",
     "visitType": "ประเภทการเข้าพบ",
-    "zipCode": "รหัสไปรษณีย์"
+    "zipCode": "รหัสไปรษณีย์",
+    "createdAt": "สร้างเมื่อ",
+    "updatedAt": "อัปเดตล่าสุด"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "แพทย์ปฐมภูมิ",

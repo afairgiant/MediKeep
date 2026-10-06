@@ -237,7 +237,9 @@
     "usageInstructions": "Usage instructions",
     "vaccineTradeName": "Vaccine trade name",
     "visitType": "Visit type",
-    "zipCode": "ZIP / postal code"
+    "zipCode": "ZIP / postal code",
+    "createdAt": "Created",
+    "updatedAt": "Last updated"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primary Care Physician",

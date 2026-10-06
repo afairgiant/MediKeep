@@ -67,8 +67,18 @@ _ENUM_VALUE_FIELDS = frozenset(
         "category",
         "outcome",
         "mode",
+        "visit_type",
+        "relationship_to_holder",
     }
 )
+
+
+# Vitals fields whose unit label is exported in a sibling field
+_VITAL_UNIT_FIELDS = {
+    "temperature": "temperature_unit",
+    "weight": "weight_unit",
+    "height": "height_unit",
+}
 
 
 class UnitConverter:
@@ -2010,7 +2020,7 @@ class ExportService:
             "next_service_date",
         }
 
-        def format_value(field_name, value):
+        def format_value(field_name, value, record):
             """Format field values for display; returns None when there is nothing to show."""
             if value is None or value == "":
                 return None
@@ -2020,6 +2030,11 @@ class ExportService:
                 return t.format_date(value)
 
             str_value = str(value)
+
+            # Vitals carry their unit in a sibling field (e.g. weight_unit)
+            if field_name in _VITAL_UNIT_FIELDS:
+                unit = record.get(_VITAL_UNIT_FIELDS[field_name])
+                return f"{str_value} {unit}" if unit else str_value
 
             # Format boolean values
             if field_name in [
@@ -2174,6 +2189,7 @@ class ExportService:
                     "status",
                     "attached_files",
                     "notes",
+                    "tags",
                 ]
             elif section_name == "allergies":
                 field_order = [
@@ -2398,6 +2414,8 @@ class ExportService:
                     "drive_through",
                     "twenty_four_hour",
                     "specialty_services",
+                    "created_at",
+                    "updated_at",
                 ]
             elif section_name == "emergency_contacts":
                 field_order = [
@@ -2410,6 +2428,8 @@ class ExportService:
                     "is_active",
                     "address",
                     "notes",
+                    "created_at",
+                    "updated_at",
                 ]
             else:
                 # Unknown section - show every field except internal identifiers
@@ -2423,7 +2443,7 @@ class ExportService:
             for field_name in field_order:
                 if field_name in record:
                     display_name = get_field_label(field_name)
-                    formatted_value = format_value(field_name, record[field_name])
+                    formatted_value = format_value(field_name, record[field_name], record)
 
                     if formatted_value is not None:  # Only show fields with values
                         # Use Paragraph for values that need text wrapping

@@ -237,7 +237,9 @@
     "usageInstructions": "使用说明",
     "vaccineTradeName": "疫苗商品名",
     "visitType": "就诊类型",
-    "zipCode": "邮政编码"
+    "zipCode": "邮政编码",
+    "createdAt": "创建时间",
+    "updatedAt": "最后更新"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "主治医生",

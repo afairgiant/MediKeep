@@ -237,7 +237,9 @@
     "usageInstructions": "Anwendungshinweise",
     "vaccineTradeName": "Handelsname des Impfstoffs",
     "visitType": "Besuchsart",
-    "zipCode": "Postleitzahl"
+    "zipCode": "Postleitzahl",
+    "createdAt": "Erstellt",
+    "updatedAt": "Zuletzt aktualisiert"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Hausarzt",
