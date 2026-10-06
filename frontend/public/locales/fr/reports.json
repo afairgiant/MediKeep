@@ -8,20 +8,20 @@
       "selectAllRecordTypes": "Sélectionner tous les types d'entrées"
     },
     "configuration": {
-      "description": "Choisissez ce qu'il faut inclure et sélectionnez les éléments ci-dessous, puis générez votre rapport. Vous pouvez aussi charger un modèle enregistré ou ajuster les paramètres du rapport ici.",
+      "description": "Choisissez quoi inclure et sélectionnez les éléments ci-dessous, puis générez votre rapport. Vous pouvez également charger un modèle sauvegardé ou ajuster les paramètres de rapport ici.",
       "title": "Configuration du rapport"
     },
     "counts": {
-      "charts_one": "{{count}} graphique",
-      "charts_other": "{{count}} graphiques"
+      "charts_one": "{{count}} tableau",
+      "charts_other": "{{count}} tableaux"
     },
     "flow": {
-      "chartsDescription": "Ajoutez les constantes vitales ou les analyses de laboratoire à représenter dans le temps.",
-      "chooseDescription": "Basculez entre les dossiers médicaux et les graphiques de tendance. Un même rapport peut contenir les deux.",
-      "chooseTitle": "1. Choisissez ce qu'il faut inclure",
-      "generateDescription": "Vérifiez votre sélection, puis générez le rapport.",
-      "generateTitle": "3. Générer le rapport",
-      "recordsDescription": "Choisissez un onglet de type d'entrée, puis activez les entrées souhaitées, ou sélectionnez tout en une fois.",
+      "chartsDescription": "Ajoutez les signes vitaux ou résultats d'analyse que vous souhaitez suivre au fil du temps.",
+      "chooseDescription": "Choisissez entre les données médicales et les tableaux de tendances. Un même rapport peut contenir les deux.",
+      "chooseTitle": "1. Choisissez quoi inclure",
+      "generateDescription": "Vérifiez vos sélections, puis générez le rapport.",
+      "generateTitle": "3. Générez le rapport",
+      "recordsDescription": "Choisissez un onglet de type de données, puis activez les entrées spécifiques désirées, ou sélectionnez tout en une fois.",
       "selectTitle": "2. Sélectionnez les éléments"
     },
     "icon": "📊",
@@ -39,7 +39,7 @@
     },
     "settingsModal": {
       "includeHeaderFooter": {
-        "description": "Imprimer le nom du rapport en haut et le numéro de page et la date en bas de chaque page",
+        "description": "Imprimez le nom du rapport au sommet ainsi que le numéro de page et la date en bas de chaque page",
         "label": "Inclure l'en-tête et le pied de page"
       },
       "includePatientInfo": {
@@ -51,7 +51,7 @@
         "label": "Inclure la photo de profil"
       },
       "includeSummary": {
-        "description": "Ajouter une section d'aperçu et de statistiques",
+        "description": "Ajoutez une section d'aperçu et de statistiques",
         "label": "Inclure les résumés statistiques"
       },
       "reportTitle": {
@@ -66,7 +66,7 @@
       "emptyState": "Aucune donnée de tendances disponible. Ajoutez des signes vitaux ou des résultats d'analyse pour activer les tableaux de tendances.",
       "labTestCharts": {
         "description": "Recherchez et sélectionnez les résultats d'analyse à présenter",
-        "resultCount": "{{count}} résultats",
+        "resultCount": "{{count}} résultat(s)",
         "resultCount_one": "{{count}} résultat",
         "resultCount_other": "{{count}} résultats",
         "searchPlaceholder": "Rechercher dans les résultats d'analyse...",
@@ -240,8 +240,8 @@
     "saveAsNew": "Sauvegarder comme nouveau modèle",
     "saveAsTemplate": "Sauvegarder comme modèle",
     "saveDescription": "Ce modèle sauvegardera vos paramètres de rapport, entrées sélectionnées et tableaux de tendances sélectionnés actuels.",
-    "savedTemplates": "Modèles sauvegardés",
     "saveModalTitle": "Sauvegarder le modèle de rapport",
+    "savedTemplates": "Modèles sauvegardés",
     "updateCurrent": "Mettre à jour \"{{name}}\"",
     "updateTemplate": "Mettre à jour le modèle"
   }

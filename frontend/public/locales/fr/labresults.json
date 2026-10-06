@@ -1,5 +1,5 @@
 {
-  "addDetailsTitle": "Ajouter les détails du résultat de laboratoire",
+  "addDetailsTitle": "Ajouter les détails du résultat d'analyse",
   "addFirst": "Ajoutez votre premier résultat d'analyse",
   "additionalNotes": {
     "description": "Notes cliniques ou instructions spéciales",
@@ -9,14 +9,14 @@
   "addNew": "+ Ajouter un résultat d'analyse",
   "addTitle": "Ajouter un résultat d'analyse",
   "advancedMode": "Mode avancé",
-  "advancedModeDescription": "Afficher tous les onglets (connexions, notes, fichiers) lors de la création d'un nouveau résultat d'analyse",
+  "advancedModeDescription": "Affiche tous les onglets (connexions, notes, fichiers) quand vous créez un nouveau résulatt d'analyse",
   "bulkEntry": {
     "addComponents": "Ajouter {{count}} composant(s)",
     "addComponents_one": "Ajouter {{count}} composant",
     "addComponents_other": "Ajouter {{count}} composants",
     "autoParseDescription": "Analyser au fil de la saisie",
     "clearAll": "Tout effacer",
-    "colonSeparated": "Séparé par des virgules, avec plages",
+    "colonSeparated": "Séparé par des deux points, avec plages",
     "completedDate": "Date de réalisation de l'analyse",
     "completedDateDescription": "Spécifiez quand l'analyse a été réalisée. Cette date est requise pour assurer le suivi des tendances au fil du temps.",
     "confidence": "Confiance : {{percent}} %",
@@ -80,6 +80,7 @@
     "withIssues_one": "{{count}} avec problèmes",
     "withIssues_other": "{{count}} avec problèmes"
   },
+  "bulkImport": "Importation de masse",
   "category": {
     "bloodWork": "Analyse sanguine",
     "cardiology": "Cardiologie",
@@ -111,8 +112,8 @@
   "discardParsedData": "Abandonner les données analysées",
   "display": {
     "errorDisplaying": "Erreur lors de l'affichage des composants d'analyse",
-    "noComponents": "Aucun résultat d'analyse trouvé",
-    "noComponentsDescription": "Les résultats d'analyse apparaîtront ici une fois qu'ils seront ajoutés à ce résultat d'analyse.",
+    "noComponents": "Aucun composant d'analyse trouvé",
+    "noComponentsDescription": "Les composants d'analyse apparaîtront ici une fois qu'ils seront ajoutés à ce résultat d'analyse.",
     "referenceLabel": "Référence :",
     "resultsGrouped": "{{count}} résultat en plus dans ce groupe",
     "resultsGrouped_other": "{{count}} résultats en plus dans ce groupe",
@@ -132,12 +133,12 @@
     "linkConditionsDescription": "Associez ce résultat d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
     "linkConditionsTitle": "Connecter des conditions médicales",
     "linkedVisits": "Visites connectées",
-    "linkMedicationsTitle": "Associer aux médicaments",
-    "linkProceduresTitle": "Associer aux procédures",
-    "linkTreatmentsTitle": "Associer aux traitements",
+    "linkMedicationsTitle": "Connecter des médicaments",
+    "linkProceduresTitle": "Connecter des procédures",
+    "linkTreatmentsTitle": "Connecter des traitements",
     "linkVisitsDescription": "Associez ce résultat d'analyse aux visites où il a été prescrit ou traité.",
     "linkVisitsTitle": "Connecter des visites",
-    "matchedCommonName": "correspondance : {{name}}",
+    "matchedCommonName": "corresponance : {{name}}",
     "notesOptional": "Notes (optionnel)",
     "refMax": "Réf max",
     "refMin": "Réf min",
@@ -149,8 +150,8 @@
     "selectResult": "Sélectionner le résultat",
     "statusIndicator": "Indicateur de statut :",
     "testCodePlaceholder": "ex : 718-7",
-    "testComponents": "Composants d'analyse (optionnel)",
-    "testDetails": "Détails de l'analyse",
+    "testComponents": "Ajouter des résultats",
+    "testDetails": "Détails des résultats",
     "unit": "Unité"
   },
   "keepEmptyLabResult": "Conserver le résultat d'analyse",
@@ -164,7 +165,7 @@
   "loading": "Chargement des résultats d'analyse...",
   "loadingHint": "Si cela prend trop longtemps, veuillez rafraîchir la page",
   "messages": {
-    "confirmDiscardAdvancedForm": "Changer de mode annulera ce que vous avez saisi jusqu'à présent. Continuer ?",
+    "confirmDiscardAdvancedForm": "Changer de mode supprimera tout ce que vous avez saisi jusqu'à présent. Continuer ?",
     "testComponentsEditInfo": "Les composants d'analyse peuvent être gérés depuis la page d'aperçu après sauvegarde."
   },
   "modal": {
@@ -175,31 +176,31 @@
     },
     "sections": {
       "associatedFiles": "Documents associés",
-      "panelDetails": "Détails du panneau",
+      "panelDetails": "Détails du panel",
       "testInfo": "Informations de l'analyse",
       "testResults": "Résultats d'analyse"
     },
     "tabs": {
-      "testComponents": "Résultats d'analyse"
+      "testComponents": "Composants d'analyse"
     },
     "title": "Détails du résultat d'analyse"
   },
   "networkError": "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
   "noResults": "Aucun résultat d'analyse trouvé",
   "numericResult": {
-    "refMaxLabel": "Max de plage",
-    "refMaxPlaceholder": "ex. 5,6",
-    "refMinLabel": "Min de plage",
-    "refMinPlaceholder": "ex. 4,0",
-    "refTextDescription": "Remplace min/max dans l'affichage",
+    "refMaxLabel": "Maximum de plage",
+    "refMaxPlaceholder": "ex : 5,6",
+    "refMinLabel": "Minimum de plage",
+    "refMinPlaceholder": "ex : 4,0",
+    "refTextDescription": "Remplace les min/max dans l'aperçu",
     "refTextLabel": "Texte de plage",
-    "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
-    "sectionDescription": "Saisissez une valeur mesurée et une plage de référence pour activer les graphiques de tendance.",
+    "refTextPlaceholder": "ex : 4,0-5,6 ou <200",
+    "sectionDescription": "Saisissez une valeur mesurée et une plage de référence pour activer le suivi des tendances pour les résultats empilés.",
     "sectionLabel": "Résultat numérique (optionnel)",
     "unitLabel": "Unité",
-    "unitPlaceholder": "ex. mg/dL, mmol/L",
+    "unitPlaceholder": "ex : mg/dL, mmol/L",
     "valueLabel": "Valeur",
-    "valuePlaceholder": "ex. 6,2"
+    "valuePlaceholder": "ex : 6,2"
   },
   "orderedDate": {
     "description": "Date à laquelle l'analyse a été prescrite",
@@ -213,14 +214,14 @@
   },
   "patientIdRequired": "L'ID du patient est requis. Veuillez d'abord sélectionner un patient.",
   "pendingRelationships": {
-    "addCondition": "Ajouter une condition",
-    "removeCondition": "Supprimer la condition",
-    "addMedication": "Ajouter un médicament",
-    "addProcedure": "Ajouter une procédure",
+    "addCondition": "Ajouter condition",
+    "addMedication": "Ajouter médicament",
+    "addProcedure": "Ajouter procédure",
     "addTreatment": "Ajouter un traitement",
-    "removeMedication": "Supprimer le médicament",
-    "removeProcedure": "Supprimer la procédure",
-    "removeTreatment": "Supprimer le traitement"
+    "removeCondition": "Supprimer condition",
+    "removeMedication": "Supprimer médicament",
+    "removeProcedure": "Supprimer procédure",
+    "removeTreatment": "Supprimer traitement"
   },
   "quickFormInstructions": "Saisissez un nom pour ce résultat d'analyse, puis vous pourrez téléverser et analyser votre PDF.",
   "quickImportModalTitle": "Importation PDF rapide - Etape {{step}} sur 2",
@@ -237,11 +238,11 @@
   },
   "resultsTable": {
     "collapseAll": "Tout réduire",
-    "dateFrom": "Date de début",
-    "dateTo": "Date de fin",
-    "expandAll": "Tout développer",
-    "noResults": "Aucun résultat de test ne correspond aux filtres actuels",
-    "results": "{{count}} résultat",
+    "dateFrom": "Date depuis",
+    "dateTo": "Date jusqu'à",
+    "expandAll": "Tout étendre",
+    "noResults": "Aucun résultat d'analyse ne correspond aux filtres actuels",
+    "results": "{{count}} résultat(s)",
     "results_one": "{{count}} résultat",
     "results_other": "{{count}} résultats",
     "source": "Source",
@@ -249,14 +250,14 @@
   },
   "stackedView": {
     "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "Du panneau",
-    "latestResult": "Dernier",
+    "fromPanel": "Depuis le panel",
+    "latestResult": "Plus récent",
     "noResults": "Aucun résultat dans ce groupe",
-    "panel": "Panneau",
-    "results": "{{count}} résultat",
+    "panel": "Panel",
+    "results": "{{count}} résultat((s)",
     "results_one": "{{count}} résultat",
     "results_other": "{{count}} résultats",
-    "trendChart": "Évolution dans le temps"
+    "trendChart": "Valeur au fil du temps"
   },
   "startAdding": "Commencez en ajoutant votre premier résultat d'analyse.",
   "stats": {
@@ -317,19 +318,19 @@
     "moreCategories": "+{{count}} en plus",
     "moreCategories_one": "+{{count}} en plus",
     "moreCategories_other": "+{{count}} en plus",
-    "noComponents": "Aucun résultat d'analyse",
-    "testComponentsCount": "Résultats d'analyse ({{count}})",
-    "testComponentsCount_one": "Résultat d'analyse ({{count}})",
-    "testComponentsCount_other": "Résultats d'analyse ({{count}})",
-    "testComponentsTotal": "{{count}} résultat(s) d'analyse",
-    "testComponentsTotal_one": "{{count}} résultat d'analyse",
-    "testComponentsTotal_other": "{{count}} résultats d'analyse",
-    "unavailable": "Résultats d'analyse indisponibles"
+    "noComponents": "Aucun composant d'analyse",
+    "testComponentsCount": "Composants d'analyse ({{count}})",
+    "testComponentsCount_one": "Composant d'analyse ({{count}})",
+    "testComponentsCount_other": "Composants d'analyse ({{count}})",
+    "testComponentsTotal": "{{count}} composant(s) d'analyse",
+    "testComponentsTotal_one": "{{count}} composant d'analyse",
+    "testComponentsTotal_other": "{{count}} composants d'analyse",
+    "unavailable": "Composants d'analyse indisponibles"
   },
   "tabs": {
     "bulkEntry": "Saisie de masse",
-    "noComponentsDescription": "Ajoutez des résultats d'analyse en utilisant les modèles ou les outils de saisie de masse pour suivre les valeurs d'analyse individuelles et les tendances.",
-    "noComponentsYet": "Aucun résultat d'analyse pour l'instant",
+    "noComponentsDescription": "Ajoutez des composants d'analyse en utilisant les modèles ou les outils de saisie de masse pour suivre les valeurs d'analyse individuelles et les tendances.",
+    "noComponentsYet": "Aucun composant d'analyse pour l'instant",
     "resultsStatus": "Résultats & Statut",
     "templates": "Modèle"
   },
@@ -370,9 +371,9 @@
     "placeholder": "ex : 85025"
   },
   "testComponents": {
-    "addTestComponents": "Ajouter des analyses",
+    "addTestComponents": "Ajouter des composants d'analyse",
     "addTests": "Ajouter des analyses",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce résultat de test ? Cette action est irréversible.",
+    "confirmDelete": "Voulez-vous vraiment supprimer ce résultat d'analyse ? Cette action est définitive.",
     "categories": {
       "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
       "chemistry": "Chimie - Electrolytes et minéraux",
@@ -420,20 +421,20 @@
         "unit": "ex : g/dL",
         "value": "Saisissez la valeur de l'analyse"
       },
-      "title": "Modifier l'analyse",
+      "title": "Editer le composant d'analyse",
       "trendLinking": "Connexion aux tendances",
-      "updating": "Mise à jour de l'analyse..."
+      "updating": "Mise à jour du composant d'analyse..."
     },
     "emptyState": {
       "description": "Les modèles fournissent des batteries d'analyse communes (hémogramme, panel métabolique complet, etc.) où vous pouvez saisir des valeurs et des plages. L'importation de masse vous permet de copier/coller des résultats de rapports d'analyse pour les analyser automatiquement."
     },
-    "errorLoading": "Erreur lors du chargement des analyses",
-    "noComponents": "Aucune analyse",
-    "noComponentsDescription": "Ce résultat ne possède pas encore d'analyses.",
+    "errorLoading": "Erreur lors du chargement des composants d'analyse",
+    "noComponents": "Aucun composant d'analyse",
+    "noComponentsDescription": "Ce résultat d'analyse ne possède pas encore de composants d'analyse individuels.",
     "notifications": {
       "componentDeleted": "Composant supprimé",
       "hasBeenDeleted": "{{name}} a été supprimé",
-      "legacyResultNotFound": "Impossible de trouver le résultat de laboratoire à modifier"
+      "legacyResultNotFound": "Impossible de trouver le résultat d'analyse à éditer"
     },
     "refreshComponents": "Rafraîchir les composants",
     "resultType": {
@@ -445,10 +446,10 @@
       "statistics": "Statistiques",
       "testResults": "Résultats d'analyse"
     },
-    "title": "Analyses"
+    "title": "Composants d'analyse"
   },
   "testEntry": {
-    "label": "Test #{{number}}"
+    "label": "Analyse n°{{number}}"
   },
   "testingFacility": {
     "description": "Où l'analyse est / a été réalisée",
@@ -485,8 +486,8 @@
   },
   "textualResult": {
     "label": "Texte du résultat",
-    "noText": "—",
-    "placeholder": "Saisir le texte du résultat (p. ex. Aucune anomalie aiguë)"
+    "noText": "-",
+    "placeholder": "Saisissez le texte du résultat (ex : Rien d'anormal)"
   },
   "timeoutError": "Requête expirée. Veuillez réessayer.",
   "title": "Résultats d'analyse",
@@ -494,8 +495,8 @@
     "highLow": "Elevé/Bas",
     "labLabel": "Analyse : {{name}}",
     "negativeUndetected": "Négatif/Non détecté",
-    "noDataPoints": "Aucun point de donnée à afficher",
-    "notAvailableForTextual": "Les graphiques de tendance ne sont pas disponibles pour les résultats textuels.",
+    "noDataPoints": "Aucun point de données à afficher",
+    "notAvailableForTextual": "Les tableaux de tendances ne sont pas disponibles pour les résultats textuels.",
     "positiveDetected": "Positif/Détecté",
     "referenceRange": "Plage de référence :",
     "referenceValue": "Référence : {{min}} - {{max}}"
@@ -504,16 +505,16 @@
     "abnormalLabel": "Anormal :",
     "average": "Moyenne",
     "chart": "Tableau",
-    "dataPoints": "{{count}} point(s) de donnée",
-    "dataPoints_one": "{{count}} point de donnée",
-    "dataPoints_other": "{{count}} points de donnée",
+    "dataPoints": "{{count}} point(s) de données",
+    "dataPoints_one": "{{count}} point de données",
+    "dataPoints_other": "{{count}} points de données",
     "dataTable": "Tableau de données",
-    "decreasing": "Décroissant",
-    "increasing": "Croissant",
+    "decreasing": "En baisse",
+    "increasing": "En hausse",
     "inRange": "{{percent}} % dans les plages",
     "latest": "Plus récent",
     "noData": "Aucune donnée de tendances disponible",
-    "noDataDescription": "Il n'y a pas de points de donnée historiques pour ce composant d'analyse.",
+    "noDataDescription": "Il n'y a pas de points de données historiques pour ce composant d'analyse.",
     "normalLabel": "Normal :",
     "range": "Plage ",
     "showing": "Affichage :",
@@ -537,6 +538,5 @@
   "unsavedDataInstructions": "Cliquez sur \"Ajouter des composants\" dans l'onglet d'aperçu pour sauvegarder vos données analysées avant de fermer la fenêtre.",
   "unsavedDataMessage_one": "Vous avez {{count}} composant d'analyse analysé qui n'a pas encore été ajouté. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
   "unsavedDataMessage_other": "Vous avez {{count}} composants d'analyse analysés qui n'ont pas encore été ajoutés. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
-  "unsavedDataWarning": "Données analysées non sauvegardées",
-  "bulkImport": "Importation en masse"
+  "unsavedDataWarning": "Données analysées non sauvegardées"
 }

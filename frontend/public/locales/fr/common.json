@@ -23,8 +23,8 @@
     "linkLabResult": "Connecter résultat d'analyse",
     "linkMedication": "Connecter médicament",
     "linkMedications": "Connecter médicaments",
-    "linkProcedure": "Associer une procédure",
-    "linkTreatment": "Associer un traitement",
+    "linkProcedure": "Connecter procédure",
+    "linkTreatment": "Connecter traitement",
     "linkVisit": "Connecter visite",
     "print": "Imprimer",
     "refresh": "Rafraîchir",
@@ -61,7 +61,7 @@
         "snomedCode": "Code de terminologie clinique SNOMED",
         "tags": "Ajoutez des étiquettes pour catégoriser et organiser les conditions"
       },
-      "labResultsDescription": "Associez les résultats d'analyse liés à cette condition ou qui la surveillent.",
+      "labResultsDescription": "Connectez les résultats d'analyse qui concernent ou servent à surveiller cette condition.",
       "medicationsDescription": "Connectez les médicaments utilisés pour traiter ou gérer cette condition.",
       "placeholders": {
         "codeDescription": "Description du code médical",
@@ -72,10 +72,10 @@
         "severity": "Sélectionnez la sévérité",
         "snomedCode": "ex : 44054006"
       },
-      "saveFirstToLinkLabResults": "Enregistrez d'abord la condition, puis revenez en mode édition pour associer des résultats d'analyse.",
+      "saveFirstToLinkLabResults": "Sauvegardez d'abord la condition, puis retournez en mode édition pour connecter les résultats d'analyse.",
       "saving": "Sauvegarde de la condition...",
       "severity": {
-        "lifeThreatening": "Critique",
+        "lifeThreatening": "Danger mortel",
         "mild": "Bénigne",
         "moderate": "Modérée",
         "severe": "Sévère"
@@ -91,8 +91,8 @@
       "labels": {
         "endDate": "Fin",
         "onsetDate": "Survenue"
-      },
-      "noNotesAvailable": "Aucune note clinique disponible",
+	  },
+	  "noNotesAvailable": "Aucune note clinique disponible",
       "sections": {
         "medicalCodes": "Codes médicaux"
       },
@@ -169,7 +169,7 @@
       "type": "Type d'équipement",
       "update": "Mettre à jour l'équipement",
       "usageInstructions": "Instructions d'usage",
-      "usagePlaceholder": "Comment utiliser ces équipement"
+      "usagePlaceholder": "Comment utiliser cet équipement"
     },
     "loading": "Chargement de l'équipment...",
     "noEquipmentFound": "Aucun équipement trouvé",
@@ -195,10 +195,10 @@
     "addFamilyMember": "Ajouter un membre de la famille",
     "card": {
       "addCondition": "Ajouter une condition",
-      "age": "Âge",
+      "age": "Age",
       "birthYear": "Année de naissance",
       "cannotEditSharedMember": "Impossible d'éditer un membre partagé",
-      "conditions": "pathologies",
+      "conditions": "conditions",
       "deathYear": "Année de décès",
       "deceased": "Décédé(e)",
       "diagnosedAtAge": "Diagnostiqué(e) à {{age}} ans",
@@ -302,23 +302,47 @@
     "clear": "Effacer",
     "itemCount": "{{filtered}} sur {{total}} objets",
     "title": "Filtres et recherche",
-    "toggle": "Basculer les filtres",
+    "toggle": "Activer les filtres",
+    "placeholders": {
+      "status": "Statut",
+      "medicationType": "Type de médicament",
+      "category": "Catégorie",
+      "prescriber": "Médecin prescrivant",
+      "pharmacy": "Pharmacie",
+      "dateRange": "Plage temporelle",
+      "orderedDate": "Date de prescription",
+      "completedDate": "Date de complétion",
+      "results": "Résultats",
+      "priority": "Priorité",
+      "files": "Fichiers",
+      "sortBy": "Trier par"
+    },
+    "sortAscending": "A-Z",
+    "sortDescending": "Z-A",
     "defaults": {
-      "all": "Tous",
-      "completedDate": {
-        "all": "Toutes les dates d'achèvement"
+      "all": "Tout",
+      "status": {
+        "all": "Tous les status",
+        "active": "Actif",
+        "inactive": "Inactif"
       },
       "dateRange": {
-        "all": "Toutes périodes",
-        "lastYear": "L'an passé",
-        "month": "Ce mois-ci",
-        "pastYear": "12 derniers mois",
+        "all": "Depuis toujours",
         "today": "Aujourd'hui",
         "week": "Cette semaine",
-        "year": "Cette année"
+        "month": "Ce mois",
+        "year": "Cette année",
+        "pastYear": "Les 12 derniers mois",
+        "lastYear": "L'an dernier"
+      },
+      "result": {
+        "all": "Tous les résultats"
+      },
+      "type": {
+        "all": "Tous les types"
       },
       "files": {
-        "all": "Tous les dossiers"
+        "all": "Toutes les entrées"
       },
       "medicationType": {
         "all": "Tous les types"
@@ -326,34 +350,10 @@
       "orderedDate": {
         "all": "Toutes les dates de prescription"
       },
-      "result": {
-        "all": "Tous les résultats"
-      },
-      "status": {
-        "active": "Actif",
-        "all": "Tous les statuts",
-        "inactive": "Inactif"
-      },
-      "type": {
-        "all": "Tous les types"
+      "completedDate": {
+        "all": "Toutes les dates de complétion"
       }
-    },
-    "placeholders": {
-      "category": "Catégorie",
-      "completedDate": "Date d'achèvement",
-      "dateRange": "Plage temporelle",
-      "files": "Fichiers",
-      "medicationType": "Type de médicament",
-      "orderedDate": "Date de prescription",
-      "pharmacy": "Pharmacie",
-      "prescriber": "Prescripteur",
-      "priority": "Priorité",
-      "results": "Résultats",
-      "sortBy": "Trier par",
-      "status": "Statut"
-    },
-    "sortAscending": "A-Z",
-    "sortDescending": "Z-A"
+    }
   },
   "immunizations": {
     "addImmunization": "Ajouter une nouvelle immunisation",
@@ -407,7 +407,7 @@
       "vaccineNamePlaceholder": "ex : vaccin contre la grippe, COVID-19, DTP"
     },
     "history": {
-      "noPatient": "Sélectionnez un patient pour afficher l'historique."
+      "noPatient": "Sélectionnez un patient pour voir son historique."
     },
     "loadingImmunizations": "Chargement des immunisations...",
     "noImmunizationsFound": "Aucune immunisation trouvée",
@@ -416,7 +416,7 @@
     },
     "tabs": {
       "history": "Historique",
-      "records": "Enregistrements"
+      "records": "Données"
     },
     "viewModal": {
       "adminDetails": "Détails d'administration",
@@ -429,23 +429,23 @@
   },
   "inlineCreate": {
     "add": {
-      "condition": "Ajouter une pathologie",
-      "injury": "Ajouter une blessure",
-      "medication": "Ajouter un médicament",
-      "treatment": "Ajouter un traitement",
-      "labResult": "Ajouter un résultat de laboratoire",
-      "equipment": "Ajouter un équipement",
-      "procedure": "Ajouter une procédure",
-      "symptom": "Ajouter un symptôme",
-      "visit": "Ajouter une visite"
+      "condition": "Ajouter condition",
+      "injury": "Ajouter blessure",
+      "medication": "Ajouter médicament",
+      "treatment": "Ajouter traitement",
+      "labResult": "Ajouter résultat d'analyse",
+      "equipment": "Ajouter équipement",
+      "procedure": "Ajouter procédure",
+      "symptom": "Ajouter symptôme",
+      "visit": "Ajouter visite"
     },
-    "createError": "Impossible de le créer. Veuillez réessayer.",
-    "created": "Créé.",
-    "createdLinked": "Créé et associé.",
-    "createdPending": "Créé. Il sera associé lors de l'enregistrement.",
-    "linkFailed": "Créé, mais il n'a pas pu être associé. Vous pouvez l'associer depuis la liste.",
-    "loadError": "Impossible d'ouvrir ce formulaire. Rien n'a été modifié dans la fenêtre située derrière. Veuillez réessayer.",
-    "uploadFailed": "Créé, mais certains fichiers n'ont pas pu être téléversés. Vous pouvez les ajouter en le modifiant."
+    "createError": "Création impossible. Veuillez réessayer.",
+    "created": "Création réussie.",
+    "createdLinked": "Création et connexion réussies.",
+    "createdPending": "Création réussie. La connexion sera effectuée au moment de la sauvegarde.",
+    "linkFailed": "Création réussie, mais connexion impossible. Celle-ci peut être réalisée depuis la liste.",
+    "loadError": "Impossible d'ouvrir ce formulaire. Rien dans le dialogue en arrière-plan n'a été modifié. Veuillez réessayer.",
+    "uploadFailed": "Création réussie, mais certains fichiers n'ont pas pu être téléversés. Vous pouvez les ajouter en éditant l'entrée."
   },
   "insurance": {
     "actions": {
@@ -519,18 +519,18 @@
   "key": "Par défaut {{var}}",
   "labels": {
     "addCustom": "+ Ajouter \"{{value}}\"",
-    "cancelEdit": "Annuler la modification",
+    "cancelEdit": "Annuler les modifications",
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
-    "deleteRelationship": "Supprimer la relation",
-    "editRelationship": "Modifier la relation",
-    "expectedFrequency": "Fréquence prévue",
-    "labResultsAvailableToLink_one": "{{count}} résultats d'analyse disponibles à associer",
-    "labResultsAvailableToLink_other": "{{count}} résultats d'analyse disponibles à associer",
-    "linkedLabResults": "Résultats de laboratoire connectés",
+    "deleteRelationship": "Supprimer la connexion",
+    "editRelationship": "Editer la connexion",
+    "expectedFrequency": "Fréquence attendue",
+    "labResultsAvailableToLink_one": "{{count}} résultat d'analyse pouvant être connecté",
+    "labResultsAvailableToLink_other": "{{count}} résultats d'analyse pouvant être connectés",
+    "linkedLabResults": "Résultats d'analyse connectés",
     "linkedMedications": "Médicaments connectés",
     "loading": "Chargement...",
-    "verifyingAuthentication": "Vérification de l'authentification...",
-    "loadingLabResults": "Chargement des résultats de laboratoire...",
+	"verifyingAuthentication": "Vérification de l'authentification...",
+    "loadingLabResults": "Chargement des résultats d'analyse...",
     "loadingOption": "Chargement : {{option}}...",
     "loadingRelatedConditions": "Chargement des conditions connectées...",
     "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés",
@@ -544,13 +544,13 @@
     "noLabResultsLinked": "Aucun résultat d'analyse connecté à cette visite",
     "noLabResultsLinkedToCondition": "Aucun résultat d'analyse connecté à cette condition",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
-    "noMedicationsLinkedToLabResult": "Aucun médicament associé à ce résultat d'analyse",
+	"noMedicationsLinkedToLabResult": "Aucun médicament connecté à ce résultat d'analyse",
     "none": "Aucun",
-    "noProceduresLinked": "Aucune procédure associée à ce résultat d'analyse",
+    "noProceduresLinked": "Aucune procédure connectée à ce résultat d'analyse",
     "noRating": "Aucun avis",
     "notAvailable": "N/A",
     "notCompleted": "Non complété(e)",
-    "noTreatmentsLinked": "Aucun traitement associé à ce résultat d'analyse",
+    "noTreatmentsLinked": "Aucun traitement connecté à ce résultat d'analyse",
     "noVisitsLinked": "Aucune visite connectée à ce résultat d'analyse",
     "ordered": "Prescrit",
     "phoneNumber": "Numéro de téléphone",
@@ -558,7 +558,7 @@
     "ratingStars": "{{count}}/5 étoiles",
     "ratingStars_one": "{{count}}/5 étoile",
     "ratingStars_other": "{{count}}/5 étoiles",
-    "saveRelationship": "Enregistrer la relation",
+    "saveRelationship": "Sauvegarder la connexion",
     "selectPurpose": "Sélectionnez le but",
     "viewDetails": "Voir les détails",
     "viewPharmacyDetails": "Voir les détails de la pharmacie",
@@ -629,30 +629,30 @@
   "messages": {
     "checkBackSoon": "Revenez bientôt pour des mises à jour !",
     "clearAll": "Tout effacer",
-    "confirmDeleteEntity": "Voulez-vous vraiment supprimer cet élément ({{entity}}) ?",
-    "entityCreated": "{{entity}} : création réussie !",
-    "entityUpdated": "{{entity}} : mise à jour réussie !",
-    "entityDeleted": "{{entity}} : suppression réussie !",
+	"confirmDeleteEntity": "Voulez-vous vraiment supprimer cette entrée de type : {{entity}} ?",
+    "entityCreated": "{{entity}} créé(e) avec succès !",
+    "entityUpdated": "{{entity}} mis(e) à jour avec succès !",
+    "entityDeleted": "{{entity}} supprimé(e) avec succès !",
     "confirmRemoveConditionRelationship": "Voulez-vous vraiment supprimer cette connexion à une condition ?",
     "confirmRemoveEquipmentRelationship": "Voulez-vous vraiment supprimer cette connexion à un équipement ?",
     "confirmRemoveLabResultLink": "Supprimer cette connexion à un résultat d'analyse ?",
-    "confirmRemoveLabResultRelationship": "Retirer cette association avec le résultat d'analyse ?",
-    "confirmRemoveMedicationLink": "Retirer cette association avec le médicament ?",
+    "confirmRemoveLabResultRelationship": "Supprimer cette connexion à un résultat d'analyse ?",
+    "confirmRemoveMedicationLink": "Supprimer cette connexion à un médicament ?",
     "confirmRemoveMedicationRelationship": "Voulez-vous vraiment supprimer cette connexion à un médicament ?",
-    "confirmRemoveProcedureLink": "Retirer cette association avec la procédure ?",
-    "confirmRemoveTreatmentLink": "Retirer cette association avec le traitement ?",
+    "confirmRemoveProcedureLink": "Supprimer cette connexion à une procédure ?",
+    "confirmRemoveTreatmentLink": "Supprimer cette connexion à un traitement ?",
     "confirmRemoveVisitLink": "Supprimer cette connexion à une visite ?",
     "displayError": "Impossible d'afficher cet objet. Veuillez rafraîchir la page.",
     "doNotClose": "Veuillez ne pas fermer ni quitter cette fenêtre",
     "failedToLinkLabResult": "Echec de la connexion au résultat d'analyse",
-    "failedToLinkMedication": "Échec de l'association du médicament",
-    "failedToLinkProcedure": "Échec de l'association de la procédure",
-    "failedToLinkTreatment": "Échec de l'association du traitement",
+    "failedToLinkMedication": "Echec de la connexion au médicament",
+    "failedToLinkProcedure": "Echec de la connexion à la procédure",
+    "failedToLinkTreatment": "Echec de la connexion au traitement",
     "failedToLinkVisit": "Echec de la connexion à la visite",
     "failedToUnlinkLabResult": "Echec de la déconnexion du résultat d'analyse",
-    "failedToUnlinkMedication": "Échec de la dissociation du médicament",
-    "failedToUnlinkProcedure": "Échec de la dissociation de la procédure",
-    "failedToUnlinkTreatment": "Échec de la dissociation du traitement",
+    "failedToUnlinkMedication": "Echec de la déconnexion du médicament",
+    "failedToUnlinkProcedure": "Echec de la déconnexion de la procédure",
+    "failedToUnlinkTreatment": "Echec de la déconnexion du traitement",
     "failedToUnlinkVisit": "Echec de la déconnexion de la visite",
     "failedToUpdateRelationship": "Echec de la mise à jour de la connexion",
     "processing": "Traitement en cours...",
@@ -667,30 +667,30 @@
   "modals": {
     "chooseConditionsToLink": "Choisissez des conditions à connecter",
     "chooseConditionToLink": "Choisissez une condition à connecter",
-    "chooseLabResultsToLink": "Choisissez les résultats d'analyse à associer",
+    "chooseLabResultsToLink": "Choisissez des résultats d'analyse à connecter",
     "chooseLabResultToLink": "Choisissez un résultat d'analyse à connecter",
     "chooseMedicationToLink": "Choisissez des médicaments à connecter",
-    "chooseOneMedicationToLink": "Choisissez un médicament à associer",
-    "chooseProcedureToLink": "Choisissez une procédure à associer",
-    "chooseTreatmentToLink": "Choisissez un traitement à associer",
+    "chooseOneMedicationToLink": "Choisissez un médicament à connecter",
+    "chooseProcedureToLink": "Choisissez une procédure à connecter",
+    "chooseTreatmentToLink": "Choisissez un traitement à connecter",
     "chooseVisitToLink": "Choisissez une visite à connecter",
     "describeConditionRelevance": "Décrivez quel rapport cette condition a avec le résultat d'analyse (optionnel)",
     "describeConditionRelevanceMedication": "Décrivez quel rapport cette condition a avec le médicament",
     "describeLabResultRelevance": "Décrivez quel rapport ce résultat d'analyse a avec cette visite",
-    "describeMedicationLabResultRelevance": "Décrivez le lien entre ce médicament et ce résultat d'analyse",
+    "describeMedicationLabResultRelevance": "Décrivez quel rapport ce médicament a avec ce résultat d'analyse",
     "describeMedicationRelevance": "Décrivez quel rapport ce médicament a avec cette condition",
-    "describeProcedureRelevance": "Décrivez le lien entre cette procédure et ce résultat d'analyse",
-    "describeTreatmentRelevance": "Décrivez le lien entre ce traitement et ce résultat d'analyse",
+    "describeProcedureRelevance": "Décrivez quel rapport cette procédure a avec ce résultat d'analyse",
+    "describeTreatmentRelevance": "Décrivez quel rapport ce traitement a avec ce résultat d'analyse",
     "describeVisitRelevance": "Décrivez quel rapport cette visite a avec ce résultat d'analyse",
-    "expectedFrequencyPlaceholder": "p. ex. Mensuel, Tous les 3 mois",
+    "expectedFrequencyPlaceholder": "ex : tous les mois, tous les 3 mois",
     "linkConditionsToMedication": "Connecter des conditions à un médicament",
     "linkConditionToLabResult": "Connecter une condition à un résultat d'analyse",
-    "linkLabResultsToCondition": "Associer des résultats d'analyse à la condition",
+    "linkLabResultsToCondition": "Connecter des résultats d'analyse à une condition",
     "linkLabResultToVisit": "Connecter un résultat d'analyse à une visite",
     "linkMedicationsToCondition": "Connecter des médicaments à une condition",
-    "linkMedicationToLabResult": "Associer un médicament au résultat d'analyse",
-    "linkProcedureToLabResult": "Associer une procédure au résultat d'analyse",
-    "linkTreatmentToLabResult": "Associer un traitement au résultat d'analyse",
+    "linkMedicationToLabResult": "Connecter un médicament à un résultat d'analyse",
+    "linkProcedureToLabResult": "Connecter une procédure à un résultat d'analyse",
+    "linkTreatmentToLabResult": "Connecter un traitement à un résultat d'analyse",
     "linkVisitToLabResult": "Connecter une visite à un résultat d'analyse",
     "noRelevanceNoteProvided": "Aucune note de pertinence fournie",
     "purpose": "But",
@@ -699,12 +699,12 @@
     "selectCondition": "Sélectionnez une condition",
     "selectConditions": "Sélectionnez des conditions",
     "selectLabResult": "Sélectionnez un résultat d'analyse",
-    "selectLabResults": "Sélectionner des résultats d'analyse",
-    "selectMedication": "Sélectionner un médicament",
+    "selectLabResults": "Sélectionnez des résultats d'analyse",
+    "selectMedication": "Sélectionnez un médicament",
     "selectMedications": "Sélectionnez des médicaments",
-    "selectProcedure": "Sélectionner une procédure",
+    "selectProcedure": "Sélectionnez une procédure",
     "selectPurpose": "Sélectionnez le but",
-    "selectTreatment": "Sélectionner un traitement",
+    "selectTreatment": "Sélectionnez un traitement",
     "selectVisit": "Sélectionnez une visite"
   },
   "noResults": "Aucun médecin trouvé",
@@ -765,8 +765,8 @@
       },
       "height": {
         "placeholder": {
-          "imperial": "p. ex. : 70",
-          "metric": "p. ex. : 175"
+          "imperial": "ex : 70",
+          "metric": "ex : 175"
         }
       },
       "lastName": {
@@ -810,8 +810,8 @@
       },
       "weight": {
         "placeholder": {
-          "imperial": "p. ex. : 150",
-          "metric": "p. ex. : 70"
+          "imperial": "ex : 150",
+          "metric": "ex : 70"
         }
       }
     },
@@ -896,11 +896,11 @@
       "subtitle": "Médecin"
     },
     "createInline": {
-      "buttonTooltip": "Nouveau praticien",
-      "createError": "Échec de la création du praticien. Veuillez réessayer.",
+      "buttonTooltip": "Nouveau médecin",
+      "createError": "Echec de la création du médecin. Veuillez réessayer.",
       "nameRequired": "Le nom est requis",
       "specialtyRequired": "La spécialité médicale est requise",
-      "successMessage": "Praticien créé et sélectionné"
+      "successMessage": "Médecin créé et sélectionné"
     },
     "createPracticeError": "Echec de la création de l'établissement. Veuillez réessayer.",
     "editPracticeError": "Echec du chargement de l'établissement pour l'éditer",
@@ -1017,7 +1017,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "L'enregistrement a été créé, mais certaines associations de visites n'ont pas pu être enregistrées. Vous pouvez les ajouter en modifiant l'enregistrement."
+    "linkFailed": "L'entrée a été créée, mais certains liens de visite n'ont pas pu être sauvegardés. Vous pouvez les ajouter en éditant l'entrée."
   },
   "search": {
     "activeFilterCount": "{{count}} filtre(s) actif(s)",
@@ -1035,9 +1035,9 @@
       "diagnosed": "Diagnostiqué(e)",
       "given": "Donné(e)",
       "identified": "Identifié(e)",
-      "injured": "Blessé le",
+	  "injured": "Blessé(e)",
       "performed": "Accompli(e)",
-      "prescribed": "Prescrit le",
+	  "prescribed": "Prescrit(e)",
       "recorded": "Enregistré(e)",
       "started": "Débuté(e)",
       "tested": "Analysé(e)",
@@ -1050,13 +1050,13 @@
     "fallbacks": {
       "allergy": "Allergie",
       "encounter": "Visite",
-      "equipment": "Équipement",
+	  "equipment": "Equipment",
       "immunization": "Immunisation",
-      "injury": "Blessure",
+	  "injury": "Blessure",
       "medication": "Médicament",
       "procedure": "Procédure",
       "record": "Entrée",
-      "symptom": "Symptôme"
+	  "symptom": "Symptôme"
     },
     "filterByTag": "Filtrer par l'étiquette : {{tag}}",
     "filtered": "(filtré)",
@@ -1139,9 +1139,9 @@
     "mildImpact": "Bénigne - Impact mineur",
     "moderate": "Modérée - Symptômes notables",
     "moderateImpact": "Modérée - Impact notable",
-    "none": "Aucune - Aucune gêne",
-    "severe": "Sévère - Réaction significative",
-    "severeImpact": "Sévère - Impact significatif"
+    "none": "Aucun - Pas d'inconfort",
+    "severe": "Severe - Significant reaction",
+    "severeImpact": "Severe - Significant impact"
   },
   "status": {
     "completed": "Complété",
@@ -1261,7 +1261,7 @@
       "createFailed": "Echec de la création de l'étiquette",
       "deleteFailed": "Echec de la suppression de l'étiquette",
       "editFailed": "Echec de la mise à jour de l'étiquette",
-      "invalidCharacters": "Les tags ne peuvent contenir que des lettres, des chiffres et . - :",
+      "invalidCharacters": "Les étiquettes ne peuvent contenir que des lettres, des chiffres, et les symboles suivants : . - :",
       "loadFailed": "Echec du chargement des étiquettes",
       "replaceFailed": "Echec du remplacement de l'étiquette"
     },
@@ -1273,7 +1273,7 @@
     "noTags": "Aucune étiquette trouvée",
     "noTagsDescription": "Commencez à utiliser des étiquettes dans votre dossier médical pour les voir ici.",
     "noTagsSearch": "Aucune étiquette ne correspond à votre recherche.",
-    "pressEnterToAdd": "Saisissez l'étiquette et appuyez sur Entrée pour en créer une nouvelle",
+    "pressEnterToAdd": "Appuyez sur Entrée pour ajouter une étiquette",
     "replaceModal": {
       "description": "Ceci remplacera \"{{oldTag}}\" par \"{{newTag}}\" sur {{count}} entrée(s).",
       "description_one": "Ceci remplacera \"{{oldTag}}\" par \"{{newTag}}\" sur {{count}} entrée.",
@@ -1382,7 +1382,7 @@
       "practitionerId": "Médecin n°{{id}}",
       "schedule": "Horaires",
       "tabs": {
-        "equipment": "Équipement",
+        "equipment": "Equipment",
         "labs": "Résultats d'analyse",
         "schedule": "Horaires & Dosage"
       },
@@ -1391,14 +1391,14 @@
     }
   },
   "validation": {
-    "fieldRequired": "{{field}} est obligatoire",
+    "fieldRequired": "Le champ {{field}} est requis",
     "noPatientSelected": "Aucun patient sélectionné. Veuillez d'abord sélectionner un patient."
   },
   "viewToggle": {
     "cards": "Cartes",
-    "components": "Résultats des tests",
+    "components": "Composants",
     "label": "Mode d'affichage",
-    "labwork": "Analyses",
+    "labwork": "Résultats d'analyse",
     "stacked": "Empilé",
     "table": "Tableau"
   },
@@ -1421,8 +1421,8 @@
     },
     "loadingVisits": "Chargement des visites...",
     "notifications": {
-      "relationshipLinkFailed": "La visite a été créée, mais certaines relations n'ont pas pu être enregistrées. Vous pouvez les ajouter en modifiant la visite.",
-      "relationshipLinkWarning": "Problème d'association des relations"
+      "relationshipLinkFailed": "La visite a été créée, mais certaines relations n'ont pas pu être sauvegardées. Vous pouvez les ajouter en éditant la visite.",
+      "relationshipLinkWarning": "Erreur de connexion des relations"
     },
     "noVisitsFound": "Aucune visite médicale trouvée",
     "table": {
@@ -1447,56 +1447,56 @@
       "visitInformation": "Informations sur la visite"
     },
     "relationships": {
-      "availableToLink": "{{count}} disponible(s) à associer",
-      "confirmRemove": "Supprimer cette association ?",
-      "editLink": "Modifier la note de l'association",
-      "linkSelected": "Associer la sélection",
-      "modalTitle": "Associer : {{section}}",
-      "none": "Rien n'est encore associé.",
-      "purpose": "Objectif",
-      "removeLink": "Supprimer l'association",
-      "selectPlaceholder": "Choisissez les éléments à associer"
-    }
-  },
-  "vitals": {
-    "form": {
-      "dateTimePlaceholder": "Sélectionnez la date et l'heure",
-      "devicePlaceholder": "ex : tensiomètre digital, modèle de thermomètre...",
-      "heightNotSet": "Taille non définie dans le profil du patient - calcul de l'IMC non disponible",
-      "locationPlaceholder": "En quel lieu ces mesures ont-elles été faites ?",
-      "lockedByImport": "Géré par l'importation système",
-      "missingPatientInfo": "Informations sur le patient manquantes",
-      "notesPlaceholder": "Notes supplémentaires sur les mesures des signes vitaux..",
-      "pasteDateTimeDescription": "Saisissez ou collez la date/l'heure, ou cliquez sur le calendrier pour la sélectionner",
-      "patientHeight": "Taille du patient : {{height}} pouces (d'après le profil)",
-      "validation": {
-        "a1cMax": "L'A1C ne peut pas dépasser 20 %",
-        "a1cMin": "L'A1C doit valoir au moins 0 %",
-        "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
-        "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
-        "dateInFuture": "La date ne peut pas se situer dans le futur",
-        "dateRequired": "La date et l'heure de la mesure sont requises",
-        "deviceMaxLength": "Le nom de l'appareil ne peut pas dépasser 100 caractères",
-        "diastolicMax": "La PAD ne peut pas dépasser 200 mmHg",
-        "diastolicMin": "La PAD doit valoir au moins 30 mmHg",
-        "heartRateMax": "La fréquence cardiaque ne peut pas dépasser 250 BPM",
-        "heartRateMin": "La fréquence cardiaque doit valoir au moins 30 BPM",
-        "notesMaxLength": "Les notes ne peuvent pas dépasser 5 000 caractères",
-        "oxygenMax": "La saturation en oxygène ne peut pas dépasser 100 %",
-        "oxygenMin": "La saturation en oxygène doit valoir au moins 50 %",
-        "painScaleMax": "L'échelle de la douleur ne peut pas dépasser 10",
-        "painScaleMin": "L'échelle de la douleur doit valoir au moins 0",
-        "respiratoryRateMax": "La fréquence respiratoire ne peut pas dépasser 100/min",
-        "respiratoryRateMin": "La fréquence respiratoire doit valoir au moins 5/min",
-        "systolicMax": "La PAS ne peut pas dépasser 300 mmHg",
-        "systolicMin": "La PAS doit valoir au moins 50 mmHg",
-        "temperatureMax": "La température ne peut pas dépasser {{max}}{{unit}}",
-        "temperatureMin": "La température doit valoir au moins {{min}}{{unit}}",
-        "timeInFuture": "L'heure sélectionnée ne peut se situer dans le futur",
-        "weightMax": "Le poids ne peut pas dépasser {{max}} {{unit}}",
-        "weightMin": "Le poids doit valoir au moins {{min}} {{unit}}"
+      "availableToLink": "{{count}} pouvant être connectés",
+      "confirmRemove": "Supprimer cette connexion ?",
+      "editLink": "Editer note de connexion",
+      "linkSelected": "Connecter la sélection",
+      "modalTitle": "Connecter {{section}}",
+      "none": "Rien de connecté pour l'instant.",
+      "purpose": "But",
+      "removeLink": "Supprimer la connexion",
+      "selectPlaceholder": "Choisissez les entrées à connecter"
+	}
+    },
+    "vitals": {
+      "form": {
+        "dateTimePlaceholder": "Sélectionnez la date et l'heure",
+        "devicePlaceholder": "ex : tensiomètre digital, modèle de thermomètre...",
+        "heightNotSet": "Taille non définie dans le profil du patient - calcul de l'IMC non disponible",
+        "locationPlaceholder": "En quel lieu ces mesures ont-elles été faites ?",
+        "lockedByImport": "Géré par l'importation système",
+        "missingPatientInfo": "Informations sur le patient manquantes",
+        "notesPlaceholder": "Notes supplémentaires sur les mesures des signes vitaux...",
+        "pasteDateTimeDescription": "Saisissez ou collez la date/l'heure, ou cliquez sur le calendrier pour la sélectionner",
+        "patientHeight": "Taille du patient : {{height}} pouces (d'après le profil)",
+        "validation": {
+          "a1cMax": "L'A1C ne peut pas dépasser 20 %",
+          "a1cMin": "L'A1C doit valoir au moins 0 %",
+          "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
+          "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
+          "dateInFuture": "La date ne peut pas se situer dans le futur",
+          "dateRequired": "La date et l'heure de la mesure sont requises",
+          "deviceMaxLength": "Le nom de l'appareil ne peut pas dépasser 100 caractères",
+          "diastolicMax": "La PAD ne peut pas dépasser 200 mmHg",
+          "diastolicMin": "La PAD doit valoir au moins 30 mmHg",
+          "heartRateMax": "La fréquence cardiaque ne peut pas dépasser 250 BPM",
+          "heartRateMin": "La fréquence cardiaque doit valoir au moins 30 BPM",
+          "notesMaxLength": "Les notes ne peuvent pas dépasser 5 000 caractères",
+          "oxygenMax": "La saturation en oxygène ne peut pas dépasser 100 %",
+          "oxygenMin": "La saturation en oxygène doit valoir au moins 50 %",
+          "painScaleMax": "L'échelle de la douleur ne peut pas dépasser 10",
+          "painScaleMin": "L'échelle de la douleur doit valoir au moins 0",
+          "respiratoryRateMax": "La fréquence respiratoire ne peut pas dépasser 100/min",
+          "respiratoryRateMin": "La fréquence respiratoire doit valoir au moins 5/min",
+          "systolicMax": "La PAS ne peut pas dépasser 300 mmHg",
+          "systolicMin": "La PAS doit valoir au moins 50 mmHg",
+          "temperatureMax": "La température ne peut pas dépasser {{max}}{{unit}}",
+          "temperatureMin": "La température doit valoir au moins {{min}}{{unit}}",
+          "timeInFuture": "L'heure sélectionnée ne peut pas se situer dans le futur",
+          "weightMax": "Le poids ne peut pas dépasser {{max}} {{unit}}",
+          "weightMin": "Le poids doit valoir au moins {{min}} {{unit}}"
+        }
       }
-    }
-  },
+    },
   "warning": "Avertissement"
-}
+  }

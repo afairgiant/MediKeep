@@ -222,8 +222,8 @@
       "name": "Connexion depuis un nouvel appareil"
     },
     "medication_reminder_due": {
-      "description": "Quand il est temps de prendre un médicament programmé",
-      "name": "Rappel de médicament"
+      "description": "Quand il est temps de prendre un médicament donné",
+      "name": "Rappel de prise de médicament"
     },
     "password_changed": {
       "description": "Quand votre mot de passe est modifié",
@@ -284,7 +284,7 @@
       "loginFailed": "Echec de la connexion",
       "loginRequired": "Veuillez vous connecter pour accéder à cette page",
       "loginSuccess": "Connexion réussie !",
-      "logoutIncomplete": "Vous avez été déconnecté sur cet appareil, mais le serveur ne l'a pas confirmé. Fermez votre navigateur par sécurité.",
+      "logoutIncomplete": "Vous avez été déconnecté(e) sur cet appareil, mais le serveur ne l'a pas confirmé. Veuillez fermer votre navigateur pour vous en assurer.",
       "logoutSuccess": "Déconnexion réussie",
       "sessionExpired": "La session a expiré pour cause d'inactivité.",
       "sessionExpiredLogin": "Session expirée. Veuillez vous reconnecter.",
@@ -383,8 +383,8 @@
       "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
       "cleanupFailed": "Echec du nettoyage des fichiers. Veuillez réessayer ultérieurement.",
       "noOutOfSync": "Aucun fichier désynchronisé à nettoyer",
-      "saved": "Paramètres enregistrés avec succès",
-      "saveFailed": "Échec de l'enregistrement des paramètres",
+      "saved": "Paramètres sauvegardés avec succès",
+      "saveFailed": "Echec de la sauvegarde des paramètres",
       "sessionTimeoutUpdated": "Expiration de session mise à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie."
     },
     "sharing": {
