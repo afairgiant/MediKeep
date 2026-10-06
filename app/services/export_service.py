@@ -50,6 +50,27 @@ UNIT_LABELS = {
 }
 
 
+# Card fields whose stored value is a choice (not free text) and is translated in PDFs
+_ENUM_VALUE_FIELDS = frozenset(
+    {
+        "status",
+        "severity",
+        "priority",
+        "gender",
+        "laterality",
+        "test_category",
+        "test_type",
+        "labs_result",
+        "insurance_type",
+        "medication_type",
+        "treatment_category",
+        "category",
+        "outcome",
+        "mode",
+    }
+)
+
+
 class UnitConverter:
     """Utility class for converting between imperial and metric units."""
 
@@ -1752,27 +1773,34 @@ class ExportService:
                         (
                             t.format_date(patient_info.get("birth_date"))
                             if patient_info.get("birth_date")
-                            else "N/A"
+                            else t.text("not_recorded")
                         ),
                     ],
-                    [t.text("blood_type"), str(patient_info.get("blood_type", "N/A"))],
+                    [
+                        t.text("blood_type"),
+                        str(patient_info.get("blood_type") or t.text("not_recorded")),
+                    ],
                     [
                         t.field("height"),
                         (
-                            f"{patient_info.get('height', 'N/A')} {height_unit}"
+                            f"{patient_info['height']} {height_unit}"
                             if patient_info.get("height")
-                            else "N/A"
+                            else t.text("not_recorded")
                         ),
                     ],
                     [
                         t.field("weight"),
                         (
-                            f"{patient_info.get('weight', 'N/A')} {weight_unit}"
+                            f"{patient_info['weight']} {weight_unit}"
                             if patient_info.get("weight")
-                            else "N/A"
+                            else t.text("not_recorded")
                         ),
                     ],
-                    [t.text("gender"), str(patient_info.get("gender", "N/A"))],
+                    [
+                        t.text("gender"),
+                        t.value(patient_info.get("gender"))
+                        or t.text("not_recorded"),
+                    ],
                 ]
 
                 patient_table = Table(patient_data, colWidths=[2 * inch, 4 * inch])
@@ -1857,12 +1885,12 @@ class ExportService:
                     start_date_str = (
                         t.format_date(date_range.get("start"))
                         if date_range.get("start")
-                        else "N/A"
+                        else t.text("not_recorded")
                     )
                     end_date_str = (
                         t.format_date(date_range.get("end"))
                         if date_range.get("end")
-                        else "N/A"
+                        else t.text("not_recorded")
                     )
                     story.append(
                         Paragraph(
@@ -1874,13 +1902,13 @@ class ExportService:
                 if metadata.get("include_files"):
                     story.append(
                         Paragraph(
-                            "File Attachments: Included (see lab results)",
+                            t.text("attachments_included"),
                             styles["Normal"],
                         )
                     )
                 else:
                     story.append(
-                        Paragraph("File Attachments: Not included", styles["Normal"])
+                        Paragraph(t.text("attachments_not_included"), styles["Normal"])
                     )
 
             # Build the PDF document
@@ -1936,7 +1964,7 @@ class ExportService:
         font_bold="Helvetica-Bold",
     ):
         """Add a section using card-based format instead of tables for better readability."""
-        t = translator
+        t = translator or get_translator()
 
         # Create styles for wrapping text in table cells
         cell_value_style = ParagraphStyle(
@@ -1958,9 +1986,7 @@ class ExportService:
 
         # Use translator for field labels, with fallback to title-cased field name
         def get_field_label(field_name):
-            if t:
-                return t.field(field_name)
-            return field_name.replace("_", " ").title()
+            return t.field(field_name)
 
         _date_fields = {
             "start_date",
@@ -1985,20 +2011,13 @@ class ExportService:
         }
 
         def format_value(field_name, value):
-            """Format field values for better display."""
+            """Format field values for display; returns None when there is nothing to show."""
             if value is None or value == "":
-                return "N/A"
+                return None
 
             # Format dates using translator's date preference
             if field_name in _date_fields:
-                if t:
-                    return t.format_date(value)
-                str_value = str(value)
-                if "T" in str_value:
-                    return str_value.split("T")[0]
-                if len(str_value) > 10 and ":" in str_value:
-                    return str_value.split(" ")[0]
-                return str_value
+                return t.format_date(value)
 
             str_value = str(value)
 
@@ -2013,9 +2032,9 @@ class ExportService:
                 "is_deceased",
             ]:
                 if isinstance(value, bool):
-                    return "Yes" if value else "No"
+                    return t.text("yes") if value else t.text("no")
                 if str_value.lower() in ["true", "false"]:
-                    return "Yes" if str_value.lower() == "true" else "No"
+                    return t.text("yes") if str_value.lower() == "true" else t.text("no")
 
             # Format rating
             if field_name == "rating" and value is not None:
@@ -2028,17 +2047,17 @@ class ExportService:
             # Format tags
             if field_name == "tags" and isinstance(value, list):
                 if not value:
-                    return "N/A"
-                return ", ".join(str(t) for t in value)
+                    return None
+                return ", ".join(str(tag) for tag in value)
 
             # Format associated conditions (for medications)
             if field_name == "associated_conditions" and isinstance(value, list):
                 if not value:
-                    return "None"
+                    return t.text("none_listed")
                 parts = []
                 for cond in value:
                     if isinstance(cond, dict):
-                        text = cond.get("condition_name") or "Unknown Condition"
+                        text = cond.get("condition_name") or t.text("unknown_condition")
                         if cond.get("relevance_note"):
                             text += f" ({cond['relevance_note']})"
                         parts.append(f"• {text}")
@@ -2047,11 +2066,13 @@ class ExportService:
             # Format associated medications (for conditions)
             if field_name == "associated_medications" and isinstance(value, list):
                 if not value:
-                    return "None"
+                    return t.text("none_listed")
                 parts = []
                 for med in value:
                     if isinstance(med, dict):
-                        text = med.get("medication_name") or "Unknown Medication"
+                        text = med.get("medication_name") or t.text(
+                            "unknown_medication"
+                        )
                         if med.get("dosage"):
                             text += f" {med['dosage']}"
                         if med.get("relevance_note"):
@@ -2062,18 +2083,21 @@ class ExportService:
             # Format nested conditions (for family history)
             if field_name == "conditions" and isinstance(value, list):
                 if not value:
-                    return "None recorded"
+                    return t.text("none_recorded")
                 condition_strs = []
                 for cond in value:
                     if isinstance(cond, dict):
-                        name = cond.get("condition_name", "Unknown")
+                        name = cond.get("condition_name") or t.text(
+                            "unknown_condition"
+                        )
                         age = cond.get("diagnosis_age")
-                        severity = cond.get("severity", "")
+                        severity = t.value(cond.get("severity"))
                         if age:
+                            age_text = t.text("age_value", age=age)
                             condition_strs.append(
-                                f"• {name} (age {age}, {severity})"
+                                f"• {name} ({age_text}, {severity})"
                                 if severity
-                                else f"• {name} (age {age})"
+                                else f"• {name} ({age_text})"
                             )
                         else:
                             condition_strs.append(
@@ -2084,8 +2108,27 @@ class ExportService:
             # Format nested occurrences (for symptoms)
             if field_name == "occurrences" and isinstance(value, list):
                 if not value:
-                    return "None recorded"
-                return f"{len(value)} occurrence(s) recorded"
+                    return t.text("none_recorded")
+                return t.text("occurrences_recorded", count=len(value))
+
+            # Format insurance coverage / contact detail dicts
+            if field_name in ("coverage_details", "contact_info"):
+                if isinstance(value, dict):
+                    return "\n".join(
+                        f"{t.insurance_detail(key)}: {detail}"
+                        for key, detail in value.items()
+                        if detail not in (None, "")
+                    ) or None
+
+            if field_name == "attached_files" and str_value == "No files attached":
+                return t.text("no_files_attached")
+
+            if field_name == "relationship":
+                return t.relationship(str_value)
+
+            # Translate stored choice values; free text is returned unchanged
+            if field_name in _ENUM_VALUE_FIELDS:
+                return t.value(str_value)
 
             return str_value
 
@@ -2327,9 +2370,54 @@ class ExportService:
                     "notes",
                     "tags",
                 ]
+            elif section_name == "practitioners":
+                field_order = [
+                    "name",
+                    "specialty",
+                    "practice",
+                    "phone_number",
+                    "website",
+                    "rating",
+                    "is_primary_physician",
+                ]
+            elif section_name == "pharmacies":
+                field_order = [
+                    "name",
+                    "brand",
+                    "street_address",
+                    "city",
+                    "state",
+                    "zip_code",
+                    "country",
+                    "store_number",
+                    "phone_number",
+                    "fax_number",
+                    "email",
+                    "website",
+                    "hours",
+                    "drive_through",
+                    "twenty_four_hour",
+                    "specialty_services",
+                ]
+            elif section_name == "emergency_contacts":
+                field_order = [
+                    "name",
+                    "relationship",
+                    "phone_number",
+                    "secondary_phone",
+                    "email",
+                    "is_primary",
+                    "is_active",
+                    "address",
+                    "notes",
+                ]
             else:
-                # Default order - use all available fields
-                field_order = list(record.keys())
+                # Unknown section - show every field except internal identifiers
+                field_order = [
+                    key
+                    for key in record.keys()
+                    if key != "id" and not key.endswith("_id")
+                ]
 
             # Add fields to card in order
             for field_name in field_order:
@@ -2337,7 +2425,7 @@ class ExportService:
                     display_name = get_field_label(field_name)
                     formatted_value = format_value(field_name, record[field_name])
 
-                    if formatted_value != "N/A":  # Only show fields with values
+                    if formatted_value is not None:  # Only show fields with values
                         # Use Paragraph for values that need text wrapping
                         # Convert newlines to <br/> tags for proper PDF rendering
                         if "\n" in formatted_value or len(formatted_value) > 50:
@@ -2425,7 +2513,7 @@ class ExportService:
             story.append(Spacer(1, 12))
             story.append(
                 Paragraph(
-                    f"Note: Showing first 50 of {len(section_data)} records. For complete data, use CSV export.",
+                    t.text("records_truncated", shown=50, total=len(section_data)),
                     styles["Italic"],
                 )
             )
