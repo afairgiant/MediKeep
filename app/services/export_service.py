@@ -69,6 +69,16 @@ _ENUM_VALUE_FIELDS = frozenset(
         "mode",
         "visit_type",
         "relationship_to_holder",
+        "route",
+        "glucose_context",
+        "location",
+        "procedure_type",
+        "procedure_setting",
+        "anesthesia_type",
+        "treatment_type",
+        "frequency",
+        "site",
+        "equipment_type",
     }
 )
 
@@ -1808,7 +1818,7 @@ class ExportService:
                     ],
                     [
                         t.text("gender"),
-                        t.value(patient_info.get("gender"))
+                        t.gender(patient_info.get("gender"))
                         or t.text("not_recorded"),
                     ],
                 ]
@@ -2130,7 +2140,7 @@ class ExportService:
             if field_name in ("coverage_details", "contact_info"):
                 if isinstance(value, dict):
                     return "\n".join(
-                        f"{t.insurance_detail(key)}: {detail}"
+                        f"{t.insurance_detail(key)}: {t.value(detail)}"
                         for key, detail in value.items()
                         if detail not in (None, "")
                     ) or None
@@ -2138,8 +2148,11 @@ class ExportService:
             if field_name == "attached_files" and str_value == "No files attached":
                 return t.text("no_files_attached")
 
-            if field_name == "relationship":
+            if field_name in ("relationship", "relationship_to_holder"):
                 return t.relationship(str_value)
+
+            if field_name == "gender":
+                return t.gender(str_value)
 
             # Translate stored choice values; free text is returned unchanged
             if field_name in _ENUM_VALUE_FIELDS:
