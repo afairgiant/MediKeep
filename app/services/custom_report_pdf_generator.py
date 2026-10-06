@@ -2450,7 +2450,7 @@ class CustomReportPDFGenerator:
             if record.get("phone_number"):
                 rows.append((t.field("phone"), record["phone_number"]))
             if record.get("secondary_phone"):
-                rows.append((t.field("phone"), record["secondary_phone"]))
+                rows.append((t.field("secondary_phone"), record["secondary_phone"]))
             if record.get("email"):
                 rows.append((t.field("email"), record["email"]))
             if record.get("address"):
@@ -2926,9 +2926,9 @@ class CustomReportPDFGenerator:
         if record.get("status"):
             rows.append((t.field("status"), t.value(record["status"])))
         if record.get("employer_group"):
-            rows.append((t.field("group_number"), record["employer_group"]))
+            rows.append((t.field("employer_group"), record["employer_group"]))
         if record.get("member_name"):
-            rows.append((t.field("name"), record["member_name"]))
+            rows.append((t.field("member_name"), record["member_name"]))
         if record.get("member_id"):
             rows.append((t.field("member_id"), record["member_id"]))
         if record.get("group_number"):
@@ -2937,7 +2937,7 @@ class CustomReportPDFGenerator:
             holder_info = record["policy_holder_name"]
             if record.get("relationship_to_holder"):
                 holder_info += f" ({t.value(record['relationship_to_holder'])})"
-            rows.append((t.field("name"), holder_info))
+            rows.append((t.field("policy_holder"), holder_info))
         if record.get("effective_date"):
             rows.append(
                 (t.field("start_date"), self._format_date(record["effective_date"]))

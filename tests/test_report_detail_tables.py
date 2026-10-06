@@ -175,3 +175,34 @@ class TestRecordCountLabel:
     def test_section_header_uses_singular(self, gen):
         story = gen._create_category_section("family_history", [{"name": "Dad"}])
         assert "(1 record)" in story[0].text
+
+
+class TestDistinctLabels:
+    def _labels(self, gen, story):
+        return [row.split(": ", 1)[0] for row in story_texts(_tables(story))]
+
+    @pytest.mark.parametrize("lang", ["en", "de", "th", "zh"])
+    def test_emergency_contact_phones_are_distinguishable(self, lang):
+        gen = CustomReportPDFGenerator()
+        gen.translator = get_translator(lang, "mdy")
+        story = gen._format_emergency_contacts(
+            [{"name": "Jane", "phone_number": "1", "secondary_phone": "2"}]
+        )
+        labels = self._labels(gen, story)
+        assert len(labels) == 2 and len(set(labels)) == 2
+
+    @pytest.mark.parametrize("lang", ["en", "de", "th", "zh"])
+    def test_insurance_rows_have_unique_labels(self, lang):
+        gen = CustomReportPDFGenerator()
+        gen.translator = get_translator(lang, "mdy")
+        story = gen._format_single_insurance(
+            {
+                "company_name": "Acme",
+                "employer_group": "E1",
+                "group_number": "G1",
+                "member_name": "Pat",
+                "policy_holder_name": "Sam",
+            }
+        )
+        labels = self._labels(gen, story)
+        assert len(labels) == 4 and len(set(labels)) == 4
