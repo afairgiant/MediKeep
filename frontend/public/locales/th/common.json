@@ -17,7 +17,7 @@
     "linkEquipment": "เชื่อมโยงอุปกรณ์",
     "linkLabResult": "เชื่อมโยงผลแลป",
     "linkMedication": "เชื่อมโยงยา",
-    "linkVisit": "เชื่อมโยงการเยี่ยม",
+    "linkVisit": "เชื่อมโยงการพบแพทย์",
     "print": "พิมพ์",
     "refresh": "รีเฟรช",
     "restore": "กู้คืน",
@@ -433,7 +433,7 @@
       "equipment": "เพิ่มอุปกรณ์",
       "procedure": "เพิ่มหัตถการ",
       "symptom": "เพิ่มอาการ",
-      "visit": "เพิ่มการเยี่ยม"
+      "visit": "เพิ่มการพบแพทย์"
     },
     "createError": "ไม่สามารถสร้างได้ โปรดลองอีกครั้ง",
     "created": "สร้างแล้ว",
@@ -451,7 +451,7 @@
       "annualMax": "วงเงินสูงสุดต่อปี",
       "basic": "พื้นฐาน",
       "bin": "BIN",
-      "deductible": "ค่าเสียหายที่ต้องจ่ายเอง",
+      "deductible": "ค่าใช้จ่ายส่วนแรก",
       "effective": "มีผลตั้งแต่",
       "examCopay": "ค่าตรวจ",
       "expires": "หมดอายุ",
@@ -488,7 +488,7 @@
       "coverageDetails": "รายละเอียดความคุ้มครอง",
       "coveragePeriod": "ระยะเวลาความคุ้มครอง",
       "customerServicePhone": "โทรศัพท์บริการลูกค้า",
-      "deductible": "ค่าเสียหายที่ต้องจ่ายเอง",
+      "deductible": "ค่าใช้จ่ายส่วนแรก",
       "dentalCoverage": "ความคุ้มครองทันตกรรม",
       "effectiveDate": "วันที่มีผล",
       "employerGroup": "นายจ้าง/ผู้สนับสนุนกลุ่ม",
@@ -525,16 +525,16 @@
     "new": "ใหม่",
     "no": "ไม่",
     "noConditionsLinked": "ไม่มีโรคที่เชื่อมโยงกับผลแลปนี้",
-    "noEncountersLinked": "ไม่มีการเยี่ยมที่เชื่อมโยงกับการรักษานี้",
+    "noEncountersLinked": "ไม่มีการพบแพทย์ที่เชื่อมโยงกับการรักษานี้",
     "noEquipmentLinked": "ไม่มีอุปกรณ์ที่เชื่อมโยงกับการรักษานี้",
-    "noLabResultsLinked": "ไม่มีผลแลปที่เชื่อมโยงกับการเยี่ยมนี้",
+    "noLabResultsLinked": "ไม่มีผลแลปที่เชื่อมโยงกับการพบแพทย์นี้",
     "noLabResultsLinkedToCondition": "ไม่มีผลแลปที่เชื่อมโยงกับโรคนี้",
     "noMedicationsLinked": "ไม่มียาที่เชื่อมโยงกับโรคนี้",
     "none": "ไม่มี",
     "noRating": "ไม่มีคะแนน",
     "notAvailable": "ไม่มีข้อมูล",
     "notCompleted": "ไม่เสร็จสิ้น",
-    "noVisitsLinked": "ไม่มีการเยี่ยมที่เชื่อมโยงกับผลแลปนี้",
+    "noVisitsLinked": "ไม่มีการพบแพทย์ที่เชื่อมโยงกับผลแลปนี้",
     "ordered": "สั่งแล้ว",
     "phoneNumber": "หมายเลขโทรศัพท์",
     "pleaseTryAgain": "กรุณาลองใหม่อีกครั้ง",
@@ -544,7 +544,7 @@
     "selectPurpose": "เลือกวัตถุประสงค์",
     "viewDetails": "ดูรายละเอียด",
     "viewPharmacyDetails": "ดูรายละเอียดร้านยา",
-    "visitDate": "วันที่เยี่ยม",
+    "visitDate": "วันที่พบแพทย์",
     "visitWebsite": "เยี่ยมชมเว็บไซต์ ↗",
     "yes": "ใช่",
     "noConditionsLinkedToMedication": "ไม่มีโรคที่เชื่อมโยงกับยานี้",
@@ -565,9 +565,9 @@
     "emptyLabResultMessage": "คุณสร้างผลแลปแต่ไม่ได้เพิ่มส่วนประกอบการตรวจ คุณต้องการลบผลแลปนี้หรือไม่?",
     "emptyLabResultWarning": "สร้างผลแลปแล้วแต่ว่างเปล่า",
     "form": {
-      "linkedVisits": "การเยี่ยมที่เชื่อมโยง",
-      "linkVisitsDescription": "เชื่อมโยงผลแลปนี้กับการเยี่ยมที่มีการสั่งหรือตรวจสอบ",
-      "linkVisitsTitle": "เชื่อมโยงกับการเยี่ยม"
+      "linkedVisits": "การพบแพทย์ที่เชื่อมโยง",
+      "linkVisitsDescription": "เชื่อมโยงผลแลปนี้กับการพบแพทย์ที่มีการสั่งหรือตรวจสอบ",
+      "linkVisitsTitle": "เชื่อมโยงกับการพบแพทย์"
     },
     "labResultCreated": "สร้างผลแลป \"{{testName}}\" แล้ว ตอนนี้คุณสามารถอัปโหลดและแยกวิเคราะห์ PDF ได้",
     "quickFormInstructions": "ป้อนชื่อสำหรับผลแลปนี้ แล้วคุณจะสามารถอัปโหลดและแยกวิเคราะห์ PDF ได้",
@@ -636,26 +636,26 @@
     "confirmRemoveMedicationRelationship": "คุณแน่ใจหรือไม่ที่จะลบความสัมพันธ์ของยานี้?",
     "confirmRemoveProcedureLink": "ลบการเชื่อมโยงหัตถการนี้หรือไม่?",
     "confirmRemoveTreatmentLink": "ลบการเชื่อมโยงการรักษานี้หรือไม่?",
-    "confirmRemoveVisitLink": "ลบการเชื่อมโยงการเยี่ยมนี้?",
+    "confirmRemoveVisitLink": "ลบการเชื่อมโยงการพบแพทย์นี้?",
     "displayError": "ไม่สามารถแสดงรายการนี้ได้ กรุณาลองรีเฟรชหน้า",
     "doNotClose": "กรุณาอย่าปิดหน้าต่างนี้หรือเปลี่ยนหน้า",
     "failedToLinkLabResult": "เชื่อมโยงผลแลปไม่สำเร็จ",
     "failedToLinkMedication": "เชื่อมโยงยาไม่สำเร็จ",
     "failedToLinkProcedure": "เชื่อมโยงหัตถการไม่สำเร็จ",
     "failedToLinkTreatment": "เชื่อมโยงการรักษาไม่สำเร็จ",
-    "failedToLinkVisit": "เชื่อมโยงการเยี่ยมไม่สำเร็จ",
+    "failedToLinkVisit": "เชื่อมโยงการพบแพทย์ไม่สำเร็จ",
     "failedToUnlinkLabResult": "ยกเลิกการเชื่อมโยงผลแลปไม่สำเร็จ",
     "failedToUnlinkMedication": "ยกเลิกการเชื่อมโยงยาไม่สำเร็จ",
     "failedToUnlinkProcedure": "ยกเลิกการเชื่อมโยงหัตถการไม่สำเร็จ",
     "failedToUnlinkTreatment": "ยกเลิกการเชื่อมโยงการรักษาไม่สำเร็จ",
-    "failedToUnlinkVisit": "ยกเลิกการเชื่อมโยงการเยี่ยมไม่สำเร็จ",
+    "failedToUnlinkVisit": "ยกเลิกการเชื่อมโยงการพบแพทย์ไม่สำเร็จ",
     "failedToUpdateRelationship": "อัปเดตความสัมพันธ์ไม่สำเร็จ",
     "processing": "กำลังประมวลผล...",
     "selectLabResult": "กรุณาเลือกผลแลป",
     "selectMedication": "กรุณาเลือกยา",
     "selectProcedure": "กรุณาเลือกหัตถการ",
     "selectTreatment": "กรุณาเลือกการรักษา",
-    "selectVisit": "กรุณาเลือกการเยี่ยม",
+    "selectVisit": "กรุณาเลือกการพบแพทย์",
     "underDevelopment": "ส่วนนี้อยู่ระหว่างการพัฒนา",
     "updateSuccess": "อัปเดตสำเร็จ"
   },
@@ -664,13 +664,13 @@
     "chooseConditionToLink": "เลือกโรคที่จะเชื่อมโยง",
     "chooseLabResultToLink": "เลือกผลแลปที่จะเชื่อมโยง",
     "chooseMedicationToLink": "เลือกยาที่จะเชื่อมโยง",
-    "chooseVisitToLink": "เลือกการเยี่ยมที่จะเชื่อมโยง",
+    "chooseVisitToLink": "เลือกการพบแพทย์ที่จะเชื่อมโยง",
     "describeConditionRelevance": "อธิบายความเกี่ยวข้องของโรคนี้กับผลแลป (ไม่บังคับ)",
-    "describeLabResultRelevance": "อธิบายความเกี่ยวข้องของผลแลปนี้กับการเยี่ยมนี้",
-    "describeVisitRelevance": "อธิบายความเกี่ยวข้องของการเยี่ยมนี้กับผลแลปนี้",
+    "describeLabResultRelevance": "อธิบายความเกี่ยวข้องของผลแลปนี้กับการพบแพทย์นี้",
+    "describeVisitRelevance": "อธิบายความเกี่ยวข้องของการพบแพทย์นี้กับผลแลปนี้",
     "linkConditionToLabResult": "เชื่อมโยงโรคกับผลแลป",
-    "linkLabResultToVisit": "เชื่อมโยงผลแลปกับการเยี่ยม",
-    "linkVisitToLabResult": "เชื่อมโยงการเยี่ยมกับผลแลป",
+    "linkLabResultToVisit": "เชื่อมโยงผลแลปกับการพบแพทย์",
+    "linkVisitToLabResult": "เชื่อมโยงการพบแพทย์กับผลแลป",
     "noRelevanceNoteProvided": "ไม่มีหมายเหตุความเกี่ยวข้อง",
     "purpose": "วัตถุประสงค์",
     "relevanceNote": "หมายเหตุความเกี่ยวข้อง",
@@ -679,7 +679,7 @@
     "selectLabResult": "เลือกผลแลป",
     "selectMedications": "เลือกยา",
     "selectPurpose": "เลือกวัตถุประสงค์",
-    "selectVisit": "เลือกการเยี่ยม",
+    "selectVisit": "เลือกการพบแพทย์",
     "linkConditionsToMedication": "เชื่อมโยงโรคกับยา",
     "linkMedicationsToCondition": "เชื่อมโยงยากับโรค",
     "selectConditions": "เลือกโรค",
@@ -1012,7 +1012,7 @@
     }
   },
   "recordRelationships": {
-    "linkFailed": "สร้างรายการแล้ว แต่บันทึกบางการเชื่อมโยงกับการเยี่ยมไม่ได้ คุณสามารถเพิ่มได้โดยแก้ไขรายการ"
+    "linkFailed": "สร้างรายการแล้ว แต่บันทึกบางการเชื่อมโยงกับการพบแพทย์ไม่ได้ คุณสามารถเพิ่มได้โดยแก้ไขรายการ"
   },
   "search": {
     "activeFilterCount": "ฟิลเตอร์ที่ใช้งาน {{count}} ตัว",
@@ -1036,7 +1036,7 @@
       "recorded": "บันทึก",
       "started": "เริ่มต้น",
       "tested": "ตรวจ",
-      "visited": "เยี่ยม"
+      "visited": "พบแพทย์"
     },
     "datePresets": "ตัวเลือกเร็ว",
     "dateRange": "ช่วงวันที่",
@@ -1044,7 +1044,7 @@
     "expandFilters": "ขยายฟิลเตอร์",
     "fallbacks": {
       "allergy": "แพ้",
-      "encounter": "การเยี่ยม",
+      "encounter": "การพบแพทย์",
       "equipment": "อุปกรณ์",
       "immunization": "การฉีดวัคซีน",
       "injury": "การบาดเจ็บ",
@@ -1102,7 +1102,7 @@
     "textResultCount_other": "ผลลัพธ์ข้อความ {{count}} รายการ",
     "title": "ผลการค้นหา",
     "types": {
-      "encounters": "การเยี่ยม",
+      "encounters": "การพบแพทย์",
       "vitals": "สัญญาณชีพ"
     },
     "viewCards": "มุมมองการ์ด",
@@ -1124,7 +1124,7 @@
     "procedures": "ค้นหาหัตถการ หมายเหตุ แท็ก...",
     "symptoms": "ค้นหาอาการ คำอธิบาย แท็ก...",
     "treatments": "ค้นหาการรักษา หมายเหตุ แท็ก...",
-    "visits": "ค้นหาการเยี่ยม เหตุผล หมายเหตุ แท็ก...",
+    "visits": "ค้นหาการพบแพทย์ เหตุผล หมายเหตุ แท็ก...",
     "vitals": "ค้นหาหมายเหตุสัญญาณชีพ..."
   },
   "severity": {
@@ -1133,7 +1133,7 @@
     "mild": "เล็กน้อย - รู้สึกไม่สบายเล็กน้อย",
     "mildImpact": "เล็กน้อย - กระทบน้อย",
     "moderate": "ปานกลาง - มีอาการที่รู้ได้",
-    "moderateImpact": "ปานกลาง - กระทบเป็นที่ร้ได้",
+    "moderateImpact": "ปานกลาง - กระทบอย่างสังเกตได้",
     "none": "ไม่มี - ไม่มีอาการไม่สบาย",
     "severe": "รุนแรง - ปฏิกิริยาที่รุนแรง",
     "severeImpact": "รุนแรง - กระทบอย่างมาก"
@@ -1394,47 +1394,47 @@
     "labwork": "งานห้องปฏิบัติการ"
   },
   "visits": {
-    "addNewVisit": "เพิ่มการเยี่ยมใหม่",
-    "addVisit": "เพิ่มการเยี่ยมใหม่",
+    "addNewVisit": "เพิ่มการพบแพทย์ใหม่",
+    "addVisit": "เพิ่มการพบแพทย์ใหม่",
     "card": {
-      "generalVisit": "การเยี่ยมทั่วไป"
+      "generalVisit": "การพบแพทย์ทั่วไป"
     },
-    "clickToGetStarted": "คลิก \"เพิ่มการเยี่ยมใหม่\" เพื่อเริ่มต้น",
-    "editVisit": "แก้ไขการเยี่ยม",
+    "clickToGetStarted": "คลิก \"เพิ่มการพบแพทย์ใหม่\" เพื่อเริ่มต้น",
+    "editVisit": "แก้ไขการพบแพทย์",
     "form": {
-      "addVisit": "เพิ่มการเยี่ยม",
-      "savingVisit": "กำลังบันทึกการเยี่ยม...",
+      "addVisit": "เพิ่มการพบแพทย์",
+      "savingVisit": "กำลังบันทึกการพบแพทย์...",
       "tabs": {
         "clinical": "ทางคลินิก",
-        "visitInfo": "ข้อมูลการเยี่ยม"
+        "visitInfo": "ข้อมูลการพบแพทย์"
       },
-      "updateVisit": "อัปเดตการเยี่ยม"
+      "updateVisit": "อัปเดตการพบแพทย์"
     },
-    "loadingVisits": "กำลังโหลดข้อมูลการเยี่ยม...",
-    "noVisitsFound": "ไม่พบการเยี่ยมทางการแพทย์",
+    "loadingVisits": "กำลังโหลดข้อมูลการพบแพทย์...",
+    "noVisitsFound": "ไม่พบการพบแพทย์ทางการแพทย์",
     "table": {
-      "visitDate": "วันที่เยี่ยม",
-      "visitType": "ประเภทการเยี่ยม"
+      "visitDate": "วันที่พบแพทย์",
+      "visitType": "ประเภทการพบแพทย์"
     },
-    "title": "การเยี่ยมทางการแพทย์",
+    "title": "การพบแพทย์ทางการแพทย์",
     "viewModal": {
       "chiefComplaint": "อาการสำคัญ",
       "clinicalInformation": "ข้อมูลทางคลินิก",
-      "editVisit": "แก้ไขการเยี่ยม",
+      "editVisit": "แก้ไขการพบแพทย์",
       "followUpInstructions": "คำแนะนำติดตาม",
-      "generalVisit": "การเยี่ยมทั่วไป",
+      "generalVisit": "การพบแพทย์ทั่วไป",
       "location": "สถานที่",
       "priority": "ลำดับความสำคัญ",
       "tabs": {
         "clinical": "ทางคลินิก",
-        "visitInfo": "ข้อมูลการเยี่ยม"
+        "visitInfo": "ข้อมูลการพบแพทย์"
       },
-      "title": "การเยี่ยม - {{date}}",
+      "title": "การพบแพทย์ - {{date}}",
       "treatmentPlan": "แผนการรักษา",
-      "visitInformation": "ข้อมูลการเยี่ยม"
+      "visitInformation": "ข้อมูลการพบแพทย์"
     },
     "notifications": {
-      "relationshipLinkFailed": "สร้างการเยี่ยมแล้ว แต่บันทึกบางความสัมพันธ์ไม่ได้ คุณสามารถเพิ่มได้โดยแก้ไขการเยี่ยม",
+      "relationshipLinkFailed": "สร้างการพบแพทย์แล้ว แต่บันทึกบางความสัมพันธ์ไม่ได้ คุณสามารถเพิ่มได้โดยแก้ไขการพบแพทย์",
       "relationshipLinkWarning": "ปัญหาการเชื่อมโยงความสัมพันธ์"
     },
     "relationships": {

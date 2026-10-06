@@ -17,6 +17,7 @@ from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.custom_report_service import CustomReportService
 from app.services.report_translations import get_translator
+from tests.utils.report_story import story_texts
 
 # Columns a report reader has no use for
 NOT_REPORTED = {"id", "symptom_id", "time_of_day", "created_at", "updated_at"}
@@ -36,7 +37,7 @@ def gen():
 def _render(gen, extra) -> str:
     record = {"symptom_name": "Migraine", "status": "active", **extra}
     story = gen._format_symptoms([record])
-    return " ".join(str(el.text) for el in story if hasattr(el, "text"))
+    return " ".join(story_texts(story))
 
 
 def _render_episodes(gen, *occurrences) -> str:

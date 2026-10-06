@@ -4,6 +4,7 @@ import pytest
 
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.report_translations import SUPPORTED_LANGUAGES, get_translator
+from tests.utils.report_story import story_texts
 
 RECORD = {
     "equipment_name": "Wheelchair",
@@ -17,9 +18,7 @@ def _lines(lang):
     gen = CustomReportPDFGenerator()
     gen.translator = get_translator(lang, "ymd")
     gen.unit_system = "imperial"
-    return [
-        el.text for el in gen._format_medical_equipment([RECORD]) if hasattr(el, "text")
-    ]
+    return story_texts(gen._format_medical_equipment([RECORD]))
 
 
 def test_english_labels_name_each_date():

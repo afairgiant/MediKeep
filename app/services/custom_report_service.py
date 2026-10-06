@@ -984,7 +984,7 @@ class CustomReportService:
         date_format: str = "mdy",
     ) -> List[Dict[str, Any]]:
         """Generate trend chart images and collect their data for PDF inclusion."""
-        from app.services.report_fonts import CJK_LANGUAGES, find_cjk_font_path
+        from app.services.report_fonts import find_dedicated_font_path
         from app.services.trend_chart_generator import TrendChartGenerator
         from app.services.trend_data_fetcher import TrendDataFetcher
 
@@ -992,7 +992,7 @@ class CustomReportService:
         translator = get_translator(language, date_format)
         generator = TrendChartGenerator(
             translator=translator,
-            font_path=find_cjk_font_path() if language in CJK_LANGUAGES else None,
+            font_path=find_dedicated_font_path(language),
         )
         chart_results = []
 

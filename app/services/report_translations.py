@@ -9,7 +9,7 @@ The module reads from: frontend/public/locales/{lang}/reportPdf.json
 Translation keys use camelCase to match the frontend i18next convention.
 Interpolation uses {{variable}} syntax matching i18next.
 
-Supports 12 languages: en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el
+Supports 13 languages: en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el, th
 """
 
 import json
@@ -21,23 +21,12 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from app.core.logging.config import get_logger
+from app.schemas.user_preferences import SUPPORTED_LANGUAGES as _SUPPORTED_LANGUAGES
 
 logger = get_logger(__name__, "app")
 
-SUPPORTED_LANGUAGES = (
-    "en",
-    "fr",
-    "de",
-    "es",
-    "it",
-    "pt",
-    "ru",
-    "sv",
-    "nl",
-    "pl",
-    "zh",
-    "el",
-)
+# Single source of truth lives in the preferences schema, so the two cannot drift.
+SUPPORTED_LANGUAGES = tuple(_SUPPORTED_LANGUAGES)
 
 
 def _resolve_locales_dir() -> Path:
@@ -123,6 +112,10 @@ _INTERPOLATION_RE = re.compile(r"\{\{(\w+)\}\}")
 _VALUE_SEPARATOR_RE = re.compile(r"[\s_-]+")
 
 
+# Stored gender codes (see app/schemas/validators.py) -> choice value keys
+_GENDER_CODES = {"M": "male", "F": "female", "U": "unknown"}
+
+
 class ReportTranslator:
     """Translator for PDF report generation.
 
@@ -200,16 +193,30 @@ class ReportTranslator:
         return result or text
 
     def relationship(self, key: str) -> str:
-        """Get translated family relationship label.
+        """Get translated relationship label.
 
-        key is the backend enum value (e.g., 'paternal_grandfather'); unknown
-        values fall back to a title-cased version ('Paternal Grandfather').
+        key is a backend relationship value (family: 'paternal_grandfather';
+        emergency contact: 'spouse', 'neighbor'). Family-specific labels are
+        looked up first, then the shared choice values; unknown values fall back
+        to a title-cased version ('Paternal Grandfather').
         """
-        camel_key = self._to_camel_case(key)
-        result = self._data.get("relationships", {}).get(
-            camel_key
-        ) or self._en_data.get("relationships", {}).get(camel_key)
+        camel_key = self._to_camel_case(
+            _VALUE_SEPARATOR_RE.sub("_", str(key).strip().lower())
+        )
+        result = (
+            self._data.get("relationships", {}).get(camel_key)
+            or self._en_data.get("relationships", {}).get(camel_key)
+            or self._data.get("values", {}).get(camel_key)
+            or self._en_data.get("values", {}).get(camel_key)
+        )
         return result or key.replace("_", " ").title()
+
+    def gender(self, raw: Any) -> str:
+        """Get translated gender text from stored codes ('M', 'F', 'OTHER', 'U')."""
+        text = str(raw).strip() if raw is not None else ""
+        if not text:
+            return ""
+        return self.value(_GENDER_CODES.get(text.upper(), text))
 
     def text(self, key: str, **kwargs) -> str:
         """Get translated report text with optional interpolation.
@@ -284,7 +291,7 @@ def get_translator(language: str = "en", date_format: str = "mdy") -> ReportTran
     """Create a ReportTranslator for the given language and date format.
 
     Args:
-        language: ISO 639-1 language code (en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el)
+        language: ISO 639-1 language code (en, fr, de, es, it, pt, ru, sv, nl, pl, zh, el, th)
         date_format: Date format preference (mdy, dmy, ymd)
 
     Returns:

@@ -1,7 +1,8 @@
 /**
  * Shared language configuration for the UI language switcher and preference sync.
- * Keep in sync with SUPPORTED_LANGUAGES in app/schemas/user_preferences.py, which
- * validates the API, and in app/services/report_translations.py, which renders PDFs.
+ * Must match SUPPORTED_LANGUAGES in app/schemas/user_preferences.py, which validates
+ * the API and feeds app/services/report_translations.py (PDFs). A backend test
+ * (tests/test_supported_languages_sync.py) fails if the two drift apart.
  */
 
 export interface Language {
@@ -23,6 +24,7 @@ export const LANGUAGES: readonly Language[] = [
   { value: 'pl', label: 'Polski', shortLabel: 'PL' },
   { value: 'zh', label: '中文', shortLabel: 'ZH' },
   { value: 'el', label: 'Ελληνικά', shortLabel: 'EL' },
+  { value: 'th', label: 'ไทย', shortLabel: 'TH' },
 ];
 
 export const SUPPORTED_LANGUAGE_CODES: readonly string[] = LANGUAGES.map(

@@ -22,9 +22,8 @@ def test_string_operations():
 def test_app_health(client: TestClient):
     """Test basic app health endpoint."""
     response = client.get("/health")
-    # This might fail if health endpoint doesn't exist, but that's OK for now
-    # The test will show if the app is loading correctly
-    assert response.status_code in [200, 404]  # Either works or endpoint doesn't exist
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
 
 
 class TestBasicFunctionality:

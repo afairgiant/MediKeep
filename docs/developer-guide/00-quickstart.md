@@ -251,7 +251,7 @@ docker compose up -d --build
 # Health check
 curl http://localhost:8000/health
 
-# Should return: {"status":"healthy"}
+# Should return: {"status":"ok","app":"MediKeep","version":"<version>"}
 ```
 
 ```bash
