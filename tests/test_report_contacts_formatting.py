@@ -15,7 +15,7 @@ from app.models.practice import MedicalSpecialty
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.custom_report_service import CustomReportService
 from app.services.report_translations import get_translator
-
+from tests.utils.report_story import story_texts
 
 @pytest.fixture
 def generator():
@@ -25,7 +25,7 @@ def generator():
 
 
 def _text(story) -> str:
-    return " ".join(str(el.text) for el in story if hasattr(el, "text"))
+    return " ".join(story_texts(story))
 
 
 class TestJoinAddress:
@@ -44,7 +44,7 @@ class TestJoinAddress:
 
 
 def _paragraph_texts(story):
-    return [str(el.text) for el in story if hasattr(el, "text")]
+    return story_texts(story)
 
 
 class TestPharmacyFormatting:
@@ -127,7 +127,7 @@ class TestPractitionerFormatting:
         )
         lines = [t.strip() for t in _paragraph_texts(story)]
         assert lines[1:] == [
-            "Heart Clinic",
+            "Practice: Heart Clinic",
             "Phone Number: 555-0111",
             "Website: https://heart.example",
             "Address: Main - 1 Heart Way, Town",

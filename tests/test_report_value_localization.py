@@ -10,6 +10,7 @@ from app.services.report_translations import (
     _load_locale,
     get_translator,
 )
+from tests.utils.report_story import story_texts
 
 # Stored values from app/models/enums.py and the lab result schema validators,
 # including hyphenated and spaced values.
@@ -36,7 +37,7 @@ NEW_FIELD_KEYS = ["reference_range", "member_id", "code", "ordered_by", "treatin
 
 
 def _text(story) -> str:
-    return " ".join(str(e.text) for e in story if hasattr(e, "text"))
+    return " ".join(story_texts(story))
 
 
 def _generator(language: str) -> CustomReportPDFGenerator:
@@ -150,7 +151,8 @@ class TestLocalizedFormatters:
             ],
         }])
         text = _text(story)
-        assert "Négatif" in text and "[Réf.: 3.5-5.0]" in text
+        assert "Négatif" in text and "3.5-5.0" in text
+        assert "Réf." in text  # column heading of the components table
         assert "Ref:" not in text and "(ÉLEVÉ)" in text
 
     def test_immunization_manufacturer_is_labelled(self, fr):

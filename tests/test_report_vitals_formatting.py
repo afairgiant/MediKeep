@@ -4,7 +4,7 @@ import pytest
 
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.report_translations import get_translator
-
+from tests.utils.report_story import story_texts
 
 class TestVitalsFormatting:
     """Test the _format_vitals method with unit conversion."""
@@ -127,14 +127,4 @@ class TestVitalsFormatting:
 
 def _extract_table_text(story) -> str:
     """Helper to extract all text content from ReportLab story elements."""
-    texts = []
-    for element in story:
-        # Extract from Paragraph elements
-        if hasattr(element, "text"):
-            texts.append(str(element.text))
-        # Extract from Table elements
-        if hasattr(element, "_cellvalues"):
-            for row in element._cellvalues:
-                for cell in row:
-                    texts.append(str(cell))
-    return " ".join(texts)
+    return " ".join(story_texts(story))

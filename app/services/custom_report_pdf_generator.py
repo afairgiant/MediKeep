@@ -321,30 +321,70 @@ class CustomReportPDFGenerator:
             )
         )
 
-        # Section header style with icon space
+        # Section header style: filled band with an accent rule, one per category
         styles.add(
             ParagraphStyle(
                 name="SectionHeader",
                 parent=styles["Heading1"],
                 fontSize=14,
-                textColor=info_blue,
-                spaceAfter=8,
-                spaceBefore=16,
+                leading=18,
+                textColor=colors.HexColor("#0D47A1"),
+                spaceAfter=10,
+                spaceBefore=18,
                 fontName=font_bold,
                 leftIndent=0,
+                backColor=colors.HexColor("#E8F0FA"),
+                borderPadding=(6, 8, 6, 8),
             )
         )
 
-        # Subsection header style
+        # Subsection header style: one per record, underlined with a thin rule
         styles.add(
             ParagraphStyle(
                 name="SubsectionHeader",
                 parent=styles["Heading2"],
-                fontSize=12,
+                fontSize=11.5,
+                leading=14,
                 textColor=dark_text,
                 spaceAfter=4,
-                spaceBefore=8,
+                spaceBefore=10,
                 fontName=font_bold,
+            )
+        )
+
+        # Group label (e.g. "Active Medications") that sits above a set of records
+        styles.add(
+            ParagraphStyle(
+                name="GroupHeader",
+                parent=styles["BodyText"],
+                fontSize=10,
+                leading=12,
+                textColor=neutral_gray,
+                fontName=font_bold,
+                spaceBefore=6,
+                spaceAfter=2,
+            )
+        )
+
+        # Detail table cells: gray label column, regular value column
+        styles.add(
+            ParagraphStyle(
+                name="DetailLabel",
+                parent=styles["BodyText"],
+                fontSize=9,
+                leading=11,
+                textColor=colors.HexColor("#455A64"),
+                fontName=font_bold,
+            )
+        )
+        styles.add(
+            ParagraphStyle(
+                name="DetailValue",
+                parent=styles["BodyText"],
+                fontSize=9,
+                leading=11,
+                textColor=dark_text,
+                fontName=font_normal,
             )
         )
 
@@ -1173,6 +1213,7 @@ class CustomReportPDFGenerator:
         "SubsectionHeader",
         "RecordHeader",
         "DateGroupHeader",
+        "GroupHeader",
     )
     HEADER_MIN_BODY_LINES = 4
     BODY_LINE_HEIGHT = 12  # points; matches the CustomBody leading
@@ -1340,6 +1381,19 @@ class CustomReportPDFGenerator:
         stripped = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
         return stripped.casefold()
 
+    def _record_count_label(self, count: int) -> str:
+        """Count with a singular or plural noun, e.g. 1 record, 5 records."""
+        t = self.translator
+        plural = t.text("records")
+        # Chinese and Thai use one counter word for any number
+        if count != 1 or t.language in self.CJK_LANGUAGES | self.THAI_LANGUAGES:
+            return f"{count} {plural}"
+        singular = t.text("record")
+        # Plurals are lowercase except where nouns are capitalised (German)
+        if plural[:1].islower():
+            singular = singular.lower()
+        return f"{count} {singular}"
+
     def _create_category_section(
         self, category: str, records: List[Dict[str, Any]]
     ) -> List:
@@ -1353,8 +1407,8 @@ class CustomReportPDFGenerator:
         # Category header with icon and count
         display_name = self.translator.category(category)
         icon = self._get_category_icon(category)
-        records_word = self.translator.text("records")
-        header_text = f"{icon} {display_name.upper()} ({len(records)} {records_word})"
+        count_label = self._record_count_label(len(records))
+        header_text = f"{icon} {display_name.upper()} ({count_label})"
         story.append(Paragraph(header_text, self.styles["SectionHeader"]))
         story.append(Spacer(1, 0.1 * inch))
 
@@ -1398,6 +1452,18 @@ class CustomReportPDFGenerator:
             story.extend(self._format_generic_records(records))
 
         return story
+
+    @staticmethod
+    def _tags_text(record: Dict[str, Any]) -> str:
+        """Tags as a comma-separated string (they may arrive as a list)."""
+        tags = record.get("tags")
+        if not tags:
+            return ""
+        return tags if isinstance(tags, str) else ", ".join(tags)
+
+    def _group_header(self, text: str) -> Paragraph:
+        """Label above a group of records, e.g. "Active Medications"."""
+        return Paragraph(text, self.styles["GroupHeader"])
 
     def _format_vitals(self, records: List[Dict[str, Any]]) -> List:
         """Format vital sign records with unit conversion based on user preference"""
@@ -1526,20 +1592,10 @@ class CustomReportPDFGenerator:
             if recorded_by:
                 details.append([f"{t.field('recorded_by')}:", str(recorded_by)])
 
-            if details:
-                table = _PlainTextTable(details, colWidths=[2.0 * inch, 4.0 * inch])
-                table.setStyle(self._get_detail_table_style())
-                story.append(table)
+            if record.get("notes"):
+                details.append([f"{t.field('notes')}:", str(record["notes"])])
 
-            # Notes
-            notes = record.get("notes")
-            if notes:
-                story.append(
-                    Paragraph(
-                        f"    <b>{t.field('notes')}:</b> {notes}",
-                        self.styles["CustomBody"],
-                    )
-                )
+            story.extend(self._detail_table(details))
 
             story.append(Spacer(1, 0.1 * inch))
 
@@ -1562,24 +1618,14 @@ class CustomReportPDFGenerator:
         )
 
         if active_meds:
-            story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('active_medications')}</i></b>",
-                    self.styles["CustomBody"],
-                )
-            )
+            story.append(self._group_header(self.translator.text("active_medications")))
             for record in active_meds:
                 story.extend(self._format_single_medication(record))
 
         if inactive_meds:
             if active_meds:
                 story.append(Spacer(1, 0.1 * inch))
-            story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('past_medications')}</i></b>",
-                    self.styles["CustomBody"],
-                )
-            )
+            story.append(self._group_header(self.translator.text("past_medications")))
             for record in inactive_meds:
                 story.extend(self._format_single_medication(record))
 
@@ -1588,6 +1634,7 @@ class CustomReportPDFGenerator:
     def _format_single_medication(self, record: Dict[str, Any]) -> List:
         """Format a single medication record with full details"""
         story = []
+        t = self.translator
 
         # Medication name with dosage and frequency
         name = record.get("medication_name", "Unnamed Medication")
@@ -1615,123 +1662,56 @@ class CustomReportPDFGenerator:
 
         story.append(Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"]))
 
-        # Critical medical details
-        details = []
-
-        # Medication type (prescription, OTC, supplement, herbal)
+        rows = []
         if record.get("medication_type"):
-            details.append(
-                f"<b>{self.translator.field('type')}:</b> {self.translator.value(record['medication_type'])}"
-            )
-
-        # Indication (purpose) is very important for medical providers - make it prominent
+            rows.append((t.field("type"), t.value(record["medication_type"])))
+        # Indication (purpose) is very important for medical providers
         if record.get("indication"):
-            details.append(
-                f"<b>{self.translator.field('purpose')}:</b> <b>{record['indication']}</b>"
-            )
-
-        # Prescriber and pharmacy info
-        prescriber_info = []
+            rows.append((t.field("purpose"), f"<b>{record['indication']}</b>"))
         if record.get("prescribing_practitioner"):
-            prescriber_info.append(
-                f"{self.translator.field('prescribed_by')}: {record['prescribing_practitioner']}"
-            )
+            rows.append((t.field("prescribed_by"), record["prescribing_practitioner"]))
         if record.get("pharmacy_name"):
-            prescriber_info.append(
-                f"{self.translator.field('pharmacy')}: {record['pharmacy_name']}"
-            )
-        if prescriber_info:
-            details.extend(prescriber_info)
+            rows.append((t.field("pharmacy"), record["pharmacy_name"]))
 
-        # Duration and status - make dates prominent
-        timing_info = []
         if record.get("effective_period_start"):
             start = self._format_date(record["effective_period_start"])
             if record.get("effective_period_end"):
-                end = self._format_date(record["effective_period_end"])
-                timing_info.append(
-                    f"<b>{self.translator.field('started')}:</b> {start} <b>{self.translator.field('ended')}:</b> {end}"
-                )
-            else:
-                timing_info.append(
-                    f"<b>{self.translator.field('started')}:</b> {start} ({self.translator.field('ongoing')})"
-                )
-        if record.get("status"):
-            status_display = self.translator.value(record["status"])
-            timing_info.append(
-                f"<b>{self.translator.field('status')}:</b> {status_display}"
-            )
-        if timing_info:
-            details.extend(timing_info)
-
-        # Refills and quantity
-        supply_info = []
-        if record.get("quantity"):
-            supply_info.append(
-                f"{self.translator.field('quantity')}: {record['quantity']}"
-            )
-        if record.get("refills_remaining") is not None:
-            supply_info.append(
-                f"{self.translator.field('refills')}: {record['refills_remaining']}"
-            )
-        if supply_info:
-            details.extend(supply_info)
-
-        # Side effects or warnings
-        if record.get("side_effects"):
-            details.append(
-                f"<b>{self.translator.field('side_effects')}:</b> {record['side_effects']}"
-            )
-        if record.get("warnings"):
-            details.append(
-                f"<b>{self.translator.field('warnings')}:</b> {record['warnings']}"
-            )
-
-        if details:
-            for detail in details:
-                story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
-        # Associated conditions
-        associated_conditions = record.get("associated_conditions", [])
-        if associated_conditions:
-            condition_parts = []
-            for cond in associated_conditions:
-                cond_text = cond.get("condition_name", "")
-                if cond.get("relevance_note"):
-                    cond_text += f" ({cond['relevance_note']})"
-                if cond_text:
-                    condition_parts.append(cond_text)
-            if condition_parts:
-                details_text = "; ".join(condition_parts)
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('for_conditions')}:</b> {details_text}",
-                        self.styles["CustomBody"],
+                rows.append((t.field("started"), start))
+                rows.append(
+                    (
+                        t.field("ended"),
+                        self._format_date(record["effective_period_end"]),
                     )
                 )
+            else:
+                rows.append((t.field("started"), f"{start} ({t.field('ongoing')})"))
+        if record.get("status"):
+            rows.append((t.field("status"), t.value(record["status"])))
 
-        # Special notes
+        if record.get("quantity"):
+            rows.append((t.field("quantity"), record["quantity"]))
+        if record.get("refills_remaining") is not None:
+            rows.append((t.field("refills"), record["refills_remaining"]))
+        if record.get("side_effects"):
+            rows.append((t.field("side_effects"), record["side_effects"]))
+        if record.get("warnings"):
+            rows.append((t.field("warnings"), record["warnings"]))
+
+        condition_parts = []
+        for cond in record.get("associated_conditions", []) or []:
+            cond_text = cond.get("condition_name", "")
+            if cond.get("relevance_note"):
+                cond_text += f" ({cond['relevance_note']})"
+            if cond_text:
+                condition_parts.append(cond_text)
+        if condition_parts:
+            rows.append((t.field("for_conditions"), "; ".join(condition_parts)))
+
         if record.get("notes"):
-            story.append(
-                Paragraph(
-                    f"    <b>{self.translator.field('notes')}:</b> {record['notes']}",
-                    self.styles["CustomBody"],
-                )
-            )
+            rows.append((t.field("notes"), record["notes"]))
+        rows.append((t.field("tags"), self._tags_text(record)))
 
-        if record.get("tags"):
-            tags = (
-                record["tags"]
-                if isinstance(record["tags"], str)
-                else ", ".join(record["tags"])
-            )
-            story.append(
-                Paragraph(
-                    f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                    self.styles["SmallText"],
-                )
-            )
-
+        story.extend(self._detail_table(rows))
         story.append(Spacer(1, 0.08 * inch))
         return story
 
@@ -1752,12 +1732,7 @@ class CustomReportPDFGenerator:
         )
 
         if active:
-            story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('active_conditions')}</i></b>",
-                    self.styles["CustomBody"],
-                )
-            )
+            story.append(self._group_header(self.translator.text("active_conditions")))
             for record in active:
                 story.extend(self._format_single_condition(record))
 
@@ -1765,10 +1740,7 @@ class CustomReportPDFGenerator:
             if active:
                 story.append(Spacer(1, 0.1 * inch))
             story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('resolved_conditions')}</i></b>",
-                    self.styles["CustomBody"],
-                )
+                self._group_header(self.translator.text("resolved_conditions"))
             )
             for record in resolved:
                 story.extend(self._format_single_condition(record))
@@ -1778,6 +1750,7 @@ class CustomReportPDFGenerator:
     def _format_single_condition(self, record: Dict[str, Any]) -> List:
         """Format a single condition with full medical details"""
         story = []
+        t = self.translator
 
         name = record.get("condition_name") or record.get(
             "diagnosis", "Unnamed Condition"
@@ -1789,38 +1762,22 @@ class CustomReportPDFGenerator:
         if icd_code:
             header_parts.append(f"(ICD: {icd_code})")
         if severity:
-            header_parts.append(f"- {self.translator.value(severity).upper()}")
+            header_parts.append(f"- {t.value(severity).upper()}")
 
         story.append(Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"]))
 
-        details = []
-
-        # Onset and duration
+        rows = []
         if record.get("onset_date"):
-            onset = self._format_date(record["onset_date"])
-            # Calculate duration if ongoing
-            details.append(f"<b>{self.translator.field('onset')}:</b> {onset}")
-
-        # Status and verification
-        status_info = []
+            rows.append((t.field("onset"), self._format_date(record["onset_date"])))
         if record.get("status"):
-            status_info.append(
-                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
-            )
+            rows.append((t.field("status"), t.value(record["status"])))
         if record.get("verification_status"):
-            status_info.append(
-                f"{self.translator.field('verification')}: {self.translator.value(record['verification_status'])}"
+            rows.append(
+                (t.field("verification"), t.value(record["verification_status"]))
             )
-        if status_info:
-            details.extend(status_info)
-
-        # Treating practitioner
         if record.get("practitioner_name"):
-            details.append(
-                f"{self.translator.field('managing_provider')}: {record['practitioner_name']}"
-            )
+            rows.append((t.field("managing_provider"), record["practitioner_name"]))
 
-        # Associated medications
         associated_medications = record.get("associated_medications", [])
         if associated_medications:
             med_parts = []
@@ -1833,45 +1790,17 @@ class CustomReportPDFGenerator:
                 if med_text:
                     med_parts.append(med_text)
             if med_parts:
-                details.append(
-                    f"<b>{self.translator.category('medications')}:</b> {'; '.join(med_parts)}"
-                )
+                rows.append((t.category("medications"), "; ".join(med_parts)))
         elif record.get("medication_name"):
-            details.append(
-                f"<b>{self.translator.field('treatment')}:</b> {record['medication_name']}"
-            )
+            rows.append((t.field("treatment"), record["medication_name"]))
 
-        # Clinical notes and diagnosis details
         if record.get("diagnosis") and record.get("condition_name"):
-            details.append(
-                f"<b>{self.translator.field('clinical_diagnosis')}:</b> {record['diagnosis']}"
-            )
-
-        if details:
-            for detail in details:
-                story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
+            rows.append((t.field("clinical_diagnosis"), record["diagnosis"]))
         if record.get("notes"):
-            story.append(
-                Paragraph(
-                    f"    <b>{self.translator.field('clinical_notes')}:</b> {record['notes']}",
-                    self.styles["CustomBody"],
-                )
-            )
+            rows.append((t.field("clinical_notes"), record["notes"]))
+        rows.append((t.field("tags"), self._tags_text(record)))
 
-        if record.get("tags"):
-            tags = (
-                record["tags"]
-                if isinstance(record["tags"], str)
-                else ", ".join(record["tags"])
-            )
-            story.append(
-                Paragraph(
-                    f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                    self.styles["SmallText"],
-                )
-            )
-
+        story.extend(self._detail_table(rows))
         story.append(Spacer(1, 0.08 * inch))
         return story
 
@@ -1897,93 +1826,44 @@ class CustomReportPDFGenerator:
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
             )
 
-            details = []
-
-            # Procedure specifics
+            t = self.translator
+            rows = []
             if record.get("body_site"):
-                details.append(
-                    f"<b>{self.translator.field('location')}:</b> {record['body_site']}"
-                )
-
-            # Provider and facility
-            provider_info = []
-            if record.get('practitioner_name'):
-                provider_info.append(f"{self.translator.field('performed_by')}: {record['practitioner_name']}")
-            if record.get('facility'):
-                facility_text = f"{self.translator.field('facility')}: {record['facility']}"
-                if record.get('procedure_setting'):
+                rows.append((t.field("location"), record["body_site"]))
+            if record.get("practitioner_name"):
+                rows.append((t.field("performed_by"), record["practitioner_name"]))
+            if record.get("facility"):
+                facility_text = record["facility"]
+                if record.get("procedure_setting"):
                     facility_text += f" ({record['procedure_setting']})"
-                provider_info.append(facility_text)
+                rows.append((t.field("facility"), facility_text))
             elif record.get("procedure_setting"):
-                provider_info.append(
-                    f"{self.translator.field('setting')}: {record['procedure_setting']}"
-                )
-            if provider_info:
-                details.extend(provider_info)
-
-            # Procedure details
-            proc_info = []
+                rows.append((t.field("setting"), record["procedure_setting"]))
             if record.get("duration"):
-                proc_info.append(
-                    f"{self.translator.field('duration')}: {record['duration']}"
-                )
+                rows.append((t.field("duration"), record["duration"]))
             if record.get("anesthesia_type"):
-                proc_info.append(
-                    f"{self.translator.field('anesthesia')}: {record['anesthesia_type']}"
-                )
-            if proc_info:
-                details.extend(proc_info)
-
-            # Status and outcome
-            outcome_info = []
+                rows.append((t.field("anesthesia"), record["anesthesia_type"]))
             if record.get("status"):
-                outcome_info.append(
-                    f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
-                )
+                rows.append((t.field("status"), t.value(record["status"])))
             if record.get("outcome"):
-                outcome_info.append(
-                    f"{self.translator.field('outcome')}: {self.translator.value(record['outcome'])}"
-                )
-            if outcome_info:
-                details.extend(outcome_info)
-
-            # Complications or follow-up
+                rows.append((t.field("outcome"), t.value(record["outcome"])))
             if record.get("complications"):
-                details.append(
-                    f"<b>{self.translator.field('complications')}:</b> {record['complications']}"
-                )
+                rows.append((t.field("complications"), record["complications"]))
             if record.get("follow_up_required"):
-                details.append(
-                    f"<b>{self.translator.field('follow_up_required')}:</b> {record['follow_up_required']}"
+                rows.append(
+                    (t.field("follow_up_required"), record["follow_up_required"])
                 )
+            if record.get("description"):
+                rows.append((t.field("description"), record["description"]))
+            if record.get("findings"):
+                rows.append((t.field("findings"), record["findings"]))
+            if record.get("notes"):
+                rows.append((t.field("procedure_notes"), record["notes"]))
+            if record.get("anesthesia_notes"):
+                rows.append((t.field("anesthesia_notes"), record["anesthesia_notes"]))
+            rows.append((t.field("tags"), self._tags_text(record)))
 
-            if details:
-                for detail in details:
-                    story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
-            # Detailed notes
-            if record.get('description'):
-                story.append(Paragraph(f"    <b>{self.translator.field('description')}:</b> {record['description']}", self.styles['CustomBody']))
-            if record.get('findings'):
-                story.append(Paragraph(f"    <b>{self.translator.field('findings')}:</b> {record['findings']}", self.styles['CustomBody']))
-            if record.get('notes'):
-                story.append(Paragraph(f"    <b>{self.translator.field('procedure_notes')}:</b> {record['notes']}", self.styles['CustomBody']))
-            if record.get('anesthesia_notes'):
-                story.append(Paragraph(f"    <b>{self.translator.field('anesthesia_notes')}:</b> {record['anesthesia_notes']}", self.styles['CustomBody']))
-
-            if record.get("tags"):
-                tags = (
-                    record["tags"]
-                    if isinstance(record["tags"], str)
-                    else ", ".join(record["tags"])
-                )
-                story.append(
-                    Paragraph(
-                        f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                        self.styles["SmallText"],
-                    )
-                )
-
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -2041,125 +1921,123 @@ class CustomReportPDFGenerator:
                     Paragraph("".join(header_parts), self.styles["SubsectionHeader"])
                 )
 
-                # Render individual test components (actual result values)
-                test_components = record.get("test_components", [])
-                if test_components:
-                    for component in test_components:
-                        comp_name = component.get("abbreviation") or component.get(
-                            "test_name", ""
-                        )
-                        comp_value = component.get("value")
-                        comp_qual = component.get("qualitative_value", "")
-                        comp_unit = component.get("unit", "")
-                        comp_ref = component.get("reference_range", "")
-                        comp_status = component.get("status", "")
+                # Individual test components (actual result values) as a table
+                story.extend(self._lab_components_table(record))
 
-                        # Determine display value
-                        if comp_value is not None:
-                            display_value = str(comp_value)
-                        elif comp_qual:
-                            display_value = self.translator.value(comp_qual)
-                        else:
-                            display_value = ""
-
-                        is_abnormal = comp_status and comp_status.lower() in (
-                            "high",
-                            "low",
-                            "critical",
-                            "abnormal",
-                        )
-
-                        # Build component line
-                        comp_parts = [f"<b>{comp_name}</b>"]
-                        if display_value:
-                            value_str = display_value
-                            if comp_unit:
-                                value_str += f" {comp_unit}"
-                            if is_abnormal:
-                                value_str = f"<font color='red'>{value_str} ({self.translator.value(comp_status).upper()})</font>"
-                            comp_parts.append(f": {value_str}")
-                        if comp_ref:
-                            comp_parts.append(
-                                f"  [{self.translator.field('reference_range')}: {comp_ref}]"
-                            )
-
-                        story.append(
-                            Paragraph(
-                                f"    {''.join(comp_parts)}", self.styles["CustomBody"]
-                            )
-                        )
-
-                # Details
-                details = []
-
-                # Test metadata
-                test_info = []
+                t = self.translator
+                rows = []
                 if record.get("test_code"):
-                    test_info.append(
-                        f"{self.translator.field('code')}: {record['test_code']}"
-                    )
+                    rows.append((t.field("code"), record["test_code"]))
                 if record.get("test_category"):
-                    test_info.append(
-                        f"{self.translator.field('type')}: {self.translator.value(record['test_category'])}"
-                    )
-                if test_info:
-                    details.extend(test_info)
-
-                # Timing information
-                timing_info = []
+                    rows.append((t.field("type"), t.value(record["test_category"])))
                 if record.get("ordered_date") and len(records_by_date) == 1:
-                    timing_info.append(
-                        f"{self.translator.field('date')}: {self._format_date(record['ordered_date'])}"
+                    rows.append(
+                        (t.field("date"), self._format_date(record["ordered_date"]))
                     )
                 if record.get("completed_date"):
-                    timing_info.append(
-                        f"{self.translator.field('end_date')}: {self._format_date(record['completed_date'])}"
+                    rows.append(
+                        (
+                            t.field("end_date"),
+                            self._format_date(record["completed_date"]),
+                        )
                     )
-                if timing_info:
-                    details.extend(timing_info)
-
-                # Provider and facility
-                provider_info = []
                 if record.get("ordered_by"):
-                    provider_info.append(
-                        f"{self.translator.field('ordered_by')}: {record['ordered_by']}"
-                    )
+                    rows.append((t.field("ordered_by"), record["ordered_by"]))
                 if record.get("facility"):
-                    provider_info.append(
-                        f"{self.translator.field('facility')}: {record['facility']}"
-                    )
-                if provider_info:
-                    details.extend(provider_info)
-
-                # Status
+                    rows.append((t.field("facility"), record["facility"]))
                 if record.get("status"):
-                    status_display = self.translator.value(record["status"])
+                    status_display = t.value(record["status"])
                     if record["status"].lower() in ("critical", "urgent"):
                         status_display = (
                             f"<font color='red'>{status_display.upper()}</font>"
                         )
-                    details.append(
-                        f"{self.translator.field('status')}: {status_display}"
-                    )
-
-                if details:
-                    for detail in details:
-                        story.append(
-                            Paragraph(f"    {detail}", self.styles["CustomBody"])
-                        )
-
-                # Clinical notes
+                    rows.append((t.field("status"), status_display))
                 if record.get("notes"):
-                    story.append(
-                        Paragraph(
-                            f"    <b>{self.translator.field('lab_notes')}:</b> {record['notes']}",
-                            self.styles["CustomBody"],
-                        )
-                    )
+                    rows.append((t.field("lab_notes"), record["notes"]))
 
+                if rows:
+                    story.append(Spacer(1, 0.05 * inch))
+                story.extend(self._detail_table(rows))
                 story.append(Spacer(1, 0.08 * inch))
 
         return story
+
+    def _lab_components_table(self, record: Dict[str, Any]) -> List:
+        """Columnar table of a lab test's components: test, result, reference."""
+        t = self.translator
+        components = record.get("test_components") or []
+        if not components:
+            return []
+
+        header_style = self.styles["DetailLabel"]
+        value_style = self.styles["DetailValue"]
+        data = [
+            [
+                Paragraph(t.field("test_name"), header_style),
+                Paragraph(t.field("result"), header_style),
+                Paragraph(t.field("reference_range"), header_style),
+            ]
+        ]
+        for component in components:
+            comp_name = component.get("abbreviation") or component.get("test_name", "")
+            comp_value = component.get("value")
+            comp_qual = component.get("qualitative_value", "")
+            comp_unit = component.get("unit", "")
+            comp_status = component.get("status", "")
+
+            if comp_value is not None:
+                display_value = str(comp_value)
+            elif comp_qual:
+                display_value = t.value(comp_qual)
+            else:
+                display_value = ""
+
+            if display_value and comp_unit:
+                display_value += f" {comp_unit}"
+            if (
+                display_value
+                and comp_status
+                and comp_status.lower()
+                in (
+                    "high",
+                    "low",
+                    "critical",
+                    "abnormal",
+                )
+            ):
+                display_value = (
+                    f"<font color='red'>{display_value} "
+                    f"({t.value(comp_status).upper()})</font>"
+                )
+
+            data.append(
+                [
+                    Paragraph(f"<b>{comp_name}</b>", value_style),
+                    Paragraph(display_value, value_style),
+                    Paragraph(str(component.get("reference_range") or ""), value_style),
+                ]
+            )
+
+        table = _PlainTextTable(
+            data,
+            colWidths=[2.8 * inch, 2.2 * inch, 2.0 * inch],
+            repeatRows=1,
+        )
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#ECEFF1")),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 3),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                    ("LINEBELOW", (0, 0), (-1, -1), 0.5, colors.HexColor("#CFD8DC")),
+                    ("LINEABOVE", (0, 0), (-1, 0), 0.5, colors.HexColor("#CFD8DC")),
+                ]
+            )
+        )
+        return [table]
 
     def _format_immunizations(self, records: List[Dict[str, Any]]) -> List:
         """Format immunization records with complete vaccination history"""
@@ -2213,91 +2091,45 @@ class CustomReportPDFGenerator:
                     Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
                 )
 
-                # Vaccine details
-                details = []
-
-                # Manufacturing info (important for tracking)
-                mfg_info = []
+                t = self.translator
+                rows = []
                 if record.get("manufacturer"):
-                    mfg_info.append(
-                        f"{self.translator.field('manufacturer')}: {record['manufacturer']}"
-                    )
+                    rows.append((t.field("manufacturer"), record["manufacturer"]))
                 if record.get("lot_number"):
-                    mfg_info.append(
-                        f"{self.translator.field('lot_number')}: {record['lot_number']}"
-                    )
+                    rows.append((t.field("lot_number"), record["lot_number"]))
                 if record.get("expiration_date"):
-                    mfg_info.append(
-                        f"{self.translator.field('end_date')}: {self._format_date(record['expiration_date'])}"
+                    rows.append(
+                        (
+                            t.field("end_date"),
+                            self._format_date(record["expiration_date"]),
+                        )
                     )
-                if mfg_info:
-                    details.extend(mfg_info)
-
-                # Administration details
-                admin_info = []
                 if record.get("site"):
-                    admin_info.append(
-                        f"{self.translator.field('administration_site')}: {record['site']}"
-                    )
+                    rows.append((t.field("administration_site"), record["site"]))
                 if record.get("route"):
-                    admin_info.append(
-                        f"{self.translator.field('route')}: {record['route']}"
-                    )
+                    rows.append((t.field("route"), record["route"]))
                 if record.get("dose_amount"):
-                    admin_info.append(
-                        f"{self.translator.field('dose_number')}: {record['dose_amount']}"
-                    )
-                if admin_info:
-                    details.extend(admin_info)
-
-                # Provider info
+                    rows.append((t.field("dose_number"), record["dose_amount"]))
                 if record.get("administered_by"):
-                    details.append(f"Administered by: {record['administered_by']}")
+                    rows.append(("Administered by", record["administered_by"]))
                 if record.get("facility"):
-                    details.append(
-                        f"{self.translator.field('location')}: {record['facility']}"
-                    )
-
-                # Next dose info if available
+                    rows.append((t.field("location"), record["facility"]))
                 if record.get("next_dose_due"):
-                    next_date = self._format_date(record["next_dose_due"])
-                    details.append(f"<b>Next Dose Due:</b> {next_date}")
-
-                if details:
-                    for detail in details:
-                        story.append(
-                            Paragraph(f"    {detail}", self.styles["CustomBody"])
+                    rows.append(
+                        (
+                            "Next Dose Due",
+                            f"<b>{self._format_date(record['next_dose_due'])}</b>",
                         )
-
-                # Reactions or notes
+                    )
                 if record.get("adverse_reaction"):
-                    story.append(
-                        Paragraph(
-                            f"    <b>{self.translator.field('adverse_reaction')}:</b> {record['adverse_reaction']}",
-                            self.styles["CustomBody"],
-                        )
+                    rows.append(
+                        (t.field("adverse_reaction"), record["adverse_reaction"])
                     )
                 if record.get("notes"):
-                    story.append(
-                        Paragraph(
-                            f"    <b>{self.translator.field('notes')}:</b> {record['notes']}",
-                            self.styles["CustomBody"],
-                        )
-                    )
+                    rows.append((t.field("notes"), record["notes"]))
+                rows.append((t.field("tags"), self._tags_text(record)))
 
-                if record.get("tags"):
-                    tags = (
-                        record["tags"]
-                        if isinstance(record["tags"], str)
-                        else ", ".join(record["tags"])
-                    )
-                    story.append(
-                        Paragraph(
-                            f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                            self.styles["SmallText"],
-                        )
-                    )
-
+                story.extend(self._detail_table(rows))
                 story.append(Spacer(1, 0.08 * inch))
 
             if len(vaccines_by_type) > 1:
@@ -2355,58 +2187,24 @@ class CustomReportPDFGenerator:
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
             )
 
-            # Critical reaction information
-            details = []
+            t = self.translator
+            rows = []
             if record.get("reaction"):
-                details.append(
-                    f"<b>{self.translator.field('reaction')}:</b> <b>{record['reaction']}</b>"
-                )
-
-            # Onset and verification
-            verification_info = []
+                rows.append((t.field("reaction"), f"<b>{record['reaction']}</b>"))
             if record.get("onset_date"):
-                verification_info.append(
-                    f"<b>{self.translator.field('onset')}:</b> {self._format_date(record['onset_date'])}"
-                )
+                rows.append((t.field("onset"), self._format_date(record["onset_date"])))
             if record.get("status"):
-                status_display = self.translator.value(record["status"])
-                verification_info.append(
-                    f"<b>{self.translator.field('status')}:</b> {status_display}"
-                )
-            if verification_info:
-                details.extend(verification_info)
-
-            # Associated medication if drug allergy - make prominent for drug interactions
+                rows.append((t.field("status"), t.value(record["status"])))
+            # Linked drug allergy: make prominent for drug interactions
             if record.get("medication_name"):
-                details.append(
-                    f"<b>Linked Medication:</b> <b>{record['medication_name']}</b>"
+                rows.append(
+                    ("Linked Medication", f"<b>{record['medication_name']}</b>")
                 )
-
-            if details:
-                for detail in details:
-                    story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
             if record.get("notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('notes')}:</b> {record['notes']}",
-                        self.styles["CustomBody"],
-                    )
-                )
+                rows.append((t.field("notes"), record["notes"]))
+            rows.append((t.field("tags"), self._tags_text(record)))
 
-            if record.get("tags"):
-                tags = (
-                    record["tags"]
-                    if isinstance(record["tags"], str)
-                    else ", ".join(record["tags"])
-                )
-                story.append(
-                    Paragraph(
-                        f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                        self.styles["SmallText"],
-                    )
-                )
-
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -2440,94 +2238,34 @@ class CustomReportPDFGenerator:
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
             )
 
-            # Treatment details
-            details = []
-
-            # Doctor and condition information
-            provider_condition = []
+            t = self.translator
+            rows = []
             if record.get("practitioner_name"):
-                provider_condition.append(
-                    f"<b>{self.translator.field('practitioner')}:</b> {record['practitioner_name']}"
-                )
+                rows.append((t.field("practitioner"), record["practitioner_name"]))
             if record.get("condition_name"):
-                provider_condition.append(
-                    f"<b>{self.translator.field('for_conditions')}:</b> {record['condition_name']}"
-                )
-            if provider_condition:
-                details.extend(provider_condition)
-
-            # Status and dates
-            timing_status = []
+                rows.append((t.field("for_conditions"), record["condition_name"]))
             if record.get("start_date"):
                 start = self._format_date(record["start_date"])
                 if record.get("end_date"):
                     end = self._format_date(record["end_date"])
-                    timing_status.append(
-                        f"<b>{self.translator.field('period')}:</b> {start} - {end}"
-                    )
+                    rows.append((t.field("period"), f"{start} - {end}"))
                 else:
-                    timing_status.append(
-                        f"<b>{self.translator.field('started')}:</b> {start} ({self.translator.field('ongoing')})"
-                    )
+                    rows.append((t.field("started"), f"{start} ({t.field('ongoing')})"))
             if record.get("status"):
-                status_display = self.translator.value(record["status"])
-                timing_status.append(
-                    f"<b>{self.translator.field('status')}:</b> {status_display}"
-                )
-            if timing_status:
-                details.extend(timing_status)
-
-            # Treatment category and location
-            logistics = []
+                rows.append((t.field("status"), t.value(record["status"])))
             if record.get("treatment_category"):
-                logistics.append(
-                    f"{self.translator.field('type')}: {self.translator.value(record['treatment_category'])}"
-                )
+                rows.append((t.field("type"), t.value(record["treatment_category"])))
             if record.get("location"):
-                logistics.append(
-                    f"{self.translator.field('location')}: {record['location']}"
-                )
-            if logistics:
-                details.extend(logistics)
-
-            # Description
+                rows.append((t.field("location"), record["location"]))
             if record.get("description"):
-                details.append(
-                    f"<b>{self.translator.field('description')}:</b> {record['description']}"
-                )
-
-            # Expected outcome
+                rows.append((t.field("description"), record["description"]))
             if record.get("outcome"):
-                details.append(
-                    f"<b>{self.translator.field('expected_outcome')}:</b> {record['outcome']}"
-                )
-
-            if details:
-                for detail in details:
-                    story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
-            # Notes
+                rows.append((t.field("expected_outcome"), record["outcome"]))
             if record.get("notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('notes')}:</b> {record['notes']}",
-                        self.styles["CustomBody"],
-                    )
-                )
+                rows.append((t.field("notes"), record["notes"]))
+            rows.append((t.field("tags"), self._tags_text(record)))
 
-            if record.get("tags"):
-                tags = (
-                    record["tags"]
-                    if isinstance(record["tags"], str)
-                    else ", ".join(record["tags"])
-                )
-                story.append(
-                    Paragraph(
-                        f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                        self.styles["SmallText"],
-                    )
-                )
-
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -2558,83 +2296,36 @@ class CustomReportPDFGenerator:
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
             )
 
-            details = []
-
-            # Doctor and condition (key medical context)
-            provider_condition = []
+            t = self.translator
+            rows = []
             if record.get("practitioner_name"):
-                provider_condition.append(
-                    f"<b>{self.translator.field('practitioner')}:</b> {record['practitioner_name']}"
-                )
-            # Check for condition_name and make sure it's not None
+                rows.append((t.field("practitioner"), record["practitioner_name"]))
             if record.get("condition_name") and record["condition_name"] != "None":
-                provider_condition.append(
-                    f"<b>{self.translator.field('related_condition')}:</b> {record['condition_name']}"
-                )
-            if provider_condition:
-                details.extend(provider_condition)
-
-            # Chief complaint (patient's primary concern)
+                rows.append((t.field("related_condition"), record["condition_name"]))
             if record.get("chief_complaint"):
-                details.append(
-                    f"<b>{self.translator.field('chief_complaint')}:</b> <b>{record['chief_complaint']}</b>"
+                rows.append(
+                    (t.field("chief_complaint"), f"<b>{record['chief_complaint']}</b>")
                 )
-
-            # Diagnosis (clinical assessment)
             if record.get("diagnosis"):
-                details.append(
-                    f"<b>{self.translator.field('diagnosis')}:</b> <b>{record['diagnosis']}</b>"
-                )
-
-            # Treatment plan and medications
+                rows.append((t.field("diagnosis"), f"<b>{record['diagnosis']}</b>"))
             if record.get("treatment_plan"):
-                details.append(
-                    f"<b>{self.translator.field('treatment_plan')}:</b> {record['treatment_plan']}"
-                )
+                rows.append((t.field("treatment_plan"), record["treatment_plan"]))
             if record.get("medications_prescribed"):
-                details.append(
-                    f"<b>{self.translator.field('medications_prescribed')}:</b> {record['medications_prescribed']}"
+                rows.append(
+                    (
+                        t.field("medications_prescribed"),
+                        record["medications_prescribed"],
+                    )
                 )
-
-            # Facility and follow-up
-            logistics = []
             if record.get("facility"):
-                logistics.append(
-                    f"{self.translator.field('facility')}: {record['facility']}"
-                )
+                rows.append((t.field("facility"), record["facility"]))
             if record.get("follow_up_instructions"):
-                logistics.append(
-                    f"{self.translator.field('follow_up')}: {record['follow_up_instructions']}"
-                )
-            if logistics:
-                details.extend(logistics)
-
-            if details:
-                for detail in details:
-                    story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
-            # Visit notes (detailed clinical notes)
+                rows.append((t.field("follow_up"), record["follow_up_instructions"]))
             if record.get("notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('visit_notes')}:</b> {record['notes']}",
-                        self.styles["CustomBody"],
-                    )
-                )
+                rows.append((t.field("visit_notes"), record["notes"]))
+            rows.append((t.field("tags"), self._tags_text(record)))
 
-            if record.get("tags"):
-                tags = (
-                    record["tags"]
-                    if isinstance(record["tags"], str)
-                    else ", ".join(record["tags"])
-                )
-                story.append(
-                    Paragraph(
-                        f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                        self.styles["SmallText"],
-                    )
-                )
-
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -2676,23 +2367,16 @@ class CustomReportPDFGenerator:
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
             )
 
-            details = []
+            t = self.translator
+            rows = []
             if practice:
-                details.append(practice)
+                rows.append((t.field("practice"), practice))
             if record.get("phone_number"):
-                details.append(
-                    f"{self.translator.field('phone')}: {record['phone_number']}"
-                )
+                rows.append((t.field("phone"), record["phone_number"]))
             if record.get("website"):
-                details.append(
-                    f"{self.translator.field('website')}: {record['website']}"
-                )
+                rows.append((t.field("website"), record["website"]))
 
-            # One detail per line
-            for detail in details:
-                story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
-            # One line per practice location
+            # One row per practice location
             for location in record.get("locations") or []:
                 address = self._join_address(
                     location.get("address"),
@@ -2704,13 +2388,9 @@ class CustomReportPDFGenerator:
                     continue
                 label = (location.get("label") or "").strip()
                 prefix = f"{label} - " if label else ""
-                story.append(
-                    Paragraph(
-                        f"    {self.translator.field('address')}: {prefix}{address}",
-                        self.styles["CustomBody"],
-                    )
-                )
+                rows.append((t.field("address"), f"{prefix}{address}"))
 
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -2724,7 +2404,8 @@ class CustomReportPDFGenerator:
             name = record.get("name", "Unnamed Pharmacy")
             story.append(Paragraph(f"<b>{name}</b>", self.styles["SubsectionHeader"]))
 
-            details = []
+            t = self.translator
+            rows = []
             address = self._join_address(
                 record.get("street_address"),
                 record.get("city"),
@@ -2733,20 +2414,13 @@ class CustomReportPDFGenerator:
                 record.get("country"),
             )
             if address:
-                details.append(f"{self.translator.field('address')}: {address}")
+                rows.append((t.field("address"), address))
             if record.get("phone_number"):
-                details.append(
-                    f"{self.translator.field('phone')}: {record['phone_number']}"
-                )
+                rows.append((t.field("phone"), record["phone_number"]))
             if record.get("website"):
-                details.append(
-                    f"{self.translator.field('website')}: {record['website']}"
-                )
+                rows.append((t.field("website"), record["website"]))
 
-            # One detail per line
-            for detail in details:
-                story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
-
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -2771,30 +2445,18 @@ class CustomReportPDFGenerator:
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
             )
 
-            details = []
+            t = self.translator
+            rows = []
             if record.get("phone_number"):
-                details.append(
-                    f"{self.translator.field('phone')}: {record['phone_number']}"
-                )
+                rows.append((t.field("phone"), record["phone_number"]))
             if record.get("secondary_phone"):
-                details.append(
-                    f"{self.translator.field('phone')}: {record['secondary_phone']}"
-                )
+                rows.append((t.field("secondary_phone"), record["secondary_phone"]))
             if record.get("email"):
-                details.append(f"{self.translator.field('email')}: {record['email']}")
-
-            if details:
-                for part in details:
-                    story.append(Paragraph(f"    {part}", self.styles["CustomBody"]))
-
+                rows.append((t.field("email"), record["email"]))
             if record.get("address"):
-                story.append(
-                    Paragraph(
-                        f"    {self.translator.field('address')}: {record['address']}",
-                        self.styles["CustomBody"],
-                    )
-                )
+                rows.append((t.field("address"), record["address"]))
 
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -2824,29 +2486,61 @@ class CustomReportPDFGenerator:
                         value = self._format_date(value)
                     details.append([f"{display_key}:", str(value)])
 
-            if details:
-                table = _PlainTextTable(details, colWidths=[1.5 * inch, 4.5 * inch])
-                table.setStyle(self._get_detail_table_style())
-                story.append(table)
+            story.extend(self._detail_table(details))
 
             story.append(Spacer(1, 0.15 * inch))
 
         return story
 
+    DETAIL_TABLE_WIDTH = 7.0 * inch  # page width minus the 0.75 inch margins
+    DETAIL_LABEL_WIDTH = 1.8 * inch
+
     def _get_detail_table_style(self) -> TableStyle:
-        """Get consistent table style for detail tables"""
+        """Light table style: gray label column and thin row rules."""
+        rule = colors.HexColor("#CFD8DC")
         return TableStyle(
             [
                 ("FONT", (0, 0), (0, -1), self.table_font_bold, 9),
                 ("FONT", (1, 0), (1, -1), self.table_font_normal, 9),
-                ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#2c3e50")),
-                ("ALIGN", (0, 0), (0, -1), "RIGHT"),
-                ("ALIGN", (1, 0), (1, -1), "LEFT"),
+                ("TEXTCOLOR", (0, 0), (-1, -1), colors.HexColor("#212121")),
+                ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#F5F7F8")),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (0, -1), 20),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 3),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                ("LINEBELOW", (0, 0), (-1, -1), 0.5, rule),
+                ("LINEABOVE", (0, 0), (-1, 0), 0.5, rule),
             ]
         )
+
+    def _detail_table(self, rows: List[Tuple[str, Any]]) -> List:
+        """Build a label/value table for one record.
+
+        Labels may carry a trailing colon, which is dropped. Returns an empty
+        list when no row has a value. Both columns are
+        Paragraphs so long text wraps and inline markup in values (bold,
+        red abnormal flags) is honoured; values arrive already escaped.
+        """
+        data = [
+            [
+                Paragraph(str(label).rstrip(":"), self.styles["DetailLabel"]),
+                Paragraph(str(value), self.styles["DetailValue"]),
+            ]
+            for label, value in rows
+            if value is not None and str(value) != ""
+        ]
+        if not data:
+            return []
+        table = _PlainTextTable(
+            data,
+            colWidths=[
+                self.DETAIL_LABEL_WIDTH,
+                self.DETAIL_TABLE_WIDTH - self.DETAIL_LABEL_WIDTH,
+            ],
+        )
+        table.setStyle(self._get_detail_table_style())
+        return [table]
 
     def _format_family_history(self, records: List[Dict[str, Any]]) -> List:
         """Format family history records with medical conditions per family member"""
@@ -2886,81 +2580,56 @@ class CustomReportPDFGenerator:
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
             )
 
-            # Basic information
-            details = []
+            t = self.translator
+            rows = []
             if record.get("gender"):
-                details.append(f"{self.translator.text('gender')}: {record['gender']}")
-
-            if details:
-                for part in details:
-                    story.append(Paragraph(f"    {part}", self.styles["CustomBody"]))
-
-            # Notes if available
+                rows.append((t.text("gender"), record["gender"]))
             if record.get("notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('notes')}:</b> {record['notes']}",
-                        self.styles["CustomBody"],
+                rows.append((t.field("notes"), record["notes"]))
+
+            condition_lines = []
+            for condition in record.get("conditions", []) or []:
+                condition_name = condition.get("condition_name", "Unknown Condition")
+                condition_details = []
+                if condition.get("diagnosis_age"):
+                    condition_details.append(
+                        f"Diagnosed at age {condition['diagnosis_age']}"
                     )
+                if condition.get("severity"):
+                    condition_details.append(
+                        f"{t.field('severity')}: {t.value(condition['severity'])}"
+                    )
+                if condition.get("status"):
+                    condition_details.append(
+                        f"{t.field('status')}: {t.value(condition['status'])}"
+                    )
+                if condition.get("condition_type"):
+                    condition_details.append(
+                        f"{t.field('type')}: {t.value(condition['condition_type'])}"
+                    )
+
+                condition_text = f"&bull; {condition_name}"
+                if condition_details:
+                    condition_text += f" ({', '.join(condition_details)})"
+                if condition.get("notes"):
+                    condition_text += (
+                        f"<br/>&nbsp;&nbsp;{t.field('notes')}: {condition['notes']}"
+                    )
+                condition_lines.append(condition_text)
+
+            if condition_lines:
+                rows.append(
+                    (t.text("medical_conditions"), "<br/>".join(condition_lines))
                 )
-
-            # Display family conditions
-            conditions = record.get("conditions", [])
-            if conditions:
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.text('medical_conditions')}:</b>",
-                        self.styles["CustomBody"],
-                    )
-                )
-                for condition in conditions:
-                    condition_name = condition.get(
-                        "condition_name", "Unknown Condition"
-                    )
-                    condition_details = []
-
-                    # Build condition details
-                    if condition.get("diagnosis_age"):
-                        condition_details.append(
-                            f"Diagnosed at age {condition['diagnosis_age']}"
-                        )
-                    if condition.get("severity"):
-                        condition_details.append(
-                            f"{self.translator.field('severity')}: {self.translator.value(condition['severity'])}"
-                        )
-                    if condition.get("status"):
-                        condition_details.append(
-                            f"{self.translator.field('status')}: {self.translator.value(condition['status'])}"
-                        )
-                    if condition.get("condition_type"):
-                        condition_details.append(
-                            f"{self.translator.field('type')}: {self.translator.value(condition['condition_type'])}"
-                        )
-
-                    condition_text = f"• {condition_name}"
-                    if condition_details:
-                        condition_text += f" ({', '.join(condition_details)})"
-
-                    story.append(
-                        Paragraph(f"      {condition_text}", self.styles["CustomBody"])
-                    )
-
-                    # Add condition notes if available
-                    if condition.get("notes"):
-                        story.append(
-                            Paragraph(
-                                f"        {self.translator.field('notes')}: {condition['notes']}",
-                                self.styles["CustomBody"],
-                            )
-                        )
             else:
-                story.append(
-                    Paragraph(
-                        "    <i>No medical conditions recorded</i>",
-                        self.styles["CustomBody"],
+                rows.append(
+                    (
+                        t.text("medical_conditions"),
+                        "<i>No medical conditions recorded</i>",
                     )
                 )
 
+            story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
 
         return story
@@ -3011,23 +2680,13 @@ class CustomReportPDFGenerator:
         )
 
         if active_symptoms:
-            story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('active_symptoms')}</i></b>",
-                    self.styles["CustomBody"],
-                )
-            )
+            story.append(self._group_header(self.translator.text("active_symptoms")))
             for record in active_symptoms:
                 story.extend(self._format_single_symptom(record))
 
         if resolved_symptoms:
             story.append(Spacer(1, 0.1 * inch))
-            story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('resolved_symptoms')}</i></b>",
-                    self.styles["CustomBody"],
-                )
-            )
+            story.append(self._group_header(self.translator.text("resolved_symptoms")))
             for record in resolved_symptoms:
                 story.extend(self._format_single_symptom(record))
 
@@ -3042,71 +2701,42 @@ class CustomReportPDFGenerator:
         is_chronic = record.get("is_chronic", False)
         chronic_badge = " [CHRONIC]" if is_chronic else ""
         story.append(
-            Paragraph(f"<b>{name}{chronic_badge}</b>", self.styles["CustomBody"])
+            Paragraph(f"{name}{chronic_badge}", self.styles["SubsectionHeader"])
         )
 
-        # Build info lines
-        info_parts = []
+        t = self.translator
+        rows = []
         if record.get("category"):
-            info_parts.append(
-                f"{self.translator.field('type')}: {self.translator.value(record['category'])}"
-            )
+            rows.append((t.field("type"), t.value(record["category"])))
         if record.get("status"):
-            info_parts.append(
-                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
-            )
+            rows.append((t.field("status"), t.value(record["status"])))
         if record.get("first_occurrence_date"):
-            info_parts.append(
-                f"{self.translator.field('onset_date')}: {self._format_date(record['first_occurrence_date'])}"
+            rows.append(
+                (
+                    t.field("onset_date"),
+                    self._format_date(record["first_occurrence_date"]),
+                )
             )
         if record.get("last_occurrence_date"):
-            info_parts.append(
-                f"{self.translator.field('end_date')}: {self._format_date(record['last_occurrence_date'])}"
+            rows.append(
+                (t.field("end_date"), self._format_date(record["last_occurrence_date"]))
             )
-
-        if info_parts:
-            for part in info_parts:
-                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
-
-        # Triggers
         if record.get("typical_triggers"):
             typical_triggers = record["typical_triggers"]
             if isinstance(typical_triggers, (list, tuple)):
-                typical_triggers = ", ".join(str(t) for t in typical_triggers)
-            story.append(
-                Paragraph(
-                    f"  Typical Triggers: {typical_triggers}", self.styles["CustomBody"]
-                )
-            )
-
-        # Notes
+                typical_triggers = ", ".join(str(item) for item in typical_triggers)
+            rows.append(("Typical Triggers", typical_triggers))
         if record.get("general_notes"):
-            story.append(
-                Paragraph(
-                    f"  {self.translator.field('notes')}: {record['general_notes']}",
-                    self.styles["CustomBody"],
-                )
-            )
+            rows.append((t.field("notes"), record["general_notes"]))
+        rows.append((t.field("tags"), self._tags_text(record)))
 
-        # Tags
-        if record.get("tags"):
-            tags = (
-                record["tags"]
-                if isinstance(record["tags"], str)
-                else ", ".join(record["tags"])
-            )
-            story.append(
-                Paragraph(
-                    f"  {self.translator.field('tags')}: {tags}",
-                    self.styles["SmallText"],
-                )
-            )
+        story.extend(self._detail_table(rows))
 
         occurrences = record.get("occurrences") or []
         if occurrences:
             story.append(
                 Paragraph(
-                    f"  <i>{self.translator.field('episodes')}</i>",
+                    f"  <i>{t.field('episodes')}</i>",
                     self.styles["CustomBody"],
                 )
             )
@@ -3183,19 +2813,13 @@ class CustomReportPDFGenerator:
         )
 
         if active_injuries:
-            story.append(
-                Paragraph(
-                    "<b><i>Active/Healing Injuries</i></b>", self.styles["CustomBody"]
-                )
-            )
+            story.append(self._group_header("Active/Healing Injuries"))
             for record in active_injuries:
                 story.extend(self._format_single_injury(record))
 
         if healed_injuries:
             story.append(Spacer(1, 0.1 * inch))
-            story.append(
-                Paragraph("<b><i>Healed Injuries</i></b>", self.styles["CustomBody"])
-            )
+            story.append(self._group_header("Healed Injuries"))
             for record in healed_injuries:
                 story.extend(self._format_single_injury(record))
 
@@ -3212,93 +2836,38 @@ class CustomReportPDFGenerator:
             f" [{self.translator.value(severity).upper()}]" if severity else ""
         )
         story.append(
-            Paragraph(f"<b>{name}{severity_badge}</b>", self.styles["CustomBody"])
+            Paragraph(f"{name}{severity_badge}", self.styles["SubsectionHeader"])
         )
 
-        # Build primary info
-        info_parts = []
+        t = self.translator
+        rows = []
         if record.get("injury_type"):
             injury_type = record["injury_type"]
             if isinstance(injury_type, dict):
                 injury_type = injury_type.get("name", str(injury_type))
-            info_parts.append(f"{self.translator.field('injury_type')}: {injury_type}")
+            rows.append((t.field("injury_type"), injury_type))
         if record.get("body_part"):
             body_part = record["body_part"]
             if record.get("laterality"):
-                body_part = f"{self.translator.value(record['laterality'])} {body_part}"
-            info_parts.append(f"{self.translator.field('location')}: {body_part}")
+                body_part = f"{t.value(record['laterality'])} {body_part}"
+            rows.append((t.field("location"), body_part))
         if record.get("status"):
-            info_parts.append(
-                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
-            )
-
-        if info_parts:
-            for part in info_parts:
-                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
-
-        # Date and mechanism
-        date_mech_parts = []
+            rows.append((t.field("status"), t.value(record["status"])))
         if record.get("date_of_injury"):
-            date_mech_parts.append(
-                f"{self.translator.field('date')}: {self._format_date(record['date_of_injury'])}"
-            )
+            rows.append((t.field("date"), self._format_date(record["date_of_injury"])))
         if record.get("mechanism"):
-            date_mech_parts.append(
-                f"{self.translator.field('reason')}: {record['mechanism']}"
-            )
-
-        if date_mech_parts:
-            for part in date_mech_parts:
-                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
-
-        # Treatment and recovery
+            rows.append((t.field("reason"), record["mechanism"]))
         if record.get("treatment_received"):
-            story.append(
-                Paragraph(
-                    f"  {self.translator.field('treatment_received')}: {record['treatment_received']}",
-                    self.styles["CustomBody"],
-                )
-            )
-
+            rows.append((t.field("treatment_received"), record["treatment_received"]))
         if record.get("recovery_notes"):
-            story.append(
-                Paragraph(
-                    f"  Recovery Notes: {record['recovery_notes']}",
-                    self.styles["CustomBody"],
-                )
-            )
-
+            rows.append(("Recovery Notes", record["recovery_notes"]))
         if record.get("practitioner"):
-            story.append(
-                Paragraph(
-                    f"  {self.translator.field('treating_provider')}: {record['practitioner']}",
-                    self.styles["CustomBody"],
-                )
-            )
-
-        # Notes
+            rows.append((t.field("treating_provider"), record["practitioner"]))
         if record.get("notes"):
-            story.append(
-                Paragraph(
-                    f"  {self.translator.field('notes')}: {record['notes']}",
-                    self.styles["CustomBody"],
-                )
-            )
+            rows.append((t.field("notes"), record["notes"]))
+        rows.append((t.field("tags"), self._tags_text(record)))
 
-        # Tags
-        if record.get("tags"):
-            tags = (
-                record["tags"]
-                if isinstance(record["tags"], str)
-                else ", ".join(record["tags"])
-            )
-            story.append(
-                Paragraph(
-                    f"  {self.translator.field('tags')}: {tags}",
-                    self.styles["SmallText"],
-                )
-            )
-
+        story.extend(self._detail_table(rows))
         story.append(Spacer(1, 0.08 * inch))
         return story
 
@@ -3311,22 +2880,14 @@ class CustomReportPDFGenerator:
         secondary_insurance = [r for r in records if not r.get("is_primary")]
 
         if primary_insurance:
-            story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('primary_insurance')}</i></b>",
-                    self.styles["CustomBody"],
-                )
-            )
+            story.append(self._group_header(self.translator.text("primary_insurance")))
             for record in primary_insurance:
                 story.extend(self._format_single_insurance(record))
 
         if secondary_insurance:
             story.append(Spacer(1, 0.1 * inch))
             story.append(
-                Paragraph(
-                    f"<b><i>{self.translator.text('secondary_insurance')}</i></b>",
-                    self.styles["CustomBody"],
-                )
+                self._group_header(self.translator.text("secondary_insurance"))
             )
             for record in secondary_insurance:
                 story.extend(self._format_single_insurance(record))
@@ -3358,115 +2919,55 @@ class CustomReportPDFGenerator:
         header = f"<b>{company}</b> - {plan}" if plan else f"<b>{company}</b>"
         story.append(Paragraph(header, self.styles["RecordHeader"]))
 
-        # Insurance type and status
-        info_parts = []
+        t = self.translator
+        rows = []
         if record.get("insurance_type"):
-            info_parts.append(
-                f"{self.translator.field('type')}: {self.translator.value(record['insurance_type'])}"
-            )
+            rows.append((t.field("type"), t.value(record["insurance_type"])))
         if record.get("status"):
-            info_parts.append(
-                f"{self.translator.field('status')}: {self.translator.value(record['status'])}"
-            )
+            rows.append((t.field("status"), t.value(record["status"])))
         if record.get("employer_group"):
-            info_parts.append(
-                f"{self.translator.field('group_number')}: {record['employer_group']}"
-            )
-
-        if info_parts:
-            for part in info_parts:
-                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
-
-        # Member information
-        member_parts = []
+            rows.append((t.field("employer_group"), record["employer_group"]))
         if record.get("member_name"):
-            member_parts.append(
-                f"{self.translator.field('name')}: {record['member_name']}"
-            )
+            rows.append((t.field("member_name"), record["member_name"]))
         if record.get("member_id"):
-            member_parts.append(
-                f"{self.translator.field('member_id')}: {record['member_id']}"
-            )
+            rows.append((t.field("member_id"), record["member_id"]))
         if record.get("group_number"):
-            member_parts.append(
-                f"{self.translator.field('group_number')}: {record['group_number']}"
-            )
-
-        if member_parts:
-            for part in member_parts:
-                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
-
-        # Policy holder
+            rows.append((t.field("group_number"), record["group_number"]))
         if record.get("policy_holder_name"):
-            holder_info = (
-                f"{self.translator.field('name')}: {record['policy_holder_name']}"
-            )
+            holder_info = record["policy_holder_name"]
             if record.get("relationship_to_holder"):
-                holder_info += (
-                    f" ({self.translator.value(record['relationship_to_holder'])})"
-                )
-            story.append(Paragraph(f"  {holder_info}", self.styles["CustomBody"]))
-
-        # Dates
-        date_parts = []
+                holder_info += f" ({t.value(record['relationship_to_holder'])})"
+            rows.append((t.field("policy_holder"), holder_info))
         if record.get("effective_date"):
-            date_parts.append(
-                f"{self.translator.field('start_date')}: {self._format_date(record['effective_date'])}"
+            rows.append(
+                (t.field("start_date"), self._format_date(record["effective_date"]))
             )
         if record.get("expiration_date"):
-            date_parts.append(
-                f"{self.translator.field('end_date')}: {self._format_date(record['expiration_date'])}"
+            rows.append(
+                (t.field("end_date"), self._format_date(record["expiration_date"]))
             )
 
-        if date_parts:
-            for part in date_parts:
-                story.append(Paragraph(f"  {part}", self.styles["CustomBody"]))
-
-        # Coverage details (may be JSON)
-        if record.get("coverage_details"):
-            coverage = record["coverage_details"]
-            if isinstance(coverage, dict):
-                coverage_parts = [
-                    f"{self.translator.insurance_detail(k)}: {v}"
-                    for k, v in coverage.items()
+        for label, key in (
+            (t.text("coverage"), "coverage_details"),
+            (t.text("contact"), "contact_info"),
+        ):
+            value = record.get(key)
+            if not value:
+                continue
+            if isinstance(value, dict):
+                parts = [
+                    f"{t.insurance_detail(k)}: {v}"
+                    for k, v in value.items()
                     if self._is_present(v)
                 ]
-                coverage = ", ".join(coverage_parts) if coverage_parts else None
-            if coverage:
-                story.append(
-                    Paragraph(
-                        f"  {self.translator.text('coverage')}: {coverage}",
-                        self.styles["CustomBody"],
-                    )
-                )
+                value = ", ".join(parts) if parts else None
+            if value:
+                rows.append((label, value))
 
-        # Contact info (may be JSON)
-        if record.get("contact_info"):
-            contact = record["contact_info"]
-            if isinstance(contact, dict):
-                contact_parts = [
-                    f"{self.translator.insurance_detail(k)}: {v}"
-                    for k, v in contact.items()
-                    if self._is_present(v)
-                ]
-                contact = ", ".join(contact_parts) if contact_parts else None
-            if contact:
-                story.append(
-                    Paragraph(
-                        f"  {self.translator.text('contact')}: {contact}",
-                        self.styles["CustomBody"],
-                    )
-                )
-
-        # Notes
         if record.get("notes"):
-            story.append(
-                Paragraph(
-                    f"  {self.translator.field('notes')}: {record['notes']}",
-                    self.styles["CustomBody"],
-                )
-            )
+            rows.append((t.field("notes"), record["notes"]))
 
+        story.extend(self._detail_table(rows))
         story.append(Spacer(1, 0.08 * inch))
         return story
 
@@ -3487,9 +2988,7 @@ class CustomReportPDFGenerator:
         ]:
             if not group:
                 continue
-            story.append(
-                Paragraph(f"<b>{group_label}</b>", self.styles["SubsectionHeader"])
-            )
+            story.append(self._group_header(group_label))
             for record in group:
                 name = record.get("equipment_name", "Unnamed Equipment")
                 equip_type = record.get("equipment_type", "")
@@ -3497,88 +2996,35 @@ class CustomReportPDFGenerator:
                 if equip_type:
                     header_parts.append(f"({equip_type})")
                 story.append(
-                    Paragraph(" ".join(header_parts), self.styles["CustomBody"])
+                    Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
                 )
 
-                details = []
-                # Identification
-                id_parts = []
+                t = self.translator
+                rows = []
                 if record.get("manufacturer"):
-                    id_parts.append(
-                        f"{self.translator.field('manufacturer')}: {record['manufacturer']}"
-                    )
+                    rows.append((t.field("manufacturer"), record["manufacturer"]))
                 if record.get("model_number"):
-                    id_parts.append(
-                        f"{self.translator.field('model')}: {record['model_number']}"
-                    )
+                    rows.append((t.field("model"), record["model_number"]))
                 if record.get("serial_number"):
-                    id_parts.append(
-                        f"{self.translator.field('serial_number')}: {record['serial_number']}"
-                    )
-                if id_parts:
-                    details.extend(id_parts)
-
-                # Dates and supplier
-                service_parts = []
-                if record.get("prescribed_date"):
-                    service_parts.append(
-                        f"{self.translator.field('prescribed_date')}: {self._format_date(record['prescribed_date'])}"
-                    )
-                if record.get("last_service_date"):
-                    service_parts.append(
-                        f"{self.translator.field('last_service_date')}: {self._format_date(record['last_service_date'])}"
-                    )
-                if record.get("next_service_date"):
-                    service_parts.append(
-                        f"{self.translator.field('next_service_date')}: {self._format_date(record['next_service_date'])}"
-                    )
+                    rows.append((t.field("serial_number"), record["serial_number"]))
+                for key in (
+                    "prescribed_date",
+                    "last_service_date",
+                    "next_service_date",
+                ):
+                    if record.get(key):
+                        rows.append((t.field(key), self._format_date(record[key])))
                 if record.get("supplier"):
-                    service_parts.append(
-                        f"{self.translator.field('provider')}: {record['supplier']}"
-                    )
-                if service_parts:
-                    details.extend(service_parts)
-
-                # Prescribed by
+                    rows.append((t.field("provider"), record["supplier"]))
                 if record.get("prescribed_by"):
-                    details.append(
-                        f"{self.translator.field('prescribed_by')}: {record['prescribed_by']}"
-                    )
-
-                if details:
-                    for detail in details:
-                        story.append(
-                            Paragraph(f"    {detail}", self.styles["CustomBody"])
-                        )
-
+                    rows.append((t.field("prescribed_by"), record["prescribed_by"]))
                 if record.get("usage_instructions"):
-                    story.append(
-                        Paragraph(
-                            f"    <b>Usage:</b> {record['usage_instructions']}",
-                            self.styles["CustomBody"],
-                        )
-                    )
+                    rows.append(("Usage", record["usage_instructions"]))
                 if record.get("notes"):
-                    story.append(
-                        Paragraph(
-                            f"    <b>{self.translator.field('notes')}:</b> {record['notes']}",
-                            self.styles["CustomBody"],
-                        )
-                    )
+                    rows.append((t.field("notes"), record["notes"]))
+                rows.append((t.field("tags"), self._tags_text(record)))
 
-                if record.get("tags"):
-                    tags = (
-                        record["tags"]
-                        if isinstance(record["tags"], str)
-                        else ", ".join(record["tags"])
-                    )
-                    story.append(
-                        Paragraph(
-                            f"    <i>{self.translator.field('tags')}: {tags}</i>",
-                            self.styles["SmallText"],
-                        )
-                    )
-
+                story.extend(self._detail_table(rows))
                 story.append(Spacer(1, 0.08 * inch))
 
         return story

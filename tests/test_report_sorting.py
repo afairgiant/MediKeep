@@ -20,7 +20,7 @@ import pytest
 
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.report_translations import get_translator
-
+from tests.utils.report_story import story_texts
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -28,16 +28,7 @@ from app.services.report_translations import get_translator
 
 def _extract_text(story) -> str:
     """Return all text from a ReportLab story as one concatenated string."""
-    parts = []
-    for element in story:
-        if hasattr(element, "text"):
-            parts.append(str(element.text))
-        if hasattr(element, "_cellvalues"):
-            for row in element._cellvalues:
-                for cell in row:
-                    parts.append(str(cell))
-    return " ".join(parts)
-
+    return " ".join(story_texts(story))
 
 def _ordered(text: str, *names: str) -> bool:
     """Return True if every name appears in text in the given left-to-right order."""

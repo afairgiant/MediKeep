@@ -2,13 +2,13 @@
 
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.report_translations import get_translator
-
+from tests.utils.report_story import story_texts
 
 def _lines(record):
     gen = CustomReportPDFGenerator()
     gen.translator = get_translator("en", "mdy")
     story = gen._format_treatments([record])
-    return [el.text for el in story if hasattr(el, "text")]
+    return story_texts(story)
 
 
 RECORD = {
