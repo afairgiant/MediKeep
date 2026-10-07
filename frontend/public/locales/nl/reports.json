@@ -94,7 +94,7 @@
       "startDate": "Startdatum",
       "endDate": "Einddatum",
       "invalidRange": "De einddatum mag niet voor de startdatum liggen",
-      "tags": "Tags",
+      "tags": "Labels",
       "tagsPlaceholder": "Voeg tags toe om op te filteren...",
       "note": "Een record komt overeen als het een van de tags heeft. Records zonder datum worden uitgesloten wanneer een datum is ingesteld. Trendgrafieken gebruiken eigen datums.",
       "chips": {

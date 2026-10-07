@@ -567,6 +567,101 @@ describe('useCustomReports', () => {
       vi.useRealTimers();
     });
 
+    it('keeps records picked while the prune request was running', async () => {
+      apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
+      let resolveCount;
+      apiService.getReportRecordCount.mockImplementation(
+        () => new Promise(resolve => (resolveCount = resolve))
+      );
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.toggleRecordSelection(
+          'medications',
+          101,
+          dataSummary.categories.medications.records[0]
+        );
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      // The count effect for the selection is in flight; let it settle first
+      await act(async () => {
+        resolveCount({ total: 1 });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      act(() => {
+        result.current.updateReportSettings({ tags: ['fred'] });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(150);
+      });
+      // Prune request (for record 101) is now pending: pick 102 meanwhile
+      act(() => {
+        result.current.toggleRecordSelection(
+          'medications',
+          102,
+          dataSummary.categories.medications.records[1]
+        );
+      });
+      await act(async () => {
+        resolveCount({ total: 0, matching_ids: { medications: [] } });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      // 101 was submitted and no longer matches: dropped. 102 was not: kept.
+      expect(Object.keys(result.current.selectedRecords.medications)).toEqual([
+        '102',
+      ]);
+    });
+
+    it('ignores a prune response that a newer filter change superseded', async () => {
+      apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
+      const resolvers = [];
+      apiService.getReportRecordCount.mockImplementation(
+        () => new Promise(resolve => resolvers.push(resolve))
+      );
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      resolvers.splice(0).forEach(resolve => resolve({ total: 3 }));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      act(() => {
+        result.current.updateReportSettings({ tags: ['a'] });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(150);
+      });
+      const firstPrune = resolvers.shift();
+
+      // A second change supersedes the first before it answers
+      act(() => {
+        result.current.updateReportSettings({ tags: ['a', 'b'] });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(150);
+      });
+
+      // The stale answer would drop everything; it must be ignored
+      await act(async () => {
+        firstPrune({ total: 0, matching_ids: {} });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      expect(Object.keys(result.current.selectedRecords).sort()).toEqual([
+        'lab_results',
+        'medications',
+      ]);
+    });
+
     it('sends nothing while the end date is before the start date', async () => {
       apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
       apiService.getReportRecordCount.mockResolvedValue({ total: 2 });

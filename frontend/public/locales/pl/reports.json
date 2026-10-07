@@ -113,8 +113,10 @@
       "loading": "Liczenie pasujących rekordów...",
       "none": "Żadne rekordy nie pasują do bieżącego wyboru i filtrów. Zmień je, aby wygenerować raport.",
       "result": "{{count}} rekordów zostanie uwzględnionych w raporcie",
+      "result_few": "{{count}} rekordy zostaną uwzględnione w raporcie",
+      "result_many": "{{count}} rekordów zostanie uwzględnionych w raporcie",
       "result_one": "{{count}} rekord zostanie uwzględniony w raporcie",
-      "result_other": "{{count}} rekordów zostanie uwzględnionych w raporcie"
+      "result_other": "{{count}} rekordu zostanie uwzględnionego w raporcie"
     },
     "recordsPanel": {
       "title": "Wybierz rekordy do raportu",

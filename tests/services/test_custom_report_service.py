@@ -45,6 +45,7 @@ class TestFormatConditionName:
 from datetime import date, datetime
 
 from app.schemas.custom_reports import (
+    CustomReportError,
     CustomReportRequest,
     DateRange,
     NoMatchingRecordsError,
@@ -254,3 +255,32 @@ class TestDisplayedDateMatchesFilterDate:
         model = CustomReportService.CATEGORY_MODELS[category]
         column = CustomReportService.CATEGORY_DATE_FIELDS.get(category, "created_at")
         assert column in model.__table__.columns
+
+
+class TestCountMatchingRecordsChartOnly:
+    @pytest.mark.asyncio
+    async def test_chart_only_request_counts_zero_without_a_patient(self):
+        from unittest.mock import MagicMock
+
+        svc = _service()
+        svc.db = MagicMock()
+
+        def no_patient(user_id):
+            raise CustomReportError("No active patient found")
+
+        svc._get_active_patient = no_patient
+        request = CustomReportRequest(
+            trend_charts={
+                "vital_charts": [
+                    {
+                        "vital_type": "weight",
+                        "date_from": "2024-01-01",
+                        "date_to": "2024-02-01",
+                    }
+                ]
+            }
+        )
+
+        result = await svc.count_matching_records(1, request)
+
+        assert result == {"total": 0, "categories": {}, "matching_ids": {}}

@@ -1135,8 +1135,10 @@ class CustomReportService:
         Uses the same query and filter as report generation so the preview
         cannot drift from what the report will contain.
         """
-        if request.selected_records:
-            await self.validate_record_ownership(user_id, request.selected_records)
+        if not request.selected_records:
+            # Chart-only request: nothing to count, and no patient is needed
+            return {"total": 0, "categories": {}, "matching_ids": {}}
+        await self.validate_record_ownership(user_id, request.selected_records)
         patient = self._get_active_patient(user_id)
 
         counts: Dict[str, int] = {}

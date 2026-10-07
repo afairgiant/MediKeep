@@ -444,60 +444,79 @@ export const useCustomReports = () => {
 
   // Reload the selectable records with the filters applied and, in parallel,
   // work out which selected records still match so the rest can be dropped.
-  const applyFilters = useCallback(async () => {
-    const { date_range: range, tags } = filtersRef.current;
-    const groups = toRecordGroups(selectedRecordsRef.current);
+  const applyFilters = useCallback(
+    async run => {
+      const { date_range: range, tags } = filtersRef.current;
+      const groups = toRecordGroups(selectedRecordsRef.current);
+      // Records included in this request: only these may be dropped from the
+      // selection (a record picked while the request ran must be kept)
+      const requested = new Set(
+        groups.flatMap(group =>
+          group.record_ids.map(id => `${group.category}:${id}`)
+        )
+      );
 
-    const pruneSelection = async () => {
-      if (groups.length === 0) return;
-      try {
-        const result = await apiService.getReportRecordCount({
-          selected_records: groups,
-          date_range: range,
-          tags,
-        });
-        const matching = result?.matching_ids;
-        if (!matching) return;
-
-        setSelectedRecords(prev => {
-          const next = {};
-          Object.entries(prev).forEach(([category, records]) => {
-            const keep = new Set(matching[category] || []);
-            const kept = Object.fromEntries(
-              Object.entries(records).filter(([id]) =>
-                keep.has(parseInt(id, 10))
-              )
-            );
-            if (Object.keys(kept).length > 0) next[category] = kept;
+      const pruneSelection = async () => {
+        if (groups.length === 0) return;
+        try {
+          const result = await apiService.getReportRecordCount({
+            selected_records: groups,
+            date_range: range,
+            tags,
           });
-          return next;
-        });
-      } catch (pruneError) {
-        logger.warn(
-          'custom_reports_prune_failed',
-          'Failed to prune selection after filter change',
-          { error: pruneError.message, component: 'useCustomReports' }
-        );
-      }
-    };
+          const matching = result?.matching_ids;
+          // A newer filter change supersedes this response
+          if (!matching || run !== filterRunRef.current) return;
 
-    await Promise.all([fetchDataSummary(), pruneSelection()]);
-  }, [fetchDataSummary]);
+          setSelectedRecords(prev => {
+            const next = {};
+            Object.entries(prev).forEach(([category, records]) => {
+              const keep = new Set(matching[category] || []);
+              const kept = Object.fromEntries(
+                Object.entries(records).filter(([id]) => {
+                  const numericId = parseInt(id, 10);
+                  return (
+                    !requested.has(`${category}:${numericId}`) ||
+                    keep.has(numericId)
+                  );
+                })
+              );
+              if (Object.keys(kept).length > 0) next[category] = kept;
+            });
+            return next;
+          });
+        } catch (pruneError) {
+          logger.warn(
+            'custom_reports_prune_failed',
+            'Failed to prune selection after filter change',
+            { error: pruneError.message, component: 'useCustomReports' }
+          );
+        }
+      };
+
+      await Promise.all([fetchDataSummary(), pruneSelection()]);
+    },
+    [fetchDataSummary]
+  );
 
   // When the date/tag filters change, reapply them. The short wait only
   // coalesces typing in the date inputs; tag changes are discrete.
   useEffect(() => {
     if (appliedFilterKeyRef.current === filterKey) return undefined;
+    // Any earlier in-flight run is now stale
+    const run = ++filterRunRef.current;
     // An end date before the start date is rejected by the backend; wait for a
     // valid range instead of showing an error
-    if (isDateRangeInvalid(reportSettings.date_range)) return undefined;
+    if (isDateRangeInvalid(reportSettings.date_range)) {
+      setIsFiltering(false);
+      return undefined;
+    }
 
     setIsFiltering(true);
     const timer = setTimeout(async () => {
       appliedFilterKeyRef.current = filterKey;
-      const run = ++filterRunRef.current;
       try {
-        await applyFilters();
+        await applyFilters(run);
       } finally {
         if (run === filterRunRef.current) setIsFiltering(false);
       }
@@ -656,7 +675,9 @@ export const useCustomReports = () => {
         );
         notifications.show({
           title: i18n.t('reports:builder.notifications.noRecordsFound'),
-          message: i18n.t('reports:builder.notifications.noRecordsFoundMessage'),
+          message: i18n.t(
+            'reports:builder.notifications.noRecordsFoundMessage'
+          ),
           color: 'blue',
           autoClose: 7000,
         });

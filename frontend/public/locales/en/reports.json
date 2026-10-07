@@ -32,7 +32,7 @@
     },
     "notifications": {
       "noRecordsFound": "No Records Found",
-      "noRecordsFoundMessage": "No records were found for report.",
+      "noRecordsFoundMessage": "No records were found for the report.",
       "templateLoaded": "Template Loaded",
       "templateLoadedMessage": "Template \"{{name}}\" has been loaded."
     },
