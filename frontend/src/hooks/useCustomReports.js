@@ -29,6 +29,10 @@ const toRecordGroups = selected =>
     }))
     .filter(group => group.record_ids.length > 0);
 
+// Identity of a filter set, used to recognise responses for superseded filters
+const filtersKeyOf = filters =>
+  JSON.stringify([filters.date_range, filters.tags]);
+
 // True when both dates are set and the end is before the start (the backend
 // rejects such a range, so it must never be sent)
 const isDateRangeInvalid = range =>
@@ -72,6 +76,7 @@ export const useCustomReports = () => {
   const abortControllerRef = useRef(null);
   const filtersRef = useRef({ date_range: null, tags: [] });
   const selectedRecordsRef = useRef({});
+  const summaryRequestRef = useRef(0);
 
   // Number of selected records left after the date/tag filters (null = unknown)
   const [matchingCount, setMatchingCount] = useState(null);
@@ -79,6 +84,11 @@ export const useCustomReports = () => {
 
   // Fetch data summary for record selection
   const fetchDataSummary = useCallback(async () => {
+    // Only the newest request, made for the filters still in force, may be
+    // committed; anything older (or for older filters) is discarded
+    const requestId = ++summaryRequestRef.current;
+    const requestFiltersKey = filtersKeyOf(filtersRef.current);
+
     logger.info(
       'custom_reports_fetch_summary',
       'Fetching data summary for report builder',
@@ -112,11 +122,15 @@ export const useCustomReports = () => {
       { errorMessage: 'Failed to fetch data summary' }
     );
 
-    if (result) {
-      setDataSummary(result);
-      return result;
+    if (!result) return null;
+    if (
+      requestId !== summaryRequestRef.current ||
+      requestFiltersKey !== filtersKeyOf(filtersRef.current)
+    ) {
+      return null;
     }
-    return null;
+    setDataSummary(result);
+    return result;
   }, [execute]);
 
   // Toggle record selection
@@ -434,10 +448,7 @@ export const useCustomReports = () => {
 
   // When the date/tag filters change, reload the selectable records with the
   // filters applied and drop any selected record that no longer matches.
-  const filterKey = JSON.stringify([
-    reportSettings.date_range,
-    reportSettings.tags,
-  ]);
+  const filterKey = filtersKeyOf(reportSettings);
   const appliedFilterKeyRef = useRef(filterKey);
   const filterRunRef = useRef(0);
   const [isFiltering, setIsFiltering] = useState(false);

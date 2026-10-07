@@ -567,6 +567,30 @@ describe('useCustomReports', () => {
       vi.useRealTimers();
     });
 
+    it('does not commit a summary fetched for superseded filters', async () => {
+      const pending = [];
+      apiService.getCustomReportSummary.mockImplementation(
+        () => new Promise(resolve => pending.push(resolve))
+      );
+      const { result } = renderHook(() => useCustomReports());
+
+      // First request, for the initial (empty) filters, stays in flight
+      act(() => {
+        result.current.fetchDataSummary();
+      });
+      act(() => {
+        result.current.updateReportSettings({ tags: ['fred'] });
+      });
+
+      // The old response arrives while the newer filter is still debouncing
+      await act(async () => {
+        pending[0](dataSummary);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(result.current.dataSummary).toBeNull();
+    });
+
     it('keeps records picked while the prune request was running', async () => {
       apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
       let resolveCount;
