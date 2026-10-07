@@ -31,6 +31,8 @@
       "title": "Keine medizinischen Daten verfügbar"
     },
     "notifications": {
+      "noRecordsFound": "Keine Datensätze gefunden",
+      "noRecordsFoundMessage": "Für den Bericht wurden keine Datensätze gefunden.",
       "templateLoaded": "Vorlage geladen",
       "templateLoadedMessage": "Vorlage \"{{name}}\" wurde geladen."
     },
@@ -85,20 +87,49 @@
         "description": "Vitalzeichen für Diagramme auswählen",
         "title": "Vitalzeichen-Diagramme"
       }
+    },
+    "filters": {
+      "title": "Filter",
+      "description": "Unten können nur Datensätze ausgewählt werden, die diesen Filtern entsprechen. Filter werden mit Vorlagen gespeichert.",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "invalidRange": "Das Enddatum darf nicht vor dem Startdatum liegen",
+      "tags": "Tags",
+      "tagsPlaceholder": "Tags zum Filtern hinzufügen...",
+      "note": "Datensätze passen, wenn sie mindestens einen der Tags haben. Datensätze ohne Datum werden bei gesetztem Datum ausgeschlossen. Trenddiagramme verwenden eigene Zeiträume.",
+      "chips": {
+        "dateBetween": "{{start}} bis {{end}}",
+        "dateFrom": "Ab {{date}}",
+        "dateUntil": "Bis {{date}}",
+        "none": "Keine Filter aktiv",
+        "remove": "Filter {{name}} entfernen"
+      }
+    },
+    "matchingCount": {
+      "loading": "Passende Datensätze werden gezählt...",
+      "none": "Keine Datensätze entsprechen der aktuellen Auswahl und den Filtern. Passen Sie diese an, um einen Bericht zu erstellen.",
+      "result": "{{count}} Datensätze werden in den Bericht aufgenommen",
+      "result_one": "{{count}} Datensatz wird in den Bericht aufgenommen",
+      "result_other": "{{count}} Datensätze werden in den Bericht aufgenommen"
+    },
+    "recordsPanel": {
+      "title": "Datensätze für den Bericht auswählen",
+      "filtering": "Daten werden gefiltert..."
     }
   },
   "categories": {
     "clearSelection": "Auswahl aufheben",
+    "hideRecords": "Datensätze ausblenden",
     "noCategories": "Keine Kategorien verfügbar",
     "noCategoriesDescription": "Keine medizinischen Datenkategorien für die Berichterstellung verfügbar.",
     "noRecords": "Keine Datensätze verfügbar",
     "recordCount": "{{count}} Datensätze",
     "recordCount_one": "{{count}} Datensatz",
     "recordCount_other": "{{count}} Datensätze",
-    "selectAll": "Alle auswählen",
     "selected": "{{count}} ausgewählt",
     "selected_one": "{{count}} ausgewählt",
     "selected_other": "{{count}} ausgewählt",
+    "showRecords": "Datensätze anzeigen",
     "showingFirst": "Erste {{count}} Datensätze werden angezeigt. Weitere Datensätze sind verfügbar, werden aber aus Leistungsgründen nicht angezeigt.",
     "showingFirst_one": "Erster {{count}} Datensatz wird angezeigt. Weitere Datensätze sind verfügbar, werden aber aus Leistungsgründen nicht angezeigt.",
     "showingFirst_other": "Erste {{count}} Datensätze werden angezeigt. Weitere Datensätze sind verfügbar, werden aber aus Leistungsgründen nicht angezeigt.",

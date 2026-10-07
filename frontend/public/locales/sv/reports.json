@@ -31,6 +31,8 @@
       "title": "Ingen medicinsk data tillgänglig"
     },
     "notifications": {
+      "noRecordsFound": "Inga poster hittades",
+      "noRecordsFoundMessage": "Inga poster hittades för rapporten.",
       "templateLoaded": "Mall laddad",
       "templateLoadedMessage": "Mallen \"{{name}}\" har laddats."
     },
@@ -85,20 +87,49 @@
         "description": "Välj vitala parametrar för diagram",
         "title": "Diagram för vitala parametrar"
       }
+    },
+    "filters": {
+      "title": "Filter",
+      "description": "Endast poster som matchar dessa filter kan väljas nedan. Filter sparas med mallar.",
+      "startDate": "Startdatum",
+      "endDate": "Slutdatum",
+      "invalidRange": "Slutdatumet får inte vara före startdatumet",
+      "tags": "Taggar",
+      "tagsPlaceholder": "Lägg till taggar att filtrera på...",
+      "note": "En post matchar om den har någon av taggarna. Poster utan datum utesluts när ett datum anges. Trenddiagram använder egna datum.",
+      "chips": {
+        "dateBetween": "{{start}} till {{end}}",
+        "dateFrom": "Från {{date}}",
+        "dateUntil": "Till {{date}}",
+        "none": "Inga filter tillämpas",
+        "remove": "Ta bort filtret {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "Räknar matchande poster...",
+      "none": "Inga poster matchar det aktuella urvalet och filtren. Justera dem för att skapa en rapport.",
+      "result": "{{count}} poster kommer att ingå i rapporten",
+      "result_one": "{{count}} post kommer att ingå i rapporten",
+      "result_other": "{{count}} poster kommer att ingå i rapporten"
+    },
+    "recordsPanel": {
+      "title": "Välj poster för rapporten",
+      "filtering": "Filtrerar data..."
     }
   },
   "categories": {
     "clearSelection": "Rensa markering",
+    "hideRecords": "Dölj poster",
     "noCategories": "Inga kategorier tillgängliga",
     "noCategoriesDescription": "Inga medicinska datakategorier är tillgängliga för rapportgenerering.",
     "noRecords": "Inga handlingar tillgängliga",
     "recordCount": "{{count}} handlingar",
     "recordCount_one": "{{count}} handling",
     "recordCount_other": "{{count}} handlingar",
-    "selectAll": "Markera alla",
     "selected": "{{count}} valda",
     "selected_one": "{{count}} vald",
     "selected_other": "{{count}} valda",
+    "showRecords": "Visa poster",
     "showingFirst": "Visar de första {{count}} handlingarna. Fler handlingar är tillgängliga men visas inte av prestandaskäl.",
     "showingFirst_one": "Visar den första {{count}} handlingen. Fler handlingar är tillgängliga men visas inte av prestandaskäl.",
     "showingFirst_other": "Visar de första {{count}} handlingarna. Fler handlingar är tillgängliga men visas inte av prestandaskäl.",

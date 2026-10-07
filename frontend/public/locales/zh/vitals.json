@@ -73,7 +73,8 @@
       "usernameLength": "用户名必须至少3个字符",
       "weightMax": "体重不能超过{{max}} {{unit}}",
       "weightMin": "体重必须至少为{{min}} {{unit}}"
-    }
+    },
+    "exampleValue": "例如：{{value}}"
   },
   "glucoseContext": {
     "after_meal": "餐后",

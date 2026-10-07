@@ -925,3 +925,136 @@ class TestReportTemplatesAPI:
         )
 
         assert response.status_code == 422
+
+
+class TestCustomReportFilters:
+    """Date range and tag filters on the summary, count preview and generate."""
+
+    URL = "/api/v1/custom-reports"
+
+    @staticmethod
+    def _med_ids(client, headers):
+        data = client.get(
+            f"{TestCustomReportFilters.URL}/data-summary", headers=headers
+        )
+        records = data.json()["categories"]["medications"]["records"]
+        assert len(records) == 2
+        return [r["id"] for r in records]
+
+    def test_summary_date_filter_narrows_counts(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        start = str(date.today() - timedelta(days=45))
+        response = client.get(
+            f"{self.URL}/data-summary",
+            params={"start_date": start},
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200
+        meds = response.json()["categories"]["medications"]
+        # Lisinopril (30 days ago) stays, Metformin (60 days ago) is dropped
+        assert meds["count"] == 1
+        assert [r["title"] for r in meds["records"]] == ["Lisinopril"]
+
+    def test_summary_tag_filter_with_no_matches(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        response = client.get(
+            f"{self.URL}/data-summary",
+            params={"tags": ["no-such-tag"]},
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200
+        categories = response.json()["categories"]
+        assert categories["medications"]["count"] == 0
+        assert categories["medications"]["records"] == []
+
+    def test_summary_rejects_end_before_start(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        response = client.get(
+            f"{self.URL}/data-summary",
+            params={"start_date": "2024-06-01", "end_date": "2024-01-01"},
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 422
+
+    def test_preview_count_returns_matching_ids(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        ids = self._med_ids(client, authenticated_headers)
+        response = client.post(
+            f"{self.URL}/preview-count",
+            json={
+                "selected_records": [{"category": "medications", "record_ids": ids}],
+                "date_range": {"start_date": str(date.today() - timedelta(days=45))},
+            },
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["total"] == 1
+        assert body["categories"] == {"medications": 1}
+        assert len(body["matching_ids"]["medications"]) == 1
+        assert body["matching_ids"]["medications"][0] in ids
+
+    def test_preview_count_invalid_category(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        response = client.post(
+            f"{self.URL}/preview-count",
+            json={"selected_records": [{"category": "bogus", "record_ids": [1]}]},
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 422
+
+    def test_preview_count_rejects_other_patients_records(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        response = client.post(
+            f"{self.URL}/preview-count",
+            json={
+                "selected_records": [
+                    {"category": "medications", "record_ids": [999999]}
+                ]
+            },
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 403
+
+    def test_preview_count_requires_authentication(self, client: TestClient):
+        response = client.post(
+            f"{self.URL}/preview-count",
+            json={"selected_records": [{"category": "medications", "record_ids": [1]}]},
+        )
+        assert response.status_code == 401
+
+    def test_generate_returns_204_when_filters_match_nothing(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        ids = self._med_ids(client, authenticated_headers)
+        response = client.post(
+            f"{self.URL}/generate",
+            json={
+                "selected_records": [{"category": "medications", "record_ids": ids}],
+                "tags": ["no-such-tag"],
+            },
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 204
+        assert response.content == b""
+
+    def test_generate_with_matching_filter_returns_pdf(
+        self, client: TestClient, populated_patient_data, authenticated_headers
+    ):
+        ids = self._med_ids(client, authenticated_headers)
+        response = client.post(
+            f"{self.URL}/generate",
+            json={
+                "selected_records": [{"category": "medications", "record_ids": ids}],
+                "date_range": {"start_date": str(date.today() - timedelta(days=45))},
+            },
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/pdf"

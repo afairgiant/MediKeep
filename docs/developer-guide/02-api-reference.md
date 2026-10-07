@@ -4681,6 +4681,45 @@ Base path: `/api/v1/tags`
 
 Base path: `/api/v1/custom-reports`
 
+#### Data Summary
+
+`GET /custom-reports/data-summary`
+
+Counts and the first 100 records (newest first) of each record type for the
+active patient, used by the report builder to pick records. Filters narrow both
+the counts and the records.
+
+- **Query Parameters** (all optional):
+  - `start_date`, `end_date` (date): inclusive range on each type's primary date
+    (e.g. onset date, date administered, recorded date). Records with no date are
+    excluded once a bound is set. Types with no date are not date-filtered.
+  - `tags` (string, repeatable): a record matches if it has any of the tags
+    (case-insensitive). Types without tags show 0. Practitioners and pharmacies
+    are never filtered.
+- **Errors**: `422` for an end date before the start date, or an invalid tag list
+  (more than 50 tags, or a tag over 100 characters).
+
+#### Preview Count
+
+`POST /custom-reports/preview-count`
+
+How many of the selected records survive the filters. Uses the same filter code
+as report generation.
+
+- **Request Body**: same shape as Generate (`selected_records`, `date_range`, `tags`)
+- **Success Response** (`200`):
+
+```json
+{
+  "total": 3,
+  "categories": { "medications": 2, "allergies": 1 },
+  "matching_ids": { "medications": [4, 9], "allergies": [2] }
+}
+```
+
+- **Errors**: `403` if a selected record is not accessible to the user, `422` for
+  an invalid category or filter.
+
 #### Generate Report
 
 `POST /custom-reports/generate`
@@ -4689,23 +4728,32 @@ Base path: `/api/v1/custom-reports`
 
 ```json
 {
-  "patient_id": 1,
-  "report_type": "medical_summary",
-  "date_range": {
-    "start": "2025-01-01",
-    "end": "2025-12-31"
-  },
-  "include_sections": ["medications", "lab_results", "conditions"]
+  "selected_records": [
+    { "category": "medications", "record_ids": [4, 9] }
+  ],
+  "report_title": "Custom Medical Report",
+  "date_range": { "start_date": "2025-01-01", "end_date": "2025-12-31" },
+  "tags": ["fred"]
 }
 ```
 
-#### List Reports
+`date_range` and `tags` narrow the selected records (see Data Summary for the
+rules). Other options: `trend_charts`, `include_patient_info`,
+`include_profile_picture`, `include_summary`, `include_header_footer`.
 
-`GET /custom-reports/`
+- **Success Response**: `200` with `application/pdf`
+- **No matching records**: `204 No Content` when `date_range` or `tags` leave
+  nothing to report (not an error)
+- **Errors**: `403` for records the user cannot access, `422` for invalid input
 
-#### Download Report
+#### Templates
 
-`GET /custom-reports/{report_id}/download`
+`POST /custom-reports/templates`, `GET /custom-reports/templates`,
+`GET|PUT|DELETE /custom-reports/templates/{template_id}`
+
+A template stores the selected record ids and its `report_settings`, which
+include `date_range` and `tags`. Templates are a snapshot: the ids are saved
+along with the filters, not re-evaluated when loaded.
 
 ### 12.2 Export
 

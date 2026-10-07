@@ -31,6 +31,8 @@
       "title": "Nenhuns Dados Médicos Disponíveis"
     },
     "notifications": {
+      "noRecordsFound": "Nenhum registo encontrado",
+      "noRecordsFoundMessage": "Não foram encontrados registos para o relatório.",
       "templateLoaded": "Modelo Carregado",
       "templateLoadedMessage": "O modelo \"{{name}}\" foi carregado."
     },
@@ -85,20 +87,49 @@
         "description": "Selecione sinais vitais para criar gráficos",
         "title": "Gráficos de Sinais Vitais"
       }
+    },
+    "filters": {
+      "title": "Filtros",
+      "description": "Só podem ser selecionados abaixo os registos que correspondam a estes filtros. Os filtros são guardados com os modelos.",
+      "startDate": "Data de início",
+      "endDate": "Data de fim",
+      "invalidRange": "A data de fim não pode ser anterior à data de início",
+      "tags": "Etiquetas",
+      "tagsPlaceholder": "Adicione etiquetas para filtrar...",
+      "note": "Um registo corresponde se tiver alguma das etiquetas. Registos sem data são excluídos quando uma data é definida. Os gráficos de tendência usam as suas próprias datas.",
+      "chips": {
+        "dateBetween": "{{start}} a {{end}}",
+        "dateFrom": "A partir de {{date}}",
+        "dateUntil": "Até {{date}}",
+        "none": "Sem filtros aplicados",
+        "remove": "Remover o filtro {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "A contar registos correspondentes...",
+      "none": "Nenhum registo corresponde à seleção e aos filtros atuais. Ajuste-os para gerar um relatório.",
+      "result": "{{count}} registos serão incluídos no relatório",
+      "result_one": "{{count}} registo será incluído no relatório",
+      "result_other": "{{count}} registos serão incluídos no relatório"
+    },
+    "recordsPanel": {
+      "title": "Selecionar registos para o relatório",
+      "filtering": "A filtrar dados..."
     }
   },
   "categories": {
     "clearSelection": "Limpar seleção",
+    "hideRecords": "Ocultar registos",
     "noCategories": "Nenhumas Categorias Disponíveis",
     "noCategoriesDescription": "Nenhumas categorias de dados médicos estão disponíveis para geração de relatórios.",
     "noRecords": "Nenhuns registos disponíveis",
     "recordCount": "{{count}} registos",
     "recordCount_one": "{{count}} registo",
     "recordCount_other": "{{count}} registos",
-    "selectAll": "Selecionar tudo",
     "selected": "{{count}} selecionados",
     "selected_one": "{{count}} selecionado",
     "selected_other": "{{count}} selecionados",
+    "showRecords": "Mostrar registos",
     "showingFirst": "A mostrar os primeiros {{count}} registos. Mais registos estão disponíveis mas não são exibidos por questões de desempenho.",
     "showingFirst_one": "A mostrar o primeiro {{count}} registo. Mais registos estão disponíveis mas não são exibidos por questões de desempenho.",
     "showingFirst_other": "A mostrar os primeiros {{count}} registos. Mais registos estão disponíveis mas não são exibidos por questões de desempenho.",

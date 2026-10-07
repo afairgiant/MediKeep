@@ -28,6 +28,10 @@ vi.mock('../../components/reports/TrendChartSelector', () => ({
   default: () => <div>trend-chart-selector</div>,
 }));
 
+vi.mock('../../components/common/TagInput', () => ({
+  TagInput: () => <div>tag-input</div>,
+}));
+
 const dataSummary = {
   total_records: 2,
   categories: {
@@ -53,6 +57,9 @@ const buildReports = (overrides = {}) => ({
   selectedCount: 0,
   hasSelections: false,
   trendChartCount: 0,
+  matchingCount: null,
+  isCountLoading: false,
+  isFiltering: false,
   fetchDataSummary: vi.fn(),
   toggleRecordSelection: vi.fn(),
   toggleCategorySelection: vi.fn(),
@@ -263,5 +270,39 @@ describe('ReportBuilder flow', () => {
     expect(screen.getAllByRole('tab')[0].getAttribute('aria-selected')).toBe(
       'true'
     );
+  });
+
+  it('hides the filters panel until the Filters button is pressed', () => {
+    render(<ReportBuilder />);
+
+    expect(screen.queryByTestId('report-filters')).toBeNull();
+
+    const toggle = screen.getByRole('button', {
+      name: 'builder.filters.title',
+    });
+    fireEvent.click(toggle);
+    expect(screen.getByTestId('report-filters')).toBeTruthy();
+
+    fireEvent.click(toggle);
+    expect(screen.queryByTestId('report-filters')).toBeNull();
+  });
+
+  it('summarises active filters as chips while the panel is closed', () => {
+    mockReports.value = buildReports({
+      reportSettings: {
+        date_range: { start_date: '2024-01-01', end_date: null },
+        tags: ['fred'],
+      },
+    });
+    render(<ReportBuilder />);
+
+    expect(screen.queryByTestId('report-filters')).toBeNull();
+    expect(screen.getByTestId('active-filter-chips')).toBeTruthy();
+    expect(screen.getByText('fred')).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'builder.filters.title' })
+    );
+    expect(screen.queryByTestId('active-filter-chips')).toBeNull();
   });
 });

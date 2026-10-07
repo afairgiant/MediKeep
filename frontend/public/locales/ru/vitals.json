@@ -73,7 +73,8 @@
       "usernameLength": "Имя пользователя должно содержать не менее 3 символов",
       "weightMax": "Вес не может превышать {{max}} {{unit}}",
       "weightMin": "Вес должен быть не менее {{min}} {{unit}}"
-    }
+    },
+    "exampleValue": "напр., {{value}}"
   },
   "glucoseContext": {
     "after_meal": "После еды",

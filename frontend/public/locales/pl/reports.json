@@ -33,6 +33,8 @@
       "title": "Brak dostępnych danych medycznych"
     },
     "notifications": {
+      "noRecordsFound": "Nie znaleziono rekordów",
+      "noRecordsFoundMessage": "Nie znaleziono rekordów dla raportu.",
       "templateLoaded": "Szablon załadowany",
       "templateLoadedMessage": "Szablon \"{{name}}\" został załadowany."
     },
@@ -89,22 +91,53 @@
         "description": "Wybierz parametry życiowe do wykresów",
         "title": "Wykresy parametrów życiowych"
       }
+    },
+    "filters": {
+      "title": "Filtry",
+      "description": "Poniżej można wybrać tylko rekordy pasujące do tych filtrów. Filtry są zapisywane w szablonach.",
+      "startDate": "Data początkowa",
+      "endDate": "Data końcowa",
+      "invalidRange": "Data końcowa nie może być wcześniejsza niż początkowa",
+      "tags": "Tagi",
+      "tagsPlaceholder": "Dodaj tagi do filtrowania...",
+      "note": "Rekord pasuje, jeśli ma dowolny z tagów. Rekordy bez daty są pomijane, gdy ustawiono datę. Wykresy trendów używają własnych dat.",
+      "chips": {
+        "dateBetween": "{{start}} do {{end}}",
+        "dateFrom": "Od {{date}}",
+        "dateUntil": "Do {{date}}",
+        "none": "Brak zastosowanych filtrów",
+        "remove": "Usuń filtr {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "Liczenie pasujących rekordów...",
+      "none": "Żadne rekordy nie pasują do bieżącego wyboru i filtrów. Zmień je, aby wygenerować raport.",
+      "result": "{{count}} rekordów zostanie uwzględnionych w raporcie",
+      "result_few": "{{count}} rekordy zostaną uwzględnione w raporcie",
+      "result_many": "{{count}} rekordów zostanie uwzględnionych w raporcie",
+      "result_one": "{{count}} rekord zostanie uwzględniony w raporcie",
+      "result_other": "{{count}} rekordu zostanie uwzględnionego w raporcie"
+    },
+    "recordsPanel": {
+      "title": "Wybierz rekordy do raportu",
+      "filtering": "Filtrowanie danych..."
     }
   },
   "categories": {
     "clearSelection": "Wyczyść zaznaczenie",
+    "hideRecords": "Ukryj rekordy",
     "noCategories": "Brak dostępnych kategorii",
     "noCategoriesDescription": "Brak dostępnych kategorii danych medycznych do generowania raportów.",
     "noRecords": "Brak dostępnych rekordów",
     "recordCount": "{{count}} rekordów",
-    "recordCount_one": "{{count}} rekord",
     "recordCount_few": "{{count}} rekordy",
     "recordCount_many": "{{count}} rekordów",
+    "recordCount_one": "{{count}} rekord",
     "recordCount_other": "{{count}} rekordów",
-    "selectAll": "Zaznacz wszystko",
     "selected": "{{count}} wybranych",
     "selected_one": "{{count}} wybrany",
     "selected_other": "{{count}} wybranych",
+    "showRecords": "Pokaż rekordy",
     "showingFirst": "Wyświetlanie pierwszych {{count}} rekordów. Więcej rekordów jest dostępnych, ale nie są wyświetlane ze względów wydajnościowych.",
     "showingFirst_one": "Wyświetlanie pierwszego {{count}} rekordu. Więcej rekordów jest dostępnych, ale nie są wyświetlane ze względów wydajnościowych.",
     "showingFirst_other": "Wyświetlanie pierwszych {{count}} rekordów. Więcej rekordów jest dostępnych, ale nie są wyświetlane ze względów wydajnościowych.",

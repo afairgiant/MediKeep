@@ -15,6 +15,10 @@ import apiService from '../../services/api';
 import logger from '../../services/logger';
 import { isValidTagName } from '../../utils/tagValidation';
 
+// Theme-aware: a fixed light grey made the suggestion text unreadable in dark mode
+const SUGGESTION_HOVER_BG =
+  'light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-4))';
+
 interface TagInputProps {
   value: string[];
   onChange: (_tags: string[]) => void;
@@ -307,7 +311,8 @@ export function TagInput({
                       transition: 'background-color 0.2s',
                     }}
                     onMouseEnter={e => {
-                      e.currentTarget.style.backgroundColor = '#f0f0f0';
+                      e.currentTarget.style.backgroundColor =
+                        SUGGESTION_HOVER_BG;
                     }}
                     onMouseLeave={e => {
                       e.currentTarget.style.backgroundColor = 'transparent';

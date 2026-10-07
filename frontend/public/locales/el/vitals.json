@@ -73,7 +73,8 @@
       "usernameLength": "Το όνομα χρήστη πρέπει να έχει τουλάχιστον 3 χαρακτήρες",
       "weightMax": "Το βάρος δεν μπορεί να υπερβαίνει τα {{max}} {{unit}}",
       "weightMin": "Το βάρος πρέπει να είναι τουλάχιστον {{min}} {{unit}}"
-    }
+    },
+    "exampleValue": "π.χ., {{value}}"
   },
   "glucoseContext": {
     "after_meal": "Μετά το Γεύμα",

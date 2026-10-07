@@ -31,6 +31,8 @@
       "title": "No Medical Data Available"
     },
     "notifications": {
+      "noRecordsFound": "No Records Found",
+      "noRecordsFoundMessage": "No records were found for the report.",
       "templateLoaded": "Template Loaded",
       "templateLoadedMessage": "Template \"{{name}}\" has been loaded."
     },
@@ -85,20 +87,49 @@
         "description": "Select vital signs to chart",
         "title": "Vital Sign Charts"
       }
+    },
+    "filters": {
+      "title": "Filters",
+      "description": "Only records matching these filters can be selected below. Filters are saved with templates.",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "invalidRange": "End date must be on or after the start date",
+      "tags": "Tags",
+      "tagsPlaceholder": "Add tags to filter by...",
+      "note": "Records match if they have any of the tags. Records without a date are excluded when a date is set. Trend charts use their own dates.",
+      "chips": {
+        "dateBetween": "{{start}} to {{end}}",
+        "dateFrom": "From {{date}}",
+        "dateUntil": "Until {{date}}",
+        "none": "No filters applied",
+        "remove": "Remove filter {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "Counting matching records...",
+      "none": "No records match the current selection and filters. Adjust them to generate a report.",
+      "result": "{{count}} records will be included in the report",
+      "result_one": "{{count}} record will be included in the report",
+      "result_other": "{{count}} records will be included in the report"
+    },
+    "recordsPanel": {
+      "title": "Select Records for Report",
+      "filtering": "Filtering data..."
     }
   },
   "categories": {
     "clearSelection": "Clear Selection",
+    "hideRecords": "Hide Records",
     "noCategories": "No Categories Available",
     "noCategoriesDescription": "No medical data categories are available for report generation.",
     "noRecords": "No records available",
     "recordCount": "{{count}} records",
     "recordCount_one": "{{count}} record",
     "recordCount_other": "{{count}} records",
-    "selectAll": "Select All",
     "selected": "{{count}} selected",
     "selected_one": "{{count}} selected",
     "selected_other": "{{count}} selected",
+    "showRecords": "Show Records",
     "showingFirst": "Showing first {{count}} records. More records are available but not displayed for performance.",
     "showingFirst_one": "Showing first {{count}} records. More records are available but not displayed for performance.",
     "showingFirst_other": "Showing first {{count}} records. More records are available but not displayed for performance.",

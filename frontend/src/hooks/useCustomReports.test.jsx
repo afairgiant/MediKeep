@@ -1,11 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
+import { notifications } from '@mantine/notifications';
+import { apiService } from '../services/api/index.js';
 import { useCustomReports } from './useCustomReports';
 
 vi.mock('../services/api/index.js', () => ({
   apiService: {
     getCustomReportSummary: vi.fn(),
     generateCustomReport: vi.fn(),
+    getReportRecordCount: vi.fn(),
   },
 }));
 
@@ -197,9 +200,7 @@ describe('useCustomReports', () => {
       const template = {
         id: 1,
         name: 'Beyond Summary',
-        selected_records: [
-          { category: 'medications', record_ids: [101, 999] },
-        ],
+        selected_records: [{ category: 'medications', record_ids: [101, 999] }],
         trend_charts: null,
         report_settings: {},
       };
@@ -354,9 +355,7 @@ describe('useCustomReports', () => {
         result.current.applyTemplate(template, dataSummary);
       });
 
-      expect(result.current.reportSettings.report_title).toBe(
-        'From Template'
-      );
+      expect(result.current.reportSettings.report_title).toBe('From Template');
       // User had toggled this to false; applying the template must restore
       // the default of true because the template omitted the key.
       expect(result.current.reportSettings.include_patient_info).toBe(true);
@@ -364,6 +363,33 @@ describe('useCustomReports', () => {
       expect(result.current.reportSettings.include_profile_picture).toBe(true);
       expect(result.current.reportSettings.include_header_footer).toBe(true);
       expect(result.current.reportSettings.date_range).toBeNull();
+      expect(result.current.reportSettings.tags).toEqual([]);
+    });
+
+    it('restores saved date range and tags from a template', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.applyTemplate(
+          {
+            id: 2,
+            name: 'Filtered',
+            selected_records: [],
+            trend_charts: null,
+            report_settings: {
+              date_range: { start_date: '2024-01-01', end_date: null },
+              tags: ['diabetes'],
+            },
+          },
+          dataSummary
+        );
+      });
+
+      expect(result.current.reportSettings.date_range).toEqual({
+        start_date: '2024-01-01',
+        end_date: null,
+      });
+      expect(result.current.reportSettings.tags).toEqual(['diabetes']);
     });
 
     it('is a no-op when template is falsy', () => {
@@ -444,6 +470,285 @@ describe('useCustomReports', () => {
       // The mmol/L chart still has the defaults the hook set on add; what
       // matters is that updating mg/L didn't touch it.
       expect(mmol.date_from).not.toBe('2025-01-01');
+    });
+  });
+
+  describe('generateReport with no matching records', () => {
+    it('shows an informational notice, not an error, on an empty response', async () => {
+      apiService.generateCustomReport.mockResolvedValue(new Blob([]));
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+
+      let outcome;
+      await act(async () => {
+        outcome = await result.current.generateReport();
+      });
+
+      expect(outcome).toBe(false);
+      expect(notifications.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          color: 'blue',
+          message: 'reports:builder.notifications.noRecordsFoundMessage',
+        })
+      );
+      expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe('matching record count', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('is null and makes no request when nothing is selected', async () => {
+      const { result } = renderHook(() => useCustomReports());
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      expect(result.current.matchingCount).toBeNull();
+      expect(apiService.getReportRecordCount).not.toHaveBeenCalled();
+    });
+
+    it('requests the count with the filters and exposes the total', async () => {
+      apiService.getReportRecordCount.mockResolvedValue({
+        total: 2,
+        categories: { medications: 2 },
+      });
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+        result.current.updateReportSettings({
+          date_range: { start_date: '2024-01-01', end_date: null },
+          tags: ['a'],
+        });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+
+      expect(apiService.getReportRecordCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          date_range: { start_date: '2024-01-01', end_date: null },
+          tags: ['a'],
+        }),
+        expect.anything()
+      );
+      expect(result.current.matchingCount).toBe(2);
+    });
+
+    it('leaves the count unknown when the request fails', async () => {
+      apiService.getReportRecordCount.mockRejectedValue(new Error('boom'));
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+
+      expect(result.current.matchingCount).toBeNull();
+      expect(result.current.isCountLoading).toBe(false);
+    });
+  });
+
+  describe('filter changes', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('does not commit a summary fetched for superseded filters', async () => {
+      const pending = [];
+      apiService.getCustomReportSummary.mockImplementation(
+        () => new Promise(resolve => pending.push(resolve))
+      );
+      const { result } = renderHook(() => useCustomReports());
+
+      // First request, for the initial (empty) filters, stays in flight
+      act(() => {
+        result.current.fetchDataSummary();
+      });
+      act(() => {
+        result.current.updateReportSettings({ tags: ['fred'] });
+      });
+
+      // The old response arrives while the newer filter is still debouncing
+      await act(async () => {
+        pending[0](dataSummary);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(result.current.dataSummary).toBeNull();
+    });
+
+    it('keeps records picked while the prune request was running', async () => {
+      apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
+      let resolveCount;
+      apiService.getReportRecordCount.mockImplementation(
+        () => new Promise(resolve => (resolveCount = resolve))
+      );
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.toggleRecordSelection(
+          'medications',
+          101,
+          dataSummary.categories.medications.records[0]
+        );
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      // The count effect for the selection is in flight; let it settle first
+      await act(async () => {
+        resolveCount({ total: 1 });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      act(() => {
+        result.current.updateReportSettings({ tags: ['fred'] });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(150);
+      });
+      // Prune request (for record 101) is now pending: pick 102 meanwhile
+      act(() => {
+        result.current.toggleRecordSelection(
+          'medications',
+          102,
+          dataSummary.categories.medications.records[1]
+        );
+      });
+      await act(async () => {
+        resolveCount({ total: 0, matching_ids: { medications: [] } });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      // 101 was submitted and no longer matches: dropped. 102 was not: kept.
+      expect(Object.keys(result.current.selectedRecords.medications)).toEqual([
+        '102',
+      ]);
+    });
+
+    it('ignores a prune response that a newer filter change superseded', async () => {
+      apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
+      const resolvers = [];
+      apiService.getReportRecordCount.mockImplementation(
+        () => new Promise(resolve => resolvers.push(resolve))
+      );
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      resolvers.splice(0).forEach(resolve => resolve({ total: 3 }));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      act(() => {
+        result.current.updateReportSettings({ tags: ['a'] });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(150);
+      });
+      const firstPrune = resolvers.shift();
+
+      // A second change supersedes the first before it answers
+      act(() => {
+        result.current.updateReportSettings({ tags: ['a', 'b'] });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(150);
+      });
+
+      // The stale answer would drop everything; it must be ignored
+      await act(async () => {
+        firstPrune({ total: 0, matching_ids: {} });
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      expect(Object.keys(result.current.selectedRecords).sort()).toEqual([
+        'lab_results',
+        'medications',
+      ]);
+    });
+
+    it('sends nothing while the end date is before the start date', async () => {
+      apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
+      apiService.getReportRecordCount.mockResolvedValue({ total: 2 });
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      apiService.getCustomReportSummary.mockClear();
+      apiService.getReportRecordCount.mockClear();
+
+      act(() => {
+        result.current.updateReportSettings({
+          date_range: { start_date: '2024-06-01', end_date: '2024-01-01' },
+        });
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(600);
+      });
+
+      expect(apiService.getCustomReportSummary).not.toHaveBeenCalled();
+      expect(apiService.getReportRecordCount).not.toHaveBeenCalled();
+      expect(result.current.isFiltering).toBe(false);
+      expect(result.current.matchingCount).toBeNull();
+    });
+
+    it('reloads the summary with filters and drops non-matching selections', async () => {
+      apiService.getCustomReportSummary.mockResolvedValue(dataSummary);
+      apiService.getReportRecordCount.mockResolvedValue({
+        total: 1,
+        categories: { medications: 1, lab_results: 0 },
+        matching_ids: { medications: [101], lab_results: [] },
+      });
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.selectAllCategories(dataSummary.categories);
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      apiService.getCustomReportSummary.mockClear();
+
+      act(() => {
+        result.current.updateReportSettings({ tags: ['fred'] });
+      });
+      expect(result.current.isFiltering).toBe(true);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(400);
+      });
+      expect(result.current.isFiltering).toBe(false);
+
+      expect(apiService.getCustomReportSummary).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tags: ['fred'] })
+      );
+      expect(Object.keys(result.current.selectedRecords.medications)).toEqual([
+        '101',
+      ]);
+      expect(result.current.selectedRecords.lab_results).toBeUndefined();
     });
   });
 });

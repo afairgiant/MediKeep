@@ -31,6 +31,8 @@
       "title": "Aucune donnée médicale disponible"
     },
     "notifications": {
+      "noRecordsFound": "Aucun dossier trouvé",
+      "noRecordsFoundMessage": "Aucun dossier n'a été trouvé pour le rapport.",
       "templateLoaded": "Modèle chargé",
       "templateLoadedMessage": "Le modèle \"{{name}}\" a été chargé."
     },
@@ -85,20 +87,49 @@
         "description": "Sélectionnez les signes vitaux à présenter",
         "title": "Tableaux des signes vitaux"
       }
+    },
+    "filters": {
+      "title": "Filtres",
+      "description": "Seuls les dossiers correspondant à ces filtres peuvent être sélectionnés ci-dessous. Les filtres sont enregistrés avec les modèles.",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "invalidRange": "La date de fin ne peut pas précéder la date de début",
+      "tags": "Étiquettes",
+      "tagsPlaceholder": "Ajouter des étiquettes à filtrer...",
+      "note": "Un dossier correspond s'il possède au moins une des étiquettes. Les dossiers sans date sont exclus lorsqu'une date est définie. Les graphiques de tendance utilisent leurs propres dates.",
+      "chips": {
+        "dateBetween": "{{start}} au {{end}}",
+        "dateFrom": "Depuis le {{date}}",
+        "dateUntil": "Jusqu'au {{date}}",
+        "none": "Aucun filtre appliqué",
+        "remove": "Supprimer le filtre {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "Comptage des dossiers correspondants...",
+      "none": "Aucun dossier ne correspond à la sélection et aux filtres actuels. Ajustez-les pour générer un rapport.",
+      "result": "{{count}} dossiers seront inclus dans le rapport",
+      "result_one": "{{count}} dossier sera inclus dans le rapport",
+      "result_other": "{{count}} dossiers seront inclus dans le rapport"
+    },
+    "recordsPanel": {
+      "title": "Sélectionner les dossiers pour le rapport",
+      "filtering": "Filtrage des données..."
     }
   },
   "categories": {
     "clearSelection": "Effacer la sélection",
+    "hideRecords": "Masquer les dossiers",
     "noCategories": "Aucune catégorie disponible",
     "noCategoriesDescription": "Aucune catégorie de données médicales n'est disponible pour la génération de rapports.",
     "noRecords": "Aucune entrée disponible",
     "recordCount": "{{count}} entrées",
     "recordCount_one": "{{count}} entrée",
     "recordCount_other": "{{count}} entrées",
-    "selectAll": "Tout sélectionner",
     "selected": "{{count}} sélectionnés",
     "selected_one": "{{count}} sélectionné",
     "selected_other": "{{count}} sélectionnés",
+    "showRecords": "Afficher les dossiers",
     "showingFirst": "Affichage des {{count}} premières entrées. D'autres entrées sont disponibles, mais non affichées pour des raisons de performances.",
     "showingFirst_one": "Affichage de la première entrée. D'autres entrées sont disponibles, mais non affichées pour des raisons de performances.",
     "showingFirst_other": "Affichage des {{count}} premières entrées. D'autres entrées sont disponibles, mais non affichées pour des raisons de performances.",

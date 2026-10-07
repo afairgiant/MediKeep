@@ -58,6 +58,7 @@ import {
 import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
+import './VitalsForm.css';
 
 const VitalsForm = ({
   vitals = null,
@@ -82,6 +83,13 @@ const VitalsForm = ({
   } = useDateFormat();
 
   const FIELD_CONFIGS = useMemo(() => {
+    // Sample value shown (faintly) in an empty field, e.g. "e.g., 120"
+    const example = value =>
+      t('vitals:form.exampleValue', {
+        value,
+        defaultValue: 'e.g., {{value}}',
+      });
+
     const ranges = validationRanges[unitSystem];
     const labels = unitLabels[unitSystem];
 
@@ -106,7 +114,7 @@ const VitalsForm = ({
         label: t('vitals:form.systolicBP', 'Systolic BP'),
         type: 'number',
         unit: t('vitals:units.mmHg', 'mmHg'),
-        placeholder: '120',
+        placeholder: example('120'),
         icon: IconHeart,
         min: 50,
         max: 300,
@@ -132,7 +140,7 @@ const VitalsForm = ({
         label: t('vitals:form.diastolicBP', 'Diastolic BP'),
         type: 'number',
         unit: t('vitals:units.mmHg', 'mmHg'),
-        placeholder: '80',
+        placeholder: example('80'),
         icon: IconHeart,
         min: 30,
         max: 200,
@@ -158,7 +166,7 @@ const VitalsForm = ({
         label: t('vitals:stats.heartRate', 'Heart Rate'),
         type: 'number',
         unit: t('vitals:units.bpm', 'BPM'),
-        placeholder: '72',
+        placeholder: example('72'),
         icon: IconActivity,
         min: 30,
         max: 250,
@@ -184,7 +192,7 @@ const VitalsForm = ({
         label: t('vitals:stats.temperature', 'Temperature'),
         type: 'number',
         unit: labels.temperature,
-        placeholder: unitSystem === 'imperial' ? '98.6' : '37.0',
+        placeholder: example(unitSystem === 'imperial' ? '98.6' : '37.0'),
         icon: IconThermometer,
         min: ranges.temperature.min,
         max: ranges.temperature.max,
@@ -212,7 +220,7 @@ const VitalsForm = ({
         label: t('vitals:stats.weight', 'Weight'),
         type: 'number',
         unit: labels.weight,
-        placeholder: unitSystem === 'imperial' ? '150' : '68',
+        placeholder: example(unitSystem === 'imperial' ? '150' : '68'),
         icon: IconWeight,
         min: ranges.weight.min,
         max: ranges.weight.max,
@@ -240,7 +248,7 @@ const VitalsForm = ({
         label: t('vitals:modal.respiratoryRate', 'Respiratory Rate'),
         type: 'number',
         unit: t('vitals:units.perMin', '/min'),
-        placeholder: '16',
+        placeholder: example('16'),
         icon: IconLungs,
         min: 5,
         max: 100,
@@ -266,7 +274,7 @@ const VitalsForm = ({
         label: t('vitals:card.oxygenSaturation', 'Oxygen Saturation'),
         type: 'number',
         unit: '%',
-        placeholder: '98',
+        placeholder: example('98'),
         icon: IconDroplet,
         min: 50,
         max: 100,
@@ -292,7 +300,7 @@ const VitalsForm = ({
         label: t('vitals:modal.bloodGlucose', 'Blood Glucose'),
         type: 'number',
         unit: t('vitals:units.mgdl', 'mg/dL'),
-        placeholder: '100',
+        placeholder: example('100'),
         icon: IconDropletFilled,
         min: 20,
         max: 800,
@@ -318,7 +326,7 @@ const VitalsForm = ({
         label: t('vitals:modal.a1c', 'A1C'),
         type: 'number',
         unit: '%',
-        placeholder: '5.7',
+        placeholder: example('5.7'),
         icon: IconDropletFilled,
         min: 0,
         max: 20,
@@ -344,7 +352,7 @@ const VitalsForm = ({
         label: t('vitals:modal.painScale', 'Pain Scale'),
         type: 'number',
         unit: t('vitals:form.painScaleUnit', '(0-10)'),
-        placeholder: '0',
+        placeholder: example('0'),
         icon: IconMoodSad,
         min: 0,
         max: 10,
@@ -988,7 +996,7 @@ const VitalsForm = ({
   };
 
   return (
-    <Stack gap="lg">
+    <Stack gap="lg" className="vitals-form">
       {/* Health warnings - applies globally */}
       {warnings.length > 0 && (
         <Alert

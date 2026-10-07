@@ -30,6 +30,8 @@
       "title": "无可用医疗数据"
     },
     "notifications": {
+      "noRecordsFound": "未找到记录",
+      "noRecordsFoundMessage": "未找到可用于报告的记录。",
       "templateLoaded": "模板已加载",
       "templateLoadedMessage": "模板\"{{name}}\"已加载。"
     },
@@ -84,20 +86,49 @@
         "description": "选择要制图的生命体征",
         "title": "生命体征图表"
       }
+    },
+    "filters": {
+      "title": "筛选",
+      "description": "下方只能选择符合这些筛选条件的记录。筛选条件会随模板一起保存。",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "invalidRange": "结束日期不能早于开始日期",
+      "tags": "标签",
+      "tagsPlaceholder": "添加要筛选的标签...",
+      "note": "记录只要包含任一标签即匹配。设置日期后，没有日期的记录会被排除。趋势图使用各自的日期。",
+      "chips": {
+        "dateBetween": "{{start}} 至 {{end}}",
+        "dateFrom": "从 {{date}}",
+        "dateUntil": "截至 {{date}}",
+        "none": "未应用筛选",
+        "remove": "移除筛选 {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "正在统计匹配的记录...",
+      "none": "没有记录符合当前选择和筛选条件。请调整后再生成报告。",
+      "result": "报告将包含 {{count}} 条记录",
+      "result_one": "报告将包含 {{count}} 条记录",
+      "result_other": "报告将包含 {{count}} 条记录"
+    },
+    "recordsPanel": {
+      "title": "选择报告记录",
+      "filtering": "正在筛选数据..."
     }
   },
   "categories": {
     "clearSelection": "清除选择",
+    "hideRecords": "隐藏记录",
     "noCategories": "无可用分类",
     "noCategoriesDescription": "没有可用于报告生成的医疗数据分类。",
     "noRecords": "无可用记录",
     "recordCount": "{{count}} 条记录",
     "recordCount_one": "{{count}} 条记录",
     "recordCount_other": "{{count}} 条记录",
-    "selectAll": "全选",
     "selected": "已选择 {{count}} 个",
     "selected_one": "已选择 {{count}} 个",
     "selected_other": "已选择 {{count}} 个",
+    "showRecords": "显示记录",
     "showingFirst": "显示前 {{count}} 条记录。出于性能考虑，更多记录可用但未显示。",
     "showingFirst_one": "显示前 {{count}} 条记录。出于性能考虑，更多记录可用但未显示。",
     "showingFirst_other": "显示前 {{count}} 条记录。出于性能考虑，更多记录可用但未显示。",

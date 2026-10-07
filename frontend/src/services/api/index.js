@@ -2563,7 +2563,7 @@ class ApiService {
    * Get summary of all medical data available for custom report generation.
    * Returns counts and basic info for each category to support UI selection.
    */
-  getCustomReportSummary(signal) {
+  getCustomReportSummary(signal, filters = {}) {
     try {
       logger.debug(
         'api_custom_report_summary',
@@ -2573,7 +2573,16 @@ class ApiService {
         }
       );
 
-      return this.get('/custom-reports/data-summary', { signal });
+      const params = new URLSearchParams();
+      if (filters.start_date) params.append('start_date', filters.start_date);
+      if (filters.end_date) params.append('end_date', filters.end_date);
+      (filters.tags || []).forEach(tag => params.append('tags', tag));
+      const query = params.toString();
+
+      return this.get(
+        `/custom-reports/data-summary${query ? `?${query}` : ''}`,
+        { signal }
+      );
     } catch (error) {
       logger.error(
         'api_custom_report_summary_error',
@@ -2643,6 +2652,15 @@ class ApiService {
       );
       throw error;
     }
+  }
+
+  /**
+   * Count how many selected records match the report's date/tag filters.
+   */
+  getReportRecordCount(countRequest, signal) {
+    return this.request('POST', '/custom-reports/preview-count', countRequest, {
+      signal,
+    });
   }
 
   /**
