@@ -28,6 +28,30 @@ class DateRange(BaseModel):
         return v
 
 
+MAX_FILTER_TAGS = 50
+MAX_TAG_LENGTH = 100
+
+
+def normalize_tags(v: Optional[List[str]]) -> Optional[List[str]]:
+    """Strip, drop blanks, dedupe (case-insensitive) and bound a tag filter list."""
+    if v is None:
+        return None
+    cleaned: List[str] = []
+    seen = set()
+    for tag in v:
+        tag = tag.strip()
+        if not tag:
+            continue
+        if len(tag) > MAX_TAG_LENGTH:
+            raise ValueError(f"Tags cannot exceed {MAX_TAG_LENGTH} characters")
+        if tag.lower() not in seen:
+            seen.add(tag.lower())
+            cleaned.append(tag)
+    if len(cleaned) > MAX_FILTER_TAGS:
+        raise ValueError(f"Cannot filter by more than {MAX_FILTER_TAGS} tags")
+    return cleaned or None
+
+
 class SelectiveRecordRequest(BaseModel):
     """Request model for selecting specific records from a category"""
 
@@ -74,8 +98,18 @@ class CustomReportRequest(BaseModel):
         description="Print the report name at the top and page number/date at the bottom of each page",
     )
     date_range: Optional[DateRange] = Field(
-        default=None, description="Optional date range filter"
+        default=None,
+        description="Optional inclusive date range applied to selected records",
     )
+    tags: Optional[List[str]] = Field(
+        default=None,
+        description="Optional tag filter; a record matches if it has any of the tags",
+    )
+
+    @field_validator("tags")
+    @classmethod
+    def validate_tags(cls, v):
+        return normalize_tags(v)
 
     @field_validator("selected_records")
     @classmethod
@@ -146,6 +180,7 @@ class RecordSummary(BaseModel):
     practitioner: Optional[str] = None
     key_info: str = Field(..., description="Brief description for selection")
     status: Optional[str] = None  # active, inactive, resolved, etc.
+    tags: List[str] = Field(default_factory=list, description="Record tags, if any")
 
 
 class CategorySummary(BaseModel):
@@ -180,6 +215,22 @@ class CustomReportError(Exception):
         self.category = category
         self.details = details or {}
         super().__init__(message)
+
+
+class NoMatchingRecordsError(ValueError):
+    """Raised when the selection and filters leave nothing to put in the report."""
+
+
+class RecordCountResponse(BaseModel):
+    """Number of selected records that match the report filters"""
+
+    total: int = Field(..., description="Total matching records")
+    categories: Dict[str, int] = Field(
+        default_factory=dict, description="Matching records per category"
+    )
+    matching_ids: Dict[str, List[int]] = Field(
+        default_factory=dict, description="Matching record ids per category"
+    )
 
 
 class ReportGenerationResponse(BaseModel):

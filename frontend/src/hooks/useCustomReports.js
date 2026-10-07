@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useApi } from './useApi.js';
 import { apiService } from '../services/api/index.js';
 import { notifications } from '@mantine/notifications';
+import i18n from '../i18n/config';
 import logger from '../services/logger';
 import { labChartMatches } from '../utils/labChartKey';
 
@@ -19,6 +20,20 @@ const getDefaultDateFrom = () => {
   return formatLocalDate(d);
 };
 
+// Selected records as the API's [{category, record_ids}] groups, skipping empty ones
+const toRecordGroups = selected =>
+  Object.entries(selected)
+    .map(([category, records]) => ({
+      category,
+      record_ids: Object.keys(records).map(id => parseInt(id, 10)),
+    }))
+    .filter(group => group.record_ids.length > 0);
+
+// True when both dates are set and the end is before the start (the backend
+// rejects such a range, so it must never be sent)
+const isDateRangeInvalid = range =>
+  !!range?.start_date && !!range?.end_date && range.end_date < range.start_date;
+
 const getDefaultDateTo = () => formatLocalDate(new Date());
 
 // Default report settings shape. Exposed as a module constant so applyTemplate
@@ -31,6 +46,7 @@ const DEFAULT_REPORT_SETTINGS = Object.freeze({
   include_header_footer: true,
   include_profile_picture: true,
   date_range: null,
+  tags: [],
 });
 
 /**
@@ -54,6 +70,12 @@ export const useCustomReports = () => {
 
   const { loading, error, execute, clearError, setError } = useApi();
   const abortControllerRef = useRef(null);
+  const filtersRef = useRef({ date_range: null, tags: [] });
+  const selectedRecordsRef = useRef({});
+
+  // Number of selected records left after the date/tag filters (null = unknown)
+  const [matchingCount, setMatchingCount] = useState(null);
+  const [isCountLoading, setIsCountLoading] = useState(false);
 
   // Fetch data summary for record selection
   const fetchDataSummary = useCallback(async () => {
@@ -67,7 +89,12 @@ export const useCustomReports = () => {
 
     const result = await execute(
       async signal => {
-        const response = await apiService.getCustomReportSummary(signal);
+        const { date_range: range, tags } = filtersRef.current;
+        const response = await apiService.getCustomReportSummary(signal, {
+          start_date: range?.start_date,
+          end_date: range?.end_date,
+          tags,
+        });
 
         // Log response summary
         logger.debug(
@@ -387,12 +414,149 @@ export const useCustomReports = () => {
   const hasTrendCharts = trendChartCount > 0;
 
   // Get selected records in API format
-  const getSelectedRecordsForAPI = useCallback(() => {
-    return Object.entries(selectedRecords).map(([category, records]) => ({
-      category,
-      record_ids: Object.keys(records).map(id => parseInt(id, 10)),
-    }));
+  const getSelectedRecordsForAPI = useCallback(
+    () => toRecordGroups(selectedRecords),
+    [selectedRecords]
+  );
+
+  // Keep refs current so the filter effect can read the latest values without
+  // re-running on every selection change.
+  useEffect(() => {
+    filtersRef.current = {
+      date_range: reportSettings.date_range,
+      tags: reportSettings.tags,
+    };
+  }, [reportSettings.date_range, reportSettings.tags]);
+
+  useEffect(() => {
+    selectedRecordsRef.current = selectedRecords;
   }, [selectedRecords]);
+
+  // When the date/tag filters change, reload the selectable records with the
+  // filters applied and drop any selected record that no longer matches.
+  const filterKey = JSON.stringify([
+    reportSettings.date_range,
+    reportSettings.tags,
+  ]);
+  const appliedFilterKeyRef = useRef(filterKey);
+  const filterRunRef = useRef(0);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // Reload the selectable records with the filters applied and, in parallel,
+  // work out which selected records still match so the rest can be dropped.
+  const applyFilters = useCallback(async () => {
+    const { date_range: range, tags } = filtersRef.current;
+    const groups = toRecordGroups(selectedRecordsRef.current);
+
+    const pruneSelection = async () => {
+      if (groups.length === 0) return;
+      try {
+        const result = await apiService.getReportRecordCount({
+          selected_records: groups,
+          date_range: range,
+          tags,
+        });
+        const matching = result?.matching_ids;
+        if (!matching) return;
+
+        setSelectedRecords(prev => {
+          const next = {};
+          Object.entries(prev).forEach(([category, records]) => {
+            const keep = new Set(matching[category] || []);
+            const kept = Object.fromEntries(
+              Object.entries(records).filter(([id]) =>
+                keep.has(parseInt(id, 10))
+              )
+            );
+            if (Object.keys(kept).length > 0) next[category] = kept;
+          });
+          return next;
+        });
+      } catch (pruneError) {
+        logger.warn(
+          'custom_reports_prune_failed',
+          'Failed to prune selection after filter change',
+          { error: pruneError.message, component: 'useCustomReports' }
+        );
+      }
+    };
+
+    await Promise.all([fetchDataSummary(), pruneSelection()]);
+  }, [fetchDataSummary]);
+
+  // When the date/tag filters change, reapply them. The short wait only
+  // coalesces typing in the date inputs; tag changes are discrete.
+  useEffect(() => {
+    if (appliedFilterKeyRef.current === filterKey) return undefined;
+    // An end date before the start date is rejected by the backend; wait for a
+    // valid range instead of showing an error
+    if (isDateRangeInvalid(reportSettings.date_range)) return undefined;
+
+    setIsFiltering(true);
+    const timer = setTimeout(async () => {
+      appliedFilterKeyRef.current = filterKey;
+      const run = ++filterRunRef.current;
+      try {
+        await applyFilters();
+      } finally {
+        if (run === filterRunRef.current) setIsFiltering(false);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [filterKey, applyFilters, reportSettings.date_range]);
+
+  // Ask the backend how many selected records survive the filters. Debounced,
+  // and a newer request cancels the previous one.
+  useEffect(() => {
+    const selectedRecordsArray = getSelectedRecordsForAPI();
+    if (
+      selectedRecordsArray.length === 0 ||
+      isDateRangeInvalid(reportSettings.date_range)
+    ) {
+      setMatchingCount(null);
+      setIsCountLoading(false);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    setIsCountLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const result = await apiService.getReportRecordCount(
+          {
+            selected_records: selectedRecordsArray,
+            date_range: reportSettings.date_range,
+            tags: reportSettings.tags,
+          },
+          controller.signal
+        );
+        setMatchingCount(
+          typeof result?.total === 'number' ? result.total : null
+        );
+        setIsCountLoading(false);
+      } catch (countError) {
+        if (countError.name === 'AbortError') return;
+        // Unknown count must never block report generation
+        logger.warn(
+          'custom_reports_count_failed',
+          'Failed to count matching records',
+          { error: countError.message, component: 'useCustomReports' }
+        );
+        setMatchingCount(null);
+        setIsCountLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [
+    getSelectedRecordsForAPI,
+    reportSettings.date_range,
+    reportSettings.tags,
+  ]);
 
   // Validate selections
   const validateSelections = useCallback(() => {
@@ -482,6 +646,22 @@ export const useCustomReports = () => {
         requestData,
         abortController.signal
       );
+
+      // 204 No Content: the filters matched nothing. Informational, not an error.
+      if (pdfBlob instanceof Blob && pdfBlob.size === 0) {
+        logger.info(
+          'custom_reports_generate_no_records',
+          'No records matched the report selection and filters',
+          { component: 'useCustomReports' }
+        );
+        notifications.show({
+          title: i18n.t('reports:builder.notifications.noRecordsFound'),
+          message: i18n.t('reports:builder.notifications.noRecordsFoundMessage'),
+          color: 'blue',
+          autoClose: 7000,
+        });
+        return false;
+      }
 
       if (pdfBlob instanceof Blob) {
         // Create download link
@@ -594,6 +774,9 @@ export const useCustomReports = () => {
 
     // Computed
     selectedCount: getSelectedCount(),
+    matchingCount,
+    isCountLoading,
+    isFiltering,
     hasSelections: getSelectedCount() > 0 || hasTrendCharts,
     trendChartCount,
     hasTrendCharts,

@@ -98,4 +98,23 @@ describe('TagInput - legacy tag suggestions', () => {
     expect(await screen.findByText('diabetes')).toBeInTheDocument();
     expect(screen.queryByText("crohn's")).not.toBeInTheDocument();
   });
+
+  it('does not use a fixed light background for the hovered suggestion', async () => {
+    mockGet.mockResolvedValueOnce({ data: ['diabetes'] });
+    render(<TagInput value={[]} onChange={vi.fn()} />);
+    await waitFor(() => expect(mockGet).toHaveBeenCalled());
+
+    fireEvent.focus(screen.getByPlaceholderText('Add tags...'));
+    const row = (await screen.findByText('diabetes'))
+      .parentElement as HTMLElement;
+    const spy = vi.spyOn(row.style, 'backgroundColor', 'set');
+    fireEvent.mouseEnter(row);
+
+    // A hard-coded #f0f0f0 is white-on-white in dark mode; the value must be
+    // theme-aware (light-dark(...) with a dark-scheme colour).
+    const applied = spy.mock.calls[0]?.[0] as string;
+    expect(applied).toContain('light-dark(');
+    expect(applied).toContain('--mantine-color-dark-');
+    expect(applied).not.toContain('#f0f0f0');
+  });
 });

@@ -7,9 +7,10 @@ with selective record inclusion and template management.
 
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
+from sqlalchemy import DateTime
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging.config import get_logger
@@ -45,6 +46,8 @@ from app.schemas.custom_reports import (
     CustomReportError,
     CustomReportRequest,
     DataSummaryResponse,
+    DateRange,
+    NoMatchingRecordsError,
     RecordSummary,
     ReportTemplate as ReportTemplateSchema,
     ReportTemplateResponse,
@@ -95,7 +98,12 @@ class CustomReportService:
         self._user_unit_system = "imperial"
         logger.debug("CustomReportService initialized")
 
-    async def get_data_summary_for_selection(self, user_id: int) -> DataSummaryResponse:
+    async def get_data_summary_for_selection(
+        self,
+        user_id: int,
+        date_range: Optional[DateRange] = None,
+        tags: Optional[List[str]] = None,
+    ) -> DataSummaryResponse:
         """
         Get summarized data for all categories to support record selection.
         Implements caching for performance optimization.
@@ -203,7 +211,14 @@ class CustomReportService:
                     return DataSummaryResponse(categories={}, total_records=0)
 
         # Include patient ID in cache key so different patients have different caches
-        cache_key = f"summary_{user_id}_{user.active_patient_id}_{language}"
+        filter_key = (
+            date_range.start_date if date_range else None,
+            date_range.end_date if date_range else None,
+            tuple(sorted(t.lower() for t in tags or [])),
+        )
+        cache_key = (
+            f"summary_{user_id}_{user.active_patient_id}_{language}_{filter_key}"
+        )
         now = time.time()
 
         # Check cache
@@ -239,7 +254,7 @@ class CustomReportService:
         for category_name, model_class in self.CATEGORY_MODELS.items():
             try:
                 category_summary = await self._get_category_summary(
-                    patient.id, category_name, model_class
+                    patient.id, category_name, model_class, date_range, tags
                 )
                 categories[category_name] = category_summary
                 total_records += category_summary.count
@@ -275,16 +290,18 @@ class CustomReportService:
         return summary
 
     async def _get_category_summary(
-        self, patient_id: int, category: str, model_class
+        self,
+        patient_id: int,
+        category: str,
+        model_class,
+        date_range: Optional[DateRange] = None,
+        tags: Optional[List[str]] = None,
     ) -> CategorySummary:
-        """Get summary for a specific category"""
+        """Get summary for a specific category, optionally narrowed by filters"""
         records = []
 
-        # Categories that don't have patient_id (shared resources)
-        shared_categories = ["practitioners", "pharmacies"]
-
         # Build base query
-        if category in shared_categories:
+        if category in self.SHARED_CATEGORIES:
             # For shared resources, get all records
             logger.debug(f"Querying shared category: {category}")
             query = self.db.query(model_class)
@@ -304,25 +321,39 @@ class CustomReportService:
                 model_class.patient_id == patient_id
             )
 
-        # Get total count
-        try:
-            total_count = query.count()
-            logger.debug(f"Category {category}: found {total_count} total records")
-        except Exception as e:
-            logger.error(
-                f"Error counting records for {category}: {str(e)}", exc_info=True
-            )
-            return CategorySummary(count=0, records=[], has_more=False)
-
         # Get limited records for display (max 100 for UI performance)
         limit = 100
 
         # Order by created_at if it exists, otherwise by id
         try:
+            query = self._apply_date_filter_sql(
+                query, model_class, category, date_range
+            )
             if hasattr(model_class, "created_at"):
-                items = query.order_by(model_class.created_at.desc()).limit(limit).all()
+                ordered = query.order_by(model_class.created_at.desc())
             else:
-                items = query.order_by(model_class.id.desc()).limit(limit).all()
+                ordered = query.order_by(model_class.id.desc())
+
+            if (
+                tags
+                and category not in self.FILTER_EXEMPT_CATEGORIES
+                and not hasattr(model_class, "tags")
+            ):
+                # No tags column: nothing can match, skip loading rows
+                total_count, items = 0, []
+            elif tags:
+                # Tags live in a plain JSON column, so they are matched in Python
+                # (same code as report generation) after the date range has
+                # already narrowed the rows in SQL.
+                matched = self._apply_report_filters(
+                    ordered.all(), category, date_range, tags
+                )
+                total_count = len(matched)
+                items = matched[:limit]
+            else:
+                total_count = query.count()
+                items = ordered.limit(limit).all()
+            logger.debug(f"Category {category}: found {total_count} total records")
         except Exception as e:
             logger.error(
                 f"Error fetching records for {category}: {str(e)}", exc_info=True
@@ -365,6 +396,7 @@ class CustomReportService:
                 or getattr(item, "provider_name", None),
                 key_info=key_info,
                 status=getattr(item, "status", None),
+                tags=[str(tag) for tag in (getattr(item, "tags", None) or [])],
             )
 
             return result
@@ -482,42 +514,41 @@ class CustomReportService:
         logger.info(f"No title field found for {category}")
         return None
 
+    # Primary date column per category. Shared by the selection summary and the
+    # report date filter. Categories without a clinically meaningful date
+    # (practitioners, pharmacies, emergency contacts, family history) are absent.
+    CATEGORY_DATE_FIELDS = {
+        "medications": "effective_period_start",
+        "conditions": "onset_date",
+        "procedures": "date",
+        "treatments": "start_date",
+        "lab_results": "ordered_date",
+        "immunizations": "date_administered",
+        "allergies": "onset_date",
+        "encounters": "date",
+        "vitals": "recorded_date",
+        "symptoms": "first_occurrence_date",
+        "injuries": "date_of_injury",
+        "insurance": "effective_date",
+        "medical_equipment": "prescribed_date",
+    }
+
+    # Categories without a patient_id column (shared across patients)
+    SHARED_CATEGORIES = frozenset({"practitioners", "pharmacies"})
+
+    # Reference categories that are never narrowed by date or tag filters
+    FILTER_EXEMPT_CATEGORIES = frozenset({"practitioners", "pharmacies"})
+
     def _get_date_field(self, item: Any, category: str) -> Optional[Any]:
-        """Get the appropriate date field for the category"""
-        # Map categories to their specific date fields
-        category_date_map = {
-            "medications": "effective_period_start",
-            "conditions": "onset_date",
-            "procedures": "date",
-            "treatments": "start_date",
-            "lab_results": "ordered_date",
-            "immunizations": "administered_date",
-            "allergies": "onset_date",
-            "encounters": "date",
-            "vitals": "measurement_date",
-            "emergency_contacts": "created_at",
-            "practitioners": "created_at",
-            "pharmacies": "created_at",
-            "family_history": "created_at",
-            "symptoms": "first_occurrence_date",
-            "injuries": "date_of_injury",
-            "insurance": "effective_date",
-        }
+        """The date shown for a record, or None when it has none.
 
-        # Try the specific field first
-        if category in category_date_map:
-            value = getattr(item, category_date_map[category], None)
-            if value:
-                return value
-
-        # Fallback to common date fields
-        common_date_fields = ["created_at", "updated_at", "date"]
-        for field in common_date_fields:
-            value = getattr(item, field, None)
-            if value:
-                return value
-
-        return None
+        Uses the same column the date filter uses (CATEGORY_DATE_FIELDS), with no
+        fallback, so a record never shows a date the filter would not match on.
+        Categories without a clinical date show when the record was created.
+        """
+        return getattr(
+            item, self.CATEGORY_DATE_FIELDS.get(category, "created_at"), None
+        )
 
     def _labeled(self, field_key: str, value: Any, translate: bool = False) -> str:
         """'Label: value' in the user's language; translate=True for stored enum values."""
@@ -788,16 +819,13 @@ class CustomReportService:
         if not patient:
             raise PermissionError("Active patient record not found")
 
-        # Categories that don't have patient_id (shared resources)
-        shared_categories = ["practitioners", "pharmacies"]
-
         for record_group in selected_records:
             if record_group.category not in self.CATEGORY_MODELS:
                 raise ValueError(f"Invalid category: {record_group.category}")
 
             model_class = self.CATEGORY_MODELS[record_group.category]
 
-            if record_group.category in shared_categories:
+            if record_group.category in self.SHARED_CATEGORIES:
                 # For shared resources, just validate that the IDs exist
                 valid_ids = set(
                     record[0]
@@ -843,17 +871,7 @@ class CustomReportService:
                 await self.validate_record_ownership(user_id, request.selected_records)
 
             # Get the active patient information
-            user = self.db.query(User).filter(User.id == user_id).first()
-            if not user:
-                raise CustomReportError("User not found")
-            patient = (
-                self.db.query(Patient)
-                .filter(Patient.id == user.active_patient_id)
-                .first()
-            )
-
-            if not patient:
-                raise CustomReportError("No active patient found")
+            patient = self._get_active_patient(user_id)
 
             # Read user preferences for unit system, language, and date format
             user_prefs = user_preferences_crud.get_by_user_id(self.db, user_id=user_id)
@@ -869,7 +887,11 @@ class CustomReportService:
             for record_group in request.selected_records:
                 try:
                     category_data = await self._get_selected_records(
-                        patient.id, record_group.category, record_group.record_ids
+                        patient.id,
+                        record_group.category,
+                        record_group.record_ids,
+                        request.date_range,
+                        request.tags,
                     )
                     if category_data:
                         report_data[record_group.category] = category_data
@@ -898,6 +920,10 @@ class CustomReportService:
                 )
 
             if not report_data and not trend_chart_data:
+                if request.tags or request.date_range:
+                    raise NoMatchingRecordsError(
+                        "No records match the selected date range or tags"
+                    )
                 raise CustomReportError("No data available for report generation")
 
             # Generate PDF using export service
@@ -1068,28 +1094,78 @@ class CustomReportService:
         logger.info("Generated %d trend charts for report", len(chart_results))
         return chart_results
 
-    async def _get_selected_records(
+    def _get_active_patient(self, user_id: int) -> Patient:
+        """The user's active patient, or CustomReportError when there is none"""
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise CustomReportError("User not found")
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
+        if not patient:
+            raise CustomReportError("No active patient found")
+        return patient
+
+    def _build_selection_query(
         self, patient_id: int, category: str, record_ids: List[int]
-    ) -> List[Dict[str, Any]]:
-        """Get specific records for a category"""
+    ):
+        """Query for the explicitly selected ids of a category, scoped to the patient"""
         if category not in self.CATEGORY_MODELS:
             raise ValueError(f"Invalid category: {category}")
 
         model_class = self.CATEGORY_MODELS[category]
 
         # Categories that don't have patient_id (shared resources)
-        shared_categories = ["practitioners", "pharmacies"]
-
-        if category in shared_categories:
+        if category in self.SHARED_CATEGORIES:
             # For shared resources, just filter by IDs
-            query = self.db.query(model_class).filter(model_class.id.in_(record_ids))
-        else:
-            # For patient-specific records, filter by patient_id and IDs
-            query = (
-                self.db.query(model_class)
-                .filter(model_class.patient_id == patient_id)
-                .filter(model_class.id.in_(record_ids))
+            return self.db.query(model_class).filter(model_class.id.in_(record_ids))
+
+        # For patient-specific records, filter by patient_id and IDs
+        return (
+            self.db.query(model_class)
+            .filter(model_class.patient_id == patient_id)
+            .filter(model_class.id.in_(record_ids))
+        )
+
+    async def count_matching_records(
+        self, user_id: int, request: CustomReportRequest
+    ) -> Dict[str, Any]:
+        """Count the selected records that survive the date/tag filters.
+
+        Uses the same query and filter as report generation so the preview
+        cannot drift from what the report will contain.
+        """
+        if request.selected_records:
+            await self.validate_record_ownership(user_id, request.selected_records)
+        patient = self._get_active_patient(user_id)
+
+        counts: Dict[str, int] = {}
+        matching_ids: Dict[str, List[int]] = {}
+        for group in request.selected_records:
+            query = self._build_selection_query(
+                patient.id, group.category, group.record_ids
             )
+            records = self._apply_report_filters(
+                query.all(), group.category, request.date_range, request.tags
+            )
+            counts[group.category] = len(records)
+            matching_ids[group.category] = [record.id for record in records]
+        return {
+            "total": sum(counts.values()),
+            "categories": counts,
+            "matching_ids": matching_ids,
+        }
+
+    async def _get_selected_records(
+        self,
+        patient_id: int,
+        category: str,
+        record_ids: List[int],
+        date_range: Optional[DateRange] = None,
+        tags: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        """Get specific records for a category"""
+        query = self._build_selection_query(patient_id, category, record_ids)
 
         # Eager-load test components for lab results to avoid N+1 queries
         if category == "lab_results":
@@ -1097,7 +1173,7 @@ class CustomReportService:
         elif category == "symptoms":
             query = query.options(selectinload(Symptom.occurrences))
 
-        records = query.all()
+        records = self._apply_report_filters(query.all(), category, date_range, tags)
 
         logger.info(
             f"Retrieved {len(records)} {category} records for report generation"
@@ -1286,6 +1362,86 @@ class CustomReportService:
             result.append(record_dict)
 
         return result
+
+    def _apply_date_filter_sql(
+        self, query, model_class, category: str, date_range: Optional[DateRange]
+    ):
+        """SQL form of the date part of _apply_report_filters (same semantics).
+
+        Inclusive bounds; rows with a NULL date never match once a bound is set.
+        Categories exempt from filters or without a date column are untouched.
+        """
+        attr = self.CATEGORY_DATE_FIELDS.get(category)
+        if (
+            not date_range
+            or category in self.FILTER_EXEMPT_CATEGORIES
+            or not attr
+            or not (date_range.start_date or date_range.end_date)
+        ):
+            return query
+
+        column = getattr(model_class, attr)
+        is_datetime = isinstance(column.type, DateTime)
+        if date_range.start_date:
+            query = query.filter(column >= date_range.start_date)
+        if date_range.end_date:
+            if is_datetime:
+                # Whole end day: strictly before the start of the next day
+                query = query.filter(column < date_range.end_date + timedelta(days=1))
+            else:
+                query = query.filter(column <= date_range.end_date)
+        return query
+
+    def _apply_report_filters(
+        self,
+        records: List[Any],
+        category: str,
+        date_range: Optional[DateRange],
+        tags: Optional[List[str]],
+    ) -> List[Any]:
+        """Narrow selected records by date range and/or tags (AND semantics).
+
+        Date: inclusive bounds on the category's primary date column; records
+        with no date are excluded while a bound is set. Categories with no date
+        column are not date-filtered.
+        Tags: case-insensitive, a record matches if it has ANY of the tags.
+        Categories without a tags column cannot match and are excluded while a
+        tag filter is set. Reference categories are never filtered.
+        """
+        if category in self.FILTER_EXEMPT_CATEGORIES:
+            return records
+
+        start = date_range.start_date if date_range else None
+        end = date_range.end_date if date_range else None
+        date_attr = self.CATEGORY_DATE_FIELDS.get(category)
+        if (start or end) and date_attr:
+            filtered = []
+            for record in records:
+                value = getattr(record, date_attr, None)
+                if isinstance(value, datetime):
+                    value = value.date()
+                if value is None:
+                    continue
+                if start and value < start:
+                    continue
+                if end and value > end:
+                    continue
+                filtered.append(record)
+            records = filtered
+
+        wanted = {tag.lower() for tag in tags or []}
+        if wanted:
+            records = [
+                record
+                for record in records
+                if wanted & self._lowercase_tags(record)
+            ]
+        return records
+
+    @staticmethod
+    def _lowercase_tags(record) -> set:
+        """The record's tags, lowercased; empty when it has none or no tags column"""
+        return {str(tag).lower() for tag in (getattr(record, "tags", None) or [])}
 
     def _resolve_practitioner_name(self, record) -> Optional[str]:
         """Look up the practitioner name for a record with a practitioner_id foreign key."""

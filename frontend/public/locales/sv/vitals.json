@@ -73,7 +73,8 @@
       "usernameLength": "Användarnamn måste vara minst 3 tecken långt",
       "weightMax": "Vikt kan inte överstiga {{max}} {{unit}}",
       "weightMin": "Vikt måste vara minst {{min}} {{unit}}"
-    }
+    },
+    "exampleValue": "t.ex. {{value}}"
   },
   "glucoseContext": {
     "after_meal": "Efter måltid",

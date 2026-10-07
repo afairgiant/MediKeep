@@ -25,6 +25,8 @@ const RecordSelector = ({
   onToggleCategory,
   onClearCategory,
   categoryDisplayName,
+  expanded = false,
+  onExpandedChange,
 }) => {
   const { t } = useTranslation('reports');
   const { formatDate } = useDateFormat();
@@ -42,6 +44,9 @@ const RecordSelector = ({
   const allSelected = categoryData.records.every(
     record => selectedRecords[record.id]
   );
+  const hasRecords = categoryData.records.length > 0;
+  // Nothing to show or hide when the type has no (matching) records
+  const showList = expanded && hasRecords;
   const selectedCount = categoryData.records.filter(
     record => selectedRecords[record.id]
   ).length;
@@ -58,20 +63,27 @@ const RecordSelector = ({
             <Badge color="blue" variant="light">
               {t('categories.totalCount', { count: categoryData.count })}
             </Badge>
-            {selectedCount > 0 && (
-              <Badge color="green" variant="light">
-                {t('categories.selected', { count: selectedCount })}
-              </Badge>
-            )}
+            <Badge color={selectedCount > 0 ? 'green' : 'gray'} variant="light">
+              {t('categories.selected', { count: selectedCount })}
+            </Badge>
           </Group>
           <Group gap="xs">
+            <Button
+              size="xs"
+              variant="subtle"
+              aria-expanded={showList}
+              onClick={() => onExpandedChange?.(true)}
+              disabled={showList || !hasRecords}
+            >
+              {t('categories.showRecords')}
+            </Button>
             <Button
               size="xs"
               variant="subtle"
               onClick={() => onToggleCategory(category, categoryData.records)}
               disabled={allSelected || categoryData.records.length === 0}
             >
-              {t('categories.selectAll')}
+              {t('builder.buttons.selectAll')}
             </Button>
             <Button
               size="xs"
@@ -82,25 +94,36 @@ const RecordSelector = ({
             >
               {t('categories.clearSelection')}
             </Button>
+            <Button
+              size="xs"
+              variant="subtle"
+              aria-expanded={showList}
+              onClick={() => onExpandedChange?.(false)}
+              disabled={!showList}
+            >
+              {t('categories.hideRecords')}
+            </Button>
           </Group>
         </Group>
       </Paper>
 
       {/* Records list */}
-      <Stack gap="xs">
-        {categoryData.records.map(record => (
-          <RecordItem
-            key={record.id}
-            record={record}
-            selected={!!selectedRecords[record.id]}
-            onToggle={() => onToggleRecord(category, record.id, record)}
-            formatDate={formatDate}
-          />
-        ))}
-      </Stack>
+      {showList && (
+        <Stack gap="xs">
+          {categoryData.records.map(record => (
+            <RecordItem
+              key={record.id}
+              record={record}
+              selected={!!selectedRecords[record.id]}
+              onToggle={() => onToggleRecord(category, record.id, record)}
+              formatDate={formatDate}
+            />
+          ))}
+        </Stack>
+      )}
 
       {/* Has more indicator */}
-      {categoryData.has_more && (
+      {showList && categoryData.has_more && (
         <Alert color="blue" variant="light">
           <Text size="sm">
             {t('categories.showingFirst', {
@@ -179,6 +202,17 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
                 {record.status}
               </Badge>
             )}
+            {record.tags?.map(tag => (
+              <Badge
+                key={tag}
+                size="xs"
+                variant="light"
+                tt="none"
+                data-testid="record-tag"
+              >
+                {tag}
+              </Badge>
+            ))}
           </Group>
         </Stack>
 

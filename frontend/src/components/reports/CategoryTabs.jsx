@@ -22,6 +22,8 @@ const CategoryTabs = ({
   onToggleCategory,
   onClearCategory,
   categoryDisplayNames = {},
+  showRecords = false,
+  onShowRecordsChange,
 }) => {
   const { t, i18n } = useTranslation('reports');
   const sortedCategories = useMemo(
@@ -114,6 +116,8 @@ const CategoryTabs = ({
             onToggleRecord={onToggleRecord}
             onToggleCategory={onToggleCategory}
             onClearCategory={onClearCategory}
+            expanded={showRecords}
+            onExpandedChange={onShowRecordsChange}
             categoryDisplayName={
               categoryDisplayNames[category] || formatCategoryName(category)
             }

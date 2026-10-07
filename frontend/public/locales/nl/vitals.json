@@ -73,7 +73,8 @@
       "usernameLength": "Gebruikersnaam moet minimaal 3 tekens lang zijn",
       "weightMax": "Gewicht mag niet hoger zijn dan {{max}} {{unit}}",
       "weightMin": "Gewicht moet minimaal {{min}} {{unit}} zijn"
-    }
+    },
+    "exampleValue": "bijv. {{value}}"
   },
   "glucoseContext": {
     "after_meal": "Na de maaltijd",

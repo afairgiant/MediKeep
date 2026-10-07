@@ -12,6 +12,7 @@ import {
   Alert,
   Button,
   Box,
+  Loader,
   Progress,
   Modal,
   TextInput,
@@ -26,14 +27,20 @@ import {
   IconFileDescription,
   IconChartLine,
   IconNotes,
+  IconFilter,
+  IconChevronDown,
+  IconChevronUp,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { PageHeader } from '../../components';
 import { CategoryTabs } from '../../components/reports';
 import TrendChartSelector from '../../components/reports/TrendChartSelector';
+import ActiveFilterChips from '../../components/reports/ActiveFilterChips';
+import ReportFilters from '../../components/reports/ReportFilters';
 import TemplateManager from '../../components/reports/TemplateManager';
 import { useCustomReports } from '../../hooks/useCustomReports';
 import { useReportTemplates } from '../../hooks/useReportTemplates';
+import { usePersistedToggle } from '../../hooks/usePersistedToggle';
 import logger from '../../services/logger';
 import { buildGenerateButtonLabel } from '../../utils/reportLabels';
 import { useTranslation } from 'react-i18next';
@@ -54,6 +61,9 @@ const ReportBuilder = () => {
     error,
     isGenerating,
     selectedCount,
+    matchingCount,
+    isCountLoading,
+    isFiltering,
     hasSelections,
     trendChartCount,
     fetchDataSummary,
@@ -89,6 +99,12 @@ const ReportBuilder = () => {
     clearError: clearTemplatesError,
   } = useReportTemplates();
 
+  // Whether record lists are shown (one setting for all tabs, remembered)
+  const [showRecords, setShowRecords] = usePersistedToggle(
+    'report_builder_show_record_lists',
+    false
+  );
+
   // Track which template (if any) is currently loaded into the builder,
   // so the user can choose between "Update this one" and "Save as new".
   const [loadedTemplate, setLoadedTemplate] = useState(null);
@@ -96,6 +112,7 @@ const ReportBuilder = () => {
   // UI state
   const [activeTab, setActiveTab] = useState(null);
   const [activeSegment, setActiveSegment] = useState('records');
+  const [showFilters, setShowFilters] = useState(false);
   const [
     showSettingsModal,
     { open: openSettingsModal, close: closeSettingsModal },
@@ -138,8 +155,7 @@ const ReportBuilder = () => {
 
   // Get available categories from data summary
   const availableCategories = useMemo(
-    () =>
-      dataSummary?.categories ? Object.keys(dataSummary.categories) : [],
+    () => (dataSummary?.categories ? Object.keys(dataSummary.categories) : []),
     [dataSummary?.categories]
   );
 
@@ -198,6 +214,7 @@ const ReportBuilder = () => {
         include_summary: reportSettings.include_summary,
         include_header_footer: reportSettings.include_header_footer,
         date_range: reportSettings.date_range,
+        tags: reportSettings.tags,
       },
     }),
     [
@@ -211,6 +228,7 @@ const ReportBuilder = () => {
       reportSettings.include_summary,
       reportSettings.include_header_footer,
       reportSettings.date_range,
+      reportSettings.tags,
     ]
   );
 
@@ -293,6 +311,23 @@ const ReportBuilder = () => {
     }
     setLoadedTemplate(null);
   }, [activeSegment, clearRecordSelections, clearTrendCharts]);
+
+  const handleDateRangeChange = useCallback(
+    range => updateReportSettings({ date_range: range }),
+    [updateReportSettings]
+  );
+  const handleTagsChange = useCallback(
+    tags => updateReportSettings({ tags }),
+    [updateReportSettings]
+  );
+
+  // Records are selected but the filters leave none, and there are no trend
+  // charts to fall back on: generating would produce nothing.
+  const noRecordsMatch =
+    selectedCount > 0 &&
+    trendChartCount === 0 &&
+    !isCountLoading &&
+    matchingCount === 0;
 
   const getGenerateButtonLabel = () =>
     buildGenerateButtonLabel(t, i18n.language, selectedCount, trendChartCount);
@@ -443,52 +478,125 @@ const ReportBuilder = () => {
               ? t('builder.flow.recordsDescription')
               : t('builder.flow.chartsDescription')}
           </Text>
-          <Group justify="space-between">
-            {activeSegment === 'records' ? (
+          {activeSegment === 'trendCharts' && (
+            <Group justify="flex-end">
               <Button
                 size="xs"
                 variant="subtle"
-                color="blue"
-                onClick={() => selectAllCategories(dataSummary?.categories)}
-                disabled={availableCategories.length === 0}
+                color="red"
+                onClick={handleClearSelections}
+                disabled={trendChartCount === 0}
               >
-                {t('builder.buttons.selectAllRecordTypes')}
+                {t('builder.buttons.clearSelections')}
               </Button>
-            ) : (
-              <span />
-            )}
-            <Button
-              size="xs"
-              variant="subtle"
-              color="red"
-              onClick={handleClearSelections}
-              disabled={
-                activeSegment === 'trendCharts'
-                  ? trendChartCount === 0
-                  : selectedCount === 0
-              }
-            >
-              {t('builder.buttons.clearSelections')}
-            </Button>
-          </Group>
+            </Group>
+          )}
         </Stack>
+
+        {/* Filters sit above the tabs: they decide which records are selectable */}
+        {activeSegment === 'records' && availableCategories.length > 0 && (
+          <>
+            <Group gap="sm">
+              <Button
+                size="sm"
+                variant={showFilters ? 'light' : 'outline'}
+                leftSection={<IconFilter size={16} />}
+                rightSection={
+                  showFilters ? (
+                    <IconChevronUp size={16} />
+                  ) : (
+                    <IconChevronDown size={16} />
+                  )
+                }
+                aria-expanded={showFilters}
+                onClick={() => setShowFilters(prev => !prev)}
+              >
+                {t('builder.filters.title')}
+              </Button>
+              {!showFilters && (
+                <ActiveFilterChips
+                  dateRange={reportSettings.date_range}
+                  tags={reportSettings.tags || []}
+                  onDateRangeChange={handleDateRangeChange}
+                  onTagsChange={handleTagsChange}
+                />
+              )}
+            </Group>
+            {showFilters && (
+              <ReportFilters
+                dateRange={reportSettings.date_range}
+                tags={reportSettings.tags || []}
+                onDateRangeChange={handleDateRangeChange}
+                onTagsChange={handleTagsChange}
+              />
+            )}
+          </>
+        )}
 
         {/* Medical Records segment */}
         {activeSegment === 'records' && (
           <>
             {availableCategories.length > 0 ? (
-              <Paper shadow="sm" radius="md" withBorder>
-                <CategoryTabs
-                  categories={availableCategories}
-                  dataSummary={dataSummary}
-                  selectedRecords={selectedRecords}
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
-                  onToggleRecord={toggleRecordSelection}
-                  onToggleCategory={toggleCategorySelection}
-                  onClearCategory={clearCategorySelection}
-                  categoryDisplayNames={categoryDisplayNames}
-                />
+              <Paper
+                shadow="sm"
+                p="md"
+                radius="md"
+                withBorder
+                data-testid="report-record-picker"
+              >
+                <Stack gap="sm">
+                  <Group gap="xs">
+                    <Title order={5}>{t('builder.recordsPanel.title')}</Title>
+                    {isFiltering && (
+                      <Group gap={6} role="status">
+                        <Loader size="xs" />
+                        <Text size="sm" c="dimmed">
+                          {t('builder.recordsPanel.filtering')}
+                        </Text>
+                      </Group>
+                    )}
+                  </Group>
+                  <Group justify="space-between">
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      color="blue"
+                      onClick={() =>
+                        selectAllCategories(dataSummary?.categories)
+                      }
+                      disabled={availableCategories.length === 0}
+                    >
+                      {t('builder.buttons.selectAllRecordTypes')}
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      color="red"
+                      onClick={handleClearSelections}
+                      disabled={selectedCount === 0}
+                    >
+                      {t('builder.buttons.clearSelections')}
+                    </Button>
+                  </Group>
+                  <Box
+                    aria-busy={isFiltering}
+                    style={{ opacity: isFiltering ? 0.5 : 1 }}
+                  >
+                    <CategoryTabs
+                      categories={availableCategories}
+                      dataSummary={dataSummary}
+                      selectedRecords={selectedRecords}
+                      activeTab={activeTab}
+                      onTabChange={setActiveTab}
+                      onToggleRecord={toggleRecordSelection}
+                      onToggleCategory={toggleCategorySelection}
+                      onClearCategory={clearCategorySelection}
+                      categoryDisplayNames={categoryDisplayNames}
+                      showRecords={showRecords}
+                      onShowRecordsChange={setShowRecords}
+                    />
+                  </Box>
+                </Stack>
               </Paper>
             ) : (
               <Paper shadow="sm" p="xl" radius="md">
@@ -537,12 +645,28 @@ const ReportBuilder = () => {
           <Text c="dimmed" size="sm">
             {t('builder.flow.generateDescription')}
           </Text>
+          {selectedCount > 0 && matchingCount !== null && (
+            <Text
+              size="sm"
+              fw={500}
+              c={matchingCount === 0 ? 'orange' : undefined}
+              aria-live="polite"
+            >
+              {isCountLoading
+                ? t('builder.matchingCount.loading')
+                : matchingCount === 0
+                  ? t('builder.matchingCount.none')
+                  : t('builder.matchingCount.result', {
+                      count: matchingCount,
+                    })}
+            </Text>
+          )}
           <Group>
             <Button
               leftSection={<IconDownload size={16} />}
               onClick={generateReport}
               loading={isGenerating}
-              disabled={!hasSelections}
+              disabled={!hasSelections || noRecordsMatch}
             >
               {getGenerateButtonLabel()}
             </Button>

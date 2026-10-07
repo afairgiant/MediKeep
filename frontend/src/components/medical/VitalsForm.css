@@ -1,0 +1,6 @@
+/* Sample values in empty vitals fields (e.g. 120, 98.6) must not be mistaken
+   for entered data: make them fainter and italic. */
+.vitals-form input::placeholder {
+  opacity: 0.5;
+  font-style: italic;
+}

@@ -5,9 +5,10 @@ This module provides endpoints for generating custom medical reports
 with selective record inclusion and template management.
 """
 
+from datetime import date
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
@@ -22,9 +23,13 @@ from app.models.models import User
 from app.schemas.custom_reports import (
     CustomReportRequest,
     DataSummaryResponse,
+    DateRange,
+    NoMatchingRecordsError,
+    RecordCountResponse,
     ReportTemplate,
     ReportTemplateResponse,
     TemplateActionResponse,
+    normalize_tags,
 )
 from app.schemas.trend_charts import TrendChartSelection, encode_lab_chart_key
 from app.services.custom_report_service import CustomReportService
@@ -46,6 +51,9 @@ def _get_active_patient_id(db: Session, user_id: int) -> Optional[int]:
 @router.get("/data-summary", response_model=DataSummaryResponse)
 async def get_custom_report_data_summary(
     request: Request,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    tags: Optional[List[str]] = Query(default=None),
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
@@ -55,7 +63,14 @@ async def get_custom_report_data_summary(
     """
     try:
         service = CustomReportService(db)
-        summary = await service.get_data_summary_for_selection(current_user_id)
+        date_range = (
+            DateRange(start_date=start_date, end_date=end_date)
+            if start_date or end_date
+            else None
+        )
+        summary = await service.get_data_summary_for_selection(
+            current_user_id, date_range, normalize_tags(tags)
+        )
         log_endpoint_access(
             logger,
             request,
@@ -65,6 +80,11 @@ async def get_custom_report_data_summary(
             category_count=len(summary.categories),
         )
         return summary
+    except ValueError as e:
+        log_validation_error(logger, request, str(e), user_id=current_user_id)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
+        )
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -76,6 +96,48 @@ async def get_custom_report_data_summary(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve data summary",
+        )
+
+
+@router.post("/preview-count", response_model=RecordCountResponse)
+async def preview_report_record_count(
+    http_request: Request,
+    request: CustomReportRequest,
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Count how many selected records would be in the report after the
+    date range and tag filters are applied.
+    """
+    try:
+        service = CustomReportService(db)
+        return await service.count_matching_records(current_user_id, request)
+    except PermissionError as e:
+        log_security_event(
+            logger,
+            "custom_report_permission_denied",
+            http_request,
+            "User attempted to count records they do not have access to",
+            user_id=current_user_id,
+        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except ValueError as e:
+        log_validation_error(logger, http_request, str(e), user_id=current_user_id)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
+        )
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            http_request,
+            "Custom report record count failed",
+            e,
+            user_id=current_user_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to count matching records",
         )
 
 
@@ -109,6 +171,9 @@ async def generate_custom_report(
             headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
 
+    except NoMatchingRecordsError:
+        # Not an error: the filters simply matched nothing
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except PermissionError as e:
         log_security_event(
             logger,

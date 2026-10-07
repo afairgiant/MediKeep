@@ -73,7 +73,8 @@
       "usernameLength": "Username must be at least 3 characters long",
       "weightMax": "Weight cannot exceed {{max}} {{unit}}",
       "weightMin": "Weight must be at least {{min}} {{unit}}"
-    }
+    },
+    "exampleValue": "e.g., {{value}}"
   },
   "glucoseContext": {
     "after_meal": "After Meal",

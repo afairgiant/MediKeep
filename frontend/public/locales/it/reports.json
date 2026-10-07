@@ -31,6 +31,8 @@
       "title": "Nessun dato medico disponibile"
     },
     "notifications": {
+      "noRecordsFound": "Nessun record trovato",
+      "noRecordsFoundMessage": "Nessun record trovato per il report.",
       "templateLoaded": "Modello caricato",
       "templateLoadedMessage": "Il modello \"{{name}}\" è stato caricato."
     },
@@ -85,20 +87,49 @@
         "description": "Seleziona i segni vitali da rappresentare in grafico",
         "title": "Grafici segni vitali"
       }
+    },
+    "filters": {
+      "title": "Filtri",
+      "description": "Qui sotto si possono selezionare solo i record che corrispondono a questi filtri. I filtri vengono salvati con i modelli.",
+      "startDate": "Data di inizio",
+      "endDate": "Data di fine",
+      "invalidRange": "La data di fine non può precedere la data di inizio",
+      "tags": "Tag",
+      "tagsPlaceholder": "Aggiungi tag da filtrare...",
+      "note": "Un record corrisponde se ha almeno uno dei tag. I record senza data sono esclusi quando è impostata una data. I grafici di tendenza usano le proprie date.",
+      "chips": {
+        "dateBetween": "Dal {{start}} al {{end}}",
+        "dateFrom": "Dal {{date}}",
+        "dateUntil": "Fino al {{date}}",
+        "none": "Nessun filtro applicato",
+        "remove": "Rimuovi il filtro {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "Conteggio dei record corrispondenti...",
+      "none": "Nessun record corrisponde alla selezione e ai filtri attuali. Modificali per generare un report.",
+      "result": "{{count}} record saranno inclusi nel report",
+      "result_one": "{{count}} record sarà incluso nel report",
+      "result_other": "{{count}} record saranno inclusi nel report"
+    },
+    "recordsPanel": {
+      "title": "Seleziona i record per il report",
+      "filtering": "Filtraggio dei dati..."
     }
   },
   "categories": {
     "clearSelection": "Cancella selezione",
+    "hideRecords": "Nascondi record",
     "noCategories": "Nessuna categoria disponibile",
     "noCategoriesDescription": "Nessuna categoria di dati medici è disponibile per la generazione di report.",
     "noRecords": "Nessun record disponibile",
     "recordCount": "{{count}} record",
     "recordCount_one": "{{count}} record",
     "recordCount_other": "{{count}} record",
-    "selectAll": "Seleziona tutto",
     "selected": "{{count}} selezionati",
     "selected_one": "{{count}} selezionati",
     "selected_other": "{{count}} selezionati",
+    "showRecords": "Mostra record",
     "showingFirst": "Visualizzazione dei primi {{count}} record. Sono disponibili altri record ma non vengono mostrati per motivi di performance.",
     "showingFirst_one": "Visualizzazione dei primi {{count}} record. Sono disponibili altri record ma non vengono mostrati per motivi di performance.",
     "showingFirst_other": "Visualizzazione dei primi {{count}} record. Sono disponibili altri record ma non vengono mostrati per motivi di performance.",

@@ -31,6 +31,8 @@
       "title": "Geen medische gegevens beschikbaar"
     },
     "notifications": {
+      "noRecordsFound": "Geen records gevonden",
+      "noRecordsFoundMessage": "Er zijn geen records gevonden voor het rapport.",
       "templateLoaded": "Sjabloon geladen",
       "templateLoadedMessage": "Sjabloon \"{{name}}\" is geladen."
     },
@@ -85,20 +87,49 @@
         "description": "Selecteer vitale functies om in grafiek weer te geven",
         "title": "Grafieken vitale functies"
       }
+    },
+    "filters": {
+      "title": "Filters",
+      "description": "Hieronder kunnen alleen records worden geselecteerd die aan deze filters voldoen. Filters worden opgeslagen met sjablonen.",
+      "startDate": "Startdatum",
+      "endDate": "Einddatum",
+      "invalidRange": "De einddatum mag niet voor de startdatum liggen",
+      "tags": "Tags",
+      "tagsPlaceholder": "Voeg tags toe om op te filteren...",
+      "note": "Een record komt overeen als het een van de tags heeft. Records zonder datum worden uitgesloten wanneer een datum is ingesteld. Trendgrafieken gebruiken eigen datums.",
+      "chips": {
+        "dateBetween": "{{start}} tot {{end}}",
+        "dateFrom": "Vanaf {{date}}",
+        "dateUntil": "Tot {{date}}",
+        "none": "Geen filters toegepast",
+        "remove": "Filter {{name}} verwijderen"
+      }
+    },
+    "matchingCount": {
+      "loading": "Overeenkomende records tellen...",
+      "none": "Geen records komen overeen met de huidige selectie en filters. Pas ze aan om een rapport te genereren.",
+      "result": "{{count}} records worden in het rapport opgenomen",
+      "result_one": "{{count}} record wordt in het rapport opgenomen",
+      "result_other": "{{count}} records worden in het rapport opgenomen"
+    },
+    "recordsPanel": {
+      "title": "Records voor het rapport selecteren",
+      "filtering": "Gegevens filteren..."
     }
   },
   "categories": {
     "clearSelection": "Selectie wissen",
+    "hideRecords": "Records verbergen",
     "noCategories": "Geen categorieën beschikbaar",
     "noCategoriesDescription": "Er zijn geen medische gegevenscategorieën beschikbaar voor het genereren van rapporten.",
     "noRecords": "Geen dossiers beschikbaar",
     "recordCount": "{{count}} dossiers",
     "recordCount_one": "{{count}} dossier",
     "recordCount_other": "{{count}} dossiers",
-    "selectAll": "Alles selecteren",
     "selected": "{{count}} geselecteerd",
     "selected_one": "{{count}} geselecteerd",
     "selected_other": "{{count}} geselecteerd",
+    "showRecords": "Records tonen",
     "showingFirst": "De eerste {{count}} dossiers worden weergegeven. Meer dossiers zijn beschikbaar maar worden om prestatieredenen niet getoond.",
     "showingFirst_one": "Het eerste {{count}} dossier wordt weergegeven. Meer dossiers zijn beschikbaar maar worden om prestatieredenen niet getoond.",
     "showingFirst_other": "De eerste {{count}} dossiers worden weergegeven. Meer dossiers zijn beschikbaar maar worden om prestatieredenen niet getoond.",

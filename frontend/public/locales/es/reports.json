@@ -31,6 +31,8 @@
       "title": "No Hay Datos Médicos Disponibles"
     },
     "notifications": {
+      "noRecordsFound": "No se encontraron registros",
+      "noRecordsFoundMessage": "No se encontraron registros para el informe.",
       "templateLoaded": "Plantilla Cargada",
       "templateLoadedMessage": "La plantilla \"{{name}}\" ha sido cargada."
     },
@@ -85,20 +87,49 @@
         "description": "Seleccione signos vitales para graficar",
         "title": "Gráficos de Signos Vitales"
       }
+    },
+    "filters": {
+      "title": "Filtros",
+      "description": "Solo se pueden seleccionar abajo los registros que coincidan con estos filtros. Los filtros se guardan con las plantillas.",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "invalidRange": "La fecha de fin no puede ser anterior a la de inicio",
+      "tags": "Etiquetas",
+      "tagsPlaceholder": "Añada etiquetas para filtrar...",
+      "note": "Un registro coincide si tiene alguna de las etiquetas. Los registros sin fecha se excluyen cuando se define una fecha. Los gráficos de tendencias usan sus propias fechas.",
+      "chips": {
+        "dateBetween": "{{start}} a {{end}}",
+        "dateFrom": "Desde {{date}}",
+        "dateUntil": "Hasta {{date}}",
+        "none": "Sin filtros aplicados",
+        "remove": "Quitar el filtro {{name}}"
+      }
+    },
+    "matchingCount": {
+      "loading": "Contando registros coincidentes...",
+      "none": "Ningún registro coincide con la selección y los filtros actuales. Ajústelos para generar un informe.",
+      "result": "Se incluirán {{count}} registros en el informe",
+      "result_one": "Se incluirá {{count}} registro en el informe",
+      "result_other": "Se incluirán {{count}} registros en el informe"
+    },
+    "recordsPanel": {
+      "title": "Seleccionar registros para el informe",
+      "filtering": "Filtrando datos..."
     }
   },
   "categories": {
     "clearSelection": "Borrar selección",
+    "hideRecords": "Ocultar registros",
     "noCategories": "No Hay Categorías Disponibles",
     "noCategoriesDescription": "No hay categorías de datos médicos disponibles para la generación de informes.",
     "noRecords": "No hay registros disponibles",
     "recordCount": "{{count}} registros",
     "recordCount_one": "{{count}} registro",
     "recordCount_other": "{{count}} registros",
-    "selectAll": "Seleccionar todo",
     "selected": "{{count}} seleccionados",
     "selected_one": "{{count}} seleccionado",
     "selected_other": "{{count}} seleccionados",
+    "showRecords": "Mostrar registros",
     "showingFirst": "Mostrando los primeros {{count}} registros. Hay más registros disponibles pero no se muestran por rendimiento.",
     "showingFirst_one": "Mostrando el primer {{count}} registro. Hay más registros disponibles pero no se muestran por rendimiento.",
     "showingFirst_other": "Mostrando los primeros {{count}} registros. Hay más registros disponibles pero no se muestran por rendimiento.",
