@@ -16,7 +16,7 @@
     "symptoms": "Symptômes",
     "injuries": "Blessures",
     "insurance": "Assurance",
-    "medical_equipment": "Equipment médical"
+    "medical_equipment": "Équipement médical"
   },
   "fields": {
     "prescribingProvider": "Médecin prescrivant",
@@ -335,7 +335,7 @@
     "secondaryInsurance": "Assurance secondaire/complémentaire",
     "trend": "Tendance",
     "trendChartTitle": "Tendance : {{name}}",
-    "notice": "Notice",
+    "notice": "Avis",
     "bloodType": "Groupe sanguin",
     "gender": "Genre",
     "medicalConditions": "Conditions médicales",

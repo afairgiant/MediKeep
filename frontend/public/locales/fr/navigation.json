@@ -85,7 +85,7 @@
     "items": {
       "adminDashboard": "Tableau de bord administrateur",
       "allergies": "Allergies",
-      "backupManagement": "Gestion des backups",
+      "backupManagement": "Gestion des sauvegardes",
       "conditions": "Conditions",
       "customReports": "Rapports personnalisés",
       "dataModels": "Modèles de données",

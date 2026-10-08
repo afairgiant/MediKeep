@@ -91,7 +91,7 @@
       "nameRequired": "Ce champ ne peut pas être vide",
       "nameTooLong": "Doit valoir {{max}} caractères ou moins",
       "updateFailed": "Echec de la mise à jour du profil. Veuillez réessayer.",
-      "usernameChars": "Le nom d'utilisateur peut seulement contenir des lettres, des chiffres, des underscores, et des tirets.",
+      "usernameChars": "Le nom d'utilisateur peut seulement contenir des lettres, des chiffres, des tirets bas, et des tirets.",
       "usernameLength": "Le nom d'utilisateur doit faire entre 3 et 50 caractères"
     },
     "fields": {

@@ -189,7 +189,7 @@
       },
       "title": "Configuration de l'exportation"
     },
-    "description": "Téléchargez vos données médicales dans divers formats pour faire un backup ou les partager avec des professionnels de santé",
+    "description": "Téléchargez vos données médicales dans divers formats pour faire une sauvegarde ou les partager avec des professionnels de santé",
     "errors": {
       "bulkExportFailed": "Echec de l'exportation de masse : {{message}}",
       "bulkInvalidSettings": "Veuillez vérifier vos paramètres d'exportation de masse. Assurez-vous d'avoir sélectionné au moins un type et format de données valides.",
@@ -213,7 +213,7 @@
     "icon": "📤",
     "information": {
       "bulk": {
-        "description": "Crée un fichier ZIP contenant plusieurs types de données dans le format de votre choix pour générer un backup exhaustif des données.",
+        "description": "Crée un fichier ZIP contenant plusieurs types de données dans le format de votre choix pour générer une sauvegarde exhaustive des données.",
         "title": "Exportation de masse :"
       },
       "csv": {

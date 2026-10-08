@@ -65,40 +65,40 @@
   },
   "backup": {
     "existingBackups": {
-      "count_one": "{{count}} backup",
-      "count_other": "{{count}} backups",
+      "count_one": "{{count}} sauvegarde",
+      "count_other": "{{count}} sauvegardes",
       "download": "Télécharger",
-      "noBackups": "Aucun backup trouvé",
+      "noBackups": "Aucune sauvegarde trouvée",
       "previewRestore": "Aperçu de la restauration",
       "restore": "Restaurer",
       "tableHeaders": {
         "fileExists": "Fichier existant",
         "filename": "Nom de fichier"
       },
-      "title": "Backups existants",
+      "title": "Sauvegardes existantes",
       "verify": "Vérifier"
     },
-    "loading": "Chargement de la gestion des backups...",
+    "loading": "Chargement de la gestion des sauvegardes...",
     "modals": {
-      "analyzingBackup": "Analyse des contenus du backup...",
+      "analyzingBackup": "Analyse des contenus de la sauvegarde...",
       "cannotBeUndone": "Cette action est définitive.",
       "cleanupItems": {
-        "oldBackups": "Les vieux fichiers de backup",
+        "oldBackups": "Les vieux fichiers de sauvegarde",
         "orphanedFiles": "Les fichiers orphelins",
         "trashFiles": "Le contenu de la corbeille"
       },
       "cleanupWarning": "Ceci supprimera définitivement :",
       "completeCleanup": "Nettoyage complet du système",
-      "deleteBackup": "Supprimer le backup",
-      "deleteConfirm": "Voulez-vous vraiment supprimer le backup \"{{filename}}\" ?",
+      "deleteBackup": "Supprimer la sauvegarde",
+      "deleteConfirm": "Voulez-vous vraiment supprimer la sauvegarde \"{{filename}}\" ?",
       "discardChanges": "Annuler les changements",
       "executeCleanup": "Exécuter le nettoyage",
       "proceedWithRestore": "Poursuivre la restauration",
-      "restoreFromBackup": "Restaurer depuis un backup",
+      "restoreFromBackup": "Restaurer depuis une sauvegarde",
       "restoreNow": "Restaurer maintenant",
       "restorePreview": "Aperçu de la restauration",
-      "restoreSafetyNote": "Un backup de sûreté sera créé automatiquement avant le lancement du processus de restauration.",
-      "restoreWarning": "Ceci restaurera les données d'un backup et REMPLACERA les données actuelles !",
+      "restoreSafetyNote": "Une sauvegarde de sûreté sera créée automatiquement avant le lancement du processus de restauration.",
+      "restoreWarning": "Ceci restaurera les données d'une sauvegarde et REMPLACERA les données actuelles !",
       "stayOnSettings": "Rester sur les paramètres",
       "typeCleanupToConfirm": "Saisissez <strong>CLEANUP</strong> pour confirmer",
       "unsavedChanges": "Changements non sauvegardés",
@@ -106,29 +106,29 @@
     },
     "operations": {
       "advancedOptions": "Options avancées",
-      "advancedOptionsDesc": "Opérations supplémentaires de backup et de nettoyage",
-      "chooseFile": "Choisissez un fichier de backup",
-      "cleanupOld": "Nettoyer les vieux backups",
+      "advancedOptionsDesc": "Opérations supplémentaires de sauvegarde et de nettoyage",
+      "chooseFile": "Choisissez un fichier de sauvegarde",
+      "cleanupOld": "Nettoyer les vieilles sauvegardes",
       "completeCleanup": "Nettoyage complet",
-      "createFullBackup": "Créer un backup complet",
+      "createFullBackup": "Créer une sauvegarde complète",
       "creating": "Création...",
       "databaseOnly": "Base de donnée uniquement",
       "filesOnly": "Fichiers uniquement",
-      "fullBackup": "Backup du système entier",
-      "fullBackupDesc": "Backup complet (base de données + fichiers)",
+      "fullBackup": "Sauvegarde du système entier",
+      "fullBackupDesc": "Sauvegarde complète (base de données + fichiers)",
       "invalidFileType": "Type de fichier invalide",
-      "invalidFileTypeDesc": "Veuillez sélectionner un fichier de backup au format .sql ou .zip.",
+      "invalidFileTypeDesc": "Veuillez sélectionner un fichier de sauvegarde au format .sql ou .zip.",
       "moreOptions": "Plus d'options",
-      "title": "Opérations de backup",
-      "uploadBackup": "Téléverser un backup",
-      "uploadBackupDesc": "Téléverser un fichier de backup externe (.sql ou .zip)"
+      "title": "Opérations de sauvegarde",
+      "uploadBackup": "Téléverser une sauvegarde",
+      "uploadBackupDesc": "Téléverser un fichier de sauvegarde externe (.sql ou .zip)"
     },
     "preview": {
       "affectedData": "Données affectées",
-      "analysisNotAvailable": "Analyse du backup non disponible",
-      "backupContent": "Contenu du backup",
-      "backupDetails": "Détails du backup",
-      "backupFiles": "Fichiers du backup",
+      "analysisNotAvailable": "Analyse de la sauvegarde non disponible",
+      "backupContent": "Contenu de la sauvegarde",
+      "backupDetails": "Détails de la sauvegarde",
+      "backupFiles": "Fichiers de la sauvegarde",
       "components": "Composants",
       "createdAt": "Créé le : {{date}}",
       "currentDatabase": "Base de données actuelle",
@@ -137,29 +137,29 @@
       "noAffectedData": "Aucune information disponible sur les données affectées",
       "noStatistics": "Aucune statistique disponible",
       "restoreMethod": "Méthode de restauration",
-      "unknownType": "Type de backup inconnu"
+      "unknownType": "Type de sauvegarde inconnu"
     },
     "retention": {
-      "backupsUnit": "backups",
-      "currentStatus_one": "<strong>Statut actuel :</strong> {{count}} backup conservé (max : {{max}})",
-      "currentStatus_other": "<strong>Statut actuel :</strong> {{count}} backups conservés (max : {{max}})",
+      "backupsUnit": "sauvegardes",
+      "currentStatus_one": "<strong>Statut actuel :</strong> {{count}} sauvegarde conservée (max : {{max}})",
+      "currentStatus_other": "<strong>Statut actuel :</strong> {{count}} sauvegardes conservées (max : {{max}})",
       "daysUnit": "jours",
-      "maximumCount": "Décompte maximum des backups",
-      "maximumCountDesc": "Alerter quand le décompte des backups dépasse cette limite (optionnel)",
-      "minimumCount": "Décompte minimum des backups",
-      "minimumCountDesc": "Toujours conserver au moins ce nombre de backups (quel que soit leur âge)",
+      "maximumCount": "Décompte maximum des sauvegardes",
+      "maximumCountDesc": "Alerter quand le décompte des sauvegardes dépasse cette limite (optionnel)",
+      "minimumCount": "Décompte minimum des sauvegardes",
+      "minimumCountDesc": "Toujours conserver au moins ce nombre de sauvegardes (quel que soit leur âge)",
       "priority": "<strong>Priorité :</strong> Le décompte minimum est toujours prioritaire sur l'ancienneté",
-      "retentionDays": "Rétention des backups (en jours)",
-      "retentionDaysDesc": "Supprimer les backups datant d'il y a plus de ce nombre de jours (au-delà du décompte minimum)",
+      "retentionDays": "Rétention des sauvegardes (en jours)",
+      "retentionDaysDesc": "Supprimer les sauvegardes datant d'il y a plus de ce nombre de jours (au-delà du décompte minimum)",
       "retentionLogic": "Logique de rétention",
       "saveRetention": "Sauvegarder les paramètres de rétention",
-      "timeBasedCleanup": "<strong>Nettoyage par ancienneté :</strong> Supprimer les backups vieux de plus de {{days}} jours (au-delà du décompte minimum)",
-      "title": "Paramètres de rétention des backups"
+      "timeBasedCleanup": "<strong>Nettoyage par ancienneté :</strong> Supprimer les sauvegardes vieilles de plus de {{days}} jours (au-delà du décompte minimum)",
+      "title": "Paramètres de rétention des sauvegardes"
     },
     "schedule": {
       "completedSuccessfully": "Complété avec succès",
       "dayOfWeek": "Jour de la semaine",
-      "dayOfWeekDesc": "Quel jour doit avoir lieu le backup hebdomadaire ?",
+      "dayOfWeekDesc": "Quel jour doit avoir lieu la sauvegarde hebdomadaire ?",
       "days": {
         "fri": "Vendredi",
         "mon": "Lundi",
@@ -170,10 +170,10 @@
         "wed": "Mercredi"
       },
       "failed": "Echec : {{error}}",
-      "frequency": "Fréquence des backups",
-      "frequencyDesc": "Programmer des backups complets automatiques (base de données + fichiers)",
-      "lastBackup": "Dernier backup :",
-      "nextScheduledRun": "Prochain backup prévu",
+      "frequency": "Fréquence des sauvegardes",
+      "frequencyDesc": "Programmer des sauvegardes complètes automatiques (base de données + fichiers)",
+      "lastBackup": "Dernière sauvegarde :",
+      "nextScheduledRun": "Prochaine sauvegarde prévue",
       "presets": {
         "daily": "Quotidien",
         "every12Hours": "Toutes les 12 heures",
@@ -181,13 +181,13 @@
       },
       "saveSchedule": "Programme de sauvegarde",
       "timeOfDay": "Moment de la journée",
-      "timeOfDayDesc": "Quand doit avoir lieu le backup ? (format 24h)",
-      "title": "Programmation des backups automatiques",
+      "timeOfDayDesc": "Quand doit avoir lieu la sauvegarde ? (format 24h)",
+      "title": "Programmation des sauvegardes automatiques",
       "unknownError": "Erreur inconnue"
     },
-    "subtitle": "Créez et gérez les backups système",
+    "subtitle": "Créez et gérez les sauvegardes système",
     "tabs": {
-      "backups": "Backups"
+      "backups": "Sauvegardes"
     },
     "unsavedBadge": "Non sauvegardé"
   },
@@ -246,8 +246,8 @@
     "loading": "Chargement du tableau de bord exhaustif...",
     "quickActions": {
       "auditLogDesc": "Voir le journal d'activité système",
-      "backups": "Backups",
-      "backupsDesc": "Gestion des backups",
+      "backups": "Sauvegardes",
+      "backupsDesc": "Gestion des sauvegardes",
       "createUser": "Créer un nouvel utilisateur",
       "createUserDesc": "Créez un compte utilisateur avec un profil de patient",
       "dataModelsDesc": "Voir et gérer les tables de la base de données",
@@ -276,8 +276,8 @@
     "systemHealth": {
       "databaseStatus": "Statut de la base de données",
       "errorLoading": "Erreur lors du chargement de la santé système",
-      "lastBackup": "Dernier backup",
-      "noBackup": "Aucun backup",
+      "lastBackup": "Dernière sauvegarde",
+      "noBackup": "Aucune sauvegarde",
       "subtitle": "Statut actuel du système",
       "uptime": "Disponible depuis"
     }
@@ -377,7 +377,7 @@
       "patientRecords": "Dossiers de patients",
       "title": "Santé de la base de données"
     },
-    "lastBackup": "Dernier backup",
+    "lastBackup": "Dernière sauvegarde",
     "lastRunFailed": "Dernier chargement échoué",
     "lastUpdated": "Dernière mise à jour : {{time}}",
     "loading": "Chargement de la santé du système...",
@@ -415,7 +415,7 @@
       "providerType": "Type de fournisseur",
       "registrationViaSso": "Enregistrement via SSO",
       "ssoStatus": "Statut du SSO",
-      "title": "Single Sign-On (SSO)"
+      "title": "Authentification unique (SSO)"
     },
     "storage": {
       "appStorage": "Stockage de l'application",
@@ -540,7 +540,7 @@
       "testConnection": "Tester la connexion",
       "testConnectionDesc": "Testez la connexion et la configuration du fournisseur SSO",
       "testSsoConnection": "Tester la connexion SSO",
-      "title": "Single Sign-On (SSO)"
+      "title": "Authentification unique (SSO)"
     },
     "subtitle": "Configurez les paramètres système et la politique de rétention",
     "title": "Paramètres administrateur",
@@ -712,7 +712,7 @@
       "all": "Tous les statuts"
     },
     "tableHeaders": {
-      "auth": "Auth",
+      "auth": "Authentification",
       "lastLogin": "Dernière connexion"
     },
     "toggleActiveModal": {
