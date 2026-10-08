@@ -824,7 +824,7 @@
         "description": "Type de formule de prescription de médicaments",
         "label": "Type de formule de prescription",
         "options": {
-          "formulary": "Formule basée sur un formulaire",
+          "formulary": "Formule basée sur une liste de médicaments couverts",
           "integrated": "Intégrée à l'assurance médicale",
           "medicarePartD": "Medicare Partie D",
           "tieredCopay": "Formule à ticket modérateur échelonné"
