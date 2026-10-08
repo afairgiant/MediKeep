@@ -186,12 +186,12 @@
   "error": "Echec du chargement des paramètres de notification",
   "events": {
     "backup_completed": {
-      "description": "Quand un backup se termine avec succès",
-      "name": "Succès de backup"
+      "description": "Quand une sauvegarde se termine avec succès",
+      "name": "Succès de sauvegarde"
     },
     "backup_failed": {
-      "description": "Quand un backup échoue",
-      "name": "Echec de backup"
+      "description": "Quand une sauvegarde échoue",
+      "name": "Echec de sauvegarde"
     },
     "immunization_due": {
       "description": "Quand une immunisation doit être réalisée",

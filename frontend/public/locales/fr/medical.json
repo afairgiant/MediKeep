@@ -2,7 +2,7 @@
   "entityNames": {
     "allergy": "allergie",
     "condition": "condition",
-    "equipment": "équipment",
+    "equipment": "équipement",
     "familyMember": "membre de la famille",
     "immunization": "immunisation",
     "injury": "blessure",
@@ -265,40 +265,40 @@
   "equipment": {
     "tabs": {
       "deviceDetails": "Détails de l'appareil",
-      "serviceDates": "Service & Dates"
+      "serviceDates": "Maintenance et dates"
     }
   },
   "familyHistory": {
     "form": {
       "condition": {
         "conditionName": {
-          "description": "Name of the medical condition",
-          "label": "Condition Name",
-          "placeholder": "e.g., Diabetes, Heart Disease, Cancer"
+          "description": "Nom de la condition médicale",
+          "label": "Nom de la condition",
+          "placeholder": "ex : Diabète, maladie cardiaque, cancer"
         },
         "conditionType": {
-          "description": "Category of medical condition",
-          "label": "Condition Type",
-          "placeholder": "Select condition type"
+          "description": "Catégorie de condition médicale",
+          "label": "Type de condition",
+          "placeholder": "Sélectionnez le type de condition"
         },
         "diagnosisAge": {
-          "description": "Age at diagnosis",
-          "label": "Diagnosis Age",
-          "placeholder": "e.g., 45"
+          "description": "Âge au moment du diagnostic",
+          "label": "Âge au diagnostic",
+          "placeholder": "ex : 45"
         },
         "icd10Code": {
-          "description": "Medical diagnosis code (if known)",
-          "label": "ICD-10 Code",
-          "placeholder": "e.g., E11.9"
+          "description": "Code de diagnostic médical (si connu)",
+          "label": "Code ICD-10",
+          "placeholder": "ex : E11.9"
         },
         "notes": {
-          "description": "Treatment details, outcomes, or other relevant information",
-          "placeholder": "Additional details about the condition..."
+          "description": "Détails du traitement, résultats, ou autres informations pertinentes",
+          "placeholder": "Détails supplémentaires sur la condition..."
         },
         "severity": {
-          "description": "How severe the condition was/is",
-          "label": "Severity",
-          "placeholder": "Select severity level"
+          "description": "À quel point la condition est ou était sévère",
+          "label": "Sévérité",
+          "placeholder": "Sélectionnez le niveau de sévérité"
         },
         "severityOptions": {
           "critical": "🚨 Critique - Danger de mort",
@@ -371,7 +371,7 @@
         "relationshipOptions": {
           "aunt": "Tante",
           "brother": "Frère",
-          "cousin": "Cousin",
+          "cousin": "Cousin(e)",
           "father": "Père",
           "maternalGrandfather": "Grand-père maternel",
           "maternalGrandmother": "Grand-mère maternelle",
@@ -824,10 +824,10 @@
         "description": "Type de formule de prescription de médicaments",
         "label": "Type de formule de prescription",
         "options": {
-          "formulary": "Formulary-Based Plan",
-          "integrated": "Integrated with Medical",
-          "medicarePartD": "Medicare Part D",
-          "tieredCopay": "Tiered Copay Plan"
+          "formulary": "Formule basée sur une liste de médicaments couverts",
+          "integrated": "Intégrée à l'assurance médicale",
+          "medicarePartD": "Medicare Partie D",
+          "tieredCopay": "Formule à ticket modérateur échelonné"
         },
         "placeholder": "Sélectionnez le type de formule de prescription"
       },
@@ -880,8 +880,8 @@
         "label": "Type de formule vision",
         "options": {
           "visionDiscount": "Formule réduite vision",
-          "visionHmo": "Vision HMO",
-          "visionPpo": "Vision PPO"
+          "visionHmo": "HMO vision",
+          "visionPpo": "PPO vision"
         },
         "placeholder": "Sélectionnez le type de formule vision"
       },
@@ -1471,7 +1471,7 @@
     "clickToExpand": "Cliquez pour développer et ajouter des détails (optionnel)",
     "conditions": "Conditions",
     "encounters": "Visites",
-    "equipment": "Equipment",
+    "equipment": "Équipement",
     "medications": "Médicaments",
     "noEquipment": "Aucun équipement trouvé. De l'équipement peut être ajouté après avoir créé le traitement.",
     "noLabResults": "Aucun résultat d'analyse trouvé. Créez des résultats d'analyse au préalable pour les connecter ici.",
