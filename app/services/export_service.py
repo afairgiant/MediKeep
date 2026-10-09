@@ -2551,7 +2551,11 @@ class ExportService:
             story.append(Spacer(1, 12))
             story.append(
                 Paragraph(
-                    t.text("records_truncated", shown=MAX_PDF_RECORDS_PER_SECTION, total=len(section_data)),
+                    t.text(
+                        "records_truncated",
+                        shown=MAX_PDF_RECORDS_PER_SECTION,
+                        total=len(section_data),
+                    ),
                     styles["Italic"],
                 )
             )
