@@ -74,6 +74,9 @@ _CHOICE_FIELDS_BY_SECTION = {
 }
 
 # Sections whose "relationship" / "gender" fields hold stored choice values
+# Maximum records rendered per category in the PDF export
+MAX_PDF_RECORDS_PER_SECTION = 250
+
 _RELATIONSHIP_SECTIONS = frozenset({"family_history", "emergency_contacts"})
 _GENDER_SECTIONS = frozenset({"family_history"})
 
@@ -2162,8 +2165,8 @@ class ExportService:
 
             return str_value
 
-        # Limit to 50 records per section
-        for i, record in enumerate(section_data[:50]):
+        # Limit records per section
+        for i, record in enumerate(section_data[:MAX_PDF_RECORDS_PER_SECTION]):
             if i > 0:
                 story.append(Spacer(1, 12))  # Space between cards
 
@@ -2544,11 +2547,15 @@ class ExportService:
                 story.append(card_table)
 
         # Add note if data was truncated
-        if len(section_data) > 50:
+        if len(section_data) > MAX_PDF_RECORDS_PER_SECTION:
             story.append(Spacer(1, 12))
             story.append(
                 Paragraph(
-                    t.text("records_truncated", shown=50, total=len(section_data)),
+                    t.text(
+                        "records_truncated",
+                        shown=MAX_PDF_RECORDS_PER_SECTION,
+                        total=len(section_data),
+                    ),
                     styles["Italic"],
                 )
             )
