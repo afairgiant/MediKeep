@@ -246,7 +246,7 @@ describe('VisitLinkTabButtons', () => {
     expect(screen.queryAllByRole('tab')).toHaveLength(0);
 
     await openLinkMenu();
-    const items = await screen.findAllByRole('menuitem');
+    const items = await screen.findAllByRole('menuitem', { hidden: true });
     expect(items.map(item => item.textContent)).toEqual([
       'shared:categories.procedures',
       'shared:categories.treatments',
@@ -265,6 +265,7 @@ describe('VisitLinkTabButtons', () => {
     await userEvent.click(
       await screen.findByRole('menuitem', {
         name: 'shared:categories.injuries',
+        hidden: true,
       })
     );
 
@@ -281,9 +282,9 @@ describe('VisitLinkTabButtons', () => {
       },
     });
     await openLinkMenu();
-    const names = (await screen.findAllByRole('menuitem')).map(
-      item => item.textContent
-    );
+    const names = (
+      await screen.findAllByRole('menuitem', { hidden: true })
+    ).map(item => item.textContent);
     expect(names).toHaveLength(6);
     expect(names).not.toContain('shared:categories.injuries');
   });

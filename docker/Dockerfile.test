@@ -2,7 +2,7 @@
 # This builds the application with testing dependencies and runs tests
 
 # Stage 1: Build React frontend for testing
-FROM node:18-alpine AS frontend-test
+FROM node:22-alpine AS frontend-test
 
 ENV NODE_ENV=test
 ENV CI=true
@@ -19,7 +19,7 @@ RUN npm ci --include=dev
 COPY frontend/ ./
 
 # Run frontend tests
-RUN npm test -- --coverage --watchAll=false
+RUN npm run test:coverage
 
 # Build the React app for integration testing
 RUN npm run build
