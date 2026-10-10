@@ -1,12 +1,11 @@
 from typing import NamedTuple, Optional
 
+import jwt
 from fastapi import Depends, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database.database import get_db
 from app.core.http.error_handling import (
     BusinessLogicException,
@@ -24,6 +23,7 @@ from app.core.logging.config import get_logger, log_security_event
 from app.core.logging.constants import LogFields, sanitize_log_input
 from app.core.utils.client_ip import get_client_ip
 from app.core.utils.cookie_auth import get_token_from_cookie
+from app.core.utils.security import decode_access_token
 from app.crud.user import user
 from app.models.models import User
 
@@ -112,11 +112,7 @@ def _validate_and_decode_token(
 
     # Decode JWT token
     try:
-        payload = jwt.decode(
-            token_str,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
-        )
+        payload = decode_access_token(token_str)
         username = payload.get("sub")
         if username is None:
             security_logger.info(f"AUTH ({auth_method}): Token missing subject claim")
@@ -139,7 +135,7 @@ def _validate_and_decode_token(
 
         return TokenValidationResult(payload=payload, username=username)
 
-    except JWTError as e:
+    except jwt.PyJWTError as e:
         security_logger.info(f"AUTH ({auth_method}): Token decode failed: {str(e)}")
         log_security_event(
             security_logger,
