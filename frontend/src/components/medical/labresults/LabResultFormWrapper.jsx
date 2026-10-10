@@ -14,7 +14,6 @@ import {
   Select,
   Text,
   Paper,
-  Title,
   Badge,
   ActionIcon,
   Collapse,
@@ -28,11 +27,10 @@ import {
   IconFileText,
   IconFileUpload,
   IconNotes,
-  IconPlus,
-  IconTrash,
   IconX,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -44,523 +42,19 @@ import {
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import LabResultTagsField from './LabResultTagsField';
-import ConditionRelationships from '../ConditionRelationships';
 import RecordVisitsCard from '../../shared/RecordVisitsCard';
 import LabResultLinkTabButtons from './LabResultLinkTabs';
-import LabResultMedicationRelationships from './LabResultMedicationRelationships';
-import LabResultProcedureRelationships from './LabResultProcedureRelationships';
-import LabResultTreatmentRelationships from './LabResultTreatmentRelationships';
+import LabResultRecordLinksCard from './LabResultRecordLinksCard';
 import TestComponentsTab from './TestComponentsTab';
 import InlineTestComponentEntry from './InlineTestComponentEntry';
 import AdvancedModeSwitch from './AdvancedModeSwitch';
 import SameAsOrderedLink from './SameAsOrderedLink';
 import {
-  PURPOSE_OPTIONS as TREATMENT_PURPOSE_OPTIONS,
-  getPurposeLabel as getTreatmentPurposeLabel,
-} from '../../../constants/treatmentLabResultConstants';
+  linksToPending,
+  pendingToLinks,
+} from '../../../constants/labResultRecordLinks';
 import logger from '../../../services/logger';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
-
-/**
- * Inline picker for selecting conditions/encounters to link during lab result creation.
- * Selections are stored locally and submitted after the lab result is saved.
- */
-const PendingRelationshipsPicker = ({
-  conditions,
-  medications,
-  procedures,
-  treatments,
-  pendingConditions,
-  pendingMedications,
-  pendingProcedures,
-  pendingTreatments,
-  onAddCondition,
-  onRemoveCondition,
-  onAddMedication,
-  onRemoveMedication,
-  onAddProcedure,
-  onRemoveProcedure,
-  onAddTreatment,
-  onRemoveTreatment,
-  patientId,
-  pendingVisitLinks,
-  onPendingVisitsChange,
-  navigate,
-  section,
-}) => {
-  const { t } = useTranslation(['medical', 'common', 'shared']);
-  const [selectedCondition, setSelectedCondition] = useState('');
-  const [conditionNote, setConditionNote] = useState('');
-  const [selectedMedication, setSelectedMedication] = useState('');
-  const [medicationNote, setMedicationNote] = useState('');
-  const [selectedProcedure, setSelectedProcedure] = useState('');
-  const [procedureNote, setProcedureNote] = useState('');
-  const [selectedTreatment, setSelectedTreatment] = useState('');
-  const [treatmentPurpose, setTreatmentPurpose] = useState('');
-  const [treatmentFrequency, setTreatmentFrequency] = useState('');
-  const [treatmentNote, setTreatmentNote] = useState('');
-
-  const availableConditions = useMemo(() => {
-    const pendingConditionIds = pendingConditions.map(pc =>
-      pc.condition_id.toString()
-    );
-    return conditions
-      .filter(c => !pendingConditionIds.includes(c.id.toString()))
-      .map(c => ({
-        value: c.id.toString(),
-        label: `${c.diagnosis}${c.status ? ` (${c.status})` : ''}`,
-      }));
-  }, [conditions, pendingConditions]);
-
-  const availableMedications = useMemo(() => {
-    const pendingMedicationIds = pendingMedications.map(pm =>
-      pm.medication_id.toString()
-    );
-    return medications
-      .filter(m => !pendingMedicationIds.includes(m.id.toString()))
-      .map(m => ({
-        value: m.id.toString(),
-        label: `${m.medication_name}${m.dosage ? ` (${m.dosage})` : ''}`,
-      }));
-  }, [medications, pendingMedications]);
-
-  const availableProcedures = useMemo(() => {
-    const pendingProcedureIds = pendingProcedures.map(pp =>
-      pp.procedure_id.toString()
-    );
-    return procedures
-      .filter(p => !pendingProcedureIds.includes(p.id.toString()))
-      .map(p => ({
-        value: p.id.toString(),
-        label: `${p.procedure_name}${p.date ? ` (${p.date})` : ''}`,
-      }));
-  }, [procedures, pendingProcedures]);
-
-  const availableTreatments = useMemo(() => {
-    const pendingTreatmentIds = pendingTreatments.map(pt =>
-      pt.treatment_id.toString()
-    );
-    return treatments
-      .filter(tr => !pendingTreatmentIds.includes(tr.id.toString()))
-      .map(tr => ({
-        value: tr.id.toString(),
-        label: tr.treatment_name,
-      }));
-  }, [treatments, pendingTreatments]);
-
-  const handleAddCondition = () => {
-    if (!selectedCondition) return;
-    onAddCondition(selectedCondition, conditionNote);
-    setSelectedCondition('');
-    setConditionNote('');
-  };
-
-  const handleAddMedication = () => {
-    if (!selectedMedication) return;
-    onAddMedication(selectedMedication, medicationNote);
-    setSelectedMedication('');
-    setMedicationNote('');
-  };
-
-  const handleAddProcedure = () => {
-    if (!selectedProcedure) return;
-    onAddProcedure(selectedProcedure, procedureNote);
-    setSelectedProcedure('');
-    setProcedureNote('');
-  };
-
-  const handleAddTreatment = () => {
-    if (!selectedTreatment) return;
-    onAddTreatment(
-      selectedTreatment,
-      treatmentPurpose,
-      treatmentFrequency,
-      treatmentNote
-    );
-    setSelectedTreatment('');
-    setTreatmentPurpose('');
-    setTreatmentFrequency('');
-    setTreatmentNote('');
-  };
-
-  const getConditionLabel = conditionId => {
-    const c = conditions.find(cond => cond.id === conditionId);
-    return c ? c.diagnosis : `Condition #${conditionId}`;
-  };
-
-  const getMedicationLabel = medicationId => {
-    const m = medications.find(med => med.id === medicationId);
-    return m ? m.medication_name : `Medication #${medicationId}`;
-  };
-
-  const getProcedureLabel = procedureId => {
-    const p = procedures.find(proc => proc.id === procedureId);
-    return p ? p.procedure_name : `Procedure #${procedureId}`;
-  };
-
-  const getTreatmentLabel = treatmentId => {
-    const tr = treatments.find(t2 => t2.id === treatmentId);
-    return tr ? tr.treatment_name : `Treatment #${treatmentId}`;
-  };
-
-  return (
-    <Stack gap="md">
-      {/* Conditions section */}
-      {section === 'conditions' && (
-        <Paper withBorder p="md">
-          <Stack gap="sm">
-            <Title order={6}>{t('labresults:form.linkConditionsTitle')}</Title>
-
-            {/* Already-added pending conditions */}
-            {pendingConditions.map((pc, index) => (
-              <Paper key={index} withBorder p="xs">
-                <Group justify="space-between">
-                  <Stack gap={2}>
-                    <Badge variant="light" color="blue" size="sm">
-                      {getConditionLabel(pc.condition_id)}
-                    </Badge>
-                    {pc.relevance_note && (
-                      <Text size="xs" c="dimmed" fs="italic">
-                        {pc.relevance_note}
-                      </Text>
-                    )}
-                  </Stack>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    size="sm"
-                    onClick={() => onRemoveCondition(index)}
-                    aria-label={t(
-                      'labresults:pendingRelationships.removeCondition'
-                    )}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
-                </Group>
-              </Paper>
-            ))}
-
-            {/* Add new condition */}
-            {availableConditions.length > 0 && (
-              <Group gap="sm" align="flex-end">
-                <Select
-                  style={{ flex: 1 }}
-                  placeholder={t('common:modals.chooseConditionToLink')}
-                  data={availableConditions}
-                  value={selectedCondition}
-                  onChange={val => setSelectedCondition(val || '')}
-                  searchable
-                  clearable
-                  size="sm"
-                  comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                />
-                <TextInput
-                  style={{ flex: 1 }}
-                  placeholder={t('common:modals.relevanceNoteOptional')}
-                  value={conditionNote}
-                  onChange={e => setConditionNote(e.target.value)}
-                  size="sm"
-                />
-                <ActionIcon
-                  variant="filled"
-                  color="blue"
-                  size="lg"
-                  onClick={handleAddCondition}
-                  disabled={!selectedCondition}
-                  aria-label={t('labresults:pendingRelationships.addCondition')}
-                >
-                  <IconPlus size={16} />
-                </ActionIcon>
-              </Group>
-            )}
-          </Stack>
-        </Paper>
-      )}
-
-      {/* Visits card: the same card the Visits tab of a record uses */}
-      {section === 'visits' && (
-        <RecordVisitsCard
-          recordType="labResults"
-          patientId={patientId}
-          pendingLinks={pendingVisitLinks}
-          onPendingChange={onPendingVisitsChange}
-          navigate={navigate}
-        />
-      )}
-
-      {/* Medications section */}
-      {section === 'medications' && (
-        <Paper withBorder p="md">
-          <Stack gap="sm">
-            <Title order={6}>
-              {t('labresults:form.linkMedicationsTitle', 'Link to Medications')}
-            </Title>
-
-            {/* Already-added pending medications */}
-            {pendingMedications.map((pm, index) => (
-              <Paper key={index} withBorder p="xs">
-                <Group justify="space-between">
-                  <Stack gap={2}>
-                    <Badge variant="light" color="teal" size="sm">
-                      {getMedicationLabel(pm.medication_id)}
-                    </Badge>
-                    {pm.relevance_note && (
-                      <Text size="xs" c="dimmed" fs="italic">
-                        {pm.relevance_note}
-                      </Text>
-                    )}
-                  </Stack>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    size="sm"
-                    onClick={() => onRemoveMedication(index)}
-                    aria-label={t(
-                      'labresults:pendingRelationships.removeMedication'
-                    )}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
-                </Group>
-              </Paper>
-            ))}
-
-            {/* Add new medication */}
-            {availableMedications.length > 0 && (
-              <Group gap="sm" align="flex-end">
-                <Select
-                  style={{ flex: 1 }}
-                  placeholder={t('common:modals.chooseOneMedicationToLink')}
-                  data={availableMedications}
-                  value={selectedMedication}
-                  onChange={val => setSelectedMedication(val || '')}
-                  searchable
-                  clearable
-                  size="sm"
-                  comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                />
-                <TextInput
-                  style={{ flex: 1 }}
-                  placeholder={t('common:modals.relevanceNoteOptional')}
-                  value={medicationNote}
-                  onChange={e => setMedicationNote(e.target.value)}
-                  size="sm"
-                />
-                <ActionIcon
-                  variant="filled"
-                  color="blue"
-                  size="lg"
-                  onClick={handleAddMedication}
-                  disabled={!selectedMedication}
-                  aria-label={t(
-                    'labresults:pendingRelationships.addMedication'
-                  )}
-                >
-                  <IconPlus size={16} />
-                </ActionIcon>
-              </Group>
-            )}
-          </Stack>
-        </Paper>
-      )}
-
-      {/* Procedures section */}
-      {section === 'procedures' && (
-        <Paper withBorder p="md">
-          <Stack gap="sm">
-            <Title order={6}>
-              {t('labresults:form.linkProceduresTitle', 'Link to Procedures')}
-            </Title>
-
-            {/* Already-added pending procedures */}
-            {pendingProcedures.map((pp, index) => (
-              <Paper key={index} withBorder p="xs">
-                <Group justify="space-between">
-                  <Stack gap={2}>
-                    <Badge variant="light" color="grape" size="sm">
-                      {getProcedureLabel(pp.procedure_id)}
-                    </Badge>
-                    {pp.relevance_note && (
-                      <Text size="xs" c="dimmed" fs="italic">
-                        {pp.relevance_note}
-                      </Text>
-                    )}
-                  </Stack>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    size="sm"
-                    onClick={() => onRemoveProcedure(index)}
-                    aria-label={t(
-                      'labresults:pendingRelationships.removeProcedure'
-                    )}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
-                </Group>
-              </Paper>
-            ))}
-
-            {/* Add new procedure */}
-            {availableProcedures.length > 0 && (
-              <Group gap="sm" align="flex-end">
-                <Select
-                  style={{ flex: 1 }}
-                  placeholder={t('common:modals.chooseProcedureToLink')}
-                  data={availableProcedures}
-                  value={selectedProcedure}
-                  onChange={val => setSelectedProcedure(val || '')}
-                  searchable
-                  clearable
-                  size="sm"
-                  comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                />
-                <TextInput
-                  style={{ flex: 1 }}
-                  placeholder={t('common:modals.relevanceNoteOptional')}
-                  value={procedureNote}
-                  onChange={e => setProcedureNote(e.target.value)}
-                  size="sm"
-                />
-                <ActionIcon
-                  variant="filled"
-                  color="blue"
-                  size="lg"
-                  onClick={handleAddProcedure}
-                  disabled={!selectedProcedure}
-                  aria-label={t('labresults:pendingRelationships.addProcedure')}
-                >
-                  <IconPlus size={16} />
-                </ActionIcon>
-              </Group>
-            )}
-          </Stack>
-        </Paper>
-      )}
-
-      {/* Treatments section */}
-      {section === 'treatments' && (
-        <Paper withBorder p="md">
-          <Stack gap="sm">
-            <Title order={6}>
-              {t('labresults:form.linkTreatmentsTitle', 'Link to Treatments')}
-            </Title>
-
-            {/* Already-added pending treatments */}
-            {pendingTreatments.map((pt, index) => (
-              <Paper key={index} withBorder p="xs">
-                <Group justify="space-between">
-                  <Stack gap={2}>
-                    <Badge variant="light" color="orange" size="sm">
-                      {getTreatmentLabel(pt.treatment_id)}
-                    </Badge>
-                    {pt.purpose && (
-                      <Badge variant="outline" size="xs">
-                        {getTreatmentPurposeLabel(pt.purpose)}
-                      </Badge>
-                    )}
-                    {pt.expected_frequency && (
-                      <Text size="xs" c="dimmed">
-                        {pt.expected_frequency}
-                      </Text>
-                    )}
-                    {pt.relevance_note && (
-                      <Text size="xs" c="dimmed" fs="italic">
-                        {pt.relevance_note}
-                      </Text>
-                    )}
-                  </Stack>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    size="sm"
-                    onClick={() => onRemoveTreatment(index)}
-                    aria-label={t(
-                      'labresults:pendingRelationships.removeTreatment'
-                    )}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
-                </Group>
-              </Paper>
-            ))}
-
-            {/* Add new treatment */}
-            {availableTreatments.length > 0 && (
-              <Stack gap="xs">
-                <Group gap="sm" align="flex-end">
-                  <Select
-                    style={{ flex: 2 }}
-                    placeholder={t(
-                      'common:modals.chooseTreatmentToLink',
-                      'Choose a treatment to link'
-                    )}
-                    data={availableTreatments}
-                    value={selectedTreatment}
-                    onChange={val => setSelectedTreatment(val || '')}
-                    searchable
-                    clearable
-                    size="sm"
-                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                  />
-                  <Select
-                    style={{ flex: 1 }}
-                    placeholder={t(
-                      'common:modals.selectPurpose',
-                      'Select purpose'
-                    )}
-                    data={TREATMENT_PURPOSE_OPTIONS}
-                    value={treatmentPurpose}
-                    onChange={val => setTreatmentPurpose(val || '')}
-                    clearable
-                    size="sm"
-                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                  />
-                  <ActionIcon
-                    variant="filled"
-                    color="blue"
-                    size="lg"
-                    onClick={handleAddTreatment}
-                    disabled={!selectedTreatment}
-                    aria-label={t(
-                      'labresults:pendingRelationships.addTreatment'
-                    )}
-                  >
-                    <IconPlus size={16} />
-                  </ActionIcon>
-                </Group>
-                {selectedTreatment && (
-                  <Group gap="sm">
-                    <TextInput
-                      style={{ flex: 1 }}
-                      placeholder={t(
-                        'common:labels.expectedFrequency',
-                        'Expected frequency'
-                      )}
-                      value={treatmentFrequency}
-                      onChange={e => setTreatmentFrequency(e.target.value)}
-                      size="sm"
-                    />
-                    <TextInput
-                      style={{ flex: 1 }}
-                      placeholder={t(
-                        'common:modals.relevanceNoteOptional',
-                        'Relevance note (optional)'
-                      )}
-                      value={treatmentNote}
-                      onChange={e => setTreatmentNote(e.target.value)}
-                      size="sm"
-                    />
-                  </Group>
-                )}
-              </Stack>
-            )}
-          </Stack>
-        </Paper>
-      )}
-    </Stack>
-  );
-};
 
 const LabResultFormWrapper = ({
   isOpen,
@@ -578,22 +72,15 @@ const LabResultFormWrapper = ({
   onSwitchToQuickImport,
   onFileUploadComplete,
   onError,
-  // Condition relationship props
-  conditions = [],
+  // Saved links of the lab results, for the numbers on the link tabs
   labResultConditions = {},
   fetchLabResultConditions,
   // Visits card
   patientId,
-  // Medication relationship props
-  medications = [],
   labResultMedications = {},
   fetchLabResultMedications,
-  // Procedure relationship props
-  procedures = [],
   labResultProcedures = {},
   fetchLabResultProcedures,
-  // Treatment relationship props
-  treatments = [],
   labResultTreatments = {},
   fetchLabResultTreatments,
   navigate,
@@ -604,6 +91,7 @@ const LabResultFormWrapper = ({
   children,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  const linkPanelDescription = useLinkPanelDescription();
   const { dateInputFormat, dateParser } = useDateFormat();
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -618,6 +106,7 @@ const LabResultFormWrapper = ({
   const [pendingMedications, setPendingMedications] = useState([]);
   const [pendingProcedures, setPendingProcedures] = useState([]);
   const [pendingTreatments, setPendingTreatments] = useState([]);
+  const [savedLinkCounts, setSavedLinkCounts] = useState({});
 
   // Notes and create-mode relationship linking are only shown once the record exists
   // (edit mode) or when the user has opted into the advanced create form.
@@ -767,6 +256,17 @@ const LabResultFormWrapper = ({
       setPendingMedications([]);
       setPendingProcedures([]);
       setPendingTreatments([]);
+      setSavedLinkCounts({});
+      // Links changed in the link cards are not known to the page's lists
+      if (linkedLabResultIdRef.current) {
+        const id = linkedLabResultIdRef.current;
+        linkedLabResultIdRef.current = null;
+        const fetchers = fetchSavedLinksRef.current;
+        fetchers.conditions?.(id);
+        fetchers.medications?.(id);
+        fetchers.procedures?.(id);
+        fetchers.treatments?.(id);
+      }
     }
   }, [isOpen]);
 
@@ -857,21 +357,6 @@ const LabResultFormWrapper = ({
     }
   }, [onPendingComponentsRef]);
 
-  // Pending condition helpers
-  const addPendingCondition = useCallback((conditionId, relevanceNote) => {
-    setPendingConditions(prev => [
-      ...prev,
-      {
-        condition_id: parseInt(conditionId),
-        relevance_note: relevanceNote || null,
-      },
-    ]);
-  }, []);
-
-  const removePendingCondition = useCallback(index => {
-    setPendingConditions(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
   // Pending encounter helpers
   // The Visits card works with {entityId, relevanceNote, purpose}; the pending list
   // (and the save step in the page) keeps the API field names.
@@ -890,10 +375,18 @@ const LabResultFormWrapper = ({
   const savedLabResultId = editingItem?.id;
   const linkCounts = savedLabResultId
     ? {
-        conditions: labResultConditions[savedLabResultId]?.length,
-        medications: labResultMedications[savedLabResultId]?.length,
-        procedures: labResultProcedures[savedLabResultId]?.length,
-        treatments: labResultTreatments[savedLabResultId]?.length,
+        conditions:
+          savedLinkCounts.conditions ??
+          labResultConditions[savedLabResultId]?.length,
+        medications:
+          savedLinkCounts.medications ??
+          labResultMedications[savedLabResultId]?.length,
+        procedures:
+          savedLinkCounts.procedures ??
+          labResultProcedures[savedLabResultId]?.length,
+        treatments:
+          savedLinkCounts.treatments ??
+          labResultTreatments[savedLabResultId]?.length,
       }
     : {
         conditions: pendingConditions.length,
@@ -924,54 +417,50 @@ const LabResultFormWrapper = ({
     );
   }, []);
 
-  // Pending medication helpers
-  const addPendingMedication = useCallback((medicationId, relevanceNote) => {
-    setPendingMedications(prev => [
-      ...prev,
-      {
-        medication_id: parseInt(medicationId),
-        relevance_note: relevanceNote || null,
-      },
-    ]);
-  }, []);
-
-  const removePendingMedication = useCallback(index => {
-    setPendingMedications(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  // Pending procedure helpers
-  const addPendingProcedure = useCallback((procedureId, relevanceNote) => {
-    setPendingProcedures(prev => [
-      ...prev,
-      {
-        procedure_id: parseInt(procedureId),
-        relevance_note: relevanceNote || null,
-      },
-    ]);
-  }, []);
-
-  const removePendingProcedure = useCallback(index => {
-    setPendingProcedures(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  // Pending treatment helpers
-  const addPendingTreatment = useCallback(
-    (treatmentId, purpose, expectedFrequency, relevanceNote) => {
-      setPendingTreatments(prev => [
-        ...prev,
-        {
-          treatment_id: parseInt(treatmentId),
-          purpose: purpose || null,
-          expected_frequency: expectedFrequency || null,
-          relevance_note: relevanceNote || null,
-        },
-      ]);
-    },
-    []
+  // The link cards work with {entityId, relevanceNote, purpose, expectedFrequency};
+  // the pending lists (and the save step in the page) keep the API field names.
+  const pendingLinkGroups = useMemo(
+    () => ({
+      conditions: pendingToLinks('conditions', pendingConditions),
+      medications: pendingToLinks('medications', pendingMedications),
+      procedures: pendingToLinks('procedures', pendingProcedures),
+      treatments: pendingToLinks('treatments', pendingTreatments),
+    }),
+    [
+      pendingConditions,
+      pendingMedications,
+      pendingProcedures,
+      pendingTreatments,
+    ]
   );
 
-  const removePendingTreatment = useCallback(index => {
-    setPendingTreatments(prev => prev.filter((_, i) => i !== index));
+  const handlePendingLinksChange = useCallback((key, next) => {
+    const setters = {
+      conditions: setPendingConditions,
+      medications: setPendingMedications,
+      procedures: setPendingProcedures,
+      treatments: setPendingTreatments,
+    };
+    setters[key](linksToPending(key, next));
+  }, []);
+
+  // Saved link counts, kept current by the link cards as links are added or removed.
+  // The page's own lists are refreshed when the dialog closes.
+  const linkedLabResultIdRef = useRef(null);
+  const fetchSavedLinksRef = useRef({});
+  fetchSavedLinksRef.current = {
+    conditions: fetchLabResultConditions,
+    medications: fetchLabResultMedications,
+    procedures: fetchLabResultProcedures,
+    treatments: fetchLabResultTreatments,
+  };
+  const savedIdRef = useRef(null);
+  savedIdRef.current = editingItem?.id ?? null;
+  const handleSavedLinkCount = useCallback((key, count) => {
+    linkedLabResultIdRef.current = savedIdRef.current;
+    setSavedLinkCounts(prev =>
+      prev[key] === count ? prev : { ...prev, [key]: count }
+    );
   }, []);
 
   const handleSubmit = async e => {
@@ -993,33 +482,20 @@ const LabResultFormWrapper = ({
 
   if (!isOpen) return null;
 
-
-  // The create-mode picker is identical on every linked-record tab except `section`
-  const renderPendingPicker = section => (
-    <PendingRelationshipsPicker
-      section={section}
-      conditions={conditions}
-      medications={medications}
-      procedures={procedures}
-      treatments={treatments}
-      pendingConditions={pendingConditions}
-      pendingMedications={pendingMedications}
-      pendingProcedures={pendingProcedures}
-      pendingTreatments={pendingTreatments}
-      onAddCondition={addPendingCondition}
-      onRemoveCondition={removePendingCondition}
-      onAddMedication={addPendingMedication}
-      onRemoveMedication={removePendingMedication}
-      onAddProcedure={addPendingProcedure}
-      onRemoveProcedure={removePendingProcedure}
-      onAddTreatment={addPendingTreatment}
-      onRemoveTreatment={removePendingTreatment}
+  // One card per kind of record, the same card in the Add and Edit forms
+  const renderLinksCard = linkKey => (
+    <LabResultRecordLinksCard
+      linkKey={linkKey}
+      labResultId={editingItem?.id}
+      description={linkPanelDescription(linkKey, 'labResult')}
       patientId={patientId}
-      pendingVisitLinks={pendingVisitLinks}
-      onPendingVisitsChange={handlePendingVisitsChange}
+      pendingLinks={pendingLinkGroups[linkKey]}
+      onPendingChange={next => handlePendingLinksChange(linkKey, next)}
+      onCountChange={handleSavedLinkCount}
       navigate={navigate}
     />
   );
+
   return (
     <Modal
       opened={isOpen}
@@ -1052,6 +528,7 @@ const LabResultFormWrapper = ({
                   labResultId={savedLabResultId}
                   counts={linkCounts}
                   pendingVisitLinks={pendingVisitLinks}
+                  activeTab={activeTab}
                   onSelectTab={setActiveTab}
                 />
               )}
@@ -1544,128 +1021,40 @@ const LabResultFormWrapper = ({
                 <Tabs.Panel value="rel-conditions">
                   <Box mt="md">
                     {activeTab === 'rel-conditions' &&
-                      (editingItem ? (
-                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                          <Stack gap="md">
-                            <Title order={5}>
-                              {t('labresults:form.linkConditionsTitle')}
-                            </Title>
-                            <Text size="sm" c="dimmed">
-                              {t('labresults:form.linkConditionsDescription')}
-                            </Text>
-                            <ConditionRelationships
-                              labResultId={editingItem.id}
-                              labResultConditions={labResultConditions}
-                              conditions={conditions}
-                              fetchLabResultConditions={
-                                fetchLabResultConditions
-                              }
-                              navigate={navigate}
-                            />
-                          </Stack>
-                        </Paper>
-                      ) : (
-                        renderPendingPicker('conditions')
-                      ))}
+                      renderLinksCard('conditions')}
                   </Box>
                 </Tabs.Panel>
                 <Tabs.Panel value="rel-visits">
                   <Box mt="md">
-                    {activeTab === 'rel-visits' &&
-                      (editingItem ? (
-                        <RecordVisitsCard
-                          recordType="labResults"
-                          recordId={editingItem.id}
-                          patientId={patientId}
-                          navigate={navigate}
-                        />
-                      ) : (
-                        renderPendingPicker('visits')
-                      ))}
+                    {activeTab === 'rel-visits' && (
+                      <RecordVisitsCard
+                        recordType="labResults"
+                        recordId={editingItem?.id}
+                        description={linkPanelDescription('visits', 'labResult')}
+                        patientId={patientId}
+                        pendingLinks={pendingVisitLinks}
+                        onPendingChange={handlePendingVisitsChange}
+                        navigate={navigate}
+                      />
+                    )}
                   </Box>
                 </Tabs.Panel>
                 <Tabs.Panel value="rel-medications">
                   <Box mt="md">
                     {activeTab === 'rel-medications' &&
-                      (editingItem ? (
-                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                          <Stack gap="md">
-                            <Title order={5}>
-                              {t(
-                                'labresults:form.linkMedicationsTitle',
-                                'Link to Medications'
-                              )}
-                            </Title>
-                            <LabResultMedicationRelationships
-                              labResultId={editingItem.id}
-                              labResultMedications={labResultMedications}
-                              medications={medications}
-                              fetchLabResultMedications={
-                                fetchLabResultMedications
-                              }
-                              navigate={navigate}
-                            />
-                          </Stack>
-                        </Paper>
-                      ) : (
-                        renderPendingPicker('medications')
-                      ))}
+                      renderLinksCard('medications')}
                   </Box>
                 </Tabs.Panel>
                 <Tabs.Panel value="rel-procedures">
                   <Box mt="md">
                     {activeTab === 'rel-procedures' &&
-                      (editingItem ? (
-                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                          <Stack gap="md">
-                            <Title order={5}>
-                              {t(
-                                'labresults:form.linkProceduresTitle',
-                                'Link to Procedures'
-                              )}
-                            </Title>
-                            <LabResultProcedureRelationships
-                              labResultId={editingItem.id}
-                              labResultProcedures={labResultProcedures}
-                              procedures={procedures}
-                              fetchLabResultProcedures={
-                                fetchLabResultProcedures
-                              }
-                              navigate={navigate}
-                            />
-                          </Stack>
-                        </Paper>
-                      ) : (
-                        renderPendingPicker('procedures')
-                      ))}
+                      renderLinksCard('procedures')}
                   </Box>
                 </Tabs.Panel>
                 <Tabs.Panel value="rel-treatments">
                   <Box mt="md">
                     {activeTab === 'rel-treatments' &&
-                      (editingItem ? (
-                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                          <Stack gap="md">
-                            <Title order={5}>
-                              {t(
-                                'labresults:form.linkTreatmentsTitle',
-                                'Link to Treatments'
-                              )}
-                            </Title>
-                            <LabResultTreatmentRelationships
-                              labResultId={editingItem.id}
-                              labResultTreatments={labResultTreatments}
-                              treatments={treatments}
-                              fetchLabResultTreatments={
-                                fetchLabResultTreatments
-                              }
-                              navigate={navigate}
-                            />
-                          </Stack>
-                        </Paper>
-                      ) : (
-                        renderPendingPicker('treatments')
-                      ))}
+                      renderLinksCard('treatments')}
                   </Box>
                 </Tabs.Panel>
               </>

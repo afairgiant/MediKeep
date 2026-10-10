@@ -130,12 +130,7 @@
     "autoCalculated": "Auto-calculé",
     "cannotRemoveLastRow": "Impossible de supprimer la dernière ligne",
     "componentCreationWarning": "Résultat d'analyse sauvegardé, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page d'aperçu.",
-    "linkConditionsDescription": "Associez ce résultat d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
-    "linkConditionsTitle": "Connecter des conditions médicales",
     "linkedVisits": "Visites connectées",
-    "linkMedicationsTitle": "Connecter des médicaments",
-    "linkProceduresTitle": "Connecter des procédures",
-    "linkTreatmentsTitle": "Connecter des traitements",
     "linkVisitsDescription": "Associez ce résultat d'analyse aux visites où il a été prescrit ou traité.",
     "linkVisitsTitle": "Connecter des visites",
     "matchedCommonName": "corresponance : {{name}}",
@@ -151,7 +146,6 @@
     "statusIndicator": "Indicateur de statut :",
     "testCodePlaceholder": "ex : 718-7",
     "testComponents": "Ajouter des résultats",
-    "testDetails": "Détails des résultats",
     "unit": "Unité"
   },
   "keepEmptyLabResult": "Conserver le résultat d'analyse",
@@ -213,16 +207,6 @@
     "placeholder": "Sélectionnez un médecin"
   },
   "patientIdRequired": "L'ID du patient est requis. Veuillez d'abord sélectionner un patient.",
-  "pendingRelationships": {
-    "addCondition": "Ajouter condition",
-    "addMedication": "Ajouter médicament",
-    "addProcedure": "Ajouter procédure",
-    "addTreatment": "Ajouter un traitement",
-    "removeCondition": "Supprimer condition",
-    "removeMedication": "Supprimer médicament",
-    "removeProcedure": "Supprimer procédure",
-    "removeTreatment": "Supprimer traitement"
-  },
   "quickFormInstructions": "Saisissez un nom pour ce résultat d'analyse, puis vous pourrez téléverser et analyser votre PDF.",
   "quickImportModalTitle": "Importation PDF rapide - Etape {{step}} sur 2",
   "quickImportSuccess": "Résultat et composants d'analyse importés avec succès",

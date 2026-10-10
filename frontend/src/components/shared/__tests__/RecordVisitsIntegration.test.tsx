@@ -3,7 +3,8 @@ import { vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
-import render, { screen } from '../../../test-utils/render';
+import render, { screen, waitFor } from '../../../test-utils/render';
+import { apiService } from '../../../services/api';
 import RawProcedureFormWrapper from '../../medical/procedures/ProcedureFormWrapper';
 import RawProcedureViewModal from '../../medical/procedures/ProcedureViewModal';
 import RawInjuryFormWrapper from '../../medical/injuries/InjuryFormWrapper';
@@ -33,11 +34,9 @@ vi.mock('../../medical/injuries/InjuryTypeSelect', () => ({
 vi.mock('../DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
-vi.mock('../../medical/MedicationRelationships', () => ({
-  default: () => <div />,
-}));
-vi.mock('../../medical/LabResultRelationships', () => ({
-  default: () => <div />,
+vi.mock('../../../hooks/useLinkPanelDescription', () => ({
+  useLinkPanelDescription: () => (items: string, record: string) =>
+    `description:${items}:${record}`,
 }));
 vi.mock('../../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
@@ -49,6 +48,7 @@ vi.mock('../RecordVisitsTab', () => ({
     recordId?: number | null;
     patientId?: number;
     isViewMode?: boolean;
+    description?: string;
     pendingLinks?: unknown;
     onPendingChange?: (_next: unknown) => void;
   }) => (
@@ -59,6 +59,7 @@ vi.mock('../RecordVisitsTab', () => ({
       data-patient-id={props.patientId ?? ''}
       data-view-mode={String(Boolean(props.isViewMode))}
       data-pending={JSON.stringify(props.pendingLinks ?? null)}
+      data-description={props.description ?? ''}
     >
       <button
         type="button"
@@ -79,6 +80,8 @@ const pending = [{ entityId: 3, relevanceNote: 'n', purpose: null }];
 interface Case {
   name: string;
   recordType: string;
+  /** The kind of record the form's link panels belong to (forms only) */
+  record?: string;
   mode: 'form' | 'view';
   /** Renders the component for a new record (form) or a saved one (view). */
   renderIt: (_extra?: Record<string, unknown>) => ReactElement;
@@ -108,6 +111,7 @@ const viewBase = () => ({
 const cases: Case[] = [
   {
     name: 'ProcedureFormWrapper',
+    record: 'procedure',
     recordType: 'procedures',
     mode: 'form',
     renderIt: extra => (
@@ -127,6 +131,7 @@ const cases: Case[] = [
   },
   {
     name: 'InjuryFormWrapper',
+    record: 'injury',
     recordType: 'injuries',
     mode: 'form',
     renderIt: extra => (
@@ -150,6 +155,7 @@ const cases: Case[] = [
   },
   {
     name: 'ConditionFormWrapper',
+    record: 'condition',
     recordType: 'conditions',
     mode: 'form',
     renderIt: extra => (
@@ -169,6 +175,7 @@ const cases: Case[] = [
   },
   {
     name: 'MantineSymptomForm',
+    record: 'symptom',
     recordType: 'symptoms',
     mode: 'form',
     renderIt: extra => (
@@ -236,20 +243,47 @@ const cases: Case[] = [
   },
 ];
 
+// The View dialogs only show link tabs that have links
+let visitLinks: unknown[];
+let spies: Array<ReturnType<typeof vi.spyOn>>;
+beforeEach(() => {
+  visitLinks = [{ id: 1 }];
+  spies = [
+    vi
+      .spyOn(apiService, 'getRecordEncounterLinks')
+      .mockImplementation(() => Promise.resolve(visitLinks)),
+    vi.spyOn(apiService, 'getRecordLabResultLinks').mockResolvedValue([]),
+  ];
+});
+afterEach(() => {
+  spies.forEach(spy => spy.mockRestore());
+});
+
 const openVisitsTab = async () => {
   const user = userEvent.setup();
-  await user.click(screen.getByRole('tab', { name: /^Visits( \(\d+\))?$/ }));
+  await user.click(
+    await screen.findByRole('tab', { name: /^Visits( \(\d+\))?$/ })
+  );
   return user;
 };
 
 describe.each(cases)('$name - Visits tab', c => {
-  it('has a Visits tab that loads only when opened', () => {
+  it('has a Visits tab that loads only when opened', async () => {
     render(c.renderIt());
     expect(
-      screen.getByRole('tab', { name: /^Visits( \(\d+\))?$/ })
+      await screen.findByRole('tab', { name: /^Visits( \(\d+\))?$/ })
     ).toBeInTheDocument();
     expect(screen.queryByTestId('record-visits')).toBeNull();
   });
+
+  if (c.mode === 'view') {
+    it('view mode: no Visits tab when the record has no visits', async () => {
+      visitLinks = [];
+      render(c.renderIt());
+      await waitFor(() => expect(spies[0]).toHaveBeenCalled());
+      expect(screen.queryByRole('tab', { name: /^Visits/ })).toBeNull();
+    });
+  }
 
   if (c.mode === 'form') {
     it('add mode: no record id, patient id and pending visits from form data', async () => {
@@ -262,6 +296,15 @@ describe.each(cases)('$name - Visits tab', c => {
       expect(tab).toHaveAttribute('data-view-mode', 'false');
       expect(JSON.parse(tab.getAttribute('data-pending') as string)).toEqual(
         pending
+      );
+    });
+
+    it('says what the Visits panel is for, in the Add and Edit forms', async () => {
+      render(c.renderIt());
+      await openVisitsTab();
+      expect(await screen.findByTestId('record-visits')).toHaveAttribute(
+        'data-description',
+        `description:visits:${c.record}`
       );
     });
 
@@ -287,10 +330,11 @@ describe.each(cases)('$name - Visits tab', c => {
       });
     });
   } else {
-    it('view mode: read-only for the viewed record', async () => {
+    it('view mode: read-only for the viewed record, without the description', async () => {
       render(c.renderIt());
       await openVisitsTab();
       const tab = await screen.findByTestId('record-visits');
+      expect(tab).toHaveAttribute('data-description', '');
       expect(tab).toHaveAttribute('data-record-type', c.recordType);
       expect(tab).toHaveAttribute('data-record-id', '42');
       expect(tab).toHaveAttribute('data-view-mode', 'true');

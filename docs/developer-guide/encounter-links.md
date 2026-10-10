@@ -91,8 +91,7 @@ Treatment dialog: the card that links a record type lives in a tab named after i
 - A tab mounts its content only while it is open, so record lists are fetched on demand, and
   not at all in View mode.
 - `components/shared/LinkedRecordsSection.tsx` is the live/pending engine shared with the
-  record side; `LinkSection.tsx` is the list + modal it renders, in the same format as
-  `MedicationRelationships`.
+  record side; `LinkSection.tsx` is the list + modal it renders.
 - `constants/encounterLinkTypes.ts`: one adapter per type (candidate lists, row normalization,
   bulk request body, `visitLinkSource`). Lab results use their older `lab_result_*` fields and
   carry `purpose`.

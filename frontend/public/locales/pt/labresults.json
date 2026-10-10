@@ -129,12 +129,7 @@
     "autoCalculated": "Calculado automaticamente",
     "cannotRemoveLastRow": "Não é possível remover a última linha",
     "componentCreationWarning": "Resultado laboratorial salvo, mas os componentes do exame não puderam ser adicionados. Você pode adicioná-los na página de visualização.",
-    "linkConditionsDescription": "Associe este resultado laboratorial a condições médicas relevantes para melhor acompanhamento e organização.",
-    "linkConditionsTitle": "Vincular Condições Médicas",
     "linkedVisits": "Consultas Vinculadas",
-    "linkMedicationsTitle": "Vincular a medicamentos",
-    "linkProceduresTitle": "Vincular a procedimentos",
-    "linkTreatmentsTitle": "Vincular a tratamentos",
     "linkVisitsDescription": "Associe este resultado laboratorial a consultas onde foi solicitado ou revisado.",
     "linkVisitsTitle": "Vincular a Consultas",
     "matchedCommonName": "correspondência: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Indicador de Status:",
     "testCodePlaceholder": "p.ex., 718-7",
     "testComponents": "Componentes do Exame (Opcional)",
-    "testDetails": "Detalhes do Exame",
     "unit": "Unidade"
   },
   "keepEmptyLabResult": "Manter Resultado Laboratorial",
@@ -212,16 +206,6 @@
     "placeholder": "Selecionar médico"
   },
   "patientIdRequired": "ID do paciente é obrigatório. Selecione um paciente primeiro.",
-  "pendingRelationships": {
-    "addCondition": "Adicionar condição",
-    "removeCondition": "Remover condição",
-    "addMedication": "Adicionar medicamento",
-    "addProcedure": "Adicionar procedimento",
-    "addTreatment": "Adicionar tratamento",
-    "removeMedication": "Remover medicamento",
-    "removeProcedure": "Remover procedimento",
-    "removeTreatment": "Remover tratamento"
-  },
   "quickFormInstructions": "Digite um nome para este resultado laboratorial, então você poderá fazer upload e analisar seu PDF.",
   "quickImportModalTitle": "Importação Rápida de PDF - Etapa {{step}} de 2",
   "quickImportSuccess": "Resultado laboratorial e componentes do exame importados com sucesso",

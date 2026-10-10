@@ -36,7 +36,6 @@ vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
   default: () => null,
 }));
 vi.mock('../MedicationTreatmentsList', () => ({ default: () => null }));
-vi.mock('../../MedicationRelationships', () => ({ default: () => null }));
 vi.mock('../../StatusBadge', () => ({
   default: ({ status }) => <span>{status}</span>,
 }));

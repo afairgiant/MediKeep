@@ -129,12 +129,7 @@
     "autoCalculated": "Calculado automáticamente",
     "cannotRemoveLastRow": "No se puede eliminar la última fila",
     "componentCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron agregar los componentes de prueba. Puede agregarlos desde la página de visualización.",
-    "linkConditionsDescription": "Asocie este resultado de laboratorio con condiciones médicas relevantes para un mejor seguimiento y organización.",
-    "linkConditionsTitle": "Vincular condiciones médicas",
     "linkedVisits": "Visitas vinculadas",
-    "linkMedicationsTitle": "Vincular a medicamentos",
-    "linkProceduresTitle": "Vincular a procedimientos",
-    "linkTreatmentsTitle": "Vincular a tratamientos",
     "linkVisitsDescription": "Asocie este resultado de laboratorio con las visitas en las que se solicitó o revisó.",
     "linkVisitsTitle": "Vincular a visitas",
     "matchedCommonName": "coincidencia: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Indicador de estado:",
     "testCodePlaceholder": "p. ej., 718-7",
     "testComponents": "Componentes de prueba (opcional)",
-    "testDetails": "Detalles de la prueba",
     "unit": "Unidad"
   },
   "keepEmptyLabResult": "Conservar resultado de laboratorio",
@@ -212,16 +206,6 @@
     "placeholder": "Seleccionar médico"
   },
   "patientIdRequired": "Se requiere el ID del paciente. Por favor, seleccione un paciente primero.",
-  "pendingRelationships": {
-    "addCondition": "Agregar afección",
-    "removeCondition": "Eliminar afección",
-    "addMedication": "Agregar medicamento",
-    "addProcedure": "Agregar procedimiento",
-    "addTreatment": "Agregar tratamiento",
-    "removeMedication": "Eliminar medicamento",
-    "removeProcedure": "Eliminar procedimiento",
-    "removeTreatment": "Eliminar tratamiento"
-  },
   "quickFormInstructions": "Ingrese un nombre para este resultado de laboratorio, luego podrá cargar y analizar su PDF.",
   "quickImportModalTitle": "Importación rápida de PDF - Paso {{step}} de 2",
   "quickImportSuccess": "Resultado de laboratorio y componentes de prueba importados exitosamente",

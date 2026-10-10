@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
-from app.models.models import Condition, ConditionMedication
+from app.models.models import Condition, ConditionMedication, Medication
 from app.schemas.condition import (
     ConditionCreate,
     ConditionMedicationBulkCreate,
@@ -57,6 +57,33 @@ class CRUDConditionMedication(
         """Get all medication relationships for a specific condition"""
         return (
             db.query(self.model).filter(self.model.condition_id == condition_id).all()
+        )
+
+    def get_by_condition_with_details(self, db: Session, *, condition_id: int) -> List:
+        """Get all medication links for a condition with joined medication data.
+
+        Returns a list of (ConditionMedication, Medication) tuples.
+        """
+        return (
+            db.query(self.model, Medication)
+            .join(Medication, self.model.medication_id == Medication.id)
+            .filter(self.model.condition_id == condition_id)
+            .all()
+        )
+
+    def get_by_medication_with_details(
+        self, db: Session, *, medication_id: int
+    ) -> List:
+        """Get all condition links for a medication with joined condition data.
+
+        Returns a list of (ConditionMedication, Condition) tuples, so listing a
+        medication's conditions takes one query however many there are.
+        """
+        return (
+            db.query(self.model, Condition)
+            .join(Condition, self.model.condition_id == Condition.id)
+            .filter(self.model.medication_id == medication_id)
+            .all()
         )
 
     def get_by_medication(

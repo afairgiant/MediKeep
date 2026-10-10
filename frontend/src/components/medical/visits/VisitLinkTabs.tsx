@@ -13,6 +13,7 @@ import {
   useLinkCounts,
   useLoadLinkCounts,
 } from '../../../utils/linkCountStore';
+import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 import { useTabLabel } from '../../../hooks/useTabLabel';
 import LinkedRecordsSection from '../../shared/LinkedRecordsSection';
 import {
@@ -58,6 +59,8 @@ interface LinkTabButtonsProps {
    * same and adds a "Link" menu to reveal the others. Editing a saved visit shows all.
    */
   isViewMode?: boolean;
+  /** Value of the open tab: a type opened from the "Link" menu stays while it is open */
+  activeTab?: string | null;
   /** Called with the tab value when the "Link" menu reveals a type, to open its tab */
   onSelectTab?: (_tab: string) => void;
 }
@@ -86,15 +89,16 @@ const LinkTabButton = ({
  * - View mode, and adding a new visit: types without links stay out of the tab bar to
  *   keep it short. When adding, a "Link" menu reveals the others.
  * - Editing a saved visit: every type is shown.
- * A type that has been shown stays shown while the dialog is open, so removing its last
- * link never drops the tab from under the user. Render inside <Tabs.List>. For a saved
- * visit the counts are loaded up front (the panels only load when their tab is opened)
+ * When adding, a type opened from the "Link" menu stays while it is open; once the user
+ * leaves it with no links it goes back into the menu. Render inside <Tabs.List>. For a
+ * saved visit the counts are loaded up front (the panels only load when their tab is opened)
  * and the panels keep them current.
  */
 export const VisitLinkTabButtons = ({
   visitId,
   pendingLinks,
   isViewMode = false,
+  activeTab,
   onSelectTab,
 }: LinkTabButtonsProps) => {
   const { t } = useTranslation(['common', 'shared']);
@@ -122,14 +126,16 @@ export const VisitLinkTabButtons = ({
   );
 
   const mode = linkTabMode(isViewMode, Boolean(visitId));
-  const { isShown, hidden, reveal } = useLinkTabVisibility(
+  const { isShown, hidden } = useLinkTabVisibility(
     ENCOUNTER_LINK_TYPES.map((config, index) => ({
       key: config.key,
       label: t(`shared:categories.${config.categoryKey}`),
       icon: config.icon,
       count: counts[index],
+      tabValue: linkTabValue(config),
     })),
-    mode
+    mode,
+    activeTab
   );
 
   return (
@@ -147,7 +153,6 @@ export const VisitLinkTabButtons = ({
         <LinkTabMenu
           hidden={hidden}
           onPick={key => {
-            reveal(key);
             const config = ENCOUNTER_LINK_TYPES.find(c => c.key === key);
             if (config) onSelectTab?.(linkTabValue(config));
           }}
@@ -169,6 +174,7 @@ const LinkTypePanel = ({
   config: EncounterLinkTypeConfig;
 }) => {
   const { t } = useTranslation(['common', 'shared']);
+  const linkPanelDescription = useLinkPanelDescription();
 
   const source = useMemo(
     () => visitLinkSource(config, visitId ?? 0, patientId),
@@ -182,6 +188,9 @@ const LinkTypePanel = ({
     <>
       <LinkedRecordsSection
         title={t(`shared:categories.${config.categoryKey}`)}
+        description={
+          isViewMode ? undefined : linkPanelDescription(config.key, 'visit')
+        }
         source={source}
         isSaved={Boolean(visitId)}
         entityType={config.entityType}

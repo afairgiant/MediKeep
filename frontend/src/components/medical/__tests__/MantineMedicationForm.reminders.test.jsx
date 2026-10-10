@@ -82,10 +82,6 @@ vi.mock('../../shared/DocumentManagerWithProgress', () => ({
   default: () => null,
 }));
 
-vi.mock('../MedicationRelationships', () => ({
-  default: () => null,
-}));
-
 const sendMedicationTestReminder = vi.fn().mockResolvedValue({});
 vi.mock('../../../services/api', () => ({
   apiService: {

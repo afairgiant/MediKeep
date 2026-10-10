@@ -1057,6 +1057,62 @@ Base path: `/api/v1/medications`
 
 - Includes treatment details with condition, plus any treatment-specific overrides for this medication
 
+#### Medication Lab Result Links
+
+Lab results linked to a medication (the same links as
+`/lab-results/{lab_result_id}/medications`, seen from the medication).
+
+`GET /medications/{id}/lab-results`
+
+- **Purpose**: List the lab results linked to a medication
+- **Authentication**: Yes (view access to the patient)
+- **Success Response** (200): Array of link objects. Links to another patient's
+  lab result are never returned.
+
+```json
+[
+  {
+    "id": 11,
+    "lab_result_id": 3,
+    "medication_id": 8,
+    "relevance_note": "Liver function monitoring",
+    "created_at": "2026-02-01T10:00:00Z",
+    "updated_at": "2026-02-01T10:00:00Z",
+    "lab_result": {
+      "id": 3,
+      "test_name": "Liver Panel",
+      "test_category": "chemistry",
+      "status": "completed",
+      "labs_result": "normal",
+      "completed_date": "2026-02-01"
+    }
+  }
+]
+```
+
+`POST /medications/{id}/lab-results`
+
+- **Purpose**: Link one existing lab result to the medication
+- **Authentication**: Yes (edit access to the patient)
+- **Request Body**: `{"lab_result_id": 3, "relevance_note": "optional, max 500 characters"}`
+- **Success Response** (200): The link object above
+- **Errors**: `400` if the lab result belongs to another patient or is already linked,
+  `404` if the medication or lab result does not exist
+
+`PUT /medications/{id}/lab-results/{relationship_id}`
+
+- **Purpose**: Update the note of a link
+- **Request Body**: `{"relevance_note": "text or null"}`
+- **Success Response** (200): The updated link object
+- **Errors**: `400` if the link belongs to another medication, `404` if it does not exist
+
+`DELETE /medications/{id}/lab-results/{relationship_id}`
+
+- **Purpose**: Remove the link (neither record is deleted)
+- **Success Response** (200): `{"message": "Medication lab result link deleted successfully"}`
+
+Medication lab result links have no purpose: a request that sends one is refused with `400`.
+
 ### 6.2 Allergies
 
 Base path: `/api/v1/allergies`
@@ -1231,6 +1287,36 @@ Base path: `/api/v1/conditions`
 ]
 ```
 
+##### Get Condition Medications With Details
+
+`GET /conditions/{condition_id}/medications`
+
+- **Purpose**: List the medications linked to a condition, with the medication details
+  (used by the condition's Medications card). Links to another patient's medication are
+  never returned.
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+[
+  {
+    "id": 1,
+    "condition_id": 1,
+    "medication_id": 5,
+    "relevance_note": "Primary treatment",
+    "created_at": "2025-10-01T00:00:00Z",
+    "updated_at": "2025-10-01T00:00:00Z",
+    "medication": {
+      "id": 5,
+      "medication_name": "Lisinopril",
+      "dosage": "10mg",
+      "status": "active",
+      "effective_period_start": "2026-01-15"
+    }
+  }
+]
+```
+
 ##### Link Medication to Condition
 
 `POST /conditions/{condition_id}/medications`
@@ -1349,6 +1435,69 @@ Base path: `/api/v1/conditions`
   }
 ]
 ```
+
+##### Condition Lab Result Links
+
+Lab results linked to a condition (the same links as
+`/lab-results/{lab_result_id}/conditions`, seen from the condition).
+
+`GET /conditions/{id}/lab-results`
+
+- **Purpose**: List the lab results linked to a condition
+- **Authentication**: Yes (view access to the patient)
+- **Success Response** (200): Array of link objects. Links to another patient's
+  lab result are never returned.
+
+```json
+[
+  {
+    "id": 11,
+    "lab_result_id": 3,
+    "condition_id": 8,
+    "purpose": "monitoring",
+    "relevance_note": "Liver function monitoring",
+    "created_at": "2026-02-01T10:00:00Z",
+    "updated_at": "2026-02-01T10:00:00Z",
+    "lab_result": {
+      "id": 3,
+      "test_name": "Liver Panel",
+      "test_category": "chemistry",
+      "status": "completed",
+      "labs_result": "normal",
+      "completed_date": "2026-02-01"
+    }
+  }
+]
+```
+
+`POST /conditions/{id}/lab-results`
+
+- **Purpose**: Link one existing lab result to the condition
+- **Authentication**: Yes (edit access to the patient)
+- **Request Body**: `{"lab_result_id": 3, "purpose": "monitoring", "relevance_note": "optional, max 500 characters"}`
+  (`purpose` and `relevance_note` are optional)
+- **Success Response** (200): The link object above
+- **Errors**: `422` for an unknown purpose, `400` if the lab result belongs to another patient or is already linked,
+  `404` if the condition or lab result does not exist
+
+`PUT /conditions/{id}/lab-results/{relationship_id}`
+
+- **Purpose**: Update the purpose and note of a link
+- **Request Body**: `{"purpose": "outcome or null", "relevance_note": "text or null"}`. A field that is
+  left out is not changed; `null` clears it.
+- **Success Response** (200): The updated link object
+- **Errors**: `400` if the link belongs to another condition, `404` if it does not exist
+
+`DELETE /conditions/{id}/lab-results/{relationship_id}`
+
+- **Purpose**: Remove the link (neither record is deleted)
+- **Success Response** (200): `{"message": "Condition lab result link deleted successfully"}`
+
+The `purpose` says why the lab result is linked: one of `baseline`, `monitoring`,
+`outcome`, `safety` or `other` (case-insensitive, stored in lower case; the same values as
+a treatment's lab result links). It is optional, and any other value is rejected with
+`422`.
+
 
 ### 6.4 Immunizations
 
@@ -1871,6 +2020,7 @@ Base path: `/api/v1/entity-files`
     "id": 1,
     "lab_result_id": 1,
     "condition_id": 3,
+    "purpose": "monitoring",
     "relevance_note": "Monitoring for diabetes",
     "created_at": "2025-10-01T00:00:00Z",
     "condition": {
@@ -1894,6 +2044,7 @@ Base path: `/api/v1/entity-files`
 ```json
 {
   "condition_id": 3,
+  "purpose": "monitoring",
   "relevance_note": "Monitoring glucose levels for diabetes management"
 }
 ```
@@ -1908,11 +2059,13 @@ Base path: `/api/v1/entity-files`
 
 ```json
 {
+  "purpose": "outcome",
   "relevance_note": "Updated relevance note"
 }
 ```
 
 - **Success Response** (200): Updated relationship object
+- **Errors**: `422` for an unknown purpose (see Condition Lab Result Links)
 
 ##### Remove Condition Link from Lab Result
 
@@ -2001,6 +2154,7 @@ Base path: `/api/v1/entity-files`
     "id": 1,
     "lab_result_id": 1,
     "procedure_id": 8,
+    "purpose": "baseline",
     "relevance_note": "Pre-operative labs for this procedure",
     "created_at": "2025-10-01T00:00:00Z",
     "procedure": {
@@ -2025,6 +2179,7 @@ Base path: `/api/v1/entity-files`
 ```json
 {
   "procedure_id": 8,
+  "purpose": "baseline",
   "relevance_note": "Pre-operative labs for this procedure"
 }
 ```
@@ -2039,11 +2194,13 @@ Base path: `/api/v1/entity-files`
 
 ```json
 {
+  "purpose": "outcome",
   "relevance_note": "Updated relevance note"
 }
 ```
 
 - **Success Response** (200): Updated relationship object
+- **Errors**: `422` for an unknown purpose (see Condition Lab Result Links)
 
 ##### Remove Procedure Link from Lab Result
 
@@ -2384,6 +2541,69 @@ Base path: `/api/v1/procedures`
   "notes": "Routine lab work"
 }
 ```
+
+#### Procedure Lab Result Links
+
+Lab results linked to a procedure (the same links as
+`/lab-results/{lab_result_id}/procedures`, seen from the procedure).
+
+`GET /procedures/{id}/lab-results`
+
+- **Purpose**: List the lab results linked to a procedure
+- **Authentication**: Yes (view access to the patient)
+- **Success Response** (200): Array of link objects. Links to another patient's
+  lab result are never returned.
+
+```json
+[
+  {
+    "id": 11,
+    "lab_result_id": 3,
+    "procedure_id": 8,
+    "purpose": "monitoring",
+    "relevance_note": "Liver function monitoring",
+    "created_at": "2026-02-01T10:00:00Z",
+    "updated_at": "2026-02-01T10:00:00Z",
+    "lab_result": {
+      "id": 3,
+      "test_name": "Liver Panel",
+      "test_category": "chemistry",
+      "status": "completed",
+      "labs_result": "normal",
+      "completed_date": "2026-02-01"
+    }
+  }
+]
+```
+
+`POST /procedures/{id}/lab-results`
+
+- **Purpose**: Link one existing lab result to the procedure
+- **Authentication**: Yes (edit access to the patient)
+- **Request Body**: `{"lab_result_id": 3, "purpose": "monitoring", "relevance_note": "optional, max 500 characters"}`
+  (`purpose` and `relevance_note` are optional)
+- **Success Response** (200): The link object above
+- **Errors**: `422` for an unknown purpose, `400` if the lab result belongs to another patient or is already linked,
+  `404` if the procedure or lab result does not exist
+
+`PUT /procedures/{id}/lab-results/{relationship_id}`
+
+- **Purpose**: Update the purpose and note of a link
+- **Request Body**: `{"purpose": "outcome or null", "relevance_note": "text or null"}`. A field that is
+  left out is not changed; `null` clears it.
+- **Success Response** (200): The updated link object
+- **Errors**: `400` if the link belongs to another procedure, `404` if it does not exist
+
+`DELETE /procedures/{id}/lab-results/{relationship_id}`
+
+- **Purpose**: Remove the link (neither record is deleted)
+- **Success Response** (200): `{"message": "Procedure lab result link deleted successfully"}`
+
+The `purpose` says why the lab result is linked: one of `baseline`, `monitoring`,
+`outcome`, `safety` or `other` (case-insensitive, stored in lower case; the same values as
+a treatment's lab result links). It is optional, and any other value is rejected with
+`422`.
+
 
 ### 6.9 Treatments
 

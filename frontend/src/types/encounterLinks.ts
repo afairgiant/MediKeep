@@ -30,6 +30,8 @@ export interface LinkRow {
   status: string | null;
   relevanceNote: string | null;
   purpose: string | null;
+  /** Only treatment links on a lab result carry an expected frequency */
+  expectedFrequency?: string | null;
 }
 
 /** A record that can still be linked. */
@@ -43,6 +45,7 @@ export interface PendingLink {
   entityId: number;
   relevanceNote: string | null;
   purpose: string | null;
+  expectedFrequency?: string | null;
 }
 
 export type PendingLinks = Partial<Record<EncounterLinkTypeKey, PendingLink[]>>;
@@ -50,6 +53,14 @@ export type PendingLinks = Partial<Record<EncounterLinkTypeKey, PendingLink[]>>;
 export interface LinkUpdate {
   relevance_note?: string | null;
   purpose?: string | null;
+  expected_frequency?: string | null;
+}
+
+/** The purposes a link can be given, with how each is shown. */
+export interface PurposeConfig {
+  options: { value: string; label: string }[];
+  getLabel: (_purpose: string) => string;
+  getColor: (_purpose: string) => string;
 }
 
 export interface EncounterLinkTypeConfig {
@@ -92,7 +103,8 @@ export interface LinkSource {
   createLinks: (
     _ids: number[],
     _note: string | null,
-    _purpose: string | null
+    _purpose: string | null,
+    _expectedFrequency?: string | null
   ) => Promise<void>;
   updateLink: (_row: LinkRow, _updates: LinkUpdate) => Promise<void>;
   removeLink: (_row: LinkRow) => Promise<void>;

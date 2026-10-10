@@ -130,12 +130,7 @@
     "autoCalculated": "Auto-calculated",
     "cannotRemoveLastRow": "Cannot remove last row",
     "componentCreationWarning": "Lab result saved but test components could not be added. You can add them from the view page.",
-    "linkConditionsDescription": "Associate this lab result with relevant medical conditions for better tracking and organization.",
-    "linkConditionsTitle": "Link Medical Conditions",
     "linkedVisits": "Linked Visits",
-    "linkMedicationsTitle": "Link to Medications",
-    "linkProceduresTitle": "Link to Procedures",
-    "linkTreatmentsTitle": "Link to Treatments",
     "linkVisitsDescription": "Associate this lab result with visits where it was ordered or reviewed.",
     "linkVisitsTitle": "Link to Visits",
     "matchedCommonName": "matched: {{name}}",
@@ -151,7 +146,6 @@
     "statusIndicator": "Status Indicator:",
     "testCodePlaceholder": "e.g., 718-7",
     "testComponents": "Add Tests",
-    "testDetails": "Test Details",
     "unit": "Unit"
   },
   "keepEmptyLabResult": "Keep Lab Result",
@@ -213,16 +207,6 @@
     "placeholder": "Select practitioner"
   },
   "patientIdRequired": "Patient ID is required. Please select a patient first.",
-  "pendingRelationships": {
-    "addCondition": "Add condition",
-    "addMedication": "Add medication",
-    "addProcedure": "Add procedure",
-    "addTreatment": "Add treatment",
-    "removeCondition": "Remove condition",
-    "removeMedication": "Remove medication",
-    "removeProcedure": "Remove procedure",
-    "removeTreatment": "Remove treatment"
-  },
   "quickFormInstructions": "Enter a name for this lab result, then you'll be able to upload and parse your PDF.",
   "quickImportModalTitle": "Quick PDF Import - Step {{step}} of 2",
   "quickImportSuccess": "Lab result and test components imported successfully",

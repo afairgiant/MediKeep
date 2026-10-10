@@ -21,6 +21,7 @@ import {
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
@@ -60,6 +61,7 @@ const InjuryFormWrapper = ({
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  const linkPanelDescription = useLinkPanelDescription();
   // Set when this dialog was opened from inside another one (inline create)
   const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -533,6 +535,7 @@ const InjuryFormWrapper = ({
                     <RecordVisitsTab
                       recordType="injuries"
                       recordId={editingInjury?.id}
+                      description={linkPanelDescription('visits', 'injury')}
                       patientId={patientId}
                       pendingLinks={formData.pending_visit_links}
                       onPendingChange={next =>

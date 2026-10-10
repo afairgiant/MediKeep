@@ -10,6 +10,7 @@ from pydantic import (
     model_validator,
 )
 
+from app.core.constants import LAB_RESULT_LINK_PURPOSES
 from app.models.enums import TreatmentStatus
 from app.schemas.base_tags import (
     TaggedEntityMixin,
@@ -30,7 +31,7 @@ def _validate_relevance_note(v: Optional[str]) -> Optional[str]:
     return v
 
 
-_VALID_LAB_RESULT_PURPOSES = ["baseline", "monitoring", "outcome", "safety", "other"]
+_VALID_LAB_RESULT_PURPOSES = LAB_RESULT_LINK_PURPOSES
 
 
 def _validate_lab_result_purpose(v: Optional[str]) -> Optional[str]:

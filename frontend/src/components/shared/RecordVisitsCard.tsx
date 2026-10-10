@@ -19,6 +19,8 @@ export interface RecordVisitsCardProps {
   recordId?: number | null;
   patientId?: number | null;
   isViewMode?: boolean;
+  /** Short line under the card title saying what the panel is for */
+  description?: string;
   /** Visits chosen in the Add form, saved after the record is created */
   pendingLinks?: PendingLink[];
   onPendingChange?: (_next: PendingLink[]) => void;
@@ -35,6 +37,7 @@ const RecordVisitsCard = ({
   recordId,
   patientId,
   isViewMode = false,
+  description,
   pendingLinks,
   onPendingChange,
   navigate,
@@ -53,6 +56,7 @@ const RecordVisitsCard = ({
   return (
     <LinkedRecordsSection
       title={t('shared:tabs.visits')}
+      description={description}
       source={source}
       isSaved={Boolean(recordId)}
       entityType="encounter"

@@ -1488,6 +1488,35 @@ class ApiService {
     );
   }
 
+  // Lab result links (record side). recordPath is medications or procedures
+  getRecordLabResultLinks(recordPath, recordId, signal) {
+    return this.get(`/${recordPath}/${recordId}/lab-results`, { signal });
+  }
+  createRecordLabResultLink(recordPath, recordId, data, signal) {
+    return this.post(`/${recordPath}/${recordId}/lab-results`, data, {
+      signal,
+    });
+  }
+  updateRecordLabResultLink(
+    recordPath,
+    recordId,
+    relationshipId,
+    data,
+    signal
+  ) {
+    return this.put(
+      `/${recordPath}/${recordId}/lab-results/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  deleteRecordLabResultLink(recordPath, recordId, relationshipId, signal) {
+    return this.delete(
+      `/${recordPath}/${recordId}/lab-results/${relationshipId}`,
+      { signal }
+    );
+  }
+
   // Lab Result - Encounter Relationship methods (lab result side)
   getLabResultEncounters(labResultId, signal) {
     return this.get(`/lab-results/${labResultId}/encounters`, { signal });
@@ -2331,6 +2360,10 @@ class ApiService {
     return this.get(`/conditions/condition-medications/${conditionId}`, {
       signal,
     });
+  }
+  // The medications linked to a condition, with the medication details
+  getConditionMedicationLinks(conditionId, signal) {
+    return this.get(`/conditions/${conditionId}/medications`, { signal });
   }
   getConditionLabResults(conditionId, signal) {
     return this.get(`/conditions/${conditionId}/lab-results`, { signal });

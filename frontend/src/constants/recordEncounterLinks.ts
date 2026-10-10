@@ -6,11 +6,7 @@ import type {
   LinkUpdate,
   RecordLinkKey,
 } from '../types/encounterLinks';
-
-type Raw = Record<string, unknown>;
-
-const asString = (value: unknown): string | null =>
-  typeof value === 'string' && value ? value : null;
+import { asString, type Raw } from '../utils/rawValues';
 
 /**
  * Row from a record-side response (/{type}/{id}/encounters). The linked

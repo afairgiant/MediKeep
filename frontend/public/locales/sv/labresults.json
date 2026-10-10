@@ -129,12 +129,7 @@
     "autoCalculated": "Automatiskt beräknad",
     "cannotRemoveLastRow": "Kan inte ta bort sista raden",
     "componentCreationWarning": "Laboratorieresultat sparat men testkomponenter kunde inte läggas till. Du kan lägga till dem från visningssidan.",
-    "linkConditionsDescription": "Associera detta laboratorieresultat med relevanta medicinska tillstånd för bättre spårning och organisation.",
-    "linkConditionsTitle": "Länka medicinska tillstånd",
     "linkedVisits": "Länkade besök",
-    "linkMedicationsTitle": "Länka till läkemedel",
-    "linkProceduresTitle": "Länka till ingrepp",
-    "linkTreatmentsTitle": "Länka till behandlingar",
     "linkVisitsDescription": "Associera detta laboratorieresultat med besök där det beställdes eller granskades.",
     "linkVisitsTitle": "Länka till besök",
     "matchedCommonName": "matchning: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Statusindikator:",
     "testCodePlaceholder": "t.ex. 718-7",
     "testComponents": "Testkomponenter (valfritt)",
-    "testDetails": "Testdetaljer",
     "unit": "Enhet"
   },
   "keepEmptyLabResult": "Behåll laboratorieresultat",
@@ -212,16 +206,6 @@
     "placeholder": "Välj läkare"
   },
   "patientIdRequired": "Patient-ID krävs. Välj en patient först.",
-  "pendingRelationships": {
-    "addCondition": "Lägg till tillstånd",
-    "removeCondition": "Ta bort tillstånd",
-    "addMedication": "Lägg till läkemedel",
-    "addProcedure": "Lägg till ingrepp",
-    "addTreatment": "Lägg till behandling",
-    "removeMedication": "Ta bort läkemedel",
-    "removeProcedure": "Ta bort ingrepp",
-    "removeTreatment": "Ta bort behandling"
-  },
   "quickFormInstructions": "Ange ett namn för detta laboratorieresultat, sedan kan du ladda upp och tolka din PDF.",
   "quickImportModalTitle": "Snabb PDF-import - Steg {{step}} av 2",
   "quickImportSuccess": "Laboratorieresultat och testkomponenter importerade framgångsrikt",

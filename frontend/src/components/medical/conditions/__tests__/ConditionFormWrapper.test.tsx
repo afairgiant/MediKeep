@@ -41,14 +41,6 @@ vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
 
-vi.mock('../../LabResultRelationships', () => ({
-  default: () => <div data-testid="lab-result-relationships" />,
-}));
-
-vi.mock('../../MedicationRelationships', () => ({
-  default: () => <div data-testid="medication-relationships" />,
-}));
-
 vi.mock('../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
     dateInputFormat: 'MM/DD/YYYY',
@@ -77,7 +69,9 @@ const defaultProps = {
     code_description: '',
     notes: '',
     tags: [],
-    pending_medication_ids: [],
+    pending_medication_links: [],
+    pending_lab_result_links: [],
+    pending_visit_links: [],
   },
   onInputChange: vi.fn(),
   onSubmit: vi.fn().mockResolvedValue({}),

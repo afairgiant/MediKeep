@@ -25,12 +25,9 @@ import {
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { useTagColors } from '../../../hooks/useTagColors';
-import ConditionRelationships from '../ConditionRelationships';
 import RecordVisitsCard from '../../shared/RecordVisitsCard';
 import LabResultLinkTabButtons from './LabResultLinkTabs';
-import LabResultMedicationRelationships from './LabResultMedicationRelationships';
-import LabResultProcedureRelationships from './LabResultProcedureRelationships';
-import LabResultTreatmentRelationships from './LabResultTreatmentRelationships';
+import LabResultRecordLinksCard from './LabResultRecordLinksCard';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import TestComponentsTab from './TestComponentsTab';
 import logger from '../../../services/logger';
@@ -44,7 +41,6 @@ const LabResultViewModal = ({
   onEdit,
   practitioners,
   onFileUploadComplete,
-  conditions = [],
   labResultConditions = {},
   fetchLabResultConditions,
   navigate,
@@ -52,13 +48,10 @@ const LabResultViewModal = ({
   onError,
   onLabResultUpdated,
   initialTab = 'overview',
-  medications = [],
   labResultMedications = {},
   fetchLabResultMedications,
-  procedures = [],
   labResultProcedures = {},
   fetchLabResultProcedures,
-  treatments = [],
   labResultTreatments = {},
   fetchLabResultTreatments,
   disableEdit = false,
@@ -531,20 +524,13 @@ const LabResultViewModal = ({
             <Tabs.Panel value="rel-conditions">
               <Box mt="md">
                 {activeTab === 'rel-conditions' && (
-                  <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                    <Stack gap="md">
-                      <Title order={5}>{t('labresults:form.linkConditionsTitle')}</Title>
-                      <ConditionRelationships
-                        key={`ConditionRelationships-${labResult.id}`}
-                        labResultId={labResult.id}
-                        labResultConditions={labResultConditions}
-                        conditions={conditions}
-                        fetchLabResultConditions={fetchLabResultConditions}
-                        navigate={navigate}
-                        isViewMode={true}
-                      />
-                    </Stack>
-                  </Paper>
+                  <LabResultRecordLinksCard
+                    key={`conditions-${labResult.id}`}
+                    linkKey="conditions"
+                    labResultId={labResult.id}
+                    isViewMode
+                    navigate={navigate}
+                  />
                 )}
               </Box>
             </Tabs.Panel>
@@ -566,20 +552,13 @@ const LabResultViewModal = ({
             <Tabs.Panel value="rel-medications">
               <Box mt="md">
                 {activeTab === 'rel-medications' && (
-                  <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                    <Stack gap="md">
-                      <Title order={5}>{t('labresults:form.linkMedicationsTitle', 'Link to Medications')}</Title>
-                      <LabResultMedicationRelationships
-                        key={`LabResultMedicationRelationships-${labResult.id}`}
-                        labResultId={labResult.id}
-                        labResultMedications={labResultMedications}
-                        medications={medications}
-                        fetchLabResultMedications={fetchLabResultMedications}
-                        navigate={navigate}
-                        isViewMode={true}
-                      />
-                    </Stack>
-                  </Paper>
+                  <LabResultRecordLinksCard
+                    key={`medications-${labResult.id}`}
+                    linkKey="medications"
+                    labResultId={labResult.id}
+                    isViewMode
+                    navigate={navigate}
+                  />
                 )}
               </Box>
             </Tabs.Panel>
@@ -587,20 +566,13 @@ const LabResultViewModal = ({
             <Tabs.Panel value="rel-procedures">
               <Box mt="md">
                 {activeTab === 'rel-procedures' && (
-                  <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                    <Stack gap="md">
-                      <Title order={5}>{t('labresults:form.linkProceduresTitle', 'Link to Procedures')}</Title>
-                      <LabResultProcedureRelationships
-                        key={`LabResultProcedureRelationships-${labResult.id}`}
-                        labResultId={labResult.id}
-                        labResultProcedures={labResultProcedures}
-                        procedures={procedures}
-                        fetchLabResultProcedures={fetchLabResultProcedures}
-                        navigate={navigate}
-                        isViewMode={true}
-                      />
-                    </Stack>
-                  </Paper>
+                  <LabResultRecordLinksCard
+                    key={`procedures-${labResult.id}`}
+                    linkKey="procedures"
+                    labResultId={labResult.id}
+                    isViewMode
+                    navigate={navigate}
+                  />
                 )}
               </Box>
             </Tabs.Panel>
@@ -608,20 +580,13 @@ const LabResultViewModal = ({
             <Tabs.Panel value="rel-treatments">
               <Box mt="md">
                 {activeTab === 'rel-treatments' && (
-                  <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                    <Stack gap="md">
-                      <Title order={5}>{t('labresults:form.linkTreatmentsTitle', 'Link to Treatments')}</Title>
-                      <LabResultTreatmentRelationships
-                        key={`LabResultTreatmentRelationships-${labResult.id}`}
-                        labResultId={labResult.id}
-                        labResultTreatments={labResultTreatments}
-                        treatments={treatments}
-                        fetchLabResultTreatments={fetchLabResultTreatments}
-                        navigate={navigate}
-                        isViewMode={true}
-                      />
-                    </Stack>
-                  </Paper>
+                  <LabResultRecordLinksCard
+                    key={`treatments-${labResult.id}`}
+                    linkKey="treatments"
+                    labResultId={labResult.id}
+                    isViewMode
+                    navigate={navigate}
+                  />
                 )}
               </Box>
             </Tabs.Panel>

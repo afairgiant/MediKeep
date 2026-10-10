@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
-import { Stack, Box } from '@mantine/core';
+import { Stack, Box, Text } from '@mantine/core';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
+import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 import TreatmentMedicationRelationships from './TreatmentMedicationRelationships';
 import TreatmentEncounterRelationships from './TreatmentEncounterRelationships';
 import TreatmentLabResultRelationships from './TreatmentLabResultRelationships';
@@ -25,6 +26,15 @@ const TreatmentRelationshipsManager = ({
   onEquipmentClick,
 }) => {
   useTranslation('common');
+  const linkPanelDescription = useLinkPanelDescription();
+
+  // The line under each section's title; the read-only dialog has no link buttons
+  const sectionDescription = items =>
+    isViewMode ? null : (
+      <Text size="sm" c="dimmed" mb="sm">
+        {linkPanelDescription(items, 'treatment')}
+      </Text>
+    );
 
   // Relationship counts for badges
   const [medicationCount, setMedicationCount] = useState(0);
@@ -224,6 +234,7 @@ const TreatmentRelationshipsManager = ({
       <Box
         style={{ display: activeSection === 'medications' ? 'block' : 'none' }}
       >
+        {sectionDescription('medications')}
         <TreatmentMedicationRelationships
           treatmentId={treatmentId}
           medications={medications}
@@ -240,6 +251,7 @@ const TreatmentRelationshipsManager = ({
       <Box
         style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}
       >
+        {sectionDescription('visits')}
         <TreatmentEncounterRelationships
           treatmentId={treatmentId}
           encounters={encounters}
@@ -252,6 +264,7 @@ const TreatmentRelationshipsManager = ({
       </Box>
 
       <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
+        {sectionDescription('labResults')}
         <TreatmentLabResultRelationships
           treatmentId={treatmentId}
           labResults={labResults}
@@ -266,6 +279,7 @@ const TreatmentRelationshipsManager = ({
       <Box
         style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}
       >
+        {sectionDescription('equipment')}
         <TreatmentEquipmentRelationships
           treatmentId={treatmentId}
           patientId={patientId}

@@ -77,7 +77,7 @@ beforeEach(() => {
 });
 
 describe('Treatment tabs show how many items are linked', () => {
-  it('View, Simple mode: Visits shows its count', async () => {
+  it('View, Simple mode: Visits and Equipment show their counts; Medications has no tab', async () => {
     render(
       <ViewModal
         isOpen
@@ -89,6 +89,12 @@ describe('Treatment tabs show how many items are linked', () => {
     expect(
       await screen.findByRole('tab', { name: 'Visits (2)' })
     ).toBeInTheDocument();
+    expect(
+      await screen.findByRole('tab', { name: /Equipment \(1\)/ })
+    ).toBeInTheDocument();
+    // Medications are linked only in Treatment Plan mode; no lab results are linked
+    expect(screen.queryByRole('tab', { name: /Medications/ })).toBeNull();
+    expect(screen.queryByRole('tab', { name: /Labs/ })).toBeNull();
   });
 
   it('View, Treatment Plan mode: each linked type shows its count; a type without links has no tab', async () => {

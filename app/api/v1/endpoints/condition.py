@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.v1.endpoints.encounter_links import register_record_encounter_routes
+from app.api.v1.endpoints.record_lab_result_links import (
+    register_record_lab_result_routes,
+)
 from app.api.deps import BusinessLogicException, ForbiddenException, NotFoundException
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
@@ -20,7 +23,6 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.crud.condition import condition, condition_medication
-from app.crud.lab_result import lab_result_condition
 from app.crud.medication import medication as medication_crud
 from app.models.activity_log import EntityType
 from app.models.models import User
@@ -35,6 +37,7 @@ from app.schemas.condition import (
     ConditionResponse,
     ConditionUpdate,
     ConditionWithRelations,
+    MedicationConditionWithDetails,
 )
 
 router = APIRouter()
@@ -644,6 +647,74 @@ def delete_condition_medication(
         return {"message": "Condition medication relationship deleted successfully"}
 
 
+@router.get(
+    "/{condition_id}/medications", response_model=List[ConditionMedicationWithDetails]
+)
+def get_condition_medications_with_details(
+    *,
+    condition_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Get the medications linked to a condition, with the medication details."""
+    with handle_database_errors(request=request):
+        db_condition = condition.get(db, id=condition_id)
+        if not db_condition:
+            raise NotFoundException(
+                resource="Condition",
+                message=f"Condition with ID {condition_id} not found",
+                request=request,
+            )
+
+        verify_patient_ownership(
+            db_condition,
+            current_user_patient_id,
+            "condition",
+            db=db,
+            current_user=current_user,
+        )
+
+        rows = condition_medication.get_by_condition_with_details(
+            db, condition_id=condition_id
+        )
+        # A link to another patient's medication is never shown
+        result = [
+            {
+                "id": rel.id,
+                "condition_id": rel.condition_id,
+                "medication_id": rel.medication_id,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "medication": {
+                    "id": med.id,
+                    "medication_name": med.medication_name,
+                    "dosage": med.dosage,
+                    "status": med.status,
+                    "effective_period_start": med.effective_period_start,
+                },
+            }
+            for rel, med in rows
+            if med.patient_id == db_condition.patient_id
+        ]
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "ConditionMedication",
+            record_id=condition_id,
+            patient_id=db_condition.patient_id,
+            count=len(result),
+        )
+
+        return result
+
+
 # Generic condition routes (must come after specific medication routes)
 
 
@@ -798,7 +869,7 @@ def get_patient_conditions(
 
 @router.get(
     "/medication/{medication_id}/conditions",
-    response_model=List[ConditionMedicationWithDetails],
+    response_model=List[MedicationConditionWithDetails],
 )
 def get_medication_conditions(
     *,
@@ -859,17 +930,15 @@ def get_medication_conditions(
                 message="Access denied to this medication", request=request
             )
 
-        # Get condition relationships
-        relationships = condition_medication.get_by_medication(
+        # Get condition relationships, with the conditions, in one query
+        relationships = condition_medication.get_by_medication_with_details(
             db, medication_id=medication_id
         )
 
-        # Enhance with condition details
         enhanced_relationships = []
-        for rel in relationships:
-            condition_obj = condition.get(db, id=rel.condition_id)
+        for rel, condition_obj in relationships:
             # Verify the condition belongs to the same patient as the medication
-            if condition_obj and condition_obj.patient_id != db_medication.patient_id:
+            if condition_obj.patient_id != db_medication.patient_id:
                 condition_obj = None  # Don't include conditions from other patients
 
             enhanced_relationships.append(
@@ -907,92 +976,5 @@ def get_medication_conditions(
         return enhanced_relationships
 
 
-# Lab result-focused endpoints (for showing lab results on condition view)
-
-
-@router.get(
-    "/{condition_id}/lab-results",
-    response_model=List[dict],
-)
-def get_condition_lab_results(
-    *,
-    condition_id: int,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
-) -> Any:
-    """Get all lab result relationships for a specific condition."""
-    with handle_database_errors(request=request):
-        db_condition = condition.get(db, id=condition_id)
-        if not db_condition:
-            raise NotFoundException(
-                resource="Condition",
-                message=f"Condition with ID {condition_id} not found",
-                request=request,
-            )
-
-        from app.models.models import Patient
-        from app.services.patient_access import PatientAccessService
-
-        patient_record = (
-            db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
-        )
-        if not patient_record:
-            raise NotFoundException(
-                resource="Patient", message="Patient not found", request=request
-            )
-
-        access_service = PatientAccessService(db)
-        if not access_service.can_access_patient(current_user, patient_record, "view"):
-            raise ForbiddenException(
-                message="Access denied to this condition", request=request
-            )
-
-        relationships = lab_result_condition.get_by_condition(
-            db, condition_id=condition_id
-        )
-
-        enhanced_relationships = []
-        for rel in relationships:
-            lab = rel.lab_result
-            if lab and lab.patient_id != db_condition.patient_id:
-                continue
-
-            enhanced_relationships.append(
-                {
-                    "id": rel.id,
-                    "lab_result_id": rel.lab_result_id,
-                    "condition_id": rel.condition_id,
-                    "relevance_note": rel.relevance_note,
-                    "created_at": rel.created_at,
-                    "updated_at": rel.updated_at,
-                    "lab_result": (
-                        {
-                            "id": lab.id,
-                            "test_name": lab.test_name,
-                            "test_category": lab.test_category,
-                            "status": lab.status,
-                            "labs_result": lab.labs_result,
-                            "completed_date": lab.completed_date,
-                        }
-                        if lab
-                        else None
-                    ),
-                }
-            )
-
-        log_data_access(
-            logger,
-            request,
-            current_user.id,
-            "read",
-            "ConditionLabResult",
-            patient_id=patient_record.id,
-            condition_id=condition_id,
-            count=len(enhanced_relationships),
-        )
-
-        return enhanced_relationships
-
-
 register_record_encounter_routes(router, "conditions")
+register_record_lab_result_routes(router, "conditions")

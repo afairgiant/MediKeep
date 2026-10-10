@@ -129,12 +129,7 @@
     "autoCalculated": "Obliczane automatycznie",
     "cannotRemoveLastRow": "Nie można usunąć ostatniego wiersza",
     "componentCreationWarning": "Wynik laboratoryjny zapisany ale składniki badania nie mogły zostać dodane. Możesz je dodać ze strony podglądu.",
-    "linkConditionsDescription": "Powiąż ten wynik laboratoryjny z odpowiednimi schorzeniami dla lepszego śledzenia i organizacji.",
-    "linkConditionsTitle": "Powiąż Schorzenia",
     "linkedVisits": "Powiązane Wizyty",
-    "linkMedicationsTitle": "Połącz z lekami",
-    "linkProceduresTitle": "Połącz z procedurami",
-    "linkTreatmentsTitle": "Połącz z leczeniem",
     "linkVisitsDescription": "Powiąż ten wynik laboratoryjny z wizytami podczas których został zlecony lub przejrzany.",
     "linkVisitsTitle": "Powiąż z Wizytami",
     "matchedCommonName": "dopasowanie: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Wskaźnik Statusu:",
     "testCodePlaceholder": "np. 718-7",
     "testComponents": "Składniki Badania (Opcjonalne)",
-    "testDetails": "Szczegóły Badania",
     "unit": "Jednostka"
   },
   "keepEmptyLabResult": "Zachowaj Wynik Laboratoryjny",
@@ -212,16 +206,6 @@
     "placeholder": "Wybierz lekarza"
   },
   "patientIdRequired": "ID pacjenta jest wymagane. Najpierw wybierz pacjenta.",
-  "pendingRelationships": {
-    "addCondition": "Dodaj schorzenie",
-    "removeCondition": "Usuń schorzenie",
-    "addMedication": "Dodaj lek",
-    "addProcedure": "Dodaj procedurę",
-    "addTreatment": "Dodaj leczenie",
-    "removeMedication": "Usuń lek",
-    "removeProcedure": "Usuń procedurę",
-    "removeTreatment": "Usuń leczenie"
-  },
   "quickFormInstructions": "Wprowadź nazwę dla tego wyniku laboratoryjnego, następnie będziesz mógł przesłać i sparsować swój PDF.",
   "quickImportModalTitle": "Szybki Import PDF - Krok {{step}} z 2",
   "quickImportSuccess": "Wynik laboratoryjny i składniki badania zaimportowane pomyślnie",

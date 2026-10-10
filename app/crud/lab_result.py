@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import (
+    Condition,
     LabResult,
     LabResultCondition,
     LabResultMedication,
@@ -102,6 +103,34 @@ class CRUDLabResultCondition(
             db.query(self.model).filter(self.model.lab_result_id == lab_result_id).all()
         )
 
+    def get_by_lab_result_with_details(
+        self, db: Session, *, lab_result_id: int
+    ) -> List:
+        """Get all condition links for a lab result with joined condition data.
+
+        Returns a list of (LabResultCondition, Condition) tuples, so listing a lab
+        result's conditions takes one query however many there are.
+        """
+        return (
+            db.query(self.model, Condition)
+            .join(Condition, self.model.condition_id == Condition.id)
+            .filter(self.model.lab_result_id == lab_result_id)
+            .all()
+        )
+
+    def get_by_condition_with_details(self, db: Session, *, condition_id: int) -> List:
+        """Get all lab result links for a condition with joined lab result data.
+
+        Returns a list of (LabResultCondition, LabResult) tuples, newest first.
+        """
+        return (
+            db.query(self.model, LabResult)
+            .join(LabResult, self.model.lab_result_id == LabResult.id)
+            .filter(self.model.condition_id == condition_id)
+            .order_by(LabResult.completed_date.desc().nulls_last())
+            .all()
+        )
+
     def get_by_condition(
         self, db: Session, *, condition_id: int
     ) -> List[LabResultCondition]:
@@ -176,6 +205,20 @@ class CRUDLabResultMedication(
             .all()
         )
 
+    def get_by_medication_with_details(
+        self, db: Session, *, medication_id: int
+    ) -> List:
+        """Get all lab result links for a medication with joined lab result data.
+
+        Returns a list of (LabResultMedication, LabResult) tuples.
+        """
+        return (
+            db.query(self.model, LabResult)
+            .join(LabResult, self.model.lab_result_id == LabResult.id)
+            .filter(self.model.medication_id == medication_id)
+            .all()
+        )
+
     def get_by_lab_result_and_medication(
         self, db: Session, *, lab_result_id: int, medication_id: int
     ) -> Optional[LabResultMedication]:
@@ -231,6 +274,18 @@ class CRUDLabResultProcedure(
             db.query(self.model, Procedure)
             .join(Procedure, self.model.procedure_id == Procedure.id)
             .filter(self.model.lab_result_id == lab_result_id)
+            .all()
+        )
+
+    def get_by_procedure_with_details(self, db: Session, *, procedure_id: int) -> List:
+        """Get all lab result links for a procedure with joined lab result data.
+
+        Returns a list of (LabResultProcedure, LabResult) tuples.
+        """
+        return (
+            db.query(self.model, LabResult)
+            .join(LabResult, self.model.lab_result_id == LabResult.id)
+            .filter(self.model.procedure_id == procedure_id)
             .all()
         )
 
