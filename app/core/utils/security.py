@@ -78,8 +78,11 @@ def decode_access_token(token: str) -> dict:
         token,
         settings.SECRET_KEY,
         algorithms=[settings.ALGORITHM],
-        # a backward clock step must not end live sessions
-        options={"verify_iat": False},
+        options={
+            # a backward clock step must not end live sessions
+            "verify_iat": False,
+            "require": ["exp"],
+        },
     )
 
 

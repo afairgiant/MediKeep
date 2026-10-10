@@ -56,6 +56,10 @@ class TestTokenValidation:
         token = _token({"sub": username, "iat": now - 600, "exp": now - 60})
         assert _get(client, token).status_code == 401
 
+    def test_missing_exp_is_rejected(self, client: TestClient, username: str):
+        token = _token({"sub": username, "iat": int(time.time())})
+        assert _get(client, token).status_code == 401
+
     def test_wrong_key_is_rejected(self, client: TestClient, username: str):
         token = _token({"sub": username, "exp": int(time.time()) + 300}, key="x" * 64)
         assert _get(client, token).status_code == 401
