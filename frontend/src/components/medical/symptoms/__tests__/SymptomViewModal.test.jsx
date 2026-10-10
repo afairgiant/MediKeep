@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import render, { screen } from '../../../../test-utils/render';
 import SymptomViewModal from '../SymptomViewModal';
@@ -107,6 +107,20 @@ describe('SymptomViewModal - episode history', () => {
 
     expect(panel).toHaveTextContent('episode-21');
     expect(panel).not.toHaveTextContent('episode-20');
+  });
+
+  it('summarises the earliest and latest episode dates as logged', async () => {
+    symptomApi.getOccurrences.mockResolvedValue([
+      { ...makeOccurrences(1)[0], occurrence_date: '2026-03-09' },
+      { ...makeOccurrences(1)[0], id: 2, occurrence_date: '2026-03-01' },
+      { ...makeOccurrences(1)[0], id: 3, occurrence_date: '2026-03-20' },
+    ]);
+    render(<SymptomViewModal isOpen onClose={vi.fn()} symptom={symptom} />);
+
+    const overview = within(await screen.findByRole('tabpanel'));
+    expect(await overview.findByText('date:2026-03-01')).toBeInTheDocument();
+    expect(overview.getByText('date:2026-03-20')).toBeInTheDocument();
+    expect(overview.queryByText('date:2026-03-09')).not.toBeInTheDocument();
   });
 
   it('does not show pagination for a single page', async () => {
