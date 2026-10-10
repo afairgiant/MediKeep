@@ -1,11 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { Tabs } from '@mantine/core';
 import '@testing-library/jest-dom';
 
 import render, { screen, waitFor, within } from '../../../test-utils/render';
-import RecordLabResultsCard from '../RecordLabResultsCard';
-import RecordLabResultsTabButton from '../RecordLabResultsTabButton';
+import RecordLinkCard from '../RecordLinkCard';
 import { InlineCreateProvider } from '../../../contexts/InlineCreateContext';
 
 const api = vi.hoisted(() => ({
@@ -49,7 +47,8 @@ const renderCard = (
 ) =>
   render(
     <InlineCreateProvider>
-      <RecordLabResultsCard
+      <RecordLinkCard
+        kind="labResults"
         recordPath={recordPath}
         recordId={8}
         patientId={7}
@@ -58,7 +57,7 @@ const renderCard = (
     </InlineCreateProvider>
   );
 
-describe('RecordLabResultsCard', () => {
+describe('RecordLinkCard - lab results', () => {
   it('shows the lab results linked to the medication (#1128)', async () => {
     renderCard();
     expect(await screen.findByText('Liver Panel')).toBeInTheDocument();
@@ -73,7 +72,8 @@ describe('RecordLabResultsCard', () => {
   it('shows the description under the title, only when one is given', async () => {
     const { unmount } = render(
       <InlineCreateProvider>
-        <RecordLabResultsCard
+        <RecordLinkCard
+          kind="labResults"
           recordPath="conditions"
           recordId={8}
           patientId={7}
@@ -138,7 +138,7 @@ describe('RecordLabResultsCard', () => {
   });
 });
 
-describe('RecordLabResultsCard - record not saved yet', () => {
+describe('RecordLinkCard - lab results - record not saved yet', () => {
   it('holds links as pending and makes no link API calls', async () => {
     api.getPatientLabResults.mockResolvedValue([
       {
@@ -151,7 +151,8 @@ describe('RecordLabResultsCard - record not saved yet', () => {
     const onPendingChange = vi.fn();
     render(
       <InlineCreateProvider>
-        <RecordLabResultsCard
+        <RecordLinkCard
+          kind="labResults"
           recordPath="procedures"
           recordId={null}
           patientId={7}
@@ -177,7 +178,7 @@ describe('RecordLabResultsCard - record not saved yet', () => {
   });
 });
 
-describe('RecordLabResultsCard - purpose of the link (#1128)', () => {
+describe('RecordLinkCard - lab results - purpose of the link (#1128)', () => {
   it.each(['procedures', 'conditions'] as const)(
     'shows and saves the purpose of a %s link',
     async path => {
@@ -282,41 +283,5 @@ describe('RecordLabResultsCard - purpose of the link (#1128)', () => {
     ]);
     renderCard(true, 'procedures');
     expect(await screen.findByText('Outcome')).toBeInTheDocument();
-  });
-});
-
-describe('RecordLabResultsTabButton', () => {
-  it('counts the chosen lab results while the record is not saved yet', () => {
-    render(
-      <Tabs value="x">
-        <Tabs.List>
-          <RecordLabResultsTabButton
-            recordPath="procedures"
-            pendingLinks={[
-              { entityId: 3, relevanceNote: null, purpose: null },
-              { entityId: 4, relevanceNote: null, purpose: null },
-            ]}
-          />
-        </Tabs.List>
-      </Tabs>
-    );
-    expect(
-      screen.getByRole('tab', { name: 'shared:tabs.labResults (2)' })
-    ).toBeInTheDocument();
-    expect(api.getRecordLabResultLinks).not.toHaveBeenCalled();
-  });
-
-  it('shows the number of linked lab results before the tab is opened', async () => {
-    api.getRecordLabResultLinks.mockResolvedValue([LINK, { ...LINK, id: 12 }]);
-    render(
-      <Tabs value="x">
-        <Tabs.List>
-          <RecordLabResultsTabButton recordPath="medications" recordId={8} />
-        </Tabs.List>
-      </Tabs>
-    );
-    expect(
-      await screen.findByRole('tab', { name: 'shared:tabs.labResults (2)' })
-    ).toBeInTheDocument();
   });
 });

@@ -37,9 +37,9 @@ import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
-import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
+import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 
 const ProcedureFormWrapper = ({
@@ -186,8 +186,10 @@ const ProcedureFormWrapper = ({
                 <RecordLinkTabButtons
                   recordPath="procedures"
                   recordId={editingItem?.id}
-                  pendingVisitLinks={formData.pending_visit_links}
-                  pendingLabResultLinks={formData.pending_lab_result_links}
+                  pendingLinks={{
+                    visits: formData.pending_visit_links,
+                    labResults: formData.pending_lab_result_links,
+                  }}
                   activeTab={activeTab}
                   onSelectTab={setActiveTab}
                 />
@@ -613,7 +615,8 @@ const ProcedureFormWrapper = ({
               <Tabs.Panel value="labResults">
                 <Box mt="md">
                   {activeTab === 'labResults' && (
-                    <RecordLabResultsCard
+                    <RecordLinkCard
+                      kind="labResults"
                       recordPath="procedures"
                       recordId={editingItem?.id}
                       description={linkPanelDescription('labResults', 'procedure')}

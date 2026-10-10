@@ -29,8 +29,7 @@ import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
-import ConditionMedicationsCard from '../../shared/ConditionMedicationsCard';
-import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
+import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
@@ -180,9 +179,11 @@ const ConditionFormWrapper = ({
                 <RecordLinkTabButtons
                   recordPath="conditions"
                   recordId={editingCondition?.id}
-                  pendingMedicationLinks={formData.pending_medication_links}
-                  pendingLabResultLinks={formData.pending_lab_result_links}
-                  pendingVisitLinks={formData.pending_visit_links}
+                  pendingLinks={{
+                    visits: formData.pending_visit_links,
+                    labResults: formData.pending_lab_result_links,
+                    medications: formData.pending_medication_links,
+                  }}
                   activeTab={activeTab}
                   onSelectTab={setActiveTab}
                 />
@@ -459,8 +460,10 @@ const ConditionFormWrapper = ({
               <Tabs.Panel value="medications">
                 <Box mt="md">
                   {activeTab === 'medications' && (
-                    <ConditionMedicationsCard
-                      conditionId={editingCondition?.id}
+                    <RecordLinkCard
+                      kind="medications"
+                      recordPath="conditions"
+                      recordId={editingCondition?.id}
                       description={linkPanelDescription('medications', 'condition')}
                       patientId={patientId}
                       pendingLinks={formData.pending_medication_links}
@@ -484,7 +487,8 @@ const ConditionFormWrapper = ({
               <Tabs.Panel value="labResults">
                 <Box mt="md">
                   {activeTab === 'labResults' && (
-                    <RecordLabResultsCard
+                    <RecordLinkCard
+                      kind="labResults"
                       recordPath="conditions"
                       recordId={editingCondition?.id}
                       description={linkPanelDescription('labResults', 'condition')}

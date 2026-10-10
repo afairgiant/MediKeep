@@ -26,9 +26,8 @@ import { useTagColors } from '../../../hooks/useTagColors';
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import ConditionMedicationsCard from '../../shared/ConditionMedicationsCard';
+import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
-import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 
@@ -453,8 +452,10 @@ const ConditionViewModal = ({
           <Tabs.Panel value="medications">
             <Box mt="md">
               {activeTab === 'medications' && (
-                <ConditionMedicationsCard
-                  conditionId={condition.id}
+                <RecordLinkCard
+                  kind="medications"
+                  recordPath="conditions"
+                  recordId={condition.id}
                   isViewMode
                   navigate={navigate}
                 />
@@ -466,7 +467,8 @@ const ConditionViewModal = ({
           <Tabs.Panel value="labResults">
             <Box mt="md">
               {activeTab === 'labResults' && (
-                <RecordLabResultsCard
+                <RecordLinkCard
+                  kind="labResults"
                   recordPath="conditions"
                   recordId={condition.id}
                   isViewMode

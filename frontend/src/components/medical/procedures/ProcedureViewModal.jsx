@@ -29,7 +29,7 @@ import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
-import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
+import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 
@@ -481,7 +481,8 @@ const ProcedureViewModal = ({
             <Tabs.Panel value="labResults">
               <Box mt="md">
                 {activeTab === 'labResults' && (
-                  <RecordLabResultsCard
+                  <RecordLinkCard
+                    kind="labResults"
                     recordPath="procedures"
                     recordId={procedure.id}
                     isViewMode

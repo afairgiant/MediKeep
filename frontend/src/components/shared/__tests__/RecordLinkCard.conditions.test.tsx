@@ -1,12 +1,10 @@
 import type { ComponentProps } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { Tabs } from '@mantine/core';
 import '@testing-library/jest-dom';
 
 import render, { screen, waitFor } from '../../../test-utils/render';
-import MedicationConditionsCard from '../MedicationConditionsCard';
-import MedicationConditionsTabButton from '../MedicationConditionsTabButton';
+import RecordLinkCard from '../RecordLinkCard';
 import { InlineCreateProvider } from '../../../contexts/InlineCreateContext';
 
 const api = vi.hoisted(() => ({
@@ -40,15 +38,21 @@ beforeEach(() => {
 });
 
 const renderCard = (
-  props: Partial<ComponentProps<typeof MedicationConditionsCard>> = {}
+  props: Partial<ComponentProps<typeof RecordLinkCard>> = {}
 ) =>
   render(
     <InlineCreateProvider>
-      <MedicationConditionsCard medicationId={8} patientId={7} {...props} />
+      <RecordLinkCard
+        kind="conditions"
+        recordPath="medications"
+        recordId={8}
+        patientId={7}
+        {...props}
+      />
     </InlineCreateProvider>
   );
 
-describe('MedicationConditionsCard', () => {
+describe("RecordLinkCard - a medication's conditions", () => {
   it('shows the conditions linked to the medication, with "+ Add" and "+ Link"', async () => {
     renderCard();
     expect(await screen.findByText('Hypertension')).toBeInTheDocument();
@@ -130,7 +134,7 @@ describe('MedicationConditionsCard', () => {
     ]);
     const onPendingChange = vi.fn();
     renderCard({
-      medicationId: null,
+      recordId: null,
       pendingLinks: [{ entityId: 3, relevanceNote: 'n', purpose: null }],
       onPendingChange,
     });
@@ -147,38 +151,5 @@ describe('MedicationConditionsCard', () => {
     );
     expect(onPendingChange).toHaveBeenCalledWith([]);
     expect(api.deleteConditionMedication).not.toHaveBeenCalled();
-  });
-});
-
-describe('MedicationConditionsTabButton', () => {
-  const renderButton = (
-    props: Partial<ComponentProps<typeof MedicationConditionsTabButton>>
-  ) =>
-    render(
-      <Tabs value="x">
-        <Tabs.List>
-          <MedicationConditionsTabButton {...props} />
-        </Tabs.List>
-      </Tabs>
-    );
-
-  it('shows the number of linked conditions before the tab is opened', async () => {
-    api.getMedicationConditions.mockResolvedValue([LINK, { ...LINK, id: 12 }]);
-    renderButton({ medicationId: 8 });
-    expect(
-      await screen.findByRole('tab', {
-        name: 'shared:categories.conditions (2)',
-      })
-    ).toBeInTheDocument();
-  });
-
-  it('counts the chosen conditions while the medication is not saved yet', () => {
-    renderButton({
-      pendingLinks: [{ entityId: 1, relevanceNote: null, purpose: null }],
-    });
-    expect(
-      screen.getByRole('tab', { name: 'shared:categories.conditions (1)' })
-    ).toBeInTheDocument();
-    expect(api.getMedicationConditions).not.toHaveBeenCalled();
   });
 });

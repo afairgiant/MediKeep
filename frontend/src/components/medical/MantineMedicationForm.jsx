@@ -42,14 +42,13 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
-import MedicationConditionsCard from '../shared/MedicationConditionsCard';
 import logger from '../../services/logger';
 import { apiService } from '../../services/api';
 import notificationApi from '../../services/api/notificationApi';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import RecordVisitsTab from '../shared/RecordVisitsTab';
-import RecordLabResultsCard from '../shared/RecordLabResultsCard';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
+import RecordLinkCard from '../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../shared/RecordLinkTabButtons';
 import { useSubDialog } from '../../contexts/SubDialogContext';
 
@@ -608,9 +607,11 @@ const MantineMedicationForm = ({
                 <RecordLinkTabButtons
                   recordPath="medications"
                   recordId={editingMedication?.id}
-                  pendingConditionLinks={formData.pending_condition_links}
-                  pendingVisitLinks={formData.pending_visit_links}
-                  pendingLabResultLinks={formData.pending_lab_result_links}
+                  pendingLinks={{
+                    visits: formData.pending_visit_links,
+                    labResults: formData.pending_lab_result_links,
+                    conditions: formData.pending_condition_links,
+                  }}
                   activeTab={activeTab}
                   onSelectTab={setActiveTab}
                 />
@@ -665,8 +666,10 @@ const MantineMedicationForm = ({
               <Tabs.Panel value="conditions">
                 <Box mt="md">
                   {activeTab === 'conditions' && (
-                    <MedicationConditionsCard
-                      medicationId={editingMedication?.id}
+                    <RecordLinkCard
+                      kind="conditions"
+                      recordPath="medications"
+                      recordId={editingMedication?.id}
                       description={linkPanelDescription(
                         'conditions',
                         'medication'
@@ -801,7 +804,8 @@ const MantineMedicationForm = ({
               <Tabs.Panel value="labResults">
                 <Box mt="md">
                   {activeTab === 'labResults' && (
-                    <RecordLabResultsCard
+                    <RecordLinkCard
+                      kind="labResults"
                       recordPath="medications"
                       recordId={editingMedication?.id}
                       description={linkPanelDescription('labResults', 'medication')}

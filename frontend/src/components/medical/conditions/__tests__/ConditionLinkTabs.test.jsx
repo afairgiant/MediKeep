@@ -62,41 +62,43 @@ vi.mock('../../../shared/RecordVisitsTab', () => ({
     </div>
   ),
 }));
-vi.mock('../../../shared/RecordLabResultsCard', () => ({
-  default: props => (
-    <div
-      data-testid="record-lab-results"
-      data-record-path={props.recordPath}
-      data-record-id={props.recordId ?? ''}
-      data-view-mode={String(Boolean(props.isViewMode))}
-      data-pending={JSON.stringify(props.pendingLinks ?? null)}
-    >
-      {props.description}
-    </div>
-  ),
-}));
-vi.mock('../../../shared/ConditionMedicationsCard', () => ({
-  default: props => (
-    <div
-      data-testid="condition-medications"
-      data-condition-id={props.conditionId ?? ''}
-      data-patient-id={props.patientId ?? ''}
-      data-view-mode={String(Boolean(props.isViewMode))}
-      data-pending={JSON.stringify(props.pendingLinks ?? null)}
-    >
-      {props.description}
-      <button
-        type="button"
-        onClick={() =>
-          props.onPendingChange?.([
-            { entityId: 5, relevanceNote: 'n', purpose: null },
-          ])
-        }
+vi.mock('../../../shared/RecordLinkCard', () => ({
+  default: props => {
+    const testId = {
+      labResults: 'record-lab-results',
+      medications: 'condition-medications',
+      conditions: 'medication-conditions',
+    }[props.kind];
+    const addLabel = {
+      labResults: 'add-pending-lab-result',
+      medications: 'add-pending-medication',
+      conditions: 'add-pending-condition',
+    }[props.kind];
+    return (
+      <div
+        data-testid={testId}
+        data-record-path={props.recordPath}
+        data-record-id={props.recordId ?? ''}
+        data-condition-id={props.recordId ?? ''}
+        data-medication-id={props.recordId ?? ''}
+        data-patient-id={props.patientId ?? ''}
+        data-view-mode={String(Boolean(props.isViewMode))}
+        data-pending={JSON.stringify(props.pendingLinks ?? null)}
       >
-        add-pending-medication
-      </button>
-    </div>
-  ),
+        {props.description}
+        <button
+          type="button"
+          onClick={() =>
+            props.onPendingChange?.([
+              { entityId: 5, relevanceNote: 'n', purpose: null },
+            ])
+          }
+        >
+          {addLabel}
+        </button>
+      </div>
+    );
+  },
 }));
 
 const MEDS = 'shared:categories.medications';

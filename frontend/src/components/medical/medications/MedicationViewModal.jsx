@@ -30,11 +30,10 @@ import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import MedicationTreatmentsList from './MedicationTreatmentsList';
-import MedicationConditionsCard from '../../shared/MedicationConditionsCard';
+import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
-import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 
 const MedicationViewModal = ({
@@ -573,8 +572,10 @@ const MedicationViewModal = ({
           <Tabs.Panel value="conditions">
             <Box mt="md">
               {activeTab === 'conditions' && (
-                <MedicationConditionsCard
-                  medicationId={medication.id}
+                <RecordLinkCard
+                  kind="conditions"
+                  recordPath="medications"
+                  recordId={medication.id}
                   isViewMode
                   navigate={navigate}
                 />
@@ -586,7 +587,8 @@ const MedicationViewModal = ({
           <Tabs.Panel value="labResults">
             <Box mt="md">
               {activeTab === 'labResults' && (
-                <RecordLabResultsCard
+                <RecordLinkCard
+                  kind="labResults"
                   recordPath="medications"
                   recordId={medication.id}
                   isViewMode
