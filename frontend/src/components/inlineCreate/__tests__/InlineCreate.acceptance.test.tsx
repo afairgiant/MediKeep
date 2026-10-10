@@ -237,7 +237,7 @@ const openLinkTab = async (name: string) => {
     .getAllByRole('button', { name: 'common:buttons.link' })
     .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
   await user.click(menuButton);
-  await user.click(await screen.findByRole('menuitem', { name }));
+  await user.click(await screen.findByRole('menuitem', { name, hidden: true }));
   return user;
 };
 

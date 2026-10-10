@@ -147,7 +147,7 @@ const openLinkTab = async (name: string) => {
     .getAllByRole('button', { name: 'common:buttons.link' })
     .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
   await user.click(menuButton);
-  await user.click(await screen.findByRole('menuitem', { name }));
+  await user.click(await screen.findByRole('menuitem', { name, hidden: true }));
   return user;
 };
 
@@ -476,7 +476,9 @@ describe('LabResultFormWrapper', () => {
         .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
       await userEvent.click(menuButton);
       expect(
-        (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+        (await screen.findAllByRole('menuitem', { hidden: true })).map(
+          item => item.textContent
+        )
       ).toEqual(LINK_TABS);
     });
 
