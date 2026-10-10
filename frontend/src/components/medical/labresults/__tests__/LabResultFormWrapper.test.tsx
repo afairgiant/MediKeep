@@ -57,19 +57,69 @@ vi.mock('../TestComponentsTab', () => ({
 vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
-vi.mock('../../ConditionRelationships', () => ({
-  default: () => <div data-testid="condition-relationships" />,
+// The same card for conditions, medications, procedures and treatments; each button
+// hands the form a link the way the real card would
+const PENDING_LINK_BY_KEY: Record<string, Record<string, unknown>> = {
+  conditions: { entityId: 7, relevanceNote: 'cn', purpose: null },
+  medications: { entityId: 8, relevanceNote: 'mn', purpose: null },
+  procedures: { entityId: 9, relevanceNote: 'pn', purpose: null },
+  treatments: {
+    entityId: 10,
+    relevanceNote: 'tn',
+    purpose: 'monitoring',
+    expectedFrequency: 'weekly',
+  },
+};
+vi.mock('../../../../hooks/useLinkPanelDescription', () => ({
+  useLinkPanelDescription: () => (items: string, record: string) =>
+    `description:${items}:${record}`,
+}));
+vi.mock('../LabResultRecordLinksCard', () => ({
+  default: (props: {
+    linkKey: string;
+    labResultId?: number | null;
+    patientId?: number;
+    description?: string;
+    pendingLinks?: unknown;
+    onPendingChange?: (_next: unknown) => void;
+    onCountChange?: (_key: string, _count: number) => void;
+  }) => (
+    <div
+      data-testid={`links-card-${props.linkKey}`}
+      data-lab-result-id={props.labResultId ?? ''}
+      data-patient-id={props.patientId ?? ''}
+      data-description={props.description ?? ''}
+      data-pending={JSON.stringify(props.pendingLinks ?? null)}
+    >
+      <button
+        type="button"
+        onClick={() =>
+          props.onPendingChange?.([PENDING_LINK_BY_KEY[props.linkKey]])
+        }
+      >
+        add-pending-{props.linkKey}
+      </button>
+      <button
+        type="button"
+        onClick={() => props.onCountChange?.(props.linkKey, 4)}
+      >
+        set-count-{props.linkKey}
+      </button>
+    </div>
+  ),
 }));
 vi.mock('../../../shared/RecordVisitsCard', () => ({
   default: (props: {
     recordType: string;
     recordId?: number | null;
     patientId?: number;
+    description?: string;
     pendingLinks?: unknown;
     onPendingChange?: (_next: unknown) => void;
   }) => (
     <div
       data-testid="visits-card"
+      data-description={props.description ?? ''}
       data-record-type={props.recordType}
       data-record-id={props.recordId ?? ''}
       data-patient-id={props.patientId ?? ''}
@@ -87,15 +137,6 @@ vi.mock('../../../shared/RecordVisitsCard', () => ({
       </button>
     </div>
   ),
-}));
-vi.mock('../LabResultMedicationRelationships', () => ({
-  default: () => <div data-testid="medication-relationships" />,
-}));
-vi.mock('../LabResultProcedureRelationships', () => ({
-  default: () => <div data-testid="procedure-relationships" />,
-}));
-vi.mock('../LabResultTreatmentRelationships', () => ({
-  default: () => <div data-testid="treatment-relationships" />,
 }));
 
 vi.mock('../../../../hooks/useDateFormat', () => ({
@@ -480,6 +521,34 @@ describe('LabResultFormWrapper', () => {
       ).toEqual(LINK_TABS);
     });
 
+    test('a type picked from the Link menu is a tab only while it is open or has links', async () => {
+      render(<LabResultFormWrapper {...defaultProps} advancedCreate />);
+      const user = await openLinkTab('shared:categories.medications');
+      expect(
+        screen.getByRole('tab', {
+          name: 'shared:categories.medications (0)',
+        })
+      ).toBeInTheDocument();
+
+      // Leave it without linking anything: back into the Link menu, not an empty tab
+      await user.click(screen.getAllByRole('tab')[0]);
+      expect(
+        screen.queryByRole('tab', {
+          name: withCount('shared:categories.medications'),
+        })
+      ).not.toBeInTheDocument();
+      const menuButton = screen
+        .getAllByRole('button', { name: 'common:buttons.link' })
+        .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement;
+      await user.click(menuButton);
+      // The dropdown is still fading in under jsdom, so it is not yet "visible"
+      expect(
+        (await screen.findAllByRole('menuitem', { hidden: true })).map(
+          item => item.textContent
+        )
+      ).toContain('shared:categories.medications');
+    }, 20000);
+
     test('each linked-record tab shows its own section', async () => {
       render(
         <LabResultFormWrapper
@@ -488,11 +557,11 @@ describe('LabResultFormWrapper', () => {
         />
       );
       const sections: Array<[string, string]> = [
-        ['shared:categories.conditions', 'condition-relationships'],
+        ['shared:categories.conditions', 'links-card-conditions'],
         ['Visits', 'visits-card'],
-        ['shared:categories.medications', 'medication-relationships'],
-        ['shared:categories.procedures', 'procedure-relationships'],
-        ['shared:categories.treatments', 'treatment-relationships'],
+        ['shared:categories.medications', 'links-card-medications'],
+        ['shared:categories.procedures', 'links-card-procedures'],
+        ['shared:categories.treatments', 'links-card-treatments'],
       ];
       for (const [tab, testId] of sections) {
         await openTab(tab);
@@ -509,11 +578,11 @@ describe('LabResultFormWrapper', () => {
       );
       await openTab('shared:categories.medications');
       expect(
-        await screen.findByTestId('medication-relationships')
+        await screen.findByTestId('links-card-medications')
       ).toBeInTheDocument();
       expect(screen.queryByTestId('visits-card')).not.toBeInTheDocument();
       expect(
-        screen.queryByTestId('condition-relationships')
+        screen.queryByTestId('links-card-conditions')
       ).not.toBeInTheDocument();
     });
 
@@ -644,41 +713,63 @@ describe('LabResultFormWrapper', () => {
       ).not.toBeInTheDocument();
     });
 
-    test('uses the pending relationships picker when creating with advancedCreate enabled', async () => {
-      const conditions = [{ id: 1, diagnosis: 'Diabetes', status: 'active' }];
+    test('shows the same link card with no record id when creating with advancedCreate enabled', async () => {
       render(
-        <LabResultFormWrapper
-          {...defaultProps}
-          advancedCreate
-          conditions={conditions}
-        />
+        <LabResultFormWrapper {...defaultProps} advancedCreate patientId={9} />
       );
       await openLinkTab('shared:categories.conditions');
 
-      // Pending picker (create mode), not the edit-mode API-backed components
-      expect(
-        screen.getByPlaceholderText('common:modals.chooseConditionToLink')
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('condition-relationships')
-      ).not.toBeInTheDocument();
+      const card = screen.getByTestId('links-card-conditions');
+      expect(card).toHaveAttribute('data-lab-result-id', '');
+      expect(card).toHaveAttribute('data-patient-id', '9');
     });
 
-    test('uses the API-backed relationship components when editing an existing lab result', async () => {
-      const conditions = [{ id: 1, diagnosis: 'Diabetes', status: 'active' }];
+    test('says what each link panel is for', async () => {
       render(
         <LabResultFormWrapper
           {...defaultProps}
           editingItem={{ id: 1, test_name: 'CBC' }}
-          conditions={conditions}
+        />
+      );
+      for (const key of [
+        'conditions',
+        'medications',
+        'procedures',
+        'treatments',
+      ]) {
+        const user = userEvent.setup();
+        await user.click(
+          screen.getByRole('tab', {
+            name: withCount(`shared:categories.${key}`),
+          })
+        );
+        expect(await screen.findByTestId(`links-card-${key}`)).toHaveAttribute(
+          'data-description',
+          `description:${key}:labResult`
+        );
+      }
+      await userEvent.click(
+        screen.getByRole('tab', { name: withCount('Visits') })
+      );
+      expect(await screen.findByTestId('visits-card')).toHaveAttribute(
+        'data-description',
+        'description:visits:labResult'
+      );
+    }, 20000);
+
+    test('shows the same link card for the saved lab result when editing', async () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          editingItem={{ id: 1, test_name: 'CBC' }}
+          patientId={9}
         />
       );
       await openLinkTab('shared:categories.conditions');
 
-      expect(screen.getByTestId('condition-relationships')).toBeInTheDocument();
-      expect(
-        screen.queryByPlaceholderText('common:modals.chooseConditionToLink')
-      ).not.toBeInTheDocument();
+      const card = screen.getByTestId('links-card-conditions');
+      expect(card).toHaveAttribute('data-lab-result-id', '1');
+      expect(card).toHaveAttribute('data-patient-id', '9');
     });
 
     test('exposes pending-relationship methods to the parent via onPendingRelationshipsRef', () => {
@@ -703,68 +794,137 @@ describe('LabResultFormWrapper', () => {
       });
     });
 
-    test('uses the pending relationships picker for medications/procedures/treatments when creating with advancedCreate enabled', async () => {
-      const medications = [{ id: 1, medication_name: 'Metformin' }];
-      const procedures = [{ id: 1, procedure_name: 'Colonoscopy' }];
-      const treatments = [{ id: 1, treatment_name: 'Physical Therapy' }];
-      for (const [tab, placeholder] of [
-        ['shared:categories.medications', /chooseOneMedicationToLink/],
-        ['shared:categories.procedures', /chooseProcedureToLink/],
+    test('links chosen in the Add form are handed to the page in the API field names', async () => {
+      const onPendingRelationshipsRef = vi.fn();
+      const expected: Array<[string, string, string, unknown]> = [
+        [
+          'shared:categories.conditions',
+          'conditions',
+          'conditions',
+          [{ condition_id: 7, relevance_note: 'cn' }],
+        ],
+        [
+          'shared:categories.medications',
+          'medications',
+          'medications',
+          [{ medication_id: 8, relevance_note: 'mn' }],
+        ],
+        [
+          'shared:categories.procedures',
+          'procedures',
+          'procedures',
+          [{ procedure_id: 9, relevance_note: 'pn' }],
+        ],
         [
           'shared:categories.treatments',
-          /chooseTreatmentToLink|Choose a treatment to link/,
+          'treatments',
+          'treatments',
+          [
+            {
+              treatment_id: 10,
+              purpose: 'monitoring',
+              expected_frequency: 'weekly',
+              relevance_note: 'tn',
+            },
+          ],
         ],
-      ] as Array<[string, RegExp]>) {
+      ];
+      for (const [tab, key, pendingKey, pending] of expected) {
         // A fresh form each time: the Link menu reveals one type per form here
         const { unmount } = render(
           <LabResultFormWrapper
             {...defaultProps}
             advancedCreate
-            medications={medications}
-            procedures={procedures}
-            treatments={treatments}
+            onPendingRelationshipsRef={onPendingRelationshipsRef}
           />
         );
-        await openLinkTab(tab);
-        // The pending picker shows this tab's section, never the API-backed one
-        expect(screen.getByPlaceholderText(placeholder)).toBeInTheDocument();
-        expect(
-          screen.queryByTestId('medication-relationships')
-        ).not.toBeInTheDocument();
-        expect(
-          screen.queryByTestId('procedure-relationships')
-        ).not.toBeInTheDocument();
-        expect(
-          screen.queryByTestId('treatment-relationships')
-        ).not.toBeInTheDocument();
+        const user = await openLinkTab(tab);
+        await user.click(
+          screen.getByRole('button', { name: `add-pending-${key}` })
+        );
+        const methods = onPendingRelationshipsRef.mock.calls.at(-1)[0];
+        expect(methods.hasPendingRelationships()).toBe(true);
+        expect(methods.getPendingRelationships()[pendingKey]).toEqual(pending);
         unmount();
       }
-    }, 15000);
+    }, 20000);
 
-    test('uses the API-backed medication/procedure/treatment components when editing an existing lab result', async () => {
-      const medications = [{ id: 1, medication_name: 'Metformin' }];
-      const procedures = [{ id: 1, procedure_name: 'Colonoscopy' }];
-      const treatments = [{ id: 1, treatment_name: 'Physical Therapy' }];
+    test('pending links are handed back to the card as links', async () => {
+      render(<LabResultFormWrapper {...defaultProps} advancedCreate />);
+      const user = await openLinkTab('shared:categories.treatments');
+      await user.click(
+        screen.getByRole('button', { name: 'add-pending-treatments' })
+      );
+      expect(
+        JSON.parse(
+          screen.getByTestId('links-card-treatments').dataset.pending ?? 'null'
+        )
+      ).toEqual([
+        {
+          entityId: 10,
+          relevanceNote: 'tn',
+          purpose: 'monitoring',
+          expectedFrequency: 'weekly',
+        },
+      ]);
+    });
+
+    test('refreshes the page lists of saved links when the dialog closes after link activity', async () => {
+      const fetchers = {
+        fetchLabResultConditions: vi.fn(),
+        fetchLabResultMedications: vi.fn(),
+        fetchLabResultProcedures: vi.fn(),
+        fetchLabResultTreatments: vi.fn(),
+      };
+      const props = {
+        ...defaultProps,
+        editingItem: { id: 42, test_name: 'CBC' },
+        ...fetchers,
+      };
+      const { rerender } = render(<LabResultFormWrapper {...props} />);
+      const user = await openLinkTab('shared:categories.conditions');
+      await user.click(
+        screen.getByRole('button', { name: 'set-count-conditions' })
+      );
+      Object.values(fetchers).forEach(fetcher => fetcher.mockClear());
+
+      rerender(<LabResultFormWrapper {...props} isOpen={false} />);
+      Object.values(fetchers).forEach(fetcher =>
+        expect(fetcher).toHaveBeenCalledWith(42)
+      );
+    });
+
+    test('does not refresh the page lists on close when no link tab was opened', () => {
+      const fetchLabResultConditions = vi.fn();
+      const props = {
+        ...defaultProps,
+        editingItem: { id: 42, test_name: 'CBC' },
+        fetchLabResultConditions,
+      };
+      const { rerender } = render(<LabResultFormWrapper {...props} />);
+      fetchLabResultConditions.mockClear();
+      rerender(<LabResultFormWrapper {...props} isOpen={false} />);
+      expect(fetchLabResultConditions).not.toHaveBeenCalled();
+    });
+
+    test('the tab number follows the saved links as the card reports them', async () => {
       render(
         <LabResultFormWrapper
           {...defaultProps}
-          editingItem={{ id: 1, test_name: 'CBC' }}
-          medications={medications}
-          procedures={procedures}
-          treatments={treatments}
+          editingItem={{ id: 42, test_name: 'CBC' }}
+          labResultConditions={{ 42: [{ id: 1 }] }}
         />
       );
-      const sections: Array<[string, string]> = [
-        ['shared:categories.medications', 'medication-relationships'],
-        ['shared:categories.procedures', 'procedure-relationships'],
-        ['shared:categories.treatments', 'treatment-relationships'],
-      ];
-      for (const [tab, testId] of sections) {
-        await userEvent.click(
-          screen.getByRole('tab', { name: withCount(tab) })
-        );
-        expect(screen.getByTestId(testId)).toBeInTheDocument();
-      }
+      expect(
+        screen.getByRole('tab', { name: 'shared:categories.conditions (1)' })
+      ).toBeInTheDocument();
+      const user = await openLinkTab('shared:categories.conditions');
+      await user.click(
+        screen.getByRole('button', { name: 'set-count-conditions' })
+      );
+      expect(
+        screen.getByRole('tab', { name: 'shared:categories.conditions (4)' })
+      ).toBeInTheDocument();
     });
   });
 

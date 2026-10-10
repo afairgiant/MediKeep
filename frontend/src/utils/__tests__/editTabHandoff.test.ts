@@ -70,6 +70,14 @@ describe('editTabHandoff', () => {
     expect(getRememberedEditTab('conditions', 'basic')).toBe('labResults');
   });
 
+  it.each(['medications', 'procedures'] as const)(
+    'keeps the Lab Results tab of a %s dialog',
+    entity => {
+      rememberEditTab(entity, 'labResults');
+      expect(getRememberedEditTab(entity, 'basic')).toBe('labResults');
+    }
+  );
+
   it('expires so it cannot leak into a later Edit opened from a card', () => {
     rememberEditTab('procedures', 'clinical');
     vi.advanceTimersByTime(EDIT_TAB_TTL_MS - 1);

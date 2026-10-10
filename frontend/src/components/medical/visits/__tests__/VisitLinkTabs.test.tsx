@@ -25,6 +25,10 @@ vi.mock('../../../../services/api', () => ({ apiService: api }));
 vi.mock('../../../../services/api/symptomApi', () => ({
   symptomApi: { getAll: api.getSymptoms },
 }));
+vi.mock('../../../../hooks/useLinkPanelDescription', () => ({
+  useLinkPanelDescription: () => (items: string, record: string) =>
+    `description:${items}:${record}`,
+}));
 vi.mock('../../../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
@@ -117,10 +121,12 @@ interface TabProps {
   onPendingChange?: (_next: PendingLinks) => void;
   navigate?: (_path: string) => void;
   onSelectTab?: (_tab: string) => void;
+  /** The tab the buttons treat as open (the panels always show the rendered type) */
+  activeTab?: string;
 }
 
 const buildTree = (key: TypeKey, props: TabProps = {}) => {
-  const { onSelectTab, ...panelProps } = props;
+  const { onSelectTab, activeTab, ...panelProps } = props;
   return (
     <Tabs value={tabValue(key)}>
       <Tabs.List>
@@ -128,6 +134,7 @@ const buildTree = (key: TypeKey, props: TabProps = {}) => {
           visitId={props.visitId}
           pendingLinks={props.pendingLinks}
           isViewMode={props.isViewMode}
+          activeTab={activeTab}
           onSelectTab={onSelectTab}
         />
       </Tabs.List>
@@ -231,6 +238,26 @@ describe('VisitLinkTabButtons', () => {
     expect(screen.queryByRole('button', { name: I18N.link })).toBeNull();
   });
 
+  it.each([
+    ['procedures', 'procedures'],
+    ['labResults', 'labResults'],
+    ['conditions', 'conditions'],
+  ] as const)(
+    'says what the %s panel is for in the Add and Edit forms',
+    async (key, items) => {
+      renderTab(key);
+      expect(
+        await screen.findByText(`description:${items}:visit`)
+      ).toBeInTheDocument();
+    }
+  );
+
+  it('does not add the description to the read-only panel', async () => {
+    renderTab('procedures', { visitId: VISIT_ID, isViewMode: true });
+    await waitFor(() => expect(api.getEncounterLinks).toHaveBeenCalled());
+    expect(screen.queryByText(/^description:/)).toBeNull();
+  });
+
   it('view mode shows no link tabs for a visit without links', async () => {
     renderTab('procedures', {
       visitId: VISIT_ID,
@@ -258,7 +285,7 @@ describe('VisitLinkTabButtons', () => {
     ]);
   });
 
-  it('add mode: choosing a type from the menu shows its tab and opens it', async () => {
+  it('add mode: choosing a type from the menu asks to open its tab', async () => {
     const onSelectTab = vi.fn();
     renderTab('conditions', { onSelectTab });
     await openLinkMenu();
@@ -269,8 +296,41 @@ describe('VisitLinkTabButtons', () => {
     );
 
     expect(onSelectTab).toHaveBeenCalledWith('link-injuries');
+  });
+
+  it('add mode: a type opened from the menu is a tab only while it is open', async () => {
+    const { rerender } = renderTab('conditions', {
+      activeTab: 'link-injuries',
+    });
     expect(
       screen.getByRole('tab', { name: 'shared:categories.injuries (0)' })
+    ).toBeInTheDocument();
+
+    // The user moves to another tab without linking anything
+    rerender(buildTree('conditions', { activeTab: 'info' }));
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+    await openLinkMenu();
+    expect(
+      await screen.findByRole('menuitem', {
+        name: 'shared:categories.injuries',
+      })
+    ).toBeInTheDocument();
+  });
+
+  it('add mode: an opened type that gets a link stays a tab after the user leaves it', () => {
+    const { rerender } = renderTab('conditions', {
+      activeTab: 'link-injuries',
+    });
+    rerender(
+      buildTree('conditions', {
+        activeTab: 'info',
+        pendingLinks: {
+          injuries: [{ entityId: 1, relevanceNote: null, purpose: null }],
+        },
+      })
+    );
+    expect(
+      screen.getByRole('tab', { name: 'shared:categories.injuries (1)' })
     ).toBeInTheDocument();
   });
 
@@ -307,7 +367,7 @@ describe('VisitLinkTabButtons', () => {
     expect(screen.queryByRole('tab', { name: /injuries/ })).toBeNull();
   });
 
-  it('add mode keeps a tab once shown, even after its last pending link is removed', () => {
+  it('add mode: a tab whose last pending link is removed goes back into the Link menu', async () => {
     const withLink: PendingLinks = {
       procedures: [{ entityId: 1, relevanceNote: null, purpose: null }],
     };
@@ -317,8 +377,12 @@ describe('VisitLinkTabButtons', () => {
     ).toBeInTheDocument();
 
     rerender(buildTree('procedures', { pendingLinks: { procedures: [] } }));
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+    await openLinkMenu();
     expect(
-      screen.getByRole('tab', { name: 'shared:categories.procedures (0)' })
+      await screen.findByRole('menuitem', {
+        name: 'shared:categories.procedures',
+      })
     ).toBeInTheDocument();
   });
 

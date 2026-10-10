@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.v1.endpoints.encounter_links import register_record_encounter_routes
+from app.api.v1.endpoints.record_lab_result_links import (
+    register_record_lab_result_routes,
+)
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -456,3 +459,4 @@ def get_medication_treatments(
 
 
 register_record_encounter_routes(router, "medications")
+register_record_lab_result_routes(router, "medications")

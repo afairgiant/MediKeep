@@ -39,6 +39,10 @@ vi.mock('../../medical/MedicationRelationships', () => ({
 vi.mock('../../medical/LabResultRelationships', () => ({
   default: () => <div />,
 }));
+vi.mock('../../../hooks/useLinkPanelDescription', () => ({
+  useLinkPanelDescription: () => (items: string, record: string) =>
+    `description:${items}:${record}`,
+}));
 vi.mock('../../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
@@ -49,6 +53,7 @@ vi.mock('../RecordVisitsTab', () => ({
     recordId?: number | null;
     patientId?: number;
     isViewMode?: boolean;
+    description?: string;
     pendingLinks?: unknown;
     onPendingChange?: (_next: unknown) => void;
   }) => (
@@ -59,6 +64,7 @@ vi.mock('../RecordVisitsTab', () => ({
       data-patient-id={props.patientId ?? ''}
       data-view-mode={String(Boolean(props.isViewMode))}
       data-pending={JSON.stringify(props.pendingLinks ?? null)}
+      data-description={props.description ?? ''}
     >
       <button
         type="button"
@@ -79,6 +85,8 @@ const pending = [{ entityId: 3, relevanceNote: 'n', purpose: null }];
 interface Case {
   name: string;
   recordType: string;
+  /** The kind of record the form's link panels belong to (forms only) */
+  record?: string;
   mode: 'form' | 'view';
   /** Renders the component for a new record (form) or a saved one (view). */
   renderIt: (_extra?: Record<string, unknown>) => ReactElement;
@@ -108,6 +116,7 @@ const viewBase = () => ({
 const cases: Case[] = [
   {
     name: 'ProcedureFormWrapper',
+    record: 'procedure',
     recordType: 'procedures',
     mode: 'form',
     renderIt: extra => (
@@ -127,6 +136,7 @@ const cases: Case[] = [
   },
   {
     name: 'InjuryFormWrapper',
+    record: 'injury',
     recordType: 'injuries',
     mode: 'form',
     renderIt: extra => (
@@ -150,6 +160,7 @@ const cases: Case[] = [
   },
   {
     name: 'ConditionFormWrapper',
+    record: 'condition',
     recordType: 'conditions',
     mode: 'form',
     renderIt: extra => (
@@ -169,6 +180,7 @@ const cases: Case[] = [
   },
   {
     name: 'MantineSymptomForm',
+    record: 'symptom',
     recordType: 'symptoms',
     mode: 'form',
     renderIt: extra => (
@@ -265,6 +277,15 @@ describe.each(cases)('$name - Visits tab', c => {
       );
     });
 
+    it('says what the Visits panel is for, in the Add and Edit forms', async () => {
+      render(c.renderIt());
+      await openVisitsTab();
+      expect(await screen.findByTestId('record-visits')).toHaveAttribute(
+        'data-description',
+        `description:visits:${c.record}`
+      );
+    });
+
     it('edit mode: passes the saved record id', async () => {
       render((c.renderEdit as () => ReactElement)());
       await openVisitsTab();
@@ -287,10 +308,11 @@ describe.each(cases)('$name - Visits tab', c => {
       });
     });
   } else {
-    it('view mode: read-only for the viewed record', async () => {
+    it('view mode: read-only for the viewed record, without the description', async () => {
       render(c.renderIt());
       await openVisitsTab();
       const tab = await screen.findByTestId('record-visits');
+      expect(tab).toHaveAttribute('data-description', '');
       expect(tab).toHaveAttribute('data-record-type', c.recordType);
       expect(tab).toHaveAttribute('data-record-id', '42');
       expect(tab).toHaveAttribute('data-view-mode', 'true');

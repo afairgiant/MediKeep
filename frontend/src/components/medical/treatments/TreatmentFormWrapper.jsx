@@ -409,6 +409,7 @@ const TreatmentFormWrapper = ({
                 <CollapsibleLinkTabs
                   items={linkTabItems}
                   mode={linkTabMode}
+                  activeTab={activeTab}
                   onSelectTab={setActiveTab}
                 />
               )}

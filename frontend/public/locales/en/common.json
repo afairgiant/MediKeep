@@ -1016,8 +1016,33 @@
       "title": "Procedure Details"
     }
   },
+  "linkPanels": {
+    "addRelated": "Add {{items}} related to {{record}}.",
+    "items": {
+      "medications": "Medications",
+      "labResults": "Lab Results",
+      "visits": "Visits",
+      "procedures": "Procedures",
+      "treatments": "Treatments",
+      "injuries": "Injuries",
+      "symptoms": "Symptoms",
+      "conditions": "Conditions",
+      "equipment": "Medical Equipment"
+    },
+    "records": {
+      "visit": "this Visit",
+      "labResult": "this Lab Result",
+      "medication": "this Medication",
+      "procedure": "this Procedure",
+      "condition": "this Condition",
+      "treatment": "this Treatment",
+      "injury": "this Injury",
+      "symptom": "this Symptom"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "The record was created, but some visit links could not be saved. You can add them by editing the record."
+    "linkFailed": "The record was created, but some visit links could not be saved. You can add them by editing the record.",
+    "labResultLinkFailed": "The record was created, but some lab result links could not be saved. You can add them by editing the record."
   },
   "search": {
     "activeFilterCount": "{{count}} active filters",

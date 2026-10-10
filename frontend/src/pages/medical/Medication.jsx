@@ -59,6 +59,7 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 import logger from '../../services/logger';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
+import { linkPendingLabResultsOrWarn } from '../../utils/recordLabResultLinks';
 import {
   INITIAL_MEDICATION_FORM_DATA,
   buildMedicationPayload,
@@ -234,6 +235,7 @@ const Medication = () => {
     ...INITIAL_MEDICATION_FORM_DATA,
     condition_ids: [],
     pending_visit_links: [],
+    pending_lab_result_links: [],
   });
 
   const {
@@ -290,6 +292,7 @@ const Medication = () => {
       ...INITIAL_MEDICATION_FORM_DATA,
       condition_ids: [],
       pending_visit_links: [],
+      pending_lab_result_links: [],
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -397,6 +400,11 @@ const Medication = () => {
             'medications',
             resultId,
             formData.pending_visit_links
+          );
+          await linkPendingLabResultsOrWarn(
+            'medications',
+            resultId,
+            formData.pending_lab_result_links
           );
         }
 

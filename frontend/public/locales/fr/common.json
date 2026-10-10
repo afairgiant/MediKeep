@@ -1016,8 +1016,33 @@
       "title": "Détails de la procédure"
     }
   },
+  "linkPanels": {
+    "addRelated": "Ajoutez {{items}} qui concernent {{record}}.",
+    "items": {
+      "medications": "des médicaments",
+      "labResults": "des résultats d'analyse",
+      "visits": "des visites",
+      "procedures": "des procédures",
+      "treatments": "des traitements",
+      "injuries": "des blessures",
+      "symptoms": "des symptômes",
+      "conditions": "des conditions",
+      "equipment": "des équipements médicaux"
+    },
+    "records": {
+      "visit": "cette visite",
+      "labResult": "ce résultat d'analyse",
+      "medication": "ce médicament",
+      "procedure": "cette procédure",
+      "condition": "cette condition",
+      "treatment": "ce traitement",
+      "injury": "cette blessure",
+      "symptom": "ce symptôme"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "L'entrée a été créée, mais certains liens de visite n'ont pas pu être sauvegardés. Vous pouvez les ajouter en éditant l'entrée."
+    "linkFailed": "L'entrée a été créée, mais certains liens de visite n'ont pas pu être sauvegardés. Vous pouvez les ajouter en éditant l'entrée.",
+    "labResultLinkFailed": "L'entrée a été créée, mais certains liens vers des résultats d'analyse n'ont pas pu être sauvegardés. Vous pouvez les ajouter en éditant l'entrée."
   },
   "search": {
     "activeFilterCount": "{{count}} filtre(s) actif(s)",

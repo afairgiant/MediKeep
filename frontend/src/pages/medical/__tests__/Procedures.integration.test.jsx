@@ -120,6 +120,7 @@ vi.mock('../../../services/api', () => ({
     updateProcedure: vi.fn(() => Promise.resolve({})),
     deleteProcedure: vi.fn(() => Promise.resolve({})),
     createRecordEncounterLinksBulk: vi.fn(() => Promise.resolve([])),
+    createRecordLabResultLink: vi.fn(() => Promise.resolve({})),
   },
 }));
 vi.mock('../../../services/logger', () => ({
@@ -369,6 +370,16 @@ vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
           }
         >
           add-pending-visit
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            handleChange('pending_lab_result_links', [
+              { entityId: 7, relevanceNote: 'lab note', purpose: null },
+            ])
+          }
+        >
+          add-pending-lab-result
         </button>
         <form data-testid="procedure-form" onSubmit={onSubmit}>
           <label>
@@ -828,6 +839,41 @@ describe('Procedures Page Integration Tests', () => {
       ).toBeLessThan(mockCompleteFormSubmission.mock.invocationCallOrder[0]);
     });
 
+    it('links the lab results chosen in the Add form once the procedure is created (#1128)', async () => {
+      apiService.createRecordLabResultLink.mockClear();
+      render(<Procedures />);
+      await userEvent.click(screen.getByText('procedures.addProcedure'));
+      const form = screen.getByTestId('form-modal');
+
+      fireEvent.change(
+        within(form).getByRole('textbox', {
+          name: /procedures\.form\.procedureName/i,
+        }),
+        { target: { name: 'procedure_name', value: 'Blood Test' } }
+      );
+      fireEvent.change(
+        within(form).getByLabelText(/procedures\.form\.procedureDate/i),
+        { target: { name: 'procedure_date', value: '2024-02-15' } }
+      );
+      await userEvent.click(within(form).getByText('add-pending-lab-result'));
+      await userEvent.click(within(form).getByText('buttons.submit'));
+
+      await vi.waitFor(() =>
+        expect(apiService.createRecordLabResultLink).toHaveBeenCalledWith(
+          'procedures',
+          99,
+          { lab_result_id: 7, relevance_note: 'lab note' }
+        )
+      );
+      // The pending list is form state only and never part of the create payload
+      expect(mockCreateItem.mock.calls[0][0]).not.toHaveProperty(
+        'pending_lab_result_links'
+      );
+      expect(
+        apiService.createRecordLabResultLink.mock.invocationCallOrder[0]
+      ).toBeLessThan(mockCompleteFormSubmission.mock.invocationCallOrder[0]);
+    });
+
     it('does not link visits when editing an existing procedure', async () => {
       render(<Procedures />);
       const card1 = screen.getByTestId('card-wrapper-1');
@@ -849,6 +895,7 @@ describe('Procedures Page Integration Tests', () => {
 
       await vi.waitFor(() => expect(mockUpdateItem).toHaveBeenCalled());
       expect(apiService.createRecordEncounterLinksBulk).not.toHaveBeenCalled();
+      expect(apiService.createRecordLabResultLink).not.toHaveBeenCalled();
     });
 
     it('opens edit form with pre-filled data when edit button is clicked', async () => {

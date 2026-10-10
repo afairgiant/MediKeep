@@ -60,6 +60,7 @@ export const LAB_LINK_TABS = [
  *   while not known); for an unsaved lab result these are the pending links
  * - pendingVisitLinks: visits chosen in the Add form
  * - isViewMode: the read-only dialog
+ * - activeTab: the open tab; a type opened from the "Link" menu stays while it is open
  * - onSelectTab: called with the tab value when the "Link" menu reveals a type
  */
 const LabResultLinkTabButtons = ({
@@ -67,6 +68,7 @@ const LabResultLinkTabButtons = ({
   counts = {},
   pendingVisitLinks,
   isViewMode = false,
+  activeTab,
   onSelectTab,
 }) => {
   const { t } = useTranslation(['shared']);
@@ -78,14 +80,15 @@ const LabResultLinkTabButtons = ({
   );
 
   const mode = linkTabMode(isViewMode, Boolean(labResultId));
-  const { isShown, hidden, reveal } = useLinkTabVisibility(
+  const { isShown, hidden } = useLinkTabVisibility(
     LAB_LINK_TABS.map(({ value, countKey, labelKey, Icon }) => ({
       key: value,
       label: countKey ? t(labelKey) : t('shared:tabs.visits', 'Visits'),
       icon: Icon ?? IconStethoscope,
       count: countKey ? counts[countKey] : visitsCount,
     })),
-    mode
+    mode,
+    activeTab
   );
 
   return (
@@ -110,10 +113,7 @@ const LabResultLinkTabButtons = ({
       {mode === 'add' && (
         <LinkTabMenu
           hidden={hidden}
-          onPick={value => {
-            reveal(value);
-            onSelectTab?.(value);
-          }}
+          onPick={value => onSelectTab?.(value)}
         />
       )}
     </>
@@ -130,6 +130,7 @@ LabResultLinkTabButtons.propTypes = {
   }),
   pendingVisitLinks: PropTypes.array,
   isViewMode: PropTypes.bool,
+  activeTab: PropTypes.string,
   onSelectTab: PropTypes.func,
 };
 

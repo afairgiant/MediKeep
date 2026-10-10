@@ -1016,8 +1016,33 @@
       "title": "Ingreppsinformation"
     }
   },
+  "linkPanels": {
+    "addRelated": "Lägg till {{items}} som hör till {{record}}.",
+    "items": {
+      "medications": "mediciner",
+      "labResults": "laboratorieresultat",
+      "visits": "besök",
+      "procedures": "ingrepp",
+      "treatments": "behandlingar",
+      "injuries": "skador",
+      "symptoms": "symtom",
+      "conditions": "tillstånd",
+      "equipment": "medicinsk utrustning"
+    },
+    "records": {
+      "visit": "detta besök",
+      "labResult": "detta laboratorieresultat",
+      "medication": "denna medicin",
+      "procedure": "detta ingrepp",
+      "condition": "detta tillstånd",
+      "treatment": "denna behandling",
+      "injury": "denna skada",
+      "symptom": "detta symtom"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "Posten skapades, men vissa besökslänkar kunde inte sparas. Du kan lägga till dem genom att redigera posten."
+    "linkFailed": "Posten skapades, men vissa besökslänkar kunde inte sparas. Du kan lägga till dem genom att redigera posten.",
+    "labResultLinkFailed": "Posten skapades, men vissa länkar till laboratorieresultat kunde inte sparas. Du kan lägga till dem genom att redigera posten."
   },
   "search": {
     "activeFilterCount": "{{count}} aktiva filter",

@@ -23,6 +23,7 @@ import {
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
@@ -36,9 +37,10 @@ import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 
 const ProcedureFormWrapper = ({
   formError,
@@ -59,6 +61,7 @@ const ProcedureFormWrapper = ({
   onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
+  const linkPanelDescription = useLinkPanelDescription();
   // Set when this dialog was opened from inside another one (inline create)
   const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -180,7 +183,14 @@ const ProcedureFormWrapper = ({
                 {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
               {!subDialog && (
-                <RecordVisitsTabButton recordType="procedures" recordId={editingItem?.id} pendingLinks={formData.pending_visit_links} />
+                <RecordLinkTabButtons
+                  recordPath="procedures"
+                  recordId={editingItem?.id}
+                  pendingVisitLinks={formData.pending_visit_links}
+                  pendingLabResultLinks={formData.pending_lab_result_links}
+                  activeTab={activeTab}
+                  onSelectTab={setActiveTab}
+                />
               )}
               <Tabs.Tab
                 value="documents"
@@ -583,11 +593,38 @@ const ProcedureFormWrapper = ({
                     <RecordVisitsTab
                       recordType="procedures"
                       recordId={editingItem?.id}
+                      description={linkPanelDescription('visits', 'procedure')}
                       patientId={patientId}
                       pendingLinks={formData.pending_visit_links}
                       onPendingChange={next =>
                         onInputChange({
                           target: { name: 'pending_visit_links', value: next },
+                        })
+                      }
+                      navigate={navigate}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Lab Results Tab (not offered in a sub-dialog: nesting stays one level deep) */}
+            {!subDialog && (
+              <Tabs.Panel value="labResults">
+                <Box mt="md">
+                  {activeTab === 'labResults' && (
+                    <RecordLabResultsCard
+                      recordPath="procedures"
+                      recordId={editingItem?.id}
+                      description={linkPanelDescription('labResults', 'procedure')}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_lab_result_links}
+                      onPendingChange={next =>
+                        onInputChange({
+                          target: {
+                            name: 'pending_lab_result_links',
+                            value: next,
+                          },
                         })
                       }
                       navigate={navigate}

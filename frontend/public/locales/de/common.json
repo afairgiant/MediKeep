@@ -1016,8 +1016,33 @@
       "title": "Eingriffsdetails"
     }
   },
+  "linkPanels": {
+    "addRelated": "{{items}} hinzufügen, die zu {{record}} gehören.",
+    "items": {
+      "medications": "Medikamente",
+      "labResults": "Laborergebnisse",
+      "visits": "Besuche",
+      "procedures": "Eingriffe",
+      "treatments": "Behandlungen",
+      "injuries": "Verletzungen",
+      "symptoms": "Symptome",
+      "conditions": "Erkrankungen",
+      "equipment": "Medizinische Geräte"
+    },
+    "records": {
+      "visit": "diesem Besuch",
+      "labResult": "diesem Laborergebnis",
+      "medication": "diesem Medikament",
+      "procedure": "diesem Eingriff",
+      "condition": "dieser Erkrankung",
+      "treatment": "dieser Behandlung",
+      "injury": "dieser Verletzung",
+      "symptom": "diesem Symptom"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "Der Eintrag wurde erstellt, aber einige Terminverknüpfungen konnten nicht gespeichert werden. Sie können sie durch Bearbeiten des Eintrags hinzufügen."
+    "linkFailed": "Der Eintrag wurde erstellt, aber einige Terminverknüpfungen konnten nicht gespeichert werden. Sie können sie durch Bearbeiten des Eintrags hinzufügen.",
+    "labResultLinkFailed": "Der Eintrag wurde erstellt, aber einige Verknüpfungen mit Laborergebnissen konnten nicht gespeichert werden. Sie können sie durch Bearbeiten des Eintrags hinzufügen."
   },
   "search": {
     "activeFilterCount": "{{count}} aktive Filter",

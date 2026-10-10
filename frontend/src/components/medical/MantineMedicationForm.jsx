@@ -35,6 +35,7 @@ import {
   IconSend,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useLinkPanelDescription } from '../../hooks/useLinkPanelDescription';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import { getReminderBlockerDescriptors, REMINDER_BLOCKERS } from '../../utils/medicationReminders';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
@@ -49,8 +50,9 @@ import { apiService } from '../../services/api';
 import notificationApi from '../../services/api/notificationApi';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import RecordVisitsTab from '../shared/RecordVisitsTab';
+import RecordLabResultsCard from '../shared/RecordLabResultsCard';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../shared/RecordVisitsTabButton';
+import RecordLinkTabButtons from '../shared/RecordLinkTabButtons';
 import { useSubDialog } from '../../contexts/SubDialogContext';
 
 const REMINDER_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -82,6 +84,7 @@ const MantineMedicationForm = ({
 }) => {
   // Translation
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  const linkPanelDescription = useLinkPanelDescription();
   // Set when this dialog was opened from inside another one (inline create)
   const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -618,10 +621,13 @@ const MantineMedicationForm = ({
                 {t('medications.reminders.tabLabel', 'Reminders')}
               </Tabs.Tab>
               {!subDialog && (
-                <RecordVisitsTabButton
-                  recordType="medications"
+                <RecordLinkTabButtons
+                  recordPath="medications"
                   recordId={editingMedication?.id}
-                  pendingLinks={formData.pending_visit_links}
+                  pendingVisitLinks={formData.pending_visit_links}
+                  pendingLabResultLinks={formData.pending_lab_result_links}
+                  activeTab={activeTab}
+                  onSelectTab={setActiveTab}
                 />
               )}
               <Tabs.Tab
@@ -800,11 +806,38 @@ const MantineMedicationForm = ({
                     <RecordVisitsTab
                       recordType="medications"
                       recordId={editingMedication?.id}
+                      description={linkPanelDescription('visits', 'medication')}
                       patientId={patientId}
                       pendingLinks={formData.pending_visit_links}
                       onPendingChange={next =>
                         onInputChange({
                           target: { name: 'pending_visit_links', value: next },
+                        })
+                      }
+                      navigate={navigate}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Lab Results Tab (not offered in a sub-dialog: nesting stays one level deep) */}
+            {!subDialog && (
+              <Tabs.Panel value="labResults">
+                <Box mt="md">
+                  {activeTab === 'labResults' && (
+                    <RecordLabResultsCard
+                      recordPath="medications"
+                      recordId={editingMedication?.id}
+                      description={linkPanelDescription('labResults', 'medication')}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_lab_result_links}
+                      onPendingChange={next =>
+                        onInputChange({
+                          target: {
+                            name: 'pending_lab_result_links',
+                            value: next,
+                          },
                         })
                       }
                       navigate={navigate}

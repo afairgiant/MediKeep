@@ -20,15 +20,16 @@ import {
   IconNotes,
   IconFileText,
   IconEdit,
-  IconFlask,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTagColors } from '../../../hooks/useTagColors';
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import LabResultRelationships from '../LabResultRelationships';
-import MedicationRelationships from '../MedicationRelationships';
+import ConditionMedicationsCard from '../../shared/ConditionMedicationsCard';
+import ConditionMedicationsTabButton from '../../shared/ConditionMedicationsTabButton';
+import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
+import RecordLabResultsTabButton from '../../shared/RecordLabResultsTabButton';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
@@ -38,12 +39,9 @@ const ConditionViewModal = ({
   onClose,
   condition,
   onEdit,
-  medications = [],
   practitioners = [],
   onPractitionerClick,
   onError,
-  conditionMedications = {},
-  fetchConditionMedications,
   navigate,
   disableEdit = false,
   disableEditTooltip,
@@ -183,12 +181,11 @@ const ConditionViewModal = ({
             >
               {t('shared:tabs.clinicalDetails', 'Clinical Details')}
             </Tabs.Tab>
-            <Tabs.Tab
-              value="labResults"
-              leftSection={<IconFlask size={16} />}
-            >
-              {t('shared:tabs.labResults', 'Lab Results')}
-            </Tabs.Tab>
+            <ConditionMedicationsTabButton conditionId={condition.id} />
+            <RecordLabResultsTabButton
+              recordPath="conditions"
+              recordId={condition.id}
+            />
             <RecordVisitsTabButton recordType="conditions" recordId={condition.id} />
             <Tabs.Tab
               value="documents"
@@ -344,21 +341,6 @@ const ConditionViewModal = ({
                   </Stack>
                 </div>
 
-                {/* Linked Medications */}
-                <div>
-                  <Title order={4} mb="sm">
-                    {t('labels.linkedMedications', 'Linked Medications')}
-                  </Title>
-                  <MedicationRelationships
-                    conditionId={condition.id}
-                    conditionMedications={conditionMedications}
-                    medications={medications}
-                    fetchConditionMedications={fetchConditionMedications}
-                    navigate={navigate}
-                    isViewMode={true}
-                  />
-                </div>
-
                 {/* Tags Section */}
                 {condition.tags && condition.tags.length > 0 && (
                   <div>
@@ -470,20 +452,30 @@ const ConditionViewModal = ({
             </Box>
           </Tabs.Panel>
 
+          {/* Medications Tab */}
+          <Tabs.Panel value="medications">
+            <Box mt="md">
+              {activeTab === 'medications' && (
+                <ConditionMedicationsCard
+                  conditionId={condition.id}
+                  isViewMode
+                  navigate={navigate}
+                />
+              )}
+            </Box>
+          </Tabs.Panel>
+
           {/* Lab Results Tab */}
           <Tabs.Panel value="labResults">
             <Box mt="md">
-              <Stack gap="lg">
-                <div>
-                  <Title order={4} mb="sm">
-                    {t('labels.linkedLabResults', 'Linked Lab Results')}
-                  </Title>
-                  <LabResultRelationships
-                    conditionId={condition.id}
-                    navigate={navigate}
-                  />
-                </div>
-              </Stack>
+              {activeTab === 'labResults' && (
+                <RecordLabResultsCard
+                  recordPath="conditions"
+                  recordId={condition.id}
+                  isViewMode
+                  navigate={navigate}
+                />
+              )}
             </Box>
           </Tabs.Panel>
 

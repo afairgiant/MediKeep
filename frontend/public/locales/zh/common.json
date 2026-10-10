@@ -1015,8 +1015,33 @@
       "title": "手术详情"
     }
   },
+  "linkPanels": {
+    "addRelated": "添加与{{record}}相关的{{items}}。",
+    "items": {
+      "medications": "药物",
+      "labResults": "化验结果",
+      "visits": "就诊",
+      "procedures": "医疗程序",
+      "treatments": "治疗",
+      "injuries": "外伤史",
+      "symptoms": "症状",
+      "conditions": "疾病状况",
+      "equipment": "医疗设备"
+    },
+    "records": {
+      "visit": "此就诊",
+      "labResult": "此化验结果",
+      "medication": "此药物",
+      "procedure": "此医疗程序",
+      "condition": "此疾病状况",
+      "treatment": "此治疗",
+      "injury": "此外伤史",
+      "symptom": "此症状"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "记录已创建，但部分就诊关联未能保存。您可以通过编辑记录来添加。"
+    "linkFailed": "记录已创建，但部分就诊关联未能保存。您可以通过编辑记录来添加。",
+    "labResultLinkFailed": "记录已创建，但部分化验结果关联未能保存。您可以通过编辑记录来添加。"
   },
   "search": {
     "activeFilterCount": "{{count}}个激活筛选",

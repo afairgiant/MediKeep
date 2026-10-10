@@ -79,6 +79,8 @@ vi.mock('../../../services/api', () => ({
     getPractitioners: vi.fn(() => Promise.resolve([])),
     getConditionMedications: vi.fn(() => Promise.resolve([])),
     createConditionMedicationsBulk: vi.fn(() => Promise.resolve([])),
+    createRecordLabResultLink: vi.fn(() => Promise.resolve({})),
+    createRecordEncounterLinksBulk: vi.fn(() => Promise.resolve([])),
   },
 }));
 vi.mock('../../../services/logger', () => ({
@@ -365,6 +367,29 @@ vi.mock('../../../components/medical/conditions', () => ({
             value={formData.notes || ''}
             onChange={onInputChange}
           />
+          {[
+            ['pending_medication_links', 'medication', 4, 'med note'],
+            ['pending_lab_result_links', 'lab-result', 7, 'lab note'],
+            ['pending_visit_links', 'visit', 5, 'visit note'],
+          ].map(([field, label, id, note]) => (
+            <button
+              key={field}
+              type="button"
+              data-testid={`add-pending-${label}`}
+              onClick={() =>
+                onInputChange({
+                  target: {
+                    name: field,
+                    value: [
+                      { entityId: id, relevanceNote: note, purpose: null },
+                    ],
+                  },
+                })
+              }
+            >
+              {`Add pending ${label}`}
+            </button>
+          ))}
           <button type="submit">Submit</button>
           <button type="button" onClick={onClose}>
             Cancel
@@ -569,6 +594,124 @@ describe('Conditions Page Integration Tests', () => {
             patient_id: 1,
           })
         );
+      });
+    });
+
+    describe('links chosen in the Add form (#1128)', () => {
+      const submitNewCondition = async (
+        pendingButtons,
+        createResult = { id: 10 }
+      ) => {
+        const mockCreateItem = vi.fn().mockResolvedValue(createResult);
+        useMedicalData.mockReturnValue({
+          items: mockConditions,
+          currentPatient: { id: 1 },
+          loading: false,
+          error: null,
+          successMessage: null,
+          createItem: mockCreateItem,
+          updateItem: vi.fn(),
+          deleteItem: vi.fn(),
+          refreshData: vi.fn(),
+          clearError: vi.fn(),
+          setError: vi.fn(),
+          setSuccessMessage: vi.fn(),
+        });
+        renderWithPatient(<Conditions />);
+        await userEvent.click(screen.getByTestId('add-button'));
+        const form = screen.getByTestId('form-modal');
+        fireEvent.change(within(form).getByLabelText('Diagnosis *'), {
+          target: { value: 'Migraine Headache', name: 'diagnosis' },
+        });
+        for (const id of pendingButtons) {
+          await userEvent.click(within(form).getByTestId(id));
+        }
+        fireEvent.click(within(form).getByText('Submit'));
+        return mockCreateItem;
+      };
+
+      beforeEach(async () => {
+        const { apiService } = await import('../../../services/api');
+        apiService.createConditionMedicationsBulk.mockClear();
+        apiService.createRecordLabResultLink.mockClear();
+        apiService.createRecordEncounterLinksBulk.mockClear();
+      });
+
+      test('links the medications, lab results and visits once the condition is created', async () => {
+        const { apiService } = await import('../../../services/api');
+        const mockCreateItem = await submitNewCondition([
+          'add-pending-medication',
+          'add-pending-lab-result',
+          'add-pending-visit',
+        ]);
+
+        await waitFor(() => {
+          expect(
+            apiService.createConditionMedicationsBulk
+          ).toHaveBeenCalledWith(10, {
+            medication_ids: [4],
+            relevance_note: 'med note',
+          });
+          expect(apiService.createRecordLabResultLink).toHaveBeenCalledWith(
+            'conditions',
+            10,
+            { lab_result_id: 7, relevance_note: 'lab note' }
+          );
+          expect(
+            apiService.createRecordEncounterLinksBulk
+          ).toHaveBeenCalledWith('conditions', 10, {
+            encounter_ids: [5],
+            relevance_note: 'visit note',
+          });
+        });
+        // The pending lists are form state only, never part of the create payload
+        const payload = mockCreateItem.mock.calls[0][0];
+        expect(payload).not.toHaveProperty('pending_medication_links');
+        expect(payload).not.toHaveProperty('pending_medication_ids');
+        expect(payload).not.toHaveProperty('pending_lab_result_links');
+        expect(payload).not.toHaveProperty('pending_visit_links');
+      });
+
+      test('makes no link requests when nothing was chosen', async () => {
+        const { apiService } = await import('../../../services/api');
+        const mockCreateItem = await submitNewCondition([]);
+        await waitFor(() => expect(mockCreateItem).toHaveBeenCalled());
+        expect(
+          apiService.createConditionMedicationsBulk
+        ).not.toHaveBeenCalled();
+        expect(apiService.createRecordLabResultLink).not.toHaveBeenCalled();
+        expect(
+          apiService.createRecordEncounterLinksBulk
+        ).not.toHaveBeenCalled();
+      });
+
+      test('warns, and keeps the condition, when a medication cannot be linked', async () => {
+        const { apiService } = await import('../../../services/api');
+        const { notifications } = await import('@mantine/notifications');
+        notifications.show.mockClear?.();
+        apiService.createConditionMedicationsBulk.mockRejectedValueOnce(
+          new Error('boom')
+        );
+        await submitNewCondition(['add-pending-medication']);
+
+        await waitFor(() =>
+          expect(notifications.show).toHaveBeenCalledWith(
+            expect.objectContaining({ color: 'yellow' })
+          )
+        );
+      });
+
+      test('does not link anything when the condition could not be created', async () => {
+        const { apiService } = await import('../../../services/api');
+        const mockCreateItem = await submitNewCondition(
+          ['add-pending-medication', 'add-pending-lab-result'],
+          null
+        );
+        await waitFor(() => expect(mockCreateItem).toHaveBeenCalled());
+        expect(
+          apiService.createConditionMedicationsBulk
+        ).not.toHaveBeenCalled();
+        expect(apiService.createRecordLabResultLink).not.toHaveBeenCalled();
       });
     });
 

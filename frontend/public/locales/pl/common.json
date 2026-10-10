@@ -1016,8 +1016,33 @@
       "title": "Szczegóły procedury"
     }
   },
+  "linkPanels": {
+    "addRelated": "Dodaj {{items}} powiązane z {{record}}.",
+    "items": {
+      "medications": "leki",
+      "labResults": "wyniki laboratoryjne",
+      "visits": "wizyty",
+      "procedures": "procedury",
+      "treatments": "zabiegi",
+      "injuries": "urazy",
+      "symptoms": "objawy",
+      "conditions": "schorzenia",
+      "equipment": "urządzenia medyczne"
+    },
+    "records": {
+      "visit": "tą wizytą",
+      "labResult": "tym wynikiem laboratoryjnym",
+      "medication": "tym lekiem",
+      "procedure": "tą procedurą",
+      "condition": "tym schorzeniem",
+      "treatment": "tym zabiegiem",
+      "injury": "tym urazem",
+      "symptom": "tym objawem"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "Rekord został utworzony, ale nie udało się zapisać niektórych powiązań z wizytami. Możesz je dodać, edytując rekord."
+    "linkFailed": "Rekord został utworzony, ale nie udało się zapisać niektórych powiązań z wizytami. Możesz je dodać, edytując rekord.",
+    "labResultLinkFailed": "Rekord został utworzony, ale nie udało się zapisać niektórych powiązań z wynikami laboratoryjnymi. Możesz je dodać, edytując rekord."
   },
   "search": {
     "activeFilterCount": "{{count}} aktywnych filtrów",

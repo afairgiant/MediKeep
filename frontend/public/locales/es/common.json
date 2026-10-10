@@ -1016,8 +1016,33 @@
       "title": "Detalles del procedimiento"
     }
   },
+  "linkPanels": {
+    "addRelated": "Añada {{items}} que se relacionan con {{record}}.",
+    "items": {
+      "medications": "medicamentos",
+      "labResults": "resultados de laboratorio",
+      "visits": "visitas",
+      "procedures": "procedimientos",
+      "treatments": "tratamientos",
+      "injuries": "lesiones",
+      "symptoms": "síntomas",
+      "conditions": "condiciones",
+      "equipment": "equipos médicos"
+    },
+    "records": {
+      "visit": "esta visita",
+      "labResult": "este resultado de laboratorio",
+      "medication": "este medicamento",
+      "procedure": "este procedimiento",
+      "condition": "esta condición",
+      "treatment": "este tratamiento",
+      "injury": "esta lesión",
+      "symptom": "este síntoma"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "El registro se creó, pero no se pudieron guardar algunos vínculos con visitas. Puede añadirlos editando el registro."
+    "linkFailed": "El registro se creó, pero no se pudieron guardar algunos vínculos con visitas. Puede añadirlos editando el registro.",
+    "labResultLinkFailed": "El registro se creó, pero no se pudieron guardar algunos vínculos con resultados de laboratorio. Puede añadirlos editando el registro."
   },
   "search": {
     "activeFilterCount": "{{count}} filtros activos",

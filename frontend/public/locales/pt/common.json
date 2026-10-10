@@ -1016,8 +1016,33 @@
       "title": "Detalhes do Procedimento"
     }
   },
+  "linkPanels": {
+    "addRelated": "Adicione {{items}} que dizem respeito a {{record}}.",
+    "items": {
+      "medications": "medicamentos",
+      "labResults": "resultados de laboratório",
+      "visits": "consultas",
+      "procedures": "procedimentos",
+      "treatments": "tratamentos",
+      "injuries": "lesões",
+      "symptoms": "sintomas",
+      "conditions": "condições",
+      "equipment": "equipamentos médicos"
+    },
+    "records": {
+      "visit": "esta consulta",
+      "labResult": "este resultado de laboratório",
+      "medication": "este medicamento",
+      "procedure": "este procedimento",
+      "condition": "esta condição",
+      "treatment": "este tratamento",
+      "injury": "esta lesão",
+      "symptom": "este sintoma"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "O registo foi criado, mas alguns vínculos com consultas não puderam ser guardados. Pode adicioná-los editando o registo."
+    "linkFailed": "O registo foi criado, mas alguns vínculos com consultas não puderam ser guardados. Pode adicioná-los editando o registo.",
+    "labResultLinkFailed": "O registo foi criado, mas alguns vínculos com resultados de laboratório não puderam ser guardados. Pode adicioná-los editando o registo."
   },
   "search": {
     "activeFilterCount": "{{count}} filtro ativo",

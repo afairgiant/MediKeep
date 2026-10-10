@@ -15,6 +15,7 @@ import {
   Stack,
   Text,
   Textarea,
+  TextInput,
 } from '@mantine/core';
 import {
   IconCheck,
@@ -37,7 +38,14 @@ import type {
   LinkCandidate,
   LinkRow,
   LinkUpdate,
+  PurposeConfig,
 } from '../../types/encounterLinks';
+
+const VISIT_PURPOSES: PurposeConfig = {
+  options: PURPOSE_OPTIONS,
+  getLabel: getPurposeLabel,
+  getColor: getPurposeColor,
+};
 
 interface LinkSectionProps {
   /** Section title, already translated */
@@ -50,6 +58,10 @@ interface LinkSectionProps {
   icon: TablerIcon;
   color: string;
   supportsPurpose?: boolean;
+  /** The purposes offered when supportsPurpose is set (default: the visit purposes) */
+  purposeConfig?: PurposeConfig;
+  /** Offers an "expected frequency" field next to the note (treatment links) */
+  supportsExpectedFrequency?: boolean;
   isViewMode?: boolean;
   loading?: boolean;
   navigate?: (_path: string) => void;
@@ -59,7 +71,8 @@ interface LinkSectionProps {
   onAdd: (
     _ids: number[],
     _note: string | null,
-    _purpose: string | null
+    _purpose: string | null,
+    _expectedFrequency: string | null
   ) => Promise<void>;
   onUpdate: (_row: LinkRow, _updates: LinkUpdate) => Promise<void>;
   onRemove: (_row: LinkRow) => Promise<void>;
@@ -74,6 +87,7 @@ interface EditState {
   id: number;
   relevanceNote: string;
   purpose: string | null;
+  expectedFrequency: string;
 }
 
 /**
@@ -89,6 +103,8 @@ const LinkSection = ({
   icon: Icon,
   color,
   supportsPurpose = false,
+  purposeConfig = VISIT_PURPOSES,
+  supportsExpectedFrequency = false,
   isViewMode = false,
   loading = false,
   navigate,
@@ -109,9 +125,10 @@ const LinkSection = ({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [purpose, setPurpose] = useState<string | null>(null);
+  const [expectedFrequency, setExpectedFrequency] = useState('');
   const [editing, setEditing] = useState<EditState | null>(null);
 
-  const purposeOptions = PURPOSE_OPTIONS.map(option => ({
+  const purposeOptions = purposeConfig.options.map(option => ({
     value: option.value,
     label: option.label,
   }));
@@ -137,6 +154,7 @@ const LinkSection = ({
     setSelectedIds([]);
     setNote('');
     setPurpose(null);
+    setExpectedFrequency('');
   };
 
   // Escape closes this modal only, not the dialog it sits in
@@ -151,7 +169,8 @@ const LinkSection = ({
         onAdd(
           selectedIds.map(id => parseInt(id, 10)),
           note.trim() || null,
-          supportsPurpose ? purpose : null
+          supportsPurpose ? purpose : null,
+          supportsExpectedFrequency ? expectedFrequency.trim() || null : null
         ),
       'errors:relationships.addFailed'
     );
@@ -164,6 +183,8 @@ const LinkSection = ({
       relevance_note: editing.relevanceNote.trim() || null,
     };
     if (supportsPurpose) updates.purpose = editing.purpose;
+    if (supportsExpectedFrequency)
+      updates.expected_frequency = editing.expectedFrequency.trim() || null;
     const ok = await run(
       () => onUpdate(row, updates),
       'errors:relationships.updateFailed'
@@ -209,6 +230,17 @@ const LinkSection = ({
               clearable
               size="sm"
               comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+            />
+          )}
+          {supportsExpectedFrequency && (
+            <TextInput
+              label={t('common:labels.expectedFrequency')}
+              value={editing.expectedFrequency}
+              onChange={e =>
+                setEditing({ ...editing, expectedFrequency: e.target.value })
+              }
+              maxLength={100}
+              size="sm"
             />
           )}
           <Textarea
@@ -283,6 +315,7 @@ const LinkSection = ({
               id: row.id,
               relevanceNote: row.relevanceNote ?? '',
               purpose: row.purpose,
+              expectedFrequency: row.expectedFrequency ?? '',
             })
           }
         >
@@ -343,12 +376,20 @@ const LinkSection = ({
                         <Badge
                           variant="light"
                           size="sm"
-                          color={getPurposeColor(row.purpose)}
+                          color={purposeConfig.getColor(row.purpose)}
                         >
-                          {getPurposeLabel(row.purpose)}
+                          {purposeConfig.getLabel(row.purpose)}
                         </Badge>
                       )}
                     </Group>
+                    {supportsExpectedFrequency &&
+                      row.expectedFrequency &&
+                      !isEditing && (
+                        <Text size="sm" c="dimmed">
+                          {t('common:labels.expectedFrequency')}:{' '}
+                          {row.expectedFrequency}
+                        </Text>
+                      )}
                     {renderNote(row, isEditing)}
                   </Stack>
                   {renderActions(row, isEditing)}
@@ -435,6 +476,14 @@ const LinkSection = ({
               onChange={setPurpose}
               clearable
               comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+            />
+          )}
+          {supportsExpectedFrequency && (
+            <TextInput
+              label={t('common:labels.expectedFrequency')}
+              value={expectedFrequency}
+              onChange={e => setExpectedFrequency(e.target.value)}
+              maxLength={100}
             />
           )}
           <Textarea

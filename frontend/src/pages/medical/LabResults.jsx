@@ -235,81 +235,11 @@ const LabResults = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(labResults || [], config);
 
-  // Get patient conditions for linking
-  const [conditions, setConditions] = useState([]);
+  // Saved links of each lab result, loaded when a lab result is opened
   const [labResultConditions, setLabResultConditions] = useState({});
-
-  // Medications, procedures, treatments for lab result relationship linking
-  const [patientMedications, setPatientMedications] = useState([]);
   const [labResultMedications, setLabResultMedications] = useState({});
-  const [patientProcedures, setPatientProcedures] = useState([]);
   const [labResultProcedures, setLabResultProcedures] = useState({});
-  const [patientTreatments, setPatientTreatments] = useState([]);
   const [labResultTreatments, setLabResultTreatments] = useState({});
-
-  useEffect(() => {
-    if (currentPatient?.id) {
-      apiService
-        .getPatientConditions(currentPatient.id)
-        .then(response => {
-          setConditions(response || []);
-        })
-        .catch(err => {
-          logger.error('medical_conditions_fetch_error', {
-            message: 'Failed to fetch conditions for lab results',
-            patientId: currentPatient.id,
-            error: err.message,
-            component: 'LabResults',
-          });
-          setConditions([]);
-        });
-
-      apiService
-        .getPatientMedications(currentPatient.id)
-        .then(response => {
-          setPatientMedications(response || []);
-        })
-        .catch(err => {
-          logger.error('medical_medications_fetch_error', {
-            message: 'Failed to fetch medications for lab results',
-            patientId: currentPatient.id,
-            error: err.message,
-            component: 'LabResults',
-          });
-          setPatientMedications([]);
-        });
-
-      apiService
-        .getPatientProcedures(currentPatient.id)
-        .then(response => {
-          setPatientProcedures(response || []);
-        })
-        .catch(err => {
-          logger.error('medical_procedures_fetch_error', {
-            message: 'Failed to fetch procedures for lab results',
-            patientId: currentPatient.id,
-            error: err.message,
-            component: 'LabResults',
-          });
-          setPatientProcedures([]);
-        });
-
-      apiService
-        .getPatientTreatments(currentPatient.id)
-        .then(response => {
-          setPatientTreatments(response || []);
-        })
-        .catch(err => {
-          logger.error('medical_treatments_fetch_error', {
-            message: 'Failed to fetch treatments for lab results',
-            patientId: currentPatient.id,
-            error: err.message,
-            component: 'LabResults',
-          });
-          setPatientTreatments([]);
-        });
-    }
-  }, [currentPatient?.id]);
 
   // Helper function to fetch condition relationships for a lab result
   const fetchLabResultConditions = async labResultId => {
@@ -1779,16 +1709,12 @@ const LabResults = () => {
           practitioners={practitioners}
           editingItem={editingLabResult}
           patientId={currentPatient?.id}
-          conditions={conditions}
           labResultConditions={labResultConditions}
           fetchLabResultConditions={fetchLabResultConditions}
-          medications={patientMedications}
           labResultMedications={labResultMedications}
           fetchLabResultMedications={fetchLabResultMedications}
-          procedures={patientProcedures}
           labResultProcedures={labResultProcedures}
           fetchLabResultProcedures={fetchLabResultProcedures}
-          treatments={patientTreatments}
           labResultTreatments={labResultTreatments}
           fetchLabResultTreatments={fetchLabResultTreatments}
           navigate={navigate}
@@ -1825,7 +1751,6 @@ const LabResults = () => {
         practitioners={practitioners}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        conditions={conditions}
         labResultConditions={labResultConditions}
         fetchLabResultConditions={fetchLabResultConditions}
         navigate={navigate}
@@ -1838,13 +1763,10 @@ const LabResults = () => {
           }
         }}
         onLabResultUpdated={handleLabResultUpdated}
-        medications={patientMedications}
         labResultMedications={labResultMedications}
         fetchLabResultMedications={fetchLabResultMedications}
-        procedures={patientProcedures}
         labResultProcedures={labResultProcedures}
         fetchLabResultProcedures={fetchLabResultProcedures}
-        treatments={patientTreatments}
         labResultTreatments={labResultTreatments}
         fetchLabResultTreatments={fetchLabResultTreatments}
       />

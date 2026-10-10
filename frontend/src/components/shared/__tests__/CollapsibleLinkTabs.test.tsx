@@ -26,14 +26,16 @@ const items = (counts: Array<number | undefined>): LinkTabItem[] => [
 const renderTabs = (
   counts: Array<number | undefined>,
   mode: 'view' | 'add' | 'edit',
-  onSelectTab?: (_tab: string) => void
+  onSelectTab?: (_tab: string) => void,
+  activeTab?: string
 ) => {
-  const tree = (c: Array<number | undefined>) => (
+  const tree = (c: Array<number | undefined>, active = activeTab) => (
     <Tabs value="procedures">
       <Tabs.List>
         <CollapsibleLinkTabs
           items={items(c)}
           mode={mode}
+          activeTab={active}
           onSelectTab={onSelectTab}
         />
       </Tabs.List>
@@ -42,7 +44,8 @@ const renderTabs = (
   const result = render(tree(counts));
   return {
     ...result,
-    rerenderWith: (c: Array<number | undefined>) => result.rerender(tree(c)),
+    rerenderWith: (c: Array<number | undefined>, active = activeTab) =>
+      result.rerender(tree(c, active)),
   };
 };
 
@@ -89,7 +92,7 @@ describe('CollapsibleLinkTabs', () => {
     ).toBeNull();
   });
 
-  it('add: lists the types without links in the Link menu, and opening one shows its tab', async () => {
+  it('add: lists the types without links in the Link menu, and picking one asks to open it', async () => {
     const onSelectTab = vi.fn();
     renderTabs([1, 0], 'add', onSelectTab);
     expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual([
@@ -102,9 +105,56 @@ describe('CollapsibleLinkTabs', () => {
     await userEvent.click(items[0]);
 
     expect(onSelectTab).toHaveBeenCalledWith('medications');
+  });
+
+  it('add: a type opened from the Link menu is a tab only while it is open', async () => {
+    const { rerenderWith } = renderTabs(
+      [1, 0],
+      'add',
+      undefined,
+      'medications'
+    );
+    expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual([
+      'Procedures (1)',
+      'Medications (0)',
+    ]);
+
+    // Left without linking anything: back into the Link menu, not an empty (0) tab
+    rerenderWith([1, 0], 'procedures');
+    expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual([
+      'Procedures (1)',
+    ]);
+    await userEvent.click(menuButton());
     expect(
-      screen.getByRole('tab', { name: 'Medications (0)' })
-    ).toBeInTheDocument();
+      (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+    ).toEqual(['Medications']);
+  });
+
+  it('add: an opened type that gets a link stays a tab after the user leaves it', () => {
+    const { rerenderWith } = renderTabs(
+      [1, 0],
+      'add',
+      undefined,
+      'medications'
+    );
+    rerenderWith([1, 2], 'procedures');
+    expect(screen.getAllByRole('tab').map(tab => tab.textContent)).toEqual([
+      'Procedures (1)',
+      'Medications (2)',
+    ]);
+  });
+
+  it('view and edit are not affected by the open tab', () => {
+    renderTabs([0, 0], 'view', undefined, 'medications');
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+  });
+
+  it('add: the Link button is styled like the tabs, not as a primary-color button', () => {
+    renderTabs([1, 0], 'add');
+    const button = menuButton();
+    // The class gives it the tabs' text color and hover background in both color schemes
+    expect(button).toHaveClass('link-tab-menu-button');
+    expect(button).toHaveAttribute('data-variant', 'transparent');
   });
 
   it('add: no Link menu once every type is shown', () => {
@@ -114,14 +164,12 @@ describe('CollapsibleLinkTabs', () => {
     ).toBeNull();
   });
 
-  it('keeps a tab shown after its last link is removed', () => {
+  it('view: a type whose last link is removed is no longer a tab', () => {
     const { rerenderWith } = renderTabs([1, 0], 'view');
     expect(
       screen.getByRole('tab', { name: 'Procedures (1)' })
     ).toBeInTheDocument();
     rerenderWith([0, 0]);
-    expect(
-      screen.getByRole('tab', { name: 'Procedures (0)' })
-    ).toBeInTheDocument();
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
   });
 });

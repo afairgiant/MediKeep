@@ -1016,8 +1016,33 @@
       "title": "Proceduredetails"
     }
   },
+  "linkPanels": {
+    "addRelated": "Voeg {{items}} toe die bij {{record}} horen.",
+    "items": {
+      "medications": "medicatie",
+      "labResults": "laboratoriumresultaten",
+      "visits": "consulten",
+      "procedures": "ingrepen",
+      "treatments": "behandelingen",
+      "injuries": "verwondingen",
+      "symptoms": "symptomen",
+      "conditions": "aandoeningen",
+      "equipment": "medische hulpmiddelen"
+    },
+    "records": {
+      "visit": "dit consult",
+      "labResult": "dit laboratoriumresultaat",
+      "medication": "deze medicatie",
+      "procedure": "deze ingreep",
+      "condition": "deze aandoening",
+      "treatment": "deze behandeling",
+      "injury": "deze verwonding",
+      "symptom": "dit symptoom"
+    }
+  },
   "recordRelationships": {
-    "linkFailed": "Het record is aangemaakt, maar sommige koppelingen met consulten konden niet worden opgeslagen. U kunt ze toevoegen door het record te bewerken."
+    "linkFailed": "Het record is aangemaakt, maar sommige koppelingen met consulten konden niet worden opgeslagen. U kunt ze toevoegen door het record te bewerken.",
+    "labResultLinkFailed": "Het record is aangemaakt, maar sommige koppelingen met laboratoriumresultaten konden niet worden opgeslagen. U kunt ze toevoegen door het record te bewerken."
   },
   "search": {
     "activeFilterCount": "{{count}} actieve filters",
