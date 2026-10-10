@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import bcrypt
-from jose import jwt
+import jwt
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
@@ -66,6 +66,21 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
     return encoded_jwt
+
+
+def decode_access_token(token: str) -> dict:
+    """Verify and decode an access token.
+
+    Raises:
+        jwt.PyJWTError: signature, algorithm, expiry or claim validation failed.
+    """
+    return jwt.decode(
+        token,
+        settings.SECRET_KEY,
+        algorithms=[settings.ALGORITHM],
+        # a backward clock step must not end live sessions
+        options={"verify_iat": False},
+    )
 
 
 class SecurityValidator:

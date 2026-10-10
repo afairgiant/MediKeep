@@ -15,7 +15,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from app.api import deps
-from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_error
 from app.core.utils.datetime_utils import (
@@ -476,14 +475,15 @@ def get_system_metrics(
 
         # 2. Authentication Service Health (test JWT operations)
         try:
-            from jose import jwt
-
-            from app.core.utils.security import create_access_token
+            from app.core.utils.security import (
+                create_access_token,
+                decode_access_token,
+            )
 
             # Test token creation and verification
             test_token = create_access_token(data={"sub": "health_check"})
             # Test token decoding
-            jwt.decode(test_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            decode_access_token(test_token)
             services_health["authentication"] = {"status": "operational"}
         except Exception as e:
             services_health["authentication"] = {"status": "error", "error": str(e)}

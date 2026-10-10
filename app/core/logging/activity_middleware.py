@@ -1,16 +1,16 @@
 from typing import Callable
 
+import jwt
 from fastapi import Request, Response
-from jose import JWTError, jwt
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.utils.client_ip import get_client_ip
 from app.core.utils.activity_tracker import (
     clear_current_user_context,
     set_current_user_context,
 )
+from app.core.utils.security import decode_access_token
 
 logger = get_logger(__name__, "app")
 
@@ -37,13 +37,11 @@ class ActivityTrackingMiddleware(BaseHTTPMiddleware):
             if token and token.startswith("Bearer "):
                 token = token.split(" ")[1]
                 try:
-                    payload = jwt.decode(
-                        token, settings.SECRET_KEY, algorithms=["HS256"]
-                    )
+                    payload = decode_access_token(token)
                     user_id = payload.get("sub")
                     if user_id:
                         user_id = int(user_id)
-                except (JWTError, ValueError):
+                except (jwt.PyJWTError, ValueError):
                     user_id = None
         except Exception as e:
             logger.debug(f"Could not get user context for activity tracking: {e}")
