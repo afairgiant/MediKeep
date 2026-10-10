@@ -146,12 +146,11 @@ const SymptomCalendar = ({ patientId, hidden }) => {
 
       if (endDate) {
         // Duration-based symptom - mark all dates in range
-        const start = parseDateInput(startDate);
-        const end = parseDateInput(endDate);
-        const current = new Date(start);
+        const current = parseDateInput(startDate);
+        let dateKey = startDate;
 
-        while (current <= end) {
-          const dateKey = formatDateForAPI(current);
+        // Compared as date keys: timestamps drift where daylight saving skips midnight
+        while (dateKey <= endDate) {
           if (!grouped[dateKey]) {
             grouped[dateKey] = [];
           }
@@ -164,6 +163,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
             isMid: dateKey !== startDate && dateKey !== endDate,
           });
           current.setDate(current.getDate() + 1);
+          dateKey = formatDateForAPI(current);
         }
       } else {
         // Point-in-time or ongoing symptom

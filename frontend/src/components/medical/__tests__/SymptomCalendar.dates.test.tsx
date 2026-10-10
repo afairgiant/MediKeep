@@ -98,3 +98,26 @@ describe('SymptomCalendar places episodes on the calendar date they were logged 
     expect(await screen.findByTestId('occurrence-card')).toBeInTheDocument();
   });
 });
+
+// Only fails where daylight saving starts at midnight, e.g. America/Santiago on this date
+describe('SymptomCalendar across a day that has no midnight', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 8, 15));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('still marks the last day of an episode', async () => {
+    await renderCalendar([
+      episode({ date: '2026-09-05', resolved_date: '2026-09-07' }),
+    ]);
+    await screen.findByText('5');
+
+    [5, 6, 7].forEach(expectMarked);
+    expectUnmarked(8);
+  });
+});
