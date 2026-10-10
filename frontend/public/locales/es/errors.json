@@ -26,7 +26,6 @@
     "viewFailed": "Error al abrir el archivo para visualizarlo. Por favor, inténtelo de nuevo."
   },
   "form": {
-    "conditionNotSelected": "Por favor, seleccione una condición",
     "entityNotFound": "El elemento solicitado no se pudo encontrar.",
     "equipmentFieldsRequired": "El nombre y tipo de equipo son obligatorios",
     "equipmentNotSelected": "Por favor, seleccione al menos un equipo",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Información del paciente no disponible",
   "relationships": {
-    "addConditionFailed": "Error al agregar la relación de condición",
     "addFailed": "Error al agregar la relación",
     "addMedicationFailed": "Error al agregar la relación de medicamento",
     "deleteFailed": "Error al eliminar la relación",
-    "fetchFailed": "Error al cargar las relaciones",
     "updateFailed": "Error al actualizar la relación"
   },
   "success": {

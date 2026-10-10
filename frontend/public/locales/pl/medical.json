@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "Nie udało się powiązać {{count}} schorzeń",
       "conditionLinkPartialFailure_one": "Nie udało się powiązać {{count}} schorzenia",
       "conditionLinkPartialFailure_other": "Nie udało się powiązać {{count}} schorzeń",
-      "linkConditionsDescription": "Opcjonalnie powiąż ten lek z istniejącymi schorzeniami",
-      "noConditionsFound": "Nie znaleziono schorzeń",
       "saving": "Zapisywanie leku...",
       "updateMedication": "Aktualizuj lek"
     },

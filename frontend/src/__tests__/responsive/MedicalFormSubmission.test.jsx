@@ -225,9 +225,8 @@ vi.mock('../../components/medical/MantineAllergyForm', () => ({
   },
 }));
 
-// Mock MantineConditionForm
-vi.mock('../../components/medical/MantineConditionForm', () => ({
-  default: function MockConditionForm({
+// Stand-in for the condition form
+const MantineConditionForm = function MockConditionForm({
     isOpen,
     onClose,
     onSubmit,
@@ -309,8 +308,7 @@ vi.mock('../../components/medical/MantineConditionForm', () => ({
         </button>
       </form>
     );
-  },
-}));
+};
 
 // Mock MantineImmunizationForm
 vi.mock('../../components/medical/MantineImmunizationForm', () => ({
@@ -396,7 +394,6 @@ vi.mock('../../components/medical/MantineImmunizationForm', () => ({
 // Import mocked components
 import MantineMedicationForm from '../../components/medical/MantineMedicationForm';
 import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
-import MantineConditionForm from '../../components/medical/MantineConditionForm';
 import MantineImmunizationForm from '../../components/medical/MantineImmunizationForm';
 
 // Mock API calls

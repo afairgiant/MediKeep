@@ -91,9 +91,8 @@ interface EditState {
 }
 
 /**
- * One typed list of links with add / edit-note / remove, in the same format as
- * MedicationRelationships. Data access is supplied by the parent so the same
- * section works for live (API) links and for links pending an unsaved form.
+ * One typed list of links with add / edit-note / remove. Data access is supplied by
+ * the parent so the same section works for live (API) links and for links pending an unsaved form.
  */
 const LinkSection = ({
   title,

@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "{{count}} σύνδεση(εις) πάθησης απέτυχε(αν)",
       "conditionLinkPartialFailure_one": "{{count}} σύνδεση πάθησης απέτυχε",
       "conditionLinkPartialFailure_other": "{{count}} συνδέσεις παθήσεων απέτυχαν",
-      "linkConditionsDescription": "Προαιρετικά συνδέστε αυτό το φάρμακο με υπάρχουσες παθήσεις",
-      "noConditionsFound": "Δεν βρέθηκαν παθήσεις",
       "saving": "Αποθήκευση φαρμάκου...",
       "updateMedication": "Ενημέρωση Φαρμάκου"
     },

@@ -34,12 +34,6 @@ vi.mock('../../medical/injuries/InjuryTypeSelect', () => ({
 vi.mock('../DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
-vi.mock('../../medical/MedicationRelationships', () => ({
-  default: () => <div />,
-}));
-vi.mock('../../medical/LabResultRelationships', () => ({
-  default: () => <div />,
-}));
 vi.mock('../../../hooks/useLinkPanelDescription', () => ({
   useLinkPanelDescription: () => (items: string, record: string) =>
     `description:${items}:${record}`,

@@ -25,12 +25,6 @@ vi.mock('../../medical/injuries/InjuryTypeSelect', () => ({
 vi.mock('../DocumentManagerWithProgress', () => ({
   default: () => <div data-testid="document-manager" />,
 }));
-vi.mock('../../medical/MedicationRelationships', () => ({
-  default: () => <div />,
-}));
-vi.mock('../../medical/LabResultRelationships', () => ({
-  default: () => <div />,
-}));
 // The tab contents are not under test; only which tab is selected
 vi.mock('../RecordVisitsTab', () => ({ default: () => <div /> }));
 vi.mock('../../medical/visits/VisitLinkTabs', async importOriginal => ({

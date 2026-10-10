@@ -26,7 +26,6 @@
     "viewFailed": "Datei konnte nicht zum Anzeigen geöffnet werden. Bitte versuchen Sie es erneut."
   },
   "form": {
-    "conditionNotSelected": "Bitte wählen Sie eine Erkrankung aus",
     "entityNotFound": "Der angeforderte Eintrag konnte nicht gefunden werden.",
     "equipmentFieldsRequired": "Gerätename und -typ sind erforderlich",
     "equipmentNotSelected": "Bitte wählen Sie mindestens ein Gerät aus",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Patienteninformationen nicht verfügbar",
   "relationships": {
-    "addConditionFailed": "Fehler beim Hinzufügen der Erkrankungsverknüpfung",
     "addFailed": "Fehler beim Hinzufügen der Verknüpfung",
     "addMedicationFailed": "Fehler beim Hinzufügen der Medikamentenverknüpfung",
     "deleteFailed": "Fehler beim Löschen der Verknüpfung",
-    "fetchFailed": "Fehler beim Laden der Verknüpfungen",
     "updateFailed": "Fehler beim Aktualisieren der Verknüpfung"
   },
   "success": {

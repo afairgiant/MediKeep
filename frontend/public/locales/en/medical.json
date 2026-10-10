@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "{{count}} condition link(s) failed",
       "conditionLinkPartialFailure_one": "{{count}} condition link failed",
       "conditionLinkPartialFailure_other": "{{count}} condition links failed",
-      "linkConditionsDescription": "Optionally link this medication to existing conditions",
-      "noConditionsFound": "No conditions found",
       "saving": "Saving medication...",
       "updateMedication": "Update Medication"
     },

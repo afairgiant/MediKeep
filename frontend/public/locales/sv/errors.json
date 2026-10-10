@@ -26,7 +26,6 @@
     "viewFailed": "Det gick inte att öppna filen för visning. Försök igen."
   },
   "form": {
-    "conditionNotSelected": "Välj ett tillstånd",
     "entityNotFound": "Det begärda objektet kunde inte hittas.",
     "equipmentFieldsRequired": "Utrustningsnamn och typ krävs",
     "equipmentNotSelected": "Välj minst en utrustning",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Patientinformation är inte tillgänglig",
   "relationships": {
-    "addConditionFailed": "Det gick inte att lägga till tillståndsrelationen",
     "addFailed": "Det gick inte att lägga till relationen",
     "addMedicationFailed": "Det gick inte att lägga till läkemedelsrelationen",
     "deleteFailed": "Det gick inte att ta bort relationen",
-    "fetchFailed": "Det gick inte att ladda relationer",
     "updateFailed": "Det gick inte att uppdatera relationen"
   },
   "success": {
