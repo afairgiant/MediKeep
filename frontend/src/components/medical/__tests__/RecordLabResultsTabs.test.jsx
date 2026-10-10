@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import render from '../../../test-utils/render';
@@ -14,6 +14,7 @@ vi.setConfig({ testTimeout: 20000 });
 const api = vi.hoisted(() => ({
   getRecordLabResultLinks: vi.fn(),
   getRecordEncounterLinks: vi.fn(),
+  getMedicationConditions: vi.fn(),
 }));
 vi.mock('../../../services/api', () => ({ apiService: api }));
 vi.mock('../../../hooks/useDateFormat', () => ({
@@ -39,7 +40,29 @@ vi.mock('../../shared/DocumentManagerWithProgress', () => ({
 vi.mock('../medications/MedicationTreatmentsList', () => ({
   default: () => null,
 }));
-vi.mock('../MedicationRelationships', () => ({ default: () => null }));
+vi.mock('../../shared/MedicationConditionsCard', () => ({
+  default: props => (
+    <div
+      data-testid="medication-conditions"
+      data-medication-id={props.medicationId ?? ''}
+      data-patient-id={props.patientId ?? ''}
+      data-view-mode={String(Boolean(props.isViewMode))}
+      data-pending={JSON.stringify(props.pendingLinks ?? null)}
+    >
+      {props.description}
+      <button
+        type="button"
+        onClick={() =>
+          props.onPendingChange?.([
+            { entityId: 5, relevanceNote: 'n', purpose: null },
+          ])
+        }
+      >
+        add-pending-condition
+      </button>
+    </div>
+  ),
+}));
 vi.mock('../practitioners/PractitionerSelectWithCreate', () => ({
   default: () => null,
 }));
@@ -133,6 +156,7 @@ const FORMS = [
     name: 'Medication',
     path: 'medications',
     record: 'medication',
+    menu: ['shared:categories.conditions', 'shared:tabs.labResults', 'Visits'],
     Form: MantineMedicationForm,
     props: medicationForm,
     saved: { editingMedication: { id: 42 } },
@@ -141,6 +165,7 @@ const FORMS = [
     name: 'Procedure',
     path: 'procedures',
     record: 'procedure',
+    menu: ['Visits', 'shared:tabs.labResults'],
     Form: ProcedureFormWrapper,
     props: procedureForm,
     saved: { editingItem: { id: 42, procedure_name: 'x' } },
@@ -150,11 +175,12 @@ const FORMS = [
 beforeEach(() => {
   api.getRecordLabResultLinks.mockReset().mockResolvedValue([]);
   api.getRecordEncounterLinks.mockReset().mockResolvedValue([]);
+  api.getMedicationConditions.mockReset().mockResolvedValue([]);
 });
 
 describe.each(FORMS)(
   '$name Add form - Visits and Lab Results link tabs (#1128)',
-  ({ path, record, Form, props, saved }) => {
+  ({ path, record, menu, Form, props, saved }) => {
     it('shows neither tab until a link is added, with a Link menu for both', async () => {
       render(<Form {...props()} />);
       expect(screen.queryByRole('tab', { name: VISITS_TAB })).toBeNull();
@@ -164,10 +190,7 @@ describe.each(FORMS)(
         screen.getByRole('button', { name: 'common:buttons.link' })
       );
       const items = await screen.findAllByRole('menuitem');
-      expect(items.map(item => item.textContent)).toEqual([
-        'Visits',
-        'shared:tabs.labResults',
-      ]);
+      expect(items.map(item => item.textContent)).toEqual(menu);
     });
 
     it('picking Lab Results from the Link menu shows its tab and opens it', async () => {
@@ -212,7 +235,7 @@ describe.each(FORMS)(
         (await screen.findAllByRole('menuitem', { hidden: true })).map(
           item => item.textContent
         )
-      ).toEqual(['Visits', 'shared:tabs.labResults']);
+      ).toEqual(menu);
     }, 20000);
 
     it('picking Visits from the Link menu shows its tab', async () => {
@@ -323,8 +346,85 @@ describe.each(FORMS)(
   }
 );
 
+describe('Medication Add form - Conditions link tab (#1128)', () => {
+  const COND = 'shared:categories.conditions';
+  const COND_TAB = new RegExp(`^${COND}( \\(\\d+\\))?$`);
+  const pendingCondition = [{ entityId: 3, relevanceNote: 'n', purpose: null }];
+
+  it('is not a tab until a condition is linked, and the old condition picker is gone', async () => {
+    render(<MantineMedicationForm {...medicationForm()} />);
+    expect(screen.queryByRole('tab', { name: COND_TAB })).toBeNull();
+    expect(screen.queryByText('common:buttons.linkConditions')).toBeNull();
+  });
+
+  it('picking Conditions from the Link menu shows its tab and opens the card', async () => {
+    render(<MantineMedicationForm {...medicationForm()} />);
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole('button', { name: 'common:buttons.link' })
+    );
+    await user.click(await screen.findByRole('menuitem', { name: COND }));
+
+    expect(
+      screen.getByRole('tab', { name: `${COND} (0)` })
+    ).toBeInTheDocument();
+    const card = await screen.findByTestId('medication-conditions');
+    expect(card).toHaveAttribute('data-medication-id', '');
+    expect(card).toHaveAttribute('data-patient-id', '7');
+    expect(card).toHaveAttribute('data-view-mode', 'false');
+    expect(card).toHaveTextContent('description:conditions:medication');
+  });
+
+  it('shows the tab, with its count, and stores chosen conditions under pending_condition_links', async () => {
+    const onInputChange = vi.fn();
+    render(
+      <MantineMedicationForm
+        {...medicationForm(
+          { onInputChange },
+          { pending_condition_links: pendingCondition }
+        )}
+      />
+    );
+    expect(
+      screen.getByRole('tab', { name: `${COND} (1)` })
+    ).toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('tab', { name: COND_TAB }));
+    expect(
+      JSON.parse(
+        (await screen.findByTestId('medication-conditions')).dataset.pending
+      )
+    ).toEqual(pendingCondition);
+    await user.click(screen.getByText('add-pending-condition'));
+    expect(onInputChange).toHaveBeenCalledWith({
+      target: {
+        name: 'pending_condition_links',
+        value: [{ entityId: 5, relevanceNote: 'n', purpose: null }],
+      },
+    });
+  });
+
+  it('keeps the Conditions tab, with the saved medication, when editing', async () => {
+    api.getMedicationConditions.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    render(
+      <MantineMedicationForm
+        {...medicationForm({ editingMedication: { id: 42 } })}
+      />
+    );
+    expect(
+      await screen.findByRole('tab', { name: `${COND} (2)` })
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: COND_TAB }));
+    expect(await screen.findByTestId('medication-conditions')).toHaveAttribute(
+      'data-medication-id',
+      '42'
+    );
+  });
+});
+
 describe('Medication and Procedure View dialogs - Lab Results tab (#1128)', () => {
   it('medication view shows a read-only card', async () => {
+    api.getRecordLabResultLinks.mockResolvedValue([{ id: 1 }]);
     render(
       <MedicationViewModal
         isOpen
@@ -341,14 +441,91 @@ describe('Medication and Procedure View dialogs - Lab Results tab (#1128)', () =
         }}
       />
     );
-    await userEvent.click(screen.getByRole('tab', { name: LAB_TAB }));
+    await userEvent.click(await screen.findByRole('tab', { name: LAB_TAB }));
     const card = await screen.findByTestId('record-lab-results');
     expect(card).toHaveAttribute('data-record-path', 'medications');
     expect(card).toHaveAttribute('data-record-id', '42');
     expect(card).toHaveAttribute('data-view-mode', 'true');
   });
 
+  it('medication view shows its conditions in their own read-only tab', async () => {
+    api.getMedicationConditions.mockResolvedValue([{ id: 1 }]);
+    render(
+      <MedicationViewModal
+        isOpen
+        onClose={vi.fn()}
+        onEdit={vi.fn()}
+        navigate={vi.fn()}
+        practitioners={[]}
+        medication={{
+          id: 42,
+          medication_name: 'Ibuprofen',
+          status: 'active',
+          tags: [],
+        }}
+      />
+    );
+    expect(
+      await screen.findByRole('tab', {
+        name: 'shared:categories.conditions (1)',
+      })
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole('tab', { name: /^shared:categories\.conditions/ })
+    );
+    const card = await screen.findByTestId('medication-conditions');
+    expect(card).toHaveAttribute('data-medication-id', '42');
+    expect(card).toHaveAttribute('data-view-mode', 'true');
+    expect(card).not.toHaveTextContent('description:');
+  });
+
+  it.each([
+    [
+      'medication',
+      <MedicationViewModal
+        key="m"
+        isOpen
+        onClose={vi.fn()}
+        onEdit={vi.fn()}
+        navigate={vi.fn()}
+        practitioners={[]}
+        medication={{ id: 42, medication_name: 'Ibuprofen', tags: [] }}
+      />,
+    ],
+    [
+      'procedure',
+      <ProcedureViewModal
+        key="p"
+        isOpen
+        onClose={vi.fn()}
+        onEdit={vi.fn()}
+        navigate={vi.fn()}
+        practitioners={[]}
+        procedure={{ id: 9, procedure_name: 'Appendectomy', tags: [] }}
+      />,
+    ],
+  ])(
+    '%s view has no link tabs when nothing is linked',
+    async (_name, dialog) => {
+      render(dialog);
+      await waitFor(() =>
+        expect(api.getRecordLabResultLinks).toHaveBeenCalled()
+      );
+      await waitFor(() =>
+        expect(api.getRecordEncounterLinks).toHaveBeenCalled()
+      );
+      for (const name of [
+        LAB_TAB,
+        VISITS_TAB,
+        /^shared:categories\.conditions/,
+      ]) {
+        expect(screen.queryByRole('tab', { name })).toBeNull();
+      }
+    }
+  );
+
   it('procedure view shows a read-only card', async () => {
+    api.getRecordLabResultLinks.mockResolvedValue([{ id: 1 }]);
     render(
       <ProcedureViewModal
         isOpen
@@ -359,7 +536,7 @@ describe('Medication and Procedure View dialogs - Lab Results tab (#1128)', () =
         procedure={{ id: 9, procedure_name: 'Appendectomy', tags: [] }}
       />
     );
-    await userEvent.click(screen.getByRole('tab', { name: LAB_TAB }));
+    await userEvent.click(await screen.findByRole('tab', { name: LAB_TAB }));
     const card = await screen.findByTestId('record-lab-results');
     expect(card).toHaveAttribute('data-record-path', 'procedures');
     expect(card).toHaveAttribute('data-record-id', '9');

@@ -40,6 +40,7 @@ const RESPONSES = {
     id: 11,
     lab_result_id: 3,
     condition_id: 21,
+    purpose: 'baseline',
     relevance_note: 'diabetes follow-up',
     condition: { id: 21, diagnosis: 'Diabetes', status: 'active' },
   },
@@ -59,6 +60,7 @@ const RESPONSES = {
     id: 13,
     lab_result_id: 3,
     procedure_id: 23,
+    purpose: 'outcome',
     relevance_note: 'biopsy',
     procedure: {
       id: 23,
@@ -95,7 +97,7 @@ describe('labResultRecordLinkSource.loadRows', () => {
         date: null,
         status: 'active',
         relevanceNote: 'diabetes follow-up',
-        purpose: null,
+        purpose: 'baseline',
         expectedFrequency: null,
       },
       medications: {
@@ -115,7 +117,7 @@ describe('labResultRecordLinkSource.loadRows', () => {
         date: '2025-02-01',
         status: 'completed',
         relevanceNote: 'biopsy',
-        purpose: null,
+        purpose: 'outcome',
         expectedFrequency: null,
       },
       treatments: {
@@ -162,11 +164,13 @@ describe('labResultRecordLinkSource writes', () => {
     expect(api.createLabResultCondition).toHaveBeenNthCalledWith(1, 3, {
       lab_result_id: 3,
       condition_id: 21,
+      purpose: null,
       relevance_note: 'note',
     });
     expect(api.createLabResultCondition).toHaveBeenNthCalledWith(2, 3, {
       lab_result_id: 3,
       condition_id: 22,
+      purpose: null,
       relevance_note: 'note',
     });
   });
@@ -192,7 +196,35 @@ describe('labResultRecordLinkSource writes', () => {
     expect(api.createLabResultProcedure).toHaveBeenCalledWith(3, {
       lab_result_id: 3,
       procedure_id: 23,
+      purpose: null,
       relevance_note: 'n',
+    });
+  });
+
+  it('creates condition and procedure links with the chosen purpose', async () => {
+    api.createLabResultCondition.mockResolvedValue({});
+    api.createLabResultProcedure.mockResolvedValue({});
+    await labResultRecordLinkSource('conditions', 3, 7).createLinks(
+      [21],
+      null,
+      'monitoring'
+    );
+    await labResultRecordLinkSource('procedures', 3, 7).createLinks(
+      [23],
+      null,
+      'safety'
+    );
+    expect(api.createLabResultCondition).toHaveBeenCalledWith(3, {
+      lab_result_id: 3,
+      condition_id: 21,
+      purpose: 'monitoring',
+      relevance_note: null,
+    });
+    expect(api.createLabResultProcedure).toHaveBeenCalledWith(3, {
+      lab_result_id: 3,
+      procedure_id: 23,
+      purpose: 'safety',
+      relevance_note: null,
     });
   });
 
@@ -212,7 +244,7 @@ describe('labResultRecordLinkSource writes', () => {
     });
   });
 
-  it('does not send purpose or frequency when linking conditions', async () => {
+  it('does not send an expected frequency when linking conditions', async () => {
     api.createLabResultCondition.mockResolvedValue({});
     await labResultRecordLinkSource('conditions', 3, 7).createLinks(
       [21],
@@ -223,11 +255,48 @@ describe('labResultRecordLinkSource writes', () => {
     expect(api.createLabResultCondition).toHaveBeenCalledWith(3, {
       lab_result_id: 3,
       condition_id: 21,
+      purpose: 'baseline',
       relevance_note: null,
     });
   });
 
-  it('updates a treatment link with all three fields, and others with the note only', async () => {
+  it('does not send a purpose when linking medications', async () => {
+    api.createLabResultMedication.mockResolvedValue({});
+    await labResultRecordLinkSource('medications', 3, 7).createLinks(
+      [22],
+      null,
+      'baseline'
+    );
+    expect(api.createLabResultMedication).toHaveBeenCalledWith(3, {
+      lab_result_id: 3,
+      medication_id: 22,
+      relevance_note: null,
+    });
+  });
+
+  it('updates the purpose and note of condition and procedure links', async () => {
+    api.updateLabResultCondition.mockResolvedValue({});
+    api.updateLabResultProcedure.mockResolvedValue({});
+    const row = { id: 11 } as never;
+    await labResultRecordLinkSource('conditions', 3, 7).updateLink(row, {
+      purpose: 'outcome',
+      relevance_note: 'n',
+    });
+    await labResultRecordLinkSource('procedures', 3, 7).updateLink(row, {
+      purpose: null,
+      relevance_note: null,
+    });
+    expect(api.updateLabResultCondition).toHaveBeenCalledWith(3, 11, {
+      purpose: 'outcome',
+      relevance_note: 'n',
+    });
+    expect(api.updateLabResultProcedure).toHaveBeenCalledWith(3, 11, {
+      purpose: null,
+      relevance_note: null,
+    });
+  });
+
+  it('updates a treatment link with all three fields, and a medication link with the note only', async () => {
     api.updateLabResultTreatment.mockResolvedValue({});
     api.updateLabResultMedication.mockResolvedValue({});
     const row = { id: 14 } as never;
@@ -311,7 +380,7 @@ describe('pending link mapping', () => {
     expect(linksToPending('treatments', links)).toEqual(treatments);
   });
 
-  it('keeps only the note for conditions, medications and procedures', () => {
+  it('keeps the purpose and note for conditions and procedures, but not the frequency', () => {
     expect(
       linksToPending('conditions', [
         {
@@ -321,16 +390,33 @@ describe('pending link mapping', () => {
           expectedFrequency: 'daily',
         },
       ])
-    ).toEqual([{ condition_id: 21, relevance_note: null }]);
-    expect(
-      linksToPending('medications', [
-        { entityId: 22, relevanceNote: 'n', purpose: null },
-      ])
-    ).toEqual([{ medication_id: 22, relevance_note: 'n' }]);
+    ).toEqual([
+      { condition_id: 21, purpose: 'baseline', relevance_note: null },
+    ]);
     expect(
       linksToPending('procedures', [
         { entityId: 23, relevanceNote: null, purpose: null },
       ])
-    ).toEqual([{ procedure_id: 23, relevance_note: null }]);
+    ).toEqual([{ procedure_id: 23, purpose: null, relevance_note: null }]);
+    expect(
+      pendingToLinks('procedures', [
+        { procedure_id: 23, purpose: 'safety', relevance_note: 'n' },
+      ])
+    ).toEqual([
+      {
+        entityId: 23,
+        relevanceNote: 'n',
+        purpose: 'safety',
+        expectedFrequency: null,
+      },
+    ]);
+  });
+
+  it('keeps only the note for medications', () => {
+    expect(
+      linksToPending('medications', [
+        { entityId: 22, relevanceNote: 'n', purpose: 'baseline' },
+      ])
+    ).toEqual([{ medication_id: 22, relevance_note: 'n' }]);
   });
 });

@@ -1011,6 +1011,7 @@ const LabResults = () => {
                 apiService.createLabResultCondition(resultId, {
                   lab_result_id: resultId,
                   condition_id: condRel.condition_id,
+                  purpose: condRel.purpose || null,
                   relevance_note: condRel.relevance_note,
                 })
               );
@@ -1035,6 +1036,7 @@ const LabResults = () => {
                 apiService.createLabResultProcedure(resultId, {
                   lab_result_id: resultId,
                   procedure_id: procRel.procedure_id,
+                  purpose: procRel.purpose || null,
                   relevance_note: procRel.relevance_note,
                 })
               );

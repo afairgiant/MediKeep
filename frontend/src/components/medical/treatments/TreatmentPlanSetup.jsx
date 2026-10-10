@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
+  ActionIcon,
   Badge,
   Stack,
   Box,
-  MultiSelect,
   Select,
   Paper,
   Text,
@@ -14,7 +14,6 @@ import {
   Group,
   Collapse,
   UnstyledButton,
-  Button,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -24,7 +23,7 @@ import {
   IconDeviceDesktop,
   IconChevronDown,
   IconChevronRight,
-  IconPlus,
+  IconTrash,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
@@ -35,6 +34,7 @@ import {
 } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
+import TreatmentPlanLinkSection from './TreatmentPlanLinkSection';
 import {
   createDateSortedOptions,
   formatDateDisplay,
@@ -66,33 +66,50 @@ const ItemDetailsCard = ({
   icon: Icon,
   children,
   defaultOpen = false,
+  onRemove,
 }) => {
+  const { t } = useTranslation(['common']);
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <Paper withBorder p="xs">
-      <UnstyledButton
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ width: '100%' }}
-      >
-        <Group justify="space-between">
-          <Group gap="xs">
-            <Badge
-              size="sm"
-              variant="light"
-              color={color}
-              leftSection={<Icon size={12} />}
-            >
-              {label}
-            </Badge>
+      <Group justify="space-between" wrap="nowrap">
+        <UnstyledButton
+          onClick={() => setIsOpen(!isOpen)}
+          style={{ flex: 1 }}
+          aria-expanded={isOpen}
+        >
+          <Group justify="space-between">
+            <Group gap="xs">
+              <Badge
+                size="sm"
+                variant="light"
+                color={color}
+                leftSection={<Icon size={12} />}
+              >
+                {label}
+              </Badge>
+            </Group>
+            {isOpen ? (
+              <IconChevronDown size={14} />
+            ) : (
+              <IconChevronRight size={14} />
+            )}
           </Group>
-          {isOpen ? (
-            <IconChevronDown size={14} />
-          ) : (
-            <IconChevronRight size={14} />
-          )}
-        </Group>
-      </UnstyledButton>
+        </UnstyledButton>
+        {onRemove && (
+          <ActionIcon
+            type="button"
+            variant="light"
+            color="red"
+            size="sm"
+            aria-label={t('common:visits.relationships.removeLink')}
+            onClick={onRemove}
+          >
+            <IconTrash size={14} />
+          </ActionIcon>
+        )}
+      </Group>
       <Collapse in={isOpen}>
         <Stack gap="xs" mt="xs">
           {children}
@@ -108,26 +125,7 @@ ItemDetailsCard.propTypes = {
   icon: PropTypes.elementType.isRequired,
   children: PropTypes.node.isRequired,
   defaultOpen: PropTypes.bool,
-};
-
-/** "Add <type>" next to a section's select; nothing when creating is not available. */
-const CreateButton = ({ onCreateNew, createLabel }) =>
-  onCreateNew ? (
-    <Group>
-      <Button
-        variant="light"
-        size="xs"
-        leftSection={<IconPlus size={14} />}
-        onClick={onCreateNew}
-      >
-        {createLabel}
-      </Button>
-    </Group>
-  ) : null;
-
-CreateButton.propTypes = {
-  onCreateNew: PropTypes.func,
-  createLabel: PropTypes.string,
+  onRemove: PropTypes.func,
 };
 
 /**
@@ -376,24 +374,17 @@ const TreatmentPlanSetup = ({
             display: activeSection === 'medications' ? 'block' : 'none',
           }}
         >
-          <Stack gap="md">
-            <MultiSelect
-              label="Medications to Link"
-              placeholder={
-                medicationOptions.length > 0
-                  ? 'Select medications...'
-                  : 'No medications available'
-              }
-              data={medicationOptions}
-              value={selectedMedIds}
-              onChange={values => handleSelectionChange('medications', values)}
-              searchable
-              clearable
-              disabled={medicationOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...medicationCreate} />
-
+          <TreatmentPlanLinkSection
+            items="medications"
+            options={medicationOptions}
+            selectedIds={selectedMedIds}
+            onSelectedChange={values =>
+              handleSelectionChange('medications', values)
+            }
+            onCreateNew={medicationCreate.onCreateNew}
+            createLabel={medicationCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected medication */}
             {selectedMedIds.length > 0 && (
               <Stack gap="xs">
@@ -405,6 +396,12 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={medId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'medications',
+                          selectedMedIds.filter(id => id !== medId)
+                        )
+                      }
                       label={getItemLabel('medications', medId)}
                       color="teal"
                       icon={IconPill}
@@ -579,31 +576,24 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noMedications')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
 
         {/* Visits Section */}
         <Box
           style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}
         >
-          <Stack gap="md">
-            <MultiSelect
-              label="Visits to Link"
-              placeholder={
-                encounterOptions.length > 0
-                  ? 'Select visits...'
-                  : 'No visits available'
-              }
-              data={encounterOptions}
-              value={selectedEncIds}
-              onChange={values => handleSelectionChange('encounters', values)}
-              searchable
-              clearable
-              disabled={encounterOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...encounterCreate} />
-
+          <TreatmentPlanLinkSection
+            items="visits"
+            options={encounterOptions}
+            selectedIds={selectedEncIds}
+            onSelectedChange={values =>
+              handleSelectionChange('encounters', values)
+            }
+            onCreateNew={encounterCreate.onCreateNew}
+            createLabel={encounterCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected visit */}
             {selectedEncIds.length > 0 && (
               <Stack gap="xs">
@@ -615,6 +605,12 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={encId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'encounters',
+                          selectedEncIds.filter(id => id !== encId)
+                        )
+                      }
                       label={getItemLabel('encounters', encId)}
                       color="blue"
                       icon={IconStethoscope}
@@ -675,29 +671,22 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noVisits')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
 
         {/* Labs Section */}
         <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
-          <Stack gap="md">
-            <MultiSelect
-              label="Lab Results to Link"
-              placeholder={
-                labResultOptions.length > 0
-                  ? 'Select lab results...'
-                  : 'No lab results available'
-              }
-              data={labResultOptions}
-              value={selectedLabIds}
-              onChange={values => handleSelectionChange('labResults', values)}
-              searchable
-              clearable
-              disabled={labResultOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...labResultCreate} />
-
+          <TreatmentPlanLinkSection
+            items="labResults"
+            options={labResultOptions}
+            selectedIds={selectedLabIds}
+            onSelectedChange={values =>
+              handleSelectionChange('labResults', values)
+            }
+            onCreateNew={labResultCreate.onCreateNew}
+            createLabel={labResultCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected lab */}
             {selectedLabIds.length > 0 && (
               <Stack gap="xs">
@@ -709,6 +698,12 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={labId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'labResults',
+                          selectedLabIds.filter(id => id !== labId)
+                        )
+                      }
                       label={getItemLabel('labResults', labId)}
                       color="violet"
                       icon={IconTestPipe}
@@ -768,31 +763,24 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noLabResults')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
 
         {/* Equipment Section */}
         <Box
           style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}
         >
-          <Stack gap="md">
-            <MultiSelect
-              label="Equipment to Link"
-              placeholder={
-                equipmentOptions.length > 0
-                  ? 'Select equipment...'
-                  : 'No equipment available'
-              }
-              data={equipmentOptions}
-              value={selectedEquipIds}
-              onChange={values => handleSelectionChange('equipment', values)}
-              searchable
-              clearable
-              disabled={equipmentOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...equipmentCreate} />
-
+          <TreatmentPlanLinkSection
+            items="equipment"
+            options={equipmentOptions}
+            selectedIds={selectedEquipIds}
+            onSelectedChange={values =>
+              handleSelectionChange('equipment', values)
+            }
+            onCreateNew={equipmentCreate.onCreateNew}
+            createLabel={equipmentCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected equipment */}
             {selectedEquipIds.length > 0 && (
               <Stack gap="xs">
@@ -804,6 +792,12 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={equipId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'equipment',
+                          selectedEquipIds.filter(id => id !== equipId)
+                        )
+                      }
                       label={getItemLabel('equipment', equipId)}
                       color="orange"
                       icon={IconDeviceDesktop}
@@ -860,7 +854,7 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noEquipment')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
       </Stack>
     </Box>

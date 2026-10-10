@@ -7,11 +7,7 @@ import {
 } from '@tabler/icons-react';
 
 import { apiService } from '../services/api';
-import {
-  PURPOSE_OPTIONS as TREATMENT_PURPOSE_OPTIONS,
-  getPurposeColor as getTreatmentPurposeColor,
-  getPurposeLabel as getTreatmentPurposeLabel,
-} from './treatmentLabResultConstants';
+import { LAB_RESULT_LINK_PURPOSES } from './labResultLinkPurposes';
 import { ENCOUNTER_LINK_TYPE_BY_KEY } from './encounterLinkTypes';
 import type {
   LinkRow,
@@ -81,12 +77,6 @@ const medicationName = (detail: Raw): string | null => {
   return name && dosage ? `${name} (${dosage})` : name;
 };
 
-const TREATMENT_PURPOSES: PurposeConfig = {
-  options: TREATMENT_PURPOSE_OPTIONS,
-  getLabel: getTreatmentPurposeLabel,
-  getColor: getTreatmentPurposeColor,
-};
-
 export const LAB_RESULT_LINK_TYPES: LabResultLinkConfig[] = [
   {
     key: 'conditions',
@@ -95,8 +85,9 @@ export const LAB_RESULT_LINK_TYPES: LabResultLinkConfig[] = [
     color: 'blue',
     createType: 'conditions',
     candidateLabel: ENCOUNTER_LINK_TYPE_BY_KEY.conditions.candidateLabel,
-    supportsPurpose: false,
+    supportsPurpose: true,
     supportsExpectedFrequency: false,
+    purposeConfig: LAB_RESULT_LINK_PURPOSES,
   },
   {
     key: 'medications',
@@ -115,8 +106,9 @@ export const LAB_RESULT_LINK_TYPES: LabResultLinkConfig[] = [
     color: 'grape',
     createType: 'procedures',
     candidateLabel: ENCOUNTER_LINK_TYPE_BY_KEY.procedures.candidateLabel,
-    supportsPurpose: false,
+    supportsPurpose: true,
     supportsExpectedFrequency: false,
+    purposeConfig: LAB_RESULT_LINK_PURPOSES,
   },
   {
     key: 'treatments',
@@ -127,7 +119,7 @@ export const LAB_RESULT_LINK_TYPES: LabResultLinkConfig[] = [
     candidateLabel: ENCOUNTER_LINK_TYPE_BY_KEY.treatments.candidateLabel,
     supportsPurpose: true,
     supportsExpectedFrequency: true,
-    purposeConfig: TREATMENT_PURPOSES,
+    purposeConfig: LAB_RESULT_LINK_PURPOSES,
   },
 ];
 
@@ -161,14 +153,16 @@ const API_BY_KEY: Record<LabResultLinkKey, LabResultLinkApi> = {
       name: detail => asString(detail.diagnosis),
     },
     load: (id, signal) => apiService.getLabResultConditions(id, signal),
-    create: (id, targetId, note) =>
+    create: (id, targetId, note, purpose) =>
       apiService.createLabResultCondition(id, {
         lab_result_id: id,
         condition_id: targetId,
+        purpose,
         relevance_note: note,
       }),
     update: (id, linkId, updates) =>
       apiService.updateLabResultCondition(id, linkId, {
+        purpose: updates.purpose ?? null,
         relevance_note: updates.relevance_note ?? null,
       }),
     remove: (id, linkId) => apiService.deleteLabResultCondition(id, linkId),
@@ -200,14 +194,16 @@ const API_BY_KEY: Record<LabResultLinkKey, LabResultLinkApi> = {
       date: detail => asString(detail.date),
     },
     load: (id, signal) => apiService.getLabResultProcedures(id, signal),
-    create: (id, targetId, note) =>
+    create: (id, targetId, note, purpose) =>
       apiService.createLabResultProcedure(id, {
         lab_result_id: id,
         procedure_id: targetId,
+        purpose,
         relevance_note: note,
       }),
     update: (id, linkId, updates) =>
       apiService.updateLabResultProcedure(id, linkId, {
+        purpose: updates.purpose ?? null,
         relevance_note: updates.relevance_note ?? null,
       }),
     remove: (id, linkId) => apiService.deleteLabResultProcedure(id, linkId),
@@ -302,11 +298,10 @@ export const linksToPending = (
 ): Raw[] =>
   links.map(link => ({
     [PENDING_ID_FIELD[key]]: link.entityId,
+    // Medication links have no purpose; treatment links also have a frequency
+    ...(key !== 'medications' ? { purpose: link.purpose || null } : {}),
     ...(key === 'treatments'
-      ? {
-          purpose: link.purpose || null,
-          expected_frequency: link.expectedFrequency || null,
-        }
+      ? { expected_frequency: link.expectedFrequency || null }
       : {}),
     relevance_note: link.relevanceNote || null,
   }));

@@ -80,6 +80,7 @@ const VIEW_TO_EDIT_TAB: Record<EditTabEntity, TabMap> = {
     overview: 'basic',
     ...sameTabs(
       'details',
+      'conditions',
       'reminders',
       'visits',
       'labResults',

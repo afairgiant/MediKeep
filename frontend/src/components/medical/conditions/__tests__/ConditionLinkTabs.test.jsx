@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import render from '../../../../test-utils/render';
@@ -323,8 +323,36 @@ describe('Condition View dialog - link tabs (#1128)', () => {
       />
     );
 
+  it('shows only the link tabs that have links, with their counts', async () => {
+    api.getConditionMedicationLinks.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    api.getRecordLabResultLinks.mockResolvedValue([]);
+    api.getRecordEncounterLinks.mockResolvedValue([{ id: 3 }]);
+    renderModal();
+
+    expect(
+      await screen.findByRole('tab', { name: `${MEDS} (2)` })
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole('tab', { name: 'Visits (1)' })
+    ).toBeInTheDocument();
+    // No empty "(0)" tab for the type without links
+    expect(screen.queryByRole('tab', { name: LABS_TAB })).toBeNull();
+  });
+
+  it('shows no link tabs at all for a condition without links', async () => {
+    renderModal();
+    await waitFor(() =>
+      expect(api.getConditionMedicationLinks).toHaveBeenCalled()
+    );
+    await waitFor(() => expect(api.getRecordLabResultLinks).toHaveBeenCalled());
+    for (const name of [MEDS_TAB, LABS_TAB, VISITS_TAB]) {
+      expect(screen.queryByRole('tab', { name })).toBeNull();
+    }
+  });
+
   it('shows read-only Medications and Lab Results cards in their own tabs', async () => {
     api.getConditionMedicationLinks.mockResolvedValue([{ id: 1 }]);
+    api.getRecordLabResultLinks.mockResolvedValue([{ id: 2 }]);
     renderModal();
     const user = userEvent.setup();
 
@@ -344,9 +372,10 @@ describe('Condition View dialog - link tabs (#1128)', () => {
   });
 
   it('does not add the panel descriptions to the View dialog', async () => {
+    api.getConditionMedicationLinks.mockResolvedValue([{ id: 1 }]);
     renderModal();
     const user = userEvent.setup();
-    await user.click(screen.getByRole('tab', { name: MEDS_TAB }));
+    await user.click(await screen.findByRole('tab', { name: MEDS_TAB }));
     await screen.findByTestId('condition-medications');
     expect(screen.queryByText(/linkPanels\./)).toBeNull();
   });

@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
 
-from app.core.constants import LAB_TEST_COMPONENT_LIMITS
+from app.core.constants import LAB_RESULT_LINK_PURPOSES, LAB_TEST_COMPONENT_LIMITS
 from app.schemas.base_tags import (
     TaggedEntityMixin,
     TaggedEntityResponseMixin,
@@ -17,6 +17,20 @@ def _validate_relevance_note(v):
     if v and len(v.strip()) > 500:
         raise ValueError("Relevance note must be less than 500 characters")
     return v.strip() if v else None
+
+
+def _validate_link_purpose(v):
+    """Validate the purpose of a condition or procedure lab result link"""
+    if v is None:
+        return v
+    purpose = v.strip().lower()
+    if not purpose:
+        return None
+    if purpose not in LAB_RESULT_LINK_PURPOSES:
+        raise ValueError(
+            f"Purpose must be one of: {', '.join(LAB_RESULT_LINK_PURPOSES)}"
+        )
+    return purpose
 
 
 class LabResultBase(TaggedEntityMixin):
@@ -532,7 +546,14 @@ class RecordLabResultLinkCreate(BaseModel):
     """Link an existing lab result to the record in the URL path"""
 
     lab_result_id: int
+    # Conditions and procedures only; medication links have no purpose
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return _validate_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -541,9 +562,16 @@ class RecordLabResultLinkCreate(BaseModel):
 
 
 class RecordLabResultLinkUpdate(BaseModel):
-    """Update the note of a record-side lab result link"""
+    """Update the purpose and note of a record-side lab result link"""
 
+    # Conditions and procedures only; medication links have no purpose
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return _validate_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -572,6 +600,7 @@ class RecordLabResultLinkResponse(BaseModel):
     medication_id: Optional[int] = None
     procedure_id: Optional[int] = None
     condition_id: Optional[int] = None
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -588,7 +617,13 @@ class LabResultConditionBase(BaseModel):
 
     lab_result_id: int
     condition_id: int
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return _validate_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -603,7 +638,13 @@ class LabResultConditionCreate(LabResultConditionBase):
 class LabResultConditionUpdate(BaseModel):
     """Schema for updating a lab result condition relationship"""
 
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return _validate_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -688,7 +729,13 @@ class LabResultProcedureBase(BaseModel):
 
     lab_result_id: int
     procedure_id: int
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return _validate_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -705,7 +752,13 @@ class LabResultProcedureCreate(LabResultProcedureBase):
 class LabResultProcedureUpdate(BaseModel):
     """Schema for updating a lab result procedure relationship"""
 
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return _validate_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod

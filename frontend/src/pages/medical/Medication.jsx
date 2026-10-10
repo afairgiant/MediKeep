@@ -60,6 +60,7 @@ import logger from '../../services/logger';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
 import { linkPendingLabResultsOrWarn } from '../../utils/recordLabResultLinks';
+import { savePendingMedicationConditionLinks } from '../../utils/medicationConditionLinks';
 import {
   INITIAL_MEDICATION_FORM_DATA,
   buildMedicationPayload,
@@ -147,22 +148,6 @@ const Medication = () => {
     requiresPatient: true,
   });
 
-  // Fetch conditions for the condition-linking dropdown in the form and view modal.
-  // Depends on currentPatient so it refreshes when the active patient changes.
-  // Fetches all conditions (including inactive) so they can be linked to medications.
-  const [conditions, setConditions] = useState([]);
-  useEffect(() => {
-    if (!currentPatient?.id) return;
-    apiService
-      .getConditionsDropdown(false)
-      .then(data => {
-        setConditions(data || []);
-      })
-      .catch(err => {
-        logger.warn('Failed to fetch conditions dropdown:', err);
-      });
-  }, [currentPatient?.id]);
-
   // Get standardized configuration
   const config = getMedicalPageConfig('medications');
 
@@ -233,7 +218,7 @@ const Medication = () => {
   // Form data state
   const [formData, setFormData] = useState({
     ...INITIAL_MEDICATION_FORM_DATA,
-    condition_ids: [],
+    pending_condition_links: [],
     pending_visit_links: [],
     pending_lab_result_links: [],
   });
@@ -290,7 +275,7 @@ const Medication = () => {
   const resetForm = useCallback(() => {
     setFormData({
       ...INITIAL_MEDICATION_FORM_DATA,
-      condition_ids: [],
+      pending_condition_links: [],
       pending_visit_links: [],
       pending_lab_result_links: [],
     });
@@ -411,27 +396,25 @@ const Medication = () => {
         completeFormSubmission(success, resultId);
 
         if (success && resultId) {
-          if (!editingMedication && formData.condition_ids.length > 0) {
-            const linkResults = await Promise.allSettled(
-              formData.condition_ids.map(conditionId => {
-                const id = parseInt(conditionId, 10);
-                return apiService.createConditionMedication(id, {
-                  medication_id: resultId,
-                });
-              })
+          if (
+            !editingMedication &&
+            formData.pending_condition_links?.length > 0
+          ) {
+            const failedCount = await savePendingMedicationConditionLinks(
+              resultId,
+              formData.pending_condition_links
             );
-            const failures = linkResults.filter(r => r.status === 'rejected');
-            if (failures.length > 0) {
+            if (failedCount > 0) {
               logger.warn('medications_condition_link_partial_failure', {
-                message: `Failed to link ${failures.length} of ${formData.condition_ids.length} conditions`,
+                message: `Failed to link ${failedCount} of ${formData.pending_condition_links.length} conditions`,
                 medicationId: resultId,
-                failedCount: failures.length,
+                failedCount,
                 component: 'Medication',
               });
               notifications.show({
                 title: t(
                   'medical:medications.form.conditionLinkPartialFailure',
-                  { count: failures.length }
+                  { count: failedCount }
                 ),
                 message: t('medical:medications.form.conditionLinkFailed'),
                 color: 'yellow',
@@ -715,7 +698,6 @@ const Medication = () => {
           practitioners={practitioners}
           pharmacies={pharmacies}
           editingMedication={editingMedication}
-          conditions={conditions}
           patientId={currentPatient?.id}
           navigate={navigate}
           isLoading={isBlocking}
@@ -883,7 +865,6 @@ const Medication = () => {
           navigate={navigate}
           onError={setError}
           practitioners={practitioners}
-          conditions={conditions}
           disableEdit={isViewOnly}
           disableEditTooltip={viewOnlyTooltip}
         />

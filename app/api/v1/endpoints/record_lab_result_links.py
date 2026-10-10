@@ -57,6 +57,8 @@ class RecordLabResultLinkConfig:
     update_schema: type
     # (db, record_id) -> (link, lab result) rows, joined in one query
     details: Callable[[Session, int], List]
+    # Whether the link has a purpose (conditions and procedures; not medications)
+    supports_purpose: bool = False
 
 
 RECORD_LAB_RESULT_LINK_CONFIGS = {
@@ -81,6 +83,7 @@ RECORD_LAB_RESULT_LINK_CONFIGS = {
         lambda db, record_id: lab_result_procedure.get_by_procedure_with_details(
             db, procedure_id=record_id
         ),
+        supports_purpose=True,
     ),
     "conditions": RecordLabResultLinkConfig(
         "Condition",
@@ -92,6 +95,7 @@ RECORD_LAB_RESULT_LINK_CONFIGS = {
         lambda db, record_id: lab_result_condition.get_by_condition_with_details(
             db, condition_id=record_id
         ),
+        supports_purpose=True,
     ),
 }
 
@@ -112,6 +116,15 @@ def _get_record(
     return record
 
 
+def _require_purpose_support(request, config, purpose):
+    """A purpose is only accepted by the links that have one."""
+    if purpose is not None and not config.supports_purpose:
+        raise BusinessLogicException(
+            message=f"{config.label} lab result links have no purpose",
+            request=request,
+        )
+
+
 def _get_link(db, request, config, relationship_id, record_id):
     """Fetch a link and confirm it belongs to the record in the path."""
     link = config.crud.get(db, id=relationship_id)
@@ -129,6 +142,7 @@ def _serialize(config, link, db_lab_result):
         "id": link.id,
         "lab_result_id": link.lab_result_id,
         config.fk: getattr(link, config.fk),
+        "purpose": getattr(link, "purpose", None),
         "relevance_note": link.relevance_note,
         "created_at": link.created_at,
         "updated_at": link.updated_at,
@@ -199,6 +213,7 @@ def register_record_lab_result_routes(router: APIRouter, config_key: str) -> Non
                 current_user,
                 "edit",
             )
+            _require_purpose_support(request, config, link_in.purpose)
             db_lab_result = lab_result.get(db, id=link_in.lab_result_id)
             handle_not_found(db_lab_result, "Lab result", request)
             verify_patient_ownership(
@@ -235,6 +250,7 @@ def register_record_lab_result_routes(router: APIRouter, config_key: str) -> Non
                 obj_in=config.create_schema(
                     lab_result_id=db_lab_result.id,
                     relevance_note=link_in.relevance_note,
+                    **({"purpose": link_in.purpose} if config.supports_purpose else {}),
                     **{config.fk: record_id},
                 ),
             )
@@ -260,11 +276,14 @@ def register_record_lab_result_routes(router: APIRouter, config_key: str) -> Non
                 current_user,
                 "edit",
             )
+            # Only the fields the request sent change; a field left out stays as it is
+            fields = link_in.model_dump(exclude_unset=True)
+            _require_purpose_support(request, config, fields.get("purpose"))
             link = _get_link(db, request, config, relationship_id, record_id)
             updated = config.crud.update(
                 db,
                 db_obj=link,
-                obj_in=config.update_schema(relevance_note=link_in.relevance_note),
+                obj_in=config.update_schema(**fields),
             )
             _log(request, current_user, "update", config, updated.id, record)
             return _serialize(

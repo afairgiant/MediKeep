@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   recordLabResultLinkSource,
   recordLabResultRow,
+  recordLabResultsHavePurpose,
 } from '../recordLabResultLinks';
 
 const api = vi.hoisted(() => ({
@@ -47,6 +48,9 @@ describe('recordLabResultRow', () => {
       relevanceNote: 'liver function',
       purpose: null,
     });
+    expect(recordLabResultRow({ ...RESPONSE, purpose: 'safety' }).purpose).toBe(
+      'safety'
+    );
   });
 
   it('falls back to the id when the lab result is missing', () => {
@@ -57,45 +61,89 @@ describe('recordLabResultRow', () => {
 });
 
 describe('recordLabResultLinkSource', () => {
-  it.each(['medications', 'procedures'] as const)(
-    'reads and writes through the %s record routes',
+  it.each(['procedures', 'conditions'] as const)(
+    'reads and writes the purpose and note through the %s record routes',
     async path => {
-      api.getRecordLabResultLinks.mockResolvedValue([RESPONSE]);
+      api.getRecordLabResultLinks.mockResolvedValue([
+        { ...RESPONSE, purpose: 'monitoring' },
+      ]);
       api.createRecordLabResultLink.mockResolvedValue({});
       api.updateRecordLabResultLink.mockResolvedValue({});
       api.deleteRecordLabResultLink.mockResolvedValue({});
       const source = recordLabResultLinkSource(path, 8, 7);
 
-      expect(await source.loadRows()).toHaveLength(1);
+      const rows = await source.loadRows();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].purpose).toBe('monitoring');
       expect(api.getRecordLabResultLinks).toHaveBeenCalledWith(
         path,
         8,
         undefined
       );
 
-      await source.createLinks([3, 4], 'n', null);
+      await source.createLinks([3, 4], 'n', 'baseline');
       expect(api.createRecordLabResultLink).toHaveBeenNthCalledWith(
         1,
         path,
         8,
-        { lab_result_id: 3, relevance_note: 'n' }
+        { lab_result_id: 3, relevance_note: 'n', purpose: 'baseline' }
       );
       expect(api.createRecordLabResultLink).toHaveBeenNthCalledWith(
         2,
         path,
         8,
-        { lab_result_id: 4, relevance_note: 'n' }
+        { lab_result_id: 4, relevance_note: 'n', purpose: 'baseline' }
       );
 
-      await source.updateLink({ id: 11 } as never, { relevance_note: null });
+      await source.updateLink({ id: 11 } as never, {
+        relevance_note: null,
+        purpose: 'outcome',
+      });
       expect(api.updateRecordLabResultLink).toHaveBeenCalledWith(path, 8, 11, {
         relevance_note: null,
+        purpose: 'outcome',
       });
+      await source.updateLink({ id: 11 } as never, { relevance_note: 'n' });
+      expect(api.updateRecordLabResultLink).toHaveBeenLastCalledWith(
+        path,
+        8,
+        11,
+        { relevance_note: 'n', purpose: null }
+      );
 
       await source.removeLink({ id: 11 } as never);
       expect(api.deleteRecordLabResultLink).toHaveBeenCalledWith(path, 8, 11);
     }
   );
+
+  it('sends no purpose for medication links, which have none', async () => {
+    api.createRecordLabResultLink.mockResolvedValue({});
+    api.updateRecordLabResultLink.mockResolvedValue({});
+    const source = recordLabResultLinkSource('medications', 8, 7);
+
+    await source.createLinks([3], 'n', 'baseline');
+    expect(api.createRecordLabResultLink).toHaveBeenCalledWith(
+      'medications',
+      8,
+      { lab_result_id: 3, relevance_note: 'n' }
+    );
+    await source.updateLink({ id: 11 } as never, {
+      relevance_note: 'n',
+      purpose: 'baseline',
+    });
+    expect(api.updateRecordLabResultLink).toHaveBeenCalledWith(
+      'medications',
+      8,
+      11,
+      { relevance_note: 'n' }
+    );
+  });
+
+  it('knows which record types have a purpose', () => {
+    expect(recordLabResultsHavePurpose('procedures')).toBe(true);
+    expect(recordLabResultsHavePurpose('conditions')).toBe(true);
+    expect(recordLabResultsHavePurpose('medications')).toBe(false);
+  });
 
   it('offers the patient lab results, labelled like the visit side', async () => {
     api.getPatientLabResults.mockResolvedValue([

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { Tabs } from '@mantine/core';
 import '@testing-library/jest-dom';
 
-import render, { screen, waitFor } from '../../../test-utils/render';
+import render, { screen, waitFor, within } from '../../../test-utils/render';
 import RecordLabResultsCard from '../RecordLabResultsCard';
 import RecordLabResultsTabButton from '../RecordLabResultsTabButton';
 import { InlineCreateProvider } from '../../../contexts/InlineCreateContext';
@@ -43,11 +43,14 @@ beforeEach(() => {
   api.getPatientLabResults.mockResolvedValue([]);
 });
 
-const renderCard = (isViewMode = false) =>
+const renderCard = (
+  isViewMode = false,
+  recordPath: 'medications' | 'procedures' | 'conditions' = 'medications'
+) =>
   render(
     <InlineCreateProvider>
       <RecordLabResultsCard
-        recordPath="medications"
+        recordPath={recordPath}
         recordId={8}
         patientId={7}
         isViewMode={isViewMode}
@@ -171,6 +174,114 @@ describe('RecordLabResultsCard - record not saved yet', () => {
     );
     expect(onPendingChange).toHaveBeenCalledWith([]);
     expect(api.deleteRecordLabResultLink).not.toHaveBeenCalled();
+  });
+});
+
+describe('RecordLabResultsCard - purpose of the link (#1128)', () => {
+  it.each(['procedures', 'conditions'] as const)(
+    'shows and saves the purpose of a %s link',
+    async path => {
+      api.getRecordLabResultLinks.mockResolvedValue([
+        { ...LINK, purpose: 'monitoring' },
+      ]);
+      api.updateRecordLabResultLink.mockResolvedValue({});
+      renderCard(false, path);
+
+      expect(await screen.findByText('Monitoring')).toBeInTheDocument();
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: 'common:visits.relationships.editLink',
+        })
+      );
+      await userEvent.click(
+        screen.getAllByLabelText('common:visits.relationships.purpose')[0]
+      );
+      await userEvent.click(
+        await screen.findByRole('option', { name: 'Safety', hidden: true })
+      );
+      await userEvent.click(
+        screen.getByRole('button', { name: 'common:buttons.save' })
+      );
+      await waitFor(() =>
+        expect(api.updateRecordLabResultLink).toHaveBeenCalledWith(
+          path,
+          8,
+          11,
+          { relevance_note: 'liver function', purpose: 'safety' }
+        )
+      );
+    }
+  );
+
+  it('offers a purpose in the Link dialog of a condition', async () => {
+    api.getPatientLabResults.mockResolvedValue([
+      { id: 9, test_name: 'CBC', ordered_date: '2026-01-05', status: 'done' },
+    ]);
+    api.createRecordLabResultLink.mockResolvedValue({});
+    renderCard(false, 'conditions');
+    await screen.findByText('Liver Panel');
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole('button', { name: 'common:buttons.link' })
+          .find(button => !button.hasAttribute('aria-haspopup'))
+      ).toBeEnabled()
+    );
+    await userEvent.click(
+      screen
+        .getAllByRole('button', { name: 'common:buttons.link' })
+        .find(button => !button.hasAttribute('aria-haspopup')) as HTMLElement
+    );
+    const dialog = await screen.findByRole('dialog');
+    await userEvent.click(
+      within(dialog).getByPlaceholderText(
+        'common:visits.relationships.selectPlaceholder'
+      )
+    );
+    await userEvent.click(
+      await screen.findByRole('option', {
+        name: 'CBC (2026-01-05, done)',
+        hidden: true,
+      })
+    );
+    await userEvent.click(
+      within(dialog).getByLabelText('common:visits.relationships.purpose')
+    );
+    await userEvent.click(
+      await screen.findByRole('option', { name: 'Baseline', hidden: true })
+    );
+    await userEvent.click(
+      within(dialog).getByRole('button', {
+        name: 'common:visits.relationships.linkSelected',
+      })
+    );
+    await waitFor(() =>
+      expect(api.createRecordLabResultLink).toHaveBeenCalledWith(
+        'conditions',
+        8,
+        { lab_result_id: 9, relevance_note: null, purpose: 'baseline' }
+      )
+    );
+  });
+
+  it('has no purpose for a medication link', async () => {
+    renderCard(false, 'medications');
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'common:visits.relationships.editLink',
+      })
+    );
+    expect(
+      screen.queryAllByLabelText('common:visits.relationships.purpose')
+    ).toHaveLength(0);
+  });
+
+  it('shows the purpose in view mode too', async () => {
+    api.getRecordLabResultLinks.mockResolvedValue([
+      { ...LINK, purpose: 'outcome' },
+    ]);
+    renderCard(true, 'procedures');
+    expect(await screen.findByText('Outcome')).toBeInTheDocument();
   });
 });
 

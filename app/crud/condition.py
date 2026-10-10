@@ -71,6 +71,21 @@ class CRUDConditionMedication(
             .all()
         )
 
+    def get_by_medication_with_details(
+        self, db: Session, *, medication_id: int
+    ) -> List:
+        """Get all condition links for a medication with joined condition data.
+
+        Returns a list of (ConditionMedication, Condition) tuples, so listing a
+        medication's conditions takes one query however many there are.
+        """
+        return (
+            db.query(self.model, Condition)
+            .join(Condition, self.model.condition_id == Condition.id)
+            .filter(self.model.medication_id == medication_id)
+            .all()
+        )
+
     def get_by_medication(
         self, db: Session, *, medication_id: int
     ) -> List[ConditionMedication]:

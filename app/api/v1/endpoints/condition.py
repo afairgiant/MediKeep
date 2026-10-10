@@ -37,6 +37,7 @@ from app.schemas.condition import (
     ConditionResponse,
     ConditionUpdate,
     ConditionWithRelations,
+    MedicationConditionWithDetails,
 )
 
 router = APIRouter()
@@ -868,7 +869,7 @@ def get_patient_conditions(
 
 @router.get(
     "/medication/{medication_id}/conditions",
-    response_model=List[ConditionMedicationWithDetails],
+    response_model=List[MedicationConditionWithDetails],
 )
 def get_medication_conditions(
     *,
@@ -929,17 +930,15 @@ def get_medication_conditions(
                 message="Access denied to this medication", request=request
             )
 
-        # Get condition relationships
-        relationships = condition_medication.get_by_medication(
+        # Get condition relationships, with the conditions, in one query
+        relationships = condition_medication.get_by_medication_with_details(
             db, medication_id=medication_id
         )
 
-        # Enhance with condition details
         enhanced_relationships = []
-        for rel in relationships:
-            condition_obj = condition.get(db, id=rel.condition_id)
+        for rel, condition_obj in relationships:
             # Verify the condition belongs to the same patient as the medication
-            if condition_obj and condition_obj.patient_id != db_medication.patient_id:
+            if condition_obj.patient_id != db_medication.patient_id:
                 condition_obj = None  # Don't include conditions from other patients
 
             enhanced_relationships.append(

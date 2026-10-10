@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   submitComponents: vi.fn(),
   warn: vi.fn(),
   success: vi.fn(),
+  // The test results the user has entered in the component rows
+  pendingRows: [] as Array<{ test_name: string; value: number | '' }>,
 }));
 
 vi.mock('../../../services/api', () => ({
@@ -44,16 +46,26 @@ vi.mock('../../../utils/notifyTranslated', () => ({
   notifyWarning: mocks.warn,
   notifySuccess: mocks.success,
 }));
-// Stands in for the component rows: one pending result, as if the user had entered it
-vi.mock('../../medical/labresults/InlineTestComponentEntry', () => ({
-  default: ({ onRef }: { onRef: (_m: unknown) => void }) => {
-    onRef({
-      getPendingComponents: () => [{ test_name: 'Glucose', value: 5 }],
-      clearComponents: vi.fn(),
-    });
+// Stands in for the component rows: reports the pending results like the real rows do
+vi.mock('../../medical/labresults/InlineTestComponentEntry', async () => {
+  const { useEffect } = await import('react');
+  const InlineTestComponentEntryMock = ({
+    onRef,
+  }: {
+    onRef: (_m: unknown) => void;
+  }) => {
+    useEffect(() => {
+      onRef({
+        hasPendingComponents: () => mocks.pendingRows.length > 0,
+        getPendingComponents: () => mocks.pendingRows,
+        clearComponents: vi.fn(),
+      });
+      return () => onRef(null);
+    }, [onRef]);
     return <div />;
-  },
-}));
+  };
+  return { default: InlineTestComponentEntryMock };
+});
 
 const renderDialog = (onCreated = vi.fn().mockResolvedValue('linked')) => {
   const onClose = vi.fn();
@@ -77,6 +89,8 @@ const fillName = async () =>
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // One pending test result, as if the user had entered it
+  mocks.pendingRows = [{ test_name: 'Glucose', value: 5 }];
   mocks.createLabResult.mockResolvedValue({
     id: 321,
     test_name: 'Metabolic panel',
@@ -134,13 +148,38 @@ describe('LabResultCreateDialog', () => {
     expect(mocks.success).not.toHaveBeenCalled();
   });
 
-  it('creates nothing without a name', async () => {
+  it('keeps Save Results inactive without a name, and creates nothing', async () => {
     const { onClose } = renderDialog();
-    await userEvent.click(
-      screen.getByRole('button', { name: /createButton|Create/i })
-    );
+    const save = screen.getByRole('button', { name: /createButton|Create/i });
+    expect(save).toBeDisabled();
+    await userEvent.click(save);
     expect(mocks.createLabResult).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('keeps Save Results inactive until a test result is entered (#1128)', async () => {
+    mocks.pendingRows = [];
+    const { onClose } = renderDialog();
+    await fillName();
+    const save = screen.getByRole('button', { name: /createButton|Create/i });
+
+    expect(save).toBeDisabled();
+    expect(
+      screen.getByText(/testResultRequired|At least one/)
+    ).toBeInTheDocument();
+    await userEvent.click(save);
+    expect(mocks.createLabResult).not.toHaveBeenCalled();
+    expect(mocks.submitComponents).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('activates Save Results with a name and a test result, even without a value', async () => {
+    mocks.pendingRows = [{ test_name: 'Glucose', value: '' }];
+    renderDialog();
+    await fillName();
+    expect(
+      screen.getByRole('button', { name: /createButton|Create/i })
+    ).toBeEnabled();
   });
 
   it('ignores Escape while the save is running, so it cannot be created twice', async () => {

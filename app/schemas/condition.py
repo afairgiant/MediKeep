@@ -311,6 +311,15 @@ class ConditionMedicationWithDetails(ConditionMedicationResponse):
     model_config = {"from_attributes": True}
 
 
+class MedicationConditionWithDetails(ConditionMedicationResponse):
+    """Schema for a condition medication relationship seen from the medication,
+    with the condition details"""
+
+    condition: Optional[dict] = None  # Will contain condition details
+
+    model_config = {"from_attributes": True}
+
+
 class ConditionMedicationBulkCreate(BaseModel):
     """Schema for bulk creating condition medication relationships.
 

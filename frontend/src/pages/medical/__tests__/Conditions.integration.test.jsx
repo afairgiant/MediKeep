@@ -368,10 +368,16 @@ vi.mock('../../../components/medical/conditions', () => ({
             onChange={onInputChange}
           />
           {[
-            ['pending_medication_links', 'medication', 4, 'med note'],
-            ['pending_lab_result_links', 'lab-result', 7, 'lab note'],
-            ['pending_visit_links', 'visit', 5, 'visit note'],
-          ].map(([field, label, id, note]) => (
+            ['pending_medication_links', 'medication', 4, 'med note', null],
+            [
+              'pending_lab_result_links',
+              'lab-result',
+              7,
+              'lab note',
+              'monitoring',
+            ],
+            ['pending_visit_links', 'visit', 5, 'visit note', null],
+          ].map(([field, label, id, note, purpose]) => (
             <button
               key={field}
               type="button"
@@ -380,9 +386,7 @@ vi.mock('../../../components/medical/conditions', () => ({
                 onInputChange({
                   target: {
                     name: field,
-                    value: [
-                      { entityId: id, relevanceNote: note, purpose: null },
-                    ],
+                    value: [{ entityId: id, relevanceNote: note, purpose }],
                   },
                 })
               }
@@ -655,7 +659,11 @@ describe('Conditions Page Integration Tests', () => {
           expect(apiService.createRecordLabResultLink).toHaveBeenCalledWith(
             'conditions',
             10,
-            { lab_result_id: 7, relevance_note: 'lab note' }
+            {
+              lab_result_id: 7,
+              relevance_note: 'lab note',
+              purpose: 'monitoring',
+            }
           );
           expect(
             apiService.createRecordEncounterLinksBulk

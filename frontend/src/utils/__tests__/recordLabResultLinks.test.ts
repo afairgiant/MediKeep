@@ -48,6 +48,33 @@ describe('savePendingRecordLabResultLinks', () => {
     );
   });
 
+  it('sends the purpose for conditions and procedures, but not for medications', async () => {
+    const withPurpose = [
+      { entityId: 3, relevanceNote: 'a', purpose: 'monitoring' },
+    ];
+    await savePendingRecordLabResultLinks('conditions', 9, withPurpose);
+    await savePendingRecordLabResultLinks('procedures', 9, withPurpose);
+    await savePendingRecordLabResultLinks('medications', 9, withPurpose);
+    expect(api.createRecordLabResultLink).toHaveBeenNthCalledWith(
+      1,
+      'conditions',
+      9,
+      { lab_result_id: 3, relevance_note: 'a', purpose: 'monitoring' }
+    );
+    expect(api.createRecordLabResultLink).toHaveBeenNthCalledWith(
+      2,
+      'procedures',
+      9,
+      { lab_result_id: 3, relevance_note: 'a', purpose: 'monitoring' }
+    );
+    expect(api.createRecordLabResultLink).toHaveBeenNthCalledWith(
+      3,
+      'medications',
+      9,
+      { lab_result_id: 3, relevance_note: 'a' }
+    );
+  });
+
   it('keeps going after a failure and counts the failed links', async () => {
     api.createRecordLabResultLink
       .mockRejectedValueOnce(new Error('boom'))

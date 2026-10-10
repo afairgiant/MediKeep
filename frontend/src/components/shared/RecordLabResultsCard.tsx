@@ -4,9 +4,11 @@ import { IconFlask } from '@tabler/icons-react';
 
 import {
   recordLabResultLinkSource,
+  recordLabResultsHavePurpose,
   type RecordLabResultPath,
 } from '../../constants/recordLabResultLinks';
 import { ENCOUNTER_LINK_TYPE_BY_KEY } from '../../constants/encounterLinkTypes';
+import { LAB_RESULT_LINK_PURPOSES } from '../../constants/labResultLinkPurposes';
 import { setLinkCount } from '../../utils/linkCountStore';
 import LinkedRecordsSection from './LinkedRecordsSection';
 import { recordLabResultsCountKey } from './RecordLabResultsTabButton';
@@ -59,6 +61,8 @@ const RecordLabResultsCard = ({
       entityType={config.entityType}
       icon={IconFlask}
       color={config.color}
+      supportsPurpose={recordLabResultsHavePurpose(recordPath)}
+      purposeConfig={LAB_RESULT_LINK_PURPOSES}
       isViewMode={isViewMode}
       hideWhenEmpty={false}
       navigate={navigate}

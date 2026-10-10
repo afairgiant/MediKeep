@@ -14,19 +14,21 @@ import type { PendingLink } from '../../types/encounterLinks';
 
 /** Key of a record's "Lab Results" count, shared with the card that changes it. */
 export const recordLabResultsCountKey = (
-  recordPath: RecordLabResultPath,
+  recordPath: string,
   recordId: number | null | undefined
 ) => linkCountKey(recordPath, recordId, 'labResults');
 
 /**
  * Count of the lab results a record is linked to. For a saved record it is loaded up
  * front (the card only loads when its tab is opened) and kept current by the card; for
- * a new record it is the number of pending links.
+ * a new record it is the number of pending links. `enabled` is false for records that
+ * have no lab result links, so the hook can always be called.
  */
 export const useRecordLabResultsCount = (
-  recordPath: RecordLabResultPath,
+  recordPath: string,
   recordId?: number | null,
-  pendingLinks?: PendingLink[]
+  pendingLinks?: PendingLink[],
+  enabled = true
 ): number | undefined => {
   const key = recordLabResultsCountKey(recordPath, recordId);
 
@@ -44,7 +46,7 @@ export const useRecordLabResultsCount = (
         },
       },
     ],
-    Boolean(recordId)
+    enabled && Boolean(recordId)
   );
 
   const storedCount = useLinkCount(key);

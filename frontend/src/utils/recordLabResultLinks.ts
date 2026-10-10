@@ -1,4 +1,7 @@
-import type { RecordLabResultPath } from '../constants/recordLabResultLinks';
+import {
+  recordLabResultsHavePurpose,
+  type RecordLabResultPath,
+} from '../constants/recordLabResultLinks';
 import { apiService } from '../services/api';
 import logger from '../services/logger';
 import { notifyWarning } from './notifyTranslated';
@@ -20,6 +23,10 @@ export const savePendingRecordLabResultLinks = async (
       await apiService.createRecordLabResultLink(recordPath, recordId, {
         lab_result_id: link.entityId,
         relevance_note: link.relevanceNote,
+        // Only conditions and procedures have a purpose
+        ...(recordLabResultsHavePurpose(recordPath) && {
+          purpose: link.purpose,
+        }),
       });
     } catch (err) {
       failed += 1;

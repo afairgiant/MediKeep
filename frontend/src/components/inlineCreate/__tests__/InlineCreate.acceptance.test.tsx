@@ -81,15 +81,25 @@ vi.mock('../../../utils/labTestComponentUtils', () => ({
   submitPendingTestComponents: vi.fn().mockResolvedValue(undefined),
 }));
 // Stands in for the test-result rows: one pending result, as if the user had entered it
-vi.mock('../../medical/labresults/InlineTestComponentEntry', () => ({
-  default: ({ onRef }: { onRef: (_m: unknown) => void }) => {
-    onRef({
-      getPendingComponents: () => [{ test_name: 'Glucose', value: 5 }],
-      clearComponents: vi.fn(),
-    });
+vi.mock('../../medical/labresults/InlineTestComponentEntry', async () => {
+  const { useEffect } = await import('react');
+  const InlineTestComponentEntryMock = ({
+    onRef,
+  }: {
+    onRef: (_m: unknown) => void;
+  }) => {
+    useEffect(() => {
+      onRef({
+        hasPendingComponents: () => true,
+        getPendingComponents: () => [{ test_name: 'Glucose', value: 5 }],
+        clearComponents: vi.fn(),
+      });
+      return () => onRef(null);
+    }, [onRef]);
     return <div />;
-  },
-}));
+  };
+  return { default: InlineTestComponentEntryMock };
+});
 vi.mock('../../medical/treatments/TreatmentPlanSetup', () => ({
   default: () => <div data-testid="treatment-plan-setup" />,
 }));

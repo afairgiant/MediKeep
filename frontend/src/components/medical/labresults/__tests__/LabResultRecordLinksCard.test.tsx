@@ -12,6 +12,9 @@ const api = vi.hoisted(() => ({
   createLabResultCondition: vi.fn(),
   getLabResultTreatments: vi.fn(),
   updateLabResultTreatment: vi.fn(),
+  getLabResultProcedures: vi.fn(),
+  updateLabResultProcedure: vi.fn(),
+  getLabResultMedications: vi.fn(),
   getPatientConditions: vi.fn(),
   getPatientTreatments: vi.fn(),
 }));
@@ -142,27 +145,85 @@ describe('LabResultRecordLinksCard', () => {
     );
   });
 
-  it('does not offer purpose or frequency for conditions', async () => {
+  it('offers a purpose, but no expected frequency, for conditions', async () => {
     api.getLabResultConditions.mockResolvedValue([
       {
         id: 11,
         condition_id: 21,
+        purpose: 'baseline',
         relevance_note: 'n',
         condition: { id: 21, diagnosis: 'Diabetes', status: 'active' },
       },
     ]);
     renderCard({ linkKey: 'conditions', labResultId: 3 });
+    // The saved purpose is shown on the link
+    expect(await screen.findByText('Baseline')).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: 'common:visits.relationships.editLink',
+      })
+    );
+    expect(
+      screen.getAllByLabelText('common:visits.relationships.purpose').length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.queryByLabelText('common:labels.expectedFrequency')
+    ).not.toBeInTheDocument();
+  });
+
+  it('saves a changed purpose of a procedure link', async () => {
+    api.getLabResultProcedures.mockResolvedValue([
+      {
+        id: 12,
+        procedure_id: 31,
+        purpose: 'baseline',
+        relevance_note: null,
+        procedure: { id: 31, procedure_name: 'Biopsy', status: 'completed' },
+      },
+    ]);
+    api.updateLabResultProcedure.mockResolvedValue({});
+    renderCard({ linkKey: 'procedures', labResultId: 3 });
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'common:visits.relationships.editLink',
+      })
+    );
+    // The purpose select of the row being edited comes before the Link dialog's
+    await userEvent.click(
+      screen.getAllByLabelText('common:visits.relationships.purpose')[0]
+    );
+    await userEvent.click(
+      await screen.findByRole('option', { name: 'Outcome', hidden: true })
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'common:buttons.save' })
+    );
+    await waitFor(() =>
+      expect(api.updateLabResultProcedure).toHaveBeenCalledWith(3, 12, {
+        purpose: 'outcome',
+        relevance_note: null,
+      })
+    );
+  });
+
+  it('has no purpose for medications', async () => {
+    api.getLabResultMedications.mockResolvedValue([
+      {
+        id: 13,
+        medication_id: 41,
+        relevance_note: 'n',
+        medication: { id: 41, medication_name: 'Aspirin', status: 'active' },
+      },
+    ]);
+    renderCard({ linkKey: 'medications', labResultId: 3 });
     await userEvent.click(
       await screen.findByRole('button', {
         name: 'common:visits.relationships.editLink',
       })
     );
     expect(
-      screen.queryByLabelText('common:labels.expectedFrequency')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText('common:visits.relationships.purpose')
-    ).not.toBeInTheDocument();
+      screen.queryAllByLabelText('common:visits.relationships.purpose')
+    ).toHaveLength(0);
   });
 
   it('is read-only in view mode for every type', async () => {

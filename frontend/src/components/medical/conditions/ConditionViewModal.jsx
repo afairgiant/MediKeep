@@ -27,12 +27,10 @@ import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import ConditionMedicationsCard from '../../shared/ConditionMedicationsCard';
-import ConditionMedicationsTabButton from '../../shared/ConditionMedicationsTabButton';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
-import RecordLabResultsTabButton from '../../shared/RecordLabResultsTabButton';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const ConditionViewModal = ({
   isOpen,
@@ -181,12 +179,11 @@ const ConditionViewModal = ({
             >
               {t('shared:tabs.clinicalDetails', 'Clinical Details')}
             </Tabs.Tab>
-            <ConditionMedicationsTabButton conditionId={condition.id} />
-            <RecordLabResultsTabButton
+            <RecordLinkTabButtons
               recordPath="conditions"
               recordId={condition.id}
+              isViewMode
             />
-            <RecordVisitsTabButton recordType="conditions" recordId={condition.id} />
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}

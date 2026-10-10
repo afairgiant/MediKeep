@@ -60,9 +60,9 @@ vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
 // The same card for conditions, medications, procedures and treatments; each button
 // hands the form a link the way the real card would
 const PENDING_LINK_BY_KEY: Record<string, Record<string, unknown>> = {
-  conditions: { entityId: 7, relevanceNote: 'cn', purpose: null },
+  conditions: { entityId: 7, relevanceNote: 'cn', purpose: 'baseline' },
   medications: { entityId: 8, relevanceNote: 'mn', purpose: null },
-  procedures: { entityId: 9, relevanceNote: 'pn', purpose: null },
+  procedures: { entityId: 9, relevanceNote: 'pn', purpose: 'safety' },
   treatments: {
     entityId: 10,
     relevanceNote: 'tn',
@@ -801,7 +801,7 @@ describe('LabResultFormWrapper', () => {
           'shared:categories.conditions',
           'conditions',
           'conditions',
-          [{ condition_id: 7, relevance_note: 'cn' }],
+          [{ condition_id: 7, purpose: 'baseline', relevance_note: 'cn' }],
         ],
         [
           'shared:categories.medications',
@@ -813,7 +813,7 @@ describe('LabResultFormWrapper', () => {
           'shared:categories.procedures',
           'procedures',
           'procedures',
-          [{ procedure_id: 9, relevance_note: 'pn' }],
+          [{ procedure_id: 9, purpose: 'safety', relevance_note: 'pn' }],
         ],
         [
           'shared:categories.treatments',

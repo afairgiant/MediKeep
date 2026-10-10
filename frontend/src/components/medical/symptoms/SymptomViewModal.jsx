@@ -39,7 +39,7 @@ import {
 } from '../../../constants/symptomEnums';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { OCCURRENCE_SEVERITY_LABEL_KEYS } from '../../../utils/medicalFormFields/symptomOccurrence';
 import { usePagination } from '../../../hooks/usePagination';
 
@@ -223,7 +223,11 @@ const SymptomViewModal = ({
                 count: occurrences.length,
               })}
             </Tabs.Tab>
-            <RecordVisitsTabButton recordType="symptoms" recordId={symptom.id} />
+            <RecordLinkTabButtons
+              recordPath="symptoms"
+              recordId={symptom.id}
+              isViewMode
+            />
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}

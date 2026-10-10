@@ -899,21 +899,18 @@ def get_lab_result_conditions(
                 message="Access denied to this lab result", request=request
             )
 
-        # Get condition relationships
-        relationships = lab_result_condition.get_by_lab_result(
+        # Get condition relationships, with the conditions, in one query
+        relationships = lab_result_condition.get_by_lab_result_with_details(
             db, lab_result_id=lab_result_id
         )
 
-        # Enhance with condition details
-        from app.crud.condition import condition as condition_crud
-
         enhanced_relationships = []
-        for rel in relationships:
-            condition_obj = condition_crud.get(db, id=rel.condition_id)
+        for rel, condition_obj in relationships:
             rel_dict = {
                 "id": rel.id,
                 "lab_result_id": rel.lab_result_id,
                 "condition_id": rel.condition_id,
+                "purpose": rel.purpose,
                 "relevance_note": rel.relevance_note,
                 "created_at": rel.created_at,
                 "updated_at": rel.updated_at,
@@ -1545,6 +1542,7 @@ def get_lab_result_procedures(
                 "id": rel.id,
                 "lab_result_id": rel.lab_result_id,
                 "procedure_id": rel.procedure_id,
+                "purpose": rel.purpose,
                 "relevance_note": rel.relevance_note,
                 "created_at": rel.created_at,
                 "updated_at": rel.updated_at,

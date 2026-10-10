@@ -11,7 +11,6 @@ import {
   TextInput,
   Textarea,
   Select,
-  MultiSelect,
   Text,
   Title,
   Switch,
@@ -27,7 +26,6 @@ import {
   IconPill,
   IconFileText,
   IconNotes,
-  IconStethoscope,
   IconBell,
   IconAlertCircle,
   IconTrash,
@@ -44,7 +42,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
-import MedicationRelationships from './MedicationRelationships';
+import MedicationConditionsCard from '../shared/MedicationConditionsCard';
 import logger from '../../services/logger';
 import { apiService } from '../../services/api';
 import notificationApi from '../../services/api/notificationApi';
@@ -74,7 +72,6 @@ const MantineMedicationForm = ({
   pharmacies = [],
   editingMedication = null,
   isLoading = false,
-  conditions = [],
   navigate = null,
   children,
   statusMessage,
@@ -233,11 +230,6 @@ const MantineMedicationForm = ({
   const pharmacyOptions = pharmacies.map(pharmacy => ({
     value: String(pharmacy.id),
     label: pharmacy.name || pharmacy.brand || 'Pharmacy',
-  }));
-
-  const conditionOptions = conditions.map(c => ({
-    value: String(c.id),
-    label: `${c.diagnosis || `Condition #${c.id}`}${c.severity ? ` (${c.severity})` : ''}${c.status ? ` - ${c.status}` : ''}`,
   }));
 
   // Handle form submission
@@ -593,14 +585,6 @@ const MantineMedicationForm = ({
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
                 {t('shared:tabs.details')}
               </Tabs.Tab>
-              {!subDialog && (
-                <Tabs.Tab
-                  value="conditions"
-                  leftSection={<IconStethoscope size={16} />}
-                >
-                  {t('shared:categories.conditions')}
-                </Tabs.Tab>
-              )}
               <Tabs.Tab
                 value="reminders"
                 leftSection={<IconBell size={16} />}
@@ -624,6 +608,7 @@ const MantineMedicationForm = ({
                 <RecordLinkTabButtons
                   recordPath="medications"
                   recordId={editingMedication?.id}
+                  pendingConditionLinks={formData.pending_condition_links}
                   pendingVisitLinks={formData.pending_visit_links}
                   pendingLabResultLinks={formData.pending_lab_result_links}
                   activeTab={activeTab}
@@ -675,38 +660,28 @@ const MantineMedicationForm = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Conditions Tab */}
+            {/* Conditions Tab (not offered in a sub-dialog: nesting stays one level deep) */}
             {!subDialog && (
               <Tabs.Panel value="conditions">
                 <Box mt="md">
-                  {editingMedication ? (
-                    <MedicationRelationships
-                      direction="medication"
-                      medicationId={editingMedication.id}
-                      conditions={conditions}
-                      navigate={navigate}
-                      isViewMode={false}
-                    />
-                  ) : (
-                    <MultiSelect
-                      label={t('common:buttons.linkConditions')}
-                      description={t(
-                        'medications.form.linkConditionsDescription'
+                  {activeTab === 'conditions' && (
+                    <MedicationConditionsCard
+                      medicationId={editingMedication?.id}
+                      description={linkPanelDescription(
+                        'conditions',
+                        'medication'
                       )}
-                      placeholder={t('common:modals.chooseConditionsToLink')}
-                      data={conditionOptions}
-                      value={formData.condition_ids || []}
-                      onChange={values => {
+                      patientId={patientId}
+                      pendingLinks={formData.pending_condition_links}
+                      onPendingChange={next =>
                         onInputChange({
-                          target: { name: 'condition_ids', value: values },
-                        });
-                      }}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                      nothingFoundMessage={t(
-                        'medications.form.noConditionsFound'
-                      )}
+                          target: {
+                            name: 'pending_condition_links',
+                            value: next,
+                          },
+                        })
+                      }
+                      navigate={navigate}
                     />
                   )}
                 </Box>

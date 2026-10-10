@@ -165,17 +165,26 @@ const clickEdit = async () => {
   await userEvent.click(edit as HTMLElement);
 };
 
-// View mode only shows link tabs that have links; the visit under test has lab results
-let linksSpy: ReturnType<typeof vi.spyOn>;
+// View mode only shows link tabs that have links: the visit under test has lab results,
+// and every record under test has a visit and a lab result
+let spies: Array<ReturnType<typeof vi.spyOn>>;
 beforeEach(() => {
-  linksSpy = vi
-    .spyOn(apiService, 'getEncounterLinks')
-    .mockImplementation((_visitId: number, linkType: string) =>
-      Promise.resolve(linkType === 'lab-results' ? [{ id: 1 }] : [])
-    );
+  spies = [
+    vi
+      .spyOn(apiService, 'getEncounterLinks')
+      .mockImplementation((_visitId: number, linkType: string) =>
+        Promise.resolve(linkType === 'lab-results' ? [{ id: 1 }] : [])
+      ),
+    vi
+      .spyOn(apiService, 'getRecordEncounterLinks')
+      .mockResolvedValue([{ id: 1 }]),
+    vi
+      .spyOn(apiService, 'getRecordLabResultLinks')
+      .mockResolvedValue([{ id: 1 }]),
+  ];
 });
 afterEach(() => {
-  linksSpy.mockRestore();
+  spies.forEach(spy => spy.mockRestore());
 });
 
 describe.each(cases)('View to Edit keeps the tab - $name', c => {

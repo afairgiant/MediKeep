@@ -2,6 +2,9 @@
 Application constants and configuration values.
 """
 
+# Why a lab result is linked to a treatment, procedure or condition
+LAB_RESULT_LINK_PURPOSES = ["baseline", "monitoring", "outcome", "safety", "other"]
+
 # Lab Test Component validation constants
 LAB_TEST_COMPONENT_LIMITS = {
     "MAX_TEST_NAME_LENGTH": 200,

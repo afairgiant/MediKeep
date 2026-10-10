@@ -3,7 +3,8 @@ import { vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
-import render, { screen } from '../../../test-utils/render';
+import render, { screen, waitFor } from '../../../test-utils/render';
+import { apiService } from '../../../services/api';
 import RawProcedureFormWrapper from '../../medical/procedures/ProcedureFormWrapper';
 import RawProcedureViewModal from '../../medical/procedures/ProcedureViewModal';
 import RawInjuryFormWrapper from '../../medical/injuries/InjuryFormWrapper';
@@ -248,20 +249,47 @@ const cases: Case[] = [
   },
 ];
 
+// The View dialogs only show link tabs that have links
+let visitLinks: unknown[];
+let spies: Array<ReturnType<typeof vi.spyOn>>;
+beforeEach(() => {
+  visitLinks = [{ id: 1 }];
+  spies = [
+    vi
+      .spyOn(apiService, 'getRecordEncounterLinks')
+      .mockImplementation(() => Promise.resolve(visitLinks)),
+    vi.spyOn(apiService, 'getRecordLabResultLinks').mockResolvedValue([]),
+  ];
+});
+afterEach(() => {
+  spies.forEach(spy => spy.mockRestore());
+});
+
 const openVisitsTab = async () => {
   const user = userEvent.setup();
-  await user.click(screen.getByRole('tab', { name: /^Visits( \(\d+\))?$/ }));
+  await user.click(
+    await screen.findByRole('tab', { name: /^Visits( \(\d+\))?$/ })
+  );
   return user;
 };
 
 describe.each(cases)('$name - Visits tab', c => {
-  it('has a Visits tab that loads only when opened', () => {
+  it('has a Visits tab that loads only when opened', async () => {
     render(c.renderIt());
     expect(
-      screen.getByRole('tab', { name: /^Visits( \(\d+\))?$/ })
+      await screen.findByRole('tab', { name: /^Visits( \(\d+\))?$/ })
     ).toBeInTheDocument();
     expect(screen.queryByTestId('record-visits')).toBeNull();
   });
+
+  if (c.mode === 'view') {
+    it('view mode: no Visits tab when the record has no visits', async () => {
+      visitLinks = [];
+      render(c.renderIt());
+      await waitFor(() => expect(spies[0]).toHaveBeenCalled());
+      expect(screen.queryByRole('tab', { name: /^Visits/ })).toBeNull();
+    });
+  }
 
   if (c.mode === 'form') {
     it('add mode: no record id, patient id and pending visits from form data', async () => {

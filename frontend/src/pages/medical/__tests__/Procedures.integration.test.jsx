@@ -227,7 +227,11 @@ vi.mock('../../../components/shared/MedicalPageFilters', () => ({
   default: () => <div data-testid="filters">Filters</div>,
 }));
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, viewMode, onViewModeChange: _onViewModeChange }) => (
+  default: ({
+    primaryAction,
+    viewMode,
+    onViewModeChange: _onViewModeChange,
+  }) => (
     <div data-testid="page-actions">
       <button onClick={primaryAction?.onClick}>{primaryAction?.label}</button>
       <span data-testid="view-mode">{viewMode}</span>
@@ -375,7 +379,7 @@ vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
           type="button"
           onClick={() =>
             handleChange('pending_lab_result_links', [
-              { entityId: 7, relevanceNote: 'lab note', purpose: null },
+              { entityId: 7, relevanceNote: 'lab note', purpose: 'safety' },
             ])
           }
         >
@@ -862,7 +866,7 @@ describe('Procedures Page Integration Tests', () => {
         expect(apiService.createRecordLabResultLink).toHaveBeenCalledWith(
           'procedures',
           99,
-          { lab_result_id: 7, relevance_note: 'lab note' }
+          { lab_result_id: 7, relevance_note: 'lab note', purpose: 'safety' }
         )
       );
       // The pending list is form state only and never part of the create payload
@@ -1276,9 +1280,8 @@ describe('Procedures Page Integration Tests', () => {
 /* ------------------------------------------------------------------ */
 describe('proceduresPageConfig — practitioner filtering/sorting', () => {
   it('wires up practitioner_name for filtering, search, and sorting', async () => {
-    const { proceduresPageConfig } = await import(
-      '../../../utils/medicalPageConfigs/procedures'
-    );
+    const { proceduresPageConfig } =
+      await import('../../../utils/medicalPageConfigs/procedures');
 
     expect(proceduresPageConfig.filtering.practitionerField).toBe(
       'practitioner_name'

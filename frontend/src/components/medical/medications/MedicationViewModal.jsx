@@ -30,13 +30,12 @@ import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import MedicationTreatmentsList from './MedicationTreatmentsList';
-import MedicationRelationships from '../MedicationRelationships';
+import MedicationConditionsCard from '../../shared/MedicationConditionsCard';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
-import RecordLabResultsTabButton from '../../shared/RecordLabResultsTabButton';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const MedicationViewModal = ({
   isOpen,
@@ -47,7 +46,6 @@ const MedicationViewModal = ({
   onError,
   onFileUploadComplete,
   practitioners = [],
-  conditions = [],
   disableEdit = false,
   disableEditTooltip,
 }) => {
@@ -166,10 +164,10 @@ const MedicationViewModal = ({
             <Tabs.Tab value="reminders" leftSection={<IconBell size={16} />}>
               {t('medical:medications.reminders.tabLabel', 'Reminders')}
             </Tabs.Tab>
-            <RecordVisitsTabButton recordType="medications" recordId={medication.id} />
-            <RecordLabResultsTabButton
+            <RecordLinkTabButtons
               recordPath="medications"
               recordId={medication.id}
+              isViewMode
             />
             <Tabs.Tab
               value="documents"
@@ -348,20 +346,6 @@ const MedicationViewModal = ({
                     </Group>
                   </div>
                 )}
-
-                {/* Related Conditions */}
-                <div>
-                  <Title order={4} mb="sm">
-                    {t('shared:labels.relatedConditions', 'Related Conditions')}
-                  </Title>
-                  <MedicationRelationships
-                    direction="medication"
-                    medicationId={medication.id}
-                    conditions={conditions}
-                    navigate={navigate}
-                    isViewMode={true}
-                  />
-                </div>
 
                 {/* Used in Treatments */}
                 <div>
@@ -578,6 +562,19 @@ const MedicationViewModal = ({
                 <RecordVisitsTab
                   recordType="medications"
                   recordId={medication.id}
+                  isViewMode
+                  navigate={navigate}
+                />
+              )}
+            </Box>
+          </Tabs.Panel>
+
+          {/* Conditions Tab */}
+          <Tabs.Panel value="conditions">
+            <Box mt="md">
+              {activeTab === 'conditions' && (
+                <MedicationConditionsCard
+                  medicationId={medication.id}
                   isViewMode
                   navigate={navigate}
                 />

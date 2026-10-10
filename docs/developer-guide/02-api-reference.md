@@ -1111,6 +1111,8 @@ Lab results linked to a medication (the same links as
 - **Purpose**: Remove the link (neither record is deleted)
 - **Success Response** (200): `{"message": "Medication lab result link deleted successfully"}`
 
+Medication lab result links have no purpose: a request that sends one is refused with `400`.
+
 ### 6.2 Allergies
 
 Base path: `/api/v1/allergies`
@@ -1452,6 +1454,7 @@ Lab results linked to a condition (the same links as
     "id": 11,
     "lab_result_id": 3,
     "condition_id": 8,
+    "purpose": "monitoring",
     "relevance_note": "Liver function monitoring",
     "created_at": "2026-02-01T10:00:00Z",
     "updated_at": "2026-02-01T10:00:00Z",
@@ -1471,15 +1474,17 @@ Lab results linked to a condition (the same links as
 
 - **Purpose**: Link one existing lab result to the condition
 - **Authentication**: Yes (edit access to the patient)
-- **Request Body**: `{"lab_result_id": 3, "relevance_note": "optional, max 500 characters"}`
+- **Request Body**: `{"lab_result_id": 3, "purpose": "monitoring", "relevance_note": "optional, max 500 characters"}`
+  (`purpose` and `relevance_note` are optional)
 - **Success Response** (200): The link object above
-- **Errors**: `400` if the lab result belongs to another patient or is already linked,
+- **Errors**: `422` for an unknown purpose, `400` if the lab result belongs to another patient or is already linked,
   `404` if the condition or lab result does not exist
 
 `PUT /conditions/{id}/lab-results/{relationship_id}`
 
-- **Purpose**: Update the note of a link
-- **Request Body**: `{"relevance_note": "text or null"}`
+- **Purpose**: Update the purpose and note of a link
+- **Request Body**: `{"purpose": "outcome or null", "relevance_note": "text or null"}`. A field that is
+  left out is not changed; `null` clears it.
 - **Success Response** (200): The updated link object
 - **Errors**: `400` if the link belongs to another condition, `404` if it does not exist
 
@@ -1487,6 +1492,12 @@ Lab results linked to a condition (the same links as
 
 - **Purpose**: Remove the link (neither record is deleted)
 - **Success Response** (200): `{"message": "Condition lab result link deleted successfully"}`
+
+The `purpose` says why the lab result is linked: one of `baseline`, `monitoring`,
+`outcome`, `safety` or `other` (case-insensitive, stored in lower case; the same values as
+a treatment's lab result links). It is optional, and any other value is rejected with
+`422`.
+
 
 ### 6.4 Immunizations
 
@@ -2009,6 +2020,7 @@ Base path: `/api/v1/entity-files`
     "id": 1,
     "lab_result_id": 1,
     "condition_id": 3,
+    "purpose": "monitoring",
     "relevance_note": "Monitoring for diabetes",
     "created_at": "2025-10-01T00:00:00Z",
     "condition": {
@@ -2032,6 +2044,7 @@ Base path: `/api/v1/entity-files`
 ```json
 {
   "condition_id": 3,
+  "purpose": "monitoring",
   "relevance_note": "Monitoring glucose levels for diabetes management"
 }
 ```
@@ -2046,11 +2059,13 @@ Base path: `/api/v1/entity-files`
 
 ```json
 {
+  "purpose": "outcome",
   "relevance_note": "Updated relevance note"
 }
 ```
 
 - **Success Response** (200): Updated relationship object
+- **Errors**: `422` for an unknown purpose (see Condition Lab Result Links)
 
 ##### Remove Condition Link from Lab Result
 
@@ -2139,6 +2154,7 @@ Base path: `/api/v1/entity-files`
     "id": 1,
     "lab_result_id": 1,
     "procedure_id": 8,
+    "purpose": "baseline",
     "relevance_note": "Pre-operative labs for this procedure",
     "created_at": "2025-10-01T00:00:00Z",
     "procedure": {
@@ -2163,6 +2179,7 @@ Base path: `/api/v1/entity-files`
 ```json
 {
   "procedure_id": 8,
+  "purpose": "baseline",
   "relevance_note": "Pre-operative labs for this procedure"
 }
 ```
@@ -2177,11 +2194,13 @@ Base path: `/api/v1/entity-files`
 
 ```json
 {
+  "purpose": "outcome",
   "relevance_note": "Updated relevance note"
 }
 ```
 
 - **Success Response** (200): Updated relationship object
+- **Errors**: `422` for an unknown purpose (see Condition Lab Result Links)
 
 ##### Remove Procedure Link from Lab Result
 
@@ -2541,6 +2560,7 @@ Lab results linked to a procedure (the same links as
     "id": 11,
     "lab_result_id": 3,
     "procedure_id": 8,
+    "purpose": "monitoring",
     "relevance_note": "Liver function monitoring",
     "created_at": "2026-02-01T10:00:00Z",
     "updated_at": "2026-02-01T10:00:00Z",
@@ -2560,15 +2580,17 @@ Lab results linked to a procedure (the same links as
 
 - **Purpose**: Link one existing lab result to the procedure
 - **Authentication**: Yes (edit access to the patient)
-- **Request Body**: `{"lab_result_id": 3, "relevance_note": "optional, max 500 characters"}`
+- **Request Body**: `{"lab_result_id": 3, "purpose": "monitoring", "relevance_note": "optional, max 500 characters"}`
+  (`purpose` and `relevance_note` are optional)
 - **Success Response** (200): The link object above
-- **Errors**: `400` if the lab result belongs to another patient or is already linked,
+- **Errors**: `422` for an unknown purpose, `400` if the lab result belongs to another patient or is already linked,
   `404` if the procedure or lab result does not exist
 
 `PUT /procedures/{id}/lab-results/{relationship_id}`
 
-- **Purpose**: Update the note of a link
-- **Request Body**: `{"relevance_note": "text or null"}`
+- **Purpose**: Update the purpose and note of a link
+- **Request Body**: `{"purpose": "outcome or null", "relevance_note": "text or null"}`. A field that is
+  left out is not changed; `null` clears it.
 - **Success Response** (200): The updated link object
 - **Errors**: `400` if the link belongs to another procedure, `404` if it does not exist
 
@@ -2576,6 +2598,12 @@ Lab results linked to a procedure (the same links as
 
 - **Purpose**: Remove the link (neither record is deleted)
 - **Success Response** (200): `{"message": "Procedure lab result link deleted successfully"}`
+
+The `purpose` says why the lab result is linked: one of `baseline`, `monitoring`,
+`outcome`, `safety` or `other` (case-insensitive, stored in lower case; the same values as
+a treatment's lab result links). It is optional, and any other value is rejected with
+`422`.
+
 
 ### 6.9 Treatments
 

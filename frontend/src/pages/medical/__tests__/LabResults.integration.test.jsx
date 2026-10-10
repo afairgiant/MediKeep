@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
+import { useEffect } from 'react';
 import { screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithPatient } from '../../../test-utils/render';
@@ -14,11 +15,14 @@ const {
   useDataManagement,
   usePersistedViewMode,
   useViewModalNavigation,
+  pendingLinks,
 } = vi.hoisted(() => ({
   useMedicalData: vi.fn(),
   useDataManagement: vi.fn(),
   usePersistedViewMode: vi.fn(),
   useViewModalNavigation: vi.fn(),
+  // What the Add form's link tabs hold; set by a test, read by the form mock
+  pendingLinks: { current: null },
 }));
 
 // --- Hook mocks ---
@@ -115,6 +119,7 @@ vi.mock('../../../services/api', () => ({
     createLabResultMedication: vi.fn(() => Promise.resolve({})),
     getPatientProcedures: vi.fn(() => Promise.resolve([])),
     getLabResultProcedures: vi.fn(() => Promise.resolve([])),
+    createLabResultCondition: vi.fn(() => Promise.resolve({})),
     createLabResultProcedure: vi.fn(() => Promise.resolve({})),
     getPatientTreatments: vi.fn(() => Promise.resolve([])),
     getLabResultTreatments: vi.fn(() => Promise.resolve([])),
@@ -306,8 +311,25 @@ vi.mock('../../../components/medical/labresults/LabResultViewModal', () => ({
     );
   },
 }));
-vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => ({
-  default: ({ isOpen, onClose, title, formData, onInputChange, onSubmit }) => {
+vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => {
+  const LabResultFormWrapperMock = ({
+    isOpen,
+    onClose,
+    title,
+    formData,
+    onInputChange,
+    onSubmit,
+    onPendingRelationshipsRef,
+  }) => {
+    // Like the real form, hand the page the links chosen in the Add form
+    useEffect(() => {
+      if (isOpen && pendingLinks.current) {
+        onPendingRelationshipsRef?.({
+          hasPendingRelationships: () => true,
+          getPendingRelationships: () => pendingLinks.current,
+        });
+      }
+    }, [isOpen, onPendingRelationshipsRef]);
     if (!isOpen) return null;
     return (
       <div data-testid="form-modal" role="dialog">
@@ -376,8 +398,10 @@ vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => ({
         </form>
       </div>
     );
-  },
-}));
+  };
+  return { default: LabResultFormWrapperMock };
+});
+
 vi.mock(
   '../../../components/medical/labresults/LabResultQuickImportModal',
   () => ({
@@ -620,6 +644,75 @@ describe('Lab Results Page Integration Tests', () => {
           })
         );
       });
+    });
+
+    test('saves the purpose of the conditions and procedures chosen in the Add form (#1128)', async () => {
+      const { apiService } = await import('../../../services/api');
+      apiService.createLabResultCondition.mockClear();
+      apiService.createLabResultProcedure.mockClear();
+      apiService.createLabResultMedication.mockClear();
+      pendingLinks.current = {
+        conditions: [
+          { condition_id: 21, purpose: 'baseline', relevance_note: 'c' },
+          { condition_id: 22, purpose: null, relevance_note: null },
+        ],
+        encounters: [],
+        medications: [{ medication_id: 41, relevance_note: 'm' }],
+        procedures: [
+          { procedure_id: 31, purpose: 'safety', relevance_note: null },
+        ],
+        treatments: [],
+      };
+      // The full Add form, not the quick panel dialog
+      // (localStorage is a mock in the test setup)
+      localStorage.getItem.mockImplementation(key =>
+        key === 'medikeep_labresults_advanced_create' ? 'true' : null
+      );
+      try {
+        const mockCreateItem = vi.fn().mockResolvedValue({ id: 55 });
+        useMedicalData.mockReturnValue({
+          ...defaultMedicalData,
+          createItem: mockCreateItem,
+        });
+        renderWithPatient(<LabResults />);
+        await userEvent.click(screen.getByTestId('add-button'));
+        const form = await screen.findByTestId('form-modal');
+        fireEvent.change(within(form).getByLabelText('Test Name *'), {
+          target: { value: 'CBC', name: 'test_name' },
+        });
+        fireEvent.click(within(form).getByText('Submit'));
+
+        await waitFor(() => {
+          expect(apiService.createLabResultCondition).toHaveBeenCalledTimes(2);
+        });
+        expect(apiService.createLabResultCondition).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          condition_id: 21,
+          purpose: 'baseline',
+          relevance_note: 'c',
+        });
+        expect(apiService.createLabResultCondition).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          condition_id: 22,
+          purpose: null,
+          relevance_note: null,
+        });
+        expect(apiService.createLabResultProcedure).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          procedure_id: 31,
+          purpose: 'safety',
+          relevance_note: null,
+        });
+        // Medication links have no purpose
+        expect(apiService.createLabResultMedication).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          medication_id: 41,
+          relevance_note: 'm',
+        });
+      } finally {
+        pendingLinks.current = null;
+        localStorage.getItem.mockReset();
+      }
     });
 
     test('edits existing lab result with results and completion date', async () => {

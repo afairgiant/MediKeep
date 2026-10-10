@@ -1,8 +1,9 @@
 import { vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import render from '../../../../test-utils/render';
+import { apiService } from '../../../../services/api';
 import MantineMedicationForm from '../../MantineMedicationForm';
 import MedicationViewModal from '../MedicationViewModal';
 
@@ -85,7 +86,9 @@ const formProps = (extra = {}) => ({
 
 const openVisitsTab = async () => {
   const user = userEvent.setup();
-  await user.click(screen.getByRole('tab', { name: /^Visits( \(\d+\))?$/ }));
+  await user.click(
+    await screen.findByRole('tab', { name: /^Visits( \(\d+\))?$/ })
+  );
   return user;
 };
 
@@ -142,6 +145,23 @@ describe('MantineMedicationForm - Visits tab', () => {
 });
 
 describe('MedicationViewModal - Visits tab', () => {
+  // The View dialog only shows link tabs that have links
+  let visitLinks;
+  let spies;
+  beforeEach(() => {
+    visitLinks = [{ id: 1 }];
+    spies = [
+      vi
+        .spyOn(apiService, 'getRecordEncounterLinks')
+        .mockImplementation(() => Promise.resolve(visitLinks)),
+      vi.spyOn(apiService, 'getRecordLabResultLinks').mockResolvedValue([]),
+      vi.spyOn(apiService, 'getMedicationConditions').mockResolvedValue([]),
+    ];
+  });
+  afterEach(() => {
+    spies.forEach(spy => spy.mockRestore());
+  });
+
   const renderModal = () =>
     render(
       <MedicationViewModal
@@ -160,12 +180,23 @@ describe('MedicationViewModal - Visits tab', () => {
       />
     );
 
-  it('has a Visits tab that loads only when opened', () => {
+  it('has a Visits tab that loads only when opened', async () => {
     renderModal();
     expect(
-      screen.getByRole('tab', { name: /^Visits( \(\d+\))?$/ })
+      await screen.findByRole('tab', { name: /^Visits( \(\d+\))?$/ })
     ).toBeInTheDocument();
     expect(screen.queryByTestId('record-visits')).toBeNull();
+  });
+
+  it('has no Visits, Lab Results or Conditions tab for a medication without links', async () => {
+    visitLinks = [];
+    renderModal();
+    await waitFor(() => expect(spies[0]).toHaveBeenCalled());
+    expect(
+      screen.queryByRole('tab', {
+        name: /^(Visits|shared:tabs\.labResults|shared:categories\.conditions)/,
+      })
+    ).toBeNull();
   });
 
   it('shows a read-only Visits card for the viewed medication', async () => {

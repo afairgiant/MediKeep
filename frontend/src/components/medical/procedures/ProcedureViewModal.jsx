@@ -30,9 +30,8 @@ import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import RecordLabResultsCard from '../../shared/RecordLabResultsCard';
-import RecordLabResultsTabButton from '../../shared/RecordLabResultsTabButton';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const ProcedureViewModal = ({
   isOpen,
@@ -166,10 +165,10 @@ const ProcedureViewModal = ({
               >
                 {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
-              <RecordVisitsTabButton recordType="procedures" recordId={procedure.id} />
-              <RecordLabResultsTabButton
+              <RecordLinkTabButtons
                 recordPath="procedures"
                 recordId={procedure.id}
+                isViewMode
               />
               <Tabs.Tab
                 value="documents"
