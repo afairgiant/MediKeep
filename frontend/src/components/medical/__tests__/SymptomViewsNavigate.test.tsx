@@ -5,6 +5,7 @@ import '@testing-library/jest-dom';
 import render, { screen, waitFor } from '../../../test-utils/render';
 import SymptomTimeline from '../SymptomTimeline';
 import SymptomCalendar from '../SymptomCalendar';
+import { formatDateForAPI } from '../../../utils/dateUtils';
 
 const api = vi.hoisted(() => ({
   getTimeline: vi.fn(),
@@ -67,11 +68,10 @@ describe('Symptom views open the symptom with navigation, so its visits can be o
   });
 
   it('Calendar: the symptom view modal receives navigate', async () => {
-    // Same date key the calendar derives when a day is clicked
     const now = new Date();
-    const dateKey = new Date(now.getFullYear(), now.getMonth(), 15)
-      .toISOString()
-      .split('T')[0];
+    const dateKey = formatDateForAPI(
+      new Date(now.getFullYear(), now.getMonth(), 15)
+    );
     api.getTimeline.mockResolvedValue([
       {
         date: dateKey,

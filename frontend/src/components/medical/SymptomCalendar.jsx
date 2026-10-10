@@ -25,14 +25,13 @@ import { OccurrenceDetailCard, SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { capitalizeFirst } from '../../utils/dateFormatUtils';
+import { formatDateForAPI, parseDateInput } from '../../utils/dateUtils';
 
 /**
  * Pure helper function - outside component to prevent recreation
  */
-const getDateKey = (year, month, day) => {
-  const date = new Date(year, month, day);
-  return date.toISOString().split('T')[0];
-};
+const getDateKey = (year, month, day) =>
+  formatDateForAPI(new Date(year, month, day));
 
 /**
  * Compute border radius for a calendar cell based on duration position
@@ -102,21 +101,17 @@ const SymptomCalendar = ({ patientId, hidden }) => {
       // Get first and last day of current month
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
+      const startDate = getDateKey(year, month, 1);
+      const endDate = getDateKey(year, month + 1, 0);
 
       logger.debug('symptom_calendar_fetch', {
         patientId,
-        startDate: firstDay.toISOString().split('T')[0],
-        endDate: lastDay.toISOString().split('T')[0],
+        startDate,
+        endDate,
         component: 'SymptomCalendar',
       });
 
-      const data = await symptomApi.getTimeline(
-        patientId,
-        firstDay.toISOString().split('T')[0],
-        lastDay.toISOString().split('T')[0]
-      );
+      const data = await symptomApi.getTimeline(patientId, startDate, endDate);
 
       setOccurrences(data || []);
 
@@ -151,12 +146,11 @@ const SymptomCalendar = ({ patientId, hidden }) => {
 
       if (endDate) {
         // Duration-based symptom - mark all dates in range
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const current = new Date(start);
+        const current = parseDateInput(startDate);
+        let dateKey = startDate;
 
-        while (current <= end) {
-          const dateKey = current.toISOString().split('T')[0];
+        // Compared as date keys: timestamps drift where daylight saving skips midnight
+        while (dateKey <= endDate) {
           if (!grouped[dateKey]) {
             grouped[dateKey] = [];
           }
@@ -169,6 +163,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
             isMid: dateKey !== startDate && dateKey !== endDate,
           });
           current.setDate(current.getDate() + 1);
+          dateKey = formatDateForAPI(current);
         }
       } else {
         // Point-in-time or ongoing symptom
@@ -230,7 +225,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
       currentDate.getMonth(),
       day
     );
-    const dateKey = clickedDate.toISOString().split('T')[0];
+    const dateKey = formatDateForAPI(clickedDate);
     const occurrencesOnDate = occurrencesByDate[dateKey] || [];
 
     if (occurrencesOnDate.length > 0) {
