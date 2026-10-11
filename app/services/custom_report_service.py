@@ -61,6 +61,9 @@ from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
 
+# Maximum records per category offered for selection in the report builder
+MAX_SUMMARY_RECORDS_PER_CATEGORY = 250
+
 
 class CustomReportService:
     """Service for generating custom medical reports with selective data"""
@@ -321,8 +324,8 @@ class CustomReportService:
                 model_class.patient_id == patient_id
             )
 
-        # Get limited records for display (max 100 for UI performance)
-        limit = 100
+        # Get limited records for display (capped for UI performance)
+        limit = MAX_SUMMARY_RECORDS_PER_CATEGORY
 
         # Order by created_at if it exists, otherwise by id
         try:

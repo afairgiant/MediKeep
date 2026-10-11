@@ -4685,7 +4685,7 @@ Base path: `/api/v1/custom-reports`
 
 `GET /custom-reports/data-summary`
 
-Counts and the first 100 records (newest first) of each record type for the
+Counts and the first 250 records (newest first) of each record type for the
 active patient, used by the report builder to pick records. Filters narrow both
 the counts and the records.
 

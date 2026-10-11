@@ -9,7 +9,10 @@ import pytest
 
 from app.models.models import Condition, Vitals
 from app.schemas.custom_reports import DateRange
-from app.services.custom_report_service import CustomReportService
+from app.services.custom_report_service import (
+    MAX_SUMMARY_RECORDS_PER_CATEGORY,
+    CustomReportService,
+)
 
 
 def _condition(patient_id, onset, tags=None, name="c"):
@@ -126,3 +129,34 @@ def test_record_summary_includes_tags(db_session, test_patient):
     svc._user_unit_system = "imperial"
     assert svc._convert_to_record_summary(cond, "conditions").tags == ["fred", "cardio"]
     assert svc._convert_to_record_summary(untagged, "conditions").tags == []
+
+
+@pytest.mark.asyncio
+async def test_summary_not_capped_at_100_records(db_session, test_patient):
+    """Regression for #1136: the record picker only offered the first 100."""
+    for i in range(120):
+        db_session.add(_condition(test_patient.id, date(2024, 1, 1), name=f"c{i}"))
+    db_session.commit()
+
+    svc = CustomReportService(db_session)
+    summary = await svc._get_category_summary(
+        test_patient.id, "conditions", Condition, None, None
+    )
+    assert summary.count == 120
+    assert len(summary.records) == 120
+    assert summary.has_more is False
+
+
+@pytest.mark.asyncio
+async def test_summary_capped_at_max_records(db_session, test_patient):
+    for i in range(MAX_SUMMARY_RECORDS_PER_CATEGORY + 5):
+        db_session.add(_condition(test_patient.id, date(2024, 1, 1), name=f"c{i}"))
+    db_session.commit()
+
+    svc = CustomReportService(db_session)
+    summary = await svc._get_category_summary(
+        test_patient.id, "conditions", Condition, None, None
+    )
+    assert summary.count == MAX_SUMMARY_RECORDS_PER_CATEGORY + 5
+    assert len(summary.records) == MAX_SUMMARY_RECORDS_PER_CATEGORY
+    assert summary.has_more is True
