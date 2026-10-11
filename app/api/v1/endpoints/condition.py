@@ -935,32 +935,25 @@ def get_medication_conditions(
             db, medication_id=medication_id
         )
 
-        enhanced_relationships = []
-        for rel, condition_obj in relationships:
-            # Verify the condition belongs to the same patient as the medication
-            if condition_obj.patient_id != db_medication.patient_id:
-                condition_obj = None  # Don't include conditions from other patients
-
-            enhanced_relationships.append(
-                {
-                    "id": rel.id,
-                    "condition_id": rel.condition_id,
-                    "medication_id": rel.medication_id,
-                    "relevance_note": rel.relevance_note,
-                    "created_at": rel.created_at,
-                    "updated_at": rel.updated_at,
-                    "condition": (
-                        {
-                            "id": condition_obj.id,
-                            "diagnosis": condition_obj.diagnosis,
-                            "status": condition_obj.status,
-                            "severity": condition_obj.severity,
-                        }
-                        if condition_obj
-                        else None
-                    ),
-                }
-            )
+        # A link to another patient's condition is never shown
+        enhanced_relationships = [
+            {
+                "id": rel.id,
+                "condition_id": rel.condition_id,
+                "medication_id": rel.medication_id,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "condition": {
+                    "id": condition_obj.id,
+                    "diagnosis": condition_obj.diagnosis,
+                    "status": condition_obj.status,
+                    "severity": condition_obj.severity,
+                },
+            }
+            for rel, condition_obj in relationships
+            if condition_obj.patient_id == db_medication.patient_id
+        ]
 
         log_data_access(
             logger,
@@ -970,7 +963,7 @@ def get_medication_conditions(
             "ConditionMedication",
             patient_id=patient_record.id,
             medication_id=medication_id,
-            count=len(relationships),
+            count=len(enhanced_relationships),
         )
 
         return enhanced_relationships

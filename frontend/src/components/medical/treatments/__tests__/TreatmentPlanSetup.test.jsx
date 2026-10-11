@@ -253,3 +253,38 @@ describe('Add Treatment - Link dialog', () => {
     ).toBeDisabled();
   });
 });
+
+describe('Add Treatment - lab result purpose', () => {
+  it('translates the link details of a chosen lab result, and its purposes', async () => {
+    renderSetup({
+      activeSection: 'labs',
+      pendingRelationships: { ...EMPTY, labResults: [{ id: '3' }] },
+    });
+    const user = userEvent.setup();
+    const card = await screen.findByRole('button', { expanded: false });
+    await user.click(card);
+    // The link detail fields are translated (no hardcoded English)
+    expect(
+      screen.getByPlaceholderText(
+        'common:treatments.links.expectedFrequencyPlaceholder'
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('common:modals.relevanceNoteOptional')
+    ).toBeInTheDocument();
+    await user.click(
+      screen.getByPlaceholderText('common:visits.relationships.purpose')
+    );
+    expect(
+      (await screen.findAllByRole('option', { hidden: true })).map(
+        option => option.textContent
+      )
+    ).toEqual([
+      'shared:linkPurposes.baseline',
+      'shared:linkPurposes.monitoring',
+      'shared:linkPurposes.outcome',
+      'shared:linkPurposes.safety',
+      'shared:linkPurposes.other',
+    ]);
+  });
+});

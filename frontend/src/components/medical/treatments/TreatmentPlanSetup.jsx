@@ -34,28 +34,14 @@ import {
 } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
+import { PURPOSE_OPTIONS } from '../../../constants/treatmentLabResultConstants';
+import { VISIT_LABEL_OPTIONS } from '../../../constants/treatmentVisitLabels';
+import { translateOptions } from '../../../utils/translateOptions';
 import TreatmentPlanLinkSection from './TreatmentPlanLinkSection';
 import {
   createDateSortedOptions,
   formatDateDisplay,
 } from './RelationshipComponents';
-
-// Options for select fields
-const VISIT_LABEL_OPTIONS = [
-  { value: 'initial', label: 'Initial Visit' },
-  { value: 'follow_up', label: 'Follow-up' },
-  { value: 'review', label: 'Review' },
-  { value: 'final', label: 'Final Visit' },
-  { value: 'other', label: 'Other' },
-];
-
-const PURPOSE_OPTIONS = [
-  { value: 'baseline', label: 'Baseline' },
-  { value: 'monitoring', label: 'Monitoring' },
-  { value: 'outcome', label: 'Outcome' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'other', label: 'Other' },
-];
 
 /**
  * Collapsible item card for showing/editing relationship details
@@ -141,6 +127,8 @@ const TreatmentPlanSetup = ({
 }) => {
   const { t } = useTranslation('medical');
   const { dateInputFormat, dateParser } = useDateFormat();
+  const purposeOptions = translateOptions(PURPOSE_OPTIONS, t);
+  const visitLabelOptions = translateOptions(VISIT_LABEL_OPTIONS, t);
   const [loading, setLoading] = useState(true);
 
   // Available entities for selection
@@ -408,7 +396,9 @@ const TreatmentPlanSetup = ({
                     >
                       <TextInput
                         size="xs"
-                        placeholder="Specific dosage (e.g., 400mg 3x daily)"
+                        placeholder={t(
+                          'common:treatments.links.specificDosagePlaceholder'
+                        )}
                         value={metadata.specific_dosage || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -421,7 +411,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Frequency (e.g., Every 8 hours)"
+                        placeholder={t(
+                          'common:treatments.links.specificFrequencyPlaceholder'
+                        )}
                         value={metadata.specific_frequency || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -434,7 +426,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Duration (e.g., 2 weeks)"
+                        placeholder={t(
+                          'common:treatments.links.durationPlaceholder'
+                        )}
                         value={metadata.specific_duration || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -447,7 +441,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Timing instructions"
+                        placeholder={t(
+                          'common:treatments.links.timingPlaceholder'
+                        )}
                         value={metadata.timing_instructions || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -461,7 +457,7 @@ const TreatmentPlanSetup = ({
                       <Group grow gap="xs">
                         <Select
                           size="xs"
-                          placeholder="Treatment prescriber"
+                          placeholder={t('common:treatments.links.prescriber')}
                           data={practitioners.map(p => ({
                             value: p.id.toString(),
                             label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
@@ -481,10 +477,15 @@ const TreatmentPlanSetup = ({
                         />
                         <Select
                           size="xs"
-                          placeholder="Treatment pharmacy"
+                          placeholder={t('common:treatments.links.pharmacy')}
                           data={pharmacies.map(p => ({
                             value: p.id.toString(),
-                            label: p.name || p.brand || `Pharmacy #${p.id}`,
+                            label:
+                              p.name ||
+                              p.brand ||
+                              t('common:treatments.links.pharmacyFallback', {
+                                id: p.id,
+                              }),
                           }))}
                           value={metadata.specific_pharmacy_id || ''}
                           onChange={value =>
@@ -552,7 +553,7 @@ const TreatmentPlanSetup = ({
                       </Group>
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -617,8 +618,8 @@ const TreatmentPlanSetup = ({
                     >
                       <Select
                         size="xs"
-                        placeholder="Visit label"
-                        data={VISIT_LABEL_OPTIONS}
+                        placeholder={t('common:treatments.links.visitLabel')}
+                        data={visitLabelOptions}
                         value={metadata.visit_label || ''}
                         onChange={value =>
                           updateItemMetadata(
@@ -633,7 +634,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Visit sequence (1, 2, 3...)"
+                        placeholder={t(
+                          'common:treatments.links.visitSequencePlaceholder'
+                        )}
                         type="number"
                         value={metadata.visit_sequence || ''}
                         onChange={e =>
@@ -647,7 +650,7 @@ const TreatmentPlanSetup = ({
                       />
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -710,8 +713,8 @@ const TreatmentPlanSetup = ({
                     >
                       <Select
                         size="xs"
-                        placeholder="Purpose"
-                        data={PURPOSE_OPTIONS}
+                        placeholder={t('common:visits.relationships.purpose')}
+                        data={purposeOptions}
                         value={metadata.purpose || ''}
                         onChange={value =>
                           updateItemMetadata(
@@ -726,7 +729,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Expected frequency (e.g., Monthly)"
+                        placeholder={t(
+                          'common:treatments.links.expectedFrequencyPlaceholder'
+                        )}
                         value={metadata.expected_frequency || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -739,7 +744,7 @@ const TreatmentPlanSetup = ({
                       />
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -804,7 +809,9 @@ const TreatmentPlanSetup = ({
                     >
                       <TextInput
                         size="xs"
-                        placeholder="Usage frequency (e.g., Nightly)"
+                        placeholder={t(
+                          'common:treatments.links.usageFrequencyPlaceholder'
+                        )}
                         value={metadata.usage_frequency || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -817,7 +824,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Specific settings (e.g., Pressure: 10 cmH2O)"
+                        placeholder={t(
+                          'common:treatments.links.specificSettingsPlaceholder'
+                        )}
                         value={metadata.specific_settings || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -830,7 +839,7 @@ const TreatmentPlanSetup = ({
                       />
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(

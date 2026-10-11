@@ -188,7 +188,9 @@ describe('RecordLinkCard - lab results - purpose of the link (#1128)', () => {
       api.updateRecordLabResultLink.mockResolvedValue({});
       renderCard(false, path);
 
-      expect(await screen.findByText('Monitoring')).toBeInTheDocument();
+      expect(
+        await screen.findByText('shared:linkPurposes.monitoring')
+      ).toBeInTheDocument();
       await userEvent.click(
         screen.getByRole('button', {
           name: 'common:visits.relationships.editLink',
@@ -198,7 +200,10 @@ describe('RecordLinkCard - lab results - purpose of the link (#1128)', () => {
         screen.getAllByLabelText('common:visits.relationships.purpose')[0]
       );
       await userEvent.click(
-        await screen.findByRole('option', { name: 'Safety', hidden: true })
+        await screen.findByRole('option', {
+          name: 'shared:linkPurposes.safety',
+          hidden: true,
+        })
       );
       await userEvent.click(
         screen.getByRole('button', { name: 'common:buttons.save' })
@@ -249,7 +254,10 @@ describe('RecordLinkCard - lab results - purpose of the link (#1128)', () => {
       within(dialog).getByLabelText('common:visits.relationships.purpose')
     );
     await userEvent.click(
-      await screen.findByRole('option', { name: 'Baseline', hidden: true })
+      await screen.findByRole('option', {
+        name: 'shared:linkPurposes.baseline',
+        hidden: true,
+      })
     );
     await userEvent.click(
       within(dialog).getByRole('button', {
@@ -282,6 +290,8 @@ describe('RecordLinkCard - lab results - purpose of the link (#1128)', () => {
       { ...LINK, purpose: 'outcome' },
     ]);
     renderCard(true, 'procedures');
-    expect(await screen.findByText('Outcome')).toBeInTheDocument();
+    expect(
+      await screen.findByText('shared:linkPurposes.outcome')
+    ).toBeInTheDocument();
   });
 });

@@ -9,8 +9,29 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
+from app.models.associations import ConditionMedication
+from app.models.clinical import Condition, Medication
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
+
+
+def _other_user_and_patient(db_session: Session):
+    """A second user whose active patient owns no records of the test user."""
+    other_user = create_random_user(db_session)["user"]
+    other_patient = patient_crud.create_for_user(
+        db_session,
+        user_id=other_user.id,
+        patient_data=PatientCreate(
+            first_name="Other",
+            last_name="Patient",
+            birth_date=date(1985, 5, 15),
+            gender="F",
+            address="456 Other St",
+        ),
+    )
+    other_user.active_patient_id = other_patient.id
+    db_session.commit()
+    return other_user, other_patient
 
 
 @pytest.fixture
@@ -132,23 +153,51 @@ def test_other_user_cannot_access(
         json={"medication_id": medication["id"]},
         headers=authenticated_headers,
     )
-    other_user_data = create_random_user(db_session)
-    other_patient = patient_crud.create_for_user(
-        db_session,
-        user_id=other_user_data["user"].id,
-        patient_data=PatientCreate(
-            first_name="Other",
-            last_name="Patient",
-            birth_date=date(1985, 5, 15),
-            gender="F",
-            address="456 Other St",
-        ),
-    )
-    other_user_data["user"].active_patient_id = other_patient.id
-    db_session.commit()
-    other_headers = create_user_token_headers(other_user_data["user"].username)
+    other_user, _ = _other_user_and_patient(db_session)
+    other_headers = create_user_token_headers(other_user.username)
 
     response = client.get(
         f"/api/v1/conditions/{condition['id']}/medications", headers=other_headers
     )
     assert response.status_code in (403, 404)
+
+
+def test_cross_patient_links_hidden_on_both_sides(
+    client, db_session: Session, authenticated_headers, condition, medication
+):
+    """The API refuses cross-patient links, but a legacy row must not show on
+    either side (regression: the medication side listed it with no condition)."""
+    _, other_patient = _other_user_and_patient(db_session)
+    other_condition = Condition(
+        patient_id=other_patient.id, diagnosis="Asthma", status="active"
+    )
+    other_medication = Medication(
+        patient_id=other_patient.id, medication_name="Albuterol", status="active"
+    )
+    db_session.add_all([other_condition, other_medication])
+    db_session.flush()
+    db_session.add_all(
+        [
+            ConditionMedication(
+                condition_id=condition["id"], medication_id=other_medication.id
+            ),
+            ConditionMedication(
+                condition_id=other_condition.id, medication_id=medication["id"]
+            ),
+        ]
+    )
+    db_session.commit()
+
+    condition_side = client.get(
+        f"/api/v1/conditions/{condition['id']}/medications",
+        headers=authenticated_headers,
+    )
+    assert condition_side.status_code == 200
+    assert condition_side.json() == []
+
+    medication_side = client.get(
+        f"/api/v1/conditions/medication/{medication['id']}/conditions",
+        headers=authenticated_headers,
+    )
+    assert medication_side.status_code == 200
+    assert medication_side.json() == []

@@ -44,11 +44,13 @@ interface UseLinkTabVisibilityResult {
  *   menu is open, so it stays while the user adds links to it; once they leave it with
  *   no links it goes back into the menu instead of staying as an empty "(0)" tab.
  * - edit: every type
+ * In add mode the caller must pass the open tab and, when the "Link" menu picks a type,
+ * open that type's tab; otherwise the picked type never shows.
  */
 export const useLinkTabVisibility = (
   items: LinkTabItem[],
   mode: LinkTabMode,
-  activeTab?: string | null
+  activeTab: string | null | undefined
 ): UseLinkTabVisibilityResult => {
   const collapse = mode !== 'edit';
 

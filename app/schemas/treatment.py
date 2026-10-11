@@ -10,13 +10,13 @@ from pydantic import (
     model_validator,
 )
 
-from app.core.constants import LAB_RESULT_LINK_PURPOSES
 from app.models.enums import TreatmentStatus
 from app.schemas.base_tags import (
     TaggedEntityMixin,
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.validators import validate_lab_result_link_purpose
 
 
 # Helper function for validating relevance notes
@@ -28,20 +28,6 @@ def _validate_relevance_note(v: Optional[str]) -> Optional[str]:
             raise ValueError("Relevance note must be 500 characters or less")
         if len(v) == 0:
             return None
-    return v
-
-
-_VALID_LAB_RESULT_PURPOSES = LAB_RESULT_LINK_PURPOSES
-
-
-def _validate_lab_result_purpose(v: Optional[str]) -> Optional[str]:
-    """Validate purpose for a treatment-lab result relationship."""
-    if v is not None:
-        if v.lower() not in _VALID_LAB_RESULT_PURPOSES:
-            raise ValueError(
-                f"Purpose must be one of: {', '.join(_VALID_LAB_RESULT_PURPOSES)}"
-            )
-        return v.lower()
     return v
 
 
@@ -664,7 +650,7 @@ class TreatmentLabResultBase(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_lab_result_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -684,7 +670,7 @@ class TreatmentLabResultCreate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_lab_result_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -704,7 +690,7 @@ class LabResultTreatmentCreate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_lab_result_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -722,7 +708,7 @@ class TreatmentLabResultUpdate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_lab_result_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -784,7 +770,7 @@ class TreatmentLabResultBulkCreate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_lab_result_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod

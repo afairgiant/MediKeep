@@ -316,6 +316,17 @@
     "weight": "Peso",
     "zip": "ZIP"
   },
+  "linkPurposes": {
+    "baseline": "Valore basale",
+    "followUpFor": "Follow-up dei risultati",
+    "monitoring": "Monitoraggio",
+    "orderedDuring": "Richiesto durante la visita",
+    "other": "Altro",
+    "outcome": "Esito",
+    "reference": "Riferimento",
+    "resultsReviewed": "Risultati esaminati",
+    "safety": "Sicurezza"
+  },
   "permissions": {
     "viewOnly": "Accesso in sola lettura"
   },

@@ -144,6 +144,43 @@ class TestRecordLabResultLinks:
         assert rows[0]["lab_result"]["test_name"] == "Liver Function Panel"
         assert rows[0]["lab_result"]["status"] == "completed"
 
+    def test_lists_newest_lab_result_first(
+        self, record_type, client, authenticated_headers, record, patient_id
+    ):
+        """Every record type orders its lab results the same way. The older one is
+        linked first, so insertion order is the opposite of the expected order."""
+        lab_ids = {}
+        for name, completed in [("Older", "2026-01-10"), ("Newer", "2026-03-10")]:
+            created = client.post(
+                "/api/v1/lab-results/",
+                json={
+                    "test_name": name,
+                    "test_category": "chemistry",
+                    "status": "completed",
+                    "completed_date": completed,
+                    "patient_id": patient_id,
+                },
+                headers=authenticated_headers,
+            )
+            assert created.status_code == 201
+            lab_ids[name] = created.json()["id"]
+            linked = client.post(
+                f"/api/v1/{record_type}/{record['id']}/lab-results",
+                json={"lab_result_id": lab_ids[name]},
+                headers=authenticated_headers,
+            )
+            assert linked.status_code == 200
+
+        response = client.get(
+            f"/api/v1/{record_type}/{record['id']}/lab-results",
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200
+        assert [row["lab_result_id"] for row in response.json()] == [
+            lab_ids["Newer"],
+            lab_ids["Older"],
+        ]
+
     def test_create_link_shows_on_the_lab_result(
         self, record_type, client, authenticated_headers, record, lab_result
     ):

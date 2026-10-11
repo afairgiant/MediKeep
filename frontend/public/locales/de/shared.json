@@ -316,6 +316,17 @@
     "weight": "Körpergewicht",
     "zip": "ZIP"
   },
+  "linkPurposes": {
+    "baseline": "Ausgangswert",
+    "followUpFor": "Nachsorge zu Ergebnissen",
+    "monitoring": "Überwachung",
+    "orderedDuring": "Beim Besuch angeordnet",
+    "other": "Sonstiges",
+    "outcome": "Behandlungsergebnis",
+    "reference": "Referenz",
+    "resultsReviewed": "Ergebnisse besprochen",
+    "safety": "Sicherheit"
+  },
   "permissions": {
     "viewOnly": "Nur-Lese-Zugriff"
   },

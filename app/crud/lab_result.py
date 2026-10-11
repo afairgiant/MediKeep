@@ -216,6 +216,7 @@ class CRUDLabResultMedication(
             db.query(self.model, LabResult)
             .join(LabResult, self.model.lab_result_id == LabResult.id)
             .filter(self.model.medication_id == medication_id)
+            .order_by(LabResult.completed_date.desc().nulls_last())
             .all()
         )
 
@@ -286,6 +287,7 @@ class CRUDLabResultProcedure(
             db.query(self.model, LabResult)
             .join(LabResult, self.model.lab_result_id == LabResult.id)
             .filter(self.model.procedure_id == procedure_id)
+            .order_by(LabResult.completed_date.desc().nulls_last())
             .all()
         )
 

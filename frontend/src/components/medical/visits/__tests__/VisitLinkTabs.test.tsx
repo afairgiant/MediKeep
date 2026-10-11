@@ -489,7 +489,9 @@ describe('VisitLinkTabPanels - view mode', () => {
       isViewMode: true,
     });
     expect(await screen.findByText('Complete Blood Count')).toBeInTheDocument();
-    expect(screen.getByText('Results Reviewed')).toBeInTheDocument();
+    expect(
+      screen.getByText('shared:linkPurposes.resultsReviewed')
+    ).toBeInTheDocument();
   });
 
   it('shows an empty card when nothing is linked', async () => {
@@ -757,7 +759,7 @@ describe('VisitLinkTabPanels - edit mode (saved visit)', () => {
     );
     await userEvent.click(
       await screen.findByRole('option', {
-        name: 'Ordered During Visit',
+        name: 'shared:linkPurposes.orderedDuring',
         hidden: true,
       })
     );
@@ -781,12 +783,17 @@ describe('VisitLinkTabPanels - edit mode (saved visit)', () => {
     linkRows = { 'lab-results': [labResultLink] };
     edit('labResults');
     expect(await screen.findByText('Complete Blood Count')).toBeInTheDocument();
-    expect(screen.getByText('Results Reviewed')).toBeInTheDocument();
+    expect(
+      screen.getByText('shared:linkPurposes.resultsReviewed')
+    ).toBeInTheDocument();
 
     await userEvent.click(screen.getByLabelText(I18N.editLink));
     await userEvent.click(screen.getByRole('textbox', { name: I18N.purpose }));
     await userEvent.click(
-      await screen.findByRole('option', { name: 'Reference', hidden: true })
+      await screen.findByRole('option', {
+        name: 'shared:linkPurposes.reference',
+        hidden: true,
+      })
     );
     await userEvent.click(screen.getByLabelText(I18N.save));
     await waitFor(() =>

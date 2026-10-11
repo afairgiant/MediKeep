@@ -316,6 +316,17 @@
     "weight": "Gewicht",
     "zip": "ZIP"
   },
+  "linkPurposes": {
+    "baseline": "Uitgangswaarde",
+    "followUpFor": "Opvolging van resultaten",
+    "monitoring": "Controle",
+    "orderedDuring": "Aangevraagd tijdens consult",
+    "other": "Overig",
+    "outcome": "Uitkomst",
+    "reference": "Referentie",
+    "resultsReviewed": "Resultaten besproken",
+    "safety": "Veiligheid"
+  },
   "permissions": {
     "viewOnly": "Alleen-lezen toegang"
   },

@@ -316,6 +316,17 @@
     "weight": "Βάρος",
     "zip": "Τ.Κ."
   },
+  "linkPurposes": {
+    "baseline": "Αρχική τιμή",
+    "followUpFor": "Παρακολούθηση αποτελεσμάτων",
+    "monitoring": "Παρακολούθηση",
+    "orderedDuring": "Ζητήθηκε κατά την επίσκεψη",
+    "other": "Άλλο",
+    "outcome": "Έκβαση",
+    "reference": "Αναφορά",
+    "resultsReviewed": "Εξέταση αποτελεσμάτων",
+    "safety": "Ασφάλεια"
+  },
   "permissions": {
     "viewOnly": "Πρόσβαση μόνο για προβολή"
   },

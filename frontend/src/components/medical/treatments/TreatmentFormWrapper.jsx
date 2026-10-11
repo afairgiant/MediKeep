@@ -444,6 +444,27 @@ const TreatmentFormWrapper = ({
                         <SegmentedControl
                           value={formData.mode || 'simple'}
                           onChange={value => {
+                            // Simple mode has no Medications tab, so medications picked
+                            // for a new treatment would be linked without being shown
+                            if (
+                              value === 'simple' &&
+                              pendingRelationships.medications?.length > 0
+                            ) {
+                              if (
+                                !window.confirm(
+                                  t(
+                                    'treatments.mode.confirmSimpleDropsMedications',
+                                    'Simple mode does not link medications. Switch to Simple and remove the medications you selected?'
+                                  )
+                                )
+                              ) {
+                                return;
+                              }
+                              setPendingRelationships(prev => ({
+                                ...prev,
+                                medications: [],
+                              }));
+                            }
                             onInputChange({ target: { name: 'mode', value } });
                             // Reset to basic tab when hiding current tab (Simple mode
                             // keeps every relationship tab except Medications)

@@ -391,15 +391,7 @@ const Medication = () => {
             resultId,
             formData.pending_lab_result_links
           );
-        }
-
-        completeFormSubmission(success, resultId);
-
-        if (success && resultId) {
-          if (
-            !editingMedication &&
-            formData.pending_condition_links?.length > 0
-          ) {
+          if (formData.pending_condition_links?.length > 0) {
             const failedCount = await savePendingMedicationConditionLinks(
               resultId,
               formData.pending_condition_links
@@ -421,7 +413,11 @@ const Medication = () => {
               });
             }
           }
+        }
 
+        completeFormSubmission(success, resultId);
+
+        if (success && resultId) {
           // Reminders that can never fire are easy to save by accident
           // (lapsed effective period, non-active status). Surface it at the
           // moment of saving, not just inside the Reminders tab.

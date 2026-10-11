@@ -35,7 +35,7 @@ import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 
 const InjuryFormWrapper = ({
   formError,
@@ -187,7 +187,13 @@ const InjuryFormWrapper = ({
                 {t('shared:labels.treatment', 'Treatment')}
               </Tabs.Tab>
               {!subDialog && (
-                <RecordVisitsTabButton recordType="injuries" recordId={editingInjury?.id} pendingLinks={formData.pending_visit_links} />
+                <RecordLinkTabButtons
+                  recordPath="injuries"
+                  recordId={editingInjury?.id}
+                  pendingLinks={{ visits: formData.pending_visit_links }}
+                  activeTab={activeTab}
+                  onSelectTab={setActiveTab}
+                />
               )}
               <Tabs.Tab
                 value="documents"

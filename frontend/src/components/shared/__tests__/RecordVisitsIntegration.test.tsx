@@ -308,6 +308,25 @@ describe.each(cases)('$name - Visits tab', c => {
       );
     });
 
+    it('add mode with no visits: Visits is offered in the Link menu', async () => {
+      // typical_triggers is for the symptom form; the others ignore it
+      render(c.renderIt({ formData: { tags: [], typical_triggers: [] } }));
+      expect(screen.queryByRole('tab', { name: /^Visits/ })).toBeNull();
+      const user = userEvent.setup();
+      await user.click(
+        screen
+          .getAllByRole('button', { name: 'common:buttons.link' })
+          .find(button => button.hasAttribute('aria-haspopup')) as HTMLElement
+      );
+      await user.click(
+        await screen.findByRole('menuitem', { name: /^Visits/, hidden: true })
+      );
+      expect(
+        await screen.findByRole('tab', { name: /^Visits/ })
+      ).toHaveAttribute('aria-selected', 'true');
+      expect(await screen.findByTestId('record-visits')).toBeInTheDocument();
+    });
+
     it('edit mode: passes the saved record id', async () => {
       render((c.renderEdit as () => ReactElement)());
       await openVisitsTab();

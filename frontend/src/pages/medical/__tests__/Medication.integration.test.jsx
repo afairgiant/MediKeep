@@ -259,11 +259,12 @@ vi.mock('../../../components/medical/medications', () => ({
     formData,
     onInputChange,
     onSubmit,
+    isLoading,
     navigate: _navigate,
   }) => {
     if (!isOpen) return null;
     return (
-      <div data-testid="form-modal" role="dialog">
+      <div data-testid="form-modal" role="dialog" data-loading={!!isLoading}>
         <h2>{title}</h2>
         <form onSubmit={onSubmit}>
           <label htmlFor="med-name">Medication Name *</label>
@@ -1048,6 +1049,40 @@ describe('Medication Page Integration Tests', () => {
       const payload = mockCreateItem.mock.calls[0][0];
       expect(payload).not.toHaveProperty('pending_condition_links');
       expect(payload).not.toHaveProperty('condition_ids');
+    });
+
+    test('keeps the form blocked until the conditions are linked', async () => {
+      const mockCreateItem = vi.fn().mockResolvedValue({ id: 10 });
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
+      });
+      const { apiService } = await import('../../../services/api');
+      let finishLinking;
+      apiService.createConditionMedication.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            finishLinking = resolve;
+          })
+      );
+
+      renderWithPatient(<Medication />);
+      await userEvent.click(screen.getByTestId('add-button'));
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Aspirin', name: 'medication_name' },
+      });
+      await userEvent.click(within(form).getByTestId('select-conditions'));
+      fireEvent.click(within(form).getByText('Submit'));
+
+      await waitFor(() =>
+        expect(apiService.createConditionMedication).toHaveBeenCalled()
+      );
+      expect(screen.getByTestId('form-modal')).toHaveAttribute(
+        'data-loading',
+        'true'
+      );
+      finishLinking({});
     });
 
     test('does not call condition linking API when no conditions selected', async () => {

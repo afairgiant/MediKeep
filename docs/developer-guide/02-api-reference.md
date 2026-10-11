@@ -1413,7 +1413,8 @@ Base path: `/api/v1/conditions`
 
 `GET /conditions/medication/{medication_id}/conditions`
 
-- **Purpose**: Get all conditions linked to a specific medication (reverse lookup)
+- **Purpose**: Get all conditions linked to a specific medication (reverse lookup).
+  Links to another patient's condition are never returned.
 - **Authentication**: Yes
 - **Success Response** (200):
 

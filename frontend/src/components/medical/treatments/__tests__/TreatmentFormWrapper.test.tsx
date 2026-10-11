@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import render, { screen, fireEvent } from '../../../../test-utils/render';
 import '@testing-library/jest-dom';
 import TreatmentFormWrapper from '../TreatmentFormWrapper';
+import { apiService } from '../../../../services/api';
 
 // Paths are relative to this test file (src/components/medical/treatments/__tests__/)
 
@@ -53,13 +54,31 @@ vi.mock('../TreatmentRelationshipsManager', () => ({
   ),
 }));
 
+type PendingRelationships = Record<string, { id: number }[]>;
+
 vi.mock('../TreatmentPlanSetup', () => ({
-  default: (props: { activeSection?: string }) => (
-    <div
-      data-testid="treatment-plan-setup"
-      data-section={props.activeSection}
-    />
-  ),
+  default: (props: {
+    activeSection?: string;
+    onRelationshipsChange: (
+      _update: (_prev: PendingRelationships) => PendingRelationships
+    ) => void;
+  }) => {
+    const pick = (key: string, id: number) => () =>
+      props.onRelationshipsChange(prev => ({ ...prev, [key]: [{ id }] }));
+    return (
+      <div
+        data-testid="treatment-plan-setup"
+        data-section={props.activeSection}
+      >
+        <button type="button" onClick={pick('medications', 5)}>
+          pick-medication
+        </button>
+        <button type="button" onClick={pick('encounters', 6)}>
+          pick-visit
+        </button>
+      </div>
+    );
+  },
 }));
 
 vi.mock('../../../services/api', () => ({
@@ -352,5 +371,66 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
     expect(
       screen.getByRole('tab', { name: /shared:tabs.basicInfo|Basic Info/ })
     ).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('switching a new treatment to Simple with medications picked asks first, and the medications are not linked', async () => {
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    const linkMedication = vi
+      .spyOn(apiService, 'linkTreatmentMedication')
+      .mockResolvedValue({});
+    const linkEncounter = vi
+      .spyOn(apiService, 'linkTreatmentEncounter')
+      .mockResolvedValue({});
+    const onSubmit = vi.fn().mockResolvedValue({ id: 99 });
+    const Stateful = () => {
+      const [mode, setMode] = useState('advanced');
+      return (
+        <TreatmentFormWrapper
+          {...defaultProps}
+          onSubmit={onSubmit}
+          formData={{ ...defaultProps.formData, mode }}
+          onInputChange={(e: { target: { name: string; value: string } }) => {
+            if (e.target.name === 'mode') setMode(e.target.value);
+          }}
+        />
+      );
+    };
+    try {
+      render(<Stateful />);
+      fireEvent.click(screen.getByText('pick-medication'));
+      fireEvent.click(screen.getByText('pick-visit'));
+
+      // Cancelling keeps Treatment Plan mode
+      fireEvent.click(screen.getByText('Simple'));
+      expect(confirmSpy).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByText(
+          'Medication-centric plan with per-medication overrides'
+        )
+      ).toBeInTheDocument();
+
+      // Confirming switches to Simple and drops the medications, but keeps the visit
+      fireEvent.click(screen.getByText('Simple'));
+      expect(confirmSpy).toHaveBeenCalledTimes(2);
+      expect(
+        screen.getByText('Basic tracking with schedule and dosage')
+      ).toBeInTheDocument();
+
+      fireEvent.submit(document.querySelector('form') as HTMLFormElement);
+      await vi.waitFor(() =>
+        expect(linkEncounter).toHaveBeenCalledWith(
+          99,
+          expect.objectContaining({ encounter_id: 6 })
+        )
+      );
+      expect(linkMedication).not.toHaveBeenCalled();
+    } finally {
+      confirmSpy.mockRestore();
+      linkMedication.mockRestore();
+      linkEncounter.mockRestore();
+    }
   });
 });

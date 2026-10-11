@@ -141,14 +141,14 @@ function TreatmentEquipmentRelationships({
           error: err.message,
           component: 'TreatmentEquipmentRelationships',
         });
-        setError(err.message || 'Failed to load equipment relationships');
+        setError(err.message || t('treatments.links.loadEquipmentFailed'));
       } finally {
         if (!signal?.aborted) {
           setLoading(false);
         }
       }
     },
-    [treatmentId]
+    [treatmentId, t]
   );
 
   useEffect(() => {
@@ -311,7 +311,7 @@ function TreatmentEquipmentRelationships({
       setError(
         err.response?.data?.detail ||
           err.message ||
-          'Failed to add equipment relationship'
+          t('treatments.links.addEquipmentFailed')
       );
     } finally {
       setLoading(false);
@@ -340,7 +340,7 @@ function TreatmentEquipmentRelationships({
       setError(
         err.response?.data?.detail ||
           err.message ||
-          'Failed to update equipment relationship'
+          t('treatments.links.updateEquipmentFailed')
       );
     } finally {
       setLoading(false);
@@ -375,7 +375,7 @@ function TreatmentEquipmentRelationships({
       setError(
         err.response?.data?.detail ||
           err.message ||
-          'Failed to delete equipment relationship'
+          t('treatments.links.deleteEquipmentFailed')
       );
     } finally {
       setLoading(false);
@@ -466,7 +466,9 @@ function TreatmentEquipmentRelationships({
                           }
                         >
                           {eq?.equipment_name ||
-                            `Equipment ID: ${relationship.equipment_id}`}
+                            t('treatments.links.equipmentFallback', {
+                              id: relationship.equipment_id,
+                            })}
                         </Badge>
                         {typeLabel && (
                           <Badge variant="outline" size="sm" color="blue">
@@ -493,7 +495,8 @@ function TreatmentEquipmentRelationships({
                         <Text size="sm" c="dimmed">
                           <strong>{t('shared:fields.manufacturer')}:</strong>{' '}
                           {eq.manufacturer}
-                          {eq.model_number && ` | Model: ${eq.model_number}`}
+                          {eq.model_number &&
+                            ` | ${t('treatments.links.model')}: ${eq.model_number}`}
                         </Text>
                       )}
 
@@ -508,7 +511,9 @@ function TreatmentEquipmentRelationships({
                         <Stack gap="xs">
                           <TextInput
                             size="xs"
-                            placeholder="Usage frequency (e.g., Nightly, As needed)"
+                            placeholder={t(
+                              'treatments.links.usageFrequencyPlaceholder'
+                            )}
                             value={editingRelationship?.usage_frequency || ''}
                             onChange={e =>
                               setEditingRelationship(prev => ({
@@ -519,7 +524,9 @@ function TreatmentEquipmentRelationships({
                           />
                           <TextInput
                             size="xs"
-                            placeholder="Specific settings (e.g., Pressure: 10 cmH2O)"
+                            placeholder={t(
+                              'treatments.links.specificSettingsPlaceholder'
+                            )}
                             value={editingRelationship?.specific_settings || ''}
                             onChange={e =>
                               setEditingRelationship(prev => ({
@@ -530,7 +537,7 @@ function TreatmentEquipmentRelationships({
                           />
                           <Textarea
                             size="xs"
-                            placeholder="Relevance note"
+                            placeholder={t('modals.relevanceNoteOptional')}
                             value={editingRelationship?.relevance_note || ''}
                             onChange={e =>
                               setEditingRelationship(prev => ({
@@ -665,7 +672,7 @@ function TreatmentEquipmentRelationships({
         <Modal
           opened={showAddModal}
           onClose={resetAndCloseModal}
-          title="Link Equipment to Treatment"
+          title={t('treatments.links.equipmentModalTitle')}
           size="lg"
           centered
           zIndex={3000}
@@ -697,8 +704,8 @@ function TreatmentEquipmentRelationships({
                   {availableOptions.length > 0 ? (
                     <>
                       <MultiSelect
-                        label="Select Equipment"
-                        placeholder="Choose equipment to link"
+                        label={t('treatments.links.selectEquipment')}
+                        placeholder={t('treatments.links.chooseEquipment')}
                         data={availableOptions}
                         value={newRelationship.equipment_ids}
                         onChange={values =>
@@ -716,8 +723,10 @@ function TreatmentEquipmentRelationships({
                       {selectedCount === 1 && (
                         <>
                           <TextInput
-                            label="Usage Frequency (Optional)"
-                            placeholder="e.g., Nightly, As needed, 3x daily"
+                            label={t('treatments.links.usageFrequencyOptional')}
+                            placeholder={t(
+                              'treatments.links.usageFrequencyExample'
+                            )}
                             value={newRelationship.usage_frequency}
                             onChange={e =>
                               setNewRelationship(prev => ({
@@ -725,12 +734,18 @@ function TreatmentEquipmentRelationships({
                                 usage_frequency: e.target.value,
                               }))
                             }
-                            description="How often this equipment is used for this treatment"
+                            description={t(
+                              'treatments.links.usageFrequencyDescription'
+                            )}
                           />
 
                           <TextInput
-                            label="Specific Settings (Optional)"
-                            placeholder="e.g., Pressure: 10 cmH2O, Flow: 2L/min"
+                            label={t(
+                              'treatments.links.specificSettingsOptional'
+                            )}
+                            placeholder={t(
+                              'treatments.links.specificSettingsExample'
+                            )}
                             value={newRelationship.specific_settings}
                             onChange={e =>
                               setNewRelationship(prev => ({
@@ -738,14 +753,18 @@ function TreatmentEquipmentRelationships({
                                 specific_settings: e.target.value,
                               }))
                             }
-                            description="Treatment-specific equipment settings"
+                            description={t(
+                              'treatments.links.specificSettingsDescription'
+                            )}
                           />
                         </>
                       )}
 
                       <Textarea
-                        label="Relevance Note (Optional)"
-                        placeholder="Describe how this equipment relates to the treatment"
+                        label={t('modals.relevanceNoteOptional')}
+                        placeholder={t(
+                          'treatments.links.equipmentNotePlaceholder'
+                        )}
                         value={newRelationship.relevance_note}
                         onChange={e =>
                           setNewRelationship(prev => ({
@@ -897,11 +916,14 @@ function TreatmentEquipmentRelationships({
                     minRows={2}
                   />
 
-                  <Divider label="Link Settings" labelPosition="center" />
+                  <Divider
+                    label={t('treatments.links.linkSettings')}
+                    labelPosition="center"
+                  />
 
                   <TextInput
-                    label="Usage Frequency (Optional)"
-                    placeholder="e.g., Nightly, As needed"
+                    label={t('treatments.links.usageFrequencyOptional')}
+                    placeholder={t('treatments.links.usageFrequencyExample')}
                     value={newRelationship.usage_frequency}
                     onChange={e =>
                       setNewRelationship(prev => ({
@@ -912,8 +934,8 @@ function TreatmentEquipmentRelationships({
                   />
 
                   <TextInput
-                    label="Specific Settings (Optional)"
-                    placeholder="e.g., Pressure: 10 cmH2O"
+                    label={t('treatments.links.specificSettingsOptional')}
+                    placeholder={t('treatments.links.specificSettingsExample')}
                     value={newRelationship.specific_settings}
                     onChange={e =>
                       setNewRelationship(prev => ({
@@ -924,8 +946,8 @@ function TreatmentEquipmentRelationships({
                   />
 
                   <Textarea
-                    label="Relevance Note (Optional)"
-                    placeholder="How this equipment relates to the treatment"
+                    label={t('modals.relevanceNoteOptional')}
+                    placeholder={t('treatments.links.equipmentNotePlaceholder')}
                     value={newRelationship.relevance_note}
                     onChange={e =>
                       setNewRelationship(prev => ({
@@ -955,10 +977,12 @@ function TreatmentEquipmentRelationships({
                 }
               >
                 {addMode === 'new'
-                  ? 'Create & Link Equipment'
+                  ? t('treatments.links.createAndLinkEquipment')
                   : selectedCount > 1
-                    ? `Link ${selectedCount} Equipment`
-                    : 'Link Equipment'}
+                    ? t('treatments.links.linkSelectedCount', {
+                        count: selectedCount,
+                      })
+                    : t('buttons.linkEquipment', 'Link Equipment')}
               </Button>
             </Group>
           </Stack>

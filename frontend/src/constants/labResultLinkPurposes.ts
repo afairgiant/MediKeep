@@ -1,7 +1,6 @@
 import {
   PURPOSE_OPTIONS,
   getPurposeColor,
-  getPurposeLabel,
 } from './treatmentLabResultConstants';
 import type { PurposeConfig } from '../types/encounterLinks';
 
@@ -12,7 +11,6 @@ import type { PurposeConfig } from '../types/encounterLinks';
  */
 export const LAB_RESULT_LINK_PURPOSES: PurposeConfig = {
   options: PURPOSE_OPTIONS,
-  getLabel: getPurposeLabel,
   getColor: getPurposeColor,
 };
 

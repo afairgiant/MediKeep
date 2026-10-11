@@ -58,8 +58,8 @@ export interface LinkUpdate {
 
 /** The purposes a link can be given, with how each is shown. */
 export interface PurposeConfig {
-  options: { value: string; label: string }[];
-  getLabel: (_purpose: string) => string;
+  /** labelKey is an i18n key, e.g. 'shared:linkPurposes.baseline' */
+  options: { value: string; labelKey: string }[];
   getColor: (_purpose: string) => string;
 }
 

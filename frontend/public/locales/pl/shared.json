@@ -316,6 +316,17 @@
     "weight": "Waga",
     "zip": "ZIP"
   },
+  "linkPurposes": {
+    "baseline": "Wartość wyjściowa",
+    "followUpFor": "Kontrola wyników",
+    "monitoring": "Monitorowanie",
+    "orderedDuring": "Zlecone podczas wizyty",
+    "other": "Inne",
+    "outcome": "Wynik leczenia",
+    "reference": "Odniesienie",
+    "resultsReviewed": "Wyniki omówione",
+    "safety": "Bezpieczeństwo"
+  },
   "permissions": {
     "viewOnly": "Dostęp tylko do odczytu"
   },

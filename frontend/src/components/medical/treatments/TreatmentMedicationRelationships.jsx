@@ -203,7 +203,9 @@ function TreatmentMedicationRelationships({
                         }
                       >
                         {medication?.medication_name ||
-                          `Medication ID: ${relationship.medication_id}`}
+                          t('treatments.links.medicationFallback', {
+                            id: relationship.medication_id,
+                          })}
                       </Badge>
                       {(relationship.specific_dosage || medication?.dosage) && (
                         <Badge variant="outline" size="sm">
@@ -240,7 +242,9 @@ function TreatmentMedicationRelationships({
                       <Stack gap="xs">
                         <TextInput
                           size="xs"
-                          placeholder="Specific dosage for this treatment"
+                          placeholder={t(
+                            'treatments.links.specificDosagePlaceholder'
+                          )}
                           value={editingRelationship?.specific_dosage || ''}
                           onChange={e =>
                             updateEditingRelationship(
@@ -251,7 +255,9 @@ function TreatmentMedicationRelationships({
                         />
                         <TextInput
                           size="xs"
-                          placeholder="Specific frequency"
+                          placeholder={t(
+                            'treatments.links.specificFrequencyPlaceholder'
+                          )}
                           value={editingRelationship?.specific_frequency || ''}
                           onChange={e =>
                             updateEditingRelationship(
@@ -263,7 +269,7 @@ function TreatmentMedicationRelationships({
                         <Group grow gap="xs">
                           <Select
                             size="xs"
-                            placeholder="Treatment prescriber"
+                            placeholder={t('treatments.links.prescriber')}
                             data={practitioners.map(p => ({
                               value: p.id.toString(),
                               label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
@@ -284,10 +290,15 @@ function TreatmentMedicationRelationships({
                           />
                           <Select
                             size="xs"
-                            placeholder="Treatment pharmacy"
+                            placeholder={t('treatments.links.pharmacy')}
                             data={pharmacies.map(p => ({
                               value: p.id.toString(),
-                              label: p.name || p.brand || `Pharmacy #${p.id}`,
+                              label:
+                                p.name ||
+                                p.brand ||
+                                t('treatments.links.pharmacyFallback', {
+                                  id: p.id,
+                                }),
                             }))}
                             value={
                               editingRelationship?.specific_pharmacy_id?.toString() ||
@@ -342,7 +353,7 @@ function TreatmentMedicationRelationships({
                         </Group>
                         <Textarea
                           size="xs"
-                          placeholder="Relevance note"
+                          placeholder={t('modals.relevanceNoteOptional')}
                           value={editingRelationship?.relevance_note || ''}
                           onChange={e =>
                             updateEditingRelationship(
@@ -408,7 +419,7 @@ function TreatmentMedicationRelationships({
               'labels.noMedicationsLinked',
               'No medications linked to this treatment'
             )}
-            description="Link medications to track what is prescribed for this treatment plan."
+            description={t('treatments.links.medicationsEmpty')}
             isViewMode={isViewMode}
           />
         )}
@@ -428,11 +439,11 @@ function TreatmentMedicationRelationships({
         <RelationshipAddModal
           opened={showAddModal}
           onClose={resetAndCloseModal}
-          title="Link Medications to Treatment"
+          title={t('treatments.links.medicationsModalTitle')}
         >
           <MultiSelect
-            label="Select Medications"
-            placeholder="Choose medications to link"
+            label={t('treatments.links.selectMedications')}
+            placeholder={t('treatments.links.chooseMedications')}
             data={availableOptions}
             value={newRelationship.medication_ids}
             onChange={values => updateNewRelationship('medication_ids', values)}
@@ -445,18 +456,18 @@ function TreatmentMedicationRelationships({
           {selectedCount === 1 && (
             <>
               <TextInput
-                label="Specific Dosage (Optional)"
-                placeholder="e.g., 400mg 3x daily with meals"
+                label={t('treatments.links.specificDosageOptional')}
+                placeholder={t('treatments.links.specificDosageExample')}
                 value={newRelationship.specific_dosage}
                 onChange={e =>
                   updateNewRelationship('specific_dosage', e.target.value)
                 }
-                description="Override the medication's default dosage for this treatment"
+                description={t('treatments.links.specificDosageDescription')}
               />
 
               <TextInput
-                label="Duration (Optional)"
-                placeholder="e.g., 2 weeks, Until symptoms resolve"
+                label={t('treatments.links.durationOptional')}
+                placeholder={t('treatments.links.durationExample')}
                 value={newRelationship.specific_duration}
                 onChange={e =>
                   updateNewRelationship('specific_duration', e.target.value)
@@ -464,8 +475,8 @@ function TreatmentMedicationRelationships({
               />
 
               <TextInput
-                label="Timing Instructions (Optional)"
-                placeholder="e.g., Take 30 min before PT session"
+                label={t('treatments.links.timingOptional')}
+                placeholder={t('treatments.links.timingExample')}
                 value={newRelationship.timing_instructions}
                 onChange={e =>
                   updateNewRelationship('timing_instructions', e.target.value)
@@ -474,8 +485,8 @@ function TreatmentMedicationRelationships({
 
               <Group grow gap="sm">
                 <Select
-                  label="Treatment Prescriber"
-                  placeholder="Override prescriber"
+                  label={t('treatments.links.prescriber')}
+                  placeholder={t('treatments.links.overridePrescriber')}
                   data={practitioners.map(p => ({
                     value: p.id.toString(),
                     label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
@@ -489,11 +500,14 @@ function TreatmentMedicationRelationships({
                   comboboxProps={{ withinPortal: true, zIndex: 4000 }}
                 />
                 <Select
-                  label="Treatment Pharmacy"
-                  placeholder="Override pharmacy"
+                  label={t('treatments.links.pharmacy')}
+                  placeholder={t('treatments.links.overridePharmacy')}
                   data={pharmacies.map(p => ({
                     value: p.id.toString(),
-                    label: p.name || p.brand || `Pharmacy #${p.id}`,
+                    label:
+                      p.name ||
+                      p.brand ||
+                      t('treatments.links.pharmacyFallback', { id: p.id }),
                   }))}
                   value={newRelationship.specific_pharmacy_id || null}
                   onChange={value =>
@@ -507,7 +521,7 @@ function TreatmentMedicationRelationships({
 
               <Group grow gap="sm">
                 <DateInput
-                  label="Treatment Start Date"
+                  label={t('medical:treatments.medications.specificStartDate')}
                   placeholder={dateInputFormat}
                   value={parseDateInput(newRelationship.specific_start_date)}
                   onChange={date =>
@@ -522,7 +536,7 @@ function TreatmentMedicationRelationships({
                   popoverProps={{ withinPortal: true, zIndex: 4000 }}
                 />
                 <DateInput
-                  label="Treatment End Date"
+                  label={t('medical:treatments.medications.specificEndDate')}
                   placeholder={dateInputFormat}
                   value={parseDateInput(newRelationship.specific_end_date)}
                   onChange={date =>
@@ -541,8 +555,8 @@ function TreatmentMedicationRelationships({
           )}
 
           <Textarea
-            label="Relevance Note (Optional)"
-            placeholder="Describe how this medication relates to the treatment"
+            label={t('modals.relevanceNoteOptional')}
+            placeholder={t('treatments.links.medicationNotePlaceholder')}
             value={newRelationship.relevance_note}
             onChange={e =>
               updateNewRelationship('relevance_note', e.target.value)
@@ -558,8 +572,10 @@ function TreatmentMedicationRelationships({
             disabled={selectedCount === 0}
             submitLabel={
               selectedCount > 1
-                ? `Link ${selectedCount} Medications`
-                : 'Link Medication'
+                ? t('treatments.links.linkSelectedCount', {
+                    count: selectedCount,
+                  })
+                : t('buttons.linkMedication', 'Link Medication')
             }
           />
         </RelationshipAddModal>

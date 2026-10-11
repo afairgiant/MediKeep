@@ -104,7 +104,9 @@ describe('LabResultRecordLinksCard', () => {
     renderCard({ linkKey: 'treatments', labResultId: 3 });
 
     expect(await screen.findByText('Insulin')).toBeInTheDocument();
-    expect(screen.getByText('Monitoring')).toBeInTheDocument();
+    expect(
+      screen.getByText('shared:linkPurposes.monitoring')
+    ).toBeInTheDocument();
     expect(screen.getByText(/weekly/)).toBeInTheDocument();
     expect(screen.getByText('check levels')).toBeInTheDocument();
   });
@@ -157,7 +159,9 @@ describe('LabResultRecordLinksCard', () => {
     ]);
     renderCard({ linkKey: 'conditions', labResultId: 3 });
     // The saved purpose is shown on the link
-    expect(await screen.findByText('Baseline')).toBeInTheDocument();
+    expect(
+      await screen.findByText('shared:linkPurposes.baseline')
+    ).toBeInTheDocument();
     await userEvent.click(
       screen.getByRole('button', {
         name: 'common:visits.relationships.editLink',
@@ -193,7 +197,10 @@ describe('LabResultRecordLinksCard', () => {
       screen.getAllByLabelText('common:visits.relationships.purpose')[0]
     );
     await userEvent.click(
-      await screen.findByRole('option', { name: 'Outcome', hidden: true })
+      await screen.findByRole('option', {
+        name: 'shared:linkPurposes.outcome',
+        hidden: true,
+      })
     );
     await userEvent.click(
       screen.getByRole('button', { name: 'common:buttons.save' })

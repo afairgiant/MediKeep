@@ -77,7 +77,6 @@ vi.mock('../../../services/api', () => ({
     getPatientMedications: vi.fn(() => Promise.resolve([])),
     getPatientLabResults: vi.fn(() => Promise.resolve([])),
     getPractitioners: vi.fn(() => Promise.resolve([])),
-    getConditionMedications: vi.fn(() => Promise.resolve([])),
     createConditionMedicationsBulk: vi.fn(() => Promise.resolve([])),
     createRecordLabResultLink: vi.fn(() => Promise.resolve({})),
     createRecordEncounterLinksBulk: vi.fn(() => Promise.resolve([])),
@@ -286,10 +285,11 @@ vi.mock('../../../components/medical/conditions', () => ({
     formData,
     onInputChange,
     onSubmit,
+    isLoading,
   }) => {
     if (!isOpen) return null;
     return (
-      <div data-testid="form-modal" role="dialog">
+      <div data-testid="form-modal" role="dialog" data-loading={!!isLoading}>
         <h2>{title}</h2>
         <form onSubmit={onSubmit}>
           <label htmlFor="diagnosis">Diagnosis *</label>
@@ -678,6 +678,27 @@ describe('Conditions Page Integration Tests', () => {
         expect(payload).not.toHaveProperty('pending_medication_ids');
         expect(payload).not.toHaveProperty('pending_lab_result_links');
         expect(payload).not.toHaveProperty('pending_visit_links');
+      });
+
+      test('keeps the form blocked until the medications are linked', async () => {
+        const { apiService } = await import('../../../services/api');
+        let finishLinking;
+        apiService.createConditionMedicationsBulk.mockImplementationOnce(
+          () =>
+            new Promise(resolve => {
+              finishLinking = resolve;
+            })
+        );
+        await submitNewCondition(['add-pending-medication']);
+
+        await waitFor(() =>
+          expect(apiService.createConditionMedicationsBulk).toHaveBeenCalled()
+        );
+        expect(screen.getByTestId('form-modal')).toHaveAttribute(
+          'data-loading',
+          'true'
+        );
+        finishLinking([]);
       });
 
       test('makes no link requests when nothing was chosen', async () => {

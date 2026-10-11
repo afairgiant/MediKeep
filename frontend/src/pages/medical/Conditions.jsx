@@ -302,13 +302,7 @@ const Conditions = () => {
           resultId,
           formData.pending_lab_result_links
         );
-      }
-
-      completeFormSubmission(success, resultId);
-
-      if (success && resultId) {
-        // Link the medications chosen in the Add form now that the condition exists
-        if (!editingCondition && formData.pending_medication_links?.length > 0) {
+        if (formData.pending_medication_links?.length > 0) {
           const failed = await savePendingConditionMedicationLinks(
             resultId,
             formData.pending_medication_links
@@ -327,7 +321,11 @@ const Conditions = () => {
             });
           }
         }
+      }
 
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
 
         if (hasPendingFiles) {

@@ -4,12 +4,13 @@ from typing import List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
 
-from app.core.constants import LAB_RESULT_LINK_PURPOSES, LAB_TEST_COMPONENT_LIMITS
+from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.schemas.base_tags import (
     TaggedEntityMixin,
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.validators import validate_lab_result_link_purpose
 
 
 def _validate_relevance_note(v):
@@ -17,20 +18,6 @@ def _validate_relevance_note(v):
     if v and len(v.strip()) > 500:
         raise ValueError("Relevance note must be less than 500 characters")
     return v.strip() if v else None
-
-
-def _validate_link_purpose(v):
-    """Validate the purpose of a condition or procedure lab result link"""
-    if v is None:
-        return v
-    purpose = v.strip().lower()
-    if not purpose:
-        return None
-    if purpose not in LAB_RESULT_LINK_PURPOSES:
-        raise ValueError(
-            f"Purpose must be one of: {', '.join(LAB_RESULT_LINK_PURPOSES)}"
-        )
-    return purpose
 
 
 class LabResultBase(TaggedEntityMixin):
@@ -553,7 +540,7 @@ class RecordLabResultLinkCreate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_link_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -571,7 +558,7 @@ class RecordLabResultLinkUpdate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_link_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -623,7 +610,7 @@ class LabResultConditionBase(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_link_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -644,7 +631,7 @@ class LabResultConditionUpdate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_link_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -735,7 +722,7 @@ class LabResultProcedureBase(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_link_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -758,7 +745,7 @@ class LabResultProcedureUpdate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        return _validate_link_purpose(v)
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod

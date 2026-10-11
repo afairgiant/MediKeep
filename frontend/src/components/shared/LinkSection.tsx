@@ -31,9 +31,9 @@ import { useNestedDialog } from '../../hooks/useNestedDialog';
 import {
   PURPOSE_OPTIONS,
   getPurposeColor,
-  getPurposeLabel,
 } from '../../constants/encounterLabResultConstants';
 import { navigateToEntity } from '../../utils/linkNavigation';
+import { translateOptions } from '../../utils/translateOptions';
 import type {
   LinkCandidate,
   LinkRow,
@@ -43,7 +43,6 @@ import type {
 
 const VISIT_PURPOSES: PurposeConfig = {
   options: PURPOSE_OPTIONS,
-  getLabel: getPurposeLabel,
   getColor: getPurposeColor,
 };
 
@@ -127,10 +126,12 @@ const LinkSection = ({
   const [expectedFrequency, setExpectedFrequency] = useState('');
   const [editing, setEditing] = useState<EditState | null>(null);
 
-  const purposeOptions = purposeConfig.options.map(option => ({
-    value: option.value,
-    label: option.label,
-  }));
+  const purposeOptions = translateOptions(purposeConfig.options, key =>
+    t(key, { defaultValue: key })
+  );
+  // An unknown purpose (not in the options) shows as stored
+  const purposeLabel = (value: string) =>
+    purposeOptions.find(option => option.value === value)?.label ?? value;
 
   const run = async (action: () => Promise<void>, failureKey: FailureKey) => {
     setBusy(true);
@@ -377,7 +378,7 @@ const LinkSection = ({
                           size="sm"
                           color={purposeConfig.getColor(row.purpose)}
                         >
-                          {purposeConfig.getLabel(row.purpose)}
+                          {purposeLabel(row.purpose)}
                         </Badge>
                       )}
                     </Group>

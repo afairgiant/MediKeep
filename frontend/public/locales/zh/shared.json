@@ -316,6 +316,17 @@
     "weight": "体重",
     "zip": "ZIP"
   },
+  "linkPurposes": {
+    "baseline": "基线",
+    "followUpFor": "结果随访",
+    "monitoring": "监测",
+    "orderedDuring": "就诊时开具",
+    "other": "其他",
+    "outcome": "治疗结果",
+    "reference": "参考",
+    "resultsReviewed": "已审阅结果",
+    "safety": "安全性"
+  },
   "permissions": {
     "viewOnly": "仅查看权限"
   },
