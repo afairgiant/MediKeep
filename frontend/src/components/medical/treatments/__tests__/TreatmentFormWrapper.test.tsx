@@ -201,7 +201,9 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
   const revealTab = async (name: RegExp) => {
     const user = userEvent.setup();
     await user.click(linkMenuButton());
-    await user.click(await screen.findByRole('menuitem', { name }));
+    await user.click(
+      await screen.findByRole('menuitem', { name, hidden: true })
+    );
     return user;
   };
 
@@ -216,7 +218,9 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
 
     await userEvent.click(linkMenuButton());
     expect(
-      (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+      (await screen.findAllByRole('menuitem', { hidden: true })).map(
+        item => item.textContent
+      )
     ).toEqual([
       'shared:tabs.visits',
       'shared:categories.lab_results',
@@ -300,7 +304,9 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
 
     await userEvent.click(linkMenuButton());
     expect(
-      (await screen.findAllByRole('menuitem')).map(item => item.textContent)
+      (await screen.findAllByRole('menuitem', { hidden: true })).map(
+        item => item.textContent
+      )
     ).toEqual([
       'shared:categories.medications',
       'shared:tabs.visits',

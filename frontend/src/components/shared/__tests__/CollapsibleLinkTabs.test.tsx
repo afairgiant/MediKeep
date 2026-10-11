@@ -100,7 +100,7 @@ describe('CollapsibleLinkTabs', () => {
     ]);
 
     await userEvent.click(menuButton());
-    const items = await screen.findAllByRole('menuitem');
+    const items = await screen.findAllByRole('menuitem', { hidden: true });
     expect(items.map(item => item.textContent)).toEqual(['Medications']);
     await userEvent.click(items[0]);
 

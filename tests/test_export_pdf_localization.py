@@ -346,3 +346,30 @@ class TestFreeTextIsPreserved:
         assert contact.endswith(": OTHER")
         assert ": none" in coverage
         assert t.value("other") in coverage
+
+
+def _card_count(records):
+    story = []
+    ExportService.__new__(ExportService)._add_card_based_section(
+        story,
+        records,
+        "medications",
+        getSampleStyleSheet(),
+        translator=get_translator("en"),
+    )
+    return sum(1 for f in story if isinstance(f, Table))
+
+
+def test_export_pdf_not_capped_at_50_records():
+    """Regression for #1135: sections were truncated to 50 records."""
+    records = [{"medication_name": f"Med {i}"} for i in range(120)]
+    assert _card_count(records) == 120
+
+
+def test_export_pdf_truncates_above_max_records():
+    from app.services.export_service import MAX_PDF_RECORDS_PER_SECTION
+
+    records = [
+        {"medication_name": f"Med {i}"} for i in range(MAX_PDF_RECORDS_PER_SECTION + 5)
+    ]
+    assert _card_count(records) == MAX_PDF_RECORDS_PER_SECTION

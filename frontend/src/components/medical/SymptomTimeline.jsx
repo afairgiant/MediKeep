@@ -24,6 +24,7 @@ import {
 } from '../../constants/symptomEnums';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { capitalizeFirst } from '../../utils/dateFormatUtils';
+import { formatDateForAPI, parseDateInput } from '../../utils/dateUtils';
 
 /**
  * SymptomTimeline Component
@@ -46,7 +47,9 @@ const SymptomTimeline = ({ patientId, hidden }) => {
   const [viewingSymptom, setViewingSymptom] = useState(null);
 
   const formatLocalDate = (dateStr, options) =>
-    capitalizeFirst(new Date(dateStr).toLocaleDateString(locale, options));
+    capitalizeFirst(
+      parseDateInput(dateStr)?.toLocaleDateString(locale, options)
+    );
 
   const fetchTimelineData = useCallback(async () => {
     try {
@@ -77,8 +80,8 @@ const SymptomTimeline = ({ patientId, hidden }) => {
             startDate.setMonth(startDate.getMonth() - 1);
         }
 
-        startDateParam = startDate.toISOString().split('T')[0];
-        endDateParam = endDate.toISOString().split('T')[0];
+        startDateParam = formatDateForAPI(startDate);
+        endDateParam = formatDateForAPI(endDate);
       }
 
       logger.debug('symptom_timeline_fetch', {

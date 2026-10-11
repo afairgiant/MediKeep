@@ -150,7 +150,7 @@ All documentation has been validated against the actual codebase for accuracy.
 - **ORM:** SQLAlchemy 2.0+
 - **Database:** PostgreSQL 15-18
 - **Migrations:** Alembic
-- **Authentication:** JWT (python-jose) + SSO (Google, GitHub, OIDC)
+- **Authentication:** JWT (PyJWT) + SSO (Google, GitHub, OIDC)
 
 ### Frontend
 

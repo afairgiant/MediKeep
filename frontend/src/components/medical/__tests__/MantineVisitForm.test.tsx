@@ -193,7 +193,7 @@ describe('MantineVisitForm — linked record tabs', () => {
 
     const user = userEvent.setup();
     await user.click(linkMenuButton());
-    const items = await screen.findAllByRole('menuitem');
+    const items = await screen.findAllByRole('menuitem', { hidden: true });
     expect(items.map(item => item.textContent)).toEqual(LINK_TABS);
   });
 
@@ -247,6 +247,7 @@ describe('MantineVisitForm — linked record tabs', () => {
     await user.click(
       await screen.findByRole('menuitem', {
         name: 'shared:categories.lab_results',
+        hidden: true,
       })
     );
     expect(screen.getByTestId('visit-link-panels')).toHaveAttribute(

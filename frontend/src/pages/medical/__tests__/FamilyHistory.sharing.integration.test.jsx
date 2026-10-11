@@ -461,15 +461,15 @@ describe('FamilyHistory Page - Sharing Integration Tests', () => {
       expect(screen.getByTestId('page-header')).toBeInTheDocument();
     });
 
-    it('should handle errors when loading shared family history', () => {
+    it('should handle errors when loading shared family history', async () => {
       mockFamilyHistoryApi.getSharedFamilyHistory.mockRejectedValue(
         new Error('Shared API Error')
       );
 
       // Verify the mock is configured
-      expect(mockFamilyHistoryApi.getSharedFamilyHistory()).rejects.toThrow(
-        'Shared API Error'
-      );
+      await expect(
+        mockFamilyHistoryApi.getSharedFamilyHistory()
+      ).rejects.toThrow('Shared API Error');
     });
   });
 

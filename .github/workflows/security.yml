@@ -59,36 +59,7 @@ jobs:
       - name: Run pip-audit (JSON report)
         run: pip-audit -r requirements.txt -f json -o pip-audit-report.json --progress-spinner off || true
       - name: Run pip-audit (blocking)
-        run: >-
-          pip-audit -r requirements.txt --progress-spinner off
-          --ignore-vuln CVE-2025-53643
-          --ignore-vuln CVE-2025-69223
-          --ignore-vuln CVE-2025-69224
-          --ignore-vuln CVE-2025-69225
-          --ignore-vuln CVE-2025-69226
-          --ignore-vuln CVE-2025-69227
-          --ignore-vuln CVE-2025-69228
-          --ignore-vuln CVE-2025-69229
-          --ignore-vuln CVE-2025-69230
-          --ignore-vuln CVE-2026-26007
-          --ignore-vuln CVE-2026-4539
-          --ignore-vuln CVE-2024-23342
-          --ignore-vuln CVE-2025-54121
-          --ignore-vuln CVE-2025-62727
-          --ignore-vuln CVE-2026-25990
-          --ignore-vuln CVE-2024-47081
-          --ignore-vuln CVE-2026-21441
-          --ignore-vuln CVE-2025-64512
-          --ignore-vuln CVE-2025-70559
-        # Pre-existing CVEs in pinned dependencies. Remove ignores as packages are upgraded:
-        #   aiohttp 3.12.12 -> 3.12.14+ (9 CVEs)
-        #   cryptography 45.0.3 -> 46.0.5+ (1 CVE)
-        #   ecdsa 0.19.1 - no fix available (1 CVE)
-        #   starlette 0.46.2 -> 0.47.2+ (2 CVEs, tied to FastAPI version)
-        #   pillow 11.3.0 -> 12.1.1+ (1 CVE)
-        #   requests 2.32.3 -> 2.32.4+ (1 CVE)
-        #   urllib3 2.6.0 -> 2.6.3+ (1 CVE)
-        #   pdfminer-six 20221105 -> 20251107+ (2 CVEs)
+        run: pip-audit -r requirements.txt --progress-spinner off
       - name: Upload report artifact
         if: always()
         uses: actions/upload-artifact@v7

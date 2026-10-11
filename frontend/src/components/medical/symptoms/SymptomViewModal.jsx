@@ -144,11 +144,10 @@ const SymptomViewModal = ({
 
   // Calculate occurrence statistics from actual occurrence dates
   const totalOccurrences = occurrences.length;
-  const occurrenceDates = occurrences.map(o => new Date(o.occurrence_date));
-  const firstOccurrenceDate =
-    occurrenceDates.length > 0 ? new Date(Math.min(...occurrenceDates)) : null;
+  const occurrenceDates = occurrences.map(o => o.occurrence_date).sort();
+  const firstOccurrenceDate = occurrenceDates[0] ?? null;
   const lastOccurrenceDate =
-    occurrenceDates.length > 0 ? new Date(Math.max(...occurrenceDates)) : null;
+    occurrenceDates[occurrenceDates.length - 1] ?? null;
 
   const episodePageCount = totalPages(totalOccurrences);
   const visibleOccurrences = paginateData(occurrences);

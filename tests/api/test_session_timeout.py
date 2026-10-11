@@ -23,7 +23,7 @@ exists to prevent. Not exercised here; the tests below assert the behavior as bu
 """
 
 from datetime import datetime, timedelta, timezone
-from jose import jwt
+import jwt
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 

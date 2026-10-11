@@ -287,18 +287,22 @@ export const ResponsiveTestHelpers = {
    */
   beforeEach() {
     // Mock IntersectionObserver
-    global.IntersectionObserver = vi.fn(() => ({
-      observe: vi.fn(),
-      disconnect: vi.fn(),
-      unobserve: vi.fn(),
-    }));
+    global.IntersectionObserver = vi.fn(function () {
+      return {
+        observe: vi.fn(),
+        disconnect: vi.fn(),
+        unobserve: vi.fn(),
+      };
+    });
 
     // Mock ResizeObserver
-    global.ResizeObserver = vi.fn(() => ({
-      observe: vi.fn(),
-      disconnect: vi.fn(),
-      unobserve: vi.fn(),
-    }));
+    global.ResizeObserver = vi.fn(function () {
+      return {
+        observe: vi.fn(),
+        disconnect: vi.fn(),
+        unobserve: vi.fn(),
+      };
+    });
 
     // Set default window dimensions
     mockWindowDimensions(1024, 768);

@@ -34,7 +34,7 @@ Yes! MediKeep supports multiple patient profiles, so you can manage records for 
 
 **Minimum requirements:**
 - Docker and Docker Compose (recommended), OR
-- Python 3.12+ and Node.js 18+
+- Python 3.12+ and Node.js 20.19+
 - PostgreSQL 15-18
 - 2GB RAM, 2 CPU cores, 20GB disk space
 
