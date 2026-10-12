@@ -539,6 +539,70 @@ class TestConditionMedicationLinkageAPI:
         assert data[0]["relevance_note"] == "Test note"
         assert "id" in data[0]
 
+    def test_get_medication_conditions_includes_the_condition_details(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
+        """The medication's link list names each condition (#1128).
+
+        The response used to drop the condition details, so the Medication's
+        Conditions tab could only show "#<id>" for a linked condition.
+        """
+        condition_id = condition_and_medication["condition"]["id"]
+        medication_id = condition_and_medication["medication"]["id"]
+        client.post(
+            f"/api/v1/conditions/{condition_id}/medications",
+            json={"medication_id": medication_id},
+            headers=auth_headers,
+        )
+
+        response = client.get(
+            f"/api/v1/conditions/medication/{medication_id}/conditions",
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 200, response.text
+        assert response.json()[0]["condition"] == {
+            "id": condition_id,
+            "diagnosis": "Hypertension",
+            "status": "active",
+            "severity": "moderate",
+        }
+
+    def test_get_medication_conditions_names_every_linked_condition(
+        self,
+        client: TestClient,
+        condition_and_medication,
+        user_with_patient,
+        auth_headers,
+    ):
+        """With several links, each row carries its own condition."""
+        medication_id = condition_and_medication["medication"]["id"]
+        second = client.post(
+            "/api/v1/conditions/",
+            json={
+                "patient_id": user_with_patient["patient"].id,
+                "diagnosis": "Arthritic Hip Joint",
+                "status": "chronic",
+            },
+            headers=auth_headers,
+        ).json()
+        for condition_id in (condition_and_medication["condition"]["id"], second["id"]):
+            client.post(
+                f"/api/v1/conditions/{condition_id}/medications",
+                json={"medication_id": medication_id},
+                headers=auth_headers,
+            )
+
+        rows = client.get(
+            f"/api/v1/conditions/medication/{medication_id}/conditions",
+            headers=auth_headers,
+        ).json()
+
+        assert {row["condition"]["diagnosis"] for row in rows} == {
+            "Hypertension",
+            "Arthritic Hip Joint",
+        }
+
     def test_get_medication_conditions_nonexistent_medication(
         self, client: TestClient, auth_headers
     ):

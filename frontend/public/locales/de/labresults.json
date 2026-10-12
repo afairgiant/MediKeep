@@ -129,12 +129,7 @@
     "autoCalculated": "Automatisch berechnet",
     "cannotRemoveLastRow": "Letzte Zeile kann nicht entfernt werden",
     "componentCreationWarning": "Laborergebnis gespeichert, aber Testkomponenten konnten nicht hinzugefügt werden. Sie können sie über die Ansichtsseite hinzufügen.",
-    "linkConditionsDescription": "Verknüpfen Sie dieses Laborergebnis mit relevanten medizinischen Bedingungen für bessere Nachverfolgung und Organisation.",
-    "linkConditionsTitle": "Medizinische Bedingungen verknüpfen",
     "linkedVisits": "Verknüpfte Besuche",
-    "linkMedicationsTitle": "Mit Medikamenten verknüpfen",
-    "linkProceduresTitle": "Mit Eingriffen verknüpfen",
-    "linkTreatmentsTitle": "Mit Behandlungen verknüpfen",
     "linkVisitsDescription": "Verknüpfen Sie dieses Laborergebnis mit Besuchen, bei denen es angeordnet oder überprüft wurde.",
     "linkVisitsTitle": "Mit Besuchen verknüpfen",
     "matchedCommonName": "Treffer: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Statusindikator:",
     "testCodePlaceholder": "z. B. 718-7",
     "testComponents": "Testkomponenten (Optional)",
-    "testDetails": "Testdetails",
     "unit": "Einheit"
   },
   "keepEmptyLabResult": "Laborergebnis behalten",
@@ -212,16 +206,6 @@
     "placeholder": "Arzt auswählen"
   },
   "patientIdRequired": "Patienten-ID ist erforderlich. Bitte wählen Sie zuerst einen Patienten aus.",
-  "pendingRelationships": {
-    "addCondition": "Erkrankung hinzufügen",
-    "removeCondition": "Erkrankung entfernen",
-    "addMedication": "Medikament hinzufügen",
-    "addProcedure": "Eingriff hinzufügen",
-    "addTreatment": "Behandlung hinzufügen",
-    "removeMedication": "Medikament entfernen",
-    "removeProcedure": "Eingriff entfernen",
-    "removeTreatment": "Behandlung entfernen"
-  },
   "quickFormInstructions": "Geben Sie einen Namen für dieses Laborergebnis ein, dann können Sie Ihr PDF hochladen und analysieren.",
   "quickImportModalTitle": "Schneller PDF-Import - Schritt {{step}} von 2",
   "quickImportSuccess": "Laborergebnis und Testkomponenten erfolgreich importiert",

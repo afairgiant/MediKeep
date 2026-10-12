@@ -129,8 +129,6 @@
     "autoCalculated": "คำนวณอัตโนมัติ",
     "cannotRemoveLastRow": "ไม่สามารถลบแถวสุดท้าย",
     "componentCreationWarning": "บันทึกผลแลปแล้วแต่ไม่สามารถเพิ่มรายการตรวจได้ คุณสามารถเพิ่มจากหน้าดูรายละเอียด",
-    "linkConditionsDescription": "เชื่อมโยงผลแลปนี้กับอาการป่วยที่เกี่ยวข้องเพื่อการติดตามและจัดระบบที่ดีขึ้น",
-    "linkConditionsTitle": "เชื่อมโยงอาการป่วย",
     "linkedVisits": "การมาพบแพทย์ที่เชื่อมโยง",
     "linkVisitsDescription": "เชื่อมโยงผลแลปนี้กับการมาพบแพทย์ที่สั่งตรวจหรือรับชมผล",
     "linkVisitsTitle": "เชื่อมโยงกับการมาพบแพทย์",
@@ -146,12 +144,8 @@
     "statusIndicator": "ตัวบ่งชี้สถานะ:",
     "testCodePlaceholder": "เช่น 718-7",
     "testComponents": "รายการตรวจ (ไม่บังคับ)",
-    "testDetails": "รายละเอียดการตรวจ",
     "unit": "หน่วย",
-    "matchedCommonName": "ตรงกับ: {{name}}",
-    "linkMedicationsTitle": "เชื่อมโยงกับยา",
-    "linkProceduresTitle": "เชื่อมโยงกับหัตถการ",
-    "linkTreatmentsTitle": "เชื่อมโยงกับการรักษา"
+    "matchedCommonName": "ตรงกับ: {{name}}"
   },
   "keepEmptyLabResult": "เก็บผลแลป",
   "labResult": {
@@ -166,16 +160,6 @@
   "messages": {
     "confirmDiscardAdvancedForm": "การสลับโหมดจะทำให้ข้อมูลที่คุณกรอกไว้หายไป ต้องการดำเนินการต่อหรือไม่?",
     "testComponentsEditInfo": "สามารถจัดการรายการตรวจจากหน้าดูรายละเอียดหลังจากบันทึก"
-  },
-  "pendingRelationships": {
-    "addCondition": "เพิ่มภาวะ",
-    "removeCondition": "ลบภาวะ",
-    "addMedication": "เพิ่มยา",
-    "addProcedure": "เพิ่มหัตถการ",
-    "addTreatment": "เพิ่มการรักษา",
-    "removeMedication": "ลบยา",
-    "removeProcedure": "ลบหัตถการ",
-    "removeTreatment": "ลบการรักษา"
   },
   "modal": {
     "editLabResult": "แก้ไขผลแลป",

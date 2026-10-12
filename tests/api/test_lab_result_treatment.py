@@ -384,6 +384,28 @@ class TestLabResultTreatmentAPI:
         assert response.status_code == 200, response.text
         assert response.json()["purpose"] == "monitoring"
 
+    @pytest.mark.parametrize(
+        "purpose,expected", [("  Monitoring ", "monitoring"), ("", None), ("  ", None)]
+    )
+    def test_purpose_normalized_like_condition_and_procedure_links(
+        self,
+        client,
+        authenticated_headers,
+        test_lab_result,
+        test_treatment,
+        purpose,
+        expected,
+    ):
+        """Padded purposes are trimmed and an empty purpose is saved as none, the
+        same as on condition and procedure lab result links."""
+        response = client.post(
+            f"/api/v1/lab-results/{test_lab_result['id']}/treatments",
+            json={"treatment_id": test_treatment["id"], "purpose": purpose},
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["purpose"] == expected
+
     def test_invalid_purpose_rejected(
         self, client, authenticated_headers, test_lab_result, test_treatment
     ):

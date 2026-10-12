@@ -56,17 +56,21 @@ export const LAB_LINK_TABS = [
  * - Editing a saved lab result: every type is shown.
  * Props:
  * - labResultId: the saved lab result, if any (the Visits count is loaded for it)
- * - counts: { conditions, medications, procedures, treatments } (numbers, or undefined
- *   while not known); for an unsaved lab result these are the pending links
+ * - counts: { conditions, medications, procedures, treatments }, each { count, loading }
+ *   (see listCountState); for an unsaved lab result these are the pending links
  * - pendingVisitLinks: visits chosen in the Add form
  * - isViewMode: the read-only dialog
+ * - activeTab: the open tab; a type opened from the "Link" menu stays while it is open
+ *   (required unless isViewMode)
  * - onSelectTab: called with the tab value when the "Link" menu reveals a type
+ *   (required unless isViewMode)
  */
 const LabResultLinkTabButtons = ({
   labResultId,
   counts = {},
   pendingVisitLinks,
   isViewMode = false,
+  activeTab,
   onSelectTab,
 }) => {
   const { t } = useTranslation(['shared']);
@@ -78,14 +82,16 @@ const LabResultLinkTabButtons = ({
   );
 
   const mode = linkTabMode(isViewMode, Boolean(labResultId));
-  const { isShown, hidden, reveal } = useLinkTabVisibility(
+  const { isShown, hidden } = useLinkTabVisibility(
     LAB_LINK_TABS.map(({ value, countKey, labelKey, Icon }) => ({
       key: value,
       label: countKey ? t(labelKey) : t('shared:tabs.visits', 'Visits'),
       icon: Icon ?? IconStethoscope,
-      count: countKey ? counts[countKey] : visitsCount,
+      count: countKey ? counts[countKey]?.count : visitsCount.count,
+      loading: countKey ? counts[countKey]?.loading : visitsCount.loading,
     })),
-    mode
+    mode,
+    activeTab
   );
 
   return (
@@ -94,7 +100,7 @@ const LabResultLinkTabButtons = ({
         if (!isShown(value)) return null;
         return countKey ? (
           <Tabs.Tab key={value} value={value} leftSection={<Icon size={16} />}>
-            {tabLabel(t(labelKey), counts[countKey])}
+            {tabLabel(t(labelKey), counts[countKey]?.count)}
           </Tabs.Tab>
         ) : (
           <RecordVisitsTabButton
@@ -103,34 +109,44 @@ const LabResultLinkTabButtons = ({
             recordType="labResults"
             recordId={labResultId}
             managed
-            count={visitsCount}
+            count={visitsCount.count}
           />
         );
       })}
       {mode === 'add' && (
         <LinkTabMenu
           hidden={hidden}
-          onPick={value => {
-            reveal(value);
-            onSelectTab?.(value);
-          }}
+          onPick={value => onSelectTab?.(value)}
         />
       )}
     </>
   );
 };
 
+// Only an editable dialog has a "Link" menu, which needs the open tab and a way to open
+// the tab it picks
+const requiredUnlessViewMode =
+  type =>
+  (props, ...rest) =>
+    props.isViewMode ? null : type.isRequired(props, ...rest);
+
+const countStateShape = PropTypes.shape({
+  count: PropTypes.number,
+  loading: PropTypes.bool,
+});
+
 LabResultLinkTabButtons.propTypes = {
   labResultId: PropTypes.number,
   counts: PropTypes.shape({
-    conditions: PropTypes.number,
-    medications: PropTypes.number,
-    procedures: PropTypes.number,
-    treatments: PropTypes.number,
+    conditions: countStateShape,
+    medications: countStateShape,
+    procedures: countStateShape,
+    treatments: countStateShape,
   }),
   pendingVisitLinks: PropTypes.array,
   isViewMode: PropTypes.bool,
-  onSelectTab: PropTypes.func,
+  activeTab: requiredUnlessViewMode(PropTypes.string),
+  onSelectTab: requiredUnlessViewMode(PropTypes.func),
 };
 
 export default LabResultLinkTabButtons;

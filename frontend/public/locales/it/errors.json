@@ -26,7 +26,6 @@
     "viewFailed": "Apertura del file per la visualizzazione non riuscita. Riprovare."
   },
   "form": {
-    "conditionNotSelected": "Si prega di selezionare una condizione",
     "entityNotFound": "L'elemento richiesto non è stato trovato.",
     "equipmentFieldsRequired": "Il nome e il tipo dell'attrezzatura sono obbligatori",
     "equipmentNotSelected": "Si prega di selezionare almeno un'attrezzatura",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Informazioni del paziente non disponibili",
   "relationships": {
-    "addConditionFailed": "Aggiunta della relazione condizione non riuscita",
     "addFailed": "Aggiunta della relazione non riuscita",
     "addMedicationFailed": "Aggiunta della relazione farmaco non riuscita",
     "deleteFailed": "Eliminazione della relazione non riuscita",
-    "fetchFailed": "Caricamento delle relazioni non riuscito",
     "updateFailed": "Aggiornamento della relazione non riuscito"
   },
   "success": {

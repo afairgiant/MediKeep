@@ -15,6 +15,11 @@ import { apiService } from '../../../services/api';
 import { useTreatmentRelationships } from '../../../hooks/useTreatmentRelationships';
 import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
 import {
+  PURPOSE_OPTIONS,
+  getPurposeColor,
+} from '../../../constants/treatmentLabResultConstants';
+import { translateOptions } from '../../../utils/translateOptions';
+import {
   RelationshipContainer,
   RelationshipErrorAlert,
   RelationshipEmptyState,
@@ -28,21 +33,6 @@ import {
   formatDateDisplay,
   getOptionLabel,
 } from './RelationshipComponents';
-
-const PURPOSE_OPTIONS = [
-  { value: 'baseline', label: 'Baseline' },
-  { value: 'monitoring', label: 'Monitoring' },
-  { value: 'outcome', label: 'Outcome' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'other', label: 'Other' },
-];
-
-const PURPOSE_COLORS = {
-  baseline: 'blue',
-  monitoring: 'cyan',
-  outcome: 'green',
-  safety: 'orange',
-};
 
 const INITIAL_RELATIONSHIP_STATE = {
   lab_result_ids: [],
@@ -82,10 +72,6 @@ function formatLabResultLabel(labResult) {
   return label;
 }
 
-function getPurposeColor(purpose) {
-  return PURPOSE_COLORS[purpose] || 'gray';
-}
-
 function TreatmentLabResultRelationships({
   treatmentId,
   labResults,
@@ -96,6 +82,7 @@ function TreatmentLabResultRelationships({
   onEntityClick,
 }) {
   const { t } = useTranslation('common');
+  const purposeOptions = translateOptions(PURPOSE_OPTIONS, t);
   // Ensure labResults is always an array
   const safeLabResults = Array.isArray(labResults) ? labResults : [];
 
@@ -194,7 +181,9 @@ function TreatmentLabResultRelationships({
                         }
                       >
                         {labResult?.test_name ||
-                          `Lab Result ID: ${relationship.lab_result_id}`}
+                          t('treatments.links.labResultFallback', {
+                            id: relationship.lab_result_id,
+                          })}
                       </Badge>
                       {relationship.purpose && (
                         <Badge
@@ -202,10 +191,7 @@ function TreatmentLabResultRelationships({
                           size="sm"
                           color={getPurposeColor(relationship.purpose)}
                         >
-                          {getOptionLabel(
-                            relationship.purpose,
-                            PURPOSE_OPTIONS
-                          )}
+                          {getOptionLabel(relationship.purpose, purposeOptions)}
                         </Badge>
                       )}
                       {relationship.expected_frequency && (
@@ -222,7 +208,7 @@ function TreatmentLabResultRelationships({
                           labResult.completed_date || labResult.ordered_date
                         )}
                         {labResult?.labs_result &&
-                          ` | Result: ${labResult.labs_result}`}
+                          ` | ${t('treatments.links.result')}: ${labResult.labs_result}`}
                       </Text>
                     )}
 
@@ -230,8 +216,8 @@ function TreatmentLabResultRelationships({
                       <Stack gap="xs">
                         <Select
                           size="xs"
-                          placeholder="Purpose"
-                          data={PURPOSE_OPTIONS}
+                          placeholder={t('visits.relationships.purpose')}
+                          data={purposeOptions}
                           value={editingRelationship?.purpose || ''}
                           onChange={value =>
                             updateEditingRelationship('purpose', value)
@@ -241,7 +227,9 @@ function TreatmentLabResultRelationships({
                         />
                         <TextInput
                           size="xs"
-                          placeholder="Expected frequency (e.g., Monthly)"
+                          placeholder={t(
+                            'treatments.links.expectedFrequencyPlaceholder'
+                          )}
                           value={editingRelationship?.expected_frequency || ''}
                           onChange={e =>
                             updateEditingRelationship(
@@ -252,7 +240,7 @@ function TreatmentLabResultRelationships({
                         />
                         <Textarea
                           size="xs"
-                          placeholder="Relevance note"
+                          placeholder={t('modals.relevanceNoteOptional')}
                           value={editingRelationship?.relevance_note || ''}
                           onChange={e =>
                             updateEditingRelationship(
@@ -301,7 +289,7 @@ function TreatmentLabResultRelationships({
               'labels.noLabResultsLinked',
               'No lab results linked to this treatment'
             )}
-            description="Link lab results to track baseline, monitoring, and outcome tests."
+            description={t('treatments.links.labResultsEmpty')}
             isViewMode={isViewMode}
           />
         )}
@@ -321,11 +309,11 @@ function TreatmentLabResultRelationships({
         <RelationshipAddModal
           opened={showAddModal}
           onClose={resetAndCloseModal}
-          title="Link Lab Results to Treatment"
+          title={t('treatments.links.labResultsModalTitle')}
         >
           <MultiSelect
-            label="Select Lab Results"
-            placeholder="Choose lab results to link"
+            label={t('treatments.links.selectLabResults')}
+            placeholder={t('treatments.links.chooseLabResults')}
             data={availableOptions}
             value={newRelationship.lab_result_ids}
             onChange={values => updateNewRelationship('lab_result_ids', values)}
@@ -338,33 +326,33 @@ function TreatmentLabResultRelationships({
           {selectedCount === 1 && (
             <>
               <Select
-                label="Purpose (Optional)"
-                placeholder="Select purpose"
-                data={PURPOSE_OPTIONS}
+                label={t('treatments.links.purposeOptional')}
+                placeholder={t('treatments.links.selectPurpose')}
+                data={purposeOptions}
                 value={newRelationship.purpose}
                 onChange={value =>
                   updateNewRelationship('purpose', value || '')
                 }
                 clearable
                 comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                description="Why this lab is part of the treatment plan"
+                description={t('treatments.links.purposeDescription')}
               />
 
               <TextInput
-                label="Expected Frequency (Optional)"
-                placeholder="e.g., Monthly, Weekly, As needed"
+                label={t('treatments.links.expectedFrequencyOptional')}
+                placeholder={t('treatments.links.expectedFrequencyExample')}
                 value={newRelationship.expected_frequency}
                 onChange={e =>
                   updateNewRelationship('expected_frequency', e.target.value)
                 }
-                description="How often this test should be done"
+                description={t('treatments.links.expectedFrequencyDescription')}
               />
             </>
           )}
 
           <Textarea
-            label="Relevance Note (Optional)"
-            placeholder="Describe how this lab result relates to the treatment"
+            label={t('modals.relevanceNoteOptional')}
+            placeholder={t('treatments.links.labResultNotePlaceholder')}
             value={newRelationship.relevance_note}
             onChange={e =>
               updateNewRelationship('relevance_note', e.target.value)
@@ -380,8 +368,10 @@ function TreatmentLabResultRelationships({
             disabled={selectedCount === 0}
             submitLabel={
               selectedCount > 1
-                ? `Link ${selectedCount} Lab Results`
-                : 'Link Lab Result'
+                ? t('treatments.links.linkSelectedCount', {
+                    count: selectedCount,
+                  })
+                : t('buttons.linkLabResult', 'Link Lab Result')
             }
           />
         </RelationshipAddModal>

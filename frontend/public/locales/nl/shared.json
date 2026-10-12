@@ -248,7 +248,6 @@
     "recordedBy": "Geregistreerd door",
     "recordedDate": "Registratiedatum",
     "relatedCondition": "Gerelateerde aandoening",
-    "relatedConditions": "Gerelateerde aandoeningen",
     "relationship": "Relatie",
     "remove": "Verwijderen",
     "resetPassword": "Wachtwoord herstellen",
@@ -316,6 +315,17 @@
     "weekly": "Wekelijks",
     "weight": "Gewicht",
     "zip": "ZIP"
+  },
+  "linkPurposes": {
+    "baseline": "Uitgangswaarde",
+    "followUpFor": "Opvolging van resultaten",
+    "monitoring": "Controle",
+    "orderedDuring": "Aangevraagd tijdens consult",
+    "other": "Overig",
+    "outcome": "Uitkomst",
+    "reference": "Referentie",
+    "resultsReviewed": "Resultaten besproken",
+    "safety": "Veiligheid"
   },
   "permissions": {
     "viewOnly": "Alleen-lezen toegang"

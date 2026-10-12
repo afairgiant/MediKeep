@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
+  ActionIcon,
   Badge,
   Stack,
   Box,
-  MultiSelect,
   Select,
   Paper,
   Text,
@@ -14,7 +14,6 @@ import {
   Group,
   Collapse,
   UnstyledButton,
-  Button,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -24,7 +23,7 @@ import {
   IconDeviceDesktop,
   IconChevronDown,
   IconChevronRight,
-  IconPlus,
+  IconTrash,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
@@ -35,27 +34,14 @@ import {
 } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
+import { PURPOSE_OPTIONS } from '../../../constants/treatmentLabResultConstants';
+import { VISIT_LABEL_OPTIONS } from '../../../constants/treatmentVisitLabels';
+import { translateOptions } from '../../../utils/translateOptions';
+import TreatmentPlanLinkSection from './TreatmentPlanLinkSection';
 import {
   createDateSortedOptions,
   formatDateDisplay,
 } from './RelationshipComponents';
-
-// Options for select fields
-const VISIT_LABEL_OPTIONS = [
-  { value: 'initial', label: 'Initial Visit' },
-  { value: 'follow_up', label: 'Follow-up' },
-  { value: 'review', label: 'Review' },
-  { value: 'final', label: 'Final Visit' },
-  { value: 'other', label: 'Other' },
-];
-
-const PURPOSE_OPTIONS = [
-  { value: 'baseline', label: 'Baseline' },
-  { value: 'monitoring', label: 'Monitoring' },
-  { value: 'outcome', label: 'Outcome' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'other', label: 'Other' },
-];
 
 /**
  * Collapsible item card for showing/editing relationship details
@@ -66,33 +52,50 @@ const ItemDetailsCard = ({
   icon: Icon,
   children,
   defaultOpen = false,
+  onRemove,
 }) => {
+  const { t } = useTranslation(['common']);
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <Paper withBorder p="xs">
-      <UnstyledButton
-        onClick={() => setIsOpen(!isOpen)}
-        style={{ width: '100%' }}
-      >
-        <Group justify="space-between">
-          <Group gap="xs">
-            <Badge
-              size="sm"
-              variant="light"
-              color={color}
-              leftSection={<Icon size={12} />}
-            >
-              {label}
-            </Badge>
+      <Group justify="space-between" wrap="nowrap">
+        <UnstyledButton
+          onClick={() => setIsOpen(!isOpen)}
+          style={{ flex: 1 }}
+          aria-expanded={isOpen}
+        >
+          <Group justify="space-between">
+            <Group gap="xs">
+              <Badge
+                size="sm"
+                variant="light"
+                color={color}
+                leftSection={<Icon size={12} />}
+              >
+                {label}
+              </Badge>
+            </Group>
+            {isOpen ? (
+              <IconChevronDown size={14} />
+            ) : (
+              <IconChevronRight size={14} />
+            )}
           </Group>
-          {isOpen ? (
-            <IconChevronDown size={14} />
-          ) : (
-            <IconChevronRight size={14} />
-          )}
-        </Group>
-      </UnstyledButton>
+        </UnstyledButton>
+        {onRemove && (
+          <ActionIcon
+            type="button"
+            variant="light"
+            color="red"
+            size="sm"
+            aria-label={t('common:visits.relationships.removeLink')}
+            onClick={onRemove}
+          >
+            <IconTrash size={14} />
+          </ActionIcon>
+        )}
+      </Group>
       <Collapse in={isOpen}>
         <Stack gap="xs" mt="xs">
           {children}
@@ -108,26 +111,7 @@ ItemDetailsCard.propTypes = {
   icon: PropTypes.elementType.isRequired,
   children: PropTypes.node.isRequired,
   defaultOpen: PropTypes.bool,
-};
-
-/** "Add <type>" next to a section's select; nothing when creating is not available. */
-const CreateButton = ({ onCreateNew, createLabel }) =>
-  onCreateNew ? (
-    <Group>
-      <Button
-        variant="light"
-        size="xs"
-        leftSection={<IconPlus size={14} />}
-        onClick={onCreateNew}
-      >
-        {createLabel}
-      </Button>
-    </Group>
-  ) : null;
-
-CreateButton.propTypes = {
-  onCreateNew: PropTypes.func,
-  createLabel: PropTypes.string,
+  onRemove: PropTypes.func,
 };
 
 /**
@@ -143,6 +127,8 @@ const TreatmentPlanSetup = ({
 }) => {
   const { t } = useTranslation('medical');
   const { dateInputFormat, dateParser } = useDateFormat();
+  const purposeOptions = translateOptions(PURPOSE_OPTIONS, t);
+  const visitLabelOptions = translateOptions(VISIT_LABEL_OPTIONS, t);
   const [loading, setLoading] = useState(true);
 
   // Available entities for selection
@@ -376,24 +362,17 @@ const TreatmentPlanSetup = ({
             display: activeSection === 'medications' ? 'block' : 'none',
           }}
         >
-          <Stack gap="md">
-            <MultiSelect
-              label="Medications to Link"
-              placeholder={
-                medicationOptions.length > 0
-                  ? 'Select medications...'
-                  : 'No medications available'
-              }
-              data={medicationOptions}
-              value={selectedMedIds}
-              onChange={values => handleSelectionChange('medications', values)}
-              searchable
-              clearable
-              disabled={medicationOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...medicationCreate} />
-
+          <TreatmentPlanLinkSection
+            items="medications"
+            options={medicationOptions}
+            selectedIds={selectedMedIds}
+            onSelectedChange={values =>
+              handleSelectionChange('medications', values)
+            }
+            onCreateNew={medicationCreate.onCreateNew}
+            createLabel={medicationCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected medication */}
             {selectedMedIds.length > 0 && (
               <Stack gap="xs">
@@ -405,13 +384,21 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={medId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'medications',
+                          selectedMedIds.filter(id => id !== medId)
+                        )
+                      }
                       label={getItemLabel('medications', medId)}
                       color="teal"
                       icon={IconPill}
                     >
                       <TextInput
                         size="xs"
-                        placeholder="Specific dosage (e.g., 400mg 3x daily)"
+                        placeholder={t(
+                          'common:treatments.links.specificDosagePlaceholder'
+                        )}
                         value={metadata.specific_dosage || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -424,7 +411,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Frequency (e.g., Every 8 hours)"
+                        placeholder={t(
+                          'common:treatments.links.specificFrequencyPlaceholder'
+                        )}
                         value={metadata.specific_frequency || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -437,7 +426,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Duration (e.g., 2 weeks)"
+                        placeholder={t(
+                          'common:treatments.links.durationPlaceholder'
+                        )}
                         value={metadata.specific_duration || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -450,7 +441,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Timing instructions"
+                        placeholder={t(
+                          'common:treatments.links.timingPlaceholder'
+                        )}
                         value={metadata.timing_instructions || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -464,7 +457,7 @@ const TreatmentPlanSetup = ({
                       <Group grow gap="xs">
                         <Select
                           size="xs"
-                          placeholder="Treatment prescriber"
+                          placeholder={t('common:treatments.links.prescriber')}
                           data={practitioners.map(p => ({
                             value: p.id.toString(),
                             label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
@@ -484,10 +477,15 @@ const TreatmentPlanSetup = ({
                         />
                         <Select
                           size="xs"
-                          placeholder="Treatment pharmacy"
+                          placeholder={t('common:treatments.links.pharmacy')}
                           data={pharmacies.map(p => ({
                             value: p.id.toString(),
-                            label: p.name || p.brand || `Pharmacy #${p.id}`,
+                            label:
+                              p.name ||
+                              p.brand ||
+                              t('common:treatments.links.pharmacyFallback', {
+                                id: p.id,
+                              }),
                           }))}
                           value={metadata.specific_pharmacy_id || ''}
                           onChange={value =>
@@ -555,7 +553,7 @@ const TreatmentPlanSetup = ({
                       </Group>
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -579,31 +577,24 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noMedications')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
 
         {/* Visits Section */}
         <Box
           style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}
         >
-          <Stack gap="md">
-            <MultiSelect
-              label="Visits to Link"
-              placeholder={
-                encounterOptions.length > 0
-                  ? 'Select visits...'
-                  : 'No visits available'
-              }
-              data={encounterOptions}
-              value={selectedEncIds}
-              onChange={values => handleSelectionChange('encounters', values)}
-              searchable
-              clearable
-              disabled={encounterOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...encounterCreate} />
-
+          <TreatmentPlanLinkSection
+            items="visits"
+            options={encounterOptions}
+            selectedIds={selectedEncIds}
+            onSelectedChange={values =>
+              handleSelectionChange('encounters', values)
+            }
+            onCreateNew={encounterCreate.onCreateNew}
+            createLabel={encounterCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected visit */}
             {selectedEncIds.length > 0 && (
               <Stack gap="xs">
@@ -615,14 +606,20 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={encId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'encounters',
+                          selectedEncIds.filter(id => id !== encId)
+                        )
+                      }
                       label={getItemLabel('encounters', encId)}
                       color="blue"
                       icon={IconStethoscope}
                     >
                       <Select
                         size="xs"
-                        placeholder="Visit label"
-                        data={VISIT_LABEL_OPTIONS}
+                        placeholder={t('common:treatments.links.visitLabel')}
+                        data={visitLabelOptions}
                         value={metadata.visit_label || ''}
                         onChange={value =>
                           updateItemMetadata(
@@ -637,7 +634,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Visit sequence (1, 2, 3...)"
+                        placeholder={t(
+                          'common:treatments.links.visitSequencePlaceholder'
+                        )}
                         type="number"
                         value={metadata.visit_sequence || ''}
                         onChange={e =>
@@ -651,7 +650,7 @@ const TreatmentPlanSetup = ({
                       />
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -675,29 +674,22 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noVisits')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
 
         {/* Labs Section */}
         <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
-          <Stack gap="md">
-            <MultiSelect
-              label="Lab Results to Link"
-              placeholder={
-                labResultOptions.length > 0
-                  ? 'Select lab results...'
-                  : 'No lab results available'
-              }
-              data={labResultOptions}
-              value={selectedLabIds}
-              onChange={values => handleSelectionChange('labResults', values)}
-              searchable
-              clearable
-              disabled={labResultOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...labResultCreate} />
-
+          <TreatmentPlanLinkSection
+            items="labResults"
+            options={labResultOptions}
+            selectedIds={selectedLabIds}
+            onSelectedChange={values =>
+              handleSelectionChange('labResults', values)
+            }
+            onCreateNew={labResultCreate.onCreateNew}
+            createLabel={labResultCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected lab */}
             {selectedLabIds.length > 0 && (
               <Stack gap="xs">
@@ -709,14 +701,20 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={labId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'labResults',
+                          selectedLabIds.filter(id => id !== labId)
+                        )
+                      }
                       label={getItemLabel('labResults', labId)}
                       color="violet"
                       icon={IconTestPipe}
                     >
                       <Select
                         size="xs"
-                        placeholder="Purpose"
-                        data={PURPOSE_OPTIONS}
+                        placeholder={t('common:visits.relationships.purpose')}
+                        data={purposeOptions}
                         value={metadata.purpose || ''}
                         onChange={value =>
                           updateItemMetadata(
@@ -731,7 +729,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Expected frequency (e.g., Monthly)"
+                        placeholder={t(
+                          'common:treatments.links.expectedFrequencyPlaceholder'
+                        )}
                         value={metadata.expected_frequency || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -744,7 +744,7 @@ const TreatmentPlanSetup = ({
                       />
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -768,31 +768,24 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noLabResults')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
 
         {/* Equipment Section */}
         <Box
           style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}
         >
-          <Stack gap="md">
-            <MultiSelect
-              label="Equipment to Link"
-              placeholder={
-                equipmentOptions.length > 0
-                  ? 'Select equipment...'
-                  : 'No equipment available'
-              }
-              data={equipmentOptions}
-              value={selectedEquipIds}
-              onChange={values => handleSelectionChange('equipment', values)}
-              searchable
-              clearable
-              disabled={equipmentOptions.length === 0}
-              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-            />
-            <CreateButton {...equipmentCreate} />
-
+          <TreatmentPlanLinkSection
+            items="equipment"
+            options={equipmentOptions}
+            selectedIds={selectedEquipIds}
+            onSelectedChange={values =>
+              handleSelectionChange('equipment', values)
+            }
+            onCreateNew={equipmentCreate.onCreateNew}
+            createLabel={equipmentCreate.createLabel}
+            loading={loading}
+          >
             {/* Show detail fields for each selected equipment */}
             {selectedEquipIds.length > 0 && (
               <Stack gap="xs">
@@ -804,13 +797,21 @@ const TreatmentPlanSetup = ({
                   return (
                     <ItemDetailsCard
                       key={equipId}
+                      onRemove={() =>
+                        handleSelectionChange(
+                          'equipment',
+                          selectedEquipIds.filter(id => id !== equipId)
+                        )
+                      }
                       label={getItemLabel('equipment', equipId)}
                       color="orange"
                       icon={IconDeviceDesktop}
                     >
                       <TextInput
                         size="xs"
-                        placeholder="Usage frequency (e.g., Nightly)"
+                        placeholder={t(
+                          'common:treatments.links.usageFrequencyPlaceholder'
+                        )}
                         value={metadata.usage_frequency || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -823,7 +824,9 @@ const TreatmentPlanSetup = ({
                       />
                       <TextInput
                         size="xs"
-                        placeholder="Specific settings (e.g., Pressure: 10 cmH2O)"
+                        placeholder={t(
+                          'common:treatments.links.specificSettingsPlaceholder'
+                        )}
                         value={metadata.specific_settings || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -836,7 +839,7 @@ const TreatmentPlanSetup = ({
                       />
                       <Textarea
                         size="xs"
-                        placeholder="Relevance note"
+                        placeholder={t('common:modals.relevanceNoteOptional')}
                         value={metadata.relevance_note || ''}
                         onChange={e =>
                           updateItemMetadata(
@@ -860,7 +863,7 @@ const TreatmentPlanSetup = ({
                 {t('treatmentPlan.noEquipment')}
               </Text>
             )}
-          </Stack>
+          </TreatmentPlanLinkSection>
         </Box>
       </Stack>
     </Box>

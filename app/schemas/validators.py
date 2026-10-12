@@ -21,6 +21,8 @@ import re
 from datetime import date, datetime, timedelta, timezone
 from typing import List, Optional
 
+from app.core.constants import LAB_RESULT_LINK_PURPOSES
+
 
 def validate_text_field(
     value: Optional[str],
@@ -437,3 +439,28 @@ def validate_blood_type(value: Optional[str]) -> Optional[str]:
         )
 
     return upper_value
+
+
+def validate_lab_result_link_purpose(value: Optional[str]) -> Optional[str]:
+    """
+    Validate why a lab result is linked to a treatment, condition or procedure.
+
+    Args:
+        value: The purpose to validate
+
+    Returns:
+        Lowercase purpose, or None when empty
+
+    Raises:
+        ValueError: If purpose is not one of LAB_RESULT_LINK_PURPOSES
+    """
+    if value is None:
+        return None
+    purpose = value.strip().lower()
+    if not purpose:
+        return None
+    if purpose not in LAB_RESULT_LINK_PURPOSES:
+        raise ValueError(
+            f"Purpose must be one of: {', '.join(LAB_RESULT_LINK_PURPOSES)}"
+        )
+    return purpose

@@ -248,7 +248,6 @@
     "recordedBy": "Записано",
     "recordedDate": "Дата записи",
     "relatedCondition": "Связанное заболевание",
-    "relatedConditions": "Связанные заболевания",
     "relationship": "Родство",
     "remove": "Удалить",
     "resetPassword": "Сбросить пароль",
@@ -316,6 +315,17 @@
     "weekly": "Еженедельно",
     "weight": "Вес",
     "zip": "ZIP"
+  },
+  "linkPurposes": {
+    "baseline": "Исходный уровень",
+    "followUpFor": "Контроль результатов",
+    "monitoring": "Мониторинг",
+    "orderedDuring": "Назначено во время визита",
+    "other": "Другое",
+    "outcome": "Исход",
+    "reference": "Справочно",
+    "resultsReviewed": "Результаты рассмотрены",
+    "safety": "Безопасность"
   },
   "permissions": {
     "viewOnly": "Доступ только для чтения"

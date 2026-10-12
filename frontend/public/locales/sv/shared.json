@@ -248,7 +248,6 @@
     "recordedBy": "Registrerad av",
     "recordedDate": "Registrerat datum",
     "relatedCondition": "Relaterat tillstånd",
-    "relatedConditions": "Relaterade tillstånd",
     "relationship": "Relation",
     "remove": "Ta bort",
     "resetPassword": "Återställ lösenord",
@@ -316,6 +315,17 @@
     "weekly": "Veckovis",
     "weight": "Vikt",
     "zip": "ZIP"
+  },
+  "linkPurposes": {
+    "baseline": "Utgångsvärde",
+    "followUpFor": "Uppföljning av resultat",
+    "monitoring": "Övervakning",
+    "orderedDuring": "Beställt vid besöket",
+    "other": "Annat",
+    "outcome": "Utfall",
+    "reference": "Referens",
+    "resultsReviewed": "Resultat granskade",
+    "safety": "Säkerhet"
   },
   "permissions": {
     "viewOnly": "Skrivskyddad åtkomst"

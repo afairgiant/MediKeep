@@ -26,7 +26,6 @@
     "viewFailed": "打开文件查看失败。请重试。"
   },
   "form": {
-    "conditionNotSelected": "请选择病症",
     "entityNotFound": "找不到请求的项目。",
     "equipmentFieldsRequired": "设备名称和类型为必填项",
     "equipmentNotSelected": "请至少选择一个设备",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "患者信息不可用",
   "relationships": {
-    "addConditionFailed": "添加病症关联失败",
     "addFailed": "添加关联失败",
     "addMedicationFailed": "添加药物关联失败",
     "deleteFailed": "删除关联失败",
-    "fetchFailed": "加载关联失败",
     "updateFailed": "更新关联失败"
   },
   "success": {

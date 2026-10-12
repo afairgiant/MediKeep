@@ -243,7 +243,6 @@
     "recordedBy": "บันทึกโดย",
     "recordedDate": "วันที่บันทึก",
     "relatedCondition": "โรค/อาการที่เกี่ยวข้อง",
-    "relatedConditions": "โรค/อาการที่เกี่ยวข้อง",
     "relationship": "ความสัมพันธ์",
     "resetPassword": "รีเซ็ตรหัสผ่าน",
     "resolved": "หายแล้ว",
@@ -311,6 +310,17 @@
     "sortBy": "เรียงตาม",
     "state": "รัฐ/จังหวัด",
     "zip": "รหัสไปรษณีย์"
+  },
+  "linkPurposes": {
+    "baseline": "ค่าพื้นฐาน",
+    "followUpFor": "ติดตามผลการตรวจ",
+    "monitoring": "การติดตาม",
+    "orderedDuring": "สั่งตรวจระหว่างการมาพบแพทย์",
+    "other": "อื่นๆ",
+    "outcome": "ผลลัพธ์การรักษา",
+    "reference": "อ้างอิง",
+    "resultsReviewed": "ทบทวนผลการตรวจแล้ว",
+    "safety": "ความปลอดภัย"
   },
   "permissions": {
     "viewOnly": "สิทธิ์ดูอย่างเดียว"

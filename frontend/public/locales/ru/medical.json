@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "Не удалось связать {{count}} заболевание(й)",
       "conditionLinkPartialFailure_one": "Не удалось связать {{count}} заболевание",
       "conditionLinkPartialFailure_other": "Не удалось связать {{count}} заболеваний",
-      "linkConditionsDescription": "При желании свяжите это лекарство с существующими заболеваниями",
-      "noConditionsFound": "Заболевания не найдены",
       "saving": "Сохранение лекарства...",
       "updateMedication": "Обновить лекарство"
     },

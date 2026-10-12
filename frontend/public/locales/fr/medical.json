@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "Echec de la connexion de {{count}} condition(s)",
       "conditionLinkPartialFailure_one": "Echec de la connexion de {{count}} condition",
       "conditionLinkPartialFailure_other": "Echec de la connexion de {{count}} conditions",
-      "linkConditionsDescription": "Connectez optionnellement ce médicament à des conditions existantes",
-      "noConditionsFound": "Aucune condition trouvée",
       "saving": "Sauvegarde du médicament...",
       "updateMedication": "Mettre à jour le médicament"
     },

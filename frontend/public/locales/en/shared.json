@@ -248,7 +248,6 @@
     "recordedBy": "Recorded By",
     "recordedDate": "Recorded Date",
     "relatedCondition": "Related Condition",
-    "relatedConditions": "Related Conditions",
     "relationship": "Relationship",
     "remove": "Remove",
     "resetPassword": "Reset Password",
@@ -316,6 +315,17 @@
     "weekly": "Weekly",
     "weight": "Weight",
     "zip": "ZIP"
+  },
+  "linkPurposes": {
+    "baseline": "Baseline",
+    "followUpFor": "Follow-up For Results",
+    "monitoring": "Monitoring",
+    "orderedDuring": "Ordered During Visit",
+    "other": "Other",
+    "outcome": "Outcome",
+    "reference": "Reference",
+    "resultsReviewed": "Results Reviewed",
+    "safety": "Safety"
   },
   "permissions": {
     "viewOnly": "View-only access"

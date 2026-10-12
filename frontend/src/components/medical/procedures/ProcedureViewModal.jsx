@@ -29,8 +29,9 @@ import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
+import RecordLinkCard from '../../shared/RecordLinkCard';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 
 const ProcedureViewModal = ({
   isOpen,
@@ -164,7 +165,11 @@ const ProcedureViewModal = ({
               >
                 {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
-              <RecordVisitsTabButton recordType="procedures" recordId={procedure.id} />
+              <RecordLinkTabButtons
+                recordPath="procedures"
+                recordId={procedure.id}
+                isViewMode
+              />
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -464,6 +469,21 @@ const ProcedureViewModal = ({
                 {activeTab === 'visits' && (
                   <RecordVisitsTab
                     recordType="procedures"
+                    recordId={procedure.id}
+                    isViewMode
+                    navigate={navigate}
+                  />
+                )}
+              </Box>
+            </Tabs.Panel>
+
+            {/* Lab Results Tab */}
+            <Tabs.Panel value="labResults">
+              <Box mt="md">
+                {activeTab === 'labResults' && (
+                  <RecordLinkCard
+                    kind="labResults"
+                    recordPath="procedures"
                     recordId={procedure.id}
                     isViewMode
                     navigate={navigate}

@@ -26,7 +26,6 @@
     "viewFailed": "Echec de l'ouverture du fichier pour le visionner. Veuillez réessayer."
   },
   "form": {
-    "conditionNotSelected": "Veuillez sélectionner une condition",
     "entityNotFound": "L'objet demandé n'a pas pu être trouvé.",
     "equipmentFieldsRequired": "Le nom et le type de l'équipement sont requis",
     "equipmentNotSelected": "Veuillez sélectionner au moins un équipement",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Informations du patient non disponibles",
   "relationships": {
-    "addConditionFailed": "Echec de l'ajout d'une connexion à une condition",
     "addFailed": "Echec de l'ajout d'une connexion",
     "addMedicationFailed": "Echec de l'ajout d'une connexion à un médicament",
     "deleteFailed": "Echec de la suppression d'une connexion",
-    "fetchFailed": "Echec du chargement des connexions",
     "updateFailed": "Echec de la mise à jour d'une connexion"
   },
   "success": {

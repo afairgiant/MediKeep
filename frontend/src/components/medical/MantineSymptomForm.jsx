@@ -23,6 +23,7 @@ import {
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useLinkPanelDescription } from '../../hooks/useLinkPanelDescription';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import SubmitButton from '../shared/SubmitButton';
@@ -38,7 +39,7 @@ import logger from '../../services/logger';
 import RecordVisitsTab from '../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import { useSubDialog } from '../../contexts/SubDialogContext';
-import RecordVisitsTabButton from '../shared/RecordVisitsTabButton';
+import RecordLinkTabButtons from '../shared/RecordLinkTabButtons';
 
 /**
  * Form for creating/editing a symptom definition (parent record).
@@ -78,6 +79,7 @@ const MantineSymptomForm = ({
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
+  const linkPanelDescription = useLinkPanelDescription();
   // Set when this dialog was opened from inside another one (inline create)
   const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -194,7 +196,13 @@ const MantineSymptomForm = ({
                 {t('shared:tabs.details')}
               </Tabs.Tab>
               {!subDialog && (
-                <RecordVisitsTabButton recordType="symptoms" recordId={editingSymptom?.id} pendingLinks={formData.pending_visit_links} />
+                <RecordLinkTabButtons
+                  recordPath="symptoms"
+                  recordId={editingSymptom?.id}
+                  pendingLinks={{ visits: formData.pending_visit_links }}
+                  activeTab={activeTab}
+                  onSelectTab={setActiveTab}
+                />
               )}
               <Tabs.Tab
                 value="documents"
@@ -376,6 +384,7 @@ const MantineSymptomForm = ({
                     <RecordVisitsTab
                       recordType="symptoms"
                       recordId={editingSymptom?.id}
+                      description={linkPanelDescription('visits', 'symptom')}
                       patientId={patientId}
                       pendingLinks={formData.pending_visit_links}
                       onPendingChange={next =>

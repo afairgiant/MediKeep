@@ -248,7 +248,6 @@
     "recordedBy": "Erfasst von",
     "recordedDate": "Erfassungsdatum",
     "relatedCondition": "Verwandte Erkrankung",
-    "relatedConditions": "Verwandte Erkrankungen",
     "relationship": "Verwandtschaftsverhältnis",
     "remove": "Entfernen",
     "resetPassword": "Passwort zurücksetzen",
@@ -316,6 +315,17 @@
     "weekly": "Wöchentlich",
     "weight": "Körpergewicht",
     "zip": "ZIP"
+  },
+  "linkPurposes": {
+    "baseline": "Ausgangswert",
+    "followUpFor": "Nachsorge zu Ergebnissen",
+    "monitoring": "Überwachung",
+    "orderedDuring": "Beim Besuch angeordnet",
+    "other": "Sonstiges",
+    "outcome": "Behandlungsergebnis",
+    "reference": "Referenz",
+    "resultsReviewed": "Ergebnisse besprochen",
+    "safety": "Sicherheit"
   },
   "permissions": {
     "viewOnly": "Nur-Lese-Zugriff"

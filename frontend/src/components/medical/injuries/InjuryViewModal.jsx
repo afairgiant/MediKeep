@@ -27,7 +27,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 
 const InjuryViewModal = ({
   isOpen,
@@ -181,7 +181,11 @@ const InjuryViewModal = ({
             <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
               {t('shared:labels.treatment', 'Treatment')}
             </Tabs.Tab>
-            <RecordVisitsTabButton recordType="injuries" recordId={injury.id} />
+            <RecordLinkTabButtons
+              recordPath="injuries"
+              recordId={injury.id}
+              isViewMode
+            />
             <Tabs.Tab
               value="documents"
               leftSection={<IconFileText size={16} />}

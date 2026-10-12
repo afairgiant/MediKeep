@@ -129,12 +129,7 @@
     "autoCalculated": "Вычислено автоматически",
     "cannotRemoveLastRow": "Нельзя удалить последнюю строку",
     "componentCreationWarning": "Результат исследования сохранен, но компоненты тестов не удалось добавить. Вы можете добавить их со страницы просмотра.",
-    "linkConditionsDescription": "Свяжите этот результат исследования с соответствующими медицинскими состояниями для лучшего отслеживания и организации.",
-    "linkConditionsTitle": "Связать медицинские состояния",
     "linkedVisits": "Связанные визиты",
-    "linkMedicationsTitle": "Связать с лекарствами",
-    "linkProceduresTitle": "Связать с процедурами",
-    "linkTreatmentsTitle": "Связать с лечением",
     "linkVisitsDescription": "Свяжите этот результат исследования с визитами, во время которых он был назначен или рассмотрен.",
     "linkVisitsTitle": "Связать с визитами",
     "matchedCommonName": "совпадение: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Индикатор статуса:",
     "testCodePlaceholder": "напр., 718-7",
     "testComponents": "Компоненты тестов (необязательно)",
-    "testDetails": "Детали теста",
     "unit": "Единица измерения"
   },
   "keepEmptyLabResult": "Оставить результат исследования",
@@ -212,16 +206,6 @@
     "placeholder": "Выберите врача"
   },
   "patientIdRequired": "Требуется ID пациента. Пожалуйста, сначала выберите пациента.",
-  "pendingRelationships": {
-    "addCondition": "Добавить заболевание",
-    "removeCondition": "Удалить заболевание",
-    "addMedication": "Добавить лекарство",
-    "addProcedure": "Добавить процедуру",
-    "addTreatment": "Добавить лечение",
-    "removeMedication": "Удалить лекарство",
-    "removeProcedure": "Удалить процедуру",
-    "removeTreatment": "Удалить лечение"
-  },
   "quickFormInstructions": "Введите название для этого результата исследования, затем вы сможете загрузить и обработать ваш PDF.",
   "quickImportModalTitle": "Быстрый импорт PDF - Шаг {{step}} из 2",
   "quickImportSuccess": "Результат исследования и компоненты тестов успешно импортированы",

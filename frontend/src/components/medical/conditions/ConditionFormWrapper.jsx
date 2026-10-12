@@ -15,16 +15,13 @@ import {
   Textarea,
   Select,
   Text,
-  MultiSelect,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconStethoscope,
   IconFileText,
-  IconFlask,
   IconNotes,
-  IconPill,
 } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
@@ -32,14 +29,14 @@ import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
-import LabResultRelationships from '../LabResultRelationships';
-import MedicationRelationships from '../MedicationRelationships';
+import RecordLinkCard from '../../shared/RecordLinkCard';
+import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
-import RecordVisitsTabButton from '../../shared/RecordVisitsTabButton';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
+import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 
 const ConditionFormWrapper = ({
   formError,
@@ -57,16 +54,11 @@ const ConditionFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
-  // Medication relationship props (only used when editing)
-  medications = [],
-  conditionMedications = {},
-  fetchConditionMedications,
-  // Lab result relationship props (only used when editing)
-  labResults = [],
   navigate,
   onPractitionerCreated = undefined,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
+  const linkPanelDescription = useLinkPanelDescription();
   // Set when this dialog was opened from inside another one (inline create)
   const subDialog = useSubDialog();
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -184,26 +176,16 @@ const ConditionFormWrapper = ({
                 {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
               {!subDialog && (
-                <Tabs.Tab
-                  value="medications"
-                  leftSection={<IconPill size={16} />}
-                >
-                  {t('shared:categories.medications', 'Medications')}
-                </Tabs.Tab>
-              )}
-              {!subDialog && (
-                <Tabs.Tab
-                  value="labResults"
-                  leftSection={<IconFlask size={16} />}
-                >
-                  {t('shared:tabs.labResults', 'Lab Results')}
-                </Tabs.Tab>
-              )}
-              {!subDialog && (
-                <RecordVisitsTabButton
-                  recordType="conditions"
+                <RecordLinkTabButtons
+                  recordPath="conditions"
                   recordId={editingCondition?.id}
-                  pendingLinks={formData.pending_visit_links}
+                  pendingLinks={{
+                    visits: formData.pending_visit_links,
+                    labResults: formData.pending_lab_result_links,
+                    medications: formData.pending_medication_links,
+                  }}
+                  activeTab={activeTab}
+                  onSelectTab={setActiveTab}
                 />
               )}
               <Tabs.Tab
@@ -473,48 +455,27 @@ const ConditionFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Medications Tab */}
+            {/* Medications Tab (not offered in a sub-dialog: nesting stays one level deep) */}
             {!subDialog && (
               <Tabs.Panel value="medications">
                 <Box mt="md">
-                  <Text size="sm" c="dimmed" mb="md">
-                    {t(
-                      'conditions.form.medicationsDescription',
-                      'Link medications used to treat or manage this condition.'
-                    )}
-                  </Text>
-                  {editingCondition ? (
-                    <MedicationRelationships
-                      conditionId={editingCondition.id}
-                      conditionMedications={conditionMedications}
-                      medications={medications}
-                      fetchConditionMedications={fetchConditionMedications}
-                      navigate={navigate}
-                      isViewMode={false}
-                    />
-                  ) : (
-                    <MultiSelect
-                      label={t('modals.selectMedications', 'Select Medications')}
-                      placeholder={t(
-                        'modals.chooseMedicationToLink',
-                        'Choose medications to link'
-                      )}
-                      data={medications.map(med => ({
-                        value: med.id.toString(),
-                        label: `${med.medication_name}${med.dosage ? ` (${med.dosage})` : ''}${med.status ? ` - ${med.status}` : ''}`,
-                      }))}
-                      value={formData.pending_medication_ids || []}
-                      onChange={values => {
+                  {activeTab === 'medications' && (
+                    <RecordLinkCard
+                      kind="medications"
+                      recordPath="conditions"
+                      recordId={editingCondition?.id}
+                      description={linkPanelDescription('medications', 'condition')}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_medication_links}
+                      onPendingChange={next =>
                         onInputChange({
                           target: {
-                            name: 'pending_medication_ids',
-                            value: values,
+                            name: 'pending_medication_links',
+                            value: next,
                           },
-                        });
-                      }}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                        })
+                      }
+                      navigate={navigate}
                     />
                   )}
                 </Box>
@@ -525,26 +486,24 @@ const ConditionFormWrapper = ({
             {!subDialog && (
               <Tabs.Panel value="labResults">
                 <Box mt="md">
-                  <Text size="sm" c="dimmed" mb="md">
-                    {t(
-                      'conditions.form.labResultsDescription',
-                      'Link lab results that relate to or monitor this condition.'
-                    )}
-                  </Text>
-                  {editingCondition ? (
-                    <LabResultRelationships
-                      conditionId={editingCondition.id}
-                      labResults={labResults}
+                  {activeTab === 'labResults' && (
+                    <RecordLinkCard
+                      kind="labResults"
+                      recordPath="conditions"
+                      recordId={editingCondition?.id}
+                      description={linkPanelDescription('labResults', 'condition')}
+                      patientId={patientId}
+                      pendingLinks={formData.pending_lab_result_links}
+                      onPendingChange={next =>
+                        onInputChange({
+                          target: {
+                            name: 'pending_lab_result_links',
+                            value: next,
+                          },
+                        })
+                      }
                       navigate={navigate}
-                      isViewMode={false}
                     />
-                  ) : (
-                    <Text size="sm" c="dimmed">
-                      {t(
-                        'conditions.form.saveFirstToLinkLabResults',
-                        'Save the condition first, then return to edit mode to link lab results.'
-                      )}
-                    </Text>
                   )}
                 </Box>
               </Tabs.Panel>
@@ -558,6 +517,7 @@ const ConditionFormWrapper = ({
                     <RecordVisitsTab
                       recordType="conditions"
                       recordId={editingCondition?.id}
+                      description={linkPanelDescription('visits', 'condition')}
                       patientId={patientId}
                       pendingLinks={formData.pending_visit_links}
                       onPendingChange={next =>

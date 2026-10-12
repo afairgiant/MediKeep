@@ -6,23 +6,15 @@
  */
 
 export const PURPOSE_OPTIONS = [
-  { value: 'ordered_during', label: 'Ordered During Visit' },
-  { value: 'results_reviewed', label: 'Results Reviewed' },
-  { value: 'follow_up_for', label: 'Follow-up For Results' },
-  { value: 'reference', label: 'Reference' },
-  { value: 'other', label: 'Other' },
+  { value: 'ordered_during', labelKey: 'shared:linkPurposes.orderedDuring' },
+  {
+    value: 'results_reviewed',
+    labelKey: 'shared:linkPurposes.resultsReviewed',
+  },
+  { value: 'follow_up_for', labelKey: 'shared:linkPurposes.followUpFor' },
+  { value: 'reference', labelKey: 'shared:linkPurposes.reference' },
+  { value: 'other', labelKey: 'shared:linkPurposes.other' },
 ];
-
-/**
- * Get the display label for a purpose value.
- *
- * @param {string} purpose - The purpose value
- * @returns {string} The display label, or the raw value if not found
- */
-export function getPurposeLabel(purpose) {
-  const option = PURPOSE_OPTIONS.find(o => o.value === purpose);
-  return option ? option.label : purpose || '';
-}
 
 /**
  * Get the badge color for a purpose value.

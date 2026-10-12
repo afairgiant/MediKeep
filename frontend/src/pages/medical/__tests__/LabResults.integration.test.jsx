@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
+import { useEffect } from 'react';
 import { screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithPatient } from '../../../test-utils/render';
@@ -14,11 +15,14 @@ const {
   useDataManagement,
   usePersistedViewMode,
   useViewModalNavigation,
+  pendingLinks,
 } = vi.hoisted(() => ({
   useMedicalData: vi.fn(),
   useDataManagement: vi.fn(),
   usePersistedViewMode: vi.fn(),
   useViewModalNavigation: vi.fn(),
+  // What the Add form's link tabs hold; set by a test, read by the form mock
+  pendingLinks: { current: null },
 }));
 
 // --- Hook mocks ---
@@ -115,6 +119,7 @@ vi.mock('../../../services/api', () => ({
     createLabResultMedication: vi.fn(() => Promise.resolve({})),
     getPatientProcedures: vi.fn(() => Promise.resolve([])),
     getLabResultProcedures: vi.fn(() => Promise.resolve([])),
+    createLabResultCondition: vi.fn(() => Promise.resolve({})),
     createLabResultProcedure: vi.fn(() => Promise.resolve({})),
     getPatientTreatments: vi.fn(() => Promise.resolve([])),
     getLabResultTreatments: vi.fn(() => Promise.resolve([])),
@@ -291,11 +296,31 @@ vi.mock('../../../components/medical/labresults/LabResultCard', () => ({
     </div>
   ),
 }));
-vi.mock('../../../components/medical/labresults/LabResultViewModal', () => ({
-  default: ({ isOpen, onClose, labResult, onEdit }) => {
+vi.mock('../../../components/medical/labresults/LabResultViewModal', () => {
+  const LabResultViewModalMock = ({
+    isOpen,
+    onClose,
+    labResult,
+    onEdit,
+    labResultConditions,
+    fetchLabResultConditions,
+  }) => {
+    // Like the real dialog, ask the page for the saved links when it opens
+    useEffect(() => {
+      if (isOpen && labResult) fetchLabResultConditions?.(labResult.id);
+      // The page rebuilds its fetcher on every render; the dialog opening is what counts
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, labResult?.id]);
     if (!isOpen || !labResult) return null;
     return (
-      <div data-testid="view-modal" role="dialog">
+      <div
+        data-testid="view-modal"
+        data-conditions={String(
+          labResultConditions?.[labResult.id]?.length ??
+            labResultConditions?.[labResult.id]
+        )}
+        role="dialog"
+      >
         <h2>Lab Result Details</h2>
         <span>{labResult.test_name}</span>
         {labResult.labs_result && <pre>{labResult.labs_result}</pre>}
@@ -304,10 +329,28 @@ vi.mock('../../../components/medical/labresults/LabResultViewModal', () => ({
         <button onClick={() => onEdit(labResult)}>Edit</button>
       </div>
     );
-  },
-}));
-vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => ({
-  default: ({ isOpen, onClose, title, formData, onInputChange, onSubmit }) => {
+  };
+  return { default: LabResultViewModalMock };
+});
+vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => {
+  const LabResultFormWrapperMock = ({
+    isOpen,
+    onClose,
+    title,
+    formData,
+    onInputChange,
+    onSubmit,
+    onPendingRelationshipsRef,
+  }) => {
+    // Like the real form, hand the page the links chosen in the Add form
+    useEffect(() => {
+      if (isOpen && pendingLinks.current) {
+        onPendingRelationshipsRef?.({
+          hasPendingRelationships: () => true,
+          getPendingRelationships: () => pendingLinks.current,
+        });
+      }
+    }, [isOpen, onPendingRelationshipsRef]);
     if (!isOpen) return null;
     return (
       <div data-testid="form-modal" role="dialog">
@@ -376,8 +419,10 @@ vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => ({
         </form>
       </div>
     );
-  },
-}));
+  };
+  return { default: LabResultFormWrapperMock };
+});
+
 vi.mock(
   '../../../components/medical/labresults/LabResultQuickImportModal',
   () => ({
@@ -622,6 +667,75 @@ describe('Lab Results Page Integration Tests', () => {
       });
     });
 
+    test('saves the purpose of the conditions and procedures chosen in the Add form (#1128)', async () => {
+      const { apiService } = await import('../../../services/api');
+      apiService.createLabResultCondition.mockClear();
+      apiService.createLabResultProcedure.mockClear();
+      apiService.createLabResultMedication.mockClear();
+      pendingLinks.current = {
+        conditions: [
+          { condition_id: 21, purpose: 'baseline', relevance_note: 'c' },
+          { condition_id: 22, purpose: null, relevance_note: null },
+        ],
+        encounters: [],
+        medications: [{ medication_id: 41, relevance_note: 'm' }],
+        procedures: [
+          { procedure_id: 31, purpose: 'safety', relevance_note: null },
+        ],
+        treatments: [],
+      };
+      // The full Add form, not the quick panel dialog
+      // (localStorage is a mock in the test setup)
+      localStorage.getItem.mockImplementation(key =>
+        key === 'medikeep_labresults_advanced_create' ? 'true' : null
+      );
+      try {
+        const mockCreateItem = vi.fn().mockResolvedValue({ id: 55 });
+        useMedicalData.mockReturnValue({
+          ...defaultMedicalData,
+          createItem: mockCreateItem,
+        });
+        renderWithPatient(<LabResults />);
+        await userEvent.click(screen.getByTestId('add-button'));
+        const form = await screen.findByTestId('form-modal');
+        fireEvent.change(within(form).getByLabelText('Test Name *'), {
+          target: { value: 'CBC', name: 'test_name' },
+        });
+        fireEvent.click(within(form).getByText('Submit'));
+
+        await waitFor(() => {
+          expect(apiService.createLabResultCondition).toHaveBeenCalledTimes(2);
+        });
+        expect(apiService.createLabResultCondition).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          condition_id: 21,
+          purpose: 'baseline',
+          relevance_note: 'c',
+        });
+        expect(apiService.createLabResultCondition).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          condition_id: 22,
+          purpose: null,
+          relevance_note: null,
+        });
+        expect(apiService.createLabResultProcedure).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          procedure_id: 31,
+          purpose: 'safety',
+          relevance_note: null,
+        });
+        // Medication links have no purpose
+        expect(apiService.createLabResultMedication).toHaveBeenCalledWith(55, {
+          lab_result_id: 55,
+          medication_id: 41,
+          relevance_note: 'm',
+        });
+      } finally {
+        pendingLinks.current = null;
+        localStorage.getItem.mockReset();
+      }
+    });
+
     test('edits existing lab result with results and completion date', async () => {
       const mockUpdateItem = vi.fn().mockResolvedValue({});
       useMedicalData.mockReturnValue({
@@ -740,6 +854,49 @@ describe('Lab Results Page Integration Tests', () => {
       expect(
         within(modal).getByText('Complete Blood Count (CBC)')
       ).toBeInTheDocument();
+    });
+
+    describe('the saved links the page loads for the opened lab result', () => {
+      const openFirstLabResult = () => {
+        useViewModalNavigation.mockReturnValue({
+          isOpen: true,
+          viewingItem: mockLabResults[0],
+          openModal: vi.fn(),
+          closeModal: vi.fn(),
+        });
+        renderWithPatient(<LabResults />);
+      };
+
+      test('hands the dialog the list, so its tab can show the number', async () => {
+        const { apiService } = await import('../../../services/api');
+        apiService.getLabResultConditions.mockResolvedValueOnce([
+          { id: 1 },
+          { id: 2 },
+        ]);
+        openFirstLabResult();
+
+        await waitFor(() =>
+          expect(screen.getByTestId('view-modal')).toHaveAttribute(
+            'data-conditions',
+            '2'
+          )
+        );
+      });
+
+      test('marks the list as failed instead of leaving it loading, when the request fails', async () => {
+        const { apiService } = await import('../../../services/api');
+        apiService.getLabResultConditions.mockRejectedValueOnce(
+          new Error('boom')
+        );
+        openFirstLabResult();
+
+        await waitFor(() =>
+          expect(screen.getByTestId('view-modal')).toHaveAttribute(
+            'data-conditions',
+            'null'
+          )
+        );
+      });
     });
 
     test('views lab result with results text', async () => {

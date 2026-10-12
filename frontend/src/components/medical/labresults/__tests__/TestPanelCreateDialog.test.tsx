@@ -310,31 +310,79 @@ describe('TestPanelCreateDialog', () => {
     expect(onAdvancedModeChange).toHaveBeenCalledWith(true);
   });
 
-  it('shows validation error with field name when Lab Results Panel or Type is empty', async () => {
+  const saveButton = () => screen.getByRole('button', { name: /Save Results/ });
+
+  it('keeps Save Results inactive while the Lab Results Panel or Type is empty', async () => {
     render(<TestPanelCreateDialog {...defaultProps} />);
-    await userEvent.click(screen.getByText('Save Results'));
-    await waitFor(() => {
-      const alert = screen.getByRole('alert');
-      expect(alert.textContent).toContain('Lab Results Panel or Type is required');
-    });
+    expect(saveButton()).toBeDisabled();
+
+    // A test result alone is not enough without the panel name
+    await userEvent.type(screen.getByPlaceholderText('Type to search tests...'), 'Glucose');
+    expect(saveButton()).toBeDisabled();
+
+    await userEvent.click(saveButton());
     expect(mockCreateLabResult).not.toHaveBeenCalled();
   });
 
-  it('shows validation error when no test results are provided', async () => {
+  it('keeps Save Results inactive, and says why, until a test result is entered', async () => {
     render(<TestPanelCreateDialog {...defaultProps} />);
 
+    expect(
+      screen.queryByText('At least one test result is required')
+    ).toBeNull();
     await userEvent.type(
       screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
       'CBC Panel'
     );
-    await userEvent.click(screen.getByText('Save Results'));
+    expect(saveButton()).toBeDisabled();
+    expect(
+      screen.getByText('At least one test result is required')
+    ).toBeInTheDocument();
 
-    await waitFor(() => {
-      const alert = screen.getByRole('alert');
-      expect(alert.textContent).toContain('At least one test result is required');
-    });
+    await userEvent.click(saveButton());
     expect(mockCreateLabResult).not.toHaveBeenCalled();
     expect(defaultProps.onCreateSuccess).not.toHaveBeenCalled();
+  });
+
+  it('activates Save Results once the panel name and a test name are entered (a value is not needed)', async () => {
+    render(<TestPanelCreateDialog {...defaultProps} />);
+    await userEvent.type(
+      screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
+      'CBC Panel'
+    );
+    await userEvent.type(screen.getByPlaceholderText('Type to search tests...'), 'Glucose');
+
+    expect(saveButton()).toBeEnabled();
+    expect(
+      screen.queryByText('At least one test result is required')
+    ).toBeNull();
+  });
+
+  it('inactivates Save Results again when the test name is cleared or the panel name is removed', async () => {
+    render(<TestPanelCreateDialog {...defaultProps} />);
+    const panel = screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork');
+    const test = screen.getByPlaceholderText('Type to search tests...');
+    await userEvent.type(panel, 'CBC Panel');
+    await userEvent.type(test, 'Glucose');
+    expect(saveButton()).toBeEnabled();
+
+    await userEvent.clear(test);
+    expect(saveButton()).toBeDisabled();
+
+    await userEvent.type(test, 'Glucose');
+    expect(saveButton()).toBeEnabled();
+    await userEvent.clear(panel);
+    expect(saveButton()).toBeDisabled();
+  });
+
+  it('keeps Save Results inactive without a patient', async () => {
+    render(<TestPanelCreateDialog {...defaultProps} currentPatient={null} />);
+    await userEvent.type(
+      screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
+      'CBC Panel'
+    );
+    await userEvent.type(screen.getByPlaceholderText('Type to search tests...'), 'Glucose');
+    expect(saveButton()).toBeDisabled();
   });
 
   const fillSubmittablePanel = async () => {
@@ -534,11 +582,13 @@ describe('TestPanelCreateDialog', () => {
       screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
       'Lipid Panel'
     );
+    await userEvent.type(screen.getByPlaceholderText('Type to search tests...'), 'LDL');
     await userEvent.click(screen.getByText('Save Results'));
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeTruthy();
+      expect(screen.getByRole('alert').textContent).toContain('Network error');
     });
+    expect(mockCreateLabResult).toHaveBeenCalledTimes(1);
     expect(defaultProps.onCreateSuccess).not.toHaveBeenCalled();
   });
 

@@ -129,12 +129,7 @@
     "autoCalculated": "Calcolato automaticamente",
     "cannotRemoveLastRow": "Impossibile rimuovere l'ultima riga",
     "componentCreationWarning": "Risultato di laboratorio salvato ma non è stato possibile aggiungere i componenti dell'esame. È possibile aggiungerli dalla pagina di visualizzazione.",
-    "linkConditionsDescription": "Associa questo risultato di laboratorio a condizioni mediche pertinenti per un migliore monitoraggio e organizzazione.",
-    "linkConditionsTitle": "Collega condizioni mediche",
     "linkedVisits": "Visite collegate",
-    "linkMedicationsTitle": "Collega ai farmaci",
-    "linkProceduresTitle": "Collega alle procedure",
-    "linkTreatmentsTitle": "Collega ai trattamenti",
     "linkVisitsDescription": "Associa questo risultato di laboratorio alle visite in cui è stato richiesto o esaminato.",
     "linkVisitsTitle": "Collega alle visite",
     "matchedCommonName": "corrispondenza: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Indicatore di stato:",
     "testCodePlaceholder": "ad es. 718-7",
     "testComponents": "Componenti dell'esame (facoltativo)",
-    "testDetails": "Dettagli dell'esame",
     "unit": "Unità"
   },
   "keepEmptyLabResult": "Mantieni risultato di laboratorio",
@@ -212,16 +206,6 @@
     "placeholder": "Seleziona medico"
   },
   "patientIdRequired": "L'ID del paziente è obbligatorio. Seleziona prima un paziente.",
-  "pendingRelationships": {
-    "addCondition": "Aggiungi condizione",
-    "removeCondition": "Rimuovi condizione",
-    "addMedication": "Aggiungi farmaco",
-    "addProcedure": "Aggiungi procedura",
-    "addTreatment": "Aggiungi trattamento",
-    "removeMedication": "Rimuovi farmaco",
-    "removeProcedure": "Rimuovi procedura",
-    "removeTreatment": "Rimuovi trattamento"
-  },
   "quickFormInstructions": "Inserisci un nome per questo risultato di laboratorio, poi potrai caricare e analizzare il tuo PDF.",
   "quickImportModalTitle": "Importazione rapida PDF - Passaggio {{step}} di 2",
   "quickImportSuccess": "Risultato di laboratorio e componenti dell'esame importati con successo",

@@ -91,8 +91,7 @@ Treatment dialog: the card that links a record type lives in a tab named after i
 - A tab mounts its content only while it is open, so record lists are fetched on demand, and
   not at all in View mode.
 - `components/shared/LinkedRecordsSection.tsx` is the live/pending engine shared with the
-  record side; `LinkSection.tsx` is the list + modal it renders, in the same format as
-  `MedicationRelationships`.
+  record side; `LinkSection.tsx` is the list + modal it renders.
 - `constants/encounterLinkTypes.ts`: one adapter per type (candidate lists, row normalization,
   bulk request body, `visitLinkSource`). Lab results use their older `lab_result_*` fields and
   carry `purpose`.
@@ -187,9 +186,18 @@ or the load failed) shows the name alone.
   type (7 for a visit, 1 for a record), so they are there before any tab is opened. The tab's panel
   keeps its count current when you add, remove or create links.
 - **Unsaved record (Add form):** the count is the number of links chosen so far.
+- **Read-only dialog:** shows only the types that have links. No link tab is shown until every
+  count has loaded, so the tab bar changes once instead of tabs appearing and vanishing. The open
+  tab is always shown, a count whose load failed keeps its tab (without a number), and a count that
+  has still not arrived after 3 seconds (`LINK_TAB_LOADING_DEADLINE_MS`) is treated the same way, so
+  a request that never returns cannot hide links that exist. The editable dialogs never wait.
+- **Shared loads:** a count is loaded once however many dialogs of the record are open. A record's
+  view dialog and its edit form share it, and it is kept for 2 seconds (`LINK_COUNT_GRACE_MS`) after
+  the last of them closes, so the edit form opened from a view dialog needs no new requests.
 - **Where:** `utils/linkCountStore.ts` (a small store shared by a tab button and its panel, numbers
   only), `hooks/useTabLabel.ts`, `VisitLinkTabButtons` (visits), `RecordVisitsTabButton` (records),
   `LabResultLinkTabButtons` (lab results; the four older sections take their numbers from the page's
-  per-lab-result link maps, which the dialog loads when it opens).
-- **Not covered:** the Treatment dialog's own relationship tabs (they have their own count badges)
-  and the Condition dialog's older Medications / Lab Results tabs.
+  per-lab-result link maps, which the dialog loads when it opens: absent while loading, `null` when
+  the load failed), `useTreatmentLinkCounts` (treatments; the relationship panels report their lists
+  to the same store).
+- **Not covered:** the Condition dialog's older Medications / Lab Results tabs.

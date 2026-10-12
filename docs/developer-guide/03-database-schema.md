@@ -1810,6 +1810,7 @@ JUNCTION TABLES (Many-to-Many)
 | id | Integer | PRIMARY KEY | Unique relationship ID |
 | lab_result_id | Integer | FK(lab_results.id), NOT NULL | Associated lab result |
 | condition_id | Integer | FK(conditions.id), NOT NULL | Associated condition |
+| purpose | String(50) | | Why the lab result is linked (one of `LAB_RESULT_LINK_PURPOSES`) |
 | relevance_note | String | | How lab relates to condition |
 | created_at | DateTime | NOT NULL | Relationship creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
@@ -1860,6 +1861,7 @@ JUNCTION TABLES (Many-to-Many)
 | id | Integer | PRIMARY KEY | Unique relationship ID |
 | lab_result_id | Integer | FK(lab_results.id), ON DELETE CASCADE, NOT NULL | Associated lab result |
 | procedure_id | Integer | FK(procedures.id), ON DELETE CASCADE, NOT NULL | Associated procedure |
+| purpose | String(50) | | Why the lab result is linked (one of `LAB_RESULT_LINK_PURPOSES`) |
 | relevance_note | String | | How lab relates to procedure |
 | created_at | DateTime | NOT NULL | Relationship creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |

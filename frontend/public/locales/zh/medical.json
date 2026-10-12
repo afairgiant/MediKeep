@@ -938,8 +938,6 @@
       "conditionLinkPartialFailure": "{{count}} 个疾病关联失败",
       "conditionLinkPartialFailure_one": "{{count}} 个疾病关联失败",
       "conditionLinkPartialFailure_other": "{{count}} 个疾病关联失败",
-      "linkConditionsDescription": "可选择将此药物关联到现有疾病",
-      "noConditionsFound": "未找到疾病",
       "saving": "正在保存药物信息...",
       "updateMedication": "更新药物"
     },

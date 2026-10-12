@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "{{count}} aandoeningkoppeling(en) mislukt",
       "conditionLinkPartialFailure_one": "{{count}} aandoeningkoppeling mislukt",
       "conditionLinkPartialFailure_other": "{{count}} aandoeningkoppelingen mislukt",
-      "linkConditionsDescription": "Koppel deze medicatie optioneel aan bestaande aandoeningen",
-      "noConditionsFound": "Geen aandoeningen gevonden",
       "saving": "Medicatie opslaan...",
       "updateMedication": "Medicatie bijwerken"
     },

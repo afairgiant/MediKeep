@@ -118,8 +118,8 @@ const TreatmentViewModal = ({
     return TREATMENT_CATEGORY_LABELS[type] || type; // Return mapped label or raw value for custom entries
   };
 
-  // The Visits tab is available in both Simple and Treatment Plan modes; the other link
-  // tabs only in Treatment Plan mode. Only types that have links get a tab.
+  // Visits, Lab Results and Equipment are available in both Simple and Treatment Plan
+  // modes; Medications only in Treatment Plan mode. Only types that have links get a tab.
   const linkTabItems = [
     ...(treatment.mode === 'advanced'
       ? [
@@ -127,7 +127,8 @@ const TreatmentViewModal = ({
             key: 'medications',
             label: t('shared:categories.medications', 'Medications'),
             icon: IconPill,
-            count: counts.medications,
+            count: counts.medications.count,
+            loading: counts.medications.loading,
           },
         ]
       : []),
@@ -135,24 +136,23 @@ const TreatmentViewModal = ({
       key: 'visits',
       label: t('shared:tabs.visits', 'Visits'),
       icon: IconStethoscope,
-      count: counts.encounters,
+      count: counts.encounters.count,
+      loading: counts.encounters.loading,
     },
-    ...(treatment.mode === 'advanced'
-      ? [
-          {
-            key: 'labs',
-            label: t('treatments.viewModal.tabs.labs', 'Labs'),
-            icon: IconTestPipe,
-            count: counts.labResults,
-          },
-          {
-            key: 'equipment',
-            label: t('treatments.viewModal.tabs.equipment', 'Equipment'),
-            icon: IconDeviceDesktop,
-            count: counts.equipment,
-          },
-        ]
-      : []),
+    {
+      key: 'labs',
+      label: t('treatments.viewModal.tabs.labs', 'Labs'),
+      icon: IconTestPipe,
+      count: counts.labResults.count,
+      loading: counts.labResults.loading,
+    },
+    {
+      key: 'equipment',
+      label: t('treatments.viewModal.tabs.equipment', 'Equipment'),
+      icon: IconDeviceDesktop,
+      count: counts.equipment.count,
+      loading: counts.equipment.loading,
+    },
   ];
   const visitsPanel = (
     <Tabs.Panel value="visits">
@@ -162,6 +162,31 @@ const TreatmentViewModal = ({
           encounters={[]}
           isViewMode={true}
           onEntityClick={onEncounterClick}
+        />
+      </Box>
+    </Tabs.Panel>
+  );
+
+  const labsPanel = (
+    <Tabs.Panel value="labs">
+      <Box mt="md">
+        <TreatmentLabResultRelationships
+          treatmentId={treatment.id}
+          labResults={[]}
+          isViewMode={true}
+          onEntityClick={onLabResultClick}
+        />
+      </Box>
+    </Tabs.Panel>
+  );
+  const equipmentPanel = (
+    <Tabs.Panel value="equipment">
+      <Box mt="md">
+        <TreatmentEquipmentRelationships
+          treatmentId={treatment.id}
+          equipment={[]}
+          isViewMode={true}
+          onEntityClick={onEquipmentClick}
         />
       </Box>
     </Tabs.Panel>
@@ -554,10 +579,16 @@ const TreatmentViewModal = ({
             </Tabs.Panel>
           )}
 
-          {/* Visits (Simple mode; Treatment Plan mode renders it with the other relationship tabs) */}
-          {treatment.mode !== 'advanced' && visitsPanel}
+          {/* Simple mode: Visits, Lab Results and Equipment */}
+          {treatment.mode !== 'advanced' && (
+            <>
+              {visitsPanel}
+              {labsPanel}
+              {equipmentPanel}
+            </>
+          )}
 
-          {/* Advanced mode: Relationship Tabs */}
+          {/* Treatment Plan mode: all the relationship tabs */}
           {treatment.mode === 'advanced' && (
             <>
               <Tabs.Panel value="medications">
@@ -570,28 +601,8 @@ const TreatmentViewModal = ({
               </Tabs.Panel>
 
               {visitsPanel}
-
-              <Tabs.Panel value="labs">
-                <Box mt="md">
-                  <TreatmentLabResultRelationships
-                    treatmentId={treatment.id}
-                    labResults={[]}
-                    isViewMode={true}
-                    onEntityClick={onLabResultClick}
-                  />
-                </Box>
-              </Tabs.Panel>
-
-              <Tabs.Panel value="equipment">
-                <Box mt="md">
-                  <TreatmentEquipmentRelationships
-                    treatmentId={treatment.id}
-                    equipment={[]}
-                    isViewMode={true}
-                    onEntityClick={onEquipmentClick}
-                  />
-                </Box>
-              </Tabs.Panel>
+              {labsPanel}
+              {equipmentPanel}
             </>
           )}
 

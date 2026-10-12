@@ -26,7 +26,6 @@
     "viewFailed": "Bestand openen voor weergave mislukt. Probeer het opnieuw."
   },
   "form": {
-    "conditionNotSelected": "Selecteer een aandoening",
     "entityNotFound": "Het gevraagde item kon niet worden gevonden.",
     "equipmentFieldsRequired": "Naam en type van de apparatuur zijn verplicht",
     "equipmentNotSelected": "Selecteer minimaal één apparatuur",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Patiëntinformatie niet beschikbaar",
   "relationships": {
-    "addConditionFailed": "Aandoeningrelatie toevoegen mislukt",
     "addFailed": "Relatie toevoegen mislukt",
     "addMedicationFailed": "Medicatierelatie toevoegen mislukt",
     "deleteFailed": "Relatie verwijderen mislukt",
-    "fetchFailed": "Relaties laden mislukt",
     "updateFailed": "Relatie bijwerken mislukt"
   },
   "success": {

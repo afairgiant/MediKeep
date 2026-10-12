@@ -115,6 +115,16 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inlineTestRef = useRef<InlineTestComponentMethods | null>(null);
+  // Whether at least one test result (a test name) has been entered; the rows live in
+  // InlineTestComponentEntry, which reports them here through its ref callback
+  const [hasTestResult, setHasTestResult] = useState(false);
+  const handleInlineTestRef = useCallback(
+    (methods: InlineTestComponentMethods | null) => {
+      inlineTestRef.current = methods;
+      setHasTestResult(methods?.hasPendingComponents() ?? false);
+    },
+    []
+  );
   const getInlineMethods = useCallback(() => inlineTestRef.current, []);
   const handleNameFieldsChange = useCallback(
     (fields: TestNameFields) => setFormData(prev => ({ ...prev, ...fields })),
@@ -239,6 +249,11 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       setIsSubmitting(false);
     }
   }, [formData, currentPatient, onCreateSuccess, resetAutoPopulate, t]);
+
+  // Saving needs the panel name and a patient, and at least one test result: a test
+  // name is enough, its value may stay empty for a test that is ordered but not resulted
+  const hasName = formData.test_name.trim() !== '';
+  const canCreate = hasName && hasTestResult && !!currentPatient?.id;
 
   return (
     <Modal
@@ -394,9 +409,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         </Grid>
 
         <InlineTestComponentEntry
-          onRef={methods => {
-            inlineTestRef.current = methods;
-          }}
+          onRef={handleInlineTestRef}
           defaultExpanded
           disabled={isSubmitting}
         />
@@ -415,11 +428,23 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
             <Button variant="default" onClick={handleClose} disabled={isSubmitting}>
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
-            <Button onClick={handleCreate} loading={isSubmitting}>
+            <Button
+              onClick={handleCreate}
+              loading={isSubmitting}
+              disabled={!canCreate}
+            >
               {t('medical:labResults.addPanel.createButton')}
             </Button>
           </Group>
         </Group>
+        {hasName && !hasTestResult && (
+          <Text size="xs" c="dimmed" ta="right">
+            {t(
+              'medical:labResults.addPanel.testResultRequired',
+              'At least one test result is required'
+            )}
+          </Text>
+        )}
       </Stack>
     </Modal>
   );

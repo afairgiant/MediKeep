@@ -248,7 +248,6 @@
     "recordedBy": "Registrado por",
     "recordedDate": "Fecha de registro",
     "relatedCondition": "Condición relacionada",
-    "relatedConditions": "Condiciones relacionadas",
     "relationship": "Parentesco",
     "remove": "Eliminar",
     "resetPassword": "Restablecer contraseña",
@@ -316,6 +315,17 @@
     "weekly": "Semanal",
     "weight": "Peso",
     "zip": "ZIP"
+  },
+  "linkPurposes": {
+    "baseline": "Valor inicial",
+    "followUpFor": "Seguimiento de resultados",
+    "monitoring": "Control",
+    "orderedDuring": "Solicitado durante la visita",
+    "other": "Otro",
+    "outcome": "Resultado clínico",
+    "reference": "Referencia",
+    "resultsReviewed": "Resultados revisados",
+    "safety": "Seguridad"
   },
   "permissions": {
     "viewOnly": "Acceso de solo lectura"

@@ -33,6 +33,7 @@ import ProcedureViewModal from '../../components/medical/procedures/ProcedureVie
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
+import { linkPendingLabResultsOrWarn } from '../../utils/recordLabResultLinks';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import {
   INITIAL_PROCEDURE_FORM_DATA,
@@ -44,6 +45,7 @@ import { Button, Stack, Container, Paper } from '@mantine/core';
 const INITIAL_FORM_DATA = {
   ...INITIAL_PROCEDURE_FORM_DATA,
   pending_visit_links: [],
+  pending_lab_result_links: [],
 };
 
 const Procedures = () => {
@@ -275,13 +277,20 @@ const Procedures = () => {
         }
       }
 
-      // Link visits chosen in the Add form now that the record exists
+      // Link what was chosen in the Add form now that the record exists
       if (success && resultId && !editingProcedure) {
-        await linkPendingVisitsOrWarn(
-          'procedures',
-          resultId,
-          formData.pending_visit_links
-        );
+        await Promise.allSettled([
+          linkPendingVisitsOrWarn(
+            'procedures',
+            resultId,
+            formData.pending_visit_links
+          ),
+          linkPendingLabResultsOrWarn(
+            'procedures',
+            resultId,
+            formData.pending_lab_result_links
+          ),
+        ]);
       }
 
       // Complete form submission

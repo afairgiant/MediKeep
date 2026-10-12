@@ -37,7 +37,14 @@ const VIEW_TO_EDIT_TAB: Record<EditTabEntity, TabMap> = {
   },
   conditions: {
     overview: 'basic',
-    ...sameTabs('clinical', 'visits', 'notes', 'labResults', 'documents'),
+    ...sameTabs(
+      'clinical',
+      'medications',
+      'visits',
+      'notes',
+      'labResults',
+      'documents'
+    ),
   },
   immunizations: {
     overview: 'basic',
@@ -71,11 +78,19 @@ const VIEW_TO_EDIT_TAB: Record<EditTabEntity, TabMap> = {
   },
   medications: {
     overview: 'basic',
-    ...sameTabs('details', 'reminders', 'visits', 'notes', 'documents'),
+    ...sameTabs(
+      'details',
+      'conditions',
+      'reminders',
+      'visits',
+      'labResults',
+      'notes',
+      'documents'
+    ),
   },
   procedures: {
     overview: 'basic',
-    ...sameTabs('clinical', 'visits', 'notes', 'documents'),
+    ...sameTabs('clinical', 'visits', 'labResults', 'notes', 'documents'),
   },
   symptoms: {
     overview: 'basic',

@@ -26,7 +26,6 @@
     "viewFailed": "Failed to open file for viewing. Please try again."
   },
   "form": {
-    "conditionNotSelected": "Please select a condition",
     "entityNotFound": "The requested item could not be found.",
     "equipmentFieldsRequired": "Equipment name and type are required",
     "equipmentNotSelected": "Please select at least one equipment",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Patient information not available",
   "relationships": {
-    "addConditionFailed": "Failed to add condition relationship",
     "addFailed": "Failed to add relationship",
     "addMedicationFailed": "Failed to add medication relationship",
     "deleteFailed": "Failed to delete relationship",
-    "fetchFailed": "Failed to load relationships",
     "updateFailed": "Failed to update relationship"
   },
   "success": {

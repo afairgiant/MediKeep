@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container, Paper, Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
 import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import {
   useMedicalData,
@@ -31,6 +30,8 @@ import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
+import { linkPendingLabResultsOrWarn } from '../../utils/recordLabResultLinks';
+import { linkPendingConditionMedicationsOrWarn } from '../../utils/conditionMedicationLinks';
 import {
   ConditionCard,
   ConditionViewModal,
@@ -62,13 +63,8 @@ const Conditions = () => {
     PAGE_SIZE_OPTIONS,
   } = usePagination();
 
-  // Load medications, lab results, and practitioners for linking dropdowns
-  const [medications, setMedications] = useState([]);
-  const [labResults, setLabResults] = useState([]);
+  // Practitioners for the practitioner dropdown
   const [practitioners, setPractitioners] = useState([]);
-
-  // Condition-medication relationships (for the junction table)
-  const [conditionMedications, setConditionMedications] = useState({});
 
   // Standardized data management
   const {
@@ -131,7 +127,8 @@ const Conditions = () => {
   const [editingCondition, setEditingCondition] = useState(null);
   const [formData, setFormData] = useState({
     ...INITIAL_CONDITION_FORM_DATA,
-    pending_medication_ids: [], // For linking medications during creation
+    pending_medication_links: [], // Linked once the condition is created
+    pending_lab_result_links: [],
     pending_visit_links: [],
   });
 
@@ -169,7 +166,9 @@ const Conditions = () => {
         onset_date: '',
         end_date: '',
         tags: [],
-        pending_medication_ids: [],
+        pending_medication_links: [],
+        pending_lab_result_links: [],
+        pending_visit_links: [],
       });
       setDocumentManagerMethods(null);
 
@@ -194,27 +193,16 @@ const Conditions = () => {
     setEditingCondition(null);
     setFormData({
       ...INITIAL_CONDITION_FORM_DATA,
-      pending_medication_ids: [],
+      pending_medication_links: [],
+      pending_lab_result_links: [],
       pending_visit_links: [],
     });
     setShowModal(true);
   };
 
-  // Load medications and practitioners for linking dropdowns
+  // Load practitioners for the dropdown
   useEffect(() => {
     if (currentPatient?.id) {
-      // Load medications
-      apiService
-        .getPatientMedications(currentPatient.id)
-        .then(response => {
-          setMedications(response || []);
-        })
-        .catch(error => {
-          logger.error('Failed to fetch medications:', error);
-          setMedications([]);
-        });
-
-      // Load practitioners
       apiService
         .getPractitioners()
         .then(response => {
@@ -224,50 +212,8 @@ const Conditions = () => {
           logger.error('Failed to fetch practitioners:', error);
           setPractitioners([]);
         });
-
     }
   }, [currentPatient?.id]);
-
-  useEffect(() => {
-    if (!currentPatient?.id) {
-      setLabResults([]);
-      return;
-    }
-
-    const controller = new AbortController();
-
-    apiService
-      .getPatientLabResults(currentPatient.id, controller.signal)
-      .then(response => {
-        setLabResults(response || []);
-      })
-      .catch(error => {
-        if (error.name === 'AbortError' || error.name === 'CanceledError') return;
-        logger.error('Failed to fetch lab results:', error);
-        setLabResults([]);
-      });
-
-    return () => {
-      controller.abort();
-      setLabResults([]);
-    };
-  }, [currentPatient?.id]);
-
-  // Function to fetch condition-medication relationships
-  const fetchConditionMedications = async conditionId => {
-    try {
-      const relationships =
-        await apiService.getConditionMedications(conditionId);
-      setConditionMedications(prev => ({
-        ...prev,
-        [conditionId]: relationships || [],
-      }));
-      return relationships;
-    } catch (error) {
-      logger.error('Failed to fetch condition medications:', error);
-      return [];
-    }
-  };
 
   const handleEditCondition = condition => {
     resetSubmission();
@@ -290,7 +236,9 @@ const Conditions = () => {
         : '',
       end_date: condition.end_date ? condition.end_date.split('T')[0] : '',
       tags: condition.tags || [],
-      pending_medication_ids: [], // Not used during edit, but keeps formData shape consistent
+      pending_medication_links: [], // Not used during edit, but keeps formData shape consistent
+      pending_lab_result_links: [],
+      pending_visit_links: [],
     });
     setShowModal(true);
   };
@@ -324,8 +272,6 @@ const Conditions = () => {
 
     const conditionData = buildConditionPayload(formData, currentPatient.id);
 
-    const pendingMedications = formData.pending_medication_ids || [];
-
     try {
       let success;
       let resultId;
@@ -343,42 +289,29 @@ const Conditions = () => {
         }
       }
 
-      // Link visits chosen in the Add form now that the record exists
+      // Link what was chosen in the Add form now that the record exists
       if (success && resultId && !editingCondition) {
-        await linkPendingVisitsOrWarn(
-          'conditions',
-          resultId,
-          formData.pending_visit_links
-        );
+        await Promise.allSettled([
+          linkPendingVisitsOrWarn(
+            'conditions',
+            resultId,
+            formData.pending_visit_links
+          ),
+          linkPendingLabResultsOrWarn(
+            'conditions',
+            resultId,
+            formData.pending_lab_result_links
+          ),
+          linkPendingConditionMedicationsOrWarn(
+            resultId,
+            formData.pending_medication_links
+          ),
+        ]);
       }
 
       completeFormSubmission(success, resultId);
 
       if (success && resultId) {
-        // Link pending medications for new conditions
-        if (!editingCondition && pendingMedications.length > 0) {
-          try {
-            await apiService.createConditionMedicationsBulk(resultId, {
-              medication_ids: pendingMedications.map(id => parseInt(id)),
-              relevance_note: null,
-            });
-            await fetchConditionMedications(resultId);
-          } catch (err) {
-            logger.error('Failed to link medications to new condition:', err);
-            notifications.show({
-              title: t(
-                'conditions.notifications.medicationLinkWarning',
-                'Medication Linking Issue'
-              ),
-              message: t(
-                'conditions.notifications.medicationLinkFailed',
-                'Condition was created, but some medications could not be linked. You can link them manually by editing the condition.'
-              ),
-              color: 'yellow',
-            });
-          }
-        }
-
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
 
         if (hasPendingFiles) {
@@ -503,10 +436,6 @@ const Conditions = () => {
               refreshFileCount(editingCondition.id);
             }
           }}
-          medications={medications}
-          conditionMedications={conditionMedications}
-          fetchConditionMedications={fetchConditionMedications}
-          labResults={labResults}
           navigate={navigate}
         />
 
@@ -640,11 +569,8 @@ const Conditions = () => {
           onClose={handleCloseViewModal}
           condition={viewingCondition}
           onEdit={handleEditCondition}
-          medications={medications}
           practitioners={practitioners}
           onPractitionerClick={handlePractitionerClick}
-          conditionMedications={conditionMedications}
-          fetchConditionMedications={fetchConditionMedications}
           navigate={navigate}
           disableEdit={isViewOnly}
           disableEditTooltip={viewOnlyTooltip}

@@ -17,13 +17,7 @@ import type {
   LinkRow,
   LinkSource,
 } from '../types/encounterLinks';
-
-type Raw = Record<string, unknown>;
-
-const asString = (value: unknown): string | null =>
-  typeof value === 'string' && value ? value : null;
-
-const asList = (value: unknown): Raw[] => (Array.isArray(value) ? value : []);
+import { asList, asString, type Raw } from '../utils/rawValues';
 
 const withParts = (name: unknown, ...parts: unknown[]): string => {
   const extras = parts.filter(Boolean).join(', ');

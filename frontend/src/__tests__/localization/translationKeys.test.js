@@ -193,9 +193,6 @@ describe('Translation Key Consistency', () => {
 
         expect(common.modals).toBeDefined();
         expect(common.modals.linkMedicationsToCondition).toBeDefined();
-        expect(common.modals.linkConditionToLabResult).toBeDefined();
-        expect(common.modals.selectMedications).toBeDefined();
-        expect(common.modals.selectCondition).toBeDefined();
         expect(common.modals.relevanceNoteOptional).toBeDefined();
       });
     });
@@ -236,7 +233,6 @@ describe('Translation Key Consistency', () => {
         expect(common.labResults).toBeDefined();
         expect(common.labResults.labResultCreated).toBeDefined();
         expect(common.labResults.quickImportModalTitle).toBeDefined();
-        expect(common.labResults.form?.linkVisitsTitle).toBeDefined();
         // The medical namespace retains the form-warning strings.
         expect(medical.labResults?.form).toBeDefined();
       });
@@ -290,7 +286,6 @@ describe('Translation Key Consistency', () => {
         const errors = loadTranslations(locale, 'errors');
 
         expect(errors.relationships).toBeDefined();
-        expect(errors.relationships.addConditionFailed).toBeDefined();
         expect(errors.relationships.addMedicationFailed).toBeDefined();
       });
     });

@@ -14,6 +14,8 @@ import { IconStethoscope } from '@tabler/icons-react';
 import { apiService } from '../../../services/api';
 import { useTreatmentRelationships } from '../../../hooks/useTreatmentRelationships';
 import { useTreatmentInlineCreate } from '../../../hooks/useTreatmentInlineCreate';
+import { VISIT_LABEL_OPTIONS } from '../../../constants/treatmentVisitLabels';
+import { translateOptions } from '../../../utils/translateOptions';
 import {
   RelationshipContainer,
   RelationshipErrorAlert,
@@ -28,14 +30,6 @@ import {
   formatDateDisplay,
   getOptionLabel,
 } from './RelationshipComponents';
-
-const VISIT_LABEL_OPTIONS = [
-  { value: 'initial', label: 'Initial Visit' },
-  { value: 'follow_up', label: 'Follow-up' },
-  { value: 'review', label: 'Review' },
-  { value: 'final', label: 'Final Visit' },
-  { value: 'other', label: 'Other' },
-];
 
 const INITIAL_RELATIONSHIP_STATE = {
   encounter_ids: [],
@@ -64,9 +58,9 @@ function buildBulkPayload(newRelationship) {
   ];
 }
 
-function formatEncounterLabel(encounter) {
+function formatEncounterLabel(encounter, fallbackType) {
   const date = formatDateDisplay(encounter.date);
-  const type = encounter.visit_type || 'Visit';
+  const type = encounter.visit_type || fallbackType;
   let label = `${date} - ${type}`;
   if (encounter.reason) {
     label += ` (${encounter.reason})`;
@@ -84,6 +78,7 @@ function TreatmentEncounterRelationships({
   onEntityClick,
 }) {
   const { t } = useTranslation('common');
+  const visitLabelOptions = translateOptions(VISIT_LABEL_OPTIONS, t);
   // Ensure encounters is always an array
   const safeEncounters = Array.isArray(encounters) ? encounters : [];
 
@@ -139,7 +134,8 @@ function TreatmentEncounterRelationships({
 
   const encounterOptions = createDateSortedOptions(
     safeEncounters,
-    formatEncounterLabel,
+    encounter =>
+      formatEncounterLabel(encounter, t('treatments.links.visitFallback')),
     'date'
   );
   const availableOptions = filterAvailableOptions(
@@ -182,13 +178,14 @@ function TreatmentEncounterRelationships({
                         }
                       >
                         {formatDateDisplay(encounter?.date)} -{' '}
-                        {encounter?.visit_type || 'Visit'}
+                        {encounter?.visit_type ||
+                          t('treatments.links.visitFallback')}
                       </Badge>
                       {relationship.visit_label && (
                         <Badge variant="outline" size="sm" color="cyan">
                           {getOptionLabel(
                             relationship.visit_label,
-                            VISIT_LABEL_OPTIONS
+                            visitLabelOptions
                           )}
                         </Badge>
                       )}
@@ -211,8 +208,8 @@ function TreatmentEncounterRelationships({
                       <Stack gap="xs">
                         <Select
                           size="xs"
-                          placeholder="Visit label"
-                          data={VISIT_LABEL_OPTIONS}
+                          placeholder={t('treatments.links.visitLabel')}
+                          data={visitLabelOptions}
                           value={editingRelationship?.visit_label || ''}
                           onChange={value =>
                             updateEditingRelationship('visit_label', value)
@@ -222,7 +219,9 @@ function TreatmentEncounterRelationships({
                         />
                         <TextInput
                           size="xs"
-                          placeholder="Visit sequence number"
+                          placeholder={t(
+                            'treatments.links.visitSequencePlaceholder'
+                          )}
                           type="number"
                           value={editingRelationship?.visit_sequence || ''}
                           onChange={e =>
@@ -234,7 +233,7 @@ function TreatmentEncounterRelationships({
                         />
                         <Textarea
                           size="xs"
-                          placeholder="Relevance note"
+                          placeholder={t('modals.relevanceNoteOptional')}
                           value={editingRelationship?.relevance_note || ''}
                           onChange={e =>
                             updateEditingRelationship(
@@ -284,7 +283,7 @@ function TreatmentEncounterRelationships({
               'labels.noEncountersLinked',
               'No visits linked to this treatment'
             )}
-            description="Link visits to track appointments related to this treatment plan."
+            description={t('treatments.links.visitsEmpty')}
             isViewMode={isViewMode}
           />
         )}
@@ -304,11 +303,11 @@ function TreatmentEncounterRelationships({
         <RelationshipAddModal
           opened={showAddModal}
           onClose={resetAndCloseModal}
-          title="Link Visits to Treatment"
+          title={t('treatments.links.visitsModalTitle')}
         >
           <MultiSelect
-            label="Select Visits"
-            placeholder="Choose visits to link"
+            label={t('treatments.links.selectVisits')}
+            placeholder={t('treatments.links.chooseVisits')}
             data={availableOptions}
             value={newRelationship.encounter_ids}
             onChange={values => updateNewRelationship('encounter_ids', values)}
@@ -321,34 +320,34 @@ function TreatmentEncounterRelationships({
           {selectedCount === 1 && (
             <>
               <Select
-                label="Visit Label (Optional)"
-                placeholder="Select visit type"
-                data={VISIT_LABEL_OPTIONS}
+                label={t('treatments.links.visitLabelOptional')}
+                placeholder={t('treatments.links.selectVisitType')}
+                data={visitLabelOptions}
                 value={newRelationship.visit_label}
                 onChange={value =>
                   updateNewRelationship('visit_label', value || '')
                 }
                 clearable
                 comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                description="Categorize this visit in the treatment plan"
+                description={t('treatments.links.visitLabelDescription')}
               />
 
               <TextInput
-                label="Visit Sequence (Optional)"
-                placeholder="e.g., 1, 2, 3..."
+                label={t('treatments.links.visitSequenceOptional')}
+                placeholder={t('treatments.links.visitSequenceExample')}
                 type="number"
                 value={newRelationship.visit_sequence}
                 onChange={e =>
                   updateNewRelationship('visit_sequence', e.target.value)
                 }
-                description="Order of this visit in the treatment plan"
+                description={t('treatments.links.visitSequenceDescription')}
               />
             </>
           )}
 
           <Textarea
-            label="Relevance Note (Optional)"
-            placeholder="Describe how this visit relates to the treatment"
+            label={t('modals.relevanceNoteOptional')}
+            placeholder={t('treatments.links.visitNotePlaceholder')}
             value={newRelationship.relevance_note}
             onChange={e =>
               updateNewRelationship('relevance_note', e.target.value)
@@ -363,7 +362,11 @@ function TreatmentEncounterRelationships({
             loading={loading}
             disabled={selectedCount === 0}
             submitLabel={
-              selectedCount > 1 ? `Link ${selectedCount} Visits` : 'Link Visit'
+              selectedCount > 1
+                ? t('treatments.links.linkSelectedCount', {
+                    count: selectedCount,
+                  })
+                : t('buttons.linkVisit', 'Link Visit')
             }
           />
         </RelationshipAddModal>

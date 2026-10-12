@@ -10,6 +10,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.validators import validate_lab_result_link_purpose
 
 
 def _validate_relevance_note(v):
@@ -525,6 +526,76 @@ class LabResultWithRelations(LabResultResponse):
     model_config = {"from_attributes": True}
 
 
+# Record-side lab result links (shown on a medication, procedure or condition)
+
+
+class RecordLabResultLinkCreate(BaseModel):
+    """Link an existing lab result to the record in the URL path"""
+
+    lab_result_id: int
+    # Conditions and procedures only; medication links have no purpose
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return validate_lab_result_link_purpose(v)
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class RecordLabResultLinkUpdate(BaseModel):
+    """Update the purpose and note of a record-side lab result link"""
+
+    # Conditions and procedures only; medication links have no purpose
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return validate_lab_result_link_purpose(v)
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class RecordLabResultSummary(BaseModel):
+    """The lab result fields shown in a record's linked lab results list"""
+
+    id: int
+    test_name: str
+    test_category: Optional[str] = None
+    status: Optional[str] = None
+    labs_result: Optional[str] = None
+    completed_date: Optional[date] = None
+
+    model_config = {"from_attributes": True}
+
+
+class RecordLabResultLinkResponse(BaseModel):
+    """A lab result link as seen from the medication, procedure or condition"""
+
+    id: int
+    lab_result_id: int
+    medication_id: Optional[int] = None
+    procedure_id: Optional[int] = None
+    condition_id: Optional[int] = None
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    lab_result: Optional[RecordLabResultSummary] = None
+
+    model_config = {"from_attributes": True}
+
+
 # Lab Result - Condition Relationship Schemas
 
 
@@ -533,7 +604,13 @@ class LabResultConditionBase(BaseModel):
 
     lab_result_id: int
     condition_id: int
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -548,7 +625,13 @@ class LabResultConditionCreate(LabResultConditionBase):
 class LabResultConditionUpdate(BaseModel):
     """Schema for updating a lab result condition relationship"""
 
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -633,7 +716,13 @@ class LabResultProcedureBase(BaseModel):
 
     lab_result_id: int
     procedure_id: int
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -650,7 +739,13 @@ class LabResultProcedureCreate(LabResultProcedureBase):
 class LabResultProcedureUpdate(BaseModel):
     """Schema for updating a lab result procedure relationship"""
 
+    purpose: Optional[str] = None
     relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return validate_lab_result_link_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod

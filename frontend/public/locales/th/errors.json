@@ -26,7 +26,6 @@
     "viewFailed": "เปิดไฟล์เพื่อดูไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
   },
   "form": {
-    "conditionNotSelected": "กรุณาเลือกอาการ",
     "entityNotFound": "ไม่พบรายการที่ร้องขอ",
     "equipmentFieldsRequired": "จำเป็นต้องระบุชื่อและประเภทของอุปกรณ์",
     "equipmentNotSelected": "กรุณาเลือกอุปกรณ์อย่างน้อยหนึ่งรายการ",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "ข้อมูลผู้ป่วยไม่พร้อมใช้งาน",
   "relationships": {
-    "addConditionFailed": "การเพิ่มความสัมพันธ์อาการไม่สำเร็จ",
     "addFailed": "การเพิ่มความสัมพันธ์ไม่สำเร็จ",
     "addMedicationFailed": "การเพิ่มความสัมพันธ์ยาไม่สำเร็จ",
     "deleteFailed": "การลบความสัมพันธ์ไม่สำเร็จ",
-    "fetchFailed": "การโหลดความสัมพันธ์ไม่สำเร็จ",
     "updateFailed": "การปรับปรุงความสัมพันธ์ไม่สำเร็จ"
   },
   "success": {

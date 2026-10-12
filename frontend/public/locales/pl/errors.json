@@ -26,7 +26,6 @@
     "viewFailed": "Nie udało się otworzyć pliku do podglądu. Proszę spróbować ponownie."
   },
   "form": {
-    "conditionNotSelected": "Proszę wybrać schorzenie",
     "entityNotFound": "Żądany element nie został znaleziony.",
     "equipmentFieldsRequired": "Nazwa i typ sprzętu są wymagane",
     "equipmentNotSelected": "Proszę wybrać co najmniej jeden sprzęt",
@@ -78,11 +77,9 @@
   },
   "patientNotAvailable": "Informacje o pacjencie niedostępne",
   "relationships": {
-    "addConditionFailed": "Nie udało się dodać powiązania ze schorzeniem",
     "addFailed": "Nie udało się dodać powiązania",
     "addMedicationFailed": "Nie udało się dodać powiązania z lekiem",
     "deleteFailed": "Nie udało się usunąć powiązania",
-    "fetchFailed": "Nie udało się załadować powiązań",
     "updateFailed": "Nie udało się zaktualizować powiązania"
   },
   "success": {

@@ -938,8 +938,6 @@
       "conditionLinkPartialFailure": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
       "conditionLinkPartialFailure_one": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
       "conditionLinkPartialFailure_other": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
-      "linkConditionsDescription": "เชื่อมโยงยานี้กับโรคที่มีอยู่ (ไม่จำเป็น)",
-      "noConditionsFound": "ไม่พบโรค",
       "saving": "กำลังบันทึกยา...",
       "updateMedication": "อัปเดตยา"
     },

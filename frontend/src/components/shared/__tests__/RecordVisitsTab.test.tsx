@@ -94,6 +94,35 @@ async function linkVisit(optionLabel: string) {
   return dialog;
 }
 
+describe('RecordVisitsTab - description', () => {
+  it('shows the description under the title, only when one is given', async () => {
+    const { unmount } = render(
+      <RecordVisitsTab
+        recordType="conditions"
+        recordId={RECORD_ID}
+        patientId={PATIENT_ID}
+        description="Add Visits related to this Condition."
+      />
+    );
+    expect(
+      await screen.findByText('Add Visits related to this Condition.')
+    ).toBeInTheDocument();
+    unmount();
+
+    render(
+      <RecordVisitsTab
+        recordType="conditions"
+        recordId={RECORD_ID}
+        patientId={PATIENT_ID}
+      />
+    );
+    await waitFor(() =>
+      expect(api.getRecordEncounterLinks).toHaveBeenCalledTimes(2)
+    );
+    expect(screen.queryByText(/related to this/)).not.toBeInTheDocument();
+  });
+});
+
 describe('RecordVisitsTab - view mode', () => {
   it('lists the linked visits read-only and navigates to the visit', async () => {
     savedRows = [savedLink];

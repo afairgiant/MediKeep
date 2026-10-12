@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "{{count}} tillståndslänk misslyckades",
       "conditionLinkPartialFailure_one": "{{count}} tillståndslänk misslyckades",
       "conditionLinkPartialFailure_other": "{{count}} tillståndslänkar misslyckades",
-      "linkConditionsDescription": "Länka valfritt detta läkemedel till befintliga tillstånd",
-      "noConditionsFound": "Inga tillstånd hittades",
       "saving": "Sparar läkemedel...",
       "updateMedication": "Uppdatera läkemedel"
     },

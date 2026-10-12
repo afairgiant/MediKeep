@@ -3,8 +3,14 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Tabs } from '@mantine/core';
 
-import render, { screen, waitFor, within } from '../../../../test-utils/render';
+import render, {
+  act,
+  screen,
+  waitFor,
+  within,
+} from '../../../../test-utils/render';
 import { VisitLinkTabButtons, VisitLinkTabPanels } from '../VisitLinkTabs';
+import type { LinkTabNavigationProps } from '../../../shared/LinkTabMenu';
 import type { PendingLinks } from '../../../../types/encounterLinks';
 
 const api = vi.hoisted(() => ({
@@ -24,6 +30,10 @@ const api = vi.hoisted(() => ({
 vi.mock('../../../../services/api', () => ({ apiService: api }));
 vi.mock('../../../../services/api/symptomApi', () => ({
   symptomApi: { getAll: api.getSymptoms },
+}));
+vi.mock('../../../../hooks/useLinkPanelDescription', () => ({
+  useLinkPanelDescription: () => (items: string, record: string) =>
+    `description:${items}:${record}`,
 }));
 vi.mock('../../../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
@@ -117,18 +127,23 @@ interface TabProps {
   onPendingChange?: (_next: PendingLinks) => void;
   navigate?: (_path: string) => void;
   onSelectTab?: (_tab: string) => void;
+  /** The tab the buttons treat as open (the panels always show the rendered type) */
+  activeTab?: string;
 }
 
 const buildTree = (key: TypeKey, props: TabProps = {}) => {
-  const { onSelectTab, ...panelProps } = props;
+  const { onSelectTab, activeTab, ...panelProps } = props;
   return (
     <Tabs value={tabValue(key)}>
       <Tabs.List>
         <VisitLinkTabButtons
           visitId={props.visitId}
           pendingLinks={props.pendingLinks}
-          isViewMode={props.isViewMode}
-          onSelectTab={onSelectTab}
+          {...({
+            isViewMode: props.isViewMode,
+            activeTab,
+            onSelectTab,
+          } as LinkTabNavigationProps)}
         />
       </Tabs.List>
       <VisitLinkTabPanels activeTab={tabValue(key)} {...panelProps} />
@@ -231,6 +246,26 @@ describe('VisitLinkTabButtons', () => {
     expect(screen.queryByRole('button', { name: I18N.link })).toBeNull();
   });
 
+  it.each([
+    ['procedures', 'procedures'],
+    ['labResults', 'labResults'],
+    ['conditions', 'conditions'],
+  ] as const)(
+    'says what the %s panel is for in the Add and Edit forms',
+    async (key, items) => {
+      renderTab(key);
+      expect(
+        await screen.findByText(`description:${items}:visit`)
+      ).toBeInTheDocument();
+    }
+  );
+
+  it('does not add the description to the read-only panel', async () => {
+    renderTab('procedures', { visitId: VISIT_ID, isViewMode: true });
+    await waitFor(() => expect(api.getEncounterLinks).toHaveBeenCalled());
+    expect(screen.queryByText(/^description:/)).toBeNull();
+  });
+
   it('view mode shows no link tabs for a visit without links', async () => {
     renderTab('procedures', {
       visitId: VISIT_ID,
@@ -258,7 +293,7 @@ describe('VisitLinkTabButtons', () => {
     ]);
   });
 
-  it('add mode: choosing a type from the menu shows its tab and opens it', async () => {
+  it('add mode: choosing a type from the menu asks to open its tab', async () => {
     const onSelectTab = vi.fn();
     renderTab('conditions', { onSelectTab });
     await openLinkMenu();
@@ -270,8 +305,41 @@ describe('VisitLinkTabButtons', () => {
     );
 
     expect(onSelectTab).toHaveBeenCalledWith('link-injuries');
+  });
+
+  it('add mode: a type opened from the menu is a tab only while it is open', async () => {
+    const { rerender } = renderTab('conditions', {
+      activeTab: 'link-injuries',
+    });
     expect(
       screen.getByRole('tab', { name: 'shared:categories.injuries (0)' })
+    ).toBeInTheDocument();
+
+    // The user moves to another tab without linking anything
+    rerender(buildTree('conditions', { activeTab: 'info' }));
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+    await openLinkMenu();
+    expect(
+      await screen.findByRole('menuitem', {
+        name: 'shared:categories.injuries',
+      })
+    ).toBeInTheDocument();
+  });
+
+  it('add mode: an opened type that gets a link stays a tab after the user leaves it', () => {
+    const { rerender } = renderTab('conditions', {
+      activeTab: 'link-injuries',
+    });
+    rerender(
+      buildTree('conditions', {
+        activeTab: 'info',
+        pendingLinks: {
+          injuries: [{ entityId: 1, relevanceNote: null, purpose: null }],
+        },
+      })
+    );
+    expect(
+      screen.getByRole('tab', { name: 'shared:categories.injuries (1)' })
     ).toBeInTheDocument();
   });
 
@@ -308,7 +376,7 @@ describe('VisitLinkTabButtons', () => {
     expect(screen.queryByRole('tab', { name: /injuries/ })).toBeNull();
   });
 
-  it('add mode keeps a tab once shown, even after its last pending link is removed', () => {
+  it('add mode: a tab whose last pending link is removed goes back into the Link menu', async () => {
     const withLink: PendingLinks = {
       procedures: [{ entityId: 1, relevanceNote: null, purpose: null }],
     };
@@ -318,8 +386,12 @@ describe('VisitLinkTabButtons', () => {
     ).toBeInTheDocument();
 
     rerender(buildTree('procedures', { pendingLinks: { procedures: [] } }));
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+    await openLinkMenu();
     expect(
-      screen.getByRole('tab', { name: 'shared:categories.procedures (0)' })
+      await screen.findByRole('menuitem', {
+        name: 'shared:categories.procedures',
+      })
     ).toBeInTheDocument();
   });
 
@@ -365,6 +437,46 @@ describe('VisitLinkTabButtons', () => {
         screen.getByRole('tab', { name: 'shared:categories.procedures (0)' })
       ).toBeInTheDocument()
     );
+  });
+
+  it('view mode shows no tab until every count has loaded, and keeps one whose count failed', async () => {
+    let resolveSlow: (_rows: unknown[]) => void = () => undefined;
+    api.getEncounterLinks.mockImplementation((_id: number, type: string) => {
+      if (type === 'procedures') return Promise.resolve([procedureLink]);
+      if (type === 'injuries') return Promise.reject(new Error('boom'));
+      if (type === 'lab-results')
+        return new Promise<unknown[]>(resolve => (resolveSlow = resolve));
+      return Promise.resolve([]);
+    });
+    renderTab('procedures', {
+      visitId: VISIT_ID,
+      patientId: PATIENT_ID,
+      isViewMode: true,
+    });
+
+    // The slow request is the last one a count waits for
+    await waitFor(() =>
+      expect(api.getEncounterLinks).toHaveBeenCalledWith(
+        VISIT_ID,
+        'lab-results',
+        expect.anything()
+      )
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+
+    resolveSlow([]);
+    expect(
+      await screen.findByRole('tab', {
+        name: 'shared:categories.procedures (1)',
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: 'shared:categories.injuries' })
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
   });
 
   it('leaves a tab without a number when its count cannot be loaded', async () => {
@@ -425,7 +537,9 @@ describe('VisitLinkTabPanels - view mode', () => {
       isViewMode: true,
     });
     expect(await screen.findByText('Complete Blood Count')).toBeInTheDocument();
-    expect(screen.getByText('Results Reviewed')).toBeInTheDocument();
+    expect(
+      screen.getByText('shared:linkPurposes.resultsReviewed')
+    ).toBeInTheDocument();
   });
 
   it('shows an empty card when nothing is linked', async () => {
@@ -693,7 +807,7 @@ describe('VisitLinkTabPanels - edit mode (saved visit)', () => {
     );
     await userEvent.click(
       await screen.findByRole('option', {
-        name: 'Ordered During Visit',
+        name: 'shared:linkPurposes.orderedDuring',
         hidden: true,
       })
     );
@@ -717,12 +831,17 @@ describe('VisitLinkTabPanels - edit mode (saved visit)', () => {
     linkRows = { 'lab-results': [labResultLink] };
     edit('labResults');
     expect(await screen.findByText('Complete Blood Count')).toBeInTheDocument();
-    expect(screen.getByText('Results Reviewed')).toBeInTheDocument();
+    expect(
+      screen.getByText('shared:linkPurposes.resultsReviewed')
+    ).toBeInTheDocument();
 
     await userEvent.click(screen.getByLabelText(I18N.editLink));
     await userEvent.click(screen.getByRole('textbox', { name: I18N.purpose }));
     await userEvent.click(
-      await screen.findByRole('option', { name: 'Reference', hidden: true })
+      await screen.findByRole('option', {
+        name: 'shared:linkPurposes.reference',
+        hidden: true,
+      })
     );
     await userEvent.click(screen.getByLabelText(I18N.save));
     await waitFor(() =>

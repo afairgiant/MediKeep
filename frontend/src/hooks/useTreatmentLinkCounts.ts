@@ -1,64 +1,69 @@
-import { useEffect, useState } from 'react';
-
 import { apiService } from '../services/api';
-import logger from '../services/logger';
+import {
+  linkCountKey,
+  useLinkCounts,
+  useLoadLinkCounts,
+  type LinkCountState,
+} from '../utils/linkCountStore';
 
-export interface TreatmentLinkCounts {
-  medications?: number;
-  encounters?: number;
-  labResults?: number;
-  equipment?: number;
-}
+export type TreatmentLinkKind =
+  | 'medications'
+  | 'encounters'
+  | 'labResults'
+  | 'equipment';
 
-const countOf = (list: unknown): number | undefined =>
-  Array.isArray(list) ? list.length : undefined;
+const TREATMENT_LINK_KINDS: TreatmentLinkKind[] = [
+  'medications',
+  'encounters',
+  'labResults',
+  'equipment',
+];
+
+const LIST_LINKS: Record<
+  TreatmentLinkKind,
+  (_treatmentId: number, _signal: AbortSignal) => Promise<unknown>
+> = {
+  medications: (id, signal) => apiService.getTreatmentMedications(id, signal),
+  encounters: (id, signal) => apiService.getTreatmentEncounters(id, signal),
+  labResults: (id, signal) => apiService.getTreatmentLabResults(id, signal),
+  equipment: (id, signal) => apiService.getTreatmentEquipment(id, signal),
+};
+
+/** Key of a treatment's count of one kind of link, shared with the panel that changes it. */
+export const treatmentLinkCountKey = (
+  treatmentId: number | null | undefined,
+  kind: TreatmentLinkKind
+) => linkCountKey('treatment', treatmentId, kind);
 
 /**
  * How many medications, visits, lab results and equipment items a saved treatment is
- * linked to, loaded up front so the tabs can show "(n)" before they are opened.
- * A count that could not be loaded stays undefined (the tab shows just its label).
+ * linked to, loaded up front so the tabs can show "(n)" before they are opened. The
+ * panels keep the counts current, and each is `loading` until it arrives. A count that
+ * could not be loaded stays unknown (the tab shows just its label).
  */
 export const useTreatmentLinkCounts = (
   treatmentId?: number | null,
   enabled = true
-): TreatmentLinkCounts => {
-  const [counts, setCounts] = useState<TreatmentLinkCounts>({});
+): Record<TreatmentLinkKind, LinkCountState> => {
+  const active = Boolean(treatmentId) && enabled;
+  const keys = TREATMENT_LINK_KINDS.map(kind =>
+    treatmentLinkCountKey(treatmentId, kind)
+  );
 
-  useEffect(() => {
-    setCounts({});
-    if (!treatmentId || !enabled) return undefined;
-    const controller = new AbortController();
-    const { signal } = controller;
-    const load = async (
-      key: keyof TreatmentLinkCounts,
-      request: Promise<unknown>
-    ) => {
-      try {
-        const count = countOf(await request);
-        if (!signal.aborted && count !== undefined) {
-          setCounts(prev => ({ ...prev, [key]: count }));
-        }
-      } catch (err) {
-        // No count is shown for this tab
-        if (err instanceof Error && err.name === 'AbortError') return;
-        logger.error('treatment_link_count_load_failed', {
-          message: 'Failed to load a treatment link count',
-          treatmentId,
-          key,
-          error: err instanceof Error ? err.message : String(err),
-          component: 'useTreatmentLinkCounts',
-        });
-      }
-    };
-    load(
-      'medications',
-      apiService.getTreatmentMedications(treatmentId, signal)
-    );
-    load('encounters', apiService.getTreatmentEncounters(treatmentId, signal));
-    load('labResults', apiService.getTreatmentLabResults(treatmentId, signal));
-    load('equipment', apiService.getTreatmentEquipment(treatmentId, signal));
-    return () => controller.abort();
-  }, [treatmentId, enabled]);
+  useLoadLinkCounts(
+    TREATMENT_LINK_KINDS.map((kind, index) => ({
+      key: keys[index],
+      load: async signal => {
+        const rows = await LIST_LINKS[kind](treatmentId as number, signal);
+        if (!Array.isArray(rows)) throw new Error('Unexpected response');
+        return rows.length;
+      },
+    })),
+    active
+  );
 
-  return counts;
+  const states = useLinkCounts(keys, active);
+  return Object.fromEntries(
+    TREATMENT_LINK_KINDS.map((kind, index) => [kind, states[index]])
+  ) as Record<TreatmentLinkKind, LinkCountState>;
 };

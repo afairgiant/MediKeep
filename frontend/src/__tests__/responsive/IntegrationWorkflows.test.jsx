@@ -321,47 +321,6 @@ vi.mock('../../components/medical/MantineAllergyForm', () => ({
   },
 }));
 
-// Mock MantineConditionForm
-vi.mock('../../components/medical/MantineConditionForm', () => ({
-  default: function MockConditionForm({
-    isOpen,
-    onClose,
-    onSubmit,
-    onInputChange,
-    formData = {},
-  }) {
-    if (!isOpen) return null;
-
-    return (
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          onSubmit(formData);
-        }}
-        data-testid="condition-form"
-      >
-        <div>
-          <label htmlFor="mock-condition-name">Condition Name</label>
-          <input
-            id="mock-condition-name"
-            name="condition_name"
-            value={formData.condition_name || ''}
-            onChange={e =>
-              onInputChange({
-                target: { name: 'condition_name', value: e.target.value },
-              })
-            }
-          />
-        </div>
-        <button type="submit">Save Condition</button>
-        <button type="button" onClick={onClose}>
-          Close
-        </button>
-      </form>
-    );
-  },
-}));
-
 // Sample data for integration tests
 const sampleMedications = [
   {

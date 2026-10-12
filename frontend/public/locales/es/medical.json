@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "Falló {{count}} vínculo de condición",
       "conditionLinkPartialFailure_one": "Falló {{count}} vínculo de condición",
       "conditionLinkPartialFailure_other": "Fallaron {{count}} vínculos de condiciones",
-      "linkConditionsDescription": "Vincule opcionalmente este medicamento a condiciones existentes",
-      "noConditionsFound": "No se encontraron condiciones",
       "saving": "Guardando medicamento...",
       "updateMedication": "Actualizar Medicamento"
     },

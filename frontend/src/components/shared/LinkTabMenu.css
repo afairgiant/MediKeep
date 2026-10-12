@@ -1,0 +1,14 @@
+/* The "Link" button of the tab bar looks like the tabs next to it: the same text color
+   and background, and the same hover background, in light and dark mode. */
+.link-tab-menu-button {
+  color: var(--mantine-color-text);
+  background-color: transparent;
+}
+
+:root[data-mantine-color-scheme='light'] .link-tab-menu-button:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+:root[data-mantine-color-scheme='dark'] .link-tab-menu-button:hover {
+  background-color: var(--mantine-color-dark-6);
+}

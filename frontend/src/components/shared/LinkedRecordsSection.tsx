@@ -18,10 +18,13 @@ import type {
   LinkSource,
   LinkUpdate,
   PendingLink,
+  PurposeConfig,
 } from '../../types/encounterLinks';
 
 interface LinkedRecordsSectionProps {
   title: string;
+  /** Short line under the title saying what the panel is for */
+  description?: string;
   /** Where links are read and written. Memoize it: a new object reloads the section. */
   source: LinkSource;
   /** False while the owning record is being created; links are then held as pending */
@@ -31,6 +34,10 @@ interface LinkedRecordsSectionProps {
   icon: TablerIcon;
   color: string;
   supportsPurpose?: boolean;
+  /** The purposes offered when supportsPurpose is set (default: the visit purposes) */
+  purposeConfig?: PurposeConfig;
+  /** Links carry an expected frequency (treatment links) */
+  supportsExpectedFrequency?: boolean;
   isViewMode?: boolean;
   /** In View mode, render nothing when there are no links (default). False shows an empty card. */
   hideWhenEmpty?: boolean;
@@ -70,12 +77,15 @@ const errorMessage = (err: unknown) =>
  */
 const LinkedRecordsSection = ({
   title,
+  description,
   source,
   isSaved,
   entityType,
   icon,
   color,
   supportsPurpose = false,
+  purposeConfig,
+  supportsExpectedFrequency = false,
   isViewMode = false,
   hideWhenEmpty = true,
   navigate,
@@ -93,7 +103,11 @@ const LinkedRecordsSection = ({
   const [liveRows, setLiveRows] = useState<LinkRow[]>([]);
   const [candidates, setCandidates] = useState<LinkCandidate[]>([]);
   const [loading, setLoading] = useState(false);
+  // The source whose rows were read last. Until a saved record's rows have been read, the
+  // card is loading rather than showing an empty list that is about to fill
+  const [loadedFor, setLoadedFor] = useState<LinkSource | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const isLoading = loading || (isSaved && loadedFor !== source);
 
   const loadRows = useCallback(
     async (signal?: AbortSignal) => {
@@ -105,6 +119,7 @@ const LinkedRecordsSection = ({
         onLoaded?.(rows.length);
       } finally {
         setLoading(false);
+        if (!signal?.aborted) setLoadedFor(source);
       }
     },
     // onLoaded is only a reporting callback and may change identity every render
@@ -178,6 +193,7 @@ const LinkedRecordsSection = ({
       status: null,
       relevanceNote: link.relevanceNote,
       purpose: link.purpose,
+      expectedFrequency: link.expectedFrequency ?? null,
     }));
   }, [isSaved, liveRows, pending, candidates]);
 
@@ -193,16 +209,29 @@ const LinkedRecordsSection = ({
   const handleAdd = async (
     ids: number[],
     note: string | null,
-    purpose: string | null
+    purpose: string | null,
+    expectedFrequency: string | null
   ) => {
     if (!isSaved) {
       onPendingChange?.([
         ...pending,
-        ...ids.map(entityId => ({ entityId, relevanceNote: note, purpose })),
+        ...ids.map(entityId => ({
+          entityId,
+          relevanceNote: note,
+          purpose,
+          ...(supportsExpectedFrequency && { expectedFrequency }),
+        })),
       ]);
       return;
     }
-    await source.createLinks(ids, note, purpose);
+    try {
+      await source.createLinks(ids, note, purpose, expectedFrequency);
+    } catch (err) {
+      // Several links are created one request at a time: the ones before the
+      // failure exist, so the list must show them
+      if (ids.length > 1) await refreshRows();
+      throw err;
+    }
     await refreshRows();
   };
 
@@ -218,6 +247,12 @@ const LinkedRecordsSection = ({
                   updates.purpose !== undefined
                     ? updates.purpose
                     : link.purpose,
+                ...(supportsExpectedFrequency && {
+                  expectedFrequency:
+                    updates.expected_frequency !== undefined
+                      ? updates.expected_frequency
+                      : link.expectedFrequency,
+                }),
               }
             : link
         )
@@ -277,7 +312,12 @@ const LinkedRecordsSection = ({
         // The parent isn't saved yet: hold the link until it is
         onPendingChange?.([
           ...pendingRef.current,
-          { entityId: record.id, relevanceNote: null, purpose: null },
+          {
+            entityId: record.id,
+            relevanceNote: null,
+            purpose: null,
+            ...(supportsExpectedFrequency && { expectedFrequency: null }),
+          },
         ]);
         return 'pending';
       },
@@ -287,7 +327,7 @@ const LinkedRecordsSection = ({
   if (
     hideWhenEmpty &&
     isViewMode &&
-    !loading &&
+    !isLoading &&
     rows.length === 0 &&
     !loadError
   )
@@ -297,6 +337,11 @@ const LinkedRecordsSection = ({
     <Paper withBorder p="md" bg="var(--color-bg-secondary)">
       <Stack gap="md">
         <Title order={5}>{title}</Title>
+        {description && (
+          <Text size="sm" c="dimmed">
+            {description}
+          </Text>
+        )}
         {loadError && (
           <Text size="sm" c="red">
             {loadError}
@@ -310,8 +355,10 @@ const LinkedRecordsSection = ({
           icon={icon}
           color={color}
           supportsPurpose={supportsPurpose}
+          purposeConfig={purposeConfig}
+          supportsExpectedFrequency={supportsExpectedFrequency}
           isViewMode={isViewMode}
-          loading={loading}
+          loading={isLoading}
           navigate={navigate}
           onCreateNew={canCreateNew ? handleCreateNew : undefined}
           createLabel={createType ? t(ADD_LABEL_KEYS[createType]) : undefined}

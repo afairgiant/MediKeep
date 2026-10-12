@@ -1,29 +1,18 @@
 /**
  * Treatment-Lab Result Relationship Constants
  *
- * Purpose options and helpers for the LabResultTreatmentRelationships component,
- * matching the valid `purpose` values accepted by the backend
- * (app/schemas/treatment.py's `_validate_lab_result_purpose`).
+ * Purpose options and helpers for lab result links to treatments, conditions and
+ * procedures, matching the valid `purpose` values accepted by the backend
+ * (app/schemas/validators.py's `validate_lab_result_link_purpose`).
  */
 
 export const PURPOSE_OPTIONS = [
-  { value: 'baseline', label: 'Baseline' },
-  { value: 'monitoring', label: 'Monitoring' },
-  { value: 'outcome', label: 'Outcome' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'other', label: 'Other' },
+  { value: 'baseline', labelKey: 'shared:linkPurposes.baseline' },
+  { value: 'monitoring', labelKey: 'shared:linkPurposes.monitoring' },
+  { value: 'outcome', labelKey: 'shared:linkPurposes.outcome' },
+  { value: 'safety', labelKey: 'shared:linkPurposes.safety' },
+  { value: 'other', labelKey: 'shared:linkPurposes.other' },
 ];
-
-/**
- * Get the display label for a purpose value.
- *
- * @param {string} purpose - The purpose value
- * @returns {string} The display label, or the raw value if not found
- */
-export function getPurposeLabel(purpose) {
-  const option = PURPOSE_OPTIONS.find(o => o.value === purpose);
-  return option ? option.label : purpose || '';
-}
 
 /**
  * Get the badge color for a purpose value.

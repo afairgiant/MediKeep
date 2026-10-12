@@ -8,13 +8,23 @@ import {
   type LinkTabMode,
 } from './LinkTabMenu';
 
-interface CollapsibleLinkTabsProps {
+type CollapsibleLinkTabsProps = {
   /** One entry per linked type; `key` is also the tab's value */
   items: LinkTabItem[];
-  mode: LinkTabMode;
-  /** Called with the tab value when the "Link" menu reveals a type, to open its tab */
-  onSelectTab?: (_tab: string) => void;
-}
+} & (
+  | {
+      mode: 'add';
+      /** Value of the open tab: a type opened from the "Link" menu stays while it is open */
+      activeTab: string | null;
+      /** Called with the tab value when the "Link" menu picks a type, to open its tab */
+      onSelectTab: (_tab: string) => void;
+    }
+  | {
+      mode: Exclude<LinkTabMode, 'add'>;
+      activeTab?: string | null;
+      onSelectTab?: (_tab: string) => void;
+    }
+);
 
 /**
  * Link tab buttons with a count each: "Medications (2)". Render inside <Tabs.List>.
@@ -24,10 +34,11 @@ interface CollapsibleLinkTabsProps {
 const CollapsibleLinkTabs = ({
   items,
   mode,
+  activeTab,
   onSelectTab,
 }: CollapsibleLinkTabsProps) => {
   const tabLabel = useTabLabel();
-  const { isShown, hidden, reveal } = useLinkTabVisibility(items, mode);
+  const { isShown, hidden } = useLinkTabVisibility(items, mode, activeTab);
 
   return (
     <>
@@ -43,13 +54,7 @@ const CollapsibleLinkTabs = ({
         ) : null
       )}
       {mode === 'add' && (
-        <LinkTabMenu
-          hidden={hidden}
-          onPick={key => {
-            reveal(key);
-            onSelectTab?.(key);
-          }}
-        />
+        <LinkTabMenu hidden={hidden} onPick={key => onSelectTab?.(key)} />
       )}
     </>
   );

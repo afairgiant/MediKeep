@@ -129,12 +129,7 @@
     "autoCalculated": "Automatisch berekend",
     "cannotRemoveLastRow": "Laatste rij kan niet worden verwijderd",
     "componentCreationWarning": "Labresultaat opgeslagen maar testcomponenten konden niet worden toegevoegd. U kunt ze toevoegen via de weergavepagina.",
-    "linkConditionsDescription": "Koppel dit labresultaat aan relevante medische aandoeningen voor betere tracking en organisatie.",
-    "linkConditionsTitle": "Medische aandoeningen koppelen",
     "linkedVisits": "Gekoppelde consulten",
-    "linkMedicationsTitle": "Koppelen aan medicatie",
-    "linkProceduresTitle": "Koppelen aan ingrepen",
-    "linkTreatmentsTitle": "Koppelen aan behandelingen",
     "linkVisitsDescription": "Koppel dit labresultaat aan consulten waarbij het is aangevraagd of beoordeeld.",
     "linkVisitsTitle": "Koppelen aan consulten",
     "matchedCommonName": "overeenkomst: {{name}}",
@@ -150,7 +145,6 @@
     "statusIndicator": "Statusindicator:",
     "testCodePlaceholder": "bijv. 718-7",
     "testComponents": "Testcomponenten (optioneel)",
-    "testDetails": "Testdetails",
     "unit": "Eenheid"
   },
   "keepEmptyLabResult": "Labresultaat behouden",
@@ -212,16 +206,6 @@
     "placeholder": "Selecteer arts"
   },
   "patientIdRequired": "Patiënt-ID is vereist. Selecteer eerst een patiënt.",
-  "pendingRelationships": {
-    "addCondition": "Aandoening toevoegen",
-    "removeCondition": "Aandoening verwijderen",
-    "addMedication": "Medicatie toevoegen",
-    "addProcedure": "Ingreep toevoegen",
-    "addTreatment": "Behandeling toevoegen",
-    "removeMedication": "Medicatie verwijderen",
-    "removeProcedure": "Ingreep verwijderen",
-    "removeTreatment": "Behandeling verwijderen"
-  },
   "quickFormInstructions": "Voer een naam in voor dit labresultaat, daarna kunt u uw PDF uploaden en verwerken.",
   "quickImportModalTitle": "Snelle PDF-import - Stap {{step}} van 2",
   "quickImportSuccess": "Labresultaat en testcomponenten succesvol geïmporteerd",

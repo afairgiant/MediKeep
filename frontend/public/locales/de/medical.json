@@ -941,8 +941,6 @@
       "conditionLinkPartialFailure": "{{count}} Erkrankungsverknüpfungen fehlgeschlagen",
       "conditionLinkPartialFailure_one": "{{count}} Erkrankungsverknüpfung fehlgeschlagen",
       "conditionLinkPartialFailure_other": "{{count}} Erkrankungsverknüpfungen fehlgeschlagen",
-      "linkConditionsDescription": "Dieses Medikament optional mit bestehenden Erkrankungen verknüpfen",
-      "noConditionsFound": "Keine Erkrankungen gefunden",
       "saving": "Medikament wird gespeichert...",
       "updateMedication": "Medikament aktualisieren"
     },

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
 import { vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 
@@ -8,6 +8,8 @@ import userEvent from '@testing-library/user-event';
 import render, { screen, fireEvent } from '../../../../test-utils/render';
 import '@testing-library/jest-dom';
 import TreatmentFormWrapper from '../TreatmentFormWrapper';
+import { notifications } from '@mantine/notifications';
+import { apiService } from '../../../../services/api';
 
 // Paths are relative to this test file (src/components/medical/treatments/__tests__/)
 
@@ -53,13 +55,31 @@ vi.mock('../TreatmentRelationshipsManager', () => ({
   ),
 }));
 
+type PendingRelationships = Record<string, { id: number }[]>;
+
 vi.mock('../TreatmentPlanSetup', () => ({
-  default: (props: { activeSection?: string }) => (
-    <div
-      data-testid="treatment-plan-setup"
-      data-section={props.activeSection}
-    />
-  ),
+  default: (props: {
+    activeSection?: string;
+    onRelationshipsChange: (
+      _update: (_prev: PendingRelationships) => PendingRelationships
+    ) => void;
+  }) => {
+    const pick = (key: string, id: number) => () =>
+      props.onRelationshipsChange(prev => ({ ...prev, [key]: [{ id }] }));
+    return (
+      <div
+        data-testid="treatment-plan-setup"
+        data-section={props.activeSection}
+      >
+        <button type="button" onClick={pick('medications', 5)}>
+          pick-medication
+        </button>
+        <button type="button" onClick={pick('encounters', 6)}>
+          pick-visit
+        </button>
+      </div>
+    );
+  },
 }));
 
 vi.mock('../../../services/api', () => ({
@@ -207,20 +227,65 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
     return user;
   };
 
-  test('Simple mode starts with no link tabs; the Link menu offers only Visits', async () => {
+  test('Simple mode starts with no link tabs; the Link menu offers Visits, Lab Results and Equipment (not Medications)', async () => {
     render(<TreatmentFormWrapper {...defaultProps} />);
     expect(
       screen.queryByRole('tab', { name: /shared:tabs.visits/ })
     ).toBeNull();
-    expect(tabNames().join('|')).not.toMatch(/medications|medical_equipment/);
-    expect(screen.queryByRole('tab', { name: /lab_results/ })).toBeNull();
+    expect(tabNames().join('|')).not.toMatch(
+      /medications|medical_equipment|lab_results/
+    );
 
     await userEvent.click(linkMenuButton());
     expect(
       (await screen.findAllByRole('menuitem', { hidden: true })).map(
         item => item.textContent
       )
-    ).toEqual(['shared:tabs.visits']);
+    ).toEqual([
+      'shared:tabs.visits',
+      'shared:categories.lab_results',
+      'shared:categories.medical_equipment',
+    ]);
+  });
+
+  test.each([
+    ['Lab Results', /shared:categories.lab_results/, 'labs'],
+    ['Medical Equipment', /shared:categories.medical_equipment/, 'equipment'],
+  ])(
+    'Simple mode: picking %s from the Link menu opens its section',
+    async (_name, menuName, section) => {
+      render(<TreatmentFormWrapper {...defaultProps} />);
+      await revealTab(menuName);
+      expect(await screen.findByTestId('treatment-plan-setup')).toHaveAttribute(
+        'data-section',
+        section
+      );
+      // The tab shows (with no links yet) while it is open
+      expect(
+        screen.getByRole('tab', { name: new RegExp(`${menuName.source}.*`) })
+      ).toHaveAttribute('aria-selected', 'true');
+    }
+  );
+
+  test('Simple mode edit shows all three link tabs, each with its own section', async () => {
+    render(
+      <TreatmentFormWrapper
+        {...defaultProps}
+        editingTreatment={{ id: 42, patient_id: 7 }}
+      />
+    );
+    expect(tabNames().join('|')).toMatch(/lab_results/);
+    expect(tabNames().join('|')).toMatch(/medical_equipment/);
+    expect(tabNames().join('|')).not.toMatch(/medications/);
+
+    fireEvent.click(screen.getByRole('tab', { name: /lab_results/ }));
+    expect(
+      await screen.findByTestId('treatment-relationships-manager')
+    ).toHaveAttribute('data-section', 'labs');
+    fireEvent.click(screen.getByRole('tab', { name: /medical_equipment/ }));
+    expect(
+      await screen.findByTestId('treatment-relationships-manager')
+    ).toHaveAttribute('data-section', 'equipment');
   });
 
   test('Simple mode loads the relationship content only when Visits is opened', async () => {
@@ -270,7 +335,7 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
     ]);
   });
 
-  test('switching to Simple mode keeps the Visits tab selected but leaves other relationship tabs', async () => {
+  test('switching to Simple mode keeps the Visits, Lab Results and Equipment tabs but leaves Medications', async () => {
     const Stateful = () => {
       const [mode, setMode] = useState('advanced');
       return (
@@ -291,6 +356,15 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
     expect(visitsTab()).toHaveAttribute('aria-selected', 'true');
     unmount();
 
+    // From the Lab Results tab: stays on it after switching to Simple
+    const { unmount: unmountLabs } = render(<Stateful />);
+    await revealTab(/shared:categories.lab_results/);
+    fireEvent.click(screen.getByText('Simple'));
+    expect(
+      screen.getByRole('tab', { name: /shared:categories.lab_results/ })
+    ).toHaveAttribute('aria-selected', 'true');
+    unmountLabs();
+
     // From the Medications tab: falls back to Basic Info
     render(<Stateful />);
     await revealTab(/shared:categories.medications/);
@@ -298,5 +372,136 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
     expect(
       screen.getByRole('tab', { name: /shared:tabs.basicInfo|Basic Info/ })
     ).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('switching a new treatment to Simple with medications picked asks first, and the medications are not linked', async () => {
+    const confirmSpy = vi
+      .spyOn(window, 'confirm')
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    const linkMedication = vi
+      .spyOn(apiService, 'linkTreatmentMedication')
+      .mockResolvedValue({});
+    const linkEncounter = vi
+      .spyOn(apiService, 'linkTreatmentEncounter')
+      .mockResolvedValue({});
+    const onSubmit = vi.fn().mockResolvedValue({ id: 99 });
+    const Stateful = () => {
+      const [mode, setMode] = useState('advanced');
+      return (
+        <TreatmentFormWrapper
+          {...defaultProps}
+          onSubmit={onSubmit}
+          formData={{ ...defaultProps.formData, mode }}
+          onInputChange={(e: { target: { name: string; value: string } }) => {
+            if (e.target.name === 'mode') setMode(e.target.value);
+          }}
+        />
+      );
+    };
+    try {
+      render(<Stateful />);
+      fireEvent.click(screen.getByText('pick-medication'));
+      fireEvent.click(screen.getByText('pick-visit'));
+
+      // Cancelling keeps Treatment Plan mode
+      fireEvent.click(screen.getByText('Simple'));
+      expect(confirmSpy).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByText(
+          'Medication-centric plan with per-medication overrides'
+        )
+      ).toBeInTheDocument();
+
+      // Confirming switches to Simple and drops the medications, but keeps the visit
+      fireEvent.click(screen.getByText('Simple'));
+      expect(confirmSpy).toHaveBeenCalledTimes(2);
+      expect(
+        screen.getByText('Basic tracking with schedule and dosage')
+      ).toBeInTheDocument();
+
+      fireEvent.submit(document.querySelector('form') as HTMLFormElement);
+      await vi.waitFor(() =>
+        expect(linkEncounter).toHaveBeenCalledWith(
+          99,
+          expect.objectContaining({ encounter_id: 6 })
+        )
+      );
+      expect(linkMedication).not.toHaveBeenCalled();
+    } finally {
+      confirmSpy.mockRestore();
+      linkMedication.mockRestore();
+      linkEncounter.mockRestore();
+    }
+  });
+});
+
+describe('TreatmentFormWrapper - Simple mode on a saved treatment plan', () => {
+  const spies: Array<{ mockRestore: () => void }> = [];
+  const spy = <T extends { mockRestore: () => void }>(created: T): T => {
+    spies.push(created);
+    return created;
+  };
+  // The wrapper's props are inferred from its defaults, which has no saved treatment
+  const SavedPlanForm = TreatmentFormWrapper as unknown as ComponentType<
+    Record<string, unknown>
+  >;
+  const savedPlan = (onInputChange: ReturnType<typeof vi.fn>) => (
+    <SavedPlanForm
+      {...defaultProps}
+      formData={{ ...defaultProps.formData, mode: 'advanced' }}
+      onInputChange={onInputChange}
+      editingTreatment={{ id: 42, patient_id: 7 }}
+    />
+  );
+  const mockLinks = (medications: unknown[]) => {
+    spy(vi.spyOn(apiService, 'getTreatmentMedications')).mockResolvedValue(
+      medications
+    );
+    spy(vi.spyOn(apiService, 'getTreatmentEncounters')).mockResolvedValue([]);
+    spy(vi.spyOn(apiService, 'getTreatmentLabResults')).mockResolvedValue([]);
+    spy(vi.spyOn(apiService, 'getTreatmentEquipment')).mockResolvedValue([]);
+  };
+
+  afterEach(() => {
+    spies.splice(0).forEach(created => created.mockRestore());
+  });
+
+  test('stays in Treatment Plan mode while medications are linked, and says why', async () => {
+    mockLinks([{ id: 1 }, { id: 2 }]);
+    const show = spy(vi.spyOn(notifications, 'show')).mockReturnValue('id');
+    const confirmSpy = spy(vi.spyOn(window, 'confirm'));
+    const onInputChange = vi.fn();
+    render(savedPlan(onInputChange));
+    await screen.findByRole('tab', {
+      name: /shared:categories.medications.*2/,
+    });
+
+    fireEvent.click(screen.getByText('Simple'));
+
+    expect(onInputChange).not.toHaveBeenCalled();
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('cannot switch to Simple mode'),
+      })
+    );
+  });
+
+  test('switches to Simple mode when no medication is linked', async () => {
+    mockLinks([]);
+    const show = spy(vi.spyOn(notifications, 'show')).mockReturnValue('id');
+    const onInputChange = vi.fn();
+    render(savedPlan(onInputChange));
+    await screen.findByRole('tab', {
+      name: /shared:categories.medications.*0/,
+    });
+
+    fireEvent.click(screen.getByText('Simple'));
+
+    expect(onInputChange).toHaveBeenCalledWith({
+      target: { name: 'mode', value: 'simple' },
+    });
+    expect(show).not.toHaveBeenCalled();
   });
 });

@@ -200,13 +200,22 @@ beforeAll(() =>
 
 // Reset any request handlers that we may add during the tests,
 // so they don't affect other tests
-afterEach(() => {
+afterEach(async () => {
   server.resetHandlers();
   // Clear all mocks
   vi.clearAllMocks();
   // Clear localStorage/sessionStorage
   localStorage.clear();
   sessionStorage.clear();
+  // Link counts outlive their dialog for a moment; one test's counts must not reach the
+  // next test that uses the same record id. Imported here, not at the top, so a test's
+  // own mock of the logger still applies to the store.
+  try {
+    const { resetLinkCountStore } = await import('./utils/linkCountStore');
+    resetLinkCountStore();
+  } catch {
+    // A test that replaces the store has nothing to reset
+  }
 });
 
 // Clean up after the tests are finished
