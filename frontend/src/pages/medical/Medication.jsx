@@ -60,7 +60,7 @@ import logger from '../../services/logger';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
 import { linkPendingLabResultsOrWarn } from '../../utils/recordLabResultLinks';
-import { savePendingMedicationConditionLinks } from '../../utils/medicationConditionLinks';
+import { linkPendingMedicationConditionsOrWarn } from '../../utils/medicationConditionLinks';
 import {
   INITIAL_MEDICATION_FORM_DATA,
   buildMedicationPayload,
@@ -379,40 +379,24 @@ const Medication = () => {
           }
         }
 
-        // Link visits chosen in the Add form now that the record exists
+        // Link what was chosen in the Add form now that the record exists
         if (success && resultId && !editingMedication) {
-          await linkPendingVisitsOrWarn(
-            'medications',
-            resultId,
-            formData.pending_visit_links
-          );
-          await linkPendingLabResultsOrWarn(
-            'medications',
-            resultId,
-            formData.pending_lab_result_links
-          );
-          if (formData.pending_condition_links?.length > 0) {
-            const failedCount = await savePendingMedicationConditionLinks(
+          await Promise.allSettled([
+            linkPendingVisitsOrWarn(
+              'medications',
+              resultId,
+              formData.pending_visit_links
+            ),
+            linkPendingLabResultsOrWarn(
+              'medications',
+              resultId,
+              formData.pending_lab_result_links
+            ),
+            linkPendingMedicationConditionsOrWarn(
               resultId,
               formData.pending_condition_links
-            );
-            if (failedCount > 0) {
-              logger.warn('medications_condition_link_partial_failure', {
-                message: `Failed to link ${failedCount} of ${formData.pending_condition_links.length} conditions`,
-                medicationId: resultId,
-                failedCount,
-                component: 'Medication',
-              });
-              notifications.show({
-                title: t(
-                  'medical:medications.form.conditionLinkPartialFailure',
-                  { count: failedCount }
-                ),
-                message: t('medical:medications.form.conditionLinkFailed'),
-                color: 'yellow',
-              });
-            }
-          }
+            ),
+          ]);
         }
 
         completeFormSubmission(success, resultId);

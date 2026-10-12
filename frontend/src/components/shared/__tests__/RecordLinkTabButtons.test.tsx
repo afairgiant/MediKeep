@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Tabs } from '@mantine/core';
 import '@testing-library/jest-dom';
 
-import render, { screen } from '../../../test-utils/render';
+import render, { act, screen, waitFor } from '../../../test-utils/render';
 import RecordLinkTabButtons from '../RecordLinkTabButtons';
 import type { RecordLinkPath } from '../../../constants/recordLinkKinds';
 import type { PendingLink } from '../../../types/encounterLinks';
@@ -30,7 +30,11 @@ const renderTabs = (
   render(
     <Tabs value="x">
       <Tabs.List>
-        <RecordLinkTabButtons recordPath={recordPath} {...props} />
+        <RecordLinkTabButtons
+          {...({ recordPath, ...props } as ComponentProps<
+            typeof RecordLinkTabButtons
+          >)}
+        />
       </Tabs.List>
     </Tabs>
   );
@@ -126,5 +130,72 @@ describe('RecordLinkTabButtons - record not saved yet', () => {
       screen.getByRole('tab', { name: 'shared:categories.conditions (1)' })
     ).toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: /labResults/ })).toBeNull();
+  });
+});
+
+describe('RecordLinkTabButtons - read-only dialog of a saved record', () => {
+  const settled = async () => {
+    await waitFor(() => expect(api.getRecordEncounterLinks).toHaveBeenCalled());
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
+  it('shows no tab until every count has loaded, then only the kinds with links', async () => {
+    let resolveLabResults: (_rows: unknown[]) => void = () => undefined;
+    api.getRecordLabResultLinks.mockReturnValue(
+      new Promise<unknown[]>(resolve => (resolveLabResults = resolve))
+    );
+    api.getConditionMedicationLinks.mockResolvedValue([{ id: 1 }]);
+    api.getRecordEncounterLinks.mockResolvedValue([]);
+    renderTabs('conditions', { recordId: 5, isViewMode: true });
+
+    // Medications already has a link, but its tab waits for the slowest count
+    await settled();
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+
+    resolveLabResults([]);
+    expect(
+      await screen.findByRole('tab', {
+        name: 'shared:categories.medications (1)',
+      })
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('tab')).toHaveLength(1);
+  });
+
+  it('keeps the tab of a kind whose count could not be loaded, without a number', async () => {
+    api.getRecordLabResultLinks.mockRejectedValue(new Error('boom'));
+    api.getConditionMedicationLinks.mockResolvedValue([]);
+    api.getRecordEncounterLinks.mockResolvedValue([]);
+    renderTabs('conditions', { recordId: 5, isViewMode: true });
+
+    expect(
+      await screen.findByRole('tab', { name: 'shared:tabs.labResults' })
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('tab')).toHaveLength(1);
+  });
+
+  it('shows no tab for a record without links', async () => {
+    renderTabs('procedures', { recordId: 5, isViewMode: true });
+    await settled();
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+  });
+
+  it('does not ask again for counts the edit form reuses after the view dialog', async () => {
+    api.getRecordEncounterLinks.mockResolvedValue([{ id: 1 }]);
+    const view = renderTabs('injuries', { recordId: 5, isViewMode: true });
+    await screen.findByRole('tab', { name: 'Visits (1)' });
+    view.unmount();
+
+    renderTabs('injuries', {
+      recordId: 5,
+      activeTab: 'basic',
+      onSelectTab: vi.fn(),
+    });
+
+    expect(
+      await screen.findByRole('tab', { name: 'Visits (1)' })
+    ).toBeInTheDocument();
+    expect(api.getRecordEncounterLinks).toHaveBeenCalledTimes(1);
   });
 });

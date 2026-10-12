@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "Le mode Simple ne connecte pas de médicaments. Passer en mode Simple et retirer les médicaments sélectionnés ?",
       "label": "Mode de traitement",
       "simple": "Simple",
+      "simpleBlockedByMedications": "Un plan de traitement enregistré ne peut pas passer en mode Simple tant que des médicaments y sont liés. Supprimez d'abord les liens dans l'onglet Médicaments.",
       "simpleDescription": "Suivi simple avec horaires et dosages"
     },
     "noEquipmentLinkedDescription": "Cherchez et connectez de l'équipement médical utilisé dans le cadre de ce traitement.",

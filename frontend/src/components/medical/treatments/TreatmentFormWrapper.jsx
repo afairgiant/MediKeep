@@ -83,10 +83,9 @@ const TreatmentFormWrapper = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Track relationship counts for badge display (edit mode)
-  // null until the relationship manager reports; until then the preloaded counts are used
-  const [relationshipCounts, setRelationshipCounts] = useState(null);
-  const loadedCounts = useTreatmentLinkCounts(editingTreatment?.id, isOpen);
+  // Relationship counts for the tab labels (edit mode): loaded when the dialog opens, and
+  // kept current by the relationship panels
+  const savedCounts = useTreatmentLinkCounts(editingTreatment?.id, isOpen);
 
   // Track pending relationships for creation mode
   const [pendingRelationships, setPendingRelationships] = useState(
@@ -145,7 +144,6 @@ const TreatmentFormWrapper = ({
     }
     if (!isOpen) {
       setIsSubmitting(false);
-      setRelationshipCounts(null);
       setPendingRelationships(EMPTY_PENDING_RELATIONSHIPS);
     }
   }, [isOpen, subDialog]);
@@ -313,7 +311,7 @@ const TreatmentFormWrapper = ({
   const getTabCount = tabValue => {
     const countKey = TAB_TO_COUNT_KEY[tabValue];
     if (editingTreatment) {
-      return (relationshipCounts ?? loadedCounts)[countKey];
+      return savedCounts[countKey].count;
     }
     return (pendingRelationships[countKey] || []).length;
   };
@@ -359,7 +357,7 @@ const TreatmentFormWrapper = ({
   // Total badge count for Basic Info alert
   const totalBadgeCount = editingTreatment
     ? ['medications', 'encounters', 'labResults', 'equipment'].reduce(
-        (sum, key) => sum + ((relationshipCounts ?? loadedCounts)[key] || 0),
+        (sum, key) => sum + (savedCounts[key].count || 0),
         0
       )
     : pendingCount;
@@ -444,12 +442,25 @@ const TreatmentFormWrapper = ({
                         <SegmentedControl
                           value={formData.mode || 'simple'}
                           onChange={value => {
-                            // Simple mode has no Medications tab, so medications picked
-                            // for a new treatment would be linked without being shown
+                            // Simple mode has no Medications tab, so medications linked
+                            // to the treatment would stay linked without being shown
                             if (
                               value === 'simple' &&
-                              pendingRelationships.medications?.length > 0
+                              getTabCount('medications') > 0
                             ) {
+                              // The links of a saved treatment are deleted on their own
+                              // tab, not by switching mode
+                              if (editingTreatment) {
+                                notifications.show({
+                                  message: t(
+                                    'treatments.mode.simpleBlockedByMedications',
+                                    'A saved treatment plan cannot switch to Simple mode while it has linked medications. Unlink them on the Medications tab first.'
+                                  ),
+                                  color: 'yellow',
+                                  autoClose: 8000,
+                                });
+                                return;
+                              }
                               if (
                                 !window.confirm(
                                   t(
@@ -925,7 +936,6 @@ const TreatmentFormWrapper = ({
                     treatmentId={editingTreatment.id}
                     patientId={editingTreatment.patient_id}
                     isViewMode={false}
-                    onCountsChange={setRelationshipCounts}
                   />
                 ) : (
                   <TreatmentPlanSetup

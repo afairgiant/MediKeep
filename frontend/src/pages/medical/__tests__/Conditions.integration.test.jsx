@@ -725,7 +725,7 @@ describe('Conditions Page Integration Tests', () => {
 
         await waitFor(() =>
           expect(notifications.show).toHaveBeenCalledWith(
-            expect.objectContaining({ color: 'yellow' })
+            expect.objectContaining({ color: 'orange' })
           )
         );
       });

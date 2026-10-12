@@ -26,7 +26,7 @@ class LabResultCondition(Base):
     lab_result_id = Column(Integer, ForeignKey("lab_results.id"), nullable=False)
     condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
 
-    # Why this lab result is linked: baseline, monitoring, outcome, safety or other
+    # Why this lab result is linked (LAB_RESULT_LINK_PURPOSES)
     purpose = Column(String(50), nullable=True)
 
     # Optional context about how this lab result relates to this condition
@@ -745,7 +745,7 @@ class LabResultProcedure(Base):
         Integer, ForeignKey("procedures.id", ondelete="CASCADE"), nullable=False
     )
 
-    # Why this lab result is linked: baseline, monitoring, outcome, safety or other
+    # Why this lab result is linked (LAB_RESULT_LINK_PURPOSES)
     purpose = Column(String(50), nullable=True)
 
     # Optional context about how this lab result relates to this procedure

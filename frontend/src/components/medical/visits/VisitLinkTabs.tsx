@@ -12,6 +12,7 @@ import {
   setLinkCount,
   useLinkCounts,
   useLoadLinkCounts,
+  type LinkCountState,
 } from '../../../utils/linkCountStore';
 import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 import { useTabLabel } from '../../../hooks/useTabLabel';
@@ -20,6 +21,7 @@ import {
   LinkTabMenu,
   linkTabMode,
   useLinkTabVisibility,
+  type LinkTabNavigationProps,
 } from '../../shared/LinkTabMenu';
 import type {
   EncounterLinkTypeConfig,
@@ -49,21 +51,16 @@ const visitCountKey = (
   config: EncounterLinkTypeConfig
 ) => linkCountKey('visit', visitId, config.key);
 
-interface LinkTabButtonsProps {
+/**
+ * View mode shows only the types that have links. Add mode (no visitId yet) does the
+ * same and adds a "Link" menu to reveal the others. Editing a saved visit shows all.
+ */
+type LinkTabButtonsProps = {
   /** Saved visit id; null/undefined while a new visit is being created */
   visitId?: number | null;
   /** Links chosen in the Add form: their number is the count until the visit is saved */
   pendingLinks?: PendingLinks;
-  /**
-   * View mode shows only the types that have links. Add mode (no visitId yet) does the
-   * same and adds a "Link" menu to reveal the others. Editing a saved visit shows all.
-   */
-  isViewMode?: boolean;
-  /** Value of the open tab: a type opened from the "Link" menu stays while it is open */
-  activeTab?: string | null;
-  /** Called with the tab value when the "Link" menu reveals a type, to open its tab */
-  onSelectTab?: (_tab: string) => void;
-}
+} & LinkTabNavigationProps;
 
 const LinkTabButton = ({
   config,
@@ -119,10 +116,13 @@ export const VisitLinkTabButtons = ({
   );
 
   const storedCounts = useLinkCounts(
-    ENCOUNTER_LINK_TYPES.map(config => visitCountKey(visitId, config))
+    ENCOUNTER_LINK_TYPES.map(config => visitCountKey(visitId, config)),
+    Boolean(visitId)
   );
-  const counts = ENCOUNTER_LINK_TYPES.map((config, index) =>
-    visitId ? storedCounts[index] : (pendingLinks?.[config.key]?.length ?? 0)
+  const counts: LinkCountState[] = ENCOUNTER_LINK_TYPES.map((config, index) =>
+    visitId
+      ? storedCounts[index]
+      : { count: pendingLinks?.[config.key]?.length ?? 0, loading: false }
   );
 
   const mode = linkTabMode(isViewMode, Boolean(visitId));
@@ -131,7 +131,8 @@ export const VisitLinkTabButtons = ({
       key: config.key,
       label: t(`shared:categories.${config.categoryKey}`),
       icon: config.icon,
-      count: counts[index],
+      count: counts[index].count,
+      loading: counts[index].loading,
       tabValue: linkTabValue(config),
     })),
     mode,
@@ -145,7 +146,7 @@ export const VisitLinkTabButtons = ({
           <LinkTabButton
             key={config.key}
             config={config}
-            count={counts[index]}
+            count={counts[index].count}
           />
         ) : null
       )}

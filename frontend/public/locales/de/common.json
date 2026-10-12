@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "Im Modus „Einfach“ werden keine Medikamente verknüpft. Zu „Einfach“ wechseln und die ausgewählten Medikamente entfernen?",
       "label": "Behandlungsmodus",
       "simple": "Einfach",
+      "simpleBlockedByMedications": "Ein gespeicherter Behandlungsplan kann nicht auf den Modus „Einfach“ umgestellt werden, solange Medikamente verknüpft sind. Entfernen Sie zuerst die Verknüpfungen auf dem Tab „Medikamente“.",
       "simpleDescription": "Grundlegende Nachverfolgung mit Zeitplan und Dosierung"
     },
     "noEquipmentLinkedDescription": "Suchen und verknüpfen Sie medizinische Geräte, die in dieser Behandlung verwendet werden.",

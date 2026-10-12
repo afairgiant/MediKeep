@@ -117,7 +117,7 @@ describe('Treatment tabs show how many items are linked', () => {
     expect(screen.queryByRole('tab', { name: /Labs/ })).toBeNull();
   });
 
-  it('View: a count that cannot be loaded gives no tab for that type', async () => {
+  it('View: a count that cannot be loaded keeps the tab for that type, without a number', async () => {
     api.getTreatmentEncounters.mockRejectedValue(new Error('boom'));
     render(
       <ViewModal
@@ -130,7 +130,7 @@ describe('Treatment tabs show how many items are linked', () => {
     expect(
       await screen.findByRole('tab', { name: /Medications \(3\)/ })
     ).toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: /Visits/ })).toBeNull();
+    expect(screen.getByRole('tab', { name: /^Visits$/ })).toBeInTheDocument();
   });
 
   const editProps = (mode: string, extra = {}) => ({

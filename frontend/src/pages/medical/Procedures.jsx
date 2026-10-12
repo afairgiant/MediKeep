@@ -277,18 +277,20 @@ const Procedures = () => {
         }
       }
 
-      // Link visits chosen in the Add form now that the record exists
+      // Link what was chosen in the Add form now that the record exists
       if (success && resultId && !editingProcedure) {
-        await linkPendingVisitsOrWarn(
-          'procedures',
-          resultId,
-          formData.pending_visit_links
-        );
-        await linkPendingLabResultsOrWarn(
-          'procedures',
-          resultId,
-          formData.pending_lab_result_links
-        );
+        await Promise.allSettled([
+          linkPendingVisitsOrWarn(
+            'procedures',
+            resultId,
+            formData.pending_visit_links
+          ),
+          linkPendingLabResultsOrWarn(
+            'procedures',
+            resultId,
+            formData.pending_lab_result_links
+          ),
+        ]);
       }
 
       // Complete form submission

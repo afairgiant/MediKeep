@@ -3,8 +3,14 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { Tabs } from '@mantine/core';
 
-import render, { screen, waitFor, within } from '../../../../test-utils/render';
+import render, {
+  act,
+  screen,
+  waitFor,
+  within,
+} from '../../../../test-utils/render';
 import { VisitLinkTabButtons, VisitLinkTabPanels } from '../VisitLinkTabs';
+import type { LinkTabNavigationProps } from '../../../shared/LinkTabMenu';
 import type { PendingLinks } from '../../../../types/encounterLinks';
 
 const api = vi.hoisted(() => ({
@@ -133,9 +139,11 @@ const buildTree = (key: TypeKey, props: TabProps = {}) => {
         <VisitLinkTabButtons
           visitId={props.visitId}
           pendingLinks={props.pendingLinks}
-          isViewMode={props.isViewMode}
-          activeTab={activeTab}
-          onSelectTab={onSelectTab}
+          {...({
+            isViewMode: props.isViewMode,
+            activeTab,
+            onSelectTab,
+          } as LinkTabNavigationProps)}
         />
       </Tabs.List>
       <VisitLinkTabPanels activeTab={tabValue(key)} {...panelProps} />
@@ -429,6 +437,46 @@ describe('VisitLinkTabButtons', () => {
         screen.getByRole('tab', { name: 'shared:categories.procedures (0)' })
       ).toBeInTheDocument()
     );
+  });
+
+  it('view mode shows no tab until every count has loaded, and keeps one whose count failed', async () => {
+    let resolveSlow: (_rows: unknown[]) => void = () => undefined;
+    api.getEncounterLinks.mockImplementation((_id: number, type: string) => {
+      if (type === 'procedures') return Promise.resolve([procedureLink]);
+      if (type === 'injuries') return Promise.reject(new Error('boom'));
+      if (type === 'lab-results')
+        return new Promise<unknown[]>(resolve => (resolveSlow = resolve));
+      return Promise.resolve([]);
+    });
+    renderTab('procedures', {
+      visitId: VISIT_ID,
+      patientId: PATIENT_ID,
+      isViewMode: true,
+    });
+
+    // The slow request is the last one a count waits for
+    await waitFor(() =>
+      expect(api.getEncounterLinks).toHaveBeenCalledWith(
+        VISIT_ID,
+        'lab-results',
+        expect.anything()
+      )
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+
+    resolveSlow([]);
+    expect(
+      await screen.findByRole('tab', {
+        name: 'shared:categories.procedures (1)',
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('tab', { name: 'shared:categories.injuries' })
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('tab')).toHaveLength(2);
   });
 
   it('leaves a tab without a number when its count cannot be loaded', async () => {

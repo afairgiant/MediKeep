@@ -336,13 +336,10 @@ const LinkSection = ({
     );
   };
 
-  if (loading && rows.length === 0) {
-    return (
-      <Group gap="xs">
-        <Loader size="xs" />
-      </Group>
-    );
-  }
+  // The list is on its way. The layout stays what it will be (the empty box's height, and
+  // the controls row of the Edit dialogs), so the dialog does not shrink while it loads
+  // and grow again when the rows arrive.
+  const awaitingRows = loading && rows.length === 0;
 
   return (
     <Stack gap="md">
@@ -352,7 +349,13 @@ const LinkSection = ({
         </Alert>
       )}
 
-      {rows.length > 0 ? (
+      {awaitingRows ? (
+        <Paper withBorder p="md" aria-busy="true">
+          <Group justify="center" mih={25}>
+            <Loader size="xs" />
+          </Group>
+        </Paper>
+      ) : rows.length > 0 ? (
         <Stack gap="sm">
           {rows.map(row => {
             const isEditing = editing?.id === row.id;
@@ -406,7 +409,11 @@ const LinkSection = ({
 
       {!isViewMode && (
         <Group justify="space-between" align="center">
-          <Text size="sm" c="dimmed">
+          <Text
+            size="sm"
+            c="dimmed"
+            style={awaitingRows ? { visibility: 'hidden' } : undefined}
+          >
             {t('common:visits.relationships.availableToLink', {
               count: candidates.length,
             })}
@@ -418,7 +425,7 @@ const LinkSection = ({
                 variant="light"
                 leftSection={<IconPlus size={16} />}
                 onClick={onCreateNew}
-                disabled={busy}
+                disabled={busy || awaitingRows}
               >
                 {createLabel}
               </Button>
@@ -428,7 +435,7 @@ const LinkSection = ({
               variant="light"
               leftSection={<IconPlus size={16} />}
               onClick={() => setShowAddModal(true)}
-              disabled={busy || candidates.length === 0}
+              disabled={busy || awaitingRows || candidates.length === 0}
             >
               {t('common:buttons.link')}
             </Button>

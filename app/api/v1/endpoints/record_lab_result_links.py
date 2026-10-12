@@ -1,8 +1,8 @@
-"""Record-side routes for lab result links on medications and procedures.
+"""Record-side routes for lab result links on medications, procedures and conditions.
 
-A link joins a lab result to a medication or procedure of the same patient. The
-lab result side owns creating the rows (``/lab-results/{id}/medications``); these
-routes let the medication or procedure list, add, edit and remove the same links:
+A link joins a lab result to a medication, procedure or condition of the same patient.
+The lab result side owns creating the rows (``/lab-results/{id}/medications``); these
+routes let the record list, add, edit and remove the same links:
 
 - ``/medications/{id}/lab-results``
 - ``/procedures/{id}/lab-results``
@@ -163,7 +163,7 @@ def _log(request, user, operation, config, link_id, record):
 
 
 def register_record_lab_result_routes(router: APIRouter, config_key: str) -> None:
-    """Add the ``/{id}/lab-results`` routes to a medication or procedure router."""
+    """Add the ``/{id}/lab-results`` routes to a medication, procedure or condition router."""
     config = RECORD_LAB_RESULT_LINK_CONFIGS[config_key]
     lower = config.label.lower()
     base = "/{record_id}/lab-results"

@@ -76,6 +76,8 @@ describe('LabResultViewModal - linked-record tabs', () => {
         initialTab="overview"
         labResultConditions={{ 5: [{ id: 1 }] }}
         labResultMedications={{ 5: [] }}
+        labResultProcedures={{ 5: [] }}
+        labResultTreatments={{ 5: [] }}
       />
     );
     expect(
@@ -99,9 +101,46 @@ describe('LabResultViewModal - linked-record tabs', () => {
     ).toBeNull();
   });
 
+  // A list is absent while it loads and null when its load failed
+  type Links = unknown[] | null | undefined;
+  const linksOf = (links: Links) => (links === undefined ? {} : { 5: links });
+  const modalWithCounts = (
+    counts: {
+      conditions?: Links;
+      medications?: Links;
+      procedures?: Links;
+      treatments?: Links;
+    },
+    initialTab = 'overview'
+  ) => (
+    <LabResultViewModal
+      isOpen
+      onClose={vi.fn()}
+      labResult={{ id: 5, test_name: 'CBC', status: 'completed', tags: [] }}
+      practitioners={[]}
+      isGroupedResult
+      initialTab={initialTab}
+      labResultConditions={linksOf(counts.conditions)}
+      labResultMedications={linksOf(counts.medications)}
+      labResultProcedures={linksOf(counts.procedures)}
+      labResultTreatments={linksOf(counts.treatments)}
+    />
+  );
+  const renderWithCounts = (
+    counts: Parameters<typeof modalWithCounts>[0],
+    initialTab?: string
+  ) => render(modalWithCounts(counts, initialTab));
+
   it('shows no linked-record tabs for a lab result without links', async () => {
-    renderModal('overview');
-    await waitFor(() => expect(visitsSpy).toHaveBeenCalled());
+    renderWithCounts({
+      conditions: [],
+      medications: [],
+      procedures: [],
+      treatments: [],
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole('tab', { name: /^Visits/ })).toBeNull()
+    );
     ['conditions', 'medications', 'procedures', 'treatments'].forEach(name =>
       expect(
         screen.queryByRole('tab', {
@@ -109,7 +148,57 @@ describe('LabResultViewModal - linked-record tabs', () => {
         })
       ).toBeNull()
     );
-    expect(screen.queryByRole('tab', { name: /^Visits/ })).toBeNull();
+  });
+
+  it('keeps the tab of a type whose links could not be loaded, without a number', async () => {
+    renderWithCounts({
+      conditions: null,
+      medications: [],
+      procedures: [],
+      treatments: [],
+    });
+    expect(
+      await screen.findByRole('tab', { name: 'shared:categories.conditions' })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('tab', {
+        name: withCount('shared:categories.medications'),
+      })
+    ).toBeNull();
+  });
+
+  it('shows no linked-record tab until every list has loaded, then only the ones with links', async () => {
+    visitRows = [];
+    const { rerender } = renderWithCounts({
+      conditions: [{ id: 1 }],
+      medications: [],
+      procedures: [],
+      treatments: undefined,
+    });
+    await waitFor(() => expect(visitsSpy).toHaveBeenCalled());
+    expect(screen.queryByRole('tab', { name: /categories/ })).toBeNull();
+
+    rerender(
+      modalWithCounts({
+        conditions: [{ id: 1 }],
+        medications: [],
+        procedures: [],
+        treatments: [],
+      })
+    );
+    expect(
+      await screen.findByRole('tab', {
+        name: 'shared:categories.conditions (1)',
+      })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /medications/ })).toBeNull();
+  });
+
+  it('keeps the tab it was opened on while the lists load', () => {
+    renderWithCounts({}, 'rel-conditions');
+    expect(
+      screen.getByRole('tab', { name: 'shared:categories.conditions' })
+    ).toBeInTheDocument();
   });
 
   it('shows a read-only Visits card for the viewed lab result on the Visits tab', () => {
@@ -133,7 +222,7 @@ describe('LabResultViewModal - linked-record tabs', () => {
 });
 
 describe('LabResultViewModal - tab numbers', () => {
-  it('shows the number of saved links on each tab and loads them when it opens', () => {
+  it('shows the number of saved links on each tab and loads them when it opens', async () => {
     const fetchers = {
       fetchLabResultConditions: vi.fn(),
       fetchLabResultMedications: vi.fn(),
@@ -156,11 +245,15 @@ describe('LabResultViewModal - tab numbers', () => {
         labResultConditions={{ 5: [{ id: 1 }] }}
         labResultMedications={{ 5: [{ id: 1 }, { id: 2 }] }}
         labResultProcedures={{ 5: [] }}
+        labResultTreatments={{ 5: [] }}
         {...fetchers}
       />
     );
+    // The tabs wait for the Visits count too
     expect(
-      screen.getByRole('tab', { name: 'shared:categories.conditions (1)' })
+      await screen.findByRole('tab', {
+        name: 'shared:categories.conditions (1)',
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByRole('tab', { name: 'shared:categories.medications (2)' })

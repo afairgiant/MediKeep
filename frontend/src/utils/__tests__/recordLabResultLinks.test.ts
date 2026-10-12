@@ -11,10 +11,7 @@ vi.mock('../../services/logger', () => ({
 vi.mock('../notifyTranslated', () => ({ notifyWarning: vi.fn() }));
 
 import { notifyWarning } from '../notifyTranslated';
-import {
-  linkPendingLabResultsOrWarn,
-  savePendingRecordLabResultLinks,
-} from '../recordLabResultLinks';
+import { linkPendingLabResultsOrWarn } from '../recordLabResultLinks';
 
 const pending = [
   { entityId: 3, relevanceNote: 'a', purpose: null },
@@ -26,14 +23,9 @@ beforeEach(() => {
   api.createRecordLabResultLink.mockResolvedValue({});
 });
 
-describe('savePendingRecordLabResultLinks', () => {
+describe('linkPendingLabResultsOrWarn', () => {
   it('links each lab result to the new record, with its note', async () => {
-    const failed = await savePendingRecordLabResultLinks(
-      'medications',
-      9,
-      pending
-    );
-    expect(failed).toBe(0);
+    await linkPendingLabResultsOrWarn('medications', 9, pending);
     expect(api.createRecordLabResultLink).toHaveBeenNthCalledWith(
       1,
       'medications',
@@ -46,15 +38,16 @@ describe('savePendingRecordLabResultLinks', () => {
       9,
       { lab_result_id: 4, relevance_note: null }
     );
+    expect(notifyWarning).not.toHaveBeenCalled();
   });
 
   it('sends the purpose for conditions and procedures, but not for medications', async () => {
     const withPurpose = [
       { entityId: 3, relevanceNote: 'a', purpose: 'monitoring' },
     ];
-    await savePendingRecordLabResultLinks('conditions', 9, withPurpose);
-    await savePendingRecordLabResultLinks('procedures', 9, withPurpose);
-    await savePendingRecordLabResultLinks('medications', 9, withPurpose);
+    await linkPendingLabResultsOrWarn('conditions', 9, withPurpose);
+    await linkPendingLabResultsOrWarn('procedures', 9, withPurpose);
+    await linkPendingLabResultsOrWarn('medications', 9, withPurpose);
     expect(api.createRecordLabResultLink).toHaveBeenNthCalledWith(
       1,
       'conditions',
@@ -75,32 +68,12 @@ describe('savePendingRecordLabResultLinks', () => {
     );
   });
 
-  it('keeps going after a failure and counts the failed links', async () => {
+  it('keeps going after a failure and warns once, about lab results', async () => {
     api.createRecordLabResultLink
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({});
-    expect(
-      await savePendingRecordLabResultLinks('procedures', 9, pending)
-    ).toBe(1);
+    await linkPendingLabResultsOrWarn('procedures', 9, pending);
     expect(api.createRecordLabResultLink).toHaveBeenCalledTimes(2);
-  });
-
-  it('does nothing without pending links', async () => {
-    expect(await savePendingRecordLabResultLinks('procedures', 9)).toBe(0);
-    expect(await savePendingRecordLabResultLinks('procedures', 9, [])).toBe(0);
-    expect(api.createRecordLabResultLink).not.toHaveBeenCalled();
-  });
-});
-
-describe('linkPendingLabResultsOrWarn', () => {
-  it('stays quiet when every link is saved', async () => {
-    await linkPendingLabResultsOrWarn('medications', 9, pending);
-    expect(notifyWarning).not.toHaveBeenCalled();
-  });
-
-  it('warns once, about lab results, when any link fails', async () => {
-    api.createRecordLabResultLink.mockRejectedValue(new Error('boom'));
-    await linkPendingLabResultsOrWarn('medications', 9, pending);
     expect(notifyWarning).toHaveBeenCalledTimes(1);
     expect(notifyWarning).toHaveBeenCalledWith(
       'common:recordRelationships.labResultLinkFailed',

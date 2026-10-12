@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "De modus Eenvoudig koppelt geen medicatie. Overschakelen naar Eenvoudig en de geselecteerde medicatie verwijderen?",
       "label": "Behandelmodus",
       "simple": "Eenvoudig",
+      "simpleBlockedByMedications": "Een opgeslagen behandelplan kan niet naar de modus Eenvoudig zolang er medicatie aan gekoppeld is. Verwijder eerst de koppelingen op het tabblad Medicatie.",
       "simpleDescription": "Basisregistratie met schema en dosering"
     },
     "noEquipmentLinkedDescription": "Zoek en koppel medische apparatuur die wordt gebruikt bij deze behandeling.",

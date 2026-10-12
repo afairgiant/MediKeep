@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "Simple mode does not link medications. Switch to Simple and remove the medications you selected?",
       "label": "Treatment Mode",
       "simple": "Simple",
+      "simpleBlockedByMedications": "A saved treatment plan cannot switch to Simple mode while it has linked medications. Unlink them on the Medications tab first.",
       "simpleDescription": "Basic tracking with schedule and dosage"
     },
     "noEquipmentLinkedDescription": "Search and link medical equipment used in this treatment.",

@@ -106,11 +106,7 @@ class CRUDLabResultCondition(
     def get_by_lab_result_with_details(
         self, db: Session, *, lab_result_id: int
     ) -> List:
-        """Get all condition links for a lab result with joined condition data.
-
-        Returns a list of (LabResultCondition, Condition) tuples, so listing a lab
-        result's conditions takes one query however many there are.
-        """
+        """Get a lab result's condition links as (LabResultCondition, Condition) tuples."""
         return (
             db.query(self.model, Condition)
             .join(Condition, self.model.condition_id == Condition.id)
@@ -119,10 +115,7 @@ class CRUDLabResultCondition(
         )
 
     def get_by_condition_with_details(self, db: Session, *, condition_id: int) -> List:
-        """Get all lab result links for a condition with joined lab result data.
-
-        Returns a list of (LabResultCondition, LabResult) tuples, newest first.
-        """
+        """Get a condition's lab result links as (LabResultCondition, LabResult) tuples, newest first."""
         return (
             db.query(self.model, LabResult)
             .join(LabResult, self.model.lab_result_id == LabResult.id)
@@ -208,10 +201,7 @@ class CRUDLabResultMedication(
     def get_by_medication_with_details(
         self, db: Session, *, medication_id: int
     ) -> List:
-        """Get all lab result links for a medication with joined lab result data.
-
-        Returns a list of (LabResultMedication, LabResult) tuples.
-        """
+        """Get a medication's lab result links as (LabResultMedication, LabResult) tuples, newest first."""
         return (
             db.query(self.model, LabResult)
             .join(LabResult, self.model.lab_result_id == LabResult.id)
@@ -279,10 +269,7 @@ class CRUDLabResultProcedure(
         )
 
     def get_by_procedure_with_details(self, db: Session, *, procedure_id: int) -> List:
-        """Get all lab result links for a procedure with joined lab result data.
-
-        Returns a list of (LabResultProcedure, LabResult) tuples.
-        """
+        """Get a procedure's lab result links as (LabResultProcedure, LabResult) tuples, newest first."""
         return (
             db.query(self.model, LabResult)
             .join(LabResult, self.model.lab_result_id == LabResult.id)

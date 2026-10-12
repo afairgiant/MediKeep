@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "La modalità Semplice non collega farmaci. Passare a Semplice e rimuovere i farmaci selezionati?",
       "label": "Modalità trattamento",
       "simple": "Semplice",
+      "simpleBlockedByMedications": "Un piano di trattamento salvato non può passare alla modalità Semplice finché ha farmaci collegati. Scollegali prima nella scheda Farmaci.",
       "simpleDescription": "Monitoraggio di base con pianificazione e dosaggio"
     },
     "noEquipmentLinkedDescription": "Cerca e collega l'attrezzatura medica utilizzata in questo trattamento.",

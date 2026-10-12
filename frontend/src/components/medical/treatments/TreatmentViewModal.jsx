@@ -127,7 +127,8 @@ const TreatmentViewModal = ({
             key: 'medications',
             label: t('shared:categories.medications', 'Medications'),
             icon: IconPill,
-            count: counts.medications,
+            count: counts.medications.count,
+            loading: counts.medications.loading,
           },
         ]
       : []),
@@ -135,19 +136,22 @@ const TreatmentViewModal = ({
       key: 'visits',
       label: t('shared:tabs.visits', 'Visits'),
       icon: IconStethoscope,
-      count: counts.encounters,
+      count: counts.encounters.count,
+      loading: counts.encounters.loading,
     },
     {
       key: 'labs',
       label: t('treatments.viewModal.tabs.labs', 'Labs'),
       icon: IconTestPipe,
-      count: counts.labResults,
+      count: counts.labResults.count,
+      loading: counts.labResults.loading,
     },
     {
       key: 'equipment',
       label: t('treatments.viewModal.tabs.equipment', 'Equipment'),
       icon: IconDeviceDesktop,
-      count: counts.equipment,
+      count: counts.equipment.count,
+      loading: counts.equipment.loading,
     },
   ];
   const visitsPanel = (

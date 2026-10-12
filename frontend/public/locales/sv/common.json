@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "Läget Enkel länkar inga mediciner. Byta till Enkel och ta bort de mediciner du valt?",
       "label": "Behandlingsläge",
       "simple": "Enkel",
+      "simpleBlockedByMedications": "En sparad behandlingsplan kan inte byta till läget Enkel så länge den har länkade mediciner. Ta först bort länkarna på fliken Mediciner.",
       "simpleDescription": "Grundläggande spårning med schema och dosering"
     },
     "noEquipmentLinkedDescription": "Sök och länka medicinsk utrustning som används i denna behandling.",

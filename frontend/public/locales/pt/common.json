@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "O modo Simples não vincula medicamentos. Mudar para Simples e remover os medicamentos selecionados?",
       "label": "Modo de Tratamento",
       "simple": "Simples",
+      "simpleBlockedByMedications": "Um plano de tratamento guardado não pode mudar para o modo Simples enquanto tiver medicamentos vinculados. Remova primeiro os vínculos no separador Medicamentos.",
       "simpleDescription": "Rastreamento básico com cronograma e dosagem"
     },
     "noEquipmentLinkedDescription": "Pesquise e vincule equipamentos médicos usados neste tratamento.",

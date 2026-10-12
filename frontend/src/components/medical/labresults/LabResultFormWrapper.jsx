@@ -394,6 +394,13 @@ const LabResultFormWrapper = ({
         procedures: pendingProcedures.length,
         treatments: pendingTreatments.length,
       };
+  // Every type is shown while editing, so only the numbers matter here
+  const linkCountStates = Object.fromEntries(
+    Object.entries(linkCounts).map(([kind, count]) => [
+      kind,
+      { count, loading: false },
+    ])
+  );
 
   // The saved links are loaded when the dialog opens so the tabs can show their numbers
   useEffect(() => {
@@ -526,7 +533,7 @@ const LabResultFormWrapper = ({
               {showAdvancedTabs && (
                 <LabResultLinkTabButtons
                   labResultId={savedLabResultId}
-                  counts={linkCounts}
+                  counts={linkCountStates}
                   pendingVisitLinks={pendingVisitLinks}
                   activeTab={activeTab}
                   onSelectTab={setActiveTab}

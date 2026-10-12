@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import { Stack, Box, Text } from '@mantine/core';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
+import { treatmentLinkCountKey } from '../../../hooks/useTreatmentLinkCounts';
+import { setLinkCount } from '../../../utils/linkCountStore';
 import TreatmentMedicationRelationships from './TreatmentMedicationRelationships';
 import TreatmentEncounterRelationships from './TreatmentEncounterRelationships';
 import TreatmentLabResultRelationships from './TreatmentLabResultRelationships';
@@ -19,7 +21,6 @@ const TreatmentRelationshipsManager = ({
   treatmentId,
   patientId,
   isViewMode = false,
-  onCountsChange,
   onMedicationClick,
   onEncounterClick,
   onLabResultClick,
@@ -35,13 +36,6 @@ const TreatmentRelationshipsManager = ({
         {linkPanelDescription(items, 'treatment')}
       </Text>
     );
-
-  // Relationship counts for badges
-  const [medicationCount, setMedicationCount] = useState(0);
-  const [encounterCount, setEncounterCount] = useState(0);
-  const [countsLoaded, setCountsLoaded] = useState(false);
-  const [labResultCount, setLabResultCount] = useState(0);
-  const [equipmentCount, setEquipmentCount] = useState(0);
 
   // Data for selectors
   const [medications, setMedications] = useState([]);
@@ -112,51 +106,6 @@ const TreatmentRelationshipsManager = ({
     [treatmentId, safeFetch]
   );
 
-  // Fetch relationship counts with abort signal
-  const fetchCounts = useCallback(
-    async signal => {
-      if (!treatmentId) return;
-
-      try {
-        const [meds, encs, labs, equip] = await Promise.all([
-          safeFetch(
-            apiService.getTreatmentMedications(treatmentId, signal),
-            'treatment medications'
-          ),
-          safeFetch(
-            apiService.getTreatmentEncounters(treatmentId, signal),
-            'treatment encounters'
-          ),
-          safeFetch(
-            apiService.getTreatmentLabResults(treatmentId, signal),
-            'treatment lab results'
-          ),
-          safeFetch(
-            apiService.getTreatmentEquipment(treatmentId, signal),
-            'treatment equipment'
-          ),
-        ]);
-
-        if (!signal?.aborted && isMountedRef.current) {
-          setMedicationCount(toArray(meds).length);
-          setEncounterCount(toArray(encs).length);
-          setLabResultCount(toArray(labs).length);
-          setEquipmentCount(toArray(equip).length);
-          setCountsLoaded(true);
-        }
-      } catch (err) {
-        if (err.name !== 'AbortError' && isMountedRef.current) {
-          logger.error('treatment_relationships_fetch_counts_error', {
-            treatmentId,
-            error: err.message,
-            component: 'TreatmentRelationshipsManager',
-          });
-        }
-      }
-    },
-    [treatmentId, safeFetch]
-  );
-
   // Effect with proper cleanup using AbortController
   useEffect(() => {
     isMountedRef.current = true;
@@ -164,31 +113,37 @@ const TreatmentRelationshipsManager = ({
 
     if (treatmentId) {
       fetchAvailableEntities(controller.signal);
-      fetchCounts(controller.signal);
     }
 
     return () => {
       isMountedRef.current = false;
       controller.abort();
     };
-  }, [treatmentId, fetchAvailableEntities, fetchCounts]);
+  }, [treatmentId, fetchAvailableEntities]);
 
-  // Memoized count-change callbacks to prevent infinite re-renders in child components
-  const handleMedicationCountChange = useCallback(
-    rels => setMedicationCount(rels?.length || 0),
-    []
+  // Each panel loads its own links and reports them whenever they change; the tab counts
+  // live in the shared store, where the form's tabs read them. Memoized so the panels do
+  // not re-render endlessly.
+  const reportCount = useCallback(
+    kind => rels =>
+      setLinkCount(treatmentLinkCountKey(treatmentId, kind), rels?.length || 0),
+    [treatmentId]
   );
-  const handleEncounterCountChange = useCallback(
-    rels => setEncounterCount(rels?.length || 0),
-    []
+  const handleMedicationCountChange = useMemo(
+    () => reportCount('medications'),
+    [reportCount]
   );
-  const handleLabResultCountChange = useCallback(
-    rels => setLabResultCount(rels?.length || 0),
-    []
+  const handleEncounterCountChange = useMemo(
+    () => reportCount('encounters'),
+    [reportCount]
   );
-  const handleEquipmentCountChange = useCallback(
-    rels => setEquipmentCount(rels?.length || 0),
-    []
+  const handleLabResultCountChange = useMemo(
+    () => reportCount('labResults'),
+    [reportCount]
+  );
+  const handleEquipmentCountChange = useMemo(
+    () => reportCount('equipment'),
+    [reportCount]
   );
 
   // Records created from a tab's Add button join the lists the rows look their names up in
@@ -204,26 +159,6 @@ const TreatmentRelationshipsManager = ({
   const handleEquipmentCreated = useCallback(newEquip => {
     setEquipment(prev => [...prev, newEquip]);
   }, []);
-
-  // Report per-type counts to parent when they change
-  useEffect(() => {
-    // Not before the real counts are known: the zeros of the first render are not counts
-    if (onCountsChange && countsLoaded) {
-      onCountsChange({
-        medications: medicationCount,
-        encounters: encounterCount,
-        labResults: labResultCount,
-        equipment: equipmentCount,
-      });
-    }
-  }, [
-    medicationCount,
-    encounterCount,
-    labResultCount,
-    equipmentCount,
-    countsLoaded,
-    onCountsChange,
-  ]);
 
   if (!treatmentId) {
     return null;
@@ -304,7 +239,6 @@ TreatmentRelationshipsManager.propTypes = {
   treatmentId: PropTypes.number,
   patientId: PropTypes.number,
   isViewMode: PropTypes.bool,
-  onCountsChange: PropTypes.func,
   onMedicationClick: PropTypes.func,
   onEncounterClick: PropTypes.func,
   onLabResultClick: PropTypes.func,

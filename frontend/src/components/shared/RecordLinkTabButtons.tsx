@@ -14,23 +14,18 @@ import {
   linkTabMode,
   useLinkTabVisibility,
   type LinkTabItem,
+  type LinkTabNavigationProps,
 } from './LinkTabMenu';
 import type { PendingLink } from '../../types/encounterLinks';
 
-interface RecordLinkTabButtonsProps {
+type RecordLinkTabButtonsProps = {
   /** The record type: a condition, medication, procedure, injury or symptom */
   recordPath: RecordLinkPath;
   /** Saved record id; null/undefined while a new record is being created */
   recordId?: number | null;
   /** The links chosen in the Add form, by kind: their number is the count until saved */
   pendingLinks?: Partial<Record<RecordLinkKind, PendingLink[]>>;
-  /** The read-only dialog: only the types that have links, and no Link menu */
-  isViewMode?: boolean;
-  /** Value of the open tab: a type opened from the "Link" menu stays while it is open */
-  activeTab?: string | null;
-  /** Called with the tab value when the "Link" menu picks a type */
-  onSelectTab?: (_value: string) => void;
-}
+} & LinkTabNavigationProps;
 
 /**
  * The linked-record tab buttons of a condition, medication, procedure, injury or symptom
@@ -60,7 +55,8 @@ const RecordLinkTabButtons = ({
       key: kind,
       label: defaultLabel ? t(labelKey, defaultLabel) : t(labelKey),
       icon,
-      count: counts[kind],
+      count: counts[kind]?.count,
+      loading: counts[kind]?.loading,
     };
   });
 

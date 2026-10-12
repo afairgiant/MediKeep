@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container, Paper, Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
 import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import {
   useMedicalData,
@@ -32,7 +31,7 @@ import logger from '../../services/logger';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { linkPendingVisitsOrWarn } from '../../utils/recordVisitLinks';
 import { linkPendingLabResultsOrWarn } from '../../utils/recordLabResultLinks';
-import { savePendingConditionMedicationLinks } from '../../utils/conditionMedicationLinks';
+import { linkPendingConditionMedicationsOrWarn } from '../../utils/conditionMedicationLinks';
 import {
   ConditionCard,
   ConditionViewModal,
@@ -290,37 +289,24 @@ const Conditions = () => {
         }
       }
 
-      // Link visits chosen in the Add form now that the record exists
+      // Link what was chosen in the Add form now that the record exists
       if (success && resultId && !editingCondition) {
-        await linkPendingVisitsOrWarn(
-          'conditions',
-          resultId,
-          formData.pending_visit_links
-        );
-        await linkPendingLabResultsOrWarn(
-          'conditions',
-          resultId,
-          formData.pending_lab_result_links
-        );
-        if (formData.pending_medication_links?.length > 0) {
-          const failed = await savePendingConditionMedicationLinks(
+        await Promise.allSettled([
+          linkPendingVisitsOrWarn(
+            'conditions',
+            resultId,
+            formData.pending_visit_links
+          ),
+          linkPendingLabResultsOrWarn(
+            'conditions',
+            resultId,
+            formData.pending_lab_result_links
+          ),
+          linkPendingConditionMedicationsOrWarn(
             resultId,
             formData.pending_medication_links
-          );
-          if (failed > 0) {
-            notifications.show({
-              title: t(
-                'conditions.notifications.medicationLinkWarning',
-                'Medication Linking Issue'
-              ),
-              message: t(
-                'conditions.notifications.medicationLinkFailed',
-                'Condition was created, but some medications could not be linked. You can link them manually by editing the condition.'
-              ),
-              color: 'yellow',
-            });
-          }
-        }
+          ),
+        ]);
       }
 
       completeFormSubmission(success, resultId);

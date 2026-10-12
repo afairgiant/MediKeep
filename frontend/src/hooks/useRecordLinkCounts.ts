@@ -8,6 +8,7 @@ import {
   linkCountKey,
   useLinkCounts,
   useLoadLinkCounts,
+  type LinkCountState,
 } from '../utils/linkCountStore';
 import type { PendingLink } from '../types/encounterLinks';
 
@@ -21,13 +22,14 @@ export const recordLinkCountKey = (
 /**
  * How many links a record has of each of its kinds. For a saved record the counts are
  * loaded up front (a card only loads when its tab is opened) and kept current by the
- * cards; for a new record they are the number of links chosen so far.
+ * cards, and each is `loading` until it arrives; for a new record they are the number of
+ * links chosen so far.
  */
 export const useRecordLinkCounts = (
   path: RecordLinkPath,
   recordId: number | null | undefined,
   pendingLinks: Partial<Record<RecordLinkKind, PendingLink[]>> = {}
-): Partial<Record<RecordLinkKind, number | undefined>> => {
+): Partial<Record<RecordLinkKind, LinkCountState>> => {
   const kinds = RECORD_LINK_KINDS[path];
   const keys = kinds.map(kind => recordLinkCountKey(path, recordId, kind));
 
@@ -46,11 +48,13 @@ export const useRecordLinkCounts = (
     Boolean(recordId)
   );
 
-  const stored = useLinkCounts(keys);
+  const stored = useLinkCounts(keys, Boolean(recordId));
   return Object.fromEntries(
     kinds.map((kind, index) => [
       kind,
-      recordId ? stored[index] : (pendingLinks[kind]?.length ?? 0),
+      recordId
+        ? stored[index]
+        : { count: pendingLinks[kind]?.length ?? 0, loading: false },
     ])
   );
 };

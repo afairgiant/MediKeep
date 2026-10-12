@@ -8,6 +8,7 @@ import {
   linkCountKey,
   useLinkCount,
   useLoadLinkCounts,
+  type LinkCountState,
 } from '../../utils/linkCountStore';
 import type { PendingLink, RecordTabType } from '../../types/encounterLinks';
 
@@ -19,14 +20,14 @@ export const recordVisitsCountKey = (
 
 /**
  * Count of the visits a record is linked to. For a saved record it is loaded up front
- * (the panel only loads when its tab is opened) and kept current by the panel; for a
- * new record it is the number of pending links.
+ * (the panel only loads when its tab is opened) and kept current by the panel, and is
+ * `loading` until it arrives; for a new record it is the number of pending links.
  */
 export const useRecordVisitsCount = (
   recordType: RecordTabType,
   recordId?: number | null,
   pendingLinks?: PendingLink[]
-): number | undefined => {
+): LinkCountState => {
   const key = recordVisitsCountKey(recordType, recordId);
 
   useLoadLinkCounts(
@@ -49,8 +50,10 @@ export const useRecordVisitsCount = (
     Boolean(recordId)
   );
 
-  const storedCount = useLinkCount(key);
-  return recordId ? storedCount : (pendingLinks?.length ?? 0);
+  const storedCount = useLinkCount(key, Boolean(recordId));
+  return recordId
+    ? storedCount
+    : { count: pendingLinks?.length ?? 0, loading: false };
 };
 
 interface RecordVisitsTabButtonProps {
@@ -89,7 +92,7 @@ const RecordVisitsTabButton = ({
     managed ? null : recordId,
     pendingLinks
   );
-  const count = managed ? providedCount : ownCount;
+  const count = managed ? providedCount : ownCount.count;
 
   return (
     <Tabs.Tab value={value} leftSection={<IconStethoscope size={16} />}>

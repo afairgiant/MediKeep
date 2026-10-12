@@ -1396,6 +1396,7 @@
       "confirmSimpleDropsMedications": "Tryb prosty nie łączy leków. Przełączyć na tryb prosty i usunąć wybrane leki?",
       "label": "Tryb leczenia",
       "simple": "Prosty",
+      "simpleBlockedByMedications": "Zapisany plan leczenia nie może przejść w tryb prosty, dopóki ma powiązane leki. Najpierw usuń powiązania na karcie Leki.",
       "simpleDescription": "Podstawowe śledzenie z harmonogramem i dawkowaniem"
     },
     "noEquipmentLinkedDescription": "Wyszukaj i powiąż sprzęt medyczny używany w tym leczeniu.",

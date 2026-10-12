@@ -241,6 +241,13 @@ const LabResults = () => {
   const [labResultProcedures, setLabResultProcedures] = useState({});
   const [labResultTreatments, setLabResultTreatments] = useState({});
 
+  // A list that could not be loaded is null, so its tab does not wait for it; a list
+  // loaded earlier is kept
+  const markLinksFailed = (setLinks, labResultId) =>
+    setLinks(prev =>
+      prev[labResultId] === undefined ? { ...prev, [labResultId]: null } : prev
+    );
+
   // Helper function to fetch condition relationships for a lab result
   const fetchLabResultConditions = async labResultId => {
     try {
@@ -258,6 +265,7 @@ const LabResults = () => {
         error: err.message,
         component: 'LabResults',
       });
+      markLinksFailed(setLabResultConditions, labResultId);
       return [];
     }
   };
@@ -279,6 +287,7 @@ const LabResults = () => {
         error: err.message,
         component: 'LabResults',
       });
+      markLinksFailed(setLabResultMedications, labResultId);
       return [];
     }
   };
@@ -300,6 +309,7 @@ const LabResults = () => {
         error: err.message,
         component: 'LabResults',
       });
+      markLinksFailed(setLabResultProcedures, labResultId);
       return [];
     }
   };
@@ -321,6 +331,7 @@ const LabResults = () => {
         error: err.message,
         component: 'LabResults',
       });
+      markLinksFailed(setLabResultTreatments, labResultId);
       return [];
     }
   };

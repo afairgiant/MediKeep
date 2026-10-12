@@ -5,8 +5,10 @@ vi.mock('../../services/api', () => ({ apiService: api }));
 vi.mock('../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
+vi.mock('../notifyTranslated', () => ({ notifyWarning: vi.fn() }));
 
-import { savePendingMedicationConditionLinks } from '../medicationConditionLinks';
+import { linkPendingMedicationConditionsOrWarn } from '../medicationConditionLinks';
+import { notifyWarning } from '../notifyTranslated';
 
 const pending = [
   { entityId: 3, relevanceNote: 'a', purpose: null },
@@ -18,9 +20,9 @@ beforeEach(() => {
   api.createConditionMedication.mockResolvedValue({});
 });
 
-describe('savePendingMedicationConditionLinks', () => {
+describe('linkPendingMedicationConditionsOrWarn', () => {
   it('links the new medication to each chosen condition, with its note', async () => {
-    expect(await savePendingMedicationConditionLinks(9, pending)).toBe(0);
+    await linkPendingMedicationConditionsOrWarn(9, pending);
     expect(api.createConditionMedication).toHaveBeenNthCalledWith(1, 3, {
       medication_id: 9,
       relevance_note: 'a',
@@ -29,19 +31,29 @@ describe('savePendingMedicationConditionLinks', () => {
       medication_id: 9,
       relevance_note: null,
     });
+    expect(notifyWarning).not.toHaveBeenCalled();
   });
 
-  it('keeps going after a failure and counts the failed links', async () => {
+  it('keeps going after a failure and warns once with the failed count', async () => {
     api.createConditionMedication
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({});
-    expect(await savePendingMedicationConditionLinks(9, pending)).toBe(1);
+    await linkPendingMedicationConditionsOrWarn(9, pending);
     expect(api.createConditionMedication).toHaveBeenCalledTimes(2);
+    expect(notifyWarning).toHaveBeenCalledTimes(1);
+    expect(notifyWarning).toHaveBeenCalledWith(
+      'medical:medications.form.conditionLinkFailed',
+      {
+        title: 'medical:medications.form.conditionLinkPartialFailure',
+        interpolation: { count: 1 },
+      }
+    );
   });
 
-  it('does nothing without pending links', async () => {
-    expect(await savePendingMedicationConditionLinks(9)).toBe(0);
-    expect(await savePendingMedicationConditionLinks(9, [])).toBe(0);
+  it('does not call the API or warn with nothing pending', async () => {
+    await linkPendingMedicationConditionsOrWarn(9);
+    await linkPendingMedicationConditionsOrWarn(9, []);
     expect(api.createConditionMedication).not.toHaveBeenCalled();
+    expect(notifyWarning).not.toHaveBeenCalled();
   });
 });

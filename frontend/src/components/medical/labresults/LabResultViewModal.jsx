@@ -33,6 +33,7 @@ import TestComponentsTab from './TestComponentsTab';
 import logger from '../../../services/logger';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
+import { listCountState } from '../../../utils/linkCountStore';
 
 const LabResultViewModal = ({
   isOpen,
@@ -201,11 +202,14 @@ const LabResultViewModal = ({
               <LabResultLinkTabButtons
                 labResultId={labResult.id}
                 isViewMode
+                activeTab={activeTab}
                 counts={{
-                  conditions: labResultConditions[labResult.id]?.length,
-                  medications: labResultMedications[labResult.id]?.length,
-                  procedures: labResultProcedures[labResult.id]?.length,
-                  treatments: labResultTreatments[labResult.id]?.length,
+                  conditions: listCountState(labResultConditions[labResult.id]),
+                  medications: listCountState(
+                    labResultMedications[labResult.id]
+                  ),
+                  procedures: listCountState(labResultProcedures[labResult.id]),
+                  treatments: listCountState(labResultTreatments[labResult.id]),
                 }}
               />
               {!isGroupedResult && (

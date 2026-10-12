@@ -1488,7 +1488,7 @@ class ApiService {
     );
   }
 
-  // Lab result links (record side). recordPath is medications or procedures
+  // Lab result links (record side). recordPath is medications, procedures or conditions
   getRecordLabResultLinks(recordPath, recordId, signal) {
     return this.get(`/${recordPath}/${recordId}/lab-results`, { signal });
   }

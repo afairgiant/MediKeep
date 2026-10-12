@@ -1268,27 +1268,6 @@ Base path: `/api/v1/conditions`
 
 ##### Get Condition Medications
 
-`GET /conditions/condition-medications/{condition_id}`
-
-- **Purpose**: Get all medications linked to a condition
-- **Authentication**: Yes
-- **Success Response** (200):
-
-```json
-[
-  {
-    "id": 1,
-    "medication_id": 5,
-    "condition_id": 1,
-    "relevance_note": "Primary treatment",
-    "created_at": "2025-10-01T00:00:00Z",
-    "updated_at": "2025-10-01T00:00:00Z"
-  }
-]
-```
-
-##### Get Condition Medications With Details
-
 `GET /conditions/{condition_id}/medications`
 
 - **Purpose**: List the medications linked to a condition, with the medication details

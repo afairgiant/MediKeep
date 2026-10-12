@@ -296,11 +296,31 @@ vi.mock('../../../components/medical/labresults/LabResultCard', () => ({
     </div>
   ),
 }));
-vi.mock('../../../components/medical/labresults/LabResultViewModal', () => ({
-  default: ({ isOpen, onClose, labResult, onEdit }) => {
+vi.mock('../../../components/medical/labresults/LabResultViewModal', () => {
+  const LabResultViewModalMock = ({
+    isOpen,
+    onClose,
+    labResult,
+    onEdit,
+    labResultConditions,
+    fetchLabResultConditions,
+  }) => {
+    // Like the real dialog, ask the page for the saved links when it opens
+    useEffect(() => {
+      if (isOpen && labResult) fetchLabResultConditions?.(labResult.id);
+      // The page rebuilds its fetcher on every render; the dialog opening is what counts
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, labResult?.id]);
     if (!isOpen || !labResult) return null;
     return (
-      <div data-testid="view-modal" role="dialog">
+      <div
+        data-testid="view-modal"
+        data-conditions={String(
+          labResultConditions?.[labResult.id]?.length ??
+            labResultConditions?.[labResult.id]
+        )}
+        role="dialog"
+      >
         <h2>Lab Result Details</h2>
         <span>{labResult.test_name}</span>
         {labResult.labs_result && <pre>{labResult.labs_result}</pre>}
@@ -309,8 +329,9 @@ vi.mock('../../../components/medical/labresults/LabResultViewModal', () => ({
         <button onClick={() => onEdit(labResult)}>Edit</button>
       </div>
     );
-  },
-}));
+  };
+  return { default: LabResultViewModalMock };
+});
 vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => {
   const LabResultFormWrapperMock = ({
     isOpen,
@@ -833,6 +854,49 @@ describe('Lab Results Page Integration Tests', () => {
       expect(
         within(modal).getByText('Complete Blood Count (CBC)')
       ).toBeInTheDocument();
+    });
+
+    describe('the saved links the page loads for the opened lab result', () => {
+      const openFirstLabResult = () => {
+        useViewModalNavigation.mockReturnValue({
+          isOpen: true,
+          viewingItem: mockLabResults[0],
+          openModal: vi.fn(),
+          closeModal: vi.fn(),
+        });
+        renderWithPatient(<LabResults />);
+      };
+
+      test('hands the dialog the list, so its tab can show the number', async () => {
+        const { apiService } = await import('../../../services/api');
+        apiService.getLabResultConditions.mockResolvedValueOnce([
+          { id: 1 },
+          { id: 2 },
+        ]);
+        openFirstLabResult();
+
+        await waitFor(() =>
+          expect(screen.getByTestId('view-modal')).toHaveAttribute(
+            'data-conditions',
+            '2'
+          )
+        );
+      });
+
+      test('marks the list as failed instead of leaving it loading, when the request fails', async () => {
+        const { apiService } = await import('../../../services/api');
+        apiService.getLabResultConditions.mockRejectedValueOnce(
+          new Error('boom')
+        );
+        openFirstLabResult();
+
+        await waitFor(() =>
+          expect(screen.getByTestId('view-modal')).toHaveAttribute(
+            'data-conditions',
+            'null'
+          )
+        );
+      });
     });
 
     test('views lab result with results text', async () => {

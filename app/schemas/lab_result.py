@@ -526,7 +526,7 @@ class LabResultWithRelations(LabResultResponse):
     model_config = {"from_attributes": True}
 
 
-# Record-side lab result links (shown on a medication or procedure)
+# Record-side lab result links (shown on a medication, procedure or condition)
 
 
 class RecordLabResultLinkCreate(BaseModel):
@@ -580,7 +580,7 @@ class RecordLabResultSummary(BaseModel):
 
 
 class RecordLabResultLinkResponse(BaseModel):
-    """A lab result link as seen from the medication or procedure"""
+    """A lab result link as seen from the medication, procedure or condition"""
 
     id: int
     lab_result_id: int

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
 import { vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 
@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import render, { screen, fireEvent } from '../../../../test-utils/render';
 import '@testing-library/jest-dom';
 import TreatmentFormWrapper from '../TreatmentFormWrapper';
+import { notifications } from '@mantine/notifications';
 import { apiService } from '../../../../services/api';
 
 // Paths are relative to this test file (src/components/medical/treatments/__tests__/)
@@ -432,5 +433,75 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
       linkMedication.mockRestore();
       linkEncounter.mockRestore();
     }
+  });
+});
+
+describe('TreatmentFormWrapper - Simple mode on a saved treatment plan', () => {
+  const spies: Array<{ mockRestore: () => void }> = [];
+  const spy = <T extends { mockRestore: () => void }>(created: T): T => {
+    spies.push(created);
+    return created;
+  };
+  // The wrapper's props are inferred from its defaults, which has no saved treatment
+  const SavedPlanForm = TreatmentFormWrapper as unknown as ComponentType<
+    Record<string, unknown>
+  >;
+  const savedPlan = (onInputChange: ReturnType<typeof vi.fn>) => (
+    <SavedPlanForm
+      {...defaultProps}
+      formData={{ ...defaultProps.formData, mode: 'advanced' }}
+      onInputChange={onInputChange}
+      editingTreatment={{ id: 42, patient_id: 7 }}
+    />
+  );
+  const mockLinks = (medications: unknown[]) => {
+    spy(vi.spyOn(apiService, 'getTreatmentMedications')).mockResolvedValue(
+      medications
+    );
+    spy(vi.spyOn(apiService, 'getTreatmentEncounters')).mockResolvedValue([]);
+    spy(vi.spyOn(apiService, 'getTreatmentLabResults')).mockResolvedValue([]);
+    spy(vi.spyOn(apiService, 'getTreatmentEquipment')).mockResolvedValue([]);
+  };
+
+  afterEach(() => {
+    spies.splice(0).forEach(created => created.mockRestore());
+  });
+
+  test('stays in Treatment Plan mode while medications are linked, and says why', async () => {
+    mockLinks([{ id: 1 }, { id: 2 }]);
+    const show = spy(vi.spyOn(notifications, 'show')).mockReturnValue('id');
+    const confirmSpy = spy(vi.spyOn(window, 'confirm'));
+    const onInputChange = vi.fn();
+    render(savedPlan(onInputChange));
+    await screen.findByRole('tab', {
+      name: /shared:categories.medications.*2/,
+    });
+
+    fireEvent.click(screen.getByText('Simple'));
+
+    expect(onInputChange).not.toHaveBeenCalled();
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('cannot switch to Simple mode'),
+      })
+    );
+  });
+
+  test('switches to Simple mode when no medication is linked', async () => {
+    mockLinks([]);
+    const show = spy(vi.spyOn(notifications, 'show')).mockReturnValue('id');
+    const onInputChange = vi.fn();
+    render(savedPlan(onInputChange));
+    await screen.findByRole('tab', {
+      name: /shared:categories.medications.*0/,
+    });
+
+    fireEvent.click(screen.getByText('Simple'));
+
+    expect(onInputChange).toHaveBeenCalledWith({
+      target: { name: 'mode', value: 'simple' },
+    });
+    expect(show).not.toHaveBeenCalled();
   });
 });

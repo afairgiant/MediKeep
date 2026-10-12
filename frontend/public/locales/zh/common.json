@@ -1395,6 +1395,7 @@
       "confirmSimpleDropsMedications": "简单模式不会关联药物。是否切换到简单模式并移除已选择的药物？",
       "label": "治疗模式",
       "simple": "简单",
+      "simpleBlockedByMedications": "已保存的治疗方案在仍有关联药物时无法切换到简单模式。请先在“药物”标签页中取消关联。",
       "simpleDescription": "基本跟踪，包含时间安排和剂量"
     },
     "noEquipmentLinkedDescription": "搜索并关联此治疗中使用的医疗设备。",

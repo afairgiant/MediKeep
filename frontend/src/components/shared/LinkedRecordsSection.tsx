@@ -103,7 +103,11 @@ const LinkedRecordsSection = ({
   const [liveRows, setLiveRows] = useState<LinkRow[]>([]);
   const [candidates, setCandidates] = useState<LinkCandidate[]>([]);
   const [loading, setLoading] = useState(false);
+  // The source whose rows were read last. Until a saved record's rows have been read, the
+  // card is loading rather than showing an empty list that is about to fill
+  const [loadedFor, setLoadedFor] = useState<LinkSource | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const isLoading = loading || (isSaved && loadedFor !== source);
 
   const loadRows = useCallback(
     async (signal?: AbortSignal) => {
@@ -115,6 +119,7 @@ const LinkedRecordsSection = ({
         onLoaded?.(rows.length);
       } finally {
         setLoading(false);
+        if (!signal?.aborted) setLoadedFor(source);
       }
     },
     // onLoaded is only a reporting callback and may change identity every render
@@ -322,7 +327,7 @@ const LinkedRecordsSection = ({
   if (
     hideWhenEmpty &&
     isViewMode &&
-    !loading &&
+    !isLoading &&
     rows.length === 0 &&
     !loadError
   )
@@ -353,7 +358,7 @@ const LinkedRecordsSection = ({
           purposeConfig={purposeConfig}
           supportsExpectedFrequency={supportsExpectedFrequency}
           isViewMode={isViewMode}
-          loading={loading}
+          loading={isLoading}
           navigate={navigate}
           onCreateNew={canCreateNew ? handleCreateNew : undefined}
           createLabel={createType ? t(ADD_LABEL_KEYS[createType]) : undefined}

@@ -100,6 +100,7 @@ The comprehensive API service that provides all medical record management functi
 - `createCondition(conditionData, signal)` - Create condition
 - `updateCondition(conditionId, conditionData, signal)` - Update condition
 - `deleteCondition(conditionId, signal)` - Delete condition
+- `getConditionMedicationLinks(conditionId, signal)` - Get the medications linked to a condition, with medication details
 
 #### Treatments
 
@@ -140,6 +141,15 @@ The comprehensive API service that provides all medical record management functi
 - `createLabResultEncountersBulk(labResultId, data, signal)` - Bulk link encounters to a lab result
 - `updateLabResultEncounter(labResultId, relationshipId, data, signal)` - Update relationship
 - `deleteLabResultEncounter(labResultId, relationshipId, signal)` - Unlink an encounter from a lab result
+
+#### Record Lab Result Links
+
+`recordPath` is `medications`, `procedures` or `conditions`.
+
+- `getRecordLabResultLinks(recordPath, recordId, signal)` - Get the lab results linked to a record
+- `createRecordLabResultLink(recordPath, recordId, data, signal)` - Link a lab result to a record
+- `updateRecordLabResultLink(recordPath, recordId, relationshipId, data, signal)` - Update a link
+- `deleteRecordLabResultLink(recordPath, recordId, relationshipId, signal)` - Unlink a lab result from a record
 
 ### Healthcare Providers
 
