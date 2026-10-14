@@ -16,11 +16,7 @@ import {
   Alert,
   Loader,
   Center,
-  ActionIcon,
-  Badge,
-  Grid,
-  Card,
-  Flex,
+  SimpleGrid,
   Box,
   Container,
   Group,
@@ -34,7 +30,6 @@ import {
   IconPlus,
   IconAlertTriangle,
   IconDroplet,
-  IconChartLine,
   IconFileImport,
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
@@ -48,6 +43,7 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import VitalViewModal from '../../components/medical/vital/VitalViewModal';
 import VitalFormWrapper from '../../components/medical/vital/VitalFormWrapper';
 import { VitalTrendsPanel } from '../../components/medical/vitals';
+import VitalStatCard from '../../components/medical/vitals/VitalStatCard';
 import VitalsImportModal from '../../components/medical/VitalsImportModal';
 
 import { apiService } from '../../services/api';
@@ -60,6 +56,16 @@ import { VITAL_FILTER_TYPES } from '../../constants/vitalFilters';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { convertForDisplay, unitLabels } from '../../utils/unitConversion';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+
+// level is language-neutral (drives badge color); label is the translated text
+const buildCategory = (level, t) => {
+  const labels = {
+    low: t('vitals:categories.low', 'Low'),
+    high: t('vitals:categories.high', 'High'),
+    normal: t('vitals:categories.normal', 'Normal'),
+  };
+  return { level, label: labels[level] };
+};
 
 const Vitals = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -97,9 +103,9 @@ const Vitals = () => {
         getCategory: stats => {
           if (!stats.avg_heart_rate) return null;
           const hr = stats.avg_heart_rate;
-          if (hr < 60) return t('vitals:categories.low', 'Low');
-          if (hr > 100) return t('vitals:categories.high', 'High');
-          return t('vitals:categories.normal', 'Normal');
+          if (hr < 60) return buildCategory('low', t);
+          if (hr > 100) return buildCategory('high', t);
+          return buildCategory('normal', t);
         },
         color: 'blue',
         filterType: VITAL_FILTER_TYPES.WITH_HEART_RATE,
@@ -124,9 +130,9 @@ const Vitals = () => {
         getCategory: stats => {
           if (!stats.current_temperature) return null;
           const temp = stats.current_temperature;
-          if (temp < 97.0) return t('vitals:categories.low', 'Low');
-          if (temp > 99.5) return t('vitals:categories.high', 'High');
-          return t('vitals:categories.normal', 'Normal');
+          if (temp < 97.0) return buildCategory('low', t);
+          if (temp > 99.5) return buildCategory('high', t);
+          return buildCategory('normal', t);
         },
         color: 'green',
         filterType: VITAL_FILTER_TYPES.WITH_TEMPERATURE,
@@ -182,9 +188,9 @@ const Vitals = () => {
         getCategory: stats => {
           if (!stats.current_blood_glucose) return null;
           const glucose = stats.current_blood_glucose;
-          if (glucose < 70) return t('vitals:categories.low', 'Low');
-          if (glucose > 180) return t('vitals:categories.high', 'High');
-          return t('vitals:categories.normal', 'Normal');
+          if (glucose < 70) return buildCategory('low', t);
+          if (glucose > 180) return buildCategory('high', t);
+          return buildCategory('normal', t);
         },
         color: 'orange',
         filterType: VITAL_FILTER_TYPES.WITH_BLOOD_GLUCOSE,
@@ -409,109 +415,6 @@ const Vitals = () => {
     [deleteItem, refreshData, loadStats]
   );
 
-  // Render stats card with Mantine components
-  const renderStatsCard = (key, config) => {
-    const IconComponent = config.icon;
-    const value = config.getValue(stats);
-    const unit = config.getUnit(stats);
-    const category = config.getCategory(stats);
-    const isSelected =
-      selectedVitalType === config.vitalType && showTrendsPanel;
-
-    return (
-      <Card
-        key={key}
-        shadow="sm"
-        padding="lg"
-        radius="md"
-        withBorder
-        tabIndex={0}
-        role="button"
-        aria-label={`${config.title}. ${config.description}`}
-        aria-pressed={isSelected}
-        style={{
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          border: isSelected
-            ? `2px solid var(--mantine-color-${config.color}-6)`
-            : undefined,
-          backgroundColor: isSelected
-            ? `var(--mantine-color-${config.color}-0)`
-            : undefined,
-        }}
-        onMouseEnter={e => {
-          if (!isSelected) {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)';
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isSelected) {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)';
-          }
-        }}
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleStatsCardClick(config.vitalType);
-          }
-        }}
-        onClick={() => handleStatsCardClick(config.vitalType)}
-        title={config.description}
-      >
-        <Flex align="center" gap="md">
-          <ActionIcon
-            size="xl"
-            variant={isSelected ? 'filled' : 'light'}
-            color={config.color}
-            radius="md"
-          >
-            <IconComponent size={24} />
-          </ActionIcon>
-          <Box flex={1}>
-            <Group justify="space-between" align="flex-start">
-              <Text size="sm" c="dimmed" fw={500}>
-                {config.title}
-              </Text>
-              <IconChartLine
-                size={14}
-                color="var(--mantine-color-gray-5)"
-                aria-hidden="true"
-              />
-            </Group>
-            <Group gap="xs" align="baseline">
-              <Text size="xl" fw={700}>
-                {value}
-              </Text>
-              {unit && (
-                <Text size="sm" c="dimmed">
-                  {unit}
-                </Text>
-              )}
-            </Group>
-            {category && (
-              <Badge
-                size="sm"
-                variant="light"
-                color={
-                  category === 'High'
-                    ? 'red'
-                    : category === 'Low'
-                      ? 'orange'
-                      : 'green'
-                }
-                mt={4}
-              >
-                {category}
-              </Badge>
-            )}
-          </Box>
-        </Flex>
-      </Card>
-    );
-  };
-
   // Loading state
   if (vitalsLoading) {
     return (
@@ -635,16 +538,24 @@ const Vitals = () => {
                 </Group>
               </Alert>
             ) : stats ? (
-              <Grid>
+              <SimpleGrid cols={{ base: 1, xs: 2, md: 3, lg: 4 }} spacing="md">
                 {Object.entries(STATS_CONFIGS).map(([key, config]) => (
-                  <Grid.Col
+                  <VitalStatCard
                     key={key}
-                    span={{ base: 12, xs: 6, sm: 4, md: 2.4 }}
-                  >
-                    {renderStatsCard(key, config)}
-                  </Grid.Col>
+                    title={config.title}
+                    description={config.description}
+                    icon={config.icon}
+                    color={config.color}
+                    value={config.getValue(stats)}
+                    unit={config.getUnit(stats)}
+                    category={config.getCategory(stats)}
+                    isSelected={
+                      selectedVitalType === config.vitalType && showTrendsPanel
+                    }
+                    onSelect={() => handleStatsCardClick(config.vitalType)}
+                  />
                 ))}
-              </Grid>
+              </SimpleGrid>
             ) : (
               <Center py="xl">
                 <Stack align="center" gap="md">
