@@ -27,10 +27,9 @@ const renderCard = (
     </MantineProvider>
   );
 
-const getCard = () =>
-  screen.getByRole('button', {
-    name: 'Heart Rate. Click to view trend analysis',
-  });
+// getByRole throws if more than one button exists, so this also guards
+// against a nested interactive control inside the card
+const getCard = () => screen.getByRole('button');
 
 describe('VitalStatCard', () => {
   it('renders title, value and unit', () => {
@@ -125,7 +124,29 @@ describe('VitalStatCard', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('exposes an accessible name and pressed state', () => {
+  it('is the only interactive control in the card', () => {
+    renderCard();
+
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+  });
+
+  it('includes the reading and category in the accessible name', () => {
+    renderCard();
+
+    expect(getCard()).toHaveAccessibleName(
+      'Heart Rate. 72 BPM. Normal. Click to view trend analysis'
+    );
+  });
+
+  it('omits missing unit and category from the accessible name', () => {
+    renderCard({ value: 0, unit: undefined, category: null });
+
+    expect(getCard()).toHaveAccessibleName(
+      'Heart Rate. 0. Click to view trend analysis'
+    );
+  });
+
+  it('reflects the selected state in aria-pressed', () => {
     const { unmount } = renderCard({ isSelected: false });
     expect(getCard()).toHaveAttribute('aria-pressed', 'false');
     unmount();
