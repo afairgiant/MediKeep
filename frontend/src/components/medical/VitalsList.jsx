@@ -773,30 +773,12 @@ const VitalsList = ({
     );
   }
 
-  // Reusable N/A cell for summary rows where columns are not applicable
-  const naCell = (
-    <Table.Td>
-      <Text size="sm" c="dimmed">
-        {t('labels.notAvailable')}
-      </Text>
-    </Table.Td>
-  );
-
-  // Render a single vital row (used for both individual records and expanded group readings)
-  const renderVitalRow = (vital, isNested = false) => (
-    <Table.Tr
-      key={vital.id}
-      style={
-        isNested ? { backgroundColor: 'var(--color-bg-secondary)' } : undefined
-      }
-    >
-      <Table.Td>
-        <Text size="sm" fw={500} pl={isNested ? 'md' : undefined}>
-          {isNested
-            ? formatDateTime(vital.recorded_date)
-            : formatDate(vital.recorded_date)}
-        </Text>
-      </Table.Td>
+  // Render the eight value columns (Blood Pressure -> O2 Sat) for a reading.
+  // Shared by individual rows, expanded group readings, and summary rows (which
+  // pass either the single reading for the day or an averaged pseudo-reading).
+  // Any field that is null falls back to the dimmed "N/A" cell per column.
+  const renderVitalValueCells = vital => (
+    <>
       <Table.Td>
         {vital.systolic_bp && vital.diastolic_bp ? (
           <Text size="sm" fw={500}>
@@ -910,6 +892,57 @@ const VitalsList = ({
           </Text>
         )}
       </Table.Td>
+    </>
+  );
+
+  // Build an averaged pseudo-reading from a day's grouped readings so that a
+  // multi-reading summary row can show a representative value in every column,
+  // not just glucose. Fields with no values are left undefined so their column
+  // falls back to the N/A cell. Used only for display in the collapsed summary
+  // row; the expanded day view still shows every individual reading.
+  const aggregateReadings = readings => {
+    const avgField = (field, decimals = 0) => {
+      const values = readings.map(r => r[field]).filter(v => v != null);
+      if (values.length === 0) return undefined;
+      const factor = 10 ** decimals;
+      return (
+        Math.round(
+          (values.reduce((a, b) => a + b, 0) / values.length) * factor
+        ) / factor
+      );
+    };
+
+    return {
+      id: `agg-${readings[0]?.id ?? 'group'}`,
+      recorded_date: readings[0]?.recorded_date,
+      systolic_bp: avgField('systolic_bp'),
+      diastolic_bp: avgField('diastolic_bp'),
+      heart_rate: avgField('heart_rate'),
+      temperature: avgField('temperature', 1),
+      weight: avgField('weight', 1),
+      height: avgField('height', 1),
+      blood_glucose: avgField('blood_glucose'),
+      a1c: avgField('a1c', 1),
+      oxygen_saturation: avgField('oxygen_saturation'),
+    };
+  };
+
+  // Render a single vital row (used for both individual records and expanded group readings)
+  const renderVitalRow = (vital, isNested = false) => (
+    <Table.Tr
+      key={vital.id}
+      style={
+        isNested ? { backgroundColor: 'var(--color-bg-secondary)' } : undefined
+      }
+    >
+      <Table.Td>
+        <Text size="sm" fw={500} pl={isNested ? 'md' : undefined}>
+          {isNested
+            ? formatDateTime(vital.recorded_date)
+            : formatDate(vital.recorded_date)}
+        </Text>
+      </Table.Td>
+      {renderVitalValueCells(vital)}
       {showActions && (
         <Table.Td>
           {!isNested && (
@@ -1209,7 +1242,9 @@ const VitalsList = ({
   };
 
   // Render a summary row that looks like a normal vitals row.
-  // Shows date + count badge, avg glucose in the glucose column, and expands on click.
+  // Shows date + count badge and a value in every column: the single reading's
+  // values when the day has one reading, otherwise the per-vital average across
+  // the day's readings. Expands on click to the full per-reading day view.
   const renderSummaryRow = item => {
     const isExpanded = expandedGroup === item.groupKey;
 
@@ -1234,31 +1269,14 @@ const VitalsList = ({
               </Badge>
             </Group>
           </Table.Td>
-          {/* BP, Heart Rate, Temperature, Weight, BMI - not applicable for grouped rows */}
-          {naCell}
-          {naCell}
-          {naCell}
-          {naCell}
-          {naCell}
-          {/* Glucose - show avg (min-max) */}
-          <Table.Td>
-            {item.stats ? (
-              <Text size="sm" fw={500}>
-                {item.stats.avg}{' '}
-                <Text span size="xs" c="dimmed">
-                  ({item.stats.min}-{item.stats.max})
-                </Text>{' '}
-                {t('vitals:units.mgdl')}
-              </Text>
-            ) : (
-              <Text size="sm" c="dimmed">
-                {t('labels.notAvailable')}
-              </Text>
-            )}
-          </Table.Td>
-          {/* A1C, O2 Sat - not applicable for grouped rows */}
-          {naCell}
-          {naCell}
+          {/* Value columns: a single reading shows its own values; a day with
+              multiple readings shows the per-vital average. Min/max and every
+              individual reading remain available in the expanded day view. */}
+          {renderVitalValueCells(
+            item.count === 1
+              ? item.readings[0]
+              : aggregateReadings(item.readings)
+          )}
           {showActions && (
             <Table.Td>
               <Group gap="xs">
