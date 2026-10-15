@@ -196,6 +196,38 @@ describe('ExportPage scope labels', () => {
     ).toBeInTheDocument();
   });
 
+  it('sorts data types alphabetically by localized label in single and bulk lists', async () => {
+    exportService.getSupportedFormats.mockResolvedValue({
+      formats: [{ value: 'json', label: 'JSON', description: 'JSON export' }],
+      scopes: [
+        { value: 'all', label: 'All Records', description: 'x' },
+        { value: 'vitals', label: 'Vital Signs', description: 'x' },
+        { value: 'allergies', label: 'Allergies', description: 'x' },
+        { value: 'medications', label: 'Medications', description: 'x' },
+        { value: 'conditions', label: 'Medical Conditions', description: 'x' },
+      ],
+    });
+    renderExportPage();
+
+    await waitFor(() =>
+      expect(exportService.getSupportedFormats).toHaveBeenCalled()
+    );
+
+    await userEvent.click(screen.getByText('export.exportMode.bulkExport'));
+
+    const bulkSection = screen.getByTestId('bulk-scope-selection');
+    const labels = within(bulkSection)
+      .getAllByRole('checkbox')
+      .map(cb => cb.closest('.mantine-Checkbox-root').textContent);
+
+    expect(labels.map(l => l.replace(/ \(.*$/, ''))).toEqual([
+      'Allergies',
+      'Medical Conditions',
+      'Medications',
+      'Vital Signs',
+    ]);
+  });
+
   it('selects every data type when "select all" is clicked', async () => {
     renderExportPage();
 

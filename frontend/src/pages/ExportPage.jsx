@@ -1,6 +1,6 @@
 import logger from '../services/logger';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
@@ -40,9 +40,15 @@ const SCOPE_CATEGORY_KEY_OVERRIDES = {
   encounters: 'visit_history',
 };
 
+const getScopeLabel = (t, scope) =>
+  t(
+    `shared:categories.${SCOPE_CATEGORY_KEY_OVERRIDES[scope.value] || scope.value}`,
+    scope.label
+  );
+
 const ExportPage = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['reports', 'common', 'shared']);
+  const { t, i18n } = useTranslation(['reports', 'common', 'shared']);
   const { unitSystem } = useUserPreferences();
 
   // State management
@@ -271,11 +277,16 @@ const ExportPage = () => {
     return summary.counts[scopeValue] || 0;
   };
 
-  const getScopeLabel = scope =>
-    t(
-      `shared:categories.${SCOPE_CATEGORY_KEY_OVERRIDES[scope.value] || scope.value}`,
-      scope.label
-    );
+  // The backend lists scopes in English order; re-sort by the translated label
+  // so the list is alphabetical in the user's language.
+  const sortedScopes = useMemo(
+    () =>
+      (formats.scopes || [])
+        .filter(scope => scope.value !== 'all')
+        .map(scope => ({ value: scope.value, label: getScopeLabel(t, scope) }))
+        .sort((a, b) => a.label.localeCompare(b.label, i18n.language)),
+    [formats.scopes, t, i18n.language]
+  );
 
   const clearAlerts = () => {
     setError(null);
@@ -426,14 +437,10 @@ const ExportPage = () => {
                 onChange={value =>
                   setExportConfig(prev => ({ ...prev, scope: value }))
                 }
-                data={
-                  formats.scopes
-                    ?.filter(scope => scope.value !== 'all')
-                    .map(scope => ({
-                      value: scope.value,
-                      label: `${getScopeLabel(scope)} (${t('categories.recordCount', { count: getRecordCount(scope.value) })})`,
-                    })) || []
-                }
+                data={sortedScopes.map(scope => ({
+                  value: scope.value,
+                  label: `${scope.label} (${t('categories.recordCount', { count: getRecordCount(scope.value) })})`,
+                }))}
               />
             ) : (
               <Box data-testid="bulk-scope-selection">
@@ -471,16 +478,14 @@ const ExportPage = () => {
                   </Button>
                 </Group>
                 <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xs">
-                  {formats.scopes
-                    ?.filter(scope => scope.value !== 'all')
-                    .map(scope => (
-                      <Checkbox
-                        key={scope.value}
-                        label={`${getScopeLabel(scope)} (${t('categories.recordCount', { count: getRecordCount(scope.value) })})`}
-                        checked={selectedScopes.includes(scope.value)}
-                        onChange={() => handleScopeToggle(scope.value)}
-                      />
-                    ))}
+                  {sortedScopes.map(scope => (
+                    <Checkbox
+                      key={scope.value}
+                      label={`${scope.label} (${t('categories.recordCount', { count: getRecordCount(scope.value) })})`}
+                      checked={selectedScopes.includes(scope.value)}
+                      onChange={() => handleScopeToggle(scope.value)}
+                    />
+                  ))}
                 </SimpleGrid>
               </Box>
             )}
@@ -558,6 +563,7 @@ const ExportPage = () => {
                     ? t('export.buttons.exporting')
                     : t('export.buttons.exportAs', {
                         scope: getScopeLabel(
+                          t,
                           formats.scopes?.find(
                             scope => scope.value === exportConfig.scope
                           ) || {
