@@ -25,6 +25,7 @@ from .associations import (
 from .base import Base, get_utc_now
 from .clinical import (
     Allergy,
+    BloodDonation,
     Condition,
     Encounter,
     Immunization,
@@ -112,6 +113,7 @@ __all__ = [
     "Immunization",
     "Allergy",
     "Vitals",
+    "BloodDonation",
     "Symptom",
     "SymptomOccurrence",
     "LabResult",

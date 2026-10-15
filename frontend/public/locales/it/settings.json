@@ -61,6 +61,12 @@
     "urlPlaceholder": "https://la-tua-istanza-papra.com"
   },
   "preferences": {
+    "bloodDonationIntervals": {
+      "days": "giorni",
+      "description": "Numero minimo di giorni dopo una donazione prima di poter donare di nuovo. Regola questi valori in base alle linee guida del tuo servizio di donazione del sangue.",
+      "reset": "Ripristina valori predefiniti",
+      "title": "Intervalli di Donazione del Sangue"
+    },
     "dateFormat": {
       "description": "Scegli come vengono visualizzate le date nell'applicazione",
       "dmy": "DD/MM/YYYY (UK/Internazionale)",

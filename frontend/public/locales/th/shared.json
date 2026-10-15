@@ -2,6 +2,7 @@
   "categories": {
     "admin_dashboard": "แดชบอร์ดผู้ดูแลระบบ",
     "allergies": "การแพ้",
+    "blood_donations": "การบริจาคเลือด",
     "conditions": "โรคและอาการ",
     "count_active_prescriptions": "ใบสั่งยาที่ใช้อยู่ {{count}} รายการ",
     "count_active_prescriptions_one": "ใบสั่งยาที่ใช้อยู่ {{count}} รายการ",

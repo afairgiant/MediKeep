@@ -61,6 +61,12 @@
     "urlPlaceholder": "https://twoja-instancja-papra.com"
   },
   "preferences": {
+    "bloodDonationIntervals": {
+      "days": "dni",
+      "description": "Minimalna liczba dni po donacji, zanim będzie można oddać krew ponownie. Dostosuj te wartości do wytycznych placówki krwiodawstwa, z której korzystasz.",
+      "reset": "Przywróć wartości domyślne",
+      "title": "Odstępy między donacjami krwi"
+    },
     "dateFormat": {
       "description": "Wybierz sposób wyświetlania dat w całej aplikacji",
       "dmy": "DD/MM/YYYY (brytyjski/międzynarodowy)",

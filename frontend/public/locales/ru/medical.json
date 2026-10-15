@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "аллергия",
+    "bloodDonation": "сдача крови",
     "condition": "заболевание",
     "equipment": "оборудование",
     "familyMember": "член семьи",
@@ -90,6 +91,68 @@
         "onsetDate": "Дата начала",
         "severity": "Тяжесть"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "Загрузка данных о донациях крови...",
+    "add": "+ Добавить донацию",
+    "addTitle": "Добавить донацию крови",
+    "editTitle": "Редактировать донацию крови",
+    "noneFound": "Донации крови не найдены",
+    "startAdding": "Начните с регистрации вашей первой донации крови.",
+    "addFirst": "Зарегистрировать первую донацию",
+    "types": {
+      "whole_blood": "Цельная кровь",
+      "plasma": "Плазма",
+      "platelets": "Тромбоциты",
+      "double_red_cells": "Двойные эритроциты"
+    },
+    "fields": {
+      "donationDate": "Дата донации",
+      "donationType": "Тип донации",
+      "location": "Место",
+      "bloodPressure": "Артериальное давление",
+      "systolic": "Систолическое (мм рт.ст.)",
+      "diastolic": "Диастолическое (мм рт.ст.)",
+      "temperature": "Температура",
+      "hemoglobin": "Гемоглобин",
+      "hemoglobinWithUnit": "Гемоглобин (г/дл)"
+    },
+    "tabs": {
+      "donation": "Донация",
+      "screening": "Предварительный осмотр"
+    },
+    "form": {
+      "locationPlaceholder": "например, акция Красного Креста, городская больница",
+      "notesPlaceholder": "Дополнительные заметки об этой донации",
+      "save": "Сохранить донацию",
+      "update": "Обновить донацию",
+      "saving": "Сохранение донации..."
+    },
+    "viewModal": {
+      "title": "Сведения о донации крови"
+    },
+    "eligibility": {
+      "title": "Следующая донация",
+      "eligibleNow": "Вы можете сдать кровь сейчас",
+      "nextDate": "Снова сможете сдать кровь {{date}}",
+      "daysRemaining_one": "Остался {{count}} день",
+      "daysRemaining_few": "Осталось {{count}} дня",
+      "daysRemaining_many": "Осталось {{count}} дней",
+      "daysRemaining_other": "Осталось {{count}} дней",
+      "basedOn": "На основе последней донации ({{type}}) от {{date}} и интервала в {{days}} дней",
+      "noDonations": "Донации пока не зарегистрированы",
+      "loadError": "Не удалось рассчитать следующую дату донации"
+    },
+    "validation": {
+      "dateRequired": "Дата донации обязательна",
+      "typeRequired": "Тип донации обязателен",
+      "bpOrder": "Систолическое давление должно быть больше диастолического",
+      "outOfRange": "{{field}} должно быть между {{min}} и {{max}}"
+    },
+    "filters": {
+      "allTypes": "Все типы",
+      "allLocations": "Все места"
     }
   },
   "componentCatalog": {

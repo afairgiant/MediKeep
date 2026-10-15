@@ -61,6 +61,12 @@
     "urlPlaceholder": "https://your-papra-instance.com"
   },
   "preferences": {
+    "bloodDonationIntervals": {
+      "days": "天",
+      "description": "献血后到可以再次献血之前的最少天数。请根据您的献血机构指南调整这些数值。",
+      "reset": "重置为默认值",
+      "title": "献血间隔"
+    },
     "dateFormat": {
       "description": "选择在整个应用程序中如何显示日期",
       "dmy": "DD/MM/YYYY（英国/国际）",

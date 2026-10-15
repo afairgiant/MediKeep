@@ -7,6 +7,7 @@
   "categories": {
     "admin_dashboard": "Painel Administrativo",
     "allergies": "Alergias",
+    "blood_donations": "Doações de sangue",
     "conditions": "Condições",
     "count_active_prescriptions": "{{count}} prescrições ativas",
     "count_active_prescriptions_one": "{{count}} prescrição ativa",
