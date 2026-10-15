@@ -36,14 +36,12 @@ import LabResultFormWrapper from '../../components/medical/labresults/LabResultF
 import TestPanelCreateDialog from '../../components/medical/labresults/TestPanelCreateDialog';
 import LabResultQuickImportModal from '../../components/medical/labresults/LabResultQuickImportModal';
 import TestComponentCatalog from '../../components/medical/labresults/TestComponentCatalog';
-import LabResultStackCard from '../../components/medical/labresults/LabResultStackCard';
-import LabResultStackPanel from '../../components/medical/labresults/LabResultStackPanel';
 import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { submitPendingTestComponents } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
-import { IconFileUpload, IconTable, IconLayoutGrid, IconStack2, IconPrinter } from '@tabler/icons-react';
+import { IconFileUpload, IconTable, IconLayoutGrid, IconPrinter } from '@tabler/icons-react';
 import LabResultsComponentTable from '../../components/medical/labresults/LabResultsComponentTable';
 import TestComponentEditModal from '../../components/medical/labresults/TestComponentEditModal';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
@@ -99,7 +97,7 @@ const LabResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
+  const [viewMode, setViewMode] = usePersistedViewMode('lab-results', 'panels');
   const [tableLayout, setTableLayout] = useState(() => viewMode === 'table');
   const [isPrintingAll, setIsPrintingAll] = useState(false);
   const {
@@ -193,12 +191,6 @@ const LabResults = () => {
       setEditingLabResult(null);
       setPostCreateMode(false);
       setFormData(EMPTY_FORM_DATA);
-
-      // Re-open the stack panel if the edit was triggered from within it
-      if (returningToStackRef.current) {
-        returningToStackRef.current = false;
-        setStackPanelOpen(true);
-      }
 
       // Sync the components table — tests may have been added via TestComponentsTab
       refreshPatientComponents();
@@ -340,13 +332,7 @@ const LabResults = () => {
   const filteredLabResults = dataManagement.data;
   const paginatedLabResults = paginateData(filteredLabResults);
 
-  // Stack view state
-  const [stackPanelOpen, setStackPanelOpen] = useState(false);
-  const [selectedGroupKey, setSelectedGroupKey] = useState(null);
-  // Set to true before triggering view/edit from the stack panel so close handlers re-open it
-  const returningToStackRef = useRef(false);
-
-  // All test components for the current patient, loaded when entering stacked view
+  // All test components for the current patient
   const [patientComponents, setPatientComponents] = useState([]);
   const [patientComponentsLoading, setPatientComponentsLoading] = useState(false);
 
@@ -390,219 +376,17 @@ const LabResults = () => {
     return map;
   }, [patientComponents, parentIdsWithComponents]);
 
-  const getGroupKey = r => {
-    const code = (r.test_code || '').trim().toUpperCase();
-    return code ? `code:${code}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
-  };
-
-
-  const groupedLabResults = useMemo(() => {
-    const map = new Map();
-    for (const r of filteredLabResults) {
-      // Exclude panels (is_panel flag) and PDF masters (have test components)
-      if (r.is_panel || parentIdsWithComponents.has(r.id)) continue;
-      const key = getGroupKey(r);
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(r);
-    }
-    return [...map.values()].map(results => {
-      const sorted = [...results].sort((a, b) => {
-        const da = a.completed_date || a.ordered_date || a.created_at || '';
-        const db = b.completed_date || b.ordered_date || b.created_at || '';
-        return db.localeCompare(da);
-      });
-      return {
-        key: getGroupKey(sorted[0]),
-        test_name: sorted[0].test_name,
-        results: sorted,
-        count: sorted.length,
-        latest_date: sorted[0]?.completed_date || sorted[0]?.ordered_date || null,
-        earliest_date:
-          sorted[sorted.length - 1]?.completed_date ||
-          sorted[sorted.length - 1]?.ordered_date ||
-          null,
-        latest_status: sorted[0]?.labs_result || null,
-      };
-    }).sort((a, b) => {
-      if (!a.latest_date && !b.latest_date) return 0;
-      if (!a.latest_date) return 1;
-      if (!b.latest_date) return -1;
-      return b.latest_date.localeCompare(a.latest_date);
-    });
-  }, [filteredLabResults, parentIdsWithComponents]);
-
-  const hasStackableResults = useMemo(() => {
-    if (!labResults?.length) return false;
-    const counts = new Map();
-    for (const r of labResults) {
-      if (r.is_panel || parentIdsWithComponents.has(r.id)) continue;
-      const key = getGroupKey(r);
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    }
-    return [...counts.values()].some(n => n > 1);
-  }, [labResults, parentIdsWithComponents]);
-
-  const currentSelectedGroup = useMemo(
-    () =>
-      selectedGroupKey
-        ? (groupedLabResults.find(g => g.key === selectedGroupKey) ?? null)
-        : null,
-    [groupedLabResults, selectedGroupKey]
-  );
-
-  // Enrich the selected group with matching test components from PDF masters
-  const enrichedSelectedGroup = useMemo(() => {
-    if (!currentSelectedGroup) return null;
-    const groupKey = currentSelectedGroup.key;
-    const groupName = currentSelectedGroup.test_name.toLowerCase().trim();
-    const existingGroupKeys = new Set(groupedLabResults.map(g => g.key));
-    const matchingComponents = patientComponents.filter(comp => {
-      // Legacy pseudo-components represent a component-less LabResult that is
-      // already present in currentSelectedGroup.results - including it here
-      // would duplicate that result in the drill-down.
-      if (comp.is_legacy) return false;
-      const compCode = (comp.test_code || '').trim().toUpperCase();
-      // If the component has a code, first try an exact code-group match.
-      // If a different code-keyed group exists for this code, don't steal it (avoids double-counting).
-      // If no code-keyed group exists at all, fall through to name matching.
-      if (compCode) {
-        const compCodeKey = `code:${compCode}`;
-        if (compCodeKey === groupKey) return true;
-        if (existingGroupKeys.has(compCodeKey)) return false;
-      }
-      const compCanonical = (comp.canonical_test_name || '').toLowerCase().trim();
-      const compTestName = (comp.test_name || '').toLowerCase().trim();
-      return (!!compCanonical && compCanonical === groupName) || compTestName === groupName;
-    });
-    // PDF masters whose key matches the group are excluded from group building but should
-    // still appear as regular results in the drill-down (they represent real measurements)
-    const matchingPDFMasters = filteredLabResults.filter(r => {
-      if (!(r.is_panel || parentIdsWithComponents.has(r.id))) return false;
-      return getGroupKey(r) === groupKey;
-    });
-    if (matchingComponents.length === 0 && matchingPDFMasters.length === 0) return currentSelectedGroup;
-    const componentResults = matchingComponents.map(comp => ({
-      id: comp.id,
-      test_name: comp.test_name,
-      labs_result: comp.status ?? null,
-      ordered_date: comp.ordered_date ?? null,
-      completed_date: comp.completed_date ?? null,
-      notes: comp.notes ?? null,
-      status: null,
-      facility: comp.facility ?? null,
-      test_category: comp.category ?? null,
-      value: comp.value ?? null,
-      unit: comp.unit ?? null,
-      ref_range_min: comp.ref_range_min ?? null,
-      ref_range_max: comp.ref_range_max ?? null,
-      ref_range_text: comp.ref_range_text ?? null,
-      source: 'component',
-      parent_lab_result_id: comp.lab_result_id,
-      result_type: comp.result_type ?? null,
-      qualitative_value: comp.qualitative_value ?? null,
-      textual_value: comp.textual_value ?? null,
-    }));
-    const allResults = [
-      ...currentSelectedGroup.results,
-      ...matchingPDFMasters,
-      ...componentResults,
-    ].sort((a, b) => {
-      const da = a.completed_date || a.ordered_date || a.created_at || '';
-      const db = b.completed_date || b.ordered_date || b.created_at || '';
-      return db.localeCompare(da);
-    });
-    return { ...currentSelectedGroup, results: allResults, count: allResults.length };
-  }, [currentSelectedGroup, patientComponents, filteredLabResults, parentIdsWithComponents, groupedLabResults]);
-
-  // Total display count per group key: base results + matching components + matching PDF masters.
-  // Uses the same predicate as enrichedSelectedGroup so badge counts always match drill-down counts.
-  const displayCountByGroupKey = useMemo(() => {
-    if (patientComponents.length === 0 && parentIdsWithComponents.size === 0) return {};
-    const existingGroupKeys = new Set(groupedLabResults.map(g => g.key));
-    const map = {};
-    for (const group of groupedLabResults) {
-      const groupKey = group.key;
-      const groupName = group.test_name.toLowerCase().trim();
-      let extra = 0;
-      for (const comp of patientComponents) {
-        // Skip legacy pseudo-components: the component-less LabResult they were
-        // synthesized from is already counted in group.count.
-        if (comp.is_legacy) continue;
-        const compCode = (comp.test_code || '').trim().toUpperCase();
-        if (compCode) {
-          if (`code:${compCode}` === groupKey) { extra++; continue; }
-          if (existingGroupKeys.has(`code:${compCode}`)) continue;
-        }
-        const compCanonical = (comp.canonical_test_name || '').toLowerCase().trim();
-        const compTestName = (comp.test_name || '').toLowerCase().trim();
-        if ((!!compCanonical && compCanonical === groupName) || compTestName === groupName) {
-          extra++;
-        }
-      }
-      for (const r of filteredLabResults) {
-        if (!(r.is_panel || parentIdsWithComponents.has(r.id))) continue;
-        if (getGroupKey(r) === groupKey) extra++;
-      }
-      if (extra > 0) map[groupKey] = group.count + extra;
-    }
-    return map;
-  }, [groupedLabResults, patientComponents, filteredLabResults, parentIdsWithComponents]);
-
-  // Auto-close the stack panel when the selected group no longer exists (e.g. all items deleted)
-  useEffect(() => {
-    if (stackPanelOpen && selectedGroupKey && !currentSelectedGroup) {
-      setStackPanelOpen(false);
-      setSelectedGroupKey(null);
-    }
-  }, [stackPanelOpen, selectedGroupKey, currentSelectedGroup]);
-
-  // Close the stack panel whenever the user leaves stacked view
-  useEffect(() => {
-    if (viewMode !== 'stacked') {
-      setStackPanelOpen(false);
-    }
-  }, [viewMode]);
-
   // Coerce legacy persisted 'table' or 'cards' viewMode to 'panels'
   useEffect(() => {
     if (viewMode === 'table' || viewMode === 'cards') setViewMode('panels');
   }, [viewMode, setViewMode]);
 
-  // Fall back from stacked view if there are no longer any stackable results
-  useEffect(() => {
-    if (viewMode === 'stacked' && !hasStackableResults) setViewMode('panels');
-  }, [hasStackableResults, viewMode, setViewMode]);
-
-  // Combined list for stacked view: stack groups + individual PDF-master results (sorted newest-first).
-  const stackedViewItems = useMemo(() => {
-    if (viewMode !== 'stacked') return [];
-    const stackItems = groupedLabResults.map(g => ({
-      type: 'stack',
-      key: g.key,
-      sortDate: g.latest_date || '',
-      data: g,
-    }));
-    const pdfItems = filteredLabResults
-      .filter(r => r.is_panel || parentIdsWithComponents.has(r.id))
-      .map(r => ({
-        type: 'pdf',
-        key: `pdf:${r.id}`,
-        sortDate: r.completed_date || r.ordered_date || '',
-        data: r,
-      }));
-    return [...stackItems, ...pdfItems].sort((a, b) => b.sortDate.localeCompare(a.sortDate));
-  }, [viewMode, groupedLabResults, filteredLabResults, parentIdsWithComponents]);
-
-  const paginatedStackedItems = paginateData(stackedViewItems);
-
   useEffect(() => {
     resetPage();
   }, [dataManagement.hasActiveFilters, resetPage]);
   useEffect(() => {
-    const count =
-      viewMode === 'stacked' ? stackedViewItems.length : filteredLabResults.length;
-    clampPage(count);
-  }, [filteredLabResults.length, stackedViewItems.length, viewMode, clampPage]);
+    clampPage(filteredLabResults.length);
+  }, [filteredLabResults.length, clampPage]);
 
   // Restore normal pagination after the browser print dialog closes (covers
   // both completed prints and cancellations).
@@ -621,10 +405,10 @@ const LabResults = () => {
     });
   };
 
-  // Combined loading state — include component fetch when in stacked or results-table view to avoid content flash.
+  // Combined loading state — include component fetch when in results-table view to avoid content flash.
   // For the components table specifically, only block on initial load (empty array); subsequent refreshes must not
   // unmount the table or the expanded-row state (local useState) is destroyed.
-  const loading = labResultsLoading || practitionersLoading || (viewMode === 'stacked' && patientComponentsLoading) || (viewMode === 'components' && tableLayout && patientComponentsLoading && patientComponents.length === 0);
+  const loading = labResultsLoading || practitionersLoading || (viewMode === 'components' && tableLayout && patientComponentsLoading && patientComponents.length === 0);
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -659,10 +443,6 @@ const LabResults = () => {
       if (labResult) {
         refreshFileCount(labResult.id);
       }
-      if (returningToStackRef.current) {
-        returningToStackRef.current = false;
-        setStackPanelOpen(true);
-      }
       setInitialViewTab('overview');
     },
   });
@@ -677,11 +457,6 @@ const LabResults = () => {
   const [editComponentModalOpen, setEditComponentModalOpen] = useState(false);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM_DATA);
-
-  const handleViewModeChange = useCallback((mode) => {
-    setViewMode(mode);
-    if (mode === 'stacked') setTableLayout(false);
-  }, [setViewMode]);
 
   const handlePanelCreateSuccess = useCallback(
     labResult => {
@@ -762,30 +537,6 @@ const LabResults = () => {
     await refreshData();
   }, [viewingLabResult, refreshData, setViewingLabResult]);
 
-  const handleViewComponent = useCallback(
-    async result => {
-      returningToStackRef.current = true;
-      const parentId = result.parent_lab_result_id;
-      const parent = labResults?.find(r => r.id === parentId);
-      const openParent = lr => {
-        setInitialViewTab('test-components');
-        setViewingLabResult(lr);
-        setShowViewModal(true);
-      };
-      if (parent) {
-        openParent(parent);
-      } else {
-        try {
-          const fetched = await apiService.getLabResult(parentId);
-          if (fetched) openParent(fetched);
-        } catch {
-          returningToStackRef.current = false;
-        }
-      }
-    },
-    [labResults, setViewingLabResult, setShowViewModal]
-  );
-
   const handleEditComponentFromTable = useCallback(
     comp => {
       // Legacy (component-less) results have no component record to edit —
@@ -845,7 +596,7 @@ const LabResults = () => {
         // mirrors handleEditComponentFromTable's is_legacy branch above). That
         // also means refreshing labResults and cleaning up its file count, the
         // same as handleDeleteLabResult does below — deleting only through
-        // patientComponents would leave a ghost entry in Panels/Stacked view
+        // patientComponents would leave a ghost entry in Panels view
         // that 404s when opened.
         if (comp.is_legacy) {
           await apiService.deleteLabResult(comp.lab_result_id);
@@ -1251,10 +1002,6 @@ const LabResults = () => {
     setShowModal(false);
     setEditingLabResult(null);
     setPostCreateMode(false);
-    if (returningToStackRef.current) {
-      returningToStackRef.current = false;
-      setStackPanelOpen(true);
-    }
     setDocumentManagerMethods(null); // Reset document manager methods
     setPendingRelationshipsMethods(null); // Reset pending relationships
     setPendingComponentsMethods(null); // Reset pending test components
@@ -1375,50 +1122,6 @@ const LabResults = () => {
               {t('medical:labResults.buttons.addLabResults', 'Add Lab Results')}
             </Button>
           }
-        />
-      );
-    }
-
-    if (viewMode === 'stacked') {
-      return (
-        <AnimatedCardGrid
-          items={paginatedStackedItems}
-          keyExtractor={item => item.key}
-          columns={{ base: 12, sm: 6, lg: 4 }}
-          renderCard={item => {
-            if (item.type === 'stack') {
-              const group = item.data;
-              return (
-                <LabResultStackCard
-                  group={
-                    displayCountByGroupKey[group.key]
-                      ? { ...group, count: displayCountByGroupKey[group.key] }
-                      : group
-                  }
-                  onDrillDown={g => {
-                    setSelectedGroupKey(g.key);
-                    setStackPanelOpen(true);
-                  }}
-                />
-              );
-            }
-            return (
-              <LabResultCard
-                labResult={item.data}
-                onEdit={handleEditLabResult}
-                onDelete={() => handleDeleteLabResult(item.data.id)}
-                onView={handleViewLabResult}
-                practitioners={practitioners}
-                fileCount={fileCounts[item.data.id] || 0}
-                fileCountLoading={fileCountsLoading[item.data.id] || false}
-                navigate={navigate}
-                disableActions={isViewOnly}
-                disableActionsTooltip={viewOnlyTooltip}
-                isGroupedResult={true}
-                worstComponentStatus={worstStatusByPanelId.get(item.data.id) ?? null}
-              />
-            );
-          }}
         />
       );
     }
@@ -1588,7 +1291,7 @@ const LabResults = () => {
               },
             ]}
             viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
+            onViewModeChange={setViewMode}
             viewModes={['panels', 'components']}
             viewToggleSize="sm"
             mb={0}
@@ -1597,32 +1300,22 @@ const LabResults = () => {
                 <Button.Group>
                   <Button
                     size="sm"
-                    variant={viewMode !== 'stacked' && !tableLayout ? 'filled' : 'default'}
+                    variant={!tableLayout ? 'filled' : 'default'}
                     leftSection={<IconLayoutGrid size={14} />}
-                    onClick={() => { setTableLayout(false); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
+                    onClick={() => setTableLayout(false)}
                   >
                     {t('common:viewToggle.cards', 'Cards')}
                   </Button>
                   <Button
                     size="sm"
-                    variant={viewMode !== 'stacked' && tableLayout ? 'filled' : 'default'}
+                    variant={tableLayout ? 'filled' : 'default'}
                     leftSection={<IconTable size={14} />}
-                    onClick={() => { setTableLayout(true); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
+                    onClick={() => setTableLayout(true)}
                   >
                     {t('common:viewToggle.table', 'Table')}
                   </Button>
-                  {hasStackableResults && (
-                    <Button
-                      size="sm"
-                      variant={viewMode === 'stacked' ? 'filled' : 'default'}
-                      leftSection={<IconStack2 size={14} />}
-                      onClick={() => handleViewModeChange('stacked')}
-                    >
-                      {t('common:viewToggle.stacked', 'Stacked')}
-                    </Button>
-                  )}
                 </Button.Group>
-                {viewMode !== 'stacked' && tableLayout && (
+                {tableLayout && (
                   <Button
                     className="print-button"
                     size="sm"
@@ -1646,23 +1339,12 @@ const LabResults = () => {
           )}
 
           {renderViewContent()}
-          {viewMode !== 'components' &&
-            (viewMode === 'stacked'
-              ? stackedViewItems.length > 0
-              : filteredLabResults.length > 0) && (
+          {viewMode !== 'components' && filteredLabResults.length > 0 && (
             <PaginationControls
               page={page}
-              totalPages={totalPages(
-                viewMode === 'stacked'
-                  ? stackedViewItems.length
-                  : filteredLabResults.length
-              )}
+              totalPages={totalPages(filteredLabResults.length)}
               pageSize={pageSize}
-              totalRecords={
-                viewMode === 'stacked'
-                  ? stackedViewItems.length
-                  : filteredLabResults.length
-              }
+              totalRecords={filteredLabResults.length}
               onPageChange={setPage}
               onPageSizeChange={handlePageSizeChange}
               pageSizeOptions={PAGE_SIZE_OPTIONS}
@@ -1670,28 +1352,6 @@ const LabResults = () => {
           )}
         </Stack>
       </Container>
-
-      {/* Stack drill-down panel */}
-      {currentPatient?.id && (
-        <LabResultStackPanel
-          opened={stackPanelOpen}
-          onClose={() => setStackPanelOpen(false)}
-          group={enrichedSelectedGroup}
-          onViewResult={result => {
-            returningToStackRef.current = true;
-            setInitialViewTab('overview');
-            const fullResult = labResults?.find(r => r.id === result.id) || result;
-            handleViewLabResult(fullResult);
-          }}
-          onEditResult={result => {
-            returningToStackRef.current = true;
-            handleEditLabResult(result);
-          }}
-          onDeleteResult={result => handleDeleteLabResult(result.id)}
-          onViewComponent={handleViewComponent}
-          disableActions={isViewOnly}
-        />
-      )}
 
       {/* Test Panel Create Dialog */}
       <TestPanelCreateDialog

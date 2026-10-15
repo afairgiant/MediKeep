@@ -232,15 +232,7 @@
     "viewTrends": "Просмотр тенденций"
   },
   "stackedView": {
-    "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "Из панели",
-    "latestResult": "Последний",
-    "noResults": "Нет результатов в этой группе",
-    "panel": "Панель",
-    "results": "{{count}} результат",
-    "results_one": "{{count}} результат",
-    "results_other": "{{count}} результатов",
-    "trendChart": "Значение с течением времени"
+    "panel": "Панель"
   },
   "startAdding": "Начните с добавления вашего первого результата исследования.",
   "stats": {

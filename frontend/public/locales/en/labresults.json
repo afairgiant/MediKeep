@@ -189,7 +189,7 @@
     "refTextDescription": "Overrides min/max in display",
     "refTextLabel": "Range text",
     "refTextPlaceholder": "e.g. 4.0-5.6 or <200",
-    "sectionDescription": "Enter a measured value and reference range to enable trend charting for stacked results.",
+    "sectionDescription": "Enter a measured value and reference range to enable trend charting.",
     "sectionLabel": "Numeric Result (optional)",
     "unitLabel": "Unit",
     "unitPlaceholder": "e.g. mg/dL, mmol/L",
@@ -233,15 +233,7 @@
     "viewTrends": "View trends"
   },
   "stackedView": {
-    "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "From panel",
-    "latestResult": "Latest",
-    "noResults": "No results in this group",
-    "panel": "Panel",
-    "results": "{{count}} result",
-    "results_one": "{{count}} result",
-    "results_other": "{{count}} results",
-    "trendChart": "Value over time"
+    "panel": "Panel"
   },
   "startAdding": "Start by adding your first lab result.",
   "stats": {

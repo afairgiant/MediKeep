@@ -58,30 +58,37 @@ describe('usePersistedViewMode', () => {
     );
   });
 
-  test('persists and restores "stacked" view mode', () => {
+  test('ignores removed "stacked" stored value and falls back to default', () => {
     localStorage.getItem.mockImplementation(key => {
       if (key === storageKey('lab-results')) return 'stacked';
       return null;
     });
 
     const { result } = renderHook(() => usePersistedViewMode('lab-results'));
-    expect(result.current[0]).toBe('stacked');
+    expect(result.current[0]).toBe('cards');
   });
 
-  test('writes "stacked" to localStorage when set', () => {
-    localStorage.getItem.mockReturnValue(null);
-
-    const { result } = renderHook(() => usePersistedViewMode('lab-results'));
-
-    act(() => {
-      result.current[1]('stacked');
+  test('uses a page-specific default when the stored value is not a persistable mode', () => {
+    localStorage.getItem.mockImplementation(key => {
+      if (key === storageKey('lab-results')) return 'panels';
+      return null;
     });
 
-    expect(result.current[0]).toBe('stacked');
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      storageKey('lab-results'),
-      'stacked'
+    const { result } = renderHook(() =>
+      usePersistedViewMode('lab-results', 'panels')
     );
+    expect(result.current[0]).toBe('panels');
+  });
+
+  test('falls back to the legacy key when the page key holds removed "stacked" value', () => {
+    localStorage.getItem.mockImplementation(key => {
+      if (key === storageKey('lab-results')) return 'stacked';
+      if (key === LEGACY_KEY) return 'table';
+      return null;
+    });
+
+    const { result } = renderHook(() => usePersistedViewMode('lab-results'));
+    expect(result.current[0]).toBe('table');
   });
 
   test('ignores invalid stored values and falls back to default', () => {

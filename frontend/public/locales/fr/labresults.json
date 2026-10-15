@@ -189,7 +189,7 @@
     "refTextDescription": "Remplace les min/max dans l'aperçu",
     "refTextLabel": "Texte de plage",
     "refTextPlaceholder": "ex : 4,0-5,6 ou <200",
-    "sectionDescription": "Saisissez une valeur mesurée et une plage de référence pour activer le suivi des tendances pour les résultats empilés.",
+    "sectionDescription": "Saisissez une valeur mesurée et une plage de référence pour activer le suivi des tendances.",
     "sectionLabel": "Résultat numérique (optionnel)",
     "unitLabel": "Unité",
     "unitPlaceholder": "ex : mg/dL, mmol/L",
@@ -233,15 +233,7 @@
     "viewTrends": "Voir les tendances"
   },
   "stackedView": {
-    "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "Depuis le panel",
-    "latestResult": "Plus récent",
-    "noResults": "Aucun résultat dans ce groupe",
-    "panel": "Panel",
-    "results": "{{count}} résultat((s)",
-    "results_one": "{{count}} résultat",
-    "results_other": "{{count}} résultats",
-    "trendChart": "Valeur au fil du temps"
+    "panel": "Panel"
   },
   "startAdding": "Commencez en ajoutant votre premier résultat d'analyse.",
   "stats": {

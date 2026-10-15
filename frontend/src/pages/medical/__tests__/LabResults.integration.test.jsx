@@ -193,12 +193,6 @@ vi.mock('../../../components/shared/MedicalPageActions', () => ({
             Labs
           </button>
           <button
-            onClick={() => onViewModeChange('stacked')}
-            data-testid="stacked-btn"
-          >
-            Stacked
-          </button>
-          <button
             onClick={() => onViewModeChange('components')}
             data-testid="components-btn"
           >
@@ -982,7 +976,7 @@ describe('Lab Results Page Integration Tests', () => {
   });
 
   describe('View Mode Toggle', () => {
-    test('switches between panels and stacked view', async () => {
+    test('switches between panels and components view', async () => {
       const mockSetViewMode = vi.fn();
       usePersistedViewMode.mockReturnValue(['panels', mockSetViewMode]);
 
@@ -994,11 +988,31 @@ describe('Lab Results Page Integration Tests', () => {
         ).toBeInTheDocument();
       });
 
-      const stackedButton = screen.getByTestId('stacked-btn');
-      await userEvent.click(stackedButton);
+      const componentsButton = screen.getByTestId('components-btn');
+      await userEvent.click(componentsButton);
 
-      expect(mockSetViewMode).toHaveBeenCalledWith('stacked');
+      expect(mockSetViewMode).toHaveBeenCalledWith('components');
     });
+
+    test('defaults the persisted view mode to panels so the first render uses the card grid', () => {
+      renderWithPatient(<LabResults />);
+
+      expect(usePersistedViewMode).toHaveBeenCalledWith('lab-results', 'panels');
+    });
+
+    test.each(['cards', 'table'])(
+      'coerces legacy persisted "%s" view mode to panels',
+      async legacyMode => {
+        const mockSetViewMode = vi.fn();
+        usePersistedViewMode.mockReturnValue([legacyMode, mockSetViewMode]);
+
+        renderWithPatient(<LabResults />);
+
+        await waitFor(() => {
+          expect(mockSetViewMode).toHaveBeenCalledWith('panels');
+        });
+      }
+    );
   });
 
   describe('Clinical Workflow Integration', () => {
