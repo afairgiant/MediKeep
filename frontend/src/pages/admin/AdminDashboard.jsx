@@ -190,7 +190,7 @@ const AdminDashboard = () => {
               { count: stats?.recent_registrations || 0 }
             )}
             color="blue"
-            href="/admin/models/user"
+            href="/admin/users"
           />
           <StatCard
             icon={IconStethoscope}
@@ -656,7 +656,7 @@ const QuickActionsCard = () => {
           color="gray"
         />
         <ActionButton
-          href="/admin/models/user"
+          href="/admin/users"
           icon={IconUsers}
           title={t('dashboard.quickActions.manageUsers', 'Manage Users')}
           desc={t(

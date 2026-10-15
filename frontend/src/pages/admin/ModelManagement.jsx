@@ -356,7 +356,9 @@ const ModelManagement = () => {
 
   const handleNavigateToCreate = useCallback(() => {
     if (modelName === 'user') {
-      navigate('/admin/create-user');
+      navigate('/admin/create-user', {
+        state: { from: '/admin/models/user' },
+      });
     } else {
       navigate(`/admin/models/${modelName}/create`);
     }

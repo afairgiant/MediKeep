@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import {
   Title,
   Text,
@@ -39,6 +40,7 @@ import {
   IconInfoCircle,
   IconBrandGoogle,
   IconLink,
+  IconPlus,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
@@ -60,6 +62,7 @@ const PER_PAGE = 20;
 
 const UserManagement = () => {
   const { t } = useTranslation(['admin', 'common', 'shared']);
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { formatDate } = useDateFormat();
 
@@ -490,12 +493,24 @@ const UserManagement = () => {
           <Title order={2}>
             {t('shared:labels.userManagement', 'User Management')}
           </Title>
-          <Text c="dimmed" size="sm">
-            {t('users.userCount', {
-              count: filteredUsers.length,
-              defaultValue: '{{count}} users',
-            })}
-          </Text>
+          <Group gap="md">
+            <Text c="dimmed" size="sm">
+              {t('users.userCount', {
+                count: filteredUsers.length,
+                defaultValue: '{{count}} users',
+              })}
+            </Text>
+            <Button
+              leftSection={<IconPlus size={16} />}
+              onClick={() =>
+                navigate('/admin/create-user', {
+                  state: { from: '/admin/users' },
+                })
+              }
+            >
+              {t('common:buttons.addNew', 'Add New')}
+            </Button>
+          </Group>
         </Group>
 
         {/* Filters */}

@@ -91,7 +91,7 @@ const ResponsiveNavigation = ({
           icon: '🗄️',
         },
         {
-          path: '/admin/models/user',
+          path: '/admin/users',
           label: 'Manage Users',
           icon: '👥',
         },

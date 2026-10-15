@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
 import UserRegistrationForm from '../../components/forms/UserRegistrationForm';
@@ -6,12 +6,19 @@ import { Card, Text, Group, ThemeIcon } from '@mantine/core';
 import { IconUserPlus } from '@tabler/icons-react';
 import './ModelEdit.css'; // Reuse existing admin styles
 
+const RETURN_PATHS = ['/admin/users', '/admin/models/user'];
+
 const AdminUserCreate = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation('admin');
 
+  const returnPath = RETURN_PATHS.includes(location.state?.from)
+    ? location.state.from
+    : '/admin';
+
   const handleSuccess = ({ formData }) => {
-    navigate('/admin', {
+    navigate(returnPath, {
       state: {
         message: t('createUser.successRedirect', {
           username: formData.username,
@@ -22,7 +29,7 @@ const AdminUserCreate = () => {
   };
 
   const handleCancel = () => {
-    navigate('/admin');
+    navigate(returnPath);
   };
 
   return (

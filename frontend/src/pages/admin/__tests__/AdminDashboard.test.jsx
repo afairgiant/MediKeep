@@ -232,12 +232,12 @@ describe('AdminDashboard', () => {
   });
 
   describe('stat card navigation (Item 20)', () => {
-    test('clicking Total Users navigates to /admin/models/user', () => {
+    test('clicking Total Users navigates to /admin/users', () => {
       renderComponent();
       fireEvent.click(
         screen.getByText('Total Users').closest('[role="button"]')
       );
-      expect(mockNavigate).toHaveBeenCalledWith('/admin/models/user');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/users');
     });
 
     test('clicking Active Patients navigates to /admin/models/patient', () => {
@@ -276,7 +276,7 @@ describe('AdminDashboard', () => {
       renderComponent();
       const card = screen.getByText('Total Users').closest('[role="button"]');
       fireEvent.keyDown(card, { key: 'Enter' });
-      expect(mockNavigate).toHaveBeenCalledWith('/admin/models/user');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/users');
     });
 
     test('stat cards are keyboard accessible with Space key', () => {
@@ -366,12 +366,12 @@ describe('AdminDashboard', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/admin/data-models');
     });
 
-    test('clicking Manage Users navigates to /admin/models/user', () => {
+    test('clicking Manage Users navigates to /admin/users', () => {
       renderComponent();
       fireEvent.click(
         screen.getByText('Manage Users').closest('[role="button"]')
       );
-      expect(mockNavigate).toHaveBeenCalledWith('/admin/models/user');
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/users');
     });
 
     test('Audit Log quick action navigates to audit log', () => {
