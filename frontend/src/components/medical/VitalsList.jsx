@@ -780,7 +780,7 @@ const VitalsList = ({
   const renderVitalValueCells = vital => (
     <>
       <Table.Td>
-        {vital.systolic_bp && vital.diastolic_bp ? (
+        {vital.systolic_bp != null && vital.diastolic_bp != null ? (
           <Text size="sm" fw={500}>
             {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
           </Text>
@@ -791,7 +791,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.heart_rate ? (
+        {vital.heart_rate != null ? (
           <Text size="sm" fw={500}>
             {vital.heart_rate} BPM
           </Text>
@@ -802,7 +802,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.temperature ? (
+        {vital.temperature != null ? (
           <Text size="sm" fw={500}>
             {formatMeasurement(
               convertForDisplay(vital.temperature, 'temperature', unitSystem),
@@ -817,7 +817,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.weight ? (
+        {vital.weight != null ? (
           <Text size="sm" fw={500}>
             {formatMeasurement(
               convertForDisplay(vital.weight, 'weight', unitSystem),
@@ -832,9 +832,17 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.weight && vital.height ? (
+        {vital.weight != null && vital.height != null ? (
+          // Single reading: derive BMI from its own weight + height.
           <Text size="sm" fw={500}>
             {getBMIDisplay(vital.weight, vital.height)}
+          </Text>
+        ) : vital.bmi != null ? (
+          // Precomputed BMI (e.g. a summary row's per-reading-averaged BMI, or
+          // a stored value when the reading lacks height). Never derived from
+          // independently averaged weight/height.
+          <Text size="sm" fw={500}>
+            {vital.bmi}
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
@@ -843,7 +851,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.blood_glucose ? (
+        {vital.blood_glucose != null ? (
           <Group gap="xs" wrap="nowrap">
             <Text size="sm" fw={500}>
               {vital.blood_glucose} {t('vitals:units.mgdl')}
@@ -871,7 +879,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.a1c ? (
+        {vital.a1c != null ? (
           <Text size="sm" fw={500}>
             {vital.a1c}%
           </Text>
@@ -882,7 +890,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.oxygen_saturation ? (
+        {vital.oxygen_saturation != null ? (
           <Text size="sm" fw={500}>
             {vital.oxygen_saturation}%
           </Text>
@@ -912,6 +920,24 @@ const VitalsList = ({
       );
     };
 
+    // BMI is averaged over per-reading BMIs, computed only from readings that
+    // have BOTH weight and height. Averaging weight and height independently
+    // and deriving a single BMI would invent a value when no reading has both,
+    // and would not equal the mean of the per-reading BMIs. `height` is
+    // deliberately omitted from the result so the BMI cell uses this precomputed
+    // value rather than re-deriving it from an averaged height.
+    const perReadingBmi = readings
+      .filter(r => r.weight != null && r.height != null)
+      .map(r => vitalsService.calculateBMI(r.weight, r.height))
+      .filter(v => v != null && v > 0);
+    const bmi =
+      perReadingBmi.length > 0
+        ? Math.round(
+            (perReadingBmi.reduce((a, b) => a + b, 0) / perReadingBmi.length) *
+              10
+          ) / 10
+        : undefined;
+
     return {
       id: `agg-${readings[0]?.id ?? 'group'}`,
       recorded_date: readings[0]?.recorded_date,
@@ -920,7 +946,7 @@ const VitalsList = ({
       heart_rate: avgField('heart_rate'),
       temperature: avgField('temperature', 1),
       weight: avgField('weight', 1),
-      height: avgField('height', 1),
+      bmi,
       blood_glucose: avgField('blood_glucose'),
       a1c: avgField('a1c', 1),
       oxygen_saturation: avgField('oxygen_saturation'),
