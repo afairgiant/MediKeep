@@ -835,7 +835,7 @@ const LabResultFormWrapper = ({
                               <Text size="xs" c="dimmed" mb="sm" mt="sm">
                                 {t(
                                   'labresults:numericResult.sectionDescription',
-                                  'Enter a measured value and reference range to enable trend charting for stacked results.'
+                                  'Enter a measured value and reference range to enable trend charting.'
                                 )}
                               </Text>
                               <Grid>

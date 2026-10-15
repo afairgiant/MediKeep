@@ -232,15 +232,7 @@
     "viewTrends": "Trends bekijken"
   },
   "stackedView": {
-    "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "Uit het paneel",
-    "latestResult": "Laatste",
-    "noResults": "Geen resultaten in deze groep",
-    "panel": "Paneel",
-    "results": "{{count}} resultaat",
-    "results_one": "{{count}} resultaat",
-    "results_other": "{{count}} resultaten",
-    "trendChart": "Waarde in de loop van de tijd"
+    "panel": "Paneel"
   },
   "startAdding": "Begin met het toevoegen van uw eerste labresultaat.",
   "stats": {

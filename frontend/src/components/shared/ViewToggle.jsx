@@ -22,11 +22,6 @@ const MODE_CONFIG = {
     labelKey: 'viewToggle.components',
     fallback: 'Test Results',
   },
-  stacked: {
-    icon: '🗂️',
-    labelKey: 'viewToggle.stacked',
-    fallback: 'Stacked',
-  },
 };
 
 const ViewToggle = ({

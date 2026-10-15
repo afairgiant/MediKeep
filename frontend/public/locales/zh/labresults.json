@@ -188,7 +188,7 @@
     "refTextDescription": "在显示中覆盖最小值/最大值",
     "refTextLabel": "范围文本",
     "refTextPlaceholder": "例如 4.0-5.6 或 <200",
-    "sectionDescription": "输入测量值和参考范围以启用堆叠结果的趋势图。",
+    "sectionDescription": "输入测量值和参考范围以启用趋势图。",
     "sectionLabel": "数值结果（可选）",
     "unitLabel": "单位",
     "unitPlaceholder": "例如 mg/dL, mmol/L",
@@ -231,15 +231,7 @@
     "viewTrends": "查看趋势"
   },
   "stackedView": {
-    "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "来自面板",
-    "latestResult": "最新",
-    "noResults": "该组中没有结果",
-    "panel": "面板",
-    "results": "{{count}} 个结果",
-    "results_one": "{{count}} 个结果",
-    "results_other": "{{count}} 个结果",
-    "trendChart": "随时间变化的值"
+    "panel": "面板"
   },
   "startAdding": "开始添加您的第一个检验结果。",
   "stats": {

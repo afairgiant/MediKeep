@@ -232,15 +232,7 @@
     "viewTrends": "Trends anzeigen"
   },
   "stackedView": {
-    "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "Aus dem Panel",
-    "latestResult": "Aktuell",
-    "noResults": "Keine Ergebnisse in dieser Gruppe",
-    "panel": "Panel",
-    "results": "{{count}} Ergebnis",
-    "results_one": "{{count}} Ergebnis",
-    "results_other": "{{count}} Ergebnisse",
-    "trendChart": "Wert im Zeitverlauf"
+    "panel": "Panel"
   },
   "startAdding": "Beginnen Sie mit dem Hinzufügen Ihres ersten Laborergebnisses.",
   "stats": {

@@ -232,15 +232,7 @@
     "viewTrends": "Visa trender"
   },
   "stackedView": {
-    "dateRange": "{{from}} – {{to}}",
-    "fromPanel": "Från panelen",
-    "latestResult": "Senaste",
-    "noResults": "Inga resultat i den här gruppen",
-    "panel": "Panel",
-    "results": "{{count}} resultat",
-    "results_one": "{{count}} resultat",
-    "results_other": "{{count}} resultat",
-    "trendChart": "Värde över tid"
+    "panel": "Panel"
   },
   "startAdding": "Börja med att lägga till ditt första laboratorieresultat.",
   "stats": {
