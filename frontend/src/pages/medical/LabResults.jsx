@@ -97,7 +97,7 @@ const LabResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
+  const [viewMode, setViewMode] = usePersistedViewMode('lab-results', 'panels');
   const [tableLayout, setTableLayout] = useState(() => viewMode === 'table');
   const [isPrintingAll, setIsPrintingAll] = useState(false);
   const {

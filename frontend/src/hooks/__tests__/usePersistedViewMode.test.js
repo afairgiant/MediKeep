@@ -68,6 +68,18 @@ describe('usePersistedViewMode', () => {
     expect(result.current[0]).toBe('cards');
   });
 
+  test('uses a page-specific default when the stored value is not a persistable mode', () => {
+    localStorage.getItem.mockImplementation(key => {
+      if (key === storageKey('lab-results')) return 'panels';
+      return null;
+    });
+
+    const { result } = renderHook(() =>
+      usePersistedViewMode('lab-results', 'panels')
+    );
+    expect(result.current[0]).toBe('panels');
+  });
+
   test('falls back to the legacy key when the page key holds removed "stacked" value', () => {
     localStorage.getItem.mockImplementation(key => {
       if (key === storageKey('lab-results')) return 'stacked';

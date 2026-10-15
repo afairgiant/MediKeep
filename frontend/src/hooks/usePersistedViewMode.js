@@ -23,8 +23,8 @@ function readValidMode(key) {
  * page-specific key via useEffect.
  *
  * @param {string} pageKey - Page identifier (e.g. 'medications', 'lab-results').
- * @param {'cards' | 'table' | 'components'} [defaultMode='cards'] - Fallback when nothing is stored.
- * @returns {['cards' | 'table' | 'components', (mode: 'cards' | 'table' | 'components') => void]}
+ * @param {string} [defaultMode='cards'] - Fallback when nothing valid is stored. May be a page-specific mode that is not itself persistable (e.g. 'panels').
+ * @returns {[string, (mode: string) => void]}
  */
 export function usePersistedViewMode(pageKey, defaultMode = 'cards') {
   if (typeof pageKey !== 'string' || pageKey.trim().length === 0) {

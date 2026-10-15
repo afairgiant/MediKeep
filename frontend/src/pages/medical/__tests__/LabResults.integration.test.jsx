@@ -994,6 +994,12 @@ describe('Lab Results Page Integration Tests', () => {
       expect(mockSetViewMode).toHaveBeenCalledWith('components');
     });
 
+    test('defaults the persisted view mode to panels so the first render uses the card grid', () => {
+      renderWithPatient(<LabResults />);
+
+      expect(usePersistedViewMode).toHaveBeenCalledWith('lab-results', 'panels');
+    });
+
     test.each(['cards', 'table'])(
       'coerces legacy persisted "%s" view mode to panels',
       async legacyMode => {
