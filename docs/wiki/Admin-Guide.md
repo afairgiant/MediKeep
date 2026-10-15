@@ -37,6 +37,7 @@ Admins can manage all user accounts in the system.
 
 - Create new user accounts with username, email, and password
 - Assign role (user or admin)
+- Use the **Add New** button on the User Management page. This works even when public registration is disabled, so it is the way to add users in that case.
 
 ### Editing Users
 

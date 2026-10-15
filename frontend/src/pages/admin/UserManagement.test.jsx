@@ -12,6 +12,13 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 
+const mockNavigate = vi.fn();
+
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
+  useNavigate: () => mockNavigate,
+}));
+
 vi.mock('../../components/admin/AdminLayout', () => ({
   default: ({ children }) => <div data-testid="admin-layout">{children}</div>,
 }));
@@ -165,6 +172,26 @@ describe('UserManagement', () => {
     mockGetUsers.mockReturnValue(new Promise(() => {}));
     renderUserManagement();
     expect(screen.getByTestId('admin-layout')).toBeInTheDocument();
+  });
+
+  it('navigates to the create user page, remembering where it came from', async () => {
+    renderUserManagement();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Add New' }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/create-user', {
+      state: { from: '/admin/users' },
+    });
+  });
+
+  it('shows the create user button when there are no users', async () => {
+    mockGetUsers.mockResolvedValue(mockEmptyUsers);
+    renderUserManagement();
+
+    await waitFor(() => {
+      expect(screen.getByText('No users found')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('button', { name: 'Add New' })).toBeInTheDocument();
   });
 
   it('renders user table with data', async () => {
