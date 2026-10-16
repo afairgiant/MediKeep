@@ -777,7 +777,7 @@ const VitalsList = ({
   // Shared by individual rows, expanded group readings, and summary rows (which
   // pass either the single reading for the day or an averaged pseudo-reading).
   // Any field that is null falls back to the dimmed "N/A" cell per column.
-  const renderVitalValueCells = vital => (
+  const renderVitalValueCells = (vital, glucoseRange = null) => (
     <>
       <Table.Td>
         {vital.systolic_bp != null && vital.diastolic_bp != null ? (
@@ -837,10 +837,11 @@ const VitalsList = ({
           <Text size="sm" fw={500}>
             {getBMIDisplay(vital.weight, vital.height)}
           </Text>
-        ) : vital.bmi != null ? (
-          // Precomputed BMI (e.g. a summary row's per-reading-averaged BMI, or
-          // a stored value when the reading lacks height). Never derived from
-          // independently averaged weight/height.
+        ) : vital._aggregate && vital.bmi != null ? (
+          // Aggregate summary row only: BMI precomputed as the mean of
+          // per-reading BMIs, each derived from a reading having BOTH weight
+          // and height. Real rows never show a stored BMI without a height, so
+          // summary and individual rows apply the same weight+height rule.
           <Text size="sm" fw={500}>
             {vital.bmi}
           </Text>
@@ -856,6 +857,14 @@ const VitalsList = ({
             <Text size="sm" fw={500}>
               {vital.blood_glucose} {t('vitals:units.mgdl')}
             </Text>
+            {glucoseRange &&
+              glucoseRange.min != null &&
+              glucoseRange.max != null &&
+              glucoseRange.min !== glucoseRange.max && (
+                <Text size="xs" c="dimmed">
+                  ({glucoseRange.min}–{glucoseRange.max})
+                </Text>
+              )}
             {vital.glucose_context && (
               <Badge
                 size="xs"
@@ -938,11 +947,23 @@ const VitalsList = ({
           ) / 10
         : undefined;
 
+    // Blood pressure is a coupled (systolic, diastolic) pair. Averaging the two
+    // fields independently would synthesize a pair that never occurred in any
+    // single measurement, so instead surface the most recent reading that has
+    // BOTH values — a real, co-occurring measurement. The scalar vitals above
+    // are averaged; BP is the coupled-pair exception.
+    const latestBpReading = readings
+      .filter(r => r.systolic_bp != null && r.diastolic_bp != null)
+      .sort((a, b) => new Date(b.recorded_date) - new Date(a.recorded_date))[0];
+
     return {
       id: `agg-${readings[0]?.id ?? 'group'}`,
       recorded_date: readings[0]?.recorded_date,
-      systolic_bp: avgField('systolic_bp'),
-      diastolic_bp: avgField('diastolic_bp'),
+      // Marks this as a display-only aggregate pseudo-reading (never a real
+      // record). The BMI cell honors a precomputed `bmi` only when this is set.
+      _aggregate: true,
+      systolic_bp: latestBpReading?.systolic_bp,
+      diastolic_bp: latestBpReading?.diastolic_bp,
       heart_rate: avgField('heart_rate'),
       temperature: avgField('temperature', 1),
       weight: avgField('weight', 1),
@@ -1219,15 +1240,26 @@ const VitalsList = ({
                         </Table.Td>
                         {showActions && (
                           <Table.Td>
-                            <ActionIcon
-                              variant="subtle"
-                              color="red"
-                              size="xs"
-                              onClick={() => handleDelete(vital.id, true)}
-                              title={t('buttons.delete', 'Delete')}
-                            >
-                              <IconTrash size={12} />
-                            </ActionIcon>
+                            <Group gap="xs" wrap="nowrap">
+                              <ActionIcon
+                                variant="subtle"
+                                color="blue"
+                                size="xs"
+                                onClick={() => onEdit(vital)}
+                                title={t('buttons.edit', 'Edit')}
+                              >
+                                <IconEdit size={12} />
+                              </ActionIcon>
+                              <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                size="xs"
+                                onClick={() => handleDelete(vital.id, true)}
+                                title={t('buttons.delete', 'Delete')}
+                              >
+                                <IconTrash size={12} />
+                              </ActionIcon>
+                            </Group>
                           </Table.Td>
                         )}
                       </Table.Tr>
@@ -1296,12 +1328,14 @@ const VitalsList = ({
             </Group>
           </Table.Td>
           {/* Value columns: a single reading shows its own values; a day with
-              multiple readings shows the per-vital average. Min/max and every
-              individual reading remain available in the expanded day view. */}
+              multiple readings shows the per-vital average, plus the glucose
+              min–max range beside the average. Every individual reading remains
+              available in the expanded day view. */}
           {renderVitalValueCells(
             item.count === 1
               ? item.readings[0]
-              : aggregateReadings(item.readings)
+              : aggregateReadings(item.readings),
+            item.count > 1 ? item.stats : null
           )}
           {showActions && (
             <Table.Td>
@@ -1318,23 +1352,24 @@ const VitalsList = ({
                 >
                   <IconEye size={14} />
                 </ActionIcon>
-                <ActionIcon
-                  variant="filled"
-                  color="blue"
-                  size="sm"
-                  onClick={e => {
-                    e.stopPropagation();
-                    // Pass first reading with locked glucose flag when multiple readings exist
-                    const record = { ...item.readings[0] };
-                    if (item.count > 1) {
-                      record._lockedFields = ['blood_glucose'];
-                    }
-                    onEdit(record);
-                  }}
-                  title="Edit vitals"
-                >
-                  <IconEdit size={14} />
-                </ActionIcon>
+                {/* A multi-reading summary row shows aggregated values, which
+                    are not a single editable record; editing happens per
+                    reading in the expanded day view. A single-reading day is a
+                    real record, so it keeps the inline edit. */}
+                {item.count === 1 && (
+                  <ActionIcon
+                    variant="filled"
+                    color="blue"
+                    size="sm"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onEdit(item.readings[0]);
+                    }}
+                    title="Edit vitals"
+                  >
+                    <IconEdit size={14} />
+                  </ActionIcon>
+                )}
                 <ActionIcon
                   variant="filled"
                   color="red"
