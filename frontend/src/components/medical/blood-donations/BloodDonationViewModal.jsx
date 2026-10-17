@@ -5,13 +5,11 @@ import {
   Group,
   Text,
   Badge,
-  Button,
   SimpleGrid,
   Title,
-  Tooltip,
 } from '@mantine/core';
-import { IconEdit } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
   getDonationTypeLabel,
@@ -147,26 +145,12 @@ const BloodDonationViewModal = ({
           </div>
         )}
 
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                variant="filled"
-                onClick={handleEdit}
-                leftSection={<IconEdit size={16} />}
-                disabled={disableEdit}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={handleEdit}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );
