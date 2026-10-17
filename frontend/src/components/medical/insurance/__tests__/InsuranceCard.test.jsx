@@ -67,6 +67,18 @@ describe('InsuranceCard', () => {
     expect(screen.getByText('Delete')).toBeInTheDocument();
   });
 
+  test('uses the shared Print button style', () => {
+    render(
+      <MantineWrapper>
+        <InsuranceCard {...defaultProps} />
+      </MantineWrapper>
+    );
+
+    const printButton = screen.getByRole('button', { name: 'Print Card' });
+    expect(printButton).toHaveClass('print-button');
+    expect(printButton).toHaveAttribute('data-variant', 'outline');
+  });
+
   test('calls onPrint with the insurance record, without triggering onView', async () => {
     const user = userEvent.setup();
     render(

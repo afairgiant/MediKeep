@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
+import PrintButton from './PrintButton';
+
 const MODE_CONFIG = {
   panels: {
     icon: '📋',
@@ -58,9 +60,10 @@ const ViewToggle = ({
         })}
       </div>
       {showPrint && viewMode === 'table' && (
-        <button className="print-button" onClick={() => window.print()}>
-          {t('buttons.print', 'Print')}
-        </button>
+        <PrintButton
+          size={size === 'sm' ? 'sm' : 'md'}
+          onClick={() => window.print()}
+        />
       )}
     </div>
   );

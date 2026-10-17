@@ -26,6 +26,7 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import PrintButton from '../../components/shared/PrintButton';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
@@ -41,7 +42,7 @@ import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { submitPendingTestComponents } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
-import { IconFileUpload, IconTable, IconLayoutGrid, IconPrinter } from '@tabler/icons-react';
+import { IconFileUpload, IconTable, IconLayoutGrid } from '@tabler/icons-react';
 import LabResultsComponentTable from '../../components/medical/labresults/LabResultsComponentTable';
 import TestComponentEditModal from '../../components/medical/labresults/TestComponentEditModal';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
@@ -1316,15 +1317,7 @@ const LabResults = () => {
                   </Button>
                 </Button.Group>
                 {tableLayout && (
-                  <Button
-                    className="print-button"
-                    size="sm"
-                    variant="light"
-                    leftSection={<IconPrinter size={14} />}
-                    onClick={handlePrintTable}
-                  >
-                    {t('common:buttons.print', 'Print')}
-                  </Button>
+                  <PrintButton onClick={handlePrintTable} />
                 )}
               </>
             }

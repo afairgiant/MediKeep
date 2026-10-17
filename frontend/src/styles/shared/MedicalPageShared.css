@@ -183,29 +183,6 @@
   z-index: 1;
 }
 
-.print-button {
-  background: var(--color-info, #17a2b8);
-  color: var(--color-text-light, white);
-  border: none;
-  padding: 0.75rem 1rem;
-  border-radius: var(--border-radius-md, 5px);
-  cursor: pointer;
-  font-weight: 500;
-  transition: var(--transition-all, all 0.3s ease);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(23, 162, 184, 0.3));
-}
-
-.print-button:hover {
-  background: var(--color-info-dark, #138496);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md, 0 2px 8px rgba(23, 162, 184, 0.4));
-}
-
-.print-button:focus-visible {
-  outline: 2px solid var(--color-info, #17a2b8);
-  outline-offset: 2px;
-}
-
 /* Button styles moved to ../components/buttons.css */
 
 .sort-controls {
@@ -892,8 +869,7 @@
 }
 
 /* Small variant - matches Mantine sm button sizing */
-.view-toggle-sm .view-toggle-btn,
-.view-toggle-sm .print-button {
+.view-toggle-sm .view-toggle-btn {
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
 }
