@@ -1164,7 +1164,6 @@
     "viewModal": {
       "acute": "Οξύ",
       "confirmDeleteEpisode": "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτό το επεισόδιο;",
-      "deleteSymptom": "Διαγραφή Συμπτώματος",
       "editSymptom": "Επεξεργασία Συμπτώματος",
       "episodeHistory": "Ιστορικό Επεισοδίων",
       "generalNotes": "Γενικές Σημειώσεις",

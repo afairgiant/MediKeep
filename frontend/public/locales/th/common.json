@@ -1159,7 +1159,6 @@
     "viewModal": {
       "acute": "เฉียบพลัน",
       "confirmDeleteEpisode": "คุณแน่ใจหรือไม่ที่จะลบอาการนี้?",
-      "deleteSymptom": "ลบอาการ",
       "editSymptom": "แก้ไขอาการ",
       "episodeHistory": "ประวัติอาการ",
       "generalNotes": "หมายเหตุทั่วไป",

@@ -23,8 +23,6 @@ import {
   IconFileText,
   IconClockHour4,
   IconNote,
-  IconEdit,
-  IconTrash,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -49,7 +47,6 @@ const SymptomViewModal = ({
   onClose,
   symptom,
   onEdit,
-  onDelete,
   onLogEpisode,
   onEditOccurrence,
   onRefresh,
@@ -487,8 +484,7 @@ const SymptomViewModal = ({
                             {onEditOccurrence && !disableEdit && (
                               <Button
                                 size="xs"
-                                variant="light"
-                                leftSection={<IconEdit size={14} />}
+                                variant="filled"
                                 onClick={() => {
                                   onClose();
                                   setTimeout(
@@ -503,9 +499,8 @@ const SymptomViewModal = ({
                             {!disableEdit && (
                               <Button
                                 size="xs"
-                                variant="light"
+                                variant="filled"
                                 color="red"
-                                leftSection={<IconTrash size={14} />}
                                 onClick={() =>
                                   handleDeleteOccurrence(occurrence.id)
                                 }
@@ -614,20 +609,6 @@ const SymptomViewModal = ({
           disableEdit={disableEdit}
           disableEditTooltip={disableEditTooltip}
         >
-          {onDelete && !disableEdit && (
-            <Button
-              variant="light"
-              color="red"
-              onClick={() => {
-                onClose();
-                setTimeout(() => {
-                  onDelete(symptom.id);
-                }, 100);
-              }}
-            >
-              {t('symptoms.viewModal.deleteSymptom', 'Delete Symptom')}
-            </Button>
-          )}
           {onLogEpisode && !disableEdit && (
             <Button
               variant="filled"

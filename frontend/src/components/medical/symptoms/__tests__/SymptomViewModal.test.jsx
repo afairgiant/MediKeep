@@ -128,6 +128,18 @@ describe('SymptomViewModal - episode history', () => {
 
     expect(screen.queryByRole('button', { name: '2' })).not.toBeInTheDocument();
   });
+
+  it('styles the episode Edit and Delete buttons as text-only filled buttons, like other record rows', async () => {
+    const panel = within(await openEpisodesTab(makeOccurrences(1)));
+
+    const editButton = panel.getByRole('button', { name: 'Edit' });
+    const deleteButton = panel.getByRole('button', { name: 'Delete' });
+    expect(editButton).toHaveAttribute('data-variant', 'filled');
+    expect(deleteButton).toHaveAttribute('data-variant', 'filled');
+    expect(deleteButton.getAttribute('style')).toContain('red');
+    expect(editButton.querySelector('svg')).toBeNull();
+    expect(deleteButton.querySelector('svg')).toBeNull();
+  });
 });
 
 describe('SymptomViewModal - footer actions', () => {
@@ -143,7 +155,6 @@ describe('SymptomViewModal - footer actions', () => {
         onClose={vi.fn()}
         symptom={symptom}
         onEdit={vi.fn()}
-        onDelete={vi.fn()}
         onLogEpisode={vi.fn()}
         {...props}
       />
@@ -160,15 +171,19 @@ describe('SymptomViewModal - footer actions', () => {
     renderModal();
     await waitFor(() => expect(symptomApi.getOccurrences).toHaveBeenCalled());
 
-    expect(footerLabels()).toEqual([
-      'Close',
-      'Delete Symptom',
-      'Log Episode',
-      'Edit Symptom',
-    ]);
+    expect(footerLabels()).toEqual(['Close', 'Log Episode', 'Edit Symptom']);
   });
 
-  it('hides Delete and Log Episode and disables Edit when editing is disabled', async () => {
+  it('offers no record-level Delete, matching the other record view modals', async () => {
+    renderModal({ onDelete: vi.fn() });
+    await waitFor(() => expect(symptomApi.getOccurrences).toHaveBeenCalled());
+
+    expect(
+      screen.queryByRole('button', { name: 'Delete Symptom' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides Log Episode and disables Edit when editing is disabled', async () => {
     renderModal({ disableEdit: true });
     await waitFor(() => expect(symptomApi.getOccurrences).toHaveBeenCalled());
 
@@ -180,6 +195,6 @@ describe('SymptomViewModal - footer actions', () => {
     renderModal({ onEdit: undefined });
     await waitFor(() => expect(symptomApi.getOccurrences).toHaveBeenCalled());
 
-    expect(footerLabels()).toEqual(['Close', 'Delete Symptom', 'Log Episode']);
+    expect(footerLabels()).toEqual(['Close', 'Log Episode']);
   });
 });

@@ -1164,7 +1164,6 @@
     "viewModal": {
       "acute": "Akut",
       "confirmDeleteEpisode": "Är du säker på att du vill ta bort denna episod?",
-      "deleteSymptom": "Ta bort symtom",
       "editSymptom": "Redigera symtom",
       "episodeHistory": "Episodhistorik",
       "generalNotes": "Allmänna anteckningar",

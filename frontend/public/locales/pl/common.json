@@ -1164,7 +1164,6 @@
     "viewModal": {
       "acute": "Ostry",
       "confirmDeleteEpisode": "Czy na pewno chcesz usunąć ten epizod?",
-      "deleteSymptom": "Usuń objaw",
       "editSymptom": "Edytuj objaw",
       "episodeHistory": "Historia epizodów",
       "generalNotes": "Notatki ogólne",
