@@ -65,24 +65,6 @@
   color: var(--color-text-light, white);
 }
 
-.print-button {
-  background: var(--color-info, #17a2b8);
-  color: var(--color-text-light, white);
-  border: none;
-  padding: 0.75rem 1rem;
-  border-radius: var(--border-radius-md, 5px);
-  cursor: pointer;
-  font-weight: 500;
-  transition: var(--transition-all, all 0.3s ease);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(23, 162, 184, 0.3));
-}
-
-.print-button:hover {
-  background: var(--color-info-dark, #138496);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md, 0 2px 8px rgba(23, 162, 184, 0.4));
-}
-
 /* Table Layout for Medical Data */
 .medications-table-container {
   background: var(--color-bg-primary, white);
