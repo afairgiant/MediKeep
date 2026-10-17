@@ -112,6 +112,13 @@ export const NAVIGATION_SECTIONS = {
         id: 'immunizations',
       },
       {
+        nameKey: 'sidebarNav.items.bloodDonations',
+        name: 'Blood Donations',
+        path: buildEntityUrl(ENTITY_TYPES.BLOOD_DONATION),
+        icon: '🩸',
+        id: 'blood-donations',
+      },
+      {
         nameKey: 'sidebarNav.items.visitHistory',
         name: 'Visit History',
         path: buildEntityUrl(ENTITY_TYPES.ENCOUNTER),

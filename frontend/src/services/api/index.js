@@ -26,6 +26,7 @@ const ENTITY_TO_API_PATH = {
   [ENTITY_TYPES.INJURY]: 'injuries',
   [ENTITY_TYPES.MEDICAL_EQUIPMENT]: 'medical-equipment',
   [ENTITY_TYPES.PRACTICE]: 'practices',
+  [ENTITY_TYPES.BLOOD_DONATION]: 'blood-donations',
 };
 
 // Streamlined API service with proper logging integration
@@ -2287,6 +2288,44 @@ class ApiService {
 
   deleteMedicalEquipment(equipmentId, signal) {
     return this.delete(`/medical-equipment/${equipmentId}`, { signal });
+  }
+
+  // Blood donation methods
+  getBloodDonations(signal) {
+    return this.getEntities(ENTITY_TYPES.BLOOD_DONATION, signal);
+  }
+
+  getPatientBloodDonations(patientId, signal) {
+    return this.getPatientEntities(
+      ENTITY_TYPES.BLOOD_DONATION,
+      patientId,
+      signal
+    );
+  }
+
+  createBloodDonation(donationData, signal) {
+    return this.createEntity(ENTITY_TYPES.BLOOD_DONATION, donationData, signal);
+  }
+
+  updateBloodDonation(donationId, donationData, signal) {
+    return this.updateEntity(
+      ENTITY_TYPES.BLOOD_DONATION,
+      donationId,
+      donationData,
+      signal
+    );
+  }
+
+  deleteBloodDonation(donationId, signal) {
+    return this.deleteEntity(ENTITY_TYPES.BLOOD_DONATION, donationId, signal);
+  }
+
+  getBloodDonationEligibility(patientId, signal) {
+    const params =
+      patientId !== null && patientId !== undefined
+        ? { patient_id: patientId }
+        : {};
+    return this.get('/blood-donations/eligibility', { params, signal });
   }
 
   // Procedure methods

@@ -61,6 +61,12 @@
     "urlPlaceholder": "https://votre-instance-papra.com"
   },
   "preferences": {
+    "bloodDonationIntervals": {
+      "days": "jours",
+      "description": "Nombre minimum de jours après un don avant de pouvoir donner à nouveau. Ajustez ces valeurs selon les directives de votre service de don du sang.",
+      "reset": "Rétablir les valeurs par défaut",
+      "title": "Intervalles de don de sang"
+    },
     "dateFormat": {
       "description": "Choisissez comment les dates sont affichées dans l'application",
       "dmy": "JJ/MM/AAAA (Royaume-Uni/International)",

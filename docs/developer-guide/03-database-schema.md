@@ -225,6 +225,7 @@ JUNCTION TABLES (Many-to-Many)
 - `insurances`: One-to-many with Insurance (cascade delete)
 - `symptoms`: One-to-many with Symptom (cascade delete)
 - `injuries`: One-to-many with Injury (cascade delete)
+- `blood_donations`: One-to-many with BloodDonation (cascade delete)
 - `shares`: One-to-many with PatientShare (cascade delete)
 - `photo`: One-to-one with PatientPhoto (cascade delete)
 
@@ -254,6 +255,7 @@ JUNCTION TABLES (Many-to-Many)
 | default_storage_backend | String(20) | NOT NULL, DEFAULT 'local' | local or paperless |
 | paperless_auto_sync | Boolean | NOT NULL, DEFAULT FALSE | Auto-sync to Paperless |
 | paperless_sync_tags | Boolean | NOT NULL, DEFAULT TRUE | Sync tags to Paperless |
+| blood_donation_intervals | JSON | NULL | Per-type minimum days between blood donations (overrides defaults) |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 
@@ -848,6 +850,45 @@ JUNCTION TABLES (Many-to-Many)
   `coverage_details.primary_care_physician`; this is preserved (not
   auto-migrated) and used as a display fallback only when practitioner_id
   is unset.
+
+### blood_donations
+**Purpose**: Patient blood donation records with optional pre-donation screening values
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique blood donation ID |
+| patient_id | Integer | FK(patients.id, ON DELETE CASCADE), NOT NULL | Associated patient |
+| donation_date | Date | NOT NULL | Date of the donation |
+| donation_type | String(50) | NOT NULL | DonationType enum value |
+| location | String | | Where the donation took place |
+| systolic_bp | Integer | | Systolic blood pressure (mmHg) |
+| diastolic_bp | Integer | | Diastolic blood pressure (mmHg) |
+| temperature | Float | | Body temperature (Fahrenheit) |
+| hemoglobin | Float | | Hemoglobin (g/dL) |
+| notes | Text | | Additional notes |
+| tags | JSON | DEFAULT [] | User tags |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Donation Type Values** (DonationType enum):
+- whole_blood
+- plasma
+- platelets
+- double_red_cells
+
+**Relationships**:
+- `patient`: Many-to-one with Patient
+
+**Indexes**:
+- `idx_blood_donations_patient_date` on (patient_id, donation_date)
+
+**Business Rules**:
+- Donation date and type are required; the date cannot be in the future
+- Screening values are optional; systolic must be greater than diastolic when both are set
+- Temperature is always stored in Fahrenheit and converted for display
+- Eligibility is computed, not stored: latest donation date plus the per-type interval
+  from `user_preferences.blood_donation_intervals` (defaults: whole_blood 56, plasma 14,
+  platelets 14, double_red_cells 112 days)
 
 ## Symptom System Tables
 

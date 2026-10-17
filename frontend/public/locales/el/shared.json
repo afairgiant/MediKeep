@@ -7,6 +7,7 @@
   "categories": {
     "admin_dashboard": "Πίνακας Ελέγχου Διαχειριστή",
     "allergies": "Αλλεργίες",
+    "blood_donations": "Αιμοδοσίες",
     "conditions": "Παθήσεις",
     "count_active_prescriptions": "{{count}} ενεργές συνταγές",
     "count_active_prescriptions_one": "{{count}} ενεργή συνταγή",

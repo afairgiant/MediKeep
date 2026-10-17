@@ -7,6 +7,7 @@
   "categories": {
     "admin_dashboard": "Beheerderspaneel",
     "allergies": "Allergieën",
+    "blood_donations": "Bloeddonaties",
     "conditions": "Aandoeningen",
     "count_active_prescriptions": "{{count}} actieve recepten",
     "count_active_prescriptions_one": "{{count}} actief recept",

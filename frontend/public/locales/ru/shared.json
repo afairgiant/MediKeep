@@ -7,6 +7,7 @@
   "categories": {
     "admin_dashboard": "Панель администратора",
     "allergies": "Аллергии",
+    "blood_donations": "Донации крови",
     "conditions": "Заболевания",
     "count_active_prescriptions": "{{count}} активных назначений",
     "count_active_prescriptions_one": "{{count}} активное назначение",

@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "allergy",
+    "bloodDonation": "blood donation",
     "condition": "condition",
     "equipment": "equipment",
     "familyMember": "family member",
@@ -90,6 +91,66 @@
         "allergen": "Allergen",
         "onsetDate": "Onset Date"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "Loading blood donations...",
+    "add": "+ Add Donation",
+    "addTitle": "Add Blood Donation",
+    "editTitle": "Edit Blood Donation",
+    "noneFound": "No Blood Donations Found",
+    "startAdding": "Start by logging your first blood donation.",
+    "addFirst": "Log Your First Donation",
+    "types": {
+      "whole_blood": "Whole Blood",
+      "plasma": "Plasma",
+      "platelets": "Platelets",
+      "double_red_cells": "Double Red Cells"
+    },
+    "fields": {
+      "donationDate": "Donation Date",
+      "donationType": "Donation Type",
+      "location": "Location",
+      "bloodPressure": "Blood Pressure",
+      "systolic": "Systolic (mmHg)",
+      "diastolic": "Diastolic (mmHg)",
+      "temperature": "Temperature",
+      "hemoglobin": "Hemoglobin",
+      "hemoglobinWithUnit": "Hemoglobin (g/dL)"
+    },
+    "tabs": {
+      "donation": "Donation",
+      "screening": "Pre-donation Screening"
+    },
+    "form": {
+      "locationPlaceholder": "e.g., Red Cross blood drive, City Hospital",
+      "notesPlaceholder": "Additional notes about this donation",
+      "save": "Save Donation",
+      "update": "Update Donation",
+      "saving": "Saving donation..."
+    },
+    "viewModal": {
+      "title": "Blood Donation Details"
+    },
+    "eligibility": {
+      "title": "Next Donation",
+      "eligibleNow": "You can donate now",
+      "nextDate": "Eligible again on {{date}}",
+      "daysRemaining_one": "{{count}} day remaining",
+      "daysRemaining_other": "{{count}} days remaining",
+      "basedOn": "Based on your last {{type}} donation on {{date}} and a {{days}}-day interval",
+      "noDonations": "No donations logged yet",
+      "loadError": "Could not calculate the next donation date"
+    },
+    "validation": {
+      "dateRequired": "Donation date is required",
+      "typeRequired": "Donation type is required",
+      "bpOrder": "Systolic must be greater than diastolic",
+      "outOfRange": "{{field}} must be between {{min}} and {{max}}"
+    },
+    "filters": {
+      "allTypes": "All Types",
+      "allLocations": "All Locations"
     }
   },
   "componentCatalog": {
