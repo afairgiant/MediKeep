@@ -162,7 +162,6 @@
     "testComponentsEditInfo": "I componenti dell'esame possono essere gestiti dalla pagina di visualizzazione dopo il salvataggio."
   },
   "modal": {
-    "editLabResult": "Modifica risultato di laboratorio",
     "labels": {
       "referenceRange": "Intervallo di riferimento",
       "testType": "Tipo di esame"

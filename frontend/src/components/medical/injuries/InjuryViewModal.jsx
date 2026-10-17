@@ -5,20 +5,17 @@ import {
   Box,
   Stack,
   Group,
-  Button,
   Text,
   Badge,
   Grid,
   Paper,
   Divider,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
   IconBandage,
   IconFileText,
   IconNotes,
-  IconEdit,
   IconCalendar,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +25,7 @@ import { navigateToEntity } from '../../../utils/linkNavigation';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const InjuryViewModal = ({
   isOpen,
@@ -355,30 +353,15 @@ const InjuryViewModal = ({
           </Tabs.Panel>
         </Tabs>
 
-        {/* Actions */}
-        <Divider />
-        <Group justify="flex-end">
-          <Button variant="subtle" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                leftSection={<IconEdit size={16} />}
-                onClick={() => {
-                  rememberEditTab('injuries', activeTab);
-                  onEdit(injury);
-                }}
-                disabled={disableEdit}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={() => {
+            rememberEditTab('injuries', activeTab);
+            onEdit(injury);
+          }}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );

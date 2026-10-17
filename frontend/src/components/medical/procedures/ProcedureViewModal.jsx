@@ -7,18 +7,15 @@ import {
   Text,
   Title,
   Badge,
-  Button,
   Box,
   SimpleGrid,
   Paper,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
   IconStethoscope,
   IconNotes,
   IconFileText,
-  IconEdit,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
@@ -32,6 +29,7 @@ import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const ProcedureViewModal = ({
   isOpen,
@@ -527,27 +525,12 @@ const ProcedureViewModal = ({
             </Tabs.Panel>
           </Tabs>
 
-          {/* Action Buttons */}
-          <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose}>
-              {t('shared:labels.close', 'Close')}
-            </Button>
-            <Tooltip
-              label={disableEditTooltip}
-              disabled={!disableEdit || !disableEditTooltip}
-            >
-              <span>
-                <Button
-                  variant="filled"
-                  onClick={handleEditClick}
-                  leftSection={<IconEdit size={16} />}
-                  disabled={disableEdit}
-                >
-                  {t('shared:labels.edit', 'Edit')}
-                </Button>
-              </span>
-            </Tooltip>
-          </Group>
+          <ViewModalFooter
+            onClose={onClose}
+            onEdit={handleEditClick}
+            disableEdit={disableEdit}
+            disableEditTooltip={disableEditTooltip}
+          />
         </Stack>
       </Modal>
     );

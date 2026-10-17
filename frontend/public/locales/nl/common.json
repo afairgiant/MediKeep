@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Contactinformatie",
-      "editContact": "Contact bewerken",
       "icon": "🚨",
       "notes": "📝 Notities",
       "primaryPhone": "Primair telefoonnummer",
@@ -567,7 +566,6 @@
     },
     "loading": "Medicatie laden...",
     "modal": {
-      "editMedication": "Medicatie bewerken",
       "labels": {
         "alternativeName": "Alternatieve naam",
         "form": "Vorm",
@@ -806,7 +804,6 @@
     "loading": "Apotheken laden...",
     "viewModal": {
       "contact": "CONTACTINFORMATIE",
-      "editButton": "Apotheek bewerken",
       "location": "LOCATIE",
       "storeNumber": "Filiaal #",
       "title": "Apotheekdetails"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Hoofdklacht",
       "clinicalInformation": "Klinische informatie",
-      "editVisit": "Consult bewerken",
       "followUpInstructions": "Opvolginstructies",
       "generalVisit": "Algemeen consult",
       "location": "Locatie",

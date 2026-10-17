@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Contact Information",
-      "editContact": "Edit Contact",
       "icon": "🚨",
       "notes": "📝 Notes",
       "primaryPhone": "Primary Phone",
@@ -567,7 +566,6 @@
     },
     "loading": "Loading medications...",
     "modal": {
-      "editMedication": "Edit Medication",
       "labels": {
         "alternativeName": "Alternative Name",
         "form": "Form",
@@ -806,7 +804,6 @@
     "loading": "Loading pharmacies...",
     "viewModal": {
       "contact": "CONTACT INFORMATION",
-      "editButton": "Edit Pharmacy",
       "location": "LOCATION",
       "storeNumber": "Store #",
       "title": "Pharmacy Details"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Chief Complaint",
       "clinicalInformation": "Clinical Information",
-      "editVisit": "Edit Visit",
       "followUpInstructions": "Follow-up Instructions",
       "generalVisit": "General Visit",
       "location": "Location",

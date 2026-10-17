@@ -162,7 +162,6 @@
     "testComponentsEditInfo": "สามารถจัดการรายการตรวจจากหน้าดูรายละเอียดหลังจากบันทึก"
   },
   "modal": {
-    "editLabResult": "แก้ไขผลแลป",
     "labels": {
       "testType": "ประเภทการตรวจ",
       "referenceRange": "ช่วงค่าปกติ"

@@ -1104,4 +1104,19 @@ describe('Emergency Contacts Page Integration Tests', () => {
       });
     });
   });
+
+  describe('View modal footer', () => {
+    test('lists Close before a plain Edit button', async () => {
+      renderWithPatient(<EmergencyContacts />);
+
+      await userEvent.click(await screen.findByText('Sarah Johnson'));
+
+      const dialog = await screen.findByRole('dialog');
+      const close = within(dialog).getByRole('button', { name: 'Close' });
+      const edit = within(dialog).getByRole('button', { name: 'Edit' });
+      expect(
+        close.compareDocumentPosition(edit) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+  });
 });

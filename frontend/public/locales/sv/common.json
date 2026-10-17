@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Kontaktinformation",
-      "editContact": "Redigera kontakt",
       "icon": "🚨",
       "notes": "📝 Anteckningar",
       "primaryPhone": "Primär telefon",
@@ -567,7 +566,6 @@
     },
     "loading": "Laddar läkemedel...",
     "modal": {
-      "editMedication": "Redigera läkemedel",
       "labels": {
         "alternativeName": "Alternativt namn",
         "form": "Form",
@@ -806,7 +804,6 @@
     "loading": "Laddar apotek...",
     "viewModal": {
       "contact": "KONTAKTINFORMATION",
-      "editButton": "Redigera apotek",
       "location": "PLATS",
       "storeNumber": "Butik #",
       "title": "Apoteksdetaljer"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Huvudbesvär",
       "clinicalInformation": "Klinisk information",
-      "editVisit": "Redigera besök",
       "followUpInstructions": "Uppföljningsinstruktioner",
       "generalVisit": "Allmänt besök",
       "location": "Plats",

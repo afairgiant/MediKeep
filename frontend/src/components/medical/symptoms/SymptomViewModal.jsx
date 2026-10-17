@@ -14,7 +14,6 @@ import {
   Paper,
   Loader,
   Center,
-  Tooltip,
   Pagination,
 } from '@mantine/core';
 import {
@@ -42,6 +41,7 @@ import { rememberEditTab } from '../../../utils/editTabHandoff';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { OCCURRENCE_SEVERITY_LABEL_KEYS } from '../../../utils/medicalFormFields/symptomOccurrence';
 import { usePagination } from '../../../hooks/usePagination';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const SymptomViewModal = ({
   navigate,
@@ -597,8 +597,23 @@ const SymptomViewModal = ({
           </Tabs.Panel>
         </Tabs>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" mt="md">
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={
+            onEdit
+              ? () => {
+                  rememberEditTab('symptoms', activeTab);
+                  onClose();
+                  setTimeout(() => {
+                    onEdit(symptom);
+                  }, 100);
+                }
+              : undefined
+          }
+          editLabel={t('symptoms.viewModal.editSymptom', 'Edit Symptom')}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        >
           {onDelete && !disableEdit && (
             <Button
               variant="light"
@@ -613,28 +628,6 @@ const SymptomViewModal = ({
               {t('symptoms.viewModal.deleteSymptom', 'Delete Symptom')}
             </Button>
           )}
-          {onEdit && (
-            <Tooltip
-              label={disableEditTooltip}
-              disabled={!disableEdit || !disableEditTooltip}
-            >
-              <span>
-                <Button
-                  variant="light"
-                  onClick={() => {
-                    rememberEditTab('symptoms', activeTab);
-                    onClose();
-                    setTimeout(() => {
-                      onEdit(symptom);
-                    }, 100);
-                  }}
-                  disabled={disableEdit}
-                >
-                  {t('symptoms.viewModal.editSymptom', 'Edit Symptom')}
-                </Button>
-              </span>
-            </Tooltip>
-          )}
           {onLogEpisode && !disableEdit && (
             <Button
               variant="filled"
@@ -648,10 +641,7 @@ const SymptomViewModal = ({
               {t('symptoms.logEpisode', 'Log Episode')}
             </Button>
           )}
-          <Button variant="filled" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-        </Group>
+        </ViewModalFooter>
       </Stack>
     </Modal>
   );

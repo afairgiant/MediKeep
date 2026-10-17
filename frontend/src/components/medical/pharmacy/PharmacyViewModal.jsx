@@ -4,7 +4,6 @@ import {
   Group,
   Text,
   Badge,
-  Button,
   Divider,
   Grid,
   Card,
@@ -12,9 +11,9 @@ import {
   Title,
   Paper,
 } from '@mantine/core';
-import { IconEdit } from '@tabler/icons-react';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const PharmacyViewModal = ({ isOpen, onClose, pharmacy, onEdit, navigate: _navigate }) => {
   const { t } = useTranslation(['common', 'shared']);
@@ -227,19 +226,7 @@ const PharmacyViewModal = ({ isOpen, onClose, pharmacy, onEdit, navigate: _navig
           </Grid.Col>
         </Grid>
 
-        <Group justify="flex-end" mt="md">
-          <Button
-            variant="filled"
-            size="xs"
-            onClick={handleEdit}
-            leftSection={<IconEdit size={16} />}
-          >
-            {t('pharmacies.viewModal.editButton', 'Edit Pharmacy')}
-          </Button>
-          <Button variant="filled" size="xs" onClick={handleClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-        </Group>
+        <ViewModalFooter onClose={handleClose} onEdit={handleEdit} />
       </Stack>
     </Modal>
   );

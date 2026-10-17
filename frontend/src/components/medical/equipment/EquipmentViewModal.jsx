@@ -5,14 +5,11 @@ import {
   Group,
   Text,
   Badge,
-  Button,
   Box,
   SimpleGrid,
   Title,
   Paper,
-  Tooltip,
 } from '@mantine/core';
-import { IconEdit } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -20,6 +17,7 @@ import {
   getEquipmentTypeLabel,
   getEquipmentStatusColor,
 } from '../../../constants/equipmentConstants';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const EquipmentViewModal = ({
   isOpen,
@@ -295,27 +293,12 @@ const EquipmentViewModal = ({
           </Stack>
         </Box>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                variant="filled"
-                onClick={handleEdit}
-                leftSection={<IconEdit size={16} />}
-                disabled={disableEdit}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={handleEdit}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );

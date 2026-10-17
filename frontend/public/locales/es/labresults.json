@@ -162,7 +162,6 @@
     "testComponentsEditInfo": "Los componentes de prueba se pueden gestionar desde la página de visualización después de guardar."
   },
   "modal": {
-    "editLabResult": "Editar resultado de laboratorio",
     "labels": {
       "referenceRange": "Rango de referencia",
       "testType": "Tipo de prueba"

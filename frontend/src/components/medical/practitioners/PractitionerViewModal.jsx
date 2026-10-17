@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import apiService from '../../../services/api';
 import logger from '../../../services/logger';
 import PracticeEditModal from './PracticeEditModal';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const PractitionerViewModal = ({
   isOpen,
@@ -477,19 +478,11 @@ const PractitionerViewModal = ({
           </Card>
         )}
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Button
-            variant="filled"
-            onClick={handleEdit}
-            leftSection={<IconEdit size={16} />}
-          >
-            {t('practitioners.viewModal.editButton', 'Edit Practitioner')}
-          </Button>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={handleEdit}
+          editLabel={t('practitioners.viewModal.editButton', 'Edit Practitioner')}
+        />
       </Stack>
 
       {/* Practice Edit Modal */}

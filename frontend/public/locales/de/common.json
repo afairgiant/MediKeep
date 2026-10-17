@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Kontaktinformationen",
-      "editContact": "Kontakt bearbeiten",
       "icon": "🚨",
       "notes": "📝 Notizen",
       "primaryPhone": "Haupttelefon",
@@ -567,7 +566,6 @@
     },
     "loading": "Medikamente werden geladen...",
     "modal": {
-      "editMedication": "Medikament bearbeiten",
       "labels": {
         "alternativeName": "Alternativer Name",
         "form": "Darreichungsform",
@@ -806,7 +804,6 @@
     "loading": "Apotheken werden geladen...",
     "viewModal": {
       "contact": "KONTAKTINFORMATIONEN",
-      "editButton": "Apotheke bearbeiten",
       "location": "STANDORT",
       "storeNumber": "Filiale Nr.",
       "title": "Apothekendetails"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Hauptbeschwerde",
       "clinicalInformation": "Klinische Informationen",
-      "editVisit": "Termin bearbeiten",
       "followUpInstructions": "Nachsorgeanweisungen",
       "generalVisit": "Allgemeiner Termin",
       "location": "Standort",

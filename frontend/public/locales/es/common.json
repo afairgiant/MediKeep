@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Información de contacto",
-      "editContact": "Editar contacto",
       "icon": "🚨",
       "notes": "📝 Notas",
       "primaryPhone": "Teléfono principal",
@@ -567,7 +566,6 @@
     },
     "loading": "Cargando medicamentos...",
     "modal": {
-      "editMedication": "Editar medicamento",
       "labels": {
         "alternativeName": "Nombre alternativo",
         "form": "Forma",
@@ -806,7 +804,6 @@
     "loading": "Cargando farmacias...",
     "viewModal": {
       "contact": "INFORMACIÓN DE CONTACTO",
-      "editButton": "Editar farmacia",
       "location": "UBICACIÓN",
       "storeNumber": "Tienda #",
       "title": "Detalles de la farmacia"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Motivo principal de consulta",
       "clinicalInformation": "Información clínica",
-      "editVisit": "Editar visita",
       "followUpInstructions": "Instrucciones de seguimiento",
       "generalVisit": "Visita general",
       "location": "Ubicación",

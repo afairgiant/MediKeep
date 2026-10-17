@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Στοιχεία Επικοινωνίας",
-      "editContact": "Επεξεργασία Επαφής",
       "icon": "🚨",
       "notes": "📝 Σημειώσεις",
       "primaryPhone": "Κύριο Τηλέφωνο",
@@ -567,7 +566,6 @@
     },
     "loading": "Φόρτωση φαρμάκων...",
     "modal": {
-      "editMedication": "Επεξεργασία Φαρμάκου",
       "labels": {
         "alternativeName": "Εναλλακτική Ονομασία",
         "form": "Μορφή",
@@ -806,7 +804,6 @@
     "loading": "Φόρτωση φαρμακείων...",
     "viewModal": {
       "contact": "ΣΤΟΙΧΕΙΑ ΕΠΙΚΟΙΝΩΝΙΑΣ",
-      "editButton": "Επεξεργασία Φαρμακείου",
       "location": "ΤΟΠΟΘΕΣΙΑ",
       "storeNumber": "Κατάστημα #",
       "title": "Στοιχεία Φαρμακείου"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Κύριο Παράπονο",
       "clinicalInformation": "Κλινικές Πληροφορίες",
-      "editVisit": "Επεξεργασία Επίσκεψης",
       "followUpInstructions": "Οδηγίες Παρακολούθησης",
       "generalVisit": "Γενική Επίσκεψη",
       "location": "Τοποθεσία",

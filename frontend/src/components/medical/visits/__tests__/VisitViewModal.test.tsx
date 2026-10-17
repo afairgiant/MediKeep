@@ -137,3 +137,22 @@ describe('VisitViewModal - linked record tabs', () => {
     );
   });
 });
+
+describe('VisitViewModal - footer actions', () => {
+  it('lists Close before a plain Edit button', () => {
+    renderModal();
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    const edit = screen.getByRole('button', { name: 'Edit' });
+    expect(
+      close.compareDocumentPosition(edit) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it('disables Edit but keeps Close usable when editing is disabled', () => {
+    renderModal({ disableEdit: true });
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Close' })).toBeEnabled();
+  });
+});

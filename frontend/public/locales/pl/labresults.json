@@ -162,7 +162,6 @@
     "testComponentsEditInfo": "Składniki badania można zarządzać ze strony podglądu po zapisaniu."
   },
   "modal": {
-    "editLabResult": "Edytuj Wynik Laboratoryjny",
     "labels": {
       "referenceRange": "Zakres Referencyjny",
       "testType": "Typ Badania"

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Modal,
   Badge,
-  Button,
   Group,
   Stack,
   Text,
@@ -12,7 +11,6 @@ import {
   Box,
   SimpleGrid,
   Paper,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -35,6 +33,7 @@ import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const MedicationViewModal = ({
   isOpen,
@@ -679,32 +678,18 @@ const MedicationViewModal = ({
           </Tabs.Panel>
         </Tabs>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" mt="md">
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                variant="light"
-                onClick={() => {
-                  rememberEditTab('medications', activeTab);
-                  onClose();
-                  setTimeout(() => {
-                    onEdit(medication);
-                  }, 100);
-                }}
-                disabled={disableEdit}
-              >
-                {t('medications.modal.editMedication', 'Edit Medication')}
-              </Button>
-            </span>
-          </Tooltip>
-          <Button variant="filled" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={() => {
+            rememberEditTab('medications', activeTab);
+            onClose();
+            setTimeout(() => {
+              onEdit(medication);
+            }, 100);
+          }}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );

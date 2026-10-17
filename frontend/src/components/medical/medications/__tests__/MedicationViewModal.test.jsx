@@ -113,3 +113,50 @@ describe('MedicationViewModal - alternative_name', () => {
     expect(screen.getAllByText('Acetaminophen').length).toBeGreaterThan(0);
   });
 });
+
+describe('MedicationViewModal - footer actions', () => {
+  const medication = {
+    id: 1,
+    medication_name: 'Acetaminophen',
+    medication_type: 'otc',
+    status: 'active',
+    tags: [],
+    practitioner: null,
+    pharmacy: null,
+  };
+
+  const renderModal = props =>
+    render(
+      <MantineWrapper>
+        <MedicationViewModal
+          isOpen
+          onClose={vi.fn()}
+          medication={medication}
+          onEdit={vi.fn()}
+          navigate={vi.fn()}
+          onError={vi.fn()}
+          onFileUploadComplete={vi.fn()}
+          practitioners={[]}
+          conditions={[]}
+          {...props}
+        />
+      </MantineWrapper>
+    );
+
+  it('lists Close before a plain Edit button', () => {
+    renderModal();
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    const edit = screen.getByRole('button', { name: 'Edit' });
+    expect(
+      close.compareDocumentPosition(edit) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it('disables Edit but keeps Close usable when editing is disabled', () => {
+    renderModal({ disableEdit: true });
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Close' })).toBeEnabled();
+  });
+});

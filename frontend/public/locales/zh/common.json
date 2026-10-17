@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 联系信息",
-      "editContact": "编辑联系人",
       "icon": "🚨",
       "notes": "📝 备注",
       "primaryPhone": "主要电话",
@@ -566,7 +565,6 @@
     },
     "loading": "正在加载药物...",
     "modal": {
-      "editMedication": "编辑药物",
       "labels": {
         "alternativeName": "别名",
         "form": "剂型",
@@ -805,7 +803,6 @@
     "loading": "正在加载药房...",
     "viewModal": {
       "contact": "联系信息",
-      "editButton": "编辑药房",
       "location": "位置",
       "storeNumber": "门店号",
       "title": "药房详情"
@@ -1461,7 +1458,6 @@
     "viewModal": {
       "chiefComplaint": "主诉",
       "clinicalInformation": "临床信息",
-      "editVisit": "编辑就诊",
       "followUpInstructions": "随访指导",
       "generalVisit": "常规就诊",
       "location": "地点",
