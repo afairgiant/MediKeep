@@ -1164,7 +1164,6 @@
     "viewModal": {
       "acute": "Aigu",
       "confirmDeleteEpisode": "Voulez-vous vraiment supprimer cette crise ?",
-      "deleteSymptom": "Supprimer le symptôme",
       "editSymptom": "Editer le symptôme",
       "episodeHistory": "Historique des crises",
       "generalNotes": "Notes générales",

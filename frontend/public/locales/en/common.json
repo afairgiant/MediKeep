@@ -1164,7 +1164,6 @@
     "viewModal": {
       "acute": "Acute",
       "confirmDeleteEpisode": "Are you sure you want to delete this episode?",
-      "deleteSymptom": "Delete Symptom",
       "editSymptom": "Edit Symptom",
       "episodeHistory": "Episode History",
       "generalNotes": "General Notes",

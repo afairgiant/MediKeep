@@ -1163,7 +1163,6 @@
     "viewModal": {
       "acute": "急性",
       "confirmDeleteEpisode": "确定要删除此发作记录吗？",
-      "deleteSymptom": "删除症状",
       "editSymptom": "编辑症状",
       "episodeHistory": "发作历史",
       "generalNotes": "一般备注",

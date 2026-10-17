@@ -1164,7 +1164,6 @@
     "viewModal": {
       "acute": "Akut",
       "confirmDeleteEpisode": "Sind Sie sicher, dass Sie diese Episode löschen möchten?",
-      "deleteSymptom": "Symptom löschen",
       "editSymptom": "Symptom bearbeiten",
       "episodeHistory": "Episodenverlauf",
       "generalNotes": "Allgemeine Notizen",

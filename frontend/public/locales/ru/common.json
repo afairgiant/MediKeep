@@ -1164,7 +1164,6 @@
     "viewModal": {
       "acute": "Острый",
       "confirmDeleteEpisode": "Вы уверены, что хотите удалить этот эпизод?",
-      "deleteSymptom": "Удалить симптом",
       "editSymptom": "Редактировать симптом",
       "episodeHistory": "История эпизодов",
       "generalNotes": "Общие заметки",

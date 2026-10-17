@@ -22,13 +22,10 @@ import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import {
   IconStethoscope,
   IconPlus,
-  IconTrash,
   IconTimeline,
   IconCalendar,
   IconList,
-  IconEye,
   IconNote,
-  IconEdit,
 } from '@tabler/icons-react';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
@@ -718,16 +715,14 @@ const Symptoms = () => {
                         </Button>
                         <Button
                           size="xs"
-                          variant="light"
-                          leftSection={<IconEye size={14} />}
+                          variant="filled"
                           onClick={() => handleViewSymptom(symptom)}
                         >
                           {t('buttons.view', 'View')}
                         </Button>
                         <Button
                           size="xs"
-                          variant="light"
-                          leftSection={<IconEdit size={14} />}
+                          variant="filled"
                           disabled={isViewOnly}
                           onClick={() => handleEditSymptom(symptom)}
                         >
@@ -735,9 +730,8 @@ const Symptoms = () => {
                         </Button>
                         <Button
                           size="xs"
-                          variant="light"
+                          variant="filled"
                           color="red"
-                          leftSection={<IconTrash size={14} />}
                           disabled={isViewOnly}
                           onClick={() => handleDeleteSymptom(symptom.id)}
                         >
@@ -782,7 +776,6 @@ const Symptoms = () => {
         onClose={handleCloseViewModal}
         symptom={viewingSymptom}
         onEdit={handleEditSymptom}
-        onDelete={handleDeleteSymptom}
         onLogEpisode={handleLogEpisode}
         onEditOccurrence={handleEditOccurrence}
         onRefresh={fetchSymptoms}
