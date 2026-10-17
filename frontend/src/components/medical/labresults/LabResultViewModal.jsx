@@ -8,12 +8,10 @@ import {
   Text,
   Paper,
   Group,
-  Button,
   ScrollArea,
   Tabs,
   Badge,
   Box,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -34,6 +32,7 @@ import logger from '../../../services/logger';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import { listCountState } from '../../../utils/linkCountStore';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const LabResultViewModal = ({
   isOpen,
@@ -662,29 +661,16 @@ const LabResultViewModal = ({
             </Tabs.Panel>
           </Tabs>
 
-          {/* Action Buttons */}
-          <Group justify="space-between" mt="md">
-            <Button variant="outline" onClick={onClose}>
-              {t('shared:labels.close', 'Close')}
-            </Button>
-            <Tooltip
-              label={disableEditTooltip}
-              disabled={!disableEdit || !disableEditTooltip}
-            >
-              <span>
-                <Button
-                  onClick={() => {
-                    rememberEditTab('labResults', activeTab);
-                    onClose();
-                    onEdit(labResult);
-                  }}
-                  disabled={disableEdit}
-                >
-                  {t('labresults:modal.editLabResult', 'Edit Lab Result')}
-                </Button>
-              </span>
-            </Tooltip>
-          </Group>
+          <ViewModalFooter
+            onClose={onClose}
+            onEdit={() => {
+              rememberEditTab('labResults', activeTab);
+              onClose();
+              onEdit(labResult);
+            }}
+            disableEdit={disableEdit}
+            disableEditTooltip={disableEditTooltip}
+          />
         </Stack>
       </Modal>
     );

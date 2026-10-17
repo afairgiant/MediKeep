@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Informations de contact",
-      "editContact": "Editer le contact",
       "icon": "🚨",
       "notes": "📝 Notes",
       "primaryPhone": "Téléphone primaire",
@@ -567,7 +566,6 @@
     },
     "loading": "Chargement des médicaments...",
     "modal": {
-      "editMedication": "Editer le médicament",
       "labels": {
         "alternativeName": "Nom alternatif",
         "form": "Forme",
@@ -806,7 +804,6 @@
     "loading": "Chargement des pharmacies...",
     "viewModal": {
       "contact": "INFORMATIONS DE CONTACT",
-      "editButton": "Editer la pharmacie",
       "location": "EMPLACEMENT",
       "storeNumber": "Numéro du magasin",
       "title": "Détails de la pharmacie"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Affection principale",
       "clinicalInformation": "Informations cliniques",
-      "editVisit": "Editer la visite",
       "followUpInstructions": "Instructions de suivi",
       "generalVisit": "Visite générale",
       "location": "Lieu",

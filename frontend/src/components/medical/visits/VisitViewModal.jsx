@@ -7,12 +7,10 @@ import {
   Text,
   Paper,
   Group,
-  Button,
   Badge,
   Tabs,
   Box,
   SimpleGrid,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -29,6 +27,7 @@ import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const VisitViewModal = ({
   isOpen,
@@ -510,33 +509,19 @@ const VisitViewModal = ({
             </Tabs.Panel>
           </Tabs>
 
-          {/* Action Buttons */}
-          <Group justify="flex-end" mt="md">
-            <Tooltip
-              label={disableEditTooltip}
-              disabled={!disableEdit || !disableEditTooltip}
-            >
-              <span>
-                <Button
-                  variant="light"
-                  onClick={() => {
-                    rememberEditTab('visits', activeTab);
-                    onClose();
-                    // Small delay to ensure view modal is closed before opening edit modal
-                    setTimeout(() => {
-                      onEdit(visit);
-                    }, 100);
-                  }}
-                  disabled={disableEdit}
-                >
-                  {t('visits.viewModal.editVisit', 'Edit Visit')}
-                </Button>
-              </span>
-            </Tooltip>
-            <Button variant="filled" onClick={onClose}>
-              {t('shared:labels.close', 'Close')}
-            </Button>
-          </Group>
+          <ViewModalFooter
+            onClose={onClose}
+            onEdit={() => {
+              rememberEditTab('visits', activeTab);
+              onClose();
+              // Small delay to ensure view modal is closed before opening edit modal
+              setTimeout(() => {
+                onEdit(visit);
+              }, 100);
+            }}
+            disableEdit={disableEdit}
+            disableEditTooltip={disableEditTooltip}
+          />
         </Stack>
       </Modal>
     );

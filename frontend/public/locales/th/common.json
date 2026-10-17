@@ -123,7 +123,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 ข้อมูลการติดต่อ",
-      "editContact": "แก้ไขผู้ติดต่อ",
       "icon": "🚨",
       "notes": "📝 หมายเหตุ",
       "primaryPhone": "โทรศัพท์หลัก",
@@ -562,7 +561,6 @@
     },
     "loading": "กำลังโหลดข้อมูลยา...",
     "modal": {
-      "editMedication": "แก้ไขยา",
       "labels": {
         "alternativeName": "ชื่ออื่น",
         "form": "รูปแบบ",
@@ -801,7 +799,6 @@
     "loading": "กำลังโหลดข้อมูลร้านยา...",
     "viewModal": {
       "contact": "ข้อมูลการติดต่อ",
-      "editButton": "แก้ไขร้านยา",
       "location": "สถานที่",
       "storeNumber": "สาขาที่",
       "title": "รายละเอียดร้านยา"
@@ -1449,7 +1446,6 @@
     "viewModal": {
       "chiefComplaint": "อาการสำคัญ",
       "clinicalInformation": "ข้อมูลทางคลินิก",
-      "editVisit": "แก้ไขการพบแพทย์",
       "followUpInstructions": "คำแนะนำติดตาม",
       "generalVisit": "การพบแพทย์ทั่วไป",
       "location": "สถานที่",

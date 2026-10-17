@@ -163,7 +163,6 @@
     "testComponentsEditInfo": "Test components can be managed from the view page after saving."
   },
   "modal": {
-    "editLabResult": "Edit Lab Result",
     "labels": {
       "referenceRange": "Reference Range",
       "testType": "Test Type"

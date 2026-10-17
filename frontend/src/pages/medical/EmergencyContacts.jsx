@@ -34,6 +34,7 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import PaginationControls from '../../components/shared/PaginationControls';
+import ViewModalFooter from '../../components/shared/ViewModalFooter';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { useTranslation } from 'react-i18next';
 import { phoneTelHref } from '../../utils/phoneUtils';
@@ -820,23 +821,14 @@ const EmergencyContacts = () => {
               )}
             </Card>
 
-            {/* Action Buttons */}
-            <Group justify="flex-end" gap="md">
-              <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
-                {t('shared:labels.close')}
-              </Button>
-              <Button
-                variant="filled"
-                size="xs"
-                disabled={isViewOnly}
-                onClick={() => {
-                  handleCloseViewModal();
-                  handleEditContact(viewingContact);
-                }}
-              >
-                {t('emergencyContacts.viewModal.editContact')}
-              </Button>
-            </Group>
+            <ViewModalFooter
+              onClose={handleCloseViewModal}
+              onEdit={() => {
+                handleCloseViewModal();
+                handleEditContact(viewingContact);
+              }}
+              disableEdit={isViewOnly}
+            />
           </Stack>
         )}
       </Modal>

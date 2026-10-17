@@ -10,7 +10,6 @@ import {
   ActionIcon,
   Title,
   Paper,
-  Tooltip,
 } from '@mantine/core';
 import { IconEdit, IconStethoscope } from '@tabler/icons-react';
 import { useMantineColorScheme } from '@mantine/core';
@@ -18,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 // Style constants matching the main component
 const CARD_STYLES = {
@@ -500,32 +500,16 @@ const FamilyHistoryViewModal = ({
             )}
           </Card>
 
-          {/* Action Buttons */}
-          <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose}>
-              {t('shared:labels.close', 'Close')}
-            </Button>
-            {!isReadOnly && (
-              <Tooltip
-                label={disableEditTooltip}
-                disabled={!disableEdit || !disableEditTooltip}
-              >
-                <span>
-                  <Button
-                    variant="filled"
-                    onClick={handleEdit}
-                    leftSection={<IconEdit size={16} />}
-                    disabled={disableEdit}
-                  >
-                    {t(
-                      'familyHistory.viewModal.editFamilyMember',
-                      'Edit Family Member'
-                    )}
-                  </Button>
-                </span>
-              </Tooltip>
+          <ViewModalFooter
+            onClose={onClose}
+            onEdit={isReadOnly ? undefined : handleEdit}
+            editLabel={t(
+              'familyHistory.viewModal.editFamilyMember',
+              'Edit Family Member'
             )}
-          </Group>
+            disableEdit={disableEdit}
+            disableEditTooltip={disableEditTooltip}
+          />
         </Stack>
       </Modal>
     );

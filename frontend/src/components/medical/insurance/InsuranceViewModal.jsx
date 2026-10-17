@@ -7,18 +7,15 @@ import {
   Text,
   Group,
   Badge,
-  Button,
   Stack,
   Tabs,
   Box,
   SimpleGrid,
   Paper,
   Divider,
-  Tooltip,
   Anchor,
 } from '@mantine/core';
 import {
-  IconEdit,
   IconInfoCircle,
   IconUser,
   IconShield,
@@ -38,6 +35,7 @@ import {
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useTranslation } from 'react-i18next';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const InsuranceViewModal = ({
   isOpen,
@@ -380,30 +378,16 @@ const InsuranceViewModal = ({
           </Tabs.Panel>
         </Tabs>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                leftSection={<IconEdit size={16} />}
-                onClick={() => {
-                  rememberEditTab('insurance', activeTab);
-                  onClose();
-                  onEdit && onEdit(insurance);
-                }}
-                disabled={disableEdit}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={() => {
+            rememberEditTab('insurance', activeTab);
+            onClose();
+            onEdit && onEdit(insurance);
+          }}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );

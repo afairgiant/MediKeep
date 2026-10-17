@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Informacje kontaktowe",
-      "editContact": "Edytuj kontakt",
       "icon": "🚨",
       "notes": "📝 Notatki",
       "primaryPhone": "Telefon główny",
@@ -567,7 +566,6 @@
     },
     "loading": "Ładowanie leków...",
     "modal": {
-      "editMedication": "Edytuj lek",
       "labels": {
         "alternativeName": "Nazwa alternatywna",
         "form": "Forma",
@@ -806,7 +804,6 @@
     "loading": "Ładowanie aptek...",
     "viewModal": {
       "contact": "INFORMACJE KONTAKTOWE",
-      "editButton": "Edytuj aptekę",
       "location": "LOKALIZACJA",
       "storeNumber": "Sklep nr",
       "title": "Szczegóły apteki"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Główna dolegliwość",
       "clinicalInformation": "Informacje kliniczne",
-      "editVisit": "Edytuj wizytę",
       "followUpInstructions": "Instrukcje kontrolne",
       "generalVisit": "Wizyta ogólna",
       "location": "Lokalizacja",

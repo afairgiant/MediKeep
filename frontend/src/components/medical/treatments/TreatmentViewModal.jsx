@@ -6,19 +6,16 @@ import {
   Group,
   Text,
   Badge,
-  Button,
   Box,
   SimpleGrid,
   Title,
   Paper,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
   IconCalendar,
   IconNotes,
   IconFileText,
-  IconEdit,
   IconPill,
   IconStethoscope,
   IconTestPipe,
@@ -37,6 +34,7 @@ import TreatmentEquipmentRelationships from './TreatmentEquipmentRelationships';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
 import CollapsibleLinkTabs from '../../shared/CollapsibleLinkTabs';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const TreatmentViewModal = ({
   isOpen,
@@ -638,27 +636,12 @@ const TreatmentViewModal = ({
           </Tabs.Panel>
         </Tabs>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                variant="filled"
-                onClick={handleEdit}
-                leftSection={<IconEdit size={16} />}
-                disabled={disableEdit}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={handleEdit}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );

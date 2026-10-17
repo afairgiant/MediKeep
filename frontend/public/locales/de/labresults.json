@@ -162,7 +162,6 @@
     "testComponentsEditInfo": "Testkomponenten können nach dem Speichern über die Ansichtsseite verwaltet werden."
   },
   "modal": {
-    "editLabResult": "Laborergebnis bearbeiten",
     "labels": {
       "referenceRange": "Referenzbereich",
       "testType": "Testtyp"

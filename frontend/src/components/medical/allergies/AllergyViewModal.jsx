@@ -7,19 +7,16 @@ import {
   Group,
   Text,
   Badge,
-  Button,
   Box,
   SimpleGrid,
   Title,
   Paper,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
   IconAlertTriangle,
   IconNotes,
   IconFileText,
-  IconEdit,
   IconExclamationCircle,
   IconAlertCircle,
   IconShield,
@@ -30,6 +27,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTagColors } from '../../../hooks/useTagColors';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 import logger from '../../../services/logger';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 
@@ -415,26 +413,12 @@ const AllergyViewModal = ({
           </Tabs>
 
           {/* Action Buttons */}
-          <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose}>
-              {t('shared:labels.close')}
-            </Button>
-            <Tooltip
-              label={disableEditTooltip}
-              disabled={!disableEdit || !disableEditTooltip}
-            >
-              <span>
-                <Button
-                  variant="filled"
-                  onClick={handleEdit}
-                  leftSection={<IconEdit size={16} />}
-                  disabled={disableEdit}
-                >
-                  {t('shared:labels.edit')}
-                </Button>
-              </span>
-            </Tooltip>
-          </Group>
+          <ViewModalFooter
+            onClose={onClose}
+            onEdit={handleEdit}
+            disableEdit={disableEdit}
+            disableEditTooltip={disableEditTooltip}
+          />
         </Stack>
       </Modal>
     );

@@ -6,19 +6,16 @@ import {
   Group,
   Text,
   Badge,
-  Button,
   Box,
   SimpleGrid,
   Title,
   Paper,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
   IconNeedle,
   IconNotes,
   IconFileText,
-  IconEdit,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -27,6 +24,7 @@ import { navigateToEntity } from '../../../utils/linkNavigation';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 const ImmunizationViewModal = ({
   isOpen,
@@ -421,27 +419,12 @@ const ImmunizationViewModal = ({
           </Tabs.Panel>
         </Tabs>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                variant="filled"
-                onClick={handleEdit}
-                leftSection={<IconEdit size={16} />}
-                disabled={disableEdit}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={handleEdit}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );

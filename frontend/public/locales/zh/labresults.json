@@ -162,7 +162,6 @@
     "testComponentsEditInfo": "保存后可以从查看页面管理检验组件。"
   },
   "modal": {
-    "editLabResult": "编辑检验结果",
     "labels": {
       "referenceRange": "参考范围",
       "testType": "检验类型"

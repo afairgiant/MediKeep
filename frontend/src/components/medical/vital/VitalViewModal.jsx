@@ -5,17 +5,14 @@ import {
   Group,
   Text,
   Badge,
-  Button,
   Grid,
   Paper,
   ActionIcon,
   Title,
   Card,
   Box,
-  Tooltip,
 } from '@mantine/core';
 import {
-  IconEdit,
   IconCalendar,
   IconHeart,
   IconActivity,
@@ -39,6 +36,7 @@ import {
 } from '../../../utils/unitConversion';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
+import ViewModalFooter from '../../shared/ViewModalFooter';
 
 // BMI conversion factor for imperial units (pounds and inches)
 const BMI_IMPERIAL_CONVERSION_FACTOR = 703;
@@ -387,27 +385,12 @@ const VitalViewModal = ({
           </Paper>
         )}
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" onClick={onClose}>
-            {t('shared:labels.close', 'Close')}
-          </Button>
-          <Tooltip
-            label={disableEditTooltip}
-            disabled={!disableEdit || !disableEditTooltip}
-          >
-            <span>
-              <Button
-                variant="filled"
-                onClick={handleEdit}
-                leftSection={<IconEdit size={16} />}
-                disabled={disableEdit}
-              >
-                {t('shared:labels.edit', 'Edit')}
-              </Button>
-            </span>
-          </Tooltip>
-        </Group>
+        <ViewModalFooter
+          onClose={onClose}
+          onEdit={handleEdit}
+          disableEdit={disableEdit}
+          disableEditTooltip={disableEditTooltip}
+        />
       </Stack>
     </Modal>
   );

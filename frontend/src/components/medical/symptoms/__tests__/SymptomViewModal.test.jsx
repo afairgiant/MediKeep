@@ -129,3 +129,57 @@ describe('SymptomViewModal - episode history', () => {
     expect(screen.queryByRole('button', { name: '2' })).not.toBeInTheDocument();
   });
 });
+
+describe('SymptomViewModal - footer actions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    symptomApi.getOccurrences.mockResolvedValue([]);
+  });
+
+  const renderModal = props =>
+    render(
+      <SymptomViewModal
+        isOpen
+        onClose={vi.fn()}
+        symptom={symptom}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+        onLogEpisode={vi.fn()}
+        {...props}
+      />
+    );
+
+  const footerLabels = () => {
+    const closeButton = screen.getByRole('button', { name: 'Close' });
+    return Array.from(closeButton.parentElement.querySelectorAll('button')).map(
+      button => button.textContent
+    );
+  };
+
+  it('lists Close first and Edit last, with the other actions between them', async () => {
+    renderModal();
+    await waitFor(() => expect(symptomApi.getOccurrences).toHaveBeenCalled());
+
+    expect(footerLabels()).toEqual([
+      'Close',
+      'Delete Symptom',
+      'Log Episode',
+      'Edit Symptom',
+    ]);
+  });
+
+  it('hides Delete and Log Episode and disables Edit when editing is disabled', async () => {
+    renderModal({ disableEdit: true });
+    await waitFor(() => expect(symptomApi.getOccurrences).toHaveBeenCalled());
+
+    expect(footerLabels()).toEqual(['Close', 'Edit Symptom']);
+    expect(screen.getByRole('button', { name: 'Edit Symptom' })).toBeDisabled();
+  });
+
+  it('omits Edit when no onEdit handler is provided', async () => {
+    renderModal({ onEdit: undefined });
+    await waitFor(() => expect(symptomApi.getOccurrences).toHaveBeenCalled());
+
+    expect(footerLabels()).toEqual(['Close', 'Delete Symptom', 'Log Episode']);
+  });
+});

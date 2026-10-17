@@ -127,7 +127,6 @@
     },
     "viewModal": {
       "contactInfo": "📞 Контактная информация",
-      "editContact": "Редактировать контакт",
       "icon": "🚨",
       "notes": "📝 Заметки",
       "primaryPhone": "Основной телефон",
@@ -567,7 +566,6 @@
     },
     "loading": "Загрузка лекарств...",
     "modal": {
-      "editMedication": "Редактировать лекарство",
       "labels": {
         "alternativeName": "Альтернативное название",
         "form": "Форма",
@@ -806,7 +804,6 @@
     "loading": "Загрузка аптек...",
     "viewModal": {
       "contact": "КОНТАКТНАЯ ИНФОРМАЦИЯ",
-      "editButton": "Редактировать аптеку",
       "location": "МЕСТОПОЛОЖЕНИЕ",
       "storeNumber": "Филиал №",
       "title": "Данные аптеки"
@@ -1462,7 +1459,6 @@
     "viewModal": {
       "chiefComplaint": "Основная жалоба",
       "clinicalInformation": "Клиническая информация",
-      "editVisit": "Редактировать визит",
       "followUpInstructions": "Рекомендации по последующему наблюдению",
       "generalVisit": "Общий визит",
       "location": "Местоположение",

@@ -163,7 +163,6 @@
     "testComponentsEditInfo": "Les composants d'analyse peuvent être gérés depuis la page d'aperçu après sauvegarde."
   },
   "modal": {
-    "editLabResult": "Editer le résultat d'analyse",
     "labels": {
       "referenceRange": "Plage de référence",
       "testType": "Type d'analyse"

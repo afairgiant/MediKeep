@@ -162,7 +162,6 @@
     "testComponentsEditInfo": "Testkomponenter kan hanteras från visningssidan efter sparande."
   },
   "modal": {
-    "editLabResult": "Redigera laboratorieresultat",
     "labels": {
       "referenceRange": "Referensintervall",
       "testType": "Testtyp"
