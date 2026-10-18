@@ -31,7 +31,7 @@ UNSAFE_REDIRECT_MESSAGE = (
 
 
 class UnsafeRedirectError(aiohttp.ClientError):
-    """A request targeted a host or scheme other than the validated integration URL."""
+    """A request left the validated integration origin or would travel through a proxy."""
 
 
 @dataclass(frozen=True)
@@ -56,13 +56,12 @@ def pin_integration_url(url: str, error_cls: Type[Exception]) -> PinnedTarget:
 
 def _hop_guard(hostname: str, scheme: str, port: int):
     async def guard(req: ClientRequest, handler: ClientHandlerType) -> ClientResponse:
+        # A proxy resolves the target itself, bypassing the pinned addresses.
+        if req.proxy is not None:
+            raise UnsafeRedirectError("Integration requests must not use a proxy.")
         target_host = (req.url.host or "").lower()
         # IP-literal hosts skip the resolver entirely, so this check is the only stop for them.
-        if (
-            target_host != hostname
-            or req.url.port != port
-            or (scheme == "https" and req.url.scheme != "https")
-        ):
+        if target_host != hostname or req.url.port != port or req.url.scheme != scheme:
             security_logger.warning(
                 "Blocked integration request to an unvalidated target",
                 extra={
@@ -83,7 +82,12 @@ def build_integration_session(
 
     Callers must not pass per-request ``middlewares``: aiohttp lets them replace the
     session's guard.
+
+    Raises:
+        ValueError: if ``trust_env`` is enabled.
     """
+    if session_kwargs.get("trust_env"):
+        raise ValueError("Integration sessions must not read proxy settings from env")
     parsed = URL(target.url)
     hostname = parsed.host or ""
     connector = aiohttp.TCPConnector(

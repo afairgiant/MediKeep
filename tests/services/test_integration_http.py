@@ -115,6 +115,22 @@ class TestBuildIntegrationSession:
                     pass
         assert server.secret_hits == 0
 
+    async def test_per_request_proxy_refused(self, server):
+        async with build_integration_session(
+            PinnedTarget(server.base_url, LOOPBACK)
+        ) as session:
+            with pytest.raises(UnsafeRedirectError):
+                async with session.get(
+                    f"{server.base_url}/api/", proxy=f"http://127.0.0.1:{server.port}"
+                ):
+                    pass
+
+    async def test_trust_env_rejected(self, server):
+        with pytest.raises(ValueError):
+            build_integration_session(
+                PinnedTarget(server.base_url, LOOPBACK), trust_env=True
+            )
+
     async def test_connects_to_pinned_address_after_dns_changes(self, server, fake_dns):
         fake_dns({HOST: "8.8.8.8"})
         async with build_integration_session(
@@ -126,11 +142,11 @@ class TestBuildIntegrationSession:
 
 @pytest.mark.asyncio
 class TestHopGuard:
-    async def _send(self, guard, url):
+    async def _send(self, guard, url, proxy=None):
         async def handler(_req):
             return "sent"
 
-        return await guard(SimpleNamespace(url=URL(url)), handler)
+        return await guard(SimpleNamespace(url=URL(url), proxy=proxy), handler)
 
     async def test_same_origin_allowed(self):
         guard = _hop_guard(HOST, "http", 8000)
@@ -140,6 +156,18 @@ class TestHopGuard:
         guard = _hop_guard(HOST, "https", 443)
         with pytest.raises(UnsafeRedirectError):
             await self._send(guard, f"http://{HOST}:443/api/")
+
+    async def test_http_upgrade_on_same_port_refused(self):
+        guard = _hop_guard(HOST, "http", 8443)
+        with pytest.raises(UnsafeRedirectError):
+            await self._send(guard, f"https://{HOST}:8443/api/")
+
+    async def test_proxy_refused(self):
+        guard = _hop_guard(HOST, "http", 8000)
+        with pytest.raises(UnsafeRedirectError):
+            await self._send(
+                guard, f"http://{HOST}:8000/api/", proxy=URL("http://10.0.0.1:3128")
+            )
 
     async def test_http_upgrade_to_default_https_port_refused(self):
         guard = _hop_guard(HOST, "http", 80)
