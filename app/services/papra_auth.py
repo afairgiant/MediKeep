@@ -10,9 +10,13 @@ from urllib.parse import urlparse
 
 import aiohttp
 
-from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.utils.url_security import validate_integration_url
+from app.core.utils.integration_http import (
+    UNSAFE_REDIRECT_MESSAGE,
+    UnsafeRedirectError,
+    build_integration_session,
+    pin_integration_url,
+)
 
 logger = get_logger(__name__)
 
@@ -38,15 +42,15 @@ class PapraAuth:
         if not self.organization_id:
             raise ValueError("Organization ID is required for Papra")
 
-        # Authoritative connection-time check; save-time validation tolerates unresolved hosts.
-        try:
-            validate_integration_url(
-                self.url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
-            )
-        except ValueError as exc:
-            from app.services.papra_client import PapraConnectionError
+        from app.services.papra_client import PapraConnectionError
 
-            raise PapraConnectionError(str(exc)) from exc
+        self._target = pin_integration_url(self.url, PapraConnectionError)
+
+    def make_session(self, **session_kwargs) -> aiohttp.ClientSession:
+        """Authenticated session pinned to the addresses validated in ``__init__``."""
+        return build_integration_session(
+            self._target, headers=self.get_headers(), **session_kwargs
+        )
 
     def get_headers(self) -> dict:
         """Get authentication headers for requests."""
@@ -73,9 +77,7 @@ class PapraAuth:
             Tuple of (success: bool, message: str)
         """
         try:
-            headers = self.get_headers()
-
-            async with aiohttp.ClientSession(headers=headers) as session:
+            async with self.make_session() as session:
                 async with session.get(f"{self.url}/api/organizations") as response:
                     if response.status == 200:
                         return True, "Connection successful"
@@ -95,6 +97,8 @@ class PapraAuth:
                         "Unable to connect to Papra. Please verify your settings.",
                     )
 
+        except UnsafeRedirectError:
+            return False, UNSAFE_REDIRECT_MESSAGE
         except aiohttp.ClientError as e:
             logger.error(
                 "Papra connection error",
@@ -119,9 +123,7 @@ class PapraAuth:
             List of organization dicts with id and name
         """
         try:
-            headers = self.get_headers()
-
-            async with aiohttp.ClientSession(headers=headers) as session:
+            async with self.make_session() as session:
                 async with session.get(f"{self.url}/api/organizations") as response:
                     if response.status != 200:
                         logger.error(

@@ -39,7 +39,7 @@ Before configuring the integration, you need:
 - **API Token** (recommended) - Your Paperless-ngx API token
 - **Username / Password** (alternative) - If you prefer basic authentication instead of a token
 
-**Security note:** URLs that reach the public internet must use HTTPS. Plain HTTP is allowed when the host resolves to a private or loopback address - for example `localhost`, `192.168.x.x`, `10.x.x.x`, `172.16-31.x.x`, a Tailscale address, a `.lan` name, or a Docker service name on a network shared with MediKeep (e.g. `http://paperless:8000`). Setting `ALLOW_PRIVATE_INTEGRATION_URLS=false` blocks private addresses entirely.
+**Security note:** URLs that reach the public internet must use HTTPS. Plain HTTP is allowed when the host resolves to a private or loopback address - for example `localhost`, `192.168.x.x`, `10.x.x.x`, `172.16-31.x.x`, a Tailscale address, a `.lan` name, or a Docker service name on a network shared with MediKeep (e.g. `http://paperless:8000`). Setting `ALLOW_PRIVATE_INTEGRATION_URLS=false` blocks private addresses entirely. If your Paperless URL redirects to a different hostname, MediKeep refuses the redirect - save the final URL instead. If Paperless redirects HTTP to HTTPS, save the final HTTPS URL.
 
 ### Step 3: Test the Connection
 

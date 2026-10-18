@@ -6,8 +6,6 @@ Replaces the complex task resolution logic with a single, clear method.
 
 from typing import Optional, Tuple
 
-import aiohttp
-
 from app.core.logging.config import get_logger
 from app.services.paperless_auth import PaperlessAuth
 from app.services.paperless_task_status import extract_task, parse_task
@@ -78,10 +76,7 @@ class PaperlessTaskResolver:
     async def _get_task_status(self, task_uuid: str) -> Optional[dict]:
         """Get task status from Paperless API."""
         try:
-            headers = self.auth.get_headers()
-            auth = self.auth.get_auth()
-
-            async with aiohttp.ClientSession(headers=headers, auth=auth) as session:
+            async with self.auth.make_session() as session:
                 url = f"{self.auth.url}/api/tasks/?task_id={task_uuid}"
 
                 async with session.get(url) as response:
@@ -101,10 +96,7 @@ class PaperlessTaskResolver:
             # Validate it's a numeric ID
             int(document_id)
 
-            headers = self.auth.get_headers()
-            auth = self.auth.get_auth()
-
-            async with aiohttp.ClientSession(headers=headers, auth=auth) as session:
+            async with self.auth.make_session() as session:
                 url = f"{self.auth.url}/api/documents/{document_id}/"
 
                 async with session.get(url) as response:

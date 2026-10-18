@@ -82,7 +82,7 @@ class TestPaperlessService:
         service = PaperlessServiceToken(
             "http://paperless-container:8000", self.api_token, self.user_id
         )
-        assert service.ssl_context is None
+        assert service.base_url == "http://paperless-container:8000"
 
     @pytest.mark.asyncio
     async def test_session_connects_to_validated_address_after_dns_changes(

@@ -55,19 +55,9 @@ class PaperlessClient:
     async def _ensure_session(self):
         """Ensure HTTP session is created."""
         if not self._session:
-            headers = self.auth.get_headers()
-            auth = self.auth.get_auth()
-
-            connector = aiohttp.TCPConnector(
-                limit=10, limit_per_host=5, ttl_dns_cache=300
-            )
-
             # Use default timeout for regular operations
-            self._session = aiohttp.ClientSession(
-                headers=headers,
-                auth=auth,
-                connector=connector,
-                timeout=aiohttp.ClientTimeout(total=30),
+            self._session = self.auth.make_session(
+                timeout=aiohttp.ClientTimeout(total=30)
             )
 
             logger.debug(f"Created Paperless session: {self.auth.get_auth_type()} auth")

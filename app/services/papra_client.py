@@ -53,20 +53,12 @@ class PapraClient:
     async def _ensure_session(self):
         """Ensure HTTP session is created."""
         if not self._session:
-            headers = self.auth.get_headers()
-
-            connector = aiohttp.TCPConnector(
-                limit=10, limit_per_host=5, ttl_dns_cache=300
-            )
-
             from app.core.config import settings
 
             timeout_seconds = getattr(settings, "PAPRA_REQUEST_TIMEOUT", 30)
 
-            self._session = aiohttp.ClientSession(
-                headers=headers,
-                connector=connector,
-                timeout=aiohttp.ClientTimeout(total=timeout_seconds),
+            self._session = self.auth.make_session(
+                timeout=aiohttp.ClientTimeout(total=timeout_seconds)
             )
 
             logger.debug("Created Papra session")

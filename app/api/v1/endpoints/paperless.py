@@ -25,16 +25,15 @@ from app.core.logging.helpers import (
     log_external_service,
     log_security_event,
 )
+from app.core.utils.integration_http import UNSAFE_REDIRECT_MESSAGE
 from app.crud.user_preferences import user_preferences
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
 from app.services.credential_encryption import SecurityError, credential_encryption
-
-# New simplified architecture
-from app.services.paperless_auth import create_paperless_auth
 from app.services.paperless_service import (
     PaperlessAuthenticationError,
     PaperlessConnectionError,
+    PaperlessRedirectError,
     _build_title_fallback_query,
     create_paperless_service,
 )
@@ -436,6 +435,11 @@ async def test_paperless_connection(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication failed. Please check your credentials.",
+        )
+
+    except PaperlessRedirectError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=UNSAFE_REDIRECT_MESSAGE
         )
 
     except PaperlessConnectionError as e:
@@ -1539,136 +1543,6 @@ async def search_paperless_documents(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while searching documents: {str(e)}",
-        )
-
-
-# =============================================================================
-# NEW SIMPLIFIED ARCHITECTURE ENDPOINTS
-# =============================================================================
-
-
-@router.post("/test-connection-v2", response_model=Dict[str, Any])
-async def test_paperless_connection_v2(
-    connection_data: PaperlessConnectionData,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-) -> Dict[str, Any]:
-    """
-    Test connection to paperless-ngx instance using new simplified architecture.
-
-    This is the new, cleaner implementation that will replace the original
-    test-connection endpoint once fully tested.
-    """
-    try:
-        # Determine if we should use saved credentials
-        use_saved_credentials = not any(
-            [
-                connection_data.paperless_api_token,
-                connection_data.paperless_username,
-                connection_data.paperless_password,
-            ]
-        )
-
-        if use_saved_credentials:
-            # Get saved credentials from database
-            user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
-            if not user_prefs:
-                raise HTTPException(
-                    status.HTTP_400_BAD_REQUEST, "No saved credentials found"
-                )
-
-            # Use saved encrypted credentials
-            encrypted_token = user_prefs.paperless_api_token_encrypted
-            encrypted_username = user_prefs.paperless_username_encrypted
-            encrypted_password = user_prefs.paperless_password_encrypted
-
-            logger.info(f"Testing with saved credentials for user {current_user.id}")
-        else:
-            # Encrypt provided credentials
-            encrypted_token = None
-            encrypted_username = None
-            encrypted_password = None
-
-            if connection_data.paperless_api_token:
-                encrypted_token = credential_encryption.encrypt_token(
-                    connection_data.paperless_api_token
-                )
-
-            if (
-                connection_data.paperless_username
-                and connection_data.paperless_password
-            ):
-                encrypted_username = credential_encryption.encrypt_token(
-                    connection_data.paperless_username
-                )
-                encrypted_password = credential_encryption.encrypt_token(
-                    connection_data.paperless_password
-                )
-
-            logger.info(f"Testing with provided credentials for user {current_user.id}")
-
-        # Create authentication handler
-        auth = create_paperless_auth(
-            url=connection_data.paperless_url,
-            encrypted_token=encrypted_token,
-            encrypted_username=encrypted_username,
-            encrypted_password=encrypted_password,
-            user_id=current_user.id,
-        )
-
-        # Test connection
-        success, message = await auth.test_connection()
-
-        if success:
-            result = {
-                "status": "success",
-                "message": message,
-                "auth_method": auth.get_auth_type(),
-                "used_saved_credentials": use_saved_credentials,
-                "url": connection_data.paperless_url,
-            }
-
-            logger.info(
-                f"Connection test successful for user {current_user.id}",
-                extra={
-                    "user_id": current_user.id,
-                    "auth_method": result["auth_method"],
-                    "used_saved_credentials": use_saved_credentials,
-                    "url": connection_data.paperless_url,
-                },
-            )
-
-            return result
-        # Connection failed
-        logger.warning(f"Connection test failed for user {current_user.id}: {message}")
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, f"Connection failed: {message}"
-        )
-
-    except HTTPException:
-        raise
-    except ValueError as e:
-        # Authentication setup error (no credentials provided)
-        logger.warning(f"Invalid credentials for user {current_user.id}: {e}")
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
-    except SecurityError as e:
-        logger.error(
-            f"Security error during connection test for user {current_user.id}: {e}"
-        )
-        raise HTTPException(
-            status.HTTP_500_INTERNAL_SERVER_ERROR, "Security error occurred"
-        )
-    except Exception as e:
-        logger.error(
-            f"Unexpected error during connection test for user {current_user.id}: {e}",
-            extra={
-                "user_id": current_user.id,
-                "error": str(e),
-                "url": connection_data.paperless_url,
-            },
-        )
-        raise HTTPException(
-            status.HTTP_500_INTERNAL_SERVER_ERROR, "Connection test failed"
         )
 
 
