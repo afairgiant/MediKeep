@@ -2,26 +2,35 @@
 Tests for GHSA-3jrc (SSRF via redirects and unpinned integration clients).
 
 Every Paperless/Papra session must connect only to the validated addresses and
-refuse any hop - redirects included - that leaves the configured host.
+refuse any hop - redirects included - that leaves the configured origin.
 """
 
 import ipaddress
+from contextlib import asynccontextmanager
 from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pytest_asyncio
 from aiohttp import web
+from fastapi import HTTPException
 from yarl import URL
 
+from app.api.v1.endpoints import paperless as paperless_endpoint
 from app.core.utils.integration_http import (
+    UNSAFE_REDIRECT_MESSAGE,
     PinnedTarget,
     UnsafeRedirectError,
     _hop_guard,
     build_integration_session,
 )
+from app.schemas.user_preferences import PaperlessConnectionData
 from app.services.paperless_auth import PaperlessAuth
 from app.services.paperless_client import PaperlessClient, PaperlessConnectionError
-from app.services.paperless_service import PaperlessServiceToken
+from app.services.paperless_service import (
+    PaperlessRedirectError,
+    PaperlessServiceToken,
+)
 from app.services.paperless_task_resolver import PaperlessTaskResolver
 from app.services.papra_auth import PapraAuth
 from app.services.papra_client import PapraClient, PapraConnectionError
@@ -71,8 +80,9 @@ async def server(monkeypatch):
 
 IP_LITERAL_REDIRECT = "http://127.0.0.1:{port}/secret"
 
-OFF_HOST_REDIRECTS = [
+OFF_ORIGIN_REDIRECTS = [
     pytest.param(IP_LITERAL_REDIRECT, id="ip-literal"),
+    pytest.param(f"http://{HOST}:1/secret", id="other-port"),
     pytest.param("http://169.254.169.254/latest/meta-data/", id="cloud-metadata"),
 ]
 
@@ -94,8 +104,8 @@ class TestBuildIntegrationSession:
             async with session.get(f"{server.base_url}/api/") as response:
                 assert await response.read() == b"SECRET"
 
-    @pytest.mark.parametrize("target", OFF_HOST_REDIRECTS)
-    async def test_off_host_redirect_refused(self, server, target):
+    @pytest.mark.parametrize("target", OFF_ORIGIN_REDIRECTS)
+    async def test_off_origin_redirect_refused(self, server, target):
         server.redirect_to = target
         async with build_integration_session(
             PinnedTarget(server.base_url, LOOPBACK)
@@ -122,22 +132,32 @@ class TestHopGuard:
 
         return await guard(SimpleNamespace(url=URL(url)), handler)
 
-    async def test_https_downgrade_refused(self):
-        guard = _hop_guard(HOST, "https")
-        with pytest.raises(UnsafeRedirectError):
-            await self._send(guard, f"http://{HOST}/api/")
+    async def test_same_origin_allowed(self):
+        guard = _hop_guard(HOST, "http", 8000)
+        assert await self._send(guard, f"http://{HOST}:8000/api/") == "sent"
 
-    async def test_http_upgrade_allowed(self):
-        guard = _hop_guard(HOST, "http")
-        assert await self._send(guard, f"https://{HOST}/api/") == "sent"
+    async def test_https_downgrade_refused(self):
+        guard = _hop_guard(HOST, "https", 443)
+        with pytest.raises(UnsafeRedirectError):
+            await self._send(guard, f"http://{HOST}:443/api/")
+
+    async def test_http_upgrade_to_default_https_port_refused(self):
+        guard = _hop_guard(HOST, "http", 80)
+        with pytest.raises(UnsafeRedirectError):
+            await self._send(guard, f"https://{HOST}/api/")
+
+    async def test_other_port_refused(self):
+        guard = _hop_guard(HOST, "http", 8000)
+        with pytest.raises(UnsafeRedirectError):
+            await self._send(guard, f"http://{HOST}:8001/api/")
 
     async def test_other_hostname_refused(self):
-        guard = _hop_guard(HOST, "http")
+        guard = _hop_guard(HOST, "http", 80)
         with pytest.raises(UnsafeRedirectError):
             await self._send(guard, "http://evil.example/api/")
 
     async def test_host_comparison_ignores_case(self):
-        guard = _hop_guard(HOST, "https")
+        guard = _hop_guard(HOST, "https", 443)
         assert await self._send(guard, f"https://{HOST.upper()}/api/") == "sent"
 
 
@@ -223,6 +243,62 @@ async def test_client_refuses_ip_literal_redirect(server, call):
         result = None
     assert not result
     assert server.secret_hits == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("make_auth", [_paperless_auth, _papra_auth])
+async def test_auth_test_connection_explains_redirect(server, make_auth):
+    server.redirect_to = IP_LITERAL_REDIRECT
+    assert await make_auth(server).test_connection() == (
+        False,
+        UNSAFE_REDIRECT_MESSAGE,
+    )
+
+
+@pytest.mark.asyncio
+async def test_paperless_service_test_connection_raises_redirect_error(server):
+    server.redirect_to = IP_LITERAL_REDIRECT
+    service = PaperlessServiceToken(server.base_url, "t" * 40, user_id=1)
+    await service._create_session()
+    try:
+        with pytest.raises(PaperlessRedirectError):
+            await service.test_connection()
+    finally:
+        await service._close_session()
+
+
+@pytest.mark.asyncio
+async def test_test_connection_endpoint_explains_redirect():
+    class RedirectingService:
+        async def test_connection(self):
+            raise PaperlessRedirectError(UNSAFE_REDIRECT_MESSAGE)
+
+    @asynccontextmanager
+    async def fake_factory(*args, **kwargs):
+        yield RedirectingService()
+
+    prefs = MagicMock(
+        paperless_api_token_encrypted="encrypted-token",
+        paperless_username_encrypted=None,
+        paperless_password_encrypted=None,
+    )
+    connection_data = PaperlessConnectionData.model_construct(
+        paperless_url="https://paperless.example.com",
+        paperless_api_token=None,
+        paperless_username=None,
+        paperless_password=None,
+    )
+    with patch.object(
+        paperless_endpoint.user_preferences, "get_by_user_id", return_value=prefs
+    ), patch.object(paperless_endpoint, "create_paperless_service", fake_factory):
+        with pytest.raises(HTTPException) as exc_info:
+            await paperless_endpoint.test_paperless_connection(
+                connection_data=connection_data,
+                current_user=MagicMock(id=2),
+                db=MagicMock(),
+            )
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == UNSAFE_REDIRECT_MESSAGE
 
 
 @pytest.mark.asyncio

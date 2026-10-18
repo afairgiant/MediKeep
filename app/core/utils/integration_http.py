@@ -8,10 +8,10 @@ that leaves the configured host.
 
 from dataclasses import dataclass
 from typing import Any, Tuple, Type
-from urllib.parse import urlparse
 
 import aiohttp
 from aiohttp import ClientHandlerType, ClientRequest, ClientResponse
+from yarl import URL
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
@@ -23,6 +23,11 @@ from app.core.utils.url_security import (
 )
 
 security_logger = get_logger(__name__, "security")
+
+UNSAFE_REDIRECT_MESSAGE = (
+    "The integration server redirected to a different address. "
+    "Save the final URL of the service instead."
+)
 
 
 class UnsafeRedirectError(aiohttp.ClientError):
@@ -49,11 +54,15 @@ def pin_integration_url(url: str, error_cls: Type[Exception]) -> PinnedTarget:
     return PinnedTarget(url, tuple(ips))
 
 
-def _hop_guard(hostname: str, scheme: str):
+def _hop_guard(hostname: str, scheme: str, port: int):
     async def guard(req: ClientRequest, handler: ClientHandlerType) -> ClientResponse:
         target_host = (req.url.host or "").lower()
         # IP-literal hosts skip the resolver entirely, so this check is the only stop for them.
-        if target_host != hostname or (scheme == "https" and req.url.scheme != "https"):
+        if (
+            target_host != hostname
+            or req.url.port != port
+            or (scheme == "https" and req.url.scheme != "https")
+        ):
             security_logger.warning(
                 "Blocked integration request to an unvalidated target",
                 extra={
@@ -61,10 +70,7 @@ def _hop_guard(hostname: str, scheme: str):
                     LogFields.EVENT: "integration_redirect_blocked",
                 },
             )
-            raise UnsafeRedirectError(
-                "The integration server redirected to a different address. "
-                "Save the final URL of the service instead."
-            )
+            raise UnsafeRedirectError(UNSAFE_REDIRECT_MESSAGE)
         return await handler(req)
 
     return guard
@@ -78,8 +84,8 @@ def build_integration_session(
     Callers must not pass per-request ``middlewares``: aiohttp lets them replace the
     session's guard.
     """
-    parsed = urlparse(target.url)
-    hostname = parsed.hostname or ""
+    parsed = URL(target.url)
+    hostname = parsed.host or ""
     connector = aiohttp.TCPConnector(
         limit=10,
         limit_per_host=5,
@@ -87,6 +93,6 @@ def build_integration_session(
     )
     return aiohttp.ClientSession(
         connector=connector,
-        middlewares=(_hop_guard(hostname, parsed.scheme),),
+        middlewares=(_hop_guard(hostname, parsed.scheme, parsed.port),),
         **session_kwargs,
     )

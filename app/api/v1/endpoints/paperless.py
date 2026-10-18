@@ -25,6 +25,7 @@ from app.core.logging.helpers import (
     log_external_service,
     log_security_event,
 )
+from app.core.utils.integration_http import UNSAFE_REDIRECT_MESSAGE
 from app.crud.user_preferences import user_preferences
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
@@ -32,6 +33,7 @@ from app.services.credential_encryption import SecurityError, credential_encrypt
 from app.services.paperless_service import (
     PaperlessAuthenticationError,
     PaperlessConnectionError,
+    PaperlessRedirectError,
     _build_title_fallback_query,
     create_paperless_service,
 )
@@ -433,6 +435,11 @@ async def test_paperless_connection(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication failed. Please check your credentials.",
+        )
+
+    except PaperlessRedirectError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=UNSAFE_REDIRECT_MESSAGE
         )
 
     except PaperlessConnectionError as e:

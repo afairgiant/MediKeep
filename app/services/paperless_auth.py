@@ -12,6 +12,8 @@ import aiohttp
 
 from app.core.logging.config import get_logger
 from app.core.utils.integration_http import (
+    UNSAFE_REDIRECT_MESSAGE,
+    UnsafeRedirectError,
     build_integration_session,
     pin_integration_url,
 )
@@ -119,6 +121,8 @@ class PaperlessAuth:
                         "Unable to connect to document service. Please verify your settings.",
                     )
 
+        except UnsafeRedirectError:
+            return False, UNSAFE_REDIRECT_MESSAGE
         except aiohttp.ClientError as e:
             # Use structured logging without exposing sensitive connection details
             logger.error(

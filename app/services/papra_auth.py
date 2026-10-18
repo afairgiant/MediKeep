@@ -12,6 +12,8 @@ import aiohttp
 
 from app.core.logging.config import get_logger
 from app.core.utils.integration_http import (
+    UNSAFE_REDIRECT_MESSAGE,
+    UnsafeRedirectError,
     build_integration_session,
     pin_integration_url,
 )
@@ -95,6 +97,8 @@ class PapraAuth:
                         "Unable to connect to Papra. Please verify your settings.",
                     )
 
+        except UnsafeRedirectError:
+            return False, UNSAFE_REDIRECT_MESSAGE
         except aiohttp.ClientError as e:
             logger.error(
                 "Papra connection error",

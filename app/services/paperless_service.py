@@ -18,6 +18,7 @@ import aiohttp
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.utils.integration_http import (
+    UnsafeRedirectError,
     build_integration_session,
     pin_integration_url,
 )
@@ -57,6 +58,10 @@ class PaperlessError(Exception):
 
 class PaperlessConnectionError(PaperlessError):
     """Exception raised for connection-related errors."""
+
+
+class PaperlessRedirectError(PaperlessConnectionError):
+    """The server redirected to a host, port, or scheme other than the saved URL."""
 
 
 class PaperlessAuthenticationError(PaperlessError):
@@ -248,6 +253,8 @@ class PaperlessServiceBase(ABC):
 
                 yield response
 
+        except UnsafeRedirectError as e:
+            raise PaperlessRedirectError(str(e)) from e
         except aiohttp.ClientError as e:
             logger.debug(f"Paperless ClientError: {type(e).__name__}: {str(e)}")
             logger.error(
