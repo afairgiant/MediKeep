@@ -773,32 +773,14 @@ const VitalsList = ({
     );
   }
 
-  // Reusable N/A cell for summary rows where columns are not applicable
-  const naCell = (
-    <Table.Td>
-      <Text size="sm" c="dimmed">
-        {t('labels.notAvailable')}
-      </Text>
-    </Table.Td>
-  );
-
-  // Render a single vital row (used for both individual records and expanded group readings)
-  const renderVitalRow = (vital, isNested = false) => (
-    <Table.Tr
-      key={vital.id}
-      style={
-        isNested ? { backgroundColor: 'var(--color-bg-secondary)' } : undefined
-      }
-    >
+  // Render the eight value columns (Blood Pressure -> O2 Sat) for a reading.
+  // Shared by individual rows, expanded group readings, and summary rows (which
+  // pass either the single reading for the day or an averaged pseudo-reading).
+  // Any field that is null falls back to the dimmed "N/A" cell per column.
+  const renderVitalValueCells = (vital, glucoseRange = null) => (
+    <>
       <Table.Td>
-        <Text size="sm" fw={500} pl={isNested ? 'md' : undefined}>
-          {isNested
-            ? formatDateTime(vital.recorded_date)
-            : formatDate(vital.recorded_date)}
-        </Text>
-      </Table.Td>
-      <Table.Td>
-        {vital.systolic_bp && vital.diastolic_bp ? (
+        {vital.systolic_bp != null && vital.diastolic_bp != null ? (
           <Text size="sm" fw={500}>
             {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}
           </Text>
@@ -809,7 +791,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.heart_rate ? (
+        {vital.heart_rate != null ? (
           <Text size="sm" fw={500}>
             {vital.heart_rate} BPM
           </Text>
@@ -820,7 +802,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.temperature ? (
+        {vital.temperature != null ? (
           <Text size="sm" fw={500}>
             {formatMeasurement(
               convertForDisplay(vital.temperature, 'temperature', unitSystem),
@@ -835,7 +817,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.weight ? (
+        {vital.weight != null ? (
           <Text size="sm" fw={500}>
             {formatMeasurement(
               convertForDisplay(vital.weight, 'weight', unitSystem),
@@ -850,9 +832,18 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.weight && vital.height ? (
+        {vital.weight != null && vital.height != null ? (
+          // Single reading: derive BMI from its own weight + height.
           <Text size="sm" fw={500}>
             {getBMIDisplay(vital.weight, vital.height)}
+          </Text>
+        ) : vital._aggregate && vital.bmi != null ? (
+          // Aggregate summary row only: BMI precomputed as the mean of
+          // per-reading BMIs, each derived from a reading having BOTH weight
+          // and height. Real rows never show a stored BMI without a height, so
+          // summary and individual rows apply the same weight+height rule.
+          <Text size="sm" fw={500}>
+            {vital.bmi}
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
@@ -861,11 +852,19 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.blood_glucose ? (
+        {vital.blood_glucose != null ? (
           <Group gap="xs" wrap="nowrap">
             <Text size="sm" fw={500}>
               {vital.blood_glucose} {t('vitals:units.mgdl')}
             </Text>
+            {glucoseRange &&
+              glucoseRange.min != null &&
+              glucoseRange.max != null &&
+              glucoseRange.min !== glucoseRange.max && (
+                <Text size="xs" c="dimmed">
+                  ({glucoseRange.min}–{glucoseRange.max})
+                </Text>
+              )}
             {vital.glucose_context && (
               <Badge
                 size="xs"
@@ -889,7 +888,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.a1c ? (
+        {vital.a1c != null ? (
           <Text size="sm" fw={500}>
             {vital.a1c}%
           </Text>
@@ -900,7 +899,7 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
-        {vital.oxygen_saturation ? (
+        {vital.oxygen_saturation != null ? (
           <Text size="sm" fw={500}>
             {vital.oxygen_saturation}%
           </Text>
@@ -910,6 +909,87 @@ const VitalsList = ({
           </Text>
         )}
       </Table.Td>
+    </>
+  );
+
+  // Build an averaged pseudo-reading from a day's grouped readings so that a
+  // multi-reading summary row can show a representative value in every column,
+  // not just glucose. Fields with no values are left undefined so their column
+  // falls back to the N/A cell. Used only for display in the collapsed summary
+  // row; the expanded day view still shows every individual reading.
+  const aggregateReadings = readings => {
+    const avgField = (field, decimals = 0) => {
+      const values = readings.map(r => r[field]).filter(v => v != null);
+      if (values.length === 0) return undefined;
+      const factor = 10 ** decimals;
+      return (
+        Math.round(
+          (values.reduce((a, b) => a + b, 0) / values.length) * factor
+        ) / factor
+      );
+    };
+
+    // BMI is averaged over per-reading BMIs, computed only from readings that
+    // have BOTH weight and height. Averaging weight and height independently
+    // and deriving a single BMI would invent a value when no reading has both,
+    // and would not equal the mean of the per-reading BMIs. `height` is
+    // deliberately omitted from the result so the BMI cell uses this precomputed
+    // value rather than re-deriving it from an averaged height.
+    const perReadingBmi = readings
+      .filter(r => r.weight != null && r.height != null)
+      .map(r => vitalsService.calculateBMI(r.weight, r.height))
+      .filter(v => v != null && v > 0);
+    const bmi =
+      perReadingBmi.length > 0
+        ? Math.round(
+            (perReadingBmi.reduce((a, b) => a + b, 0) / perReadingBmi.length) *
+              10
+          ) / 10
+        : undefined;
+
+    // Blood pressure is a coupled (systolic, diastolic) pair. Averaging the two
+    // fields independently would synthesize a pair that never occurred in any
+    // single measurement, so instead surface the most recent reading that has
+    // BOTH values — a real, co-occurring measurement. The scalar vitals above
+    // are averaged; BP is the coupled-pair exception.
+    const latestBpReading = readings
+      .filter(r => r.systolic_bp != null && r.diastolic_bp != null)
+      .sort((a, b) => new Date(b.recorded_date) - new Date(a.recorded_date))[0];
+
+    return {
+      id: `agg-${readings[0]?.id ?? 'group'}`,
+      recorded_date: readings[0]?.recorded_date,
+      // Marks this as a display-only aggregate pseudo-reading (never a real
+      // record). The BMI cell honors a precomputed `bmi` only when this is set.
+      _aggregate: true,
+      systolic_bp: latestBpReading?.systolic_bp,
+      diastolic_bp: latestBpReading?.diastolic_bp,
+      heart_rate: avgField('heart_rate'),
+      temperature: avgField('temperature', 1),
+      weight: avgField('weight', 1),
+      bmi,
+      blood_glucose: avgField('blood_glucose'),
+      a1c: avgField('a1c', 1),
+      oxygen_saturation: avgField('oxygen_saturation'),
+    };
+  };
+
+  // Render a single vital row (used for both individual records and expanded group readings)
+  const renderVitalRow = (vital, isNested = false) => (
+    <Table.Tr
+      key={vital.id}
+      style={
+        isNested ? { backgroundColor: 'var(--color-bg-secondary)' } : undefined
+      }
+    >
+      <Table.Td>
+        <Text size="sm" fw={500} pl={isNested ? 'md' : undefined}>
+          {isNested
+            ? formatDateTime(vital.recorded_date)
+            : formatDate(vital.recorded_date)}
+        </Text>
+      </Table.Td>
+      {renderVitalValueCells(vital)}
       {showActions && (
         <Table.Td>
           {!isNested && (
@@ -1160,15 +1240,26 @@ const VitalsList = ({
                         </Table.Td>
                         {showActions && (
                           <Table.Td>
-                            <ActionIcon
-                              variant="subtle"
-                              color="red"
-                              size="xs"
-                              onClick={() => handleDelete(vital.id, true)}
-                              title={t('buttons.delete', 'Delete')}
-                            >
-                              <IconTrash size={12} />
-                            </ActionIcon>
+                            <Group gap="xs" wrap="nowrap">
+                              <ActionIcon
+                                variant="subtle"
+                                color="blue"
+                                size="xs"
+                                onClick={() => onEdit(vital)}
+                                title={t('buttons.edit', 'Edit')}
+                              >
+                                <IconEdit size={12} />
+                              </ActionIcon>
+                              <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                size="xs"
+                                onClick={() => handleDelete(vital.id, true)}
+                                title={t('buttons.delete', 'Delete')}
+                              >
+                                <IconTrash size={12} />
+                              </ActionIcon>
+                            </Group>
                           </Table.Td>
                         )}
                       </Table.Tr>
@@ -1209,7 +1300,9 @@ const VitalsList = ({
   };
 
   // Render a summary row that looks like a normal vitals row.
-  // Shows date + count badge, avg glucose in the glucose column, and expands on click.
+  // Shows date + count badge and a value in every column: the single reading's
+  // values when the day has one reading, otherwise the per-vital average across
+  // the day's readings. Expands on click to the full per-reading day view.
   const renderSummaryRow = item => {
     const isExpanded = expandedGroup === item.groupKey;
 
@@ -1234,31 +1327,16 @@ const VitalsList = ({
               </Badge>
             </Group>
           </Table.Td>
-          {/* BP, Heart Rate, Temperature, Weight, BMI - not applicable for grouped rows */}
-          {naCell}
-          {naCell}
-          {naCell}
-          {naCell}
-          {naCell}
-          {/* Glucose - show avg (min-max) */}
-          <Table.Td>
-            {item.stats ? (
-              <Text size="sm" fw={500}>
-                {item.stats.avg}{' '}
-                <Text span size="xs" c="dimmed">
-                  ({item.stats.min}-{item.stats.max})
-                </Text>{' '}
-                {t('vitals:units.mgdl')}
-              </Text>
-            ) : (
-              <Text size="sm" c="dimmed">
-                {t('labels.notAvailable')}
-              </Text>
-            )}
-          </Table.Td>
-          {/* A1C, O2 Sat - not applicable for grouped rows */}
-          {naCell}
-          {naCell}
+          {/* Value columns: a single reading shows its own values; a day with
+              multiple readings shows the per-vital average, plus the glucose
+              min–max range beside the average. Every individual reading remains
+              available in the expanded day view. */}
+          {renderVitalValueCells(
+            item.count === 1
+              ? item.readings[0]
+              : aggregateReadings(item.readings),
+            item.count > 1 ? item.stats : null
+          )}
           {showActions && (
             <Table.Td>
               <Group gap="xs">
@@ -1274,23 +1352,24 @@ const VitalsList = ({
                 >
                   <IconEye size={14} />
                 </ActionIcon>
-                <ActionIcon
-                  variant="filled"
-                  color="blue"
-                  size="sm"
-                  onClick={e => {
-                    e.stopPropagation();
-                    // Pass first reading with locked glucose flag when multiple readings exist
-                    const record = { ...item.readings[0] };
-                    if (item.count > 1) {
-                      record._lockedFields = ['blood_glucose'];
-                    }
-                    onEdit(record);
-                  }}
-                  title="Edit vitals"
-                >
-                  <IconEdit size={14} />
-                </ActionIcon>
+                {/* A multi-reading summary row shows aggregated values, which
+                    are not a single editable record; editing happens per
+                    reading in the expanded day view. A single-reading day is a
+                    real record, so it keeps the inline edit. */}
+                {item.count === 1 && (
+                  <ActionIcon
+                    variant="filled"
+                    color="blue"
+                    size="sm"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onEdit(item.readings[0]);
+                    }}
+                    title="Edit vitals"
+                  >
+                    <IconEdit size={14} />
+                  </ActionIcon>
+                )}
                 <ActionIcon
                   variant="filled"
                   color="red"
