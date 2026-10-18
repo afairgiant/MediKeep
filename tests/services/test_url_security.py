@@ -23,6 +23,7 @@ from app.core.utils.url_security import (
     PRIVATE_URL_ERROR,
     UNRESOLVED_URL_ERROR,
     PinnedResolver,
+    _normalize_ip,
     classify_url,
     validate_integration_url,
 )
@@ -198,6 +199,43 @@ class TestMixedResolution:
     def test_returns_every_validated_address(self):
         ips = validate_integration_url("https://mixed.example", allow_private=True)
         assert [str(ip) for ip in ips] == ["10.0.0.5", "8.8.8.8"]
+
+
+class TestIpv4MappedAddresses:
+    @pytest.mark.parametrize(
+        "url", ["http://[::ffff:169.254.169.254]/", "http://[::ffff:a9fe:a9fe]/"]
+    )
+    def test_mapped_metadata_literal_blocked(self, url):
+        with pytest.raises(ValueError) as exc:
+            validate_integration_url(url, allow_private=True)
+        assert str(exc.value) == METADATA_URL_ERROR
+
+    def test_mapped_metadata_via_dns_blocked(self, fake_dns):
+        fake_dns({"rebind.example": "::ffff:169.254.169.254"})
+        with pytest.raises(ValueError) as exc:
+            validate_integration_url("https://rebind.example", allow_private=True)
+        assert str(exc.value) == METADATA_URL_ERROR
+
+    def test_mapped_private_is_internal(self):
+        with pytest.raises(ValueError) as exc:
+            validate_integration_url("http://[::ffff:10.0.0.1]/", allow_private=False)
+        assert str(exc.value) == PRIVATE_URL_ERROR
+
+    def test_mapped_public_is_public(self):
+        assert classify_url("https://[::ffff:8.8.8.8]/") == "public"
+
+    def test_validated_addresses_are_unwrapped_to_ipv4(self, fake_dns):
+        fake_dns({"nas.example": "::ffff:192.168.1.2"})
+        ips = validate_integration_url("http://nas.example", allow_private=True)
+        assert ips == [ipaddress.IPv4Address("192.168.1.2")]
+
+    def test_normalize_ip(self):
+        assert _normalize_ip(
+            ipaddress.ip_address("::ffff:169.254.169.254")
+        ) == ipaddress.IPv4Address("169.254.169.254")
+        assert _normalize_ip(ipaddress.ip_address("fd00::5")) == ipaddress.ip_address(
+            "fd00::5"
+        )
 
 
 class TestPinnedResolver:

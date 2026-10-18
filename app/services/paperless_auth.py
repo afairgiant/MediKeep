@@ -11,6 +11,10 @@ from urllib.parse import urlparse
 import aiohttp
 
 from app.core.logging.config import get_logger
+from app.core.utils.integration_http import (
+    build_integration_session,
+    pin_integration_url,
+)
 
 logger = get_logger(__name__)
 
@@ -38,6 +42,19 @@ class PaperlessAuth:
         # Validate we have some form of authentication
         if not self.token and not (self.username and self.password):
             raise ValueError("Must provide either API token or username/password")
+
+        from app.services.paperless_client import PaperlessConnectionError
+
+        self._target = pin_integration_url(self.url, PaperlessConnectionError)
+
+    def make_session(self, **session_kwargs) -> aiohttp.ClientSession:
+        """Authenticated session pinned to the addresses validated in ``__init__``."""
+        return build_integration_session(
+            self._target,
+            headers=self.get_headers(),
+            auth=self.get_auth(),
+            **session_kwargs,
+        )
 
     def get_auth_type(self) -> str:
         """Get the authentication type being used."""
@@ -80,10 +97,7 @@ class PaperlessAuth:
             Tuple of (success: bool, message: str)
         """
         try:
-            headers = self.get_headers()
-            auth = self.get_auth()
-
-            async with aiohttp.ClientSession(headers=headers, auth=auth) as session:
+            async with self.make_session() as session:
                 async with session.get(f"{self.url}/api/ui_settings/") as response:
                     if response.status == 200:
                         return True, "Connection successful"

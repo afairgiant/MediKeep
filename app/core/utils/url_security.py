@@ -22,8 +22,8 @@ the address space into two tiers:
   public addresses only.
 
 Resolution is done against the *resolved* IP address(es), not just the literal
-hostname text, which also closes the DNS-rebinding gap where a public-looking
-hostname resolves to an internal IP.
+hostname text. That alone does not stop DNS rebinding: connections must also be
+pinned to the validated addresses (see ``integration_http``).
 
 Plain HTTP is only accepted for hosts that resolve to a private/loopback address.
 """
@@ -63,6 +63,13 @@ UNRESOLVED_URL_ERROR = (
 INSECURE_URL_ERROR = "External URLs must use HTTPS for security"
 
 
+def _normalize_ip(ip: _IpAddress) -> _IpAddress:
+    """Unwrap an IPv4-mapped IPv6 address (``::ffff:a.b.c.d``) to its IPv4 form."""
+    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
+        return ip.ipv4_mapped
+    return ip
+
+
 def _ip_always_blocked(ip: _IpAddress) -> bool:
     """IPs that are never a legitimate integration target, blocked regardless of
     ALLOW_PRIVATE_INTEGRATION_URLS. Notably link-local covers cloud metadata
@@ -93,7 +100,7 @@ def _resolve_ips(url: str) -> Optional[List[_IpAddress]]:
         return None
 
     try:
-        return [ipaddress.ip_address(hostname)]
+        return [_normalize_ip(ipaddress.ip_address(hostname))]
     except ValueError:
         pass
 
@@ -105,7 +112,7 @@ def _resolve_ips(url: str) -> Optional[List[_IpAddress]]:
     ips: List[_IpAddress] = []
     for info in infos:
         try:
-            ips.append(ipaddress.ip_address(info[4][0]))
+            ips.append(_normalize_ip(ipaddress.ip_address(info[4][0])))
         except ValueError:
             continue
     return ips or None

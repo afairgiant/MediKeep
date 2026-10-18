@@ -7,19 +7,20 @@ including connection testing, document upload, download, and management.
 
 import asyncio
 import re
-import ssl
 import uuid
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
-from urllib.parse import urlparse
 
 import aiohttp
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.utils.url_security import PinnedResolver, validate_integration_url
+from app.core.utils.integration_http import (
+    build_integration_session,
+    pin_integration_url,
+)
 from app.services.credential_encryption import credential_encryption
 from app.services.paperless_task_status import extract_task, parse_task
 
@@ -83,21 +84,7 @@ class PaperlessServiceBase(ABC):
         self.user_id = user_id
         self._lookup_cache: Dict[str, Dict[int, str]] = {}
 
-        # Authoritative connection-time check; save-time validation tolerates unresolved hosts.
-        try:
-            self._pinned_ips = validate_integration_url(
-                self.base_url,
-                allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
-            )
-        except ValueError as exc:
-            raise PaperlessConnectionError(str(exc)) from exc
-
-        # Create SSL context with strict security for HTTPS connections
-        self.ssl_context = None
-        if self.base_url.startswith("https://"):
-            self.ssl_context = ssl.create_default_context()
-            self.ssl_context.check_hostname = True
-            self.ssl_context.verify_mode = ssl.CERT_REQUIRED
+        self._target = pin_integration_url(self.base_url, PaperlessConnectionError)
 
         # Setup session configuration
         self.timeout = aiohttp.ClientTimeout(
@@ -130,13 +117,10 @@ class PaperlessServiceBase(ABC):
     def get_auth_type(self) -> str:
         """Return authentication type for logging."""
 
-    def _make_connector(self) -> aiohttp.TCPConnector:
-        """TCP connector pinned to the addresses validated in ``__init__``."""
-        return aiohttp.TCPConnector(
-            ssl=self.ssl_context if self.base_url.startswith("https://") else False,
-            limit=10,
-            limit_per_host=5,
-            resolver=PinnedResolver(urlparse(self.base_url).hostname, self._pinned_ips),
+    def _build_session(self, **session_kwargs) -> aiohttp.ClientSession:
+        """Session pinned to the addresses validated in ``__init__``."""
+        return build_integration_session(
+            self._target, timeout=self.timeout, **session_kwargs
         )
 
     async def _close_session(self):
@@ -776,11 +760,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
             },
         )
 
-        connector = self._make_connector()
-
-        self.session = aiohttp.ClientSession(
-            connector=connector, timeout=self.timeout, headers=auth_headers
-        )
+        self.session = self._build_session(headers=auth_headers)
 
     def get_auth_type(self) -> str:
         """Return authentication type for logging."""
@@ -1346,14 +1326,10 @@ class PaperlessService(PaperlessServiceBase):
 
     async def _create_session(self):
         """Create HTTP session with basic authentication."""
-        connector = self._make_connector()
-
         # Create BasicAuth for username/password authentication
         auth = aiohttp.BasicAuth(self.username, self.password)
 
-        self.session = aiohttp.ClientSession(
-            connector=connector, timeout=self.timeout, headers=self.headers, auth=auth
-        )
+        self.session = self._build_session(headers=self.headers, auth=auth)
 
     def get_auth_type(self) -> str:
         """Return authentication type for logging."""
