@@ -117,7 +117,26 @@ MediKeep includes a built-in backup system for database protection.
 ### Deleting Backups
 
 - Remove old backups that are no longer needed
-- Configure retention settings to control how long backups are kept (by days, minimum count, and maximum count)
+- The automatic backup schedule and how long backups are kept are set under **Settings** > **Backups** (see below)
+
+---
+
+## Settings
+
+**Admin Panel** > **Settings** holds the system-wide settings, grouped into sections:
+
+- **Users and sign-in** - whether people can create their own accounts from the login page, and the single sign-on status with a **Test SSO Connection** button
+- **Data and storage** - how long deleted files stay in the trash
+- **Backups** - the automatic backup schedule, how old a backup can get before clean-up removes it, and the minimum number to always keep
+- **Set by deployment** - values that can only be changed in `docker-compose.yml` or `.env`, shown read-only
+
+Changes are held until you click **Save changes** in the bar at the bottom of the page. **Discard** puts everything back.
+
+Each setting shows where its value comes from:
+
+- **Default** - the built-in value
+- **From compose** - set by an environment variable in your deployment files
+- **Saved here** - saved on this page; it overrides the environment variable from then on. **Reset to default** removes the saved value so the compose or built-in value applies again
 
 ---
 

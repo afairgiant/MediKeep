@@ -91,7 +91,6 @@
       "completeCleanup": "Pulizia completa del sistema",
       "deleteBackup": "Elimina backup",
       "deleteConfirm": "Sei sicuro di voler eliminare il backup \"{{filename}}\"?",
-      "discardChanges": "Scarta le modifiche",
       "executeCleanup": "Esegui pulizia",
       "proceedWithRestore": "Procedi con il ripristino",
       "restoreFromBackup": "Ripristina da backup",
@@ -99,10 +98,7 @@
       "restorePreview": "Anteprima ripristino",
       "restoreSafetyNote": "Un backup di sicurezza verrà creato automaticamente prima dell'inizio del processo di ripristino.",
       "restoreWarning": "Questo ripristinerà dal backup e SOSTITUIRÀ i dati attuali!",
-      "stayOnSettings": "Resta nelle impostazioni",
-      "typeCleanupToConfirm": "Digita <strong>CLEANUP</strong> per confermare",
-      "unsavedChanges": "Modifiche non salvate",
-      "unsavedWarning": "Hai modifiche non salvate nelle impostazioni di conservazione. Lasciando questa scheda le modifiche verranno scartate."
+      "typeCleanupToConfirm": "Digita <strong>CLEANUP</strong> per confermare"
     },
     "operations": {
       "advancedOptions": "Opzioni avanzate",
@@ -139,24 +135,8 @@
       "restoreMethod": "Metodo di ripristino",
       "unknownType": "Tipo di backup sconosciuto"
     },
-    "retention": {
-      "backupsUnit": "backup",
-      "currentStatus_one": "<strong>Stato attuale:</strong> {{count}} backup archiviato (max: {{max}})",
-      "currentStatus_other": "<strong>Stato attuale:</strong> {{count}} backup archiviati (max: {{max}})",
-      "daysUnit": "giorni",
-      "maximumCount": "Conteggio massimo backup",
-      "maximumCountDesc": "Avvisa quando il numero di backup supera questo limite (opzionale)",
-      "minimumCount": "Conteggio minimo backup",
-      "minimumCountDesc": "Mantieni sempre almeno questo numero di backup (indipendentemente dall'età)",
-      "priority": "<strong>Priorità:</strong> Il conteggio minimo ha sempre la precedenza sui limiti temporali",
-      "retentionDays": "Conservazione backup (giorni)",
-      "retentionDaysDesc": "Elimina i backup più vecchi di questo numero di giorni (oltre il conteggio minimo)",
-      "retentionLogic": "Logica di conservazione",
-      "saveRetention": "Salva impostazioni di conservazione",
-      "timeBasedCleanup": "<strong>Pulizia temporale:</strong> Elimina i backup più vecchi di {{days}} giorni (oltre il conteggio minimo)",
-      "title": "Impostazioni conservazione backup"
-    },
     "schedule": {
+      "changeInSettings": "Modifica pianificazione e conservazione",
       "completedSuccessfully": "Completato con successo",
       "dayOfWeek": "Giorno della settimana",
       "dayOfWeekDesc": "In quale giorno deve essere eseguito il backup settimanale?",
@@ -179,17 +159,12 @@
         "every12Hours": "Ogni 12 ore",
         "every6Hours": "Ogni 6 ore"
       },
-      "saveSchedule": "Salva pianificazione",
       "timeOfDay": "Ora del giorno",
       "timeOfDayDesc": "Quando deve essere eseguito il backup? (formato 24 ore)",
       "title": "Pianificazione backup automatico",
       "unknownError": "Errore sconosciuto"
     },
-    "subtitle": "Crea e gestisci i backup di sistema",
-    "tabs": {
-      "backups": "Backup"
-    },
-    "unsavedBadge": "Non salvato"
+    "subtitle": "Crea e gestisci i backup di sistema"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,83 @@
     "specialtySaved": "Specialità pronta all'uso"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Massimo previsto",
+      "maxCountDesc": "Solo a titolo indicativo. I backup oltre questo numero non vengono eliminati né bloccati.",
+      "minCount": "Conserva sempre almeno",
+      "minCountDesc": "I backup più recenti vengono conservati indipendentemente dalla loro età.",
+      "operationsLink": "Crea, scarica e ripristina i backup nella pagina Gestione backup",
+      "retentionDays": "Elimina i backup più vecchi di",
+      "retentionDaysDesc": "La pulizia non scende mai sotto il numero minimo.",
+      "scheduleUnavailable": "Impossibile caricare la pianificazione dei backup."
+    },
     "dataRetention": {
-      "title": "Conservazione dati",
-      "trashRetention": "Conservazione cestino",
-      "trashRetentionDesc": "Numero di giorni per mantenere i file eliminati nel cestino prima della cancellazione definitiva"
+      "trashRetention": "Conserva i file eliminati nel cestino per",
+      "trashRetentionDesc": "Trascorso questo periodo, i file nel cestino vengono eliminati definitivamente."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Tenuto fuori dall'app per lo stesso motivo della modalità solo SSO.",
+      "logLevel": "Livello di log",
+      "logLevelDesc": "Quanto dettaglio il server scrive nei log.",
+      "privateUrls": "Indirizzi di integrazione privati",
+      "privateUrlsDesc": "Se Paperless e Papra possono usare indirizzi LAN, di loopback o Docker.",
+      "ssoOnlyDesc": "Tenuta fuori dall'app affinché un provider di identità guasto possa sempre essere annullato modificando il file compose."
+    },
+    "errors": {
+      "minAboveMax": "Non deve superare il numero massimo di backup.",
+      "outOfRange": "Inserisci un numero intero da {{min}} a {{max}}.",
+      "scheduleNotSaved": "Le altre modifiche sono state salvate, ma la pianificazione dei backup no: {{error}}"
+    },
+    "groups": {
+      "accounts": "Account",
+      "backupCleanup": "Pulizia dei backup",
+      "deployment": "Modificale in docker-compose.yml o .env, poi riavvia",
+      "retention": "Conservazione"
     },
     "loading": "Caricamento impostazioni...",
-    "resetAll": "Reimposta tutto",
-    "saveAllChanges": "Salva tutte le modifiche",
+    "saveBar": {
+      "discard": "Annulla modifiche",
+      "region": "Modifiche non salvate",
+      "save": "Salva modifiche",
+      "saved": "Impostazioni salvate",
+      "unsaved_one": "{{count}} modifica non salvata",
+      "unsaved_other": "{{count}} modifiche non salvate"
+    },
+    "sections": {
+      "backups": "Backup",
+      "data": "Dati e archiviazione",
+      "deployment": "Definite dal deployment",
+      "users": "Utenti e accesso"
+    },
+    "source": {
+      "composeOverridden": "Compose imposta {{value}}; viene usato invece il valore salvato.",
+      "default": "Predefinito",
+      "env": "Da compose",
+      "reset": "Ripristina predefinito",
+      "saved": "Salvato qui"
+    },
     "sso": {
       "autoRedirect": "Reindirizzamento automatico al provider",
       "envOnly": "Queste impostazioni sono definite da variabili d'ambiente e non possono essere modificate qui.",
+      "howToEnable": "Come attivarlo",
+      "off": "Il single sign-on è disattivato",
       "ssoDisabledInfo": "SSO è attualmente disabilitato. Per abilitare SSO, configura le seguenti variabili d'ambiente e riavvia l'applicazione:",
       "ssoOnly": "Modalità solo SSO",
       "ssoRegistration": "Registrazione SSO",
-      "testConnection": "Test connessione",
-      "testConnectionDesc": "Testa la connessione e la configurazione del provider SSO",
+      "testFailed": "Test di connessione non riuscito",
       "testSsoConnection": "Testa connessione SSO",
       "title": "Single Sign-On (SSO)"
     },
-    "subtitle": "Configura le impostazioni di sistema e le politiche di conservazione",
-    "title": "Impostazioni amministratore",
+    "subtitle": "Impostazioni di sistema per questa istanza di MediKeep",
+    "title": "Impostazioni",
+    "units": {
+      "backups": "backup",
+      "days": "giorni"
+    },
     "userManagement": {
-      "allowRegistration": "Consenti registrazione nuovi utenti",
-      "allowRegistrationDesc": "Abilita o disabilita la possibilità per i nuovi utenti di creare account dalla pagina di accesso"
+      "allowRegistration": "Consenti nuovi account dalla pagina di accesso",
+      "allowRegistrationDesc": "Se disattivato, solo un amministratore può creare account.",
+      "sealedPreview": "La modalità solo SSO è attiva: con questa opzione disattivata nessuno può creare il proprio account. Un amministratore dovrà creare ogni account."
     },
     "warnings": {
       "sso_only_no_registration_route": "La modalità solo SSO è attiva e la registrazione degli utenti è ora disabilitata. Nessun nuovo account può essere creato in autonomia: deve crearli un amministratore. Se non era voluto, riabilita la registrazione o disattiva la modalità solo SSO."

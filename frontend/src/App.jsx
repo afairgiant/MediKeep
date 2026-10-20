@@ -88,7 +88,7 @@ import ModelCreate from './pages/admin/ModelCreate';
 import AdminUserCreate from './pages/admin/AdminUserCreate';
 import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
-import AdminSettings from './pages/admin/AdminSettings';
+import AdminSettingsPage from './pages/admin/settings/AdminSettingsPage';
 import AuditLog from './pages/admin/AuditLog';
 import TrashManagement from './pages/admin/TrashManagement';
 import DataModels from './pages/admin/DataModels';
@@ -638,10 +638,10 @@ function App() {
                             }
                           />
                           <Route
-                            path="/admin/settings"
+                            path="/admin/settings/:section?"
                             element={
                               <AdminRoute>
-                                <AdminSettings />
+                                <AdminSettingsPage />
                               </AdminRoute>
                             }
                           />

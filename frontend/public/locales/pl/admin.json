@@ -91,7 +91,6 @@
       "completeCleanup": "Pełne czyszczenie systemu",
       "deleteBackup": "Usuń kopię zapasową",
       "deleteConfirm": "Czy na pewno chcesz usunąć kopię zapasową \"{{filename}}\"?",
-      "discardChanges": "Odrzuć zmiany",
       "executeCleanup": "Wykonaj czyszczenie",
       "proceedWithRestore": "Kontynuuj z przywróceniem",
       "restoreFromBackup": "Przywróć z kopii zapasowej",
@@ -99,10 +98,7 @@
       "restorePreview": "Podgląd przywrócenia",
       "restoreSafetyNote": "Kopia zapasowa bezpieczeństwa zostanie automatycznie utworzona przed rozpoczęciem procesu przywracania.",
       "restoreWarning": "Spowoduje to przywrócenie z kopii zapasowej i ZASTĄPIENIE bieżących danych!",
-      "stayOnSettings": "Pozostań w ustawieniach",
-      "typeCleanupToConfirm": "Wpisz <strong>CLEANUP</strong> aby potwierdzić",
-      "unsavedChanges": "Niezapisane zmiany",
-      "unsavedWarning": "Masz niezapisane zmiany w ustawieniach przechowywania. Opuszczenie tej karty spowoduje odrzucenie zmian."
+      "typeCleanupToConfirm": "Wpisz <strong>CLEANUP</strong> aby potwierdzić"
     },
     "operations": {
       "advancedOptions": "Opcje zaawansowane",
@@ -139,24 +135,8 @@
       "restoreMethod": "Metoda przywracania",
       "unknownType": "Nieznany typ kopii zapasowej"
     },
-    "retention": {
-      "backupsUnit": "kopie zapasowe",
-      "currentStatus_one": "<strong>Bieżący status:</strong> {{count}} kopia zapasowa przechowywana (maks: {{max}})",
-      "currentStatus_other": "<strong>Bieżący status:</strong> {{count}} kopii zapasowych przechowywanych (maks: {{max}})",
-      "daysUnit": "dni",
-      "maximumCount": "Maksymalna liczba kopii zapasowych",
-      "maximumCountDesc": "Ostrzegaj, gdy liczba kopii zapasowych przekroczy ten limit (opcjonalnie)",
-      "minimumCount": "Minimalna liczba kopii zapasowych",
-      "minimumCountDesc": "Zawsze przechowuj co najmniej tę liczbę kopii zapasowych (niezależnie od wieku)",
-      "priority": "<strong>Priorytet:</strong> Minimalna liczba zawsze ma pierwszeństwo nad limitami czasowymi",
-      "retentionDays": "Przechowywanie kopii zapasowych (dni)",
-      "retentionDaysDesc": "Usuń kopie zapasowe starsze niż ten okres (poza minimalną liczbą)",
-      "retentionLogic": "Logika przechowywania",
-      "saveRetention": "Zapisz ustawienia przechowywania",
-      "timeBasedCleanup": "<strong>Czyszczenie czasowe:</strong> Usuń kopie zapasowe starsze niż {{days}} dni (poza minimalną liczbą)",
-      "title": "Ustawienia przechowywania kopii zapasowych"
-    },
     "schedule": {
+      "changeInSettings": "Zmień harmonogram i przechowywanie",
       "completedSuccessfully": "Zakończono pomyślnie",
       "dayOfWeek": "Dzień tygodnia",
       "dayOfWeekDesc": "W który dzień powinna się wykonać cotygodniowa kopia zapasowa?",
@@ -179,17 +159,12 @@
         "every12Hours": "Co 12 godzin",
         "every6Hours": "Co 6 godzin"
       },
-      "saveSchedule": "Zapisz harmonogram",
       "timeOfDay": "Godzina dnia",
       "timeOfDayDesc": "Kiedy powinna działać kopia zapasowa? (format 24-godzinny)",
       "title": "Harmonogram automatycznych kopii zapasowych",
       "unknownError": "Nieznany błąd"
     },
-    "subtitle": "Twórz i zarządzaj kopiami zapasowymi systemu",
-    "tabs": {
-      "backups": "Kopie zapasowe"
-    },
-    "unsavedBadge": "Niezapisane"
+    "subtitle": "Twórz i zarządzaj kopiami zapasowymi systemu"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,83 @@
     "specialtySaved": "Specjalizacja gotowa do użycia"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Oczekiwane maksimum",
+      "maxCountDesc": "Tylko informacyjnie. Kopie powyżej tej liczby nie są usuwane ani blokowane.",
+      "minCount": "Zawsze zachowuj co najmniej",
+      "minCountDesc": "Najnowsze kopie zapasowe są zachowywane niezależnie od wieku.",
+      "operationsLink": "Twórz, pobieraj i przywracaj kopie zapasowe na stronie Zarządzanie kopiami zapasowymi",
+      "retentionDays": "Usuwaj kopie zapasowe starsze niż",
+      "retentionDaysDesc": "Czyszczenie nigdy nie schodzi poniżej minimalnej liczby.",
+      "scheduleUnavailable": "Nie udało się wczytać harmonogramu kopii zapasowych."
+    },
     "dataRetention": {
-      "title": "Przechowywanie danych",
-      "trashRetention": "Przechowywanie kosza",
-      "trashRetentionDesc": "Liczba dni przechowywania usuniętych plików w koszu przed stałym usunięciem"
+      "trashRetention": "Przechowuj usunięte pliki w koszu przez",
+      "trashRetentionDesc": "Po tym czasie pliki w koszu są usuwane na stałe."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Pozostaje poza aplikacją z tego samego powodu co tryb tylko SSO.",
+      "logLevel": "Poziom logowania",
+      "logLevelDesc": "Jak szczegółowo serwer zapisuje logi.",
+      "privateUrls": "Prywatne adresy integracji",
+      "privateUrlsDesc": "Czy Paperless i Papra mogą używać adresów LAN, pętli zwrotnej lub Dockera.",
+      "ssoOnlyDesc": "Pozostaje poza aplikacją, aby awarię dostawcy tożsamości zawsze można było cofnąć, edytując plik compose."
+    },
+    "errors": {
+      "minAboveMax": "Nie może przekraczać maksymalnej liczby kopii zapasowych.",
+      "outOfRange": "Wpisz liczbę całkowitą od {{min}} do {{max}}.",
+      "scheduleNotSaved": "Pozostałe zmiany zapisano, ale harmonogramu kopii zapasowych nie: {{error}}"
+    },
+    "groups": {
+      "accounts": "Konta",
+      "backupCleanup": "Czyszczenie kopii zapasowych",
+      "deployment": "Zmień je w docker-compose.yml lub .env, a następnie uruchom ponownie",
+      "retention": "Przechowywanie"
     },
     "loading": "Ładowanie ustawień...",
-    "resetAll": "Zresetuj wszystko",
-    "saveAllChanges": "Zapisz wszystkie zmiany",
+    "saveBar": {
+      "discard": "Odrzuć",
+      "region": "Niezapisane zmiany",
+      "save": "Zapisz zmiany",
+      "saved": "Ustawienia zapisane",
+      "unsaved_one": "{{count}} niezapisana zmiana",
+      "unsaved_other": "Niezapisane zmiany: {{count}}"
+    },
+    "sections": {
+      "backups": "Kopie zapasowe",
+      "data": "Dane i przechowywanie",
+      "deployment": "Ustawione we wdrożeniu",
+      "users": "Użytkownicy i logowanie"
+    },
+    "source": {
+      "composeOverridden": "Compose ustawia {{value}}; zamiast tego używana jest zapisana wartość.",
+      "default": "Domyślne",
+      "env": "Z pliku compose",
+      "reset": "Przywróć domyślne",
+      "saved": "Zapisane tutaj"
+    },
     "sso": {
       "autoRedirect": "Automatyczne przekierowanie do dostawcy",
       "envOnly": "Te ustawienia są określane przez zmienne środowiskowe i nie można ich tutaj zmienić.",
+      "howToEnable": "Jak je włączyć",
+      "off": "Logowanie jednokrotne jest wyłączone",
       "ssoDisabledInfo": "SSO jest obecnie wyłączone. Aby włączyć SSO, skonfiguruj następujące zmienne środowiskowe i uruchom ponownie aplikację:",
       "ssoOnly": "Tryb tylko SSO",
       "ssoRegistration": "Rejestracja SSO",
-      "testConnection": "Testuj połączenie",
-      "testConnectionDesc": "Przetestuj połączenie dostawcy SSO i konfigurację",
+      "testFailed": "Test połączenia nie powiódł się",
       "testSsoConnection": "Przetestuj połączenie SSO",
       "title": "Logowanie jednokrotne (SSO)"
     },
-    "subtitle": "Konfiguruj ustawienia systemowe i zasady przechowywania",
-    "title": "Ustawienia administracyjne",
+    "subtitle": "Ustawienia systemowe tej instancji MediKeep",
+    "title": "Ustawienia",
+    "units": {
+      "backups": "kopii",
+      "days": "dni"
+    },
     "userManagement": {
-      "allowRegistration": "Zezwól na rejestrację nowych użytkowników",
-      "allowRegistrationDesc": "Włącz lub wyłącz możliwość tworzenia nowych kont przez użytkowników na stronie logowania"
+      "allowRegistration": "Zezwalaj na tworzenie kont ze strony logowania",
+      "allowRegistrationDesc": "Gdy wyłączone, tylko administrator może tworzyć konta.",
+      "sealedPreview": "Tryb tylko SSO jest włączony, więc gdy ta opcja jest wyłączona, nikt nie może samodzielnie utworzyć konta. Administrator będzie musiał tworzyć każde konto."
     },
     "warnings": {
       "sso_only_no_registration_route": "Tryb wyłącznie SSO jest włączony, a rejestracja użytkowników jest teraz wyłączona. Nie można samodzielnie utworzyć nowego konta - musi je utworzyć administrator. Jeśli nie było to zamierzone, ponownie włącz rejestrację lub wyłącz tryb wyłącznie SSO."

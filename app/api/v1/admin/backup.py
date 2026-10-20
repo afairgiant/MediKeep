@@ -14,22 +14,11 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.api.v1.admin.csv_utils import stream_csv
-from app.core.auth_mode import sealed_instance_warning
-from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
-)
-from app.core.persisted_settings import (
-    KEY_ALLOW_USER_REGISTRATION,
-    KEY_BACKUP_MAX_COUNT,
-    KEY_BACKUP_MIN_COUNT,
-    KEY_BACKUP_RETENTION_DAYS,
-    KEY_TRASH_RETENTION_DAYS,
-    persist_setting,
 )
 from app.models.models import User
 from app.services.backup_scheduler_service import (
@@ -56,22 +45,6 @@ class BackupResponse(BaseModel):
     status: str
     created_at: str
     description: Optional[str]
-
-
-class RetentionSettingsResponse(BaseModel):
-    backup_retention_days: int
-    trash_retention_days: int
-    backup_min_count: int
-    backup_max_count: int
-    allow_user_registration: bool
-
-
-class RetentionSettingsUpdate(BaseModel):
-    backup_retention_days: Optional[int] = None
-    trash_retention_days: Optional[int] = None
-    backup_min_count: Optional[int] = None
-    backup_max_count: Optional[int] = None
-    allow_user_registration: Optional[bool] = None
 
 
 class AutoBackupScheduleResponse(BaseModel):
@@ -613,198 +586,6 @@ async def cleanup_all_old_data(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cleanup old data: {str(e)}",
-        )
-
-
-@router.get("/settings/retention", response_model=RetentionSettingsResponse)
-async def get_retention_settings(
-    current_user: User = Depends(get_current_admin_user),
-) -> RetentionSettingsResponse:
-    """Get current admin settings including retention and user management."""
-    return RetentionSettingsResponse(
-        backup_retention_days=settings.BACKUP_RETENTION_DAYS,
-        trash_retention_days=settings.TRASH_RETENTION_DAYS,
-        backup_min_count=settings.BACKUP_MIN_COUNT,
-        backup_max_count=settings.BACKUP_MAX_COUNT,
-        allow_user_registration=settings.ALLOW_USER_REGISTRATION,
-    )
-
-
-@router.post("/settings/retention")
-async def update_retention_settings(
-    settings_update: RetentionSettingsUpdate,
-    request: Request,
-    current_user: User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db),
-):
-    """Update admin settings including retention and user management."""
-    try:
-        # Phase 1: validate every submitted field before any side effects.
-        # Staging changes first keeps the endpoint atomic: if any field fails
-        # validation, no earlier field gets persisted to system_settings.
-        pending: list[tuple[str, str, object, str]] = []
-
-        if settings_update.backup_retention_days is not None:
-            if settings_update.backup_retention_days < 1:
-                raise HTTPException(
-                    status_code=400, detail="Backup retention days must be at least 1"
-                )
-            pending.append(
-                (
-                    "BACKUP_RETENTION_DAYS",
-                    KEY_BACKUP_RETENTION_DAYS,
-                    settings_update.backup_retention_days,
-                    "backup_retention_days",
-                )
-            )
-
-        if settings_update.trash_retention_days is not None:
-            if settings_update.trash_retention_days < 1:
-                raise HTTPException(
-                    status_code=400, detail="Trash retention days must be at least 1"
-                )
-            pending.append(
-                (
-                    "TRASH_RETENTION_DAYS",
-                    KEY_TRASH_RETENTION_DAYS,
-                    settings_update.trash_retention_days,
-                    "trash_retention_days",
-                )
-            )
-
-        if settings_update.backup_min_count is not None:
-            if settings_update.backup_min_count < 1:
-                raise HTTPException(
-                    status_code=400, detail="Minimum backup count must be at least 1"
-                )
-            current_max = (
-                settings_update.backup_max_count
-                if settings_update.backup_max_count is not None
-                else settings.BACKUP_MAX_COUNT
-            )
-            if settings_update.backup_min_count > current_max:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Minimum backup count must be less than or equal to maximum backup count",
-                )
-            pending.append(
-                (
-                    "BACKUP_MIN_COUNT",
-                    KEY_BACKUP_MIN_COUNT,
-                    settings_update.backup_min_count,
-                    "backup_min_count",
-                )
-            )
-
-        if settings_update.backup_max_count is not None:
-            if settings_update.backup_max_count < 1:
-                raise HTTPException(
-                    status_code=400, detail="Maximum backup count must be at least 1"
-                )
-            current_min = (
-                settings_update.backup_min_count
-                if settings_update.backup_min_count is not None
-                else settings.BACKUP_MIN_COUNT
-            )
-            if settings_update.backup_max_count < current_min:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Maximum backup count must be greater than or equal to minimum backup count",
-                )
-            pending.append(
-                (
-                    "BACKUP_MAX_COUNT",
-                    KEY_BACKUP_MAX_COUNT,
-                    settings_update.backup_max_count,
-                    "backup_max_count",
-                )
-            )
-
-        if settings_update.allow_user_registration is not None:
-            pending.append(
-                (
-                    "ALLOW_USER_REGISTRATION",
-                    KEY_ALLOW_USER_REGISTRATION,
-                    settings_update.allow_user_registration,
-                    "allow_user_registration",
-                )
-            )
-
-        # Phase 2: persist — stage every row in a single transaction so a
-        # mid-loop failure can't leave system_settings half-written or drift
-        # from the in-memory `settings` object.
-        try:
-            for _, key, value, _ in pending:
-                persist_setting(db, key, value, commit=False)
-            db.commit()
-        except Exception:
-            db.rollback()
-            raise
-
-        # Phase 3: mirror to in-memory only after the DB transaction committed.
-        updated_settings = {}
-        for attr, key, value, response_name in pending:
-            setattr(settings, attr, value)
-            updated_settings[response_name] = value
-
-        if settings_update.allow_user_registration is not None:
-            log_security_event(
-                logger,
-                "user_registration_toggled",
-                request,
-                f"User registration {'enabled' if settings_update.allow_user_registration else 'disabled'}",
-                user_id=current_user.id,
-                username=current_user.username,
-                registration_enabled=settings_update.allow_user_registration,
-            )
-
-        # The boot-time check cannot see a toggle, so the same warning is raised here
-        # and returned to the caller. Warn, never refuse - a sealed instance is a
-        # legitimate configuration.
-        warnings = []
-        if settings_update.allow_user_registration is False:
-            sealed = sealed_instance_warning(
-                settings.SSO_ONLY_MODE, settings.ALLOW_USER_REGISTRATION
-            )
-            if sealed:
-                event, message = sealed
-                logger.warning(
-                    message,
-                    extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
-                )
-                warnings.append({"code": event, "message": message})
-
-        log_security_event(
-            logger,
-            "settings_updated",
-            request,
-            "Admin settings updated",
-            user_id=current_user.id,
-            username=current_user.username,
-            updated_settings=str(updated_settings),
-        )
-
-        return {
-            "message": "Settings updated successfully",
-            "updated_settings": updated_settings,
-            "warnings": warnings,
-            "current_settings": {
-                "backup_retention_days": settings.BACKUP_RETENTION_DAYS,
-                "trash_retention_days": settings.TRASH_RETENTION_DAYS,
-                "backup_min_count": settings.BACKUP_MIN_COUNT,
-                "backup_max_count": settings.BACKUP_MAX_COUNT,
-                "allow_user_registration": settings.ALLOW_USER_REGISTRATION,
-            },
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        log_endpoint_error(
-            logger, request, "Failed to update settings", e, user_id=current_user.id
-        )
-        raise HTTPException(
-            status_code=500, detail=f"Failed to update settings: {str(e)}"
         )
 
 

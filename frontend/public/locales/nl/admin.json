@@ -91,7 +91,6 @@
       "completeCleanup": "Volledige systeemopschoning",
       "deleteBackup": "Back-up verwijderen",
       "deleteConfirm": "Weet u zeker dat u back-up \"{{filename}}\" wilt verwijderen?",
-      "discardChanges": "Wijzigingen verwerpen",
       "executeCleanup": "Opschoning uitvoeren",
       "proceedWithRestore": "Doorgaan met herstel",
       "restoreFromBackup": "Herstellen vanuit back-up",
@@ -99,10 +98,7 @@
       "restorePreview": "Herstelvoorbeeld",
       "restoreSafetyNote": "Er wordt automatisch een veiligheidsback-up aangemaakt voordat het herstelproces begint.",
       "restoreWarning": "Dit zal herstellen vanuit de back-up en de huidige gegevens VERVANGEN!",
-      "stayOnSettings": "Op instellingen blijven",
-      "typeCleanupToConfirm": "Typ <strong>CLEANUP</strong> om te bevestigen",
-      "unsavedChanges": "Niet-opgeslagen wijzigingen",
-      "unsavedWarning": "U heeft niet-opgeslagen wijzigingen in uw bewaarinstellingen. Dit tabblad verlaten zal uw wijzigingen ongedaan maken."
+      "typeCleanupToConfirm": "Typ <strong>CLEANUP</strong> om te bevestigen"
     },
     "operations": {
       "advancedOptions": "Geavanceerde opties",
@@ -139,24 +135,8 @@
       "restoreMethod": "Herstelmethode",
       "unknownType": "Onbekend back-uptype"
     },
-    "retention": {
-      "backupsUnit": "back-ups",
-      "currentStatus_one": "<strong>Huidige status:</strong> {{count}} back-up opgeslagen (max: {{max}})",
-      "currentStatus_other": "<strong>Huidige status:</strong> {{count}} back-ups opgeslagen (max: {{max}})",
-      "daysUnit": "dagen",
-      "maximumCount": "Maximum aantal back-ups",
-      "maximumCountDesc": "Waarschuw wanneer het aantal back-ups deze limiet overschrijdt (optioneel)",
-      "minimumCount": "Minimum aantal back-ups",
-      "minimumCountDesc": "Bewaar altijd ten minste dit aantal back-ups (ongeacht leeftijd)",
-      "priority": "<strong>Prioriteit:</strong> Minimumaantal heeft altijd voorrang op tijdslimieten",
-      "retentionDays": "Back-up bewaartermijn (dagen)",
-      "retentionDaysDesc": "Verwijder back-ups ouder dan dit aantal dagen (boven minimum aantal)",
-      "retentionLogic": "Bewaarlogica",
-      "saveRetention": "Bewaarinstellingen opslaan",
-      "timeBasedCleanup": "<strong>Tijdgebaseerde opschoning:</strong> Verwijder back-ups ouder dan {{days}} dagen (boven minimum aantal)",
-      "title": "Back-up bewaarinstellingen"
-    },
     "schedule": {
+      "changeInSettings": "Schema en bewaartermijn wijzigen",
       "completedSuccessfully": "Succesvol voltooid",
       "dayOfWeek": "Dag van de week",
       "dayOfWeekDesc": "Op welke dag moet de wekelijkse back-up worden uitgevoerd?",
@@ -179,17 +159,12 @@
         "every12Hours": "Elke 12 uur",
         "every6Hours": "Elke 6 uur"
       },
-      "saveSchedule": "Schema opslaan",
       "timeOfDay": "Tijdstip",
       "timeOfDayDesc": "Wanneer moet de back-up worden uitgevoerd? (24-uursnotatie)",
       "title": "Automatisch back-upschema",
       "unknownError": "Onbekende fout"
     },
-    "subtitle": "Systeemback-ups aanmaken en beheren",
-    "tabs": {
-      "backups": "Back-ups"
-    },
-    "unsavedBadge": "Niet opgeslagen"
+    "subtitle": "Systeemback-ups aanmaken en beheren"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,83 @@
     "specialtySaved": "Specialisme klaar voor gebruik"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Verwacht maximum",
+      "maxCountDesc": "Alleen ter informatie. Back-ups boven dit aantal worden niet verwijderd of geblokkeerd.",
+      "minCount": "Altijd minstens bewaren",
+      "minCountDesc": "De meest recente back-ups worden bewaard, ongeacht hun leeftijd.",
+      "operationsLink": "Back-ups maken, downloaden en herstellen op de pagina Back-upbeheer",
+      "retentionDays": "Back-ups verwijderen die ouder zijn dan",
+      "retentionDaysDesc": "Het opschonen gaat nooit onder het minimumaantal.",
+      "scheduleUnavailable": "Het back-upschema kon niet worden geladen."
+    },
     "dataRetention": {
-      "title": "Gegevensbewaring",
-      "trashRetention": "Prullenbakbewaring",
-      "trashRetentionDesc": "Aantal dagen om verwijderde bestanden in de prullenbak te bewaren voordat ze permanent worden verwijderd"
+      "trashRetention": "Verwijderde bestanden in de prullenbak bewaren gedurende",
+      "trashRetentionDesc": "Daarna worden bestanden in de prullenbak definitief verwijderd."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Om dezelfde reden als de modus alleen-SSO buiten de app gehouden.",
+      "logLevel": "Logniveau",
+      "logLevelDesc": "Hoeveel detail de server in zijn logboeken schrijft.",
+      "privateUrls": "Privé-integratieadressen",
+      "privateUrlsDesc": "Of Paperless en Papra LAN-, loopback- of Docker-adressen mogen gebruiken.",
+      "ssoOnlyDesc": "Buiten de app gehouden zodat een defecte identiteitsprovider altijd ongedaan kan worden gemaakt door het compose-bestand aan te passen."
+    },
+    "errors": {
+      "minAboveMax": "Mag niet hoger zijn dan het maximumaantal back-ups.",
+      "outOfRange": "Voer een geheel getal in van {{min}} tot {{max}}.",
+      "scheduleNotSaved": "Uw andere wijzigingen zijn opgeslagen, maar het back-upschema niet: {{error}}"
+    },
+    "groups": {
+      "accounts": "Gebruikersaccounts",
+      "backupCleanup": "Back-ups opschonen",
+      "deployment": "Wijzig deze in docker-compose.yml of .env en start daarna opnieuw",
+      "retention": "Bewaartermijn"
     },
     "loading": "Instellingen laden...",
-    "resetAll": "Alles herstellen",
-    "saveAllChanges": "Alle wijzigingen opslaan",
+    "saveBar": {
+      "discard": "Verwerpen",
+      "region": "Niet-opgeslagen wijzigingen",
+      "save": "Wijzigingen opslaan",
+      "saved": "Instellingen opgeslagen",
+      "unsaved_one": "{{count}} niet-opgeslagen wijziging",
+      "unsaved_other": "{{count}} niet-opgeslagen wijzigingen"
+    },
+    "sections": {
+      "backups": "Back-ups",
+      "data": "Gegevens en opslag",
+      "deployment": "Ingesteld via deployment",
+      "users": "Gebruikers en aanmelden"
+    },
+    "source": {
+      "composeOverridden": "Compose stelt {{value}} in; in plaats daarvan wordt de opgeslagen waarde gebruikt.",
+      "default": "Standaard",
+      "env": "Uit compose",
+      "reset": "Terugzetten naar standaard",
+      "saved": "Hier opgeslagen"
+    },
     "sso": {
       "autoRedirect": "Automatisch doorsturen naar provider",
       "envOnly": "Deze instellingen worden bepaald door omgevingsvariabelen en kunnen hier niet worden gewijzigd.",
+      "howToEnable": "Zo zet u het aan",
+      "off": "Single sign-on staat uit",
       "ssoDisabledInfo": "SSO is momenteel uitgeschakeld. Om SSO in te schakelen, configureer de volgende omgevingsvariabelen en herstart de applicatie:",
       "ssoOnly": "Alleen-SSO-modus",
       "ssoRegistration": "SSO-registratie",
-      "testConnection": "Verbinding testen",
-      "testConnectionDesc": "Test de SSO-providerverbinding en -configuratie",
+      "testFailed": "Verbindingstest mislukt",
       "testSsoConnection": "SSO-verbinding testen",
       "title": "Eenmalige aanmelding (SSO)"
     },
-    "subtitle": "Configureer systeembrede instellingen en bewaarbeleid",
-    "title": "Beheerinstellingen",
+    "subtitle": "Systeembrede instellingen voor deze MediKeep-installatie",
+    "title": "Instellingen",
+    "units": {
+      "backups": "back-ups",
+      "days": "dagen"
+    },
     "userManagement": {
-      "allowRegistration": "Nieuwe gebruikersregistratie toestaan",
-      "allowRegistrationDesc": "Schakel de mogelijkheid voor nieuwe gebruikers om accounts aan te maken vanaf de inlogpagina in of uit"
+      "allowRegistration": "Nieuwe accounts via de aanmeldpagina toestaan",
+      "allowRegistrationDesc": "Indien uit, kan alleen een beheerder accounts aanmaken.",
+      "sealedPreview": "De modus alleen-SSO staat aan, dus als dit uit staat kan niemand zelf een account aanmaken. Een beheerder moet elk account aanmaken."
     },
     "warnings": {
       "sso_only_no_registration_route": "De SSO-only-modus staat aan en gebruikersregistratie is nu uitgeschakeld. Er kan geen nieuw account meer via zelfregistratie worden aangemaakt - een beheerder moet ze aanmaken. Als dat niet de bedoeling was, schakel registratie weer in of zet de SSO-only-modus uit."

@@ -15,6 +15,7 @@ from app.api.v1.admin import (
     maintenance,
     models,
     restore,
+    settings,
     trash_management,
     user_management,
 )
@@ -31,6 +32,8 @@ router.include_router(bulk_operations.router, prefix="/bulk", tags=["admin-bulk"
 router.include_router(backup.router, prefix="/backups", tags=["admin-backup"])
 
 router.include_router(restore.router, prefix="/restore", tags=["admin-restore"])
+
+router.include_router(settings.router, prefix="/settings", tags=["admin-settings"])
 
 router.include_router(trash_management.router, prefix="", tags=["admin-trash"])
 

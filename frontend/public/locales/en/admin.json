@@ -91,7 +91,6 @@
       "completeCleanup": "Complete System Cleanup",
       "deleteBackup": "Delete Backup",
       "deleteConfirm": "Are you sure you want to delete backup \"{{filename}}\"?",
-      "discardChanges": "Discard Changes",
       "executeCleanup": "Execute Cleanup",
       "proceedWithRestore": "Proceed with Restore",
       "restoreFromBackup": "Restore from Backup",
@@ -99,10 +98,7 @@
       "restorePreview": "Restore Preview",
       "restoreSafetyNote": "A safety backup will be created automatically before the restore process begins.",
       "restoreWarning": "This will restore from backup and REPLACE current data!",
-      "stayOnSettings": "Stay on Settings",
-      "typeCleanupToConfirm": "Type <strong>CLEANUP</strong> to confirm",
-      "unsavedChanges": "Unsaved Changes",
-      "unsavedWarning": "You have unsaved changes in your retention settings. Leaving this tab will discard your changes."
+      "typeCleanupToConfirm": "Type <strong>CLEANUP</strong> to confirm"
     },
     "operations": {
       "advancedOptions": "Advanced Options",
@@ -139,24 +135,8 @@
       "restoreMethod": "Restore Method",
       "unknownType": "Unknown backup type"
     },
-    "retention": {
-      "backupsUnit": "backups",
-      "currentStatus_one": "<strong>Current Status:</strong> {{count}} backup stored (max: {{max}})",
-      "currentStatus_other": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
-      "daysUnit": "days",
-      "maximumCount": "Maximum Backup Count",
-      "maximumCountDesc": "Alert when backup count exceeds this limit (optional)",
-      "minimumCount": "Minimum Backup Count",
-      "minimumCountDesc": "Always keep at least this many backups (regardless of age)",
-      "priority": "<strong>Priority:</strong> Minimum count always takes precedence over time limits",
-      "retentionDays": "Backup Retention (Days)",
-      "retentionDaysDesc": "Delete backups older than this many days (beyond minimum count)",
-      "retentionLogic": "Retention Logic",
-      "saveRetention": "Save Retention Settings",
-      "timeBasedCleanup": "<strong>Time-based Cleanup:</strong> Delete backups older than {{days}} days (beyond minimum count)",
-      "title": "Backup Retention Settings"
-    },
     "schedule": {
+      "changeInSettings": "Change schedule and retention",
       "completedSuccessfully": "Completed successfully",
       "dayOfWeek": "Day of Week",
       "dayOfWeekDesc": "Which day should the weekly backup run?",
@@ -179,17 +159,12 @@
         "every12Hours": "Every 12 hours",
         "every6Hours": "Every 6 hours"
       },
-      "saveSchedule": "Save Schedule",
       "timeOfDay": "Time of Day",
       "timeOfDayDesc": "When should the backup run? (24-hour format)",
       "title": "Auto-Backup Schedule",
       "unknownError": "Unknown error"
     },
-    "subtitle": "Create and manage system backups",
-    "tabs": {
-      "backups": "Backups"
-    },
-    "unsavedBadge": "Unsaved"
+    "subtitle": "Create and manage system backups"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,83 @@
     "specialtySaved": "Specialty ready to use"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Expected maximum",
+      "maxCountDesc": "For reference only. Backups above this number are not deleted or blocked.",
+      "minCount": "Always keep at least",
+      "minCountDesc": "The most recent backups are kept regardless of age.",
+      "operationsLink": "Create, download and restore backups on the Backup Management page",
+      "retentionDays": "Delete backups older than",
+      "retentionDaysDesc": "Clean-up never goes below the minimum count.",
+      "scheduleUnavailable": "The backup schedule could not be loaded."
+    },
     "dataRetention": {
-      "title": "Data Retention",
-      "trashRetention": "Trash Retention",
-      "trashRetentionDesc": "Number of days to keep deleted files in trash before permanent deletion"
+      "trashRetention": "Keep deleted files in trash for",
+      "trashRetentionDesc": "After this, files in the trash are deleted for good."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Kept out of the app for the same reason as SSO-only mode.",
+      "logLevel": "Log level",
+      "logLevelDesc": "How much detail the server writes to its logs.",
+      "privateUrls": "Private integration addresses",
+      "privateUrlsDesc": "Whether Paperless and Papra may use LAN, loopback or Docker addresses.",
+      "ssoOnlyDesc": "Kept out of the app so a broken identity provider can always be undone by editing compose."
+    },
+    "errors": {
+      "minAboveMax": "Must be no more than the maximum backup count.",
+      "outOfRange": "Enter a whole number from {{min}} to {{max}}.",
+      "scheduleNotSaved": "Your other changes were saved, but the backup schedule was not: {{error}}"
+    },
+    "groups": {
+      "accounts": "Accounts",
+      "backupCleanup": "Backup clean-up",
+      "deployment": "Change these in docker-compose.yml or .env, then restart",
+      "retention": "Retention"
     },
     "loading": "Loading settings...",
-    "resetAll": "Reset All",
-    "saveAllChanges": "Save All Changes",
+    "saveBar": {
+      "discard": "Discard",
+      "region": "Unsaved changes",
+      "save": "Save changes",
+      "saved": "Settings saved",
+      "unsaved_one": "{{count}} unsaved change",
+      "unsaved_other": "{{count}} unsaved changes"
+    },
+    "sections": {
+      "backups": "Backups",
+      "data": "Data and storage",
+      "deployment": "Set by deployment",
+      "users": "Users and sign-in"
+    },
+    "source": {
+      "composeOverridden": "Compose sets {{value}}; the saved value is used instead.",
+      "default": "Default",
+      "env": "From compose",
+      "reset": "Reset to default",
+      "saved": "Saved here"
+    },
     "sso": {
       "autoRedirect": "Auto-Redirect to Provider",
       "envOnly": "These are set by environment variable and cannot be changed here.",
+      "howToEnable": "How to turn it on",
+      "off": "Single sign-on is off",
       "ssoDisabledInfo": "SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:",
       "ssoOnly": "SSO-Only Mode",
       "ssoRegistration": "SSO Registration",
-      "testConnection": "Test Connection",
-      "testConnectionDesc": "Test the SSO provider connection and configuration",
+      "testFailed": "Connection test failed",
       "testSsoConnection": "Test SSO Connection",
       "title": "Single Sign-On (SSO)"
     },
-    "subtitle": "Configure system-wide settings and retention policies",
-    "title": "Admin Settings",
+    "subtitle": "System-wide settings for this MediKeep instance",
+    "title": "Settings",
+    "units": {
+      "backups": "backups",
+      "days": "days"
+    },
     "userManagement": {
-      "allowRegistration": "Allow New User Registration",
-      "allowRegistrationDesc": "Enable or disable the ability for new users to create accounts from the login page"
+      "allowRegistration": "Allow new accounts from the login page",
+      "allowRegistrationDesc": "When off, only an admin can create accounts.",
+      "sealedPreview": "SSO-only mode is on, so with this off nobody can create their own account. An admin will have to create every account."
     },
     "warnings": {
       "sso_only_no_registration_route": "SSO-only mode is on and user registration is now disabled. No new account can be created by any self-service route - an administrator must create them. If that was not intended, re-enable registration or turn off SSO-only mode."

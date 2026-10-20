@@ -10,6 +10,7 @@ value is written to the DB, the DB wins on subsequent startups via
 `load_persisted_settings`.
 """
 
+import os
 from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
@@ -48,10 +49,15 @@ def _require_positive_int(value: int) -> None:
         raise ValueError(f"must be >= 1, got {value}")
 
 
+class SettingValidationError(ValueError):
+    """A submitted admin setting value was rejected."""
+
+
 @dataclass(frozen=True)
-class PersistedSetting:
+class PersistedSetting:  # pylint: disable=too-many-instance-attributes
     key: str
     attr: str
+    value_type: type
     parse: Callable[[str], Any]
     serialize: Callable[[Any], str]
     # Optional semantic check applied after `parse` succeeds. Raise ValueError
@@ -59,6 +65,22 @@ class PersistedSetting:
     # defend `load_persisted_settings` against invalid rows that somehow
     # bypassed API-level validation.
     validate: Optional[Callable[[Any], None]] = None
+    # Write-only bounds: the boot loader skips them so older stored values still load.
+    min_value: Optional[int] = None
+    max_value: Optional[int] = None
+
+
+def _int_setting(key: str, attr: str, max_value: int) -> PersistedSetting:
+    return PersistedSetting(
+        key=key,
+        attr=attr,
+        value_type=int,
+        parse=int,
+        serialize=str,
+        validate=_require_positive_int,
+        min_value=1,
+        max_value=max_value,
+    )
 
 
 PERSISTED_SETTINGS: dict[str, PersistedSetting] = {
@@ -67,37 +89,14 @@ PERSISTED_SETTINGS: dict[str, PersistedSetting] = {
         PersistedSetting(
             key=KEY_ALLOW_USER_REGISTRATION,
             attr="ALLOW_USER_REGISTRATION",
+            value_type=bool,
             parse=_parse_bool,
             serialize=_serialize_bool,
         ),
-        PersistedSetting(
-            key=KEY_BACKUP_RETENTION_DAYS,
-            attr="BACKUP_RETENTION_DAYS",
-            parse=int,
-            serialize=str,
-            validate=_require_positive_int,
-        ),
-        PersistedSetting(
-            key=KEY_TRASH_RETENTION_DAYS,
-            attr="TRASH_RETENTION_DAYS",
-            parse=int,
-            serialize=str,
-            validate=_require_positive_int,
-        ),
-        PersistedSetting(
-            key=KEY_BACKUP_MIN_COUNT,
-            attr="BACKUP_MIN_COUNT",
-            parse=int,
-            serialize=str,
-            validate=_require_positive_int,
-        ),
-        PersistedSetting(
-            key=KEY_BACKUP_MAX_COUNT,
-            attr="BACKUP_MAX_COUNT",
-            parse=int,
-            serialize=str,
-            validate=_require_positive_int,
-        ),
+        _int_setting(KEY_BACKUP_RETENTION_DAYS, "BACKUP_RETENTION_DAYS", 365),
+        _int_setting(KEY_TRASH_RETENTION_DAYS, "TRASH_RETENTION_DAYS", 365),
+        _int_setting(KEY_BACKUP_MIN_COUNT, "BACKUP_MIN_COUNT", 100),
+        _int_setting(KEY_BACKUP_MAX_COUNT, "BACKUP_MAX_COUNT", 500),
     )
 }
 
@@ -150,9 +149,7 @@ def load_persisted_settings(db: Session) -> None:
         )
 
 
-def persist_setting(
-    db: Session, key: str, value: Any, commit: bool = True
-) -> None:
+def persist_setting(db: Session, key: str, value: Any, commit: bool = True) -> None:
     """Persist a runtime-configurable setting to `system_settings`.
 
     Caller is responsible for updating the in-memory `settings.X` attribute;
@@ -164,3 +161,91 @@ def persist_setting(
     except KeyError as exc:
         raise KeyError(f"Unknown persisted setting key: {key}") from exc
     system_setting.set_setting(db, key, entry.serialize(value), commit=commit)
+
+
+def fallback_value(entry: PersistedSetting) -> Any:
+    """The env-or-built-in value a setting returns to when its saved row is removed."""
+    # Class attributes hold the import-time env values; overrides live on the instance.
+    return getattr(type(settings), entry.attr)
+
+
+def describe_settings(db: Session) -> dict[str, dict[str, Any]]:
+    """Current value, where it came from, its fallback and bounds, per registry key."""
+    stored = system_setting.get_all_settings(db)
+    described = {}
+    for entry in PERSISTED_SETTINGS.values():
+        fallback_source = "env" if entry.attr in os.environ else "default"
+        described[entry.key] = {
+            "value": getattr(settings, entry.attr),
+            "source": "saved" if entry.key in stored else fallback_source,
+            "fallback": fallback_value(entry),
+            "fallback_source": fallback_source,
+            "min": entry.min_value,
+            "max": entry.max_value,
+        }
+    return described
+
+
+def _check_value(entry: PersistedSetting, value: Any) -> None:
+    # bool is an int subclass, so isinstance would let True through as 1.
+    if type(value) is not entry.value_type:  # pylint: disable=unidiomatic-typecheck
+        raise SettingValidationError(
+            f"{entry.key} must be of type {entry.value_type.__name__}"
+        )
+    if entry.min_value is not None and value < entry.min_value:
+        raise SettingValidationError(f"{entry.key} must be at least {entry.min_value}")
+    if entry.max_value is not None and value > entry.max_value:
+        raise SettingValidationError(f"{entry.key} must be at most {entry.max_value}")
+    if entry.validate is not None:
+        try:
+            entry.validate(value)
+        except ValueError as exc:
+            raise SettingValidationError(f"{entry.key} {exc}") from exc
+
+
+def apply_setting_changes(db: Session, changes: dict[str, Any]) -> list[str]:
+    """Validate, persist and apply admin setting changes as one unit.
+
+    A ``None`` value deletes the saved row so the fallback applies again.
+    Nothing is written or applied unless every change is valid.
+
+    Raises:
+        SettingValidationError: on an unknown key, wrong type, out-of-bounds
+            value or a broken cross-field rule.
+    """
+    pending: list[tuple[PersistedSetting, Any]] = []
+    for key, value in changes.items():
+        entry = PERSISTED_SETTINGS.get(key)
+        if entry is None:
+            raise SettingValidationError(f"Unknown setting: {key}")
+        if value is not None:
+            _check_value(entry, value)
+        pending.append((entry, value))
+
+    merged = {e.key: getattr(settings, e.attr) for e in PERSISTED_SETTINGS.values()}
+    for entry, value in pending:
+        merged[entry.key] = fallback_value(entry) if value is None else value
+    # Checked only when submitted, so an env-set conflict cannot block other saves.
+    counts = {KEY_BACKUP_MIN_COUNT, KEY_BACKUP_MAX_COUNT}
+    if (
+        counts & changes.keys()
+        and merged[KEY_BACKUP_MIN_COUNT] > merged[KEY_BACKUP_MAX_COUNT]
+    ):
+        raise SettingValidationError(
+            "Minimum backup count must be less than or equal to maximum backup count"
+        )
+
+    try:
+        for entry, value in pending:
+            if value is None:
+                system_setting.delete_setting(db, entry.key, commit=False)
+            else:
+                persist_setting(db, entry.key, value, commit=False)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    for entry, _ in pending:
+        setattr(settings, entry.attr, merged[entry.key])
+    return [entry.key for entry, _ in pending]

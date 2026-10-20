@@ -91,7 +91,6 @@
       "completeCleanup": "Fullständig systemrensning",
       "deleteBackup": "Radera säkerhetskopia",
       "deleteConfirm": "Är du säker på att du vill radera säkerhetskopian \"{{filename}}\"?",
-      "discardChanges": "Förkasta ändringar",
       "executeCleanup": "Utför rensning",
       "proceedWithRestore": "Fortsätt med återställning",
       "restoreFromBackup": "Återställ från säkerhetskopia",
@@ -99,10 +98,7 @@
       "restorePreview": "Förhandsgranskning av återställning",
       "restoreSafetyNote": "En säkerhetskopia skapas automatiskt innan återställningsprocessen påbörjas.",
       "restoreWarning": "Detta kommer att återställa från säkerhetskopia och ERSÄTTA aktuell data!",
-      "stayOnSettings": "Stanna på inställningar",
-      "typeCleanupToConfirm": "Skriv <strong>RENSNING</strong> för att bekräfta",
-      "unsavedChanges": "Osparade ändringar",
-      "unsavedWarning": "Du har osparade ändringar i dina lagringsinställningar. Om du lämnar denna flik försvinner dina ändringar."
+      "typeCleanupToConfirm": "Skriv <strong>CLEANUP</strong> för att bekräfta"
     },
     "operations": {
       "advancedOptions": "Avancerade alternativ",
@@ -139,24 +135,8 @@
       "restoreMethod": "Återställningsmetod",
       "unknownType": "Okänd typ av säkerhetskopia"
     },
-    "retention": {
-      "backupsUnit": "säkerhetskopior",
-      "currentStatus_one": "<strong>Aktuell status:</strong> {{count}} säkerhetskopia lagrad (max: {{max}})",
-      "currentStatus_other": "<strong>Aktuell status:</strong> {{count}} säkerhetskopior lagrade (max: {{max}})",
-      "daysUnit": "dagar",
-      "maximumCount": "Maximalt antal säkerhetskopior",
-      "maximumCountDesc": "Varna när antalet säkerhetskopior överstiger denna gräns (valfritt)",
-      "minimumCount": "Minsta antal säkerhetskopior",
-      "minimumCountDesc": "Behåll alltid minst detta antal säkerhetskopior (oavsett ålder)",
-      "priority": "<strong>Prioritet:</strong> Minsta antal har alltid företräde framför tidsgränser",
-      "retentionDays": "Lagringstid (dagar)",
-      "retentionDaysDesc": "Radera säkerhetskopior äldre än detta antal dagar (utöver minsta antal)",
-      "retentionLogic": "Lagringslogik",
-      "saveRetention": "Spara lagringsinställningar",
-      "timeBasedCleanup": "<strong>Tidsbaserad rensning:</strong> Radera säkerhetskopior äldre än {{days}} dagar (utöver minsta antal)",
-      "title": "Inställningar för lagringstid"
-    },
     "schedule": {
+      "changeInSettings": "Ändra schema och lagringstid",
       "completedSuccessfully": "Slutfördes framgångsrikt",
       "dayOfWeek": "Veckodag",
       "dayOfWeekDesc": "Vilken dag ska den veckovisa säkerhetskopieringen köras?",
@@ -179,17 +159,12 @@
         "every12Hours": "Var 12:e timme",
         "every6Hours": "Var 6:e timme"
       },
-      "saveSchedule": "Spara schema",
       "timeOfDay": "Tid på dygnet",
       "timeOfDayDesc": "När ska säkerhetskopieringen köras? (24-timmarsformat)",
       "title": "Schema för automatisk säkerhetskopiering",
       "unknownError": "Okänt fel"
     },
-    "subtitle": "Skapa och hantera systemsäkerhetskopior",
-    "tabs": {
-      "backups": "Säkerhetskopior"
-    },
-    "unsavedBadge": "Osparat"
+    "subtitle": "Skapa och hantera systemsäkerhetskopior"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,83 @@
     "specialtySaved": "Specialiteten är redo att användas"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Förväntat maximum",
+      "maxCountDesc": "Endast som referens. Säkerhetskopior över detta antal tas inte bort och blockeras inte.",
+      "minCount": "Behåll alltid minst",
+      "minCountDesc": "De senaste säkerhetskopiorna behålls oavsett ålder.",
+      "operationsLink": "Skapa, ladda ned och återställ säkerhetskopior på sidan Hantering av säkerhetskopior",
+      "retentionDays": "Ta bort säkerhetskopior äldre än",
+      "retentionDaysDesc": "Rensningen går aldrig under minsta antal.",
+      "scheduleUnavailable": "Schemat för säkerhetskopiering kunde inte läsas in."
+    },
     "dataRetention": {
-      "title": "Datalagring",
-      "trashRetention": "Lagringstid för papperskorg",
-      "trashRetentionDesc": "Antal dagar som raderade filer behålls i papperskorgen innan permanent radering"
+      "trashRetention": "Behåll borttagna filer i papperskorgen i",
+      "trashRetentionDesc": "Därefter tas filerna i papperskorgen bort permanent."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Hålls utanför appen av samma skäl som läget endast SSO.",
+      "logLevel": "Loggnivå",
+      "logLevelDesc": "Hur detaljerat servern skriver till sina loggar.",
+      "privateUrls": "Privata integrationsadresser",
+      "privateUrlsDesc": "Om Paperless och Papra får använda LAN-, loopback- eller Docker-adresser.",
+      "ssoOnlyDesc": "Hålls utanför appen så att en trasig identitetsleverantör alltid kan återställas genom att redigera compose-filen."
+    },
+    "errors": {
+      "minAboveMax": "Får inte vara större än högsta antal säkerhetskopior.",
+      "outOfRange": "Ange ett heltal från {{min}} till {{max}}.",
+      "scheduleNotSaved": "Dina andra ändringar sparades, men inte schemat för säkerhetskopiering: {{error}}"
+    },
+    "groups": {
+      "accounts": "Konton",
+      "backupCleanup": "Rensning av säkerhetskopior",
+      "deployment": "Ändra dessa i docker-compose.yml eller .env och starta sedan om",
+      "retention": "Lagringstid"
     },
     "loading": "Laddar inställningar...",
-    "resetAll": "Återställ allt",
-    "saveAllChanges": "Spara alla ändringar",
+    "saveBar": {
+      "discard": "Ignorera",
+      "region": "Osparade ändringar",
+      "save": "Spara ändringar",
+      "saved": "Inställningarna sparades",
+      "unsaved_one": "{{count}} osparad ändring",
+      "unsaved_other": "{{count}} osparade ändringar"
+    },
+    "sections": {
+      "backups": "Säkerhetskopior",
+      "data": "Data och lagring",
+      "deployment": "Angivet i driftsättningen",
+      "users": "Användare och inloggning"
+    },
+    "source": {
+      "composeOverridden": "Compose anger {{value}}; det sparade värdet används i stället.",
+      "default": "Standard",
+      "env": "Från compose",
+      "reset": "Återställ till standard",
+      "saved": "Sparat här"
+    },
     "sso": {
       "autoRedirect": "Automatisk omdirigering till leverantör",
       "envOnly": "Dessa inställningar styrs av miljövariabler och kan inte ändras här.",
+      "howToEnable": "Så slår du på det",
+      "off": "Enkel inloggning är av",
       "ssoDisabledInfo": "SSO är för närvarande inaktiverat. För att aktivera SSO, konfigurera följande miljövariabler och starta om applikationen:",
       "ssoOnly": "Endast SSO-läge",
       "ssoRegistration": "SSO-registrering",
-      "testConnection": "Testa anslutning",
-      "testConnectionDesc": "Testa SSO-leverantörens anslutning och konfiguration",
+      "testFailed": "Anslutningstestet misslyckades",
       "testSsoConnection": "Testa SSO-anslutning",
       "title": "Enkel inloggning (SSO)"
     },
-    "subtitle": "Konfigurera systemövergripande inställningar och lagringspolicyer",
-    "title": "Admininställningar",
+    "subtitle": "Systemövergripande inställningar för den här MediKeep-instansen",
+    "title": "Inställningar",
+    "units": {
+      "backups": "säkerhetskopior",
+      "days": "dagar"
+    },
     "userManagement": {
-      "allowRegistration": "Tillåt registrering av nya användare",
-      "allowRegistrationDesc": "Aktivera eller inaktivera möjligheten för nya användare att skapa konton från inloggningssidan"
+      "allowRegistration": "Tillåt nya konton från inloggningssidan",
+      "allowRegistrationDesc": "När det är av kan bara en administratör skapa konton.",
+      "sealedPreview": "Läget endast SSO är på, så när detta är av kan ingen skapa ett eget konto. En administratör måste skapa varje konto."
     },
     "warnings": {
       "sso_only_no_registration_route": "Endast SSO-läge är aktiverat och användarregistrering är nu inaktiverad. Inget nytt konto kan skapas via självregistrering - en administratör måste skapa dem. Om det inte var meningen, aktivera registrering igen eller stäng av endast SSO-läge."

@@ -91,7 +91,6 @@
       "completeCleanup": "完整系统清理",
       "deleteBackup": "删除备份",
       "deleteConfirm": "您确定要删除备份\"{{filename}}\"吗？",
-      "discardChanges": "放弃更改",
       "executeCleanup": "执行清理",
       "proceedWithRestore": "继续恢复",
       "restoreFromBackup": "从备份恢复",
@@ -99,10 +98,7 @@
       "restorePreview": "恢复预览",
       "restoreSafetyNote": "恢复过程开始前将自动创建安全备份。",
       "restoreWarning": "这将从备份恢复并替换当前数据！",
-      "stayOnSettings": "停留在设置",
-      "typeCleanupToConfirm": "输入<strong>CLEANUP</strong>确认",
-      "unsavedChanges": "未保存的更改",
-      "unsavedWarning": "您的保留设置有未保存的更改。离开此标签页将丢失您的更改。"
+      "typeCleanupToConfirm": "输入<strong>CLEANUP</strong>确认"
     },
     "operations": {
       "advancedOptions": "高级选项",
@@ -139,24 +135,8 @@
       "restoreMethod": "恢复方法",
       "unknownType": "未知备份类型"
     },
-    "retention": {
-      "backupsUnit": "个备份",
-      "currentStatus_one": "<strong>当前状态：</strong>已存储{{count}}个备份（最大：{{max}}）",
-      "currentStatus_other": "<strong>当前状态：</strong>已存储{{count}}个备份（最大：{{max}}）",
-      "daysUnit": "天",
-      "maximumCount": "最大备份数量",
-      "maximumCountDesc": "当备份数量超过此限制时发出警报（可选）",
-      "minimumCount": "最小备份数量",
-      "minimumCountDesc": "始终保留至少这么多备份（无论使用期限）",
-      "priority": "<strong>优先级：</strong>最小数量始终优先于时间限制",
-      "retentionDays": "备份保留（天数）",
-      "retentionDaysDesc": "删除超过此天数的备份（超出最小数量）",
-      "retentionLogic": "保留逻辑",
-      "saveRetention": "保存保留设置",
-      "timeBasedCleanup": "<strong>基于时间的清理：</strong>删除超过{{days}}天的备份（超出最小数量）",
-      "title": "备份保留设置"
-    },
     "schedule": {
+      "changeInSettings": "更改计划和保留设置",
       "completedSuccessfully": "成功完成",
       "dayOfWeek": "星期",
       "dayOfWeekDesc": "每周备份应在哪一天运行？",
@@ -179,17 +159,12 @@
         "every12Hours": "每12小时",
         "every6Hours": "每6小时"
       },
-      "saveSchedule": "保存计划",
       "timeOfDay": "时间",
       "timeOfDayDesc": "备份应在何时运行？（24小时格式）",
       "title": "自动备份计划",
       "unknownError": "未知错误"
     },
-    "subtitle": "创建和管理系统备份",
-    "tabs": {
-      "backups": "备份"
-    },
-    "unsavedBadge": "未保存"
+    "subtitle": "创建和管理系统备份"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,83 @@
     "specialtySaved": "专科已可使用"
   },
   "settings": {
+    "backups": {
+      "maxCount": "预期最大数量",
+      "maxCountDesc": "仅供参考。超过此数量的备份不会被删除或阻止。",
+      "minCount": "至少始终保留",
+      "minCountDesc": "无论时间多久，都会保留最新的备份。",
+      "operationsLink": "在备份管理页面创建、下载和恢复备份",
+      "retentionDays": "删除早于以下时间的备份",
+      "retentionDaysDesc": "清理时保留的备份数量不会低于最小数量。",
+      "scheduleUnavailable": "无法加载备份计划。"
+    },
     "dataRetention": {
-      "title": "数据保留",
-      "trashRetention": "垃圾箱保留",
-      "trashRetentionDesc": "在永久删除之前将已删除文件保留在垃圾箱中的天数"
+      "trashRetention": "已删除文件在回收站中保留",
+      "trashRetentionDesc": "超过此期限后，回收站中的文件将被永久删除。"
+    },
+    "deployment": {
+      "autoRedirectDesc": "出于与仅 SSO 模式相同的原因保留在应用之外。",
+      "logLevel": "日志级别",
+      "logLevelDesc": "服务器写入日志的详细程度。",
+      "privateUrls": "私有集成地址",
+      "privateUrlsDesc": "Paperless 和 Papra 是否可以使用局域网、回环或 Docker 地址。",
+      "ssoOnlyDesc": "保留在应用之外，以便在身份提供商出现故障时始终可以通过编辑 compose 文件恢复。"
+    },
+    "errors": {
+      "minAboveMax": "不能超过最大备份数量。",
+      "outOfRange": "请输入 {{min}} 到 {{max}} 之间的整数。",
+      "scheduleNotSaved": "其他更改已保存，但备份计划未保存：{{error}}"
+    },
+    "groups": {
+      "accounts": "账户",
+      "backupCleanup": "备份清理",
+      "deployment": "在 docker-compose.yml 或 .env 中修改，然后重启",
+      "retention": "保留"
     },
     "loading": "正在加载设置...",
-    "resetAll": "全部重置",
-    "saveAllChanges": "保存所有更改",
+    "saveBar": {
+      "discard": "放弃",
+      "region": "未保存的更改",
+      "save": "保存更改",
+      "saved": "设置已保存",
+      "unsaved_one": "{{count}} 项未保存的更改",
+      "unsaved_other": "{{count}} 项未保存的更改"
+    },
+    "sections": {
+      "backups": "备份",
+      "data": "数据与存储",
+      "deployment": "由部署设置",
+      "users": "用户与登录"
+    },
+    "source": {
+      "composeOverridden": "compose 设置为 {{value}}；当前使用已保存的值。",
+      "default": "默认",
+      "env": "来自 compose",
+      "reset": "恢复默认",
+      "saved": "已在此处保存"
+    },
     "sso": {
       "autoRedirect": "自动重定向到提供程序",
       "envOnly": "这些设置由环境变量控制，无法在此处更改。",
+      "howToEnable": "如何开启",
+      "off": "单点登录已关闭",
       "ssoDisabledInfo": "SSO当前已禁用。要启用SSO，请配置以下环境变量并重启应用程序：",
       "ssoOnly": "仅 SSO 模式",
       "ssoRegistration": "SSO注册",
-      "testConnection": "测试连接",
-      "testConnectionDesc": "测试SSO提供商连接和配置",
+      "testFailed": "连接测试失败",
       "testSsoConnection": "测试SSO连接",
       "title": "单点登录（SSO）"
     },
-    "subtitle": "配置系统级设置和保留策略",
-    "title": "管理员设置",
+    "subtitle": "此 MediKeep 实例的系统级设置",
+    "title": "设置",
+    "units": {
+      "backups": "个",
+      "days": "天"
+    },
     "userManagement": {
-      "allowRegistration": "允许新用户注册",
-      "allowRegistrationDesc": "启用或禁用新用户从登录页面创建账户的功能"
+      "allowRegistration": "允许从登录页面创建新账户",
+      "allowRegistrationDesc": "关闭后，只有管理员可以创建账户。",
+      "sealedPreview": "已开启仅 SSO 模式，关闭此项后任何人都无法自行创建账户，所有账户都必须由管理员创建。"
     },
     "warnings": {
       "sso_only_no_registration_route": "仅 SSO 模式已启用，用户注册现已关闭。任何人都无法自助创建新账户，只能由管理员创建。如果这不是本意，请重新启用注册或关闭仅 SSO 模式。"

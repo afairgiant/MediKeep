@@ -5864,65 +5864,7 @@ Base path: `/api/v1/admin/backup`
 - **Purpose**: Clean up old backups, orphaned files, and old trash
 - **Success Response** (200): Combined cleanup results
 
-#### Get Retention Settings
-
-`GET /admin/backup/settings/retention`
-
-- **Purpose**: Get current retention settings
-- **Success Response** (200):
-
-```json
-{
-  "backup_retention_days": 30,
-  "trash_retention_days": 7,
-  "backup_min_count": 3,
-  "backup_max_count": 10,
-  "allow_user_registration": true
-}
-```
-
-#### Update Retention Settings
-
-`POST /admin/backup/settings/retention`
-
-- **Purpose**: Update retention and admin settings
-- **Request Body**:
-
-```json
-{
-  "backup_retention_days": 45,
-  "trash_retention_days": 14,
-  "backup_min_count": 5,
-  "backup_max_count": 20,
-  "allow_user_registration": false
-}
-```
-
-- **Success Response** (200): Updated settings, plus a `warnings` array
-
-```json
-{
-  "message": "Settings updated successfully",
-  "updated_settings": { "allow_user_registration": false },
-  "warnings": [
-    {
-      "code": "sso_only_no_registration_route",
-      "message": "SSO_ONLY_MODE is enabled and user registration is disabled..."
-    }
-  ],
-  "current_settings": { "allow_user_registration": false }
-}
-```
-
-`warnings` is always present and usually empty. Entries are advisory — the update
-succeeded regardless. Clients should render their own copy keyed by `code` and treat
-`message` as a fallback for codes they do not recognize.
-
-Current codes:
-
-| Code | Raised when |
-|---|---|
-| `sso_only_no_registration_route` | Registration was turned off while `SSO_ONLY_MODE` is on, leaving no self-service route into the instance |
+Retention values and user registration are read and changed through [15.8 Admin Settings](#158-admin-settings).
 
 #### Get Retention Stats
 
@@ -6201,6 +6143,102 @@ Base path: `/api/v1/admin/maintenance`
   "message": "Successfully synced 1200 components"
 }
 ```
+
+### 15.8 Admin Settings
+
+Admin-editable settings persisted in `system_settings`. An environment variable supplies the
+value until an admin saves one; a saved value then wins on every restart.
+
+#### Get Admin Settings
+
+`GET /admin/settings`
+
+- **Purpose**: Every admin-editable setting with where its value comes from, plus read-only
+  values set by the deployment files
+- **Success Response** (200):
+
+```json
+{
+  "settings": {
+    "trash_retention_days": {
+      "value": 14,
+      "source": "saved",
+      "fallback": 30,
+      "fallback_source": "env",
+      "min": 1,
+      "max": 365
+    },
+    "allow_user_registration": {
+      "value": true,
+      "source": "default",
+      "fallback": true,
+      "fallback_source": "default",
+      "min": null,
+      "max": null
+    }
+  },
+  "deployment": [
+    { "name": "SSO_ONLY_MODE", "value": false },
+    { "name": "LOG_LEVEL", "value": "INFO" }
+  ]
+}
+```
+
+- `source` is `saved` (a row exists), `env` (the variable is set) or `default` (built-in value).
+- `fallback` is the value used if the saved row is removed; `fallback_source` says where it comes from.
+- Keys: `allow_user_registration`, `trash_retention_days`, `backup_retention_days`,
+  `backup_min_count`, `backup_max_count`.
+- `deployment` is a fixed allowlist (`SSO_ONLY_MODE`, `SSO_AUTO_REDIRECT`,
+  `ALLOW_PRIVATE_INTEGRATION_URLS`, `LOG_LEVEL`); the environment is never enumerated.
+
+#### Update Admin Settings
+
+`PATCH /admin/settings`
+
+- **Purpose**: Change settings; send only the keys that changed. A `null` value deletes the
+  saved row so the fallback applies again.
+- **Request Body**:
+
+```json
+{
+  "changes": {
+    "trash_retention_days": 14,
+    "allow_user_registration": false,
+    "backup_retention_days": null
+  }
+}
+```
+
+- **Validation**: all changes are checked before anything is written; one invalid value saves
+  nothing. Returns 400 for an unknown key, a wrong type (`true` for a number field), a value
+  outside `min`/`max`, or `backup_min_count` greater than `backup_max_count`. Returns 422 for a
+  value that is neither a boolean nor an integer.
+- **Success Response** (200): fresh settings in the GET shape, the changed keys, and warnings
+
+```json
+{
+  "settings": { "...": "same shape as GET" },
+  "updated": ["allow_user_registration"],
+  "warnings": [
+    {
+      "code": "sso_only_no_registration_route",
+      "message": "SSO_ONLY_MODE is enabled and user registration is disabled..."
+    }
+  ]
+}
+```
+
+`warnings` is always present and usually empty. Entries are advisory: the update
+succeeded regardless. Clients should render their own copy keyed by `code` and treat
+`message` as a fallback for codes they do not recognize.
+
+Current codes:
+
+| Code | Raised when |
+|---|---|
+| `sso_only_no_registration_route` | Registration was turned off while `SSO_ONLY_MODE` is on, leaving no self-service route into the instance |
+
+The auto-backup schedule keeps its own endpoints: `GET`/`POST /admin/backups/settings/schedule`.
 
 ---
 

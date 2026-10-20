@@ -262,13 +262,14 @@ class AdminApiService extends BaseApiService {
     );
   }
 
-  // Settings management endpoints
-  async getRetentionSettings() {
-    return this.get('/backups/settings/retention');
+  // Admin settings endpoints
+  async getAdminSettings() {
+    return this.get('/settings');
   }
 
-  async updateRetentionSettings(settings) {
-    return this.post('/backups/settings/retention', settings);
+  // `changes` holds changed keys only; a null value resets that setting.
+  async updateAdminSettings(changes) {
+    return this.patch('/settings', { changes });
   }
 
   // Auto-backup schedule endpoints

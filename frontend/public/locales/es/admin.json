@@ -91,7 +91,6 @@
       "completeCleanup": "Limpieza completa del sistema",
       "deleteBackup": "Eliminar copia de seguridad",
       "deleteConfirm": "¿Está seguro de que desea eliminar la copia de seguridad \"{{filename}}\"?",
-      "discardChanges": "Descartar cambios",
       "executeCleanup": "Ejecutar limpieza",
       "proceedWithRestore": "Proceder con la restauración",
       "restoreFromBackup": "Restaurar desde copia de seguridad",
@@ -99,10 +98,7 @@
       "restorePreview": "Vista previa de restauración",
       "restoreSafetyNote": "Se creará automáticamente una copia de seguridad de protección antes de iniciar el proceso de restauración.",
       "restoreWarning": "¡Esto restaurará desde la copia de seguridad y REEMPLAZARÁ los datos actuales!",
-      "stayOnSettings": "Permanecer en configuración",
-      "typeCleanupToConfirm": "Escriba <strong>CLEANUP</strong> para confirmar",
-      "unsavedChanges": "Cambios sin guardar",
-      "unsavedWarning": "Tiene cambios sin guardar en la configuración de retención. Salir de esta pestaña descartará sus cambios."
+      "typeCleanupToConfirm": "Escriba <strong>CLEANUP</strong> para confirmar"
     },
     "operations": {
       "advancedOptions": "Opciones avanzadas",
@@ -139,24 +135,8 @@
       "restoreMethod": "Método de restauración",
       "unknownType": "Tipo de copia de seguridad desconocido"
     },
-    "retention": {
-      "backupsUnit": "copias de seguridad",
-      "currentStatus_one": "<strong>Estado actual:</strong> {{count}} copia de seguridad almacenada (máximo: {{max}})",
-      "currentStatus_other": "<strong>Estado actual:</strong> {{count}} copias de seguridad almacenadas (máximo: {{max}})",
-      "daysUnit": "días",
-      "maximumCount": "Conteo máximo de copias de seguridad",
-      "maximumCountDesc": "Alertar cuando el número de copias de seguridad supere este límite (opcional)",
-      "minimumCount": "Conteo mínimo de copias de seguridad",
-      "minimumCountDesc": "Siempre conservar al menos esta cantidad de copias de seguridad (independientemente de la antigüedad)",
-      "priority": "<strong>Prioridad:</strong> El conteo mínimo siempre tiene precedencia sobre los límites de tiempo",
-      "retentionDays": "Retención de copias de seguridad (días)",
-      "retentionDaysDesc": "Eliminar copias de seguridad con más días de antigüedad que este valor (más allá del conteo mínimo)",
-      "retentionLogic": "Lógica de retención",
-      "saveRetention": "Guardar configuración de retención",
-      "timeBasedCleanup": "<strong>Limpieza por tiempo:</strong> Eliminar copias de seguridad con más de {{days}} días de antigüedad (más allá del conteo mínimo)",
-      "title": "Configuración de retención de copias de seguridad"
-    },
     "schedule": {
+      "changeInSettings": "Cambiar programación y retención",
       "completedSuccessfully": "Completada con éxito",
       "dayOfWeek": "Día de la semana",
       "dayOfWeekDesc": "¿Qué día debe ejecutarse la copia de seguridad semanal?",
@@ -179,17 +159,12 @@
         "every12Hours": "Cada 12 horas",
         "every6Hours": "Cada 6 horas"
       },
-      "saveSchedule": "Guardar programación",
       "timeOfDay": "Hora del día",
       "timeOfDayDesc": "¿A qué hora debe ejecutarse la copia de seguridad? (formato 24 horas)",
       "title": "Programación de copias de seguridad automáticas",
       "unknownError": "Error desconocido"
     },
-    "subtitle": "Crear y gestionar copias de seguridad del sistema",
-    "tabs": {
-      "backups": "Copias de seguridad"
-    },
-    "unsavedBadge": "Sin guardar"
+    "subtitle": "Crear y gestionar copias de seguridad del sistema"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,83 @@
     "specialtySaved": "Especialidad lista para usar"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Máximo previsto",
+      "maxCountDesc": "Solo como referencia. Las copias por encima de este número no se eliminan ni se bloquean.",
+      "minCount": "Conservar siempre al menos",
+      "minCountDesc": "Las copias más recientes se conservan sin importar su antigüedad.",
+      "operationsLink": "Cree, descargue y restaure copias de seguridad en la página Gestión de copias de seguridad",
+      "retentionDays": "Eliminar copias de seguridad con más de",
+      "retentionDaysDesc": "La limpieza nunca baja del número mínimo.",
+      "scheduleUnavailable": "No se pudo cargar la programación de copias de seguridad."
+    },
     "dataRetention": {
-      "title": "Retención de datos",
-      "trashRetention": "Retención de la papelera",
-      "trashRetentionDesc": "Número de días para conservar los archivos eliminados en la papelera antes de la eliminación permanente"
+      "trashRetention": "Conservar los archivos eliminados en la papelera durante",
+      "trashRetentionDesc": "Después de este plazo, los archivos de la papelera se eliminan definitivamente."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Se mantiene fuera de la aplicación por la misma razón que el modo solo SSO.",
+      "logLevel": "Nivel de registro",
+      "logLevelDesc": "Cuánto detalle escribe el servidor en sus registros.",
+      "privateUrls": "Direcciones de integración privadas",
+      "privateUrlsDesc": "Si Paperless y Papra pueden usar direcciones LAN, de bucle invertido o de Docker.",
+      "ssoOnlyDesc": "Se mantiene fuera de la aplicación para que un proveedor de identidad averiado siempre pueda revertirse editando el archivo compose."
+    },
+    "errors": {
+      "minAboveMax": "No debe superar el número máximo de copias de seguridad.",
+      "outOfRange": "Introduzca un número entero de {{min}} a {{max}}.",
+      "scheduleNotSaved": "Sus otros cambios se guardaron, pero la programación de copias de seguridad no: {{error}}"
+    },
+    "groups": {
+      "accounts": "Cuentas",
+      "backupCleanup": "Limpieza de copias de seguridad",
+      "deployment": "Cámbielos en docker-compose.yml o .env y reinicie",
+      "retention": "Retención"
     },
     "loading": "Cargando configuración...",
-    "resetAll": "Restablecer todo",
-    "saveAllChanges": "Guardar todos los cambios",
+    "saveBar": {
+      "discard": "Descartar",
+      "region": "Cambios sin guardar",
+      "save": "Guardar cambios",
+      "saved": "Configuración guardada",
+      "unsaved_one": "{{count}} cambio sin guardar",
+      "unsaved_other": "{{count}} cambios sin guardar"
+    },
+    "sections": {
+      "backups": "Copias de seguridad",
+      "data": "Datos y almacenamiento",
+      "deployment": "Definido por el despliegue",
+      "users": "Usuarios e inicio de sesión"
+    },
+    "source": {
+      "composeOverridden": "Compose establece {{value}}; se usa el valor guardado en su lugar.",
+      "default": "Predeterminado",
+      "env": "Desde compose",
+      "reset": "Restablecer valor predeterminado",
+      "saved": "Guardado aquí"
+    },
     "sso": {
       "autoRedirect": "Redirección automática al proveedor",
       "envOnly": "Estos valores se definen mediante variables de entorno y no se pueden cambiar aquí.",
+      "howToEnable": "Cómo activarlo",
+      "off": "El inicio de sesión único está desactivado",
       "ssoDisabledInfo": "SSO está actualmente deshabilitado. Para habilitar SSO, configure las siguientes variables de entorno y reinicie la aplicación:",
       "ssoOnly": "Modo solo SSO",
       "ssoRegistration": "Registro por SSO",
-      "testConnection": "Probar conexión",
-      "testConnectionDesc": "Probar la conexión y configuración del proveedor de SSO",
+      "testFailed": "La prueba de conexión falló",
       "testSsoConnection": "Probar conexión SSO",
       "title": "Inicio de sesión único (SSO)"
     },
-    "subtitle": "Configurar ajustes y políticas de retención a nivel del sistema",
-    "title": "Configuración de administración",
+    "subtitle": "Configuración de todo el sistema para esta instancia de MediKeep",
+    "title": "Configuración",
+    "units": {
+      "backups": "copias",
+      "days": "días"
+    },
     "userManagement": {
-      "allowRegistration": "Permitir registro de nuevos usuarios",
-      "allowRegistrationDesc": "Habilitar o deshabilitar la posibilidad de que nuevos usuarios creen cuentas desde la página de inicio de sesión"
+      "allowRegistration": "Permitir cuentas nuevas desde la página de inicio de sesión",
+      "allowRegistrationDesc": "Si está desactivado, solo un administrador puede crear cuentas.",
+      "sealedPreview": "El modo solo SSO está activado, así que con esto desactivado nadie puede crear su propia cuenta. Un administrador tendrá que crear cada cuenta."
     },
     "warnings": {
       "sso_only_no_registration_route": "El modo solo SSO está activado y el registro de usuarios ahora está deshabilitado. No se puede crear ninguna cuenta nueva por autoservicio: un administrador debe crearlas. Si no era la intención, vuelva a habilitar el registro o desactive el modo solo SSO."

@@ -214,7 +214,7 @@ think about which case you are in.
 1. Set your environment variables
 2. Restart the application
 3. Go to login page - you should see the SSO button
-4. Go to Admin Settings → SSO section
+4. Go to Admin → Settings → Users and sign-in
 5. Click "Test SSO Connection" to verify configuration
 6. Try logging in with SSO
 
@@ -222,8 +222,8 @@ think about which case you are in.
 
 ### New Users
 
-- If **Admin Settings → Allow User Registration = ON**: New SSO users get accounts automatically
-- If **Admin Settings → Allow User Registration = OFF**: SSO login blocked for new users
+- If **Settings → Allow new accounts from the login page = ON**: New SSO users get accounts automatically
+- If **Settings → Allow new accounts from the login page = OFF**: SSO login blocked for new users
 
 ### Existing Users
 
