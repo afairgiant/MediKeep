@@ -91,7 +91,6 @@
       "completeCleanup": "Nettoyage complet du système",
       "deleteBackup": "Supprimer la sauvegarde",
       "deleteConfirm": "Voulez-vous vraiment supprimer la sauvegarde \"{{filename}}\" ?",
-      "discardChanges": "Annuler les changements",
       "executeCleanup": "Exécuter le nettoyage",
       "proceedWithRestore": "Poursuivre la restauration",
       "restoreFromBackup": "Restaurer depuis une sauvegarde",
@@ -99,10 +98,7 @@
       "restorePreview": "Aperçu de la restauration",
       "restoreSafetyNote": "Une sauvegarde de sûreté sera créée automatiquement avant le lancement du processus de restauration.",
       "restoreWarning": "Ceci restaurera les données d'une sauvegarde et REMPLACERA les données actuelles !",
-      "stayOnSettings": "Rester sur les paramètres",
-      "typeCleanupToConfirm": "Saisissez <strong>CLEANUP</strong> pour confirmer",
-      "unsavedChanges": "Changements non sauvegardés",
-      "unsavedWarning": "Vous avez des changements non sauvegardés dans vos paramètres de rétention. Quitter cet onglet annulera vos changements."
+      "typeCleanupToConfirm": "Saisissez <strong>CLEANUP</strong> pour confirmer"
     },
     "operations": {
       "advancedOptions": "Options avancées",
@@ -139,24 +135,8 @@
       "restoreMethod": "Méthode de restauration",
       "unknownType": "Type de sauvegarde inconnu"
     },
-    "retention": {
-      "backupsUnit": "sauvegardes",
-      "currentStatus_one": "<strong>Statut actuel :</strong> {{count}} sauvegarde conservée (max : {{max}})",
-      "currentStatus_other": "<strong>Statut actuel :</strong> {{count}} sauvegardes conservées (max : {{max}})",
-      "daysUnit": "jours",
-      "maximumCount": "Décompte maximum des sauvegardes",
-      "maximumCountDesc": "Alerter quand le décompte des sauvegardes dépasse cette limite (optionnel)",
-      "minimumCount": "Décompte minimum des sauvegardes",
-      "minimumCountDesc": "Toujours conserver au moins ce nombre de sauvegardes (quel que soit leur âge)",
-      "priority": "<strong>Priorité :</strong> Le décompte minimum est toujours prioritaire sur l'ancienneté",
-      "retentionDays": "Rétention des sauvegardes (en jours)",
-      "retentionDaysDesc": "Supprimer les sauvegardes datant d'il y a plus de ce nombre de jours (au-delà du décompte minimum)",
-      "retentionLogic": "Logique de rétention",
-      "saveRetention": "Sauvegarder les paramètres de rétention",
-      "timeBasedCleanup": "<strong>Nettoyage par ancienneté :</strong> Supprimer les sauvegardes vieilles de plus de {{days}} jours (au-delà du décompte minimum)",
-      "title": "Paramètres de rétention des sauvegardes"
-    },
     "schedule": {
+      "changeInSettings": "Modifier la planification et la conservation",
       "completedSuccessfully": "Complété avec succès",
       "dayOfWeek": "Jour de la semaine",
       "dayOfWeekDesc": "Quel jour doit avoir lieu la sauvegarde hebdomadaire ?",
@@ -179,17 +159,12 @@
         "every12Hours": "Toutes les 12 heures",
         "every6Hours": "Toutes les 6 heures"
       },
-      "saveSchedule": "Programme de sauvegarde",
       "timeOfDay": "Moment de la journée",
       "timeOfDayDesc": "Quand doit avoir lieu la sauvegarde ? (format 24h)",
       "title": "Programmation des sauvegardes automatiques",
       "unknownError": "Erreur inconnue"
     },
-    "subtitle": "Créez et gérez les sauvegardes système",
-    "tabs": {
-      "backups": "Sauvegardes"
-    },
-    "unsavedBadge": "Non sauvegardé"
+    "subtitle": "Créez et gérez les sauvegardes système"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,82 @@
     "specialtySaved": "Spécialité prête à être utilisée"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Maximum prévu",
+      "maxCountDesc": "À titre indicatif uniquement. Les sauvegardes au-delà de ce nombre ne sont ni supprimées ni bloquées.",
+      "minCount": "Toujours conserver au moins",
+      "minCountDesc": "Les sauvegardes les plus récentes sont conservées quel que soit leur âge.",
+      "operationsLink": "Créer, télécharger et restaurer des sauvegardes sur la page Gestion des sauvegardes",
+      "retentionDays": "Supprimer les sauvegardes de plus de",
+      "retentionDaysDesc": "Le nettoyage ne descend jamais sous le nombre minimum.",
+      "scheduleUnavailable": "Impossible de charger la planification des sauvegardes."
+    },
     "dataRetention": {
-      "title": "Rétention des données",
-      "trashRetention": "Rétention de la corbeille",
-      "trashRetentionDesc": "Nombre de jours pendant lequel conserver les fichiers supprimés dans la corbeille avant leur suppression définitive"
+      "trashRetention": "Conserver les fichiers supprimés dans la corbeille pendant",
+      "trashRetentionDesc": "Passé ce délai, les fichiers de la corbeille sont supprimés définitivement."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Gardé hors de l'application pour la même raison que le mode SSO uniquement.",
+      "logLevel": "Niveau de journalisation",
+      "logLevelDesc": "Quantité de détails que le serveur écrit dans ses journaux.",
+      "privateUrls": "Adresses d'intégration privées",
+      "privateUrlsDesc": "Indique si Paperless et Papra peuvent utiliser des adresses LAN, de bouclage ou Docker.",
+      "ssoOnlyDesc": "Gardé hors de l'application pour qu'un fournisseur d'identité défaillant puisse toujours être contourné en modifiant le fichier compose."
+    },
+    "errors": {
+      "minAboveMax": "Ne doit pas dépasser le nombre maximum de sauvegardes.",
+      "outOfRange": "Saisissez un nombre entier de {{min}} à {{max}}.",
+      "scheduleNotSaved": "Vos autres modifications ont été enregistrées, mais pas la planification des sauvegardes : {{error}}"
+    },
+    "groups": {
+      "accounts": "Comptes",
+      "backupCleanup": "Nettoyage des sauvegardes",
+      "deployment": "Modifiez-les dans docker-compose.yml ou .env, puis redémarrez",
+      "retention": "Conservation"
     },
     "loading": "Chargement des paramètres...",
-    "resetAll": "Tout réinitialiser",
-    "saveAllChanges": "Sauvegarder tous les changements",
+    "saveBar": {
+      "discard": "Annuler les modifications",
+      "region": "Modifications non enregistrées",
+      "save": "Enregistrer les modifications",
+      "saved": "Paramètres enregistrés",
+      "unsaved_one": "{{count}} modification non enregistrée",
+      "unsaved_other": "{{count}} modifications non enregistrées"
+    },
+    "sections": {
+      "backups": "Sauvegardes",
+      "data": "Données et stockage",
+      "deployment": "Définis par le déploiement",
+      "users": "Utilisateurs et connexion"
+    },
+    "source": {
+      "composeOverridden": "Compose définit {{value}} ; la valeur enregistrée est utilisée à la place.",
+      "default": "Par défaut",
+      "env": "Depuis compose",
+      "reset": "Rétablir la valeur par défaut",
+      "saved": "Enregistré ici"
+    },
     "sso": {
       "autoRedirect": "Redirection automatique vers le fournisseur",
       "envOnly": "Ces paramètres sont définis par des variables d'environnement et ne peuvent être modifiés ici.",
+      "howToEnable": "Comment l'activer",
+      "off": "L'authentification unique est désactivée",
       "ssoDisabledInfo": "Le SSO est actuellement désactivé. Pour l'activer, configurez les variables d'environnement suivantes et redémarrez l'application :",
       "ssoOnly": "Mode SSO uniquement",
       "ssoRegistration": "Enregistrement via SSO",
-      "testConnection": "Tester la connexion",
-      "testConnectionDesc": "Testez la connexion et la configuration du fournisseur SSO",
       "testSsoConnection": "Tester la connexion SSO",
       "title": "Authentification unique (SSO)"
     },
-    "subtitle": "Configurez les paramètres système et la politique de rétention",
-    "title": "Paramètres administrateur",
+    "subtitle": "Paramètres système de cette instance MediKeep",
+    "title": "Paramètres",
+    "units": {
+      "backups": "sauvegardes",
+      "days": "jours"
+    },
     "userManagement": {
-      "allowRegistration": "Permettre l'enregistrement de nouveaux utilisateurs",
-      "allowRegistrationDesc": "Activez ou désactivez la possibilité pour les nouveaux utilisateurs de créer des comptes depuis la page de connexion"
+      "allowRegistration": "Autoriser la création de comptes depuis la page de connexion",
+      "allowRegistrationDesc": "Si désactivé, seul un administrateur peut créer des comptes.",
+      "sealedPreview": "Le mode SSO uniquement est activé : si cette option est désactivée, personne ne peut créer son propre compte. Un administrateur devra créer chaque compte."
     },
     "warnings": {
       "sso_only_no_registration_route": "Le mode SSO uniquement est activé et l'enregistrement de nouveaux utilisateurs est désormais désactivé. Aucun nouveau compte ne peut être créé indépendamment ; un administrateur devra les créer. Si ce n'était pas prévu, réactivez l'enregistrement de nouveaux utilisateurs ou désactivez le mode SSO uniquement."

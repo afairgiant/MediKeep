@@ -1,0 +1,54 @@
+.admin-settings-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.admin-settings-tabs .mantine-Tabs-list {
+  min-width: 200px;
+}
+
+.admin-settings-tabs .mantine-Tabs-panel {
+  min-width: 0;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 20px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.setting-row + .setting-row {
+  border-top: 1px solid var(--mantine-color-default-border);
+}
+
+.setting-row.is-dirty {
+  box-shadow: inset 3px 0 0 var(--mantine-color-yellow-6);
+}
+
+.setting-row-control {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.setting-row-extra {
+  grid-column: 1 / -1;
+}
+
+.unsaved-changes-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+}
+
+@media (max-width: 48em) {
+  .setting-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .setting-row-control {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}

@@ -41,6 +41,12 @@ export function generateAdminBreadcrumbs(pathname) {
     return crumbs;
   }
 
+  // Settings sections share one crumb
+  if (pathname.startsWith('/admin/settings/')) {
+    crumbs.push({ label: ADMIN_ROUTE_LABELS['/admin/settings'], path: null });
+    return crumbs;
+  }
+
   // Static route match
   if (ADMIN_ROUTE_LABELS[pathname]) {
     crumbs.push({ label: ADMIN_ROUTE_LABELS[pathname], path: null });

@@ -56,13 +56,15 @@ class CRUDSystemSetting:
             db.flush()
         return setting
 
-    def delete_setting(self, db: Session, key: str) -> bool:
+    def delete_setting(self, db: Session, key: str, commit: bool = True) -> bool:
         """
         Delete a system setting by key.
 
         Args:
             db: Database session
             key: Setting key to delete
+            commit: As for `set_setting`; False stages the delete in the
+                caller's transaction.
 
         Returns:
             True if deleted, False if not found
@@ -71,7 +73,10 @@ class CRUDSystemSetting:
 
         if setting:
             db.delete(setting)
-            db.commit()
+            if commit:
+                db.commit()
+            else:
+                db.flush()
             return True
 
         return False

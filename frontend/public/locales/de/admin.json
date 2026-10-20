@@ -91,7 +91,6 @@
       "completeCleanup": "Vollständige Systembereinigung",
       "deleteBackup": "Sicherung löschen",
       "deleteConfirm": "Möchten Sie die Sicherung \"{{filename}}\" wirklich löschen?",
-      "discardChanges": "Änderungen verwerfen",
       "executeCleanup": "Bereinigung ausführen",
       "proceedWithRestore": "Mit Wiederherstellung fortfahren",
       "restoreFromBackup": "Aus Sicherung wiederherstellen",
@@ -99,10 +98,7 @@
       "restorePreview": "Wiederherstellungsvorschau",
       "restoreSafetyNote": "Vor dem Wiederherstellungsprozess wird automatisch eine Sicherheitskopie erstellt.",
       "restoreWarning": "Dies stellt aus der Sicherung wieder her und ERSETZT die aktuellen Daten!",
-      "stayOnSettings": "Bei Einstellungen bleiben",
-      "typeCleanupToConfirm": "Geben Sie <strong>CLEANUP</strong> zur Bestätigung ein",
-      "unsavedChanges": "Ungespeicherte Änderungen",
-      "unsavedWarning": "Sie haben ungespeicherte Änderungen in Ihren Aufbewahrungseinstellungen. Das Verlassen dieses Tabs verwirft Ihre Änderungen."
+      "typeCleanupToConfirm": "Geben Sie <strong>CLEANUP</strong> zur Bestätigung ein"
     },
     "operations": {
       "advancedOptions": "Erweiterte Optionen",
@@ -139,24 +135,8 @@
       "restoreMethod": "Wiederherstellungsmethode",
       "unknownType": "Unbekannter Sicherungstyp"
     },
-    "retention": {
-      "backupsUnit": "Sicherungen",
-      "currentStatus_one": "<strong>Aktueller Status:</strong> {{count}} Sicherung gespeichert (max: {{max}})",
-      "currentStatus_other": "<strong>Aktueller Status:</strong> {{count}} Sicherungen gespeichert (max: {{max}})",
-      "daysUnit": "Tage",
-      "maximumCount": "Maximale Anzahl der Sicherungen",
-      "maximumCountDesc": "Warnung, wenn die Sicherungsanzahl dieses Limit überschreitet (optional)",
-      "minimumCount": "Mindestanzahl der Sicherungen",
-      "minimumCountDesc": "Immer mindestens so viele Sicherungen behalten (unabhängig vom Alter)",
-      "priority": "<strong>Priorität:</strong> Die Mindestanzahl hat immer Vorrang vor Zeitlimits",
-      "retentionDays": "Aufbewahrungsdauer (Tage)",
-      "retentionDaysDesc": "Sicherungen löschen, die älter als diese Anzahl von Tagen sind (über die Mindestanzahl hinaus)",
-      "retentionLogic": "Aufbewahrungslogik",
-      "saveRetention": "Aufbewahrungseinstellungen speichern",
-      "timeBasedCleanup": "<strong>Zeitbasierte Bereinigung:</strong> Sicherungen löschen, die älter als {{days}} Tage sind (über die Mindestanzahl hinaus)",
-      "title": "Sicherungsaufbewahrungseinstellungen"
-    },
     "schedule": {
+      "changeInSettings": "Zeitplan und Aufbewahrung ändern",
       "completedSuccessfully": "Erfolgreich abgeschlossen",
       "dayOfWeek": "Wochentag",
       "dayOfWeekDesc": "An welchem Tag soll die wöchentliche Sicherung ausgeführt werden?",
@@ -179,17 +159,12 @@
         "every12Hours": "Alle 12 Stunden",
         "every6Hours": "Alle 6 Stunden"
       },
-      "saveSchedule": "Zeitplan speichern",
       "timeOfDay": "Tageszeit",
       "timeOfDayDesc": "Wann soll die Sicherung ausgeführt werden? (24-Stunden-Format)",
       "title": "Automatischer Sicherungszeitplan",
       "unknownError": "Unbekannter Fehler"
     },
-    "subtitle": "Systemsicherungen erstellen und verwalten",
-    "tabs": {
-      "backups": "Sicherungen"
-    },
-    "unsavedBadge": "Ungespeichert"
+    "subtitle": "Systemsicherungen erstellen und verwalten"
   },
   "createUser": {
     "autoFeatures": {
@@ -523,30 +498,82 @@
     "specialtySaved": "Fachgebiet einsatzbereit"
   },
   "settings": {
+    "backups": {
+      "maxCount": "Erwartetes Maximum",
+      "maxCountDesc": "Nur zur Information. Sicherungen über dieser Anzahl werden weder gelöscht noch blockiert.",
+      "minCount": "Mindestens behalten",
+      "minCountDesc": "Die neuesten Sicherungen werden unabhängig vom Alter behalten.",
+      "operationsLink": "Sicherungen auf der Seite Sicherungsverwaltung erstellen, herunterladen und wiederherstellen",
+      "retentionDays": "Sicherungen löschen, die älter sind als",
+      "retentionDaysDesc": "Die Bereinigung unterschreitet nie die Mindestanzahl.",
+      "scheduleUnavailable": "Der Sicherungszeitplan konnte nicht geladen werden."
+    },
     "dataRetention": {
-      "title": "Datenaufbewahrung",
-      "trashRetention": "Papierkorb-Aufbewahrung",
-      "trashRetentionDesc": "Anzahl der Tage, die gelöschte Dateien im Papierkorb aufbewahrt werden, bevor sie endgültig gelöscht werden"
+      "trashRetention": "Gelöschte Dateien im Papierkorb behalten für",
+      "trashRetentionDesc": "Danach werden Dateien im Papierkorb endgültig gelöscht."
+    },
+    "deployment": {
+      "autoRedirectDesc": "Aus demselben Grund wie der Nur-SSO-Modus außerhalb der App.",
+      "logLevel": "Protokollstufe",
+      "logLevelDesc": "Wie ausführlich der Server protokolliert.",
+      "privateUrls": "Private Integrationsadressen",
+      "privateUrlsDesc": "Ob Paperless und Papra LAN-, Loopback- oder Docker-Adressen verwenden dürfen.",
+      "ssoOnlyDesc": "Bleibt außerhalb der App, damit ein defekter Identitätsanbieter immer durch Bearbeiten der Compose-Datei rückgängig gemacht werden kann."
+    },
+    "errors": {
+      "minAboveMax": "Darf nicht größer als die maximale Sicherungsanzahl sein.",
+      "outOfRange": "Geben Sie eine ganze Zahl von {{min}} bis {{max}} ein.",
+      "scheduleNotSaved": "Ihre anderen Änderungen wurden gespeichert, der Sicherungszeitplan jedoch nicht: {{error}}"
+    },
+    "groups": {
+      "accounts": "Konten",
+      "backupCleanup": "Bereinigung der Sicherungen",
+      "deployment": "In docker-compose.yml oder .env ändern, dann neu starten",
+      "retention": "Aufbewahrung"
     },
     "loading": "Einstellungen werden geladen...",
-    "resetAll": "Alles zurücksetzen",
-    "saveAllChanges": "Alle Änderungen speichern",
+    "saveBar": {
+      "discard": "Verwerfen",
+      "region": "Nicht gespeicherte Änderungen",
+      "save": "Änderungen speichern",
+      "saved": "Einstellungen gespeichert",
+      "unsaved_one": "{{count}} nicht gespeicherte Änderung",
+      "unsaved_other": "{{count}} nicht gespeicherte Änderungen"
+    },
+    "sections": {
+      "backups": "Sicherungen",
+      "data": "Daten und Speicher",
+      "deployment": "Durch Bereitstellung festgelegt",
+      "users": "Benutzer und Anmeldung"
+    },
+    "source": {
+      "composeOverridden": "Compose setzt {{value}}; stattdessen wird der gespeicherte Wert verwendet.",
+      "default": "Standard",
+      "env": "Aus Compose",
+      "reset": "Auf Standard zurücksetzen",
+      "saved": "Hier gespeichert"
+    },
     "sso": {
       "autoRedirect": "Automatische Weiterleitung zum Anbieter",
       "envOnly": "Diese Einstellungen werden über Umgebungsvariablen festgelegt und können hier nicht geändert werden.",
+      "howToEnable": "So wird es aktiviert",
+      "off": "Single Sign-On ist deaktiviert",
       "ssoDisabledInfo": "SSO ist derzeit deaktiviert. Um SSO zu aktivieren, konfigurieren Sie die folgenden Umgebungsvariablen und starten Sie die Anwendung neu:",
       "ssoOnly": "Nur-SSO-Modus",
       "ssoRegistration": "SSO-Registrierung",
-      "testConnection": "Verbindung testen",
-      "testConnectionDesc": "SSO-Anbieterverbindung und -konfiguration testen",
       "testSsoConnection": "SSO-Verbindung testen",
       "title": "Single Sign-On (SSO)"
     },
-    "subtitle": "Systemweite Einstellungen und Aufbewahrungsrichtlinien konfigurieren",
-    "title": "Admin-Einstellungen",
+    "subtitle": "Systemweite Einstellungen für diese MediKeep-Instanz",
+    "title": "Einstellungen",
+    "units": {
+      "backups": "Sicherungen",
+      "days": "Tage"
+    },
     "userManagement": {
-      "allowRegistration": "Neue Benutzerregistrierung erlauben",
-      "allowRegistrationDesc": "Aktivieren oder deaktivieren Sie die Möglichkeit für neue Benutzer, Konten über die Anmeldeseite zu erstellen"
+      "allowRegistration": "Neue Konten über die Anmeldeseite erlauben",
+      "allowRegistrationDesc": "Wenn deaktiviert, kann nur ein Administrator Konten anlegen.",
+      "sealedPreview": "Der Nur-SSO-Modus ist aktiv. Wenn dies deaktiviert ist, kann niemand selbst ein Konto anlegen. Ein Administrator muss jedes Konto erstellen."
     },
     "warnings": {
       "sso_only_no_registration_route": "Der SSO-only-Modus ist aktiv und die Benutzerregistrierung ist jetzt deaktiviert. Es kann kein neues Konto mehr per Selbstregistrierung erstellt werden - ein Administrator muss die Konten anlegen. Falls das nicht beabsichtigt war, aktivieren Sie die Registrierung wieder oder schalten Sie den SSO-only-Modus aus."

@@ -34,7 +34,7 @@ SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback  # if using port 8005
 ### Step 3: Restart & Test
 1. Restart your application
 2. Go to login page - you'll see "Continue with Google"
-3. Go to Admin Settings to test the connection
+3. Go to Admin > Settings > Users and sign-in to test the connection
 
 **That's it!** 🎉
 
@@ -95,7 +95,7 @@ And add the same URL to your Google/GitHub app settings.
 
 ## Need Help?
 
-- Check the **Admin Settings** page for SSO status
+- Check **Admin > Settings > Users and sign-in** for SSO status
 - Use **"Test SSO Connection"** to verify setup
 - See [SSO_SETUP_GUIDE.md](SSO_SETUP_GUIDE.md) for detailed instructions
 - Check logs if something isn't working
@@ -134,11 +134,11 @@ SSO_ALLOWED_DOMAINS=["gmail.com", "smithfamily.org"]
 ```
 
 ### Disable New User Creation
-This is controlled in the **Admin Settings** page, not environment variables:
+This is controlled on the admin **Settings** page, not environment variables:
 
 1. Login as admin
-2. Go to **Admin Settings** → **User Management** 
-3. Toggle **"Allow New User Registration"** to **OFF**
+2. Go to **Admin** → **Settings** → **Users and sign-in**
+3. Turn off **"Allow new accounts from the login page"** and click **Save changes**
 
 This will block new SSO users but allow existing users to link accounts.
 

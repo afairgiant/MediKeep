@@ -1,16 +1,17 @@
 import logger from '../../services/logger';
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { useAdminData } from '../../hooks/useAdminData';
 import { useBackupNotifications } from '../../hooks/useBackupNotifications';
 import { adminApiService } from '../../services/api/adminApi';
 import { downloadBlob, exportTimestamp } from '../../utils/downloadUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { isTimedPreset, useScheduleLabels } from './settings/useScheduleLabels';
 import {
   Card,
-  Tabs,
   Table,
   Paper,
   ScrollArea,
@@ -25,8 +26,6 @@ import {
   Menu,
   Modal,
   Alert,
-  NumberInput,
-  Select,
   List,
   ThemeIcon,
   SimpleGrid,
@@ -37,7 +36,6 @@ import {
   FileButton,
   Divider,
 } from '@mantine/core';
-import { TimeInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconDeviceFloppy,
@@ -56,29 +54,12 @@ import {
   IconEye,
   IconAlertTriangle,
   IconAlertCircle,
-  IconShield,
   IconInbox,
   IconBolt,
   IconClipboardList,
   IconCalendarEvent,
-  IconClock,
-  IconCheck,
 } from '@tabler/icons-react';
 import './BackupManagement.css';
-
-// Default retention settings constants
-const DEFAULT_RETENTION_SETTINGS = {
-  BACKUP_RETENTION_DAYS: 7,
-  BACKUP_MIN_COUNT: 5,
-  BACKUP_MAX_COUNT: 50,
-};
-
-// Minimum allowed values for each setting
-const MIN_VALUES = {
-  backup_retention_days: 1,
-  backup_min_count: 1,
-  backup_max_count: 5,
-};
 
 const getTypeColor = type =>
   ({ database: 'blue', files: 'orange', full: 'cyan' })[type] || 'gray';
@@ -103,13 +84,7 @@ const BackupManagement = () => {
   const [exporting, setExporting] = useState(false);
   const uploadResetRef = useRef(null);
 
-  // Tab management
-  const [activeTab, setActiveTab] = useState('backups');
-  const [pendingTab, setPendingTab] = useState(null);
-
   // Modal disclosures
-  const [unsavedOpened, { open: openUnsaved, close: closeUnsaved }] =
-    useDisclosure(false);
   const [deleteOpened, { open: openDelete, close: closeDelete }] =
     useDisclosure(false);
   const [cleanupOpened, { open: openCleanup, close: closeCleanup }] =
@@ -127,28 +102,7 @@ const BackupManagement = () => {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState(null);
 
-  // Retention settings state
-  const [retentionSettings, setRetentionSettings] = useState({
-    backup_retention_days: DEFAULT_RETENTION_SETTINGS.BACKUP_RETENTION_DAYS,
-    backup_min_count: DEFAULT_RETENTION_SETTINGS.BACKUP_MIN_COUNT,
-    backup_max_count: DEFAULT_RETENTION_SETTINGS.BACKUP_MAX_COUNT,
-  });
-  const [originalSettings, setOriginalSettings] = useState(null);
-  const [settingsSaving, setSettingsSaving] = useState(false);
-  const [settingsLoading, setSettingsLoading] = useState(false);
-
-  // Auto-backup schedule state
-  const [scheduleSettings, setScheduleSettings] = useState({
-    preset: 'disabled',
-    time_of_day: '02:00',
-    day_of_week: 'sun',
-    enabled: false,
-    last_run_at: null,
-    last_run_status: null,
-    last_run_error: null,
-    next_run_at: null,
-  });
-  const [scheduleSaving, setScheduleSaving] = useState(false);
+  const [scheduleSettings, setScheduleSettings] = useState(null);
 
   // Enhanced notification system
   const { showSuccess, showError, showLoading, hideLoading, showWarning } =
@@ -212,78 +166,11 @@ const BackupManagement = () => {
     }
   };
 
-  // Detect unsaved changes
-  const hasUnsavedChanges = React.useMemo(() => {
-    if (!originalSettings) return false;
-
-    return (
-      retentionSettings.backup_retention_days !==
-        originalSettings.backup_retention_days ||
-      retentionSettings.backup_min_count !==
-        originalSettings.backup_min_count ||
-      retentionSettings.backup_max_count !== originalSettings.backup_max_count
-    );
-  }, [retentionSettings, originalSettings]);
-
-  // Handle tab change with unsaved changes warning
-  const handleTabChange = newTab => {
-    if (activeTab === 'settings' && hasUnsavedChanges) {
-      setPendingTab(newTab);
-      openUnsaved();
-      return;
-    }
-    setActiveTab(newTab);
-  };
-
-  const handleConfirmTabSwitch = () => {
-    if (hasUnsavedChanges && originalSettings) {
-      setRetentionSettings(originalSettings);
-    }
-    if (pendingTab) {
-      setActiveTab(pendingTab);
-      setPendingTab(null);
-    }
-    closeUnsaved();
-  };
-
-  // Load retention settings and schedule on mount
+  // Load the schedule summary on mount
   React.useEffect(() => {
-    loadRetentionSettings();
     loadScheduleSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; loaders are stable in component scope
   }, []);
-
-  const loadRetentionSettings = async () => {
-    try {
-      setSettingsLoading(true);
-      const data = await adminApiService.getRetentionSettings();
-
-      const loadedSettings = {
-        backup_retention_days:
-          data.backup_retention_days ||
-          DEFAULT_RETENTION_SETTINGS.BACKUP_RETENTION_DAYS,
-        backup_min_count:
-          data.backup_min_count || DEFAULT_RETENTION_SETTINGS.BACKUP_MIN_COUNT,
-        backup_max_count:
-          data.backup_max_count || DEFAULT_RETENTION_SETTINGS.BACKUP_MAX_COUNT,
-      };
-
-      setRetentionSettings(loadedSettings);
-      setOriginalSettings(loadedSettings);
-
-      logger.info('Retention settings loaded successfully', {
-        component: 'BackupManagement',
-      });
-    } catch (err) {
-      logger.error('Failed to load retention settings', {
-        component: 'BackupManagement',
-        error: err.message,
-      });
-      showError('loadRetentionSettings', err);
-    } finally {
-      setSettingsLoading(false);
-    }
-  };
 
   const loadScheduleSettings = async () => {
     try {
@@ -294,125 +181,6 @@ const BackupManagement = () => {
         component: 'BackupManagement',
         error: err.message,
       });
-    }
-  };
-
-  const handleSaveSchedule = async () => {
-    try {
-      setScheduleSaving(true);
-
-      const payload = {
-        preset: scheduleSettings.preset,
-        time_of_day: scheduleSettings.time_of_day,
-      };
-      if (scheduleSettings.preset === 'weekly') {
-        payload.day_of_week = scheduleSettings.day_of_week;
-      }
-
-      const loadingId = showLoading('updateSchedule');
-      const response = await adminApiService.updateAutoBackupSchedule(payload);
-      hideLoading(loadingId);
-      showSuccess('updateSchedule', response);
-
-      if (response.schedule) {
-        setScheduleSettings(prev => ({ ...prev, ...response.schedule }));
-      }
-    } catch (err) {
-      logger.error('Failed to save auto-backup schedule', {
-        component: 'BackupManagement',
-        error: err.message,
-      });
-      showError('updateSchedule', err);
-    } finally {
-      setScheduleSaving(false);
-    }
-  };
-
-  const handleSettingsInputChange = (field, value) => {
-    if (value === '') {
-      setRetentionSettings(prev => ({
-        ...prev,
-        [field]: '',
-      }));
-      return;
-    }
-
-    const numericValue =
-      typeof value === 'number'
-        ? value
-        : typeof value === 'string'
-          ? Number(value)
-          : NaN;
-
-    if (!Number.isNaN(numericValue) && numericValue >= 1) {
-      setRetentionSettings(prev => ({
-        ...prev,
-        [field]: numericValue,
-      }));
-    }
-  };
-
-  const handleSettingsBlur = field => {
-    const min = MIN_VALUES[field] || 1;
-    if (retentionSettings[field] === '' || retentionSettings[field] < min) {
-      setRetentionSettings(prev => ({
-        ...prev,
-        [field]: min,
-      }));
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    try {
-      setSettingsSaving(true);
-
-      const validSettings = {
-        backup_retention_days:
-          retentionSettings.backup_retention_days ||
-          DEFAULT_RETENTION_SETTINGS.BACKUP_RETENTION_DAYS,
-        backup_min_count:
-          retentionSettings.backup_min_count ||
-          DEFAULT_RETENTION_SETTINGS.BACKUP_MIN_COUNT,
-        backup_max_count:
-          retentionSettings.backup_max_count ||
-          DEFAULT_RETENTION_SETTINGS.BACKUP_MAX_COUNT,
-      };
-
-      setRetentionSettings(validSettings);
-
-      const loadingId = showLoading('updateRetentionSettings');
-
-      const response =
-        await adminApiService.updateRetentionSettings(validSettings);
-
-      hideLoading(loadingId);
-      showSuccess('updateRetentionSettings', response);
-
-      if (response.current_settings) {
-        const confirmedSettings = {
-          backup_retention_days:
-            response.current_settings.backup_retention_days,
-          backup_min_count: response.current_settings.backup_min_count,
-          backup_max_count: response.current_settings.backup_max_count,
-        };
-        setRetentionSettings(confirmedSettings);
-        setOriginalSettings(confirmedSettings);
-      }
-
-      logger.info('Retention settings updated successfully', {
-        component: 'BackupManagement',
-        settings: validSettings,
-      });
-
-      await refreshData();
-    } catch (err) {
-      logger.error('Failed to save retention settings', {
-        component: 'BackupManagement',
-        error: err.message,
-      });
-      showError('updateRetentionSettings', err);
-    } finally {
-      setSettingsSaving(false);
     }
   };
 
@@ -678,36 +446,6 @@ const BackupManagement = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const schedulePresetData = useMemo(
-    () => [
-      { value: 'disabled', label: t('shared:labels.disabled', 'Disabled') },
-      {
-        value: 'every_6_hours',
-        label: t('backup.schedule.presets.every6Hours', 'Every 6 hours'),
-      },
-      {
-        value: 'every_12_hours',
-        label: t('backup.schedule.presets.every12Hours', 'Every 12 hours'),
-      },
-      { value: 'daily', label: t('backup.schedule.presets.daily', 'Daily') },
-      { value: 'weekly', label: t('shared:labels.weekly', 'Weekly') },
-    ],
-    [t]
-  );
-
-  const dayOfWeekData = useMemo(
-    () => [
-      { value: 'mon', label: t('backup.schedule.days.mon', 'Monday') },
-      { value: 'tue', label: t('backup.schedule.days.tue', 'Tuesday') },
-      { value: 'wed', label: t('backup.schedule.days.wed', 'Wednesday') },
-      { value: 'thu', label: t('backup.schedule.days.thu', 'Thursday') },
-      { value: 'fri', label: t('backup.schedule.days.fri', 'Friday') },
-      { value: 'sat', label: t('backup.schedule.days.sat', 'Saturday') },
-      { value: 'sun', label: t('backup.schedule.days.sun', 'Sunday') },
-    ],
-    [t]
-  );
-
   if (loading && !backupData) {
     return (
       <AdminLayout>
@@ -775,667 +513,398 @@ const BackupManagement = () => {
           </Group>
         </Card>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tabs.List mb="xl">
-            <Tabs.Tab
-              value="backups"
-              leftSection={<IconDeviceFloppy size={16} />}
-            >
-              {t('backup.tabs.backups', 'Backups')}
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="settings"
-              leftSection={<IconSettings size={16} />}
-              rightSection={
-                hasUnsavedChanges ? (
-                  <Badge size="xs" color="yellow" variant="filled">
-                    {t('backup.unsavedBadge', 'Unsaved')}
-                  </Badge>
-                ) : null
-              }
-            >
-              {t('shared:labels.settings', 'Settings')}
-            </Tabs.Tab>
-          </Tabs.List>
+        {scheduleSettings && <ScheduleSummary schedule={scheduleSettings} />}
 
-          {/* Backups Panel */}
-          <Tabs.Panel value="backups">
-            {/* Backup Operations */}
-            <Card shadow="sm" p="lg" mb="xl" withBorder>
-              <Group mb="md">
-                <ThemeIcon size="lg" variant="light" color="violet">
-                  <IconBolt size={20} />
+        {/* Backup Operations */}
+        <Card shadow="sm" p="lg" mb="xl" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="violet">
+              <IconBolt size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              {t('backup.operations.title', 'Backup Operations')}
+            </Text>
+          </Group>
+          <SimpleGrid cols={{ base: 1, sm: 3 }}>
+            {/* Full Backup */}
+            <Card withBorder p="md">
+              <Stack align="center" gap="sm">
+                <ThemeIcon size="xl" variant="light" color="cyan">
+                  <IconDatabaseExport size={24} />
                 </ThemeIcon>
-                <Text fw={600} size="lg">
-                  {t('backup.operations.title', 'Backup Operations')}
+                <Text fw={500} ta="center">
+                  {t('backup.operations.fullBackup', 'Full System Backup')}
                 </Text>
-              </Group>
-              <SimpleGrid cols={{ base: 1, sm: 3 }}>
-                {/* Full Backup */}
-                <Card withBorder p="md">
-                  <Stack align="center" gap="sm">
-                    <ThemeIcon size="xl" variant="light" color="cyan">
-                      <IconDatabaseExport size={24} />
-                    </ThemeIcon>
-                    <Text fw={500} ta="center">
-                      {t('backup.operations.fullBackup', 'Full System Backup')}
-                    </Text>
-                    <Text size="sm" c="dimmed" ta="center">
-                      {t(
-                        'backup.operations.fullBackupDesc',
-                        'Complete backup (database + files)'
-                      )}
-                    </Text>
+                <Text size="sm" c="dimmed" ta="center">
+                  {t(
+                    'backup.operations.fullBackupDesc',
+                    'Complete backup (database + files)'
+                  )}
+                </Text>
+                <Button
+                  fullWidth
+                  loading={creating.full}
+                  onClick={() => handleCreateBackup('full')}
+                  leftSection={<IconDatabaseExport size={16} />}
+                >
+                  {t(
+                    'backup.operations.createFullBackup',
+                    'Create Full Backup'
+                  )}
+                </Button>
+              </Stack>
+            </Card>
+
+            {/* Upload */}
+            <Card withBorder p="md">
+              <Stack align="center" gap="sm">
+                <ThemeIcon size="xl" variant="light" color="blue">
+                  <IconUpload size={24} />
+                </ThemeIcon>
+                <Text fw={500} ta="center">
+                  {t('backup.operations.uploadBackup', 'Upload Backup')}
+                </Text>
+                <Text size="sm" c="dimmed" ta="center">
+                  {t(
+                    'backup.operations.uploadBackupDesc',
+                    'Upload an external backup file (.sql or .zip)'
+                  )}
+                </Text>
+                <FileButton
+                  resetRef={uploadResetRef}
+                  onChange={handleUploadBackup}
+                  accept=".sql,.zip"
+                >
+                  {props => (
+                    <Button
+                      {...props}
+                      fullWidth
+                      variant="light"
+                      loading={uploading}
+                      leftSection={<IconUpload size={16} />}
+                    >
+                      {t('backup.operations.chooseFile', 'Choose Backup File')}
+                    </Button>
+                  )}
+                </FileButton>
+              </Stack>
+            </Card>
+
+            {/* Advanced */}
+            <Card withBorder p="md">
+              <Stack align="center" gap="sm">
+                <ThemeIcon size="xl" variant="light" color="gray">
+                  <IconDotsVertical size={24} />
+                </ThemeIcon>
+                <Text fw={500} ta="center">
+                  {t('backup.operations.advancedOptions', 'Advanced Options')}
+                </Text>
+                <Text size="sm" c="dimmed" ta="center">
+                  {t(
+                    'backup.operations.advancedOptionsDesc',
+                    'Additional backup and cleanup operations'
+                  )}
+                </Text>
+                <Menu shadow="md" width={200}>
+                  <Menu.Target>
                     <Button
                       fullWidth
-                      loading={creating.full}
-                      onClick={() => handleCreateBackup('full')}
-                      leftSection={<IconDatabaseExport size={16} />}
-                    >
-                      {t(
-                        'backup.operations.createFullBackup',
-                        'Create Full Backup'
-                      )}
-                    </Button>
-                  </Stack>
-                </Card>
-
-                {/* Upload */}
-                <Card withBorder p="md">
-                  <Stack align="center" gap="sm">
-                    <ThemeIcon size="xl" variant="light" color="blue">
-                      <IconUpload size={24} />
-                    </ThemeIcon>
-                    <Text fw={500} ta="center">
-                      {t('backup.operations.uploadBackup', 'Upload Backup')}
-                    </Text>
-                    <Text size="sm" c="dimmed" ta="center">
-                      {t(
-                        'backup.operations.uploadBackupDesc',
-                        'Upload an external backup file (.sql or .zip)'
-                      )}
-                    </Text>
-                    <FileButton
-                      resetRef={uploadResetRef}
-                      onChange={handleUploadBackup}
-                      accept=".sql,.zip"
-                    >
-                      {props => (
-                        <Button
-                          {...props}
-                          fullWidth
-                          variant="light"
-                          loading={uploading}
-                          leftSection={<IconUpload size={16} />}
-                        >
-                          {t(
-                            'backup.operations.chooseFile',
-                            'Choose Backup File'
-                          )}
-                        </Button>
-                      )}
-                    </FileButton>
-                  </Stack>
-                </Card>
-
-                {/* Advanced */}
-                <Card withBorder p="md">
-                  <Stack align="center" gap="sm">
-                    <ThemeIcon size="xl" variant="light" color="gray">
-                      <IconDotsVertical size={24} />
-                    </ThemeIcon>
-                    <Text fw={500} ta="center">
-                      {t(
-                        'backup.operations.advancedOptions',
-                        'Advanced Options'
-                      )}
-                    </Text>
-                    <Text size="sm" c="dimmed" ta="center">
-                      {t(
-                        'backup.operations.advancedOptionsDesc',
-                        'Additional backup and cleanup operations'
-                      )}
-                    </Text>
-                    <Menu shadow="md" width={200}>
-                      <Menu.Target>
-                        <Button
-                          fullWidth
-                          variant="light"
-                          leftSection={<IconDotsVertical size={16} />}
-                        >
-                          {t('backup.operations.moreOptions', 'More Options')}
-                        </Button>
-                      </Menu.Target>
-                      <Menu.Dropdown>
-                        <Menu.Item
-                          leftSection={<IconDatabase size={16} />}
-                          onClick={() => handleCreateBackup('database')}
-                          disabled={creating.database}
-                        >
-                          {creating.database
-                            ? t('backup.operations.creating', 'Creating...')
-                            : t(
-                                'backup.operations.databaseOnly',
-                                'Database Only'
-                              )}
-                        </Menu.Item>
-                        <Menu.Item
-                          leftSection={<IconFiles size={16} />}
-                          onClick={() => handleCreateBackup('files')}
-                          disabled={creating.files}
-                        >
-                          {creating.files
-                            ? t('backup.operations.creating', 'Creating...')
-                            : t('backup.operations.filesOnly', 'Files Only')}
-                        </Menu.Item>
-                        <Menu.Divider />
-                        <Menu.Item
-                          leftSection={<IconEraser size={16} />}
-                          onClick={handleCleanupBackups}
-                          disabled={loading}
-                        >
-                          {t(
-                            'backup.operations.cleanupOld',
-                            'Cleanup Old Backups'
-                          )}
-                        </Menu.Item>
-                        <Menu.Item
-                          leftSection={<IconTrash size={16} />}
-                          color="red"
-                          onClick={handleOpenCleanupModal}
-                          disabled={loading}
-                        >
-                          {t(
-                            'backup.operations.completeCleanup',
-                            'Complete Cleanup'
-                          )}
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </Stack>
-                </Card>
-              </SimpleGrid>
-            </Card>
-
-            {/* Existing Backups Table */}
-            <Card shadow="sm" p="lg" mb="xl" withBorder pos="relative">
-              <LoadingOverlay visible={loading && !!backupData} />
-              <Group justify="space-between" mb="md">
-                <Group>
-                  <ThemeIcon size="lg" variant="light" color="blue">
-                    <IconClipboardList size={20} />
-                  </ThemeIcon>
-                  <Text fw={600} size="lg">
-                    {t('backup.existingBackups.title', 'Existing Backups')}
-                  </Text>
-                </Group>
-                <Group gap="sm">
-                  <Button
-                    variant="light"
-                    size="xs"
-                    leftSection={<IconDownload size={14} />}
-                    onClick={handleExportBackups}
-                    loading={exporting}
-                    disabled={backups.length === 0}
-                  >
-                    {t('shared:labels.exportCsv', 'Export CSV')}
-                  </Button>
-                  <Text size="sm" c="dimmed">
-                    {t('backup.existingBackups.count', '{{count}} backups', {
-                      count: backups.length,
-                    })}
-                  </Text>
-                </Group>
-              </Group>
-
-              {backups.length === 0 ? (
-                <Center py="xl">
-                  <Stack align="center">
-                    <ThemeIcon size="xl" variant="light" color="gray">
-                      <IconInbox size={24} />
-                    </ThemeIcon>
-                    <Text c="dimmed">
-                      {t(
-                        'backup.existingBackups.noBackups',
-                        'No backups found'
-                      )}
-                    </Text>
-                  </Stack>
-                </Center>
-              ) : (
-                <Paper withBorder>
-                  <ScrollArea>
-                    <Table striped highlightOnHover>
-                      <Table.Thead>
-                        <Table.Tr>
-                          <Table.Th>{t('shared:labels.type', 'Type')}</Table.Th>
-                          <Table.Th>
-                            {t(
-                              'backup.existingBackups.tableHeaders.filename',
-                              'Filename'
-                            )}
-                          </Table.Th>
-                          <Table.Th>{t('shared:labels.size', 'Size')}</Table.Th>
-                          <Table.Th>
-                            {t('shared:fields.status', 'Status')}
-                          </Table.Th>
-                          <Table.Th>
-                            {t('shared:labels.created', 'Created')}
-                          </Table.Th>
-                          <Table.Th>
-                            {t(
-                              'backup.existingBackups.tableHeaders.fileExists',
-                              'File Exists'
-                            )}
-                          </Table.Th>
-                          <Table.Th>
-                            {t('shared:labels.actions', 'Actions')}
-                          </Table.Th>
-                        </Table.Tr>
-                      </Table.Thead>
-                      <Table.Tbody>
-                        {backups.map(backup => (
-                          <Table.Tr key={backup.id}>
-                            <Table.Td>
-                              <Badge
-                                variant="light"
-                                color={getTypeColor(backup.backup_type)}
-                              >
-                                {backup.backup_type}
-                              </Badge>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text
-                                size="sm"
-                                style={{
-                                  maxWidth: 200,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                {backup.filename}
-                              </Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text size="sm">
-                                {backup.size_bytes
-                                  ? formatFileSize(backup.size_bytes)
-                                  : t('shared:labels.unknown', 'Unknown')}
-                              </Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <Badge
-                                variant="light"
-                                color={getStatusColor(backup.status)}
-                              >
-                                {backup.status}
-                              </Badge>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text size="sm">
-                                {formatDateTime(backup.created_at)}
-                              </Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <Badge
-                                color={backup.file_exists ? 'green' : 'red'}
-                                variant="light"
-                              >
-                                {backup.file_exists
-                                  ? t('common:labels.yes', 'Yes')
-                                  : t('common:labels.no', 'No')}
-                              </Badge>
-                            </Table.Td>
-                            <Table.Td>
-                              <Group gap={4} wrap="nowrap">
-                                {backup.file_exists && (
-                                  <Tooltip
-                                    label={t(
-                                      'backup.existingBackups.download',
-                                      'Download'
-                                    )}
-                                  >
-                                    <ActionIcon
-                                      variant="subtle"
-                                      color="green"
-                                      onClick={() =>
-                                        handleDownloadBackup(
-                                          backup.id,
-                                          backup.filename
-                                        )
-                                      }
-                                      aria-label={t(
-                                        'backup.existingBackups.download',
-                                        'Download'
-                                      )}
-                                    >
-                                      <IconDownload size={16} />
-                                    </ActionIcon>
-                                  </Tooltip>
-                                )}
-                                <Tooltip
-                                  label={t(
-                                    'backup.existingBackups.verify',
-                                    'Verify'
-                                  )}
-                                >
-                                  <ActionIcon
-                                    variant="subtle"
-                                    color="blue"
-                                    onClick={() =>
-                                      handleVerifyBackup(backup.id)
-                                    }
-                                    aria-label={t(
-                                      'backup.existingBackups.verify',
-                                      'Verify'
-                                    )}
-                                  >
-                                    <IconShieldCheck size={16} />
-                                  </ActionIcon>
-                                </Tooltip>
-                                {backup.file_exists && (
-                                  <Tooltip
-                                    label={t(
-                                      'backup.existingBackups.previewRestore',
-                                      'Preview restore'
-                                    )}
-                                  >
-                                    <ActionIcon
-                                      variant="subtle"
-                                      color="cyan"
-                                      onClick={() =>
-                                        handlePreviewRestore(backup.id)
-                                      }
-                                      aria-label={t(
-                                        'backup.existingBackups.previewRestore',
-                                        'Preview restore'
-                                      )}
-                                    >
-                                      <IconEye size={16} />
-                                    </ActionIcon>
-                                  </Tooltip>
-                                )}
-                                <Tooltip
-                                  label={t('common:buttons.delete', 'Delete')}
-                                >
-                                  <ActionIcon
-                                    variant="subtle"
-                                    color="red"
-                                    onClick={() =>
-                                      handleDeleteClick(
-                                        backup.id,
-                                        backup.filename
-                                      )
-                                    }
-                                    aria-label={t(
-                                      'common:buttons.delete',
-                                      'Delete'
-                                    )}
-                                  >
-                                    <IconTrash size={16} />
-                                  </ActionIcon>
-                                </Tooltip>
-                                {backup.file_exists && (
-                                  <Tooltip
-                                    label={t(
-                                      'backup.existingBackups.restore',
-                                      'Restore'
-                                    )}
-                                  >
-                                    <ActionIcon
-                                      variant="subtle"
-                                      color="orange"
-                                      onClick={() =>
-                                        handleRestoreClick(
-                                          backup.id,
-                                          backup.backup_type
-                                        )
-                                      }
-                                      disabled={restoring[backup.id]}
-                                      aria-label={t(
-                                        'backup.existingBackups.restore',
-                                        'Restore'
-                                      )}
-                                    >
-                                      <IconRestore size={16} />
-                                    </ActionIcon>
-                                  </Tooltip>
-                                )}
-                              </Group>
-                            </Table.Td>
-                          </Table.Tr>
-                        ))}
-                      </Table.Tbody>
-                    </Table>
-                  </ScrollArea>
-                </Paper>
-              )}
-            </Card>
-          </Tabs.Panel>
-
-          {/* Settings Panel */}
-          <Tabs.Panel value="settings">
-            <Stack gap="lg">
-              {/* Auto-Backup Schedule */}
-              <Card shadow="sm" p="lg" withBorder>
-                <Group mb="md">
-                  <ThemeIcon size="lg" variant="light" color="violet">
-                    <IconCalendarEvent size={20} />
-                  </ThemeIcon>
-                  <Text fw={600} size="lg">
-                    {t('backup.schedule.title', 'Auto-Backup Schedule')}
-                  </Text>
-                  <Badge
-                    variant="light"
-                    color={scheduleSettings.enabled ? 'green' : 'gray'}
-                  >
-                    {scheduleSettings.enabled
-                      ? t('shared:labels.active', 'Active')
-                      : t('shared:labels.disabled', 'Disabled')}
-                  </Badge>
-                </Group>
-
-                <Stack>
-                  <Group justify="space-between" align="flex-start">
-                    <Stack gap={4} style={{ flex: 1 }}>
-                      <Text fw={500}>
-                        {t('backup.schedule.frequency', 'Backup Frequency')}
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        {t(
-                          'backup.schedule.frequencyDesc',
-                          'Schedule automatic full backups (database + files)'
-                        )}
-                      </Text>
-                    </Stack>
-                    <Select
-                      w={200}
-                      value={scheduleSettings.preset}
-                      onChange={value =>
-                        setScheduleSettings(prev => ({
-                          ...prev,
-                          preset: value,
-                          enabled: value !== 'disabled',
-                        }))
-                      }
-                      data={schedulePresetData}
-                    />
-                  </Group>
-
-                  {(scheduleSettings.preset === 'daily' ||
-                    scheduleSettings.preset === 'weekly') && (
-                    <Group justify="space-between" align="flex-start">
-                      <Stack gap={4} style={{ flex: 1 }}>
-                        <Text fw={500}>
-                          {t('backup.schedule.timeOfDay', 'Time of Day')}
-                        </Text>
-                        <Text size="sm" c="dimmed">
-                          {t(
-                            'backup.schedule.timeOfDayDesc',
-                            'When should the backup run? (24-hour format)'
-                          )}
-                        </Text>
-                      </Stack>
-                      <TimeInput
-                        w={160}
-                        value={scheduleSettings.time_of_day}
-                        onChange={event =>
-                          setScheduleSettings(prev => ({
-                            ...prev,
-                            time_of_day: event.target.value,
-                          }))
-                        }
-                        leftSection={<IconClock size={16} />}
-                      />
-                    </Group>
-                  )}
-
-                  {scheduleSettings.preset === 'weekly' && (
-                    <Group justify="space-between" align="flex-start">
-                      <Stack gap={4} style={{ flex: 1 }}>
-                        <Text fw={500}>
-                          {t('backup.schedule.dayOfWeek', 'Day of Week')}
-                        </Text>
-                        <Text size="sm" c="dimmed">
-                          {t(
-                            'backup.schedule.dayOfWeekDesc',
-                            'Which day should the weekly backup run?'
-                          )}
-                        </Text>
-                      </Stack>
-                      <Select
-                        w={160}
-                        value={scheduleSettings.day_of_week}
-                        onChange={value =>
-                          setScheduleSettings(prev => ({
-                            ...prev,
-                            day_of_week: value,
-                          }))
-                        }
-                        data={dayOfWeekData}
-                        leftSection={<IconCalendarEvent size={16} />}
-                      />
-                    </Group>
-                  )}
-
-                  {scheduleSettings.next_run_at && scheduleSettings.enabled && (
-                    <Group justify="space-between">
-                      <Text fw={500}>
-                        {t(
-                          'backup.schedule.nextScheduledRun',
-                          'Next Scheduled Run'
-                        )}
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        {formatDateTime(scheduleSettings.next_run_at)}
-                      </Text>
-                    </Group>
-                  )}
-
-                  {scheduleSettings.last_run_at && (
-                    <Alert
                       variant="light"
-                      color={
-                        scheduleSettings.last_run_status === 'success'
-                          ? 'green'
-                          : 'red'
-                      }
-                      icon={
-                        scheduleSettings.last_run_status === 'success' ? (
-                          <IconCheck size={16} />
-                        ) : (
-                          <IconAlertCircle size={16} />
-                        )
-                      }
+                      leftSection={<IconDotsVertical size={16} />}
                     >
-                      <Text size="sm">
-                        {t('backup.schedule.lastBackup', 'Last backup:')}{' '}
-                        {formatDateTime(scheduleSettings.last_run_at)}
-                        {' \u2014 '}
-                        {scheduleSettings.last_run_status === 'success'
-                          ? t(
-                              'backup.schedule.completedSuccessfully',
-                              'Completed successfully'
-                            )
-                          : t('backup.schedule.failed', 'Failed: {{error}}', {
-                              error:
-                                scheduleSettings.last_run_error ||
-                                t(
-                                  'backup.schedule.unknownError',
-                                  'Unknown error'
-                                ),
-                            })}
-                      </Text>
-                    </Alert>
-                  )}
-
-                  <Group justify="flex-end">
-                    <Button
-                      variant="light"
-                      leftSection={<IconDeviceFloppy size={16} />}
-                      onClick={handleSaveSchedule}
-                      loading={scheduleSaving}
-                    >
-                      {t('backup.schedule.saveSchedule', 'Save Schedule')}
+                      {t('backup.operations.moreOptions', 'More Options')}
                     </Button>
-                  </Group>
-                </Stack>
-              </Card>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item
+                      leftSection={<IconDatabase size={16} />}
+                      onClick={() => handleCreateBackup('database')}
+                      disabled={creating.database}
+                    >
+                      {creating.database
+                        ? t('backup.operations.creating', 'Creating...')
+                        : t('backup.operations.databaseOnly', 'Database Only')}
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<IconFiles size={16} />}
+                      onClick={() => handleCreateBackup('files')}
+                      disabled={creating.files}
+                    >
+                      {creating.files
+                        ? t('backup.operations.creating', 'Creating...')
+                        : t('backup.operations.filesOnly', 'Files Only')}
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item
+                      leftSection={<IconEraser size={16} />}
+                      onClick={handleCleanupBackups}
+                      disabled={loading}
+                    >
+                      {t('backup.operations.cleanupOld', 'Cleanup Old Backups')}
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<IconTrash size={16} />}
+                      color="red"
+                      onClick={handleOpenCleanupModal}
+                      disabled={loading}
+                    >
+                      {t(
+                        'backup.operations.completeCleanup',
+                        'Complete Cleanup'
+                      )}
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </Stack>
+            </Card>
+          </SimpleGrid>
+        </Card>
 
-              <RetentionSettings
-                settings={retentionSettings}
-                loading={settingsLoading}
-                saving={settingsSaving}
-                backupCount={backups.length}
-                onInputChange={handleSettingsInputChange}
-                onBlur={handleSettingsBlur}
-                onSave={handleSaveSettings}
-              />
-            </Stack>
-          </Tabs.Panel>
-        </Tabs>
-
-        {/* Modal 1: Unsaved Settings Warning */}
-        <Modal
-          opened={unsavedOpened}
-          onClose={closeUnsaved}
-          title={
-            <Group gap="xs">
-              <IconAlertTriangle
-                size={20}
-                color="var(--mantine-color-yellow-6)"
-              />
-              <Text fw={600}>
-                {t('backup.modals.unsavedChanges', 'Unsaved Changes')}
+        {/* Existing Backups Table */}
+        <Card shadow="sm" p="lg" mb="xl" withBorder pos="relative">
+          <LoadingOverlay visible={loading && !!backupData} />
+          <Group justify="space-between" mb="md">
+            <Group>
+              <ThemeIcon size="lg" variant="light" color="blue">
+                <IconClipboardList size={20} />
+              </ThemeIcon>
+              <Text fw={600} size="lg">
+                {t('backup.existingBackups.title', 'Existing Backups')}
               </Text>
             </Group>
-          }
-          centered
-        >
-          <Stack gap="md">
-            <Alert
-              color="yellow"
-              variant="light"
-              icon={<IconAlertTriangle size={16} />}
-            >
-              {t(
-                'backup.modals.unsavedWarning',
-                'You have unsaved changes in your retention settings. Leaving this tab will discard your changes.'
-              )}
-            </Alert>
-            <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={closeUnsaved}>
-                {t('backup.modals.stayOnSettings', 'Stay on Settings')}
+            <Group gap="sm">
+              <Button
+                variant="light"
+                size="xs"
+                leftSection={<IconDownload size={14} />}
+                onClick={handleExportBackups}
+                loading={exporting}
+                disabled={backups.length === 0}
+              >
+                {t('shared:labels.exportCsv', 'Export CSV')}
               </Button>
-              <Button color="yellow" onClick={handleConfirmTabSwitch}>
-                {t('backup.modals.discardChanges', 'Discard Changes')}
-              </Button>
+              <Text size="sm" c="dimmed">
+                {t('backup.existingBackups.count', '{{count}} backups', {
+                  count: backups.length,
+                })}
+              </Text>
             </Group>
-          </Stack>
-        </Modal>
+          </Group>
 
+          {backups.length === 0 ? (
+            <Center py="xl">
+              <Stack align="center">
+                <ThemeIcon size="xl" variant="light" color="gray">
+                  <IconInbox size={24} />
+                </ThemeIcon>
+                <Text c="dimmed">
+                  {t('backup.existingBackups.noBackups', 'No backups found')}
+                </Text>
+              </Stack>
+            </Center>
+          ) : (
+            <Paper withBorder>
+              <ScrollArea>
+                <Table striped highlightOnHover>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>{t('shared:labels.type', 'Type')}</Table.Th>
+                      <Table.Th>
+                        {t(
+                          'backup.existingBackups.tableHeaders.filename',
+                          'Filename'
+                        )}
+                      </Table.Th>
+                      <Table.Th>{t('shared:labels.size', 'Size')}</Table.Th>
+                      <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
+                      <Table.Th>
+                        {t('shared:labels.created', 'Created')}
+                      </Table.Th>
+                      <Table.Th>
+                        {t(
+                          'backup.existingBackups.tableHeaders.fileExists',
+                          'File Exists'
+                        )}
+                      </Table.Th>
+                      <Table.Th>
+                        {t('shared:labels.actions', 'Actions')}
+                      </Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {backups.map(backup => (
+                      <Table.Tr key={backup.id}>
+                        <Table.Td>
+                          <Badge
+                            variant="light"
+                            color={getTypeColor(backup.backup_type)}
+                          >
+                            {backup.backup_type}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text
+                            size="sm"
+                            style={{
+                              maxWidth: 200,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {backup.filename}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">
+                            {backup.size_bytes
+                              ? formatFileSize(backup.size_bytes)
+                              : t('shared:labels.unknown', 'Unknown')}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            variant="light"
+                            color={getStatusColor(backup.status)}
+                          >
+                            {backup.status}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="sm">
+                            {formatDateTime(backup.created_at)}
+                          </Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge
+                            color={backup.file_exists ? 'green' : 'red'}
+                            variant="light"
+                          >
+                            {backup.file_exists
+                              ? t('common:labels.yes', 'Yes')
+                              : t('common:labels.no', 'No')}
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Group gap={4} wrap="nowrap">
+                            {backup.file_exists && (
+                              <Tooltip
+                                label={t(
+                                  'backup.existingBackups.download',
+                                  'Download'
+                                )}
+                              >
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="green"
+                                  onClick={() =>
+                                    handleDownloadBackup(
+                                      backup.id,
+                                      backup.filename
+                                    )
+                                  }
+                                  aria-label={t(
+                                    'backup.existingBackups.download',
+                                    'Download'
+                                  )}
+                                >
+                                  <IconDownload size={16} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                            <Tooltip
+                              label={t(
+                                'backup.existingBackups.verify',
+                                'Verify'
+                              )}
+                            >
+                              <ActionIcon
+                                variant="subtle"
+                                color="blue"
+                                onClick={() => handleVerifyBackup(backup.id)}
+                                aria-label={t(
+                                  'backup.existingBackups.verify',
+                                  'Verify'
+                                )}
+                              >
+                                <IconShieldCheck size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                            {backup.file_exists && (
+                              <Tooltip
+                                label={t(
+                                  'backup.existingBackups.previewRestore',
+                                  'Preview restore'
+                                )}
+                              >
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="cyan"
+                                  onClick={() =>
+                                    handlePreviewRestore(backup.id)
+                                  }
+                                  aria-label={t(
+                                    'backup.existingBackups.previewRestore',
+                                    'Preview restore'
+                                  )}
+                                >
+                                  <IconEye size={16} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                            <Tooltip
+                              label={t('common:buttons.delete', 'Delete')}
+                            >
+                              <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                onClick={() =>
+                                  handleDeleteClick(backup.id, backup.filename)
+                                }
+                                aria-label={t(
+                                  'common:buttons.delete',
+                                  'Delete'
+                                )}
+                              >
+                                <IconTrash size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                            {backup.file_exists && (
+                              <Tooltip
+                                label={t(
+                                  'backup.existingBackups.restore',
+                                  'Restore'
+                                )}
+                              >
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="orange"
+                                  onClick={() =>
+                                    handleRestoreClick(
+                                      backup.id,
+                                      backup.backup_type
+                                    )
+                                  }
+                                  disabled={restoring[backup.id]}
+                                  aria-label={t(
+                                    'backup.existingBackups.restore',
+                                    'Restore'
+                                  )}
+                                >
+                                  <IconRestore size={16} />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                          </Group>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </ScrollArea>
+            </Paper>
+          )}
+        </Card>
         {/* Modal 2: Delete Backup */}
         <Modal
           opened={deleteOpened}
@@ -1983,199 +1452,74 @@ const RestorePreviewAffectedData = ({
   );
 };
 
-// Retention Settings Component
-const RetentionSettings = ({
-  settings,
-  loading,
-  saving,
-  backupCount,
-  onInputChange,
-  onBlur,
-  onSave,
-}) => {
-  const { t } = useTranslation('admin');
+// Automatic backup summary; the schedule itself is edited on the settings page.
+const ScheduleSummary = ({ schedule }) => {
+  const { t } = useTranslation(['admin', 'shared']);
+  const { presetData, dayData, nextRunText, lastRunText } = useScheduleLabels();
 
-  if (loading) {
-    return (
-      <Center py="xl">
-        <Loader size="lg" />
-      </Center>
-    );
-  }
+  const presetLabel =
+    presetData.find(p => p.value === schedule.preset)?.label ?? schedule.preset;
+  const dayLabel = dayData.find(d => d.value === schedule.day_of_week)?.label;
+  const nextRun = nextRunText(schedule);
+  const lastRun = lastRunText(schedule);
 
   return (
-    <Card shadow="sm" p="lg" withBorder>
-      <Group mb="md">
-        <ThemeIcon size="lg" variant="light" color="blue">
-          <IconSettings size={20} />
-        </ThemeIcon>
-        <Text fw={600} size="lg">
-          {t('backup.retention.title', 'Backup Retention Settings')}
-        </Text>
-      </Group>
-
-      <Alert
-        color="blue"
-        variant="light"
-        icon={<IconShield size={16} />}
-        mb="lg"
-      >
-        <Text fw={500} mb="xs">
-          {t('backup.retention.retentionLogic', 'Retention Logic')}
-        </Text>
-        <List size="sm">
-          <List.Item>
-            <span
-              dangerouslySetInnerHTML={{
-                __html: t(
-                  'shared:labels.strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups',
-                  '<strong>Count Protection:</strong> Always keep the {{count}} most recent backups',
-                  { count: settings.backup_min_count }
-                ),
-              }}
-            />
-          </List.Item>
-          <List.Item>
-            <span
-              dangerouslySetInnerHTML={{
-                __html: t(
-                  'backup.retention.timeBasedCleanup',
-                  '<strong>Time-based Cleanup:</strong> Delete backups older than {{days}} days (beyond minimum count)',
-                  { days: settings.backup_retention_days }
-                ),
-              }}
-            />
-          </List.Item>
-          <List.Item>
-            <span
-              dangerouslySetInnerHTML={{
-                __html: t(
-                  'backup.retention.priority',
-                  '<strong>Priority:</strong> Minimum count always takes precedence over time limits'
-                ),
-              }}
-            />
-          </List.Item>
-          <List.Item>
-            <span
-              dangerouslySetInnerHTML={{
-                __html: t(
-                  'backup.retention.currentStatus',
-                  '<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})',
-                  { count: backupCount, max: settings.backup_max_count }
-                ),
-              }}
-            />
-          </List.Item>
-        </List>
-      </Alert>
-
-      <Stack gap="lg">
-        {/* Retention Days */}
-        <Group justify="space-between" wrap="nowrap">
+    <Card shadow="sm" p="lg" mb="xl" withBorder>
+      <Group justify="space-between" align="flex-start" wrap="wrap">
+        <Group align="flex-start" wrap="nowrap">
+          <ThemeIcon size="lg" variant="light" color="violet">
+            <IconCalendarEvent size={20} />
+          </ThemeIcon>
           <Stack gap={2}>
-            <Text fw={500}>
-              {t('backup.retention.retentionDays', 'Backup Retention (Days)')}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {t(
-                'backup.retention.retentionDaysDesc',
-                'Delete backups older than this many days (beyond minimum count)'
-              )}
-            </Text>
-          </Stack>
-          <NumberInput
-            w={160}
-            min={1}
-            max={365}
-            value={settings.backup_retention_days}
-            onChange={val => onInputChange('backup_retention_days', val)}
-            onBlur={() => onBlur('backup_retention_days')}
-            rightSection={
-              <Text size="xs" c="dimmed">
-                {t('backup.retention.daysUnit', 'days')}
+            <Group gap="xs">
+              <Text fw={600}>
+                {t('backup.schedule.title', 'Auto-Backup Schedule')}
               </Text>
-            }
-            aria-label={t(
-              'backup.retention.retentionDays',
-              'Backup Retention (Days)'
-            )}
-          />
-        </Group>
-
-        {/* Minimum Count */}
-        <Group justify="space-between" wrap="nowrap">
-          <Stack gap={2}>
-            <Text fw={500}>
-              {t('backup.retention.minimumCount', 'Minimum Backup Count')}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {t(
-                'backup.retention.minimumCountDesc',
-                'Always keep at least this many backups (regardless of age)'
-              )}
-            </Text>
-          </Stack>
-          <NumberInput
-            w={160}
-            min={1}
-            max={100}
-            value={settings.backup_min_count}
-            onChange={val => onInputChange('backup_min_count', val)}
-            onBlur={() => onBlur('backup_min_count')}
-            rightSection={
-              <Text size="xs" c="dimmed">
-                {t('backup.retention.backupsUnit', 'backups')}
+              <Badge
+                variant="light"
+                color={schedule.enabled ? 'green' : 'gray'}
+              >
+                {schedule.enabled
+                  ? t('shared:labels.active', 'Active')
+                  : t('shared:labels.disabled', 'Disabled')}
+              </Badge>
+            </Group>
+            {schedule.enabled && (
+              <Text size="sm" c="dimmed">
+                {[
+                  presetLabel,
+                  schedule.preset === 'weekly' ? dayLabel : null,
+                  isTimedPreset(schedule.preset) ? schedule.time_of_day : null,
+                ]
+                  .filter(Boolean)
+                  .join(' \u00b7 ')}
               </Text>
-            }
-            aria-label={t(
-              'backup.retention.minimumCount',
-              'Minimum Backup Count'
             )}
-          />
-        </Group>
-
-        {/* Maximum Count */}
-        <Group justify="space-between" wrap="nowrap">
-          <Stack gap={2}>
-            <Text fw={500}>
-              {t('backup.retention.maximumCount', 'Maximum Backup Count')}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {t(
-                'backup.retention.maximumCountDesc',
-                'Alert when backup count exceeds this limit (optional)'
-              )}
-            </Text>
-          </Stack>
-          <NumberInput
-            w={160}
-            min={5}
-            max={500}
-            value={settings.backup_max_count}
-            onChange={val => onInputChange('backup_max_count', val)}
-            onBlur={() => onBlur('backup_max_count')}
-            rightSection={
-              <Text size="xs" c="dimmed">
-                {t('backup.retention.backupsUnit', 'backups')}
+            {nextRun && (
+              <Text size="sm" c="dimmed">
+                {nextRun}
               </Text>
-            }
-            aria-label={t(
-              'backup.retention.maximumCount',
-              'Maximum Backup Count'
             )}
-          />
+            {lastRun && (
+              <Text
+                size="sm"
+                c={schedule.last_run_status === 'success' ? 'dimmed' : 'red'}
+              >
+                {lastRun}
+              </Text>
+            )}
+          </Stack>
         </Group>
-      </Stack>
-
-      <Divider my="lg" />
-      <Group justify="flex-end">
         <Button
-          loading={saving}
-          leftSection={<IconDeviceFloppy size={16} />}
-          onClick={onSave}
+          component={Link}
+          to="/admin/settings/backups"
+          variant="light"
+          leftSection={<IconSettings size={16} />}
         >
-          {t('backup.retention.saveRetention', 'Save Retention Settings')}
+          {t(
+            'backup.schedule.changeInSettings',
+            'Change schedule and retention'
+          )}
         </Button>
       </Group>
     </Card>

@@ -202,6 +202,12 @@ Specialized service for administrative functions, extending the base API service
 - `getActivityLog(params)` - Get activity logs with filtering
 - `testAdminAccess()` - Verify admin privileges
 
+### Settings
+
+- `getAdminSettings()` - Get every admin-editable setting with its value source, plus read-only deployment values
+- `updateAdminSettings(changes)` - PATCH changed settings only; a `null` value resets that setting to its env or built-in value
+- `getAutoBackupSchedule()` / `updateAutoBackupSchedule(scheduleData)` - Read or change the automatic backup schedule
+
 ## Usage
 
 ### Main API Service (Recommended)
