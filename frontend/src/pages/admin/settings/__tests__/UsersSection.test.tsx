@@ -128,6 +128,23 @@ describe('SSO flags', () => {
 
     expect(await screen.findByText('Provider reachable')).toBeInTheDocument();
   });
+
+  test('a rejected connection test shows a failure and re-enables the button', async () => {
+    const user = userEvent.setup();
+    ssoConfig({ enabled: true, provider_type: 'google' });
+    vi.spyOn(authService, 'testSSOConnection').mockRejectedValue(new Error(''));
+    renderPage();
+
+    const button = await screen.findByRole('button', {
+      name: 'Test SSO Connection',
+    });
+    await user.click(button);
+
+    expect(
+      await screen.findByText('Connection test failed')
+    ).toBeInTheDocument();
+    expect(button).toBeEnabled();
+  });
 });
 
 describe('registration switch', () => {

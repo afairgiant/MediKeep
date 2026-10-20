@@ -157,9 +157,19 @@ describe('save bar', () => {
 
   test('a failed schedule save says the other changes were kept', async () => {
     const user = userEvent.setup();
+    api.updateAdminSettings.mockResolvedValue({
+      settings: makeSettings({
+        backup_retention_days: { value: 14, source: 'saved' },
+      }),
+      updated: ['backup_retention_days'],
+      warnings: [],
+    });
     api.updateAutoBackupSchedule.mockRejectedValue(new Error('Request failed'));
     renderPage('/admin/settings/backups');
 
+    const input = await screen.findByLabelText('Delete backups older than');
+    await user.clear(input);
+    await user.type(input, '14');
     await user.click(
       await screen.findByRole('textbox', { name: 'Backup Frequency' })
     );
@@ -173,6 +183,26 @@ describe('save bar', () => {
         /Your other changes were saved, but the backup schedule was not/
       )
     ).toBeInTheDocument();
+  });
+
+  test('a failed schedule-only save shows the error alone', async () => {
+    const user = userEvent.setup();
+    api.updateAutoBackupSchedule.mockRejectedValue(new Error('Request failed'));
+    renderPage('/admin/settings/backups');
+
+    await user.click(
+      await screen.findByRole('textbox', { name: 'Backup Frequency' })
+    );
+    await user.click(
+      await screen.findByRole('option', { name: 'Every 6 hours', hidden: true })
+    );
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(api.updateAdminSettings).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText(/Your other changes were saved/)
+    ).not.toBeInTheDocument();
   });
 });
 

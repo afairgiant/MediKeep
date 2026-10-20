@@ -561,6 +561,7 @@
       "ssoDisabledInfo": "SSO is momenteel uitgeschakeld. Om SSO in te schakelen, configureer de volgende omgevingsvariabelen en herstart de applicatie:",
       "ssoOnly": "Alleen-SSO-modus",
       "ssoRegistration": "SSO-registratie",
+      "testFailed": "Verbindingstest mislukt",
       "testSsoConnection": "SSO-verbinding testen",
       "title": "Eenmalige aanmelding (SSO)"
     },

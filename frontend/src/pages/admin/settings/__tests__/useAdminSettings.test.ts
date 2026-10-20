@@ -177,6 +177,19 @@ test('a failed schedule save keeps only the schedule unsaved', async () => {
   expect(result.current.scheduleDirty).toBe(true);
 });
 
+test('a failed schedule-only save does not claim other changes were saved', async () => {
+  api.updateAutoBackupSchedule.mockRejectedValue(new Error('Request failed'));
+  const { result } = await loaded();
+
+  act(() => result.current.updateSchedule({ preset: 'weekly' }));
+  await act(async () => {
+    await result.current.save();
+  });
+
+  expect(api.updateAdminSettings).not.toHaveBeenCalled();
+  expect(result.current.saveError?.scope).toBe('scheduleOnly');
+});
+
 test('the schedule payload carries the day only for weekly', async () => {
   api.updateAutoBackupSchedule.mockResolvedValue({ schedule: {} });
   const { result } = await loaded();

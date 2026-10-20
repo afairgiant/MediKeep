@@ -19,7 +19,11 @@ import type {
 } from './types';
 import { isTimedPreset } from './useScheduleLabels';
 
-export type SaveError = { scope: 'settings' | 'schedule'; message: string };
+// 'schedule' means settings were saved first; 'scheduleOnly' means nothing else was sent.
+export type SaveError = {
+  scope: 'settings' | 'schedule' | 'scheduleOnly';
+  message: string;
+};
 
 /** Logs a failed request and returns the message to show the admin. */
 const describeFailure = (event: string, action: string, error: unknown) => {
@@ -242,7 +246,7 @@ export const useAdminSettings = () => {
           });
         } catch (error) {
           setSaveError({
-            scope: 'schedule',
+            scope: dirtyKeys.length > 0 ? 'schedule' : 'scheduleOnly',
             message: describeFailure(
               'admin_settings_schedule_save_failed',
               'save schedule',

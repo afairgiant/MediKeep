@@ -561,6 +561,7 @@
       "ssoDisabledInfo": "SSO è attualmente disabilitato. Per abilitare SSO, configura le seguenti variabili d'ambiente e riavvia l'applicazione:",
       "ssoOnly": "Modalità solo SSO",
       "ssoRegistration": "Registrazione SSO",
+      "testFailed": "Test di connessione non riuscito",
       "testSsoConnection": "Testa connessione SSO",
       "title": "Single Sign-On (SSO)"
     },

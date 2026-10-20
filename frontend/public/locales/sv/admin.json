@@ -98,7 +98,7 @@
       "restorePreview": "Förhandsgranskning av återställning",
       "restoreSafetyNote": "En säkerhetskopia skapas automatiskt innan återställningsprocessen påbörjas.",
       "restoreWarning": "Detta kommer att återställa från säkerhetskopia och ERSÄTTA aktuell data!",
-      "typeCleanupToConfirm": "Skriv <strong>RENSNING</strong> för att bekräfta"
+      "typeCleanupToConfirm": "Skriv <strong>CLEANUP</strong> för att bekräfta"
     },
     "operations": {
       "advancedOptions": "Avancerade alternativ",
@@ -561,6 +561,7 @@
       "ssoDisabledInfo": "SSO är för närvarande inaktiverat. För att aktivera SSO, konfigurera följande miljövariabler och starta om applikationen:",
       "ssoOnly": "Endast SSO-läge",
       "ssoRegistration": "SSO-registrering",
+      "testFailed": "Anslutningstestet misslyckades",
       "testSsoConnection": "Testa SSO-anslutning",
       "title": "Enkel inloggning (SSO)"
     },

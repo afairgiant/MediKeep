@@ -561,6 +561,7 @@
       "ssoDisabledInfo": "SSO当前已禁用。要启用SSO，请配置以下环境变量并重启应用程序：",
       "ssoOnly": "仅 SSO 模式",
       "ssoRegistration": "SSO注册",
+      "testFailed": "连接测试失败",
       "testSsoConnection": "测试SSO连接",
       "title": "单点登录（SSO）"
     },

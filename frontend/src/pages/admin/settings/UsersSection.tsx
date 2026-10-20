@@ -65,6 +65,13 @@ const UsersSection = ({ state }: SectionProps) => {
     setTestResult(null);
     try {
       setTestResult(await authService.testSSOConnection());
+    } catch (error) {
+      setTestResult({
+        success: false,
+        message:
+          (error as Error)?.message ||
+          t('settings.sso.testFailed', 'Connection test failed'),
+      });
     } finally {
       setTesting(false);
     }

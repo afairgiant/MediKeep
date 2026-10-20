@@ -561,6 +561,7 @@
       "ssoDisabledInfo": "SSO jest obecnie wyłączone. Aby włączyć SSO, skonfiguruj następujące zmienne środowiskowe i uruchom ponownie aplikację:",
       "ssoOnly": "Tryb tylko SSO",
       "ssoRegistration": "Rejestracja SSO",
+      "testFailed": "Test połączenia nie powiódł się",
       "testSsoConnection": "Przetestuj połączenie SSO",
       "title": "Logowanie jednokrotne (SSO)"
     },

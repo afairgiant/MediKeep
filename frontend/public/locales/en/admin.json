@@ -561,6 +561,7 @@
       "ssoDisabledInfo": "SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:",
       "ssoOnly": "SSO-Only Mode",
       "ssoRegistration": "SSO Registration",
+      "testFailed": "Connection test failed",
       "testSsoConnection": "Test SSO Connection",
       "title": "Single Sign-On (SSO)"
     },
