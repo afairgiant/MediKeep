@@ -15,7 +15,9 @@ from app.core.persisted_settings import (
     KEY_BACKUP_MAX_COUNT,
     KEY_BACKUP_MIN_COUNT,
     KEY_BACKUP_RETENTION_DAYS,
+    KEY_RELEASE_CHECK_ENABLED,
     KEY_TRASH_RETENTION_DAYS,
+    KEY_WHATS_NEW_POPUP_ENABLED,
     PERSISTED_SETTINGS,
     SettingValidationError,
     apply_setting_changes,
@@ -34,6 +36,8 @@ _TOUCHED_ATTRS = (
     "TRASH_RETENTION_DAYS",
     "BACKUP_MIN_COUNT",
     "BACKUP_MAX_COUNT",
+    "RELEASE_CHECK_ENABLED",
+    "WHATS_NEW_POPUP_ENABLED",
 )
 
 
@@ -142,6 +146,18 @@ class TestPatchPersists:
             == "true"
         )
         assert settings.ALLOW_USER_REGISTRATION is True
+
+    def test_release_settings_persist(self, admin_client, db_session, restore_settings):
+        response = _patch(
+            admin_client,
+            {KEY_RELEASE_CHECK_ENABLED: False, KEY_WHATS_NEW_POPUP_ENABLED: False},
+        )
+
+        assert response.status_code == 200
+        for key in (KEY_RELEASE_CHECK_ENABLED, KEY_WHATS_NEW_POPUP_ENABLED):
+            assert system_setting.get_setting(db_session, key) == "false"
+        assert settings.RELEASE_CHECK_ENABLED is False
+        assert settings.WHATS_NEW_POPUP_ENABLED is False
 
     def test_retention_days_persist(self, admin_client, db_session, restore_settings):
         response = _patch(

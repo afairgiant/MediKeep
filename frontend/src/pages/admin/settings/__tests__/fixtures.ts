@@ -15,16 +15,13 @@ const state = (overrides: Partial<SettingState>): SettingState => ({
   ...overrides,
 });
 
+const boolState = (overrides: Partial<SettingState> = {}): SettingState =>
+  state({ value: true, fallback: true, min: null, max: null, ...overrides });
+
 export const makeSettings = (
   overrides: Partial<Record<keyof SettingsMap, Partial<SettingState>>> = {}
 ): SettingsMap => ({
-  allow_user_registration: state({
-    value: true,
-    fallback: true,
-    min: null,
-    max: null,
-    ...overrides.allow_user_registration,
-  }),
+  allow_user_registration: boolState(overrides.allow_user_registration),
   trash_retention_days: state({
     value: 30,
     fallback: 30,
@@ -47,6 +44,8 @@ export const makeSettings = (
     max: 500,
     ...overrides.backup_max_count,
   }),
+  release_check_enabled: boolState(overrides.release_check_enabled),
+  whats_new_popup_enabled: boolState(overrides.whats_new_popup_enabled),
 });
 
 export const makeResponse = (

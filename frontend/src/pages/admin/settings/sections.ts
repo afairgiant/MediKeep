@@ -2,11 +2,12 @@ import type { ComponentType } from 'react';
 import BackupsSection from './BackupsSection';
 import DataSection from './DataSection';
 import DeploymentSection from './DeploymentSection';
+import GeneralSection from './GeneralSection';
 import UsersSection from './UsersSection';
 import type { AdminSettingsState, SectionProps } from './useAdminSettings';
 import type { SettingKey } from './types';
 
-export type SectionId = 'users' | 'data' | 'backups' | 'deployment';
+export type SectionId = 'general' | 'users' | 'data' | 'backups' | 'deployment';
 
 export interface SectionDef {
   id: SectionId;
@@ -16,6 +17,11 @@ export interface SectionDef {
 }
 
 export const SECTIONS: SectionDef[] = [
+  {
+    id: 'general',
+    keys: ['release_check_enabled', 'whats_new_popup_enabled'],
+    Component: GeneralSection,
+  },
   { id: 'users', keys: ['allow_user_registration'], Component: UsersSection },
   { id: 'data', keys: ['trash_retention_days'], Component: DataSection },
   {

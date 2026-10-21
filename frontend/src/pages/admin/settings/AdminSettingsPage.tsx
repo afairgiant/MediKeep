@@ -32,6 +32,7 @@ const AdminSettingsPage = () => {
   const state = useAdminSettings();
 
   const sectionLabels: Record<SectionId, string> = {
+    general: t('settings.sections.general', 'General'),
     users: t('settings.sections.users', 'Users and sign-in'),
     data: t('settings.sections.data', 'Data and storage'),
     backups: t('settings.sections.backups', 'Backups'),

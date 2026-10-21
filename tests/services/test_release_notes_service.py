@@ -20,8 +20,9 @@ import pytest
 from app.services.release_notes_service import (
     ReleaseNotesService,
     get_release_notes_service,
+    newer_release_tag,
+    parse_version,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -52,7 +53,14 @@ SAMPLE_GITHUB_RESPONSE = [
     },
 ]
 
-EXPECTED_KEYS = {"tag_name", "name", "body", "published_at", "html_url"}
+EXPECTED_KEYS = {
+    "tag_name",
+    "name",
+    "body",
+    "published_at",
+    "html_url",
+    "prerelease",
+}
 
 
 def _make_mock_response(json_data: list, status_code: int = 200) -> MagicMock:
@@ -469,3 +477,67 @@ class TestSingleton:
             assert second._cache == [{"tag_name": "v9.9.9"}]
         finally:
             module._service_instance = None
+
+
+class TestParseVersion:
+    @pytest.mark.parametrize(
+        "tag, expected",
+        [
+            ("v0.72.0", (0, 72, 0)),
+            ("1.2.3", (1, 2, 3)),
+            (" v10.0.1 ", (10, 0, 1)),
+        ],
+    )
+    def test_plain_tags_parse(self, tag, expected):
+        assert parse_version(tag) == expected
+
+    @pytest.mark.parametrize(
+        "tag", [None, "", "dev", "v1.2", "v1.2.3-beta", "1.2.3.4", "vX.Y.Z"]
+    )
+    def test_other_tags_return_none(self, tag):
+        assert parse_version(tag) is None
+
+
+class TestNewerReleaseTag:
+    def test_newer_stable_release_is_returned(self):
+        releases = [{"tag_name": "v0.73.0"}, {"tag_name": "v0.72.0"}]
+        assert newer_release_tag(releases, "0.72.0") == "v0.73.0"
+
+    def test_none_when_current_is_latest(self):
+        releases = [{"tag_name": "v0.72.0"}, {"tag_name": "v0.71.0"}]
+        assert newer_release_tag(releases, "0.72.0") is None
+
+    def test_none_when_installed_is_ahead(self):
+        assert newer_release_tag([{"tag_name": "v0.71.0"}], "0.72.0") is None
+
+    def test_prereleases_are_ignored(self):
+        releases = [
+            {"tag_name": "v0.80.0", "prerelease": True},
+            {"tag_name": "v0.72.0"},
+        ]
+        assert newer_release_tag(releases, "0.72.0") is None
+
+    def test_highest_version_wins_regardless_of_order(self):
+        releases = [
+            {"tag_name": "v0.72.1"},
+            {"tag_name": "v0.74.0"},
+            {"tag_name": "v0.73.0"},
+        ]
+        assert newer_release_tag(releases, "0.72.0") == "v0.74.0"
+
+    def test_versions_compare_numerically(self):
+        assert newer_release_tag([{"tag_name": "v0.100.0"}], "0.99.0") == "v0.100.0"
+
+    def test_unparseable_tags_are_skipped(self):
+        releases = [
+            {"tag_name": "nightly"},
+            {"tag_name": None},
+            {"tag_name": "v0.73.0"},
+        ]
+        assert newer_release_tag(releases, "0.72.0") == "v0.73.0"
+
+    def test_unparseable_current_version_never_reports_update(self):
+        assert newer_release_tag([{"tag_name": "v9.0.0"}], "dev") is None
+
+    def test_empty_list(self):
+        assert newer_release_tag([], "0.72.0") is None

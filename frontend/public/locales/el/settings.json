@@ -188,7 +188,8 @@
       "title": "Έκδοση Εφαρμογής",
       "unavailable": "Οι πληροφορίες έκδοσης δεν είναι διαθέσιμες",
       "unknownApp": "Άγνωστη Εφαρμογή",
-      "unknownVersion": "Άγνωστη Έκδοση"
+      "unknownVersion": "Άγνωστη Έκδοση",
+      "updateAvailable": "(διαθέσιμη ενημέρωση: {{version}})"
     }
   }
 }

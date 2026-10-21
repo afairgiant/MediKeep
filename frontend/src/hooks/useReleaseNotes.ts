@@ -74,6 +74,13 @@ export function useReleaseNotes(): UseReleaseNotesReturn {
         setCurrentVersion(version);
         setReleases(allReleases);
 
+        if (releaseData.whats_new_popup_enabled === false) {
+          // Mark as seen so turning the pop-up back on later doesn't show a backlog.
+          if (version) setLastSeenVersion(user.id, version);
+          setUnseenReleases([]);
+          return;
+        }
+
         const lastSeen = getLastSeenVersion(user.id);
 
         let unseen: Release[];

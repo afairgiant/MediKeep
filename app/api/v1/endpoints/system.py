@@ -7,7 +7,7 @@ Provides system configuration and logging level information for frontend integra
 
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
 
@@ -25,7 +25,10 @@ from app.core.logging.constants import (
 from app.core.logging.helpers import log_security_event
 from app.core.utils.client_ip import get_client_ip
 from app.core.utils.rate_limit import SlidingWindowRateLimiter
-from app.services.release_notes_service import get_release_notes_service
+from app.services.release_notes_service import (
+    get_release_notes_service,
+    newer_release_tag,
+)
 
 # Constants
 BYTES_PER_MB = 1048576  # 1024 * 1024
@@ -361,6 +364,18 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
         )
 
 
+def _releases_payload(
+    releases: list[dict], latest_version: Optional[str] = None
+) -> Dict[str, Any]:
+    return {
+        "releases": releases,
+        "current_version": settings.VERSION,
+        "latest_version": latest_version,
+        "whats_new_popup_enabled": settings.WHATS_NEW_POPUP_ENABLED,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+
+
 @router.get("/releases")
 async def get_releases(limit: int = Query(default=10, ge=1, le=20)) -> Dict[str, Any]:
     """
@@ -368,22 +383,27 @@ async def get_releases(limit: int = Query(default=10, ge=1, le=20)) -> Dict[str,
 
     Returns recent releases with version info for the frontend
     to display release notes and "What's New" notifications.
+    ``latest_version`` stays null when an admin has turned off the
+    update check.
 
     Args:
         limit: Maximum number of releases to return (capped at 20)
 
     Returns:
-        Dict containing releases list, current version, and timestamp
+        Dict containing releases list, current version, the newer stable
+        release tag if one exists (else null), whether the What's New
+        pop-up is on, and timestamp
     """
     try:
         service = get_release_notes_service()
-        releases = await service.get_releases(limit=limit)
+        releases = await service.get_releases(limit=None)
 
-        return {
-            "releases": releases,
-            "current_version": settings.VERSION,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-        }
+        latest = (
+            newer_release_tag(releases, settings.VERSION)
+            if settings.RELEASE_CHECK_ENABLED
+            else None
+        )
+        return _releases_payload(releases[:limit], latest)
     except Exception as e:
         app_logger.error(
             f"Release notes endpoint error: {e}",
@@ -395,8 +415,4 @@ async def get_releases(limit: int = Query(default=10, ge=1, le=20)) -> Dict[str,
         )
 
         # Return empty releases on error rather than failing
-        return {
-            "releases": [],
-            "current_version": settings.VERSION,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
-        }
+        return _releases_payload([])

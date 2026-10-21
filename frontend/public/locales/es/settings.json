@@ -188,7 +188,8 @@
       "title": "Versión de la aplicación",
       "unavailable": "Información de versión no disponible",
       "unknownApp": "Aplicación desconocida",
-      "unknownVersion": "Versión desconocida"
+      "unknownVersion": "Versión desconocida",
+      "updateAvailable": "(actualización disponible: {{version}})"
     }
   }
 }

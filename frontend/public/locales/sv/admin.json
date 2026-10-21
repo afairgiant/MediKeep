@@ -529,7 +529,8 @@
       "accounts": "Konton",
       "backupCleanup": "Rensning av säkerhetskopior",
       "deployment": "Ändra dessa i docker-compose.yml eller .env och starta sedan om",
-      "retention": "Lagringstid"
+      "retention": "Lagringstid",
+      "updates": "Uppdateringar"
     },
     "loading": "Laddar inställningar...",
     "saveBar": {
@@ -544,6 +545,7 @@
       "backups": "Säkerhetskopior",
       "data": "Data och lagring",
       "deployment": "Angivet i driftsättningen",
+      "general": "Allmänt",
       "users": "Användare och inloggning"
     },
     "source": {
@@ -570,6 +572,12 @@
     "units": {
       "backups": "säkerhetskopior",
       "days": "dagar"
+    },
+    "updates": {
+      "releaseCheck": "Sök efter uppdateringar",
+      "releaseCheckDesc": "Visar inloggade användare i sidfoten och bredvid versionsnumret i deras inställningar när en nyare MediKeep-version finns.",
+      "whatsNewPopup": "Visa versionsinformation efter en uppgradering",
+      "whatsNewPopupDesc": "Visar informationen om den nya versionen en gång för varje användare, första gången de loggar in efter en uppgradering."
     },
     "userManagement": {
       "allowRegistration": "Tillåt nya konton från inloggningssidan",

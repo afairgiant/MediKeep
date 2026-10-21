@@ -188,7 +188,8 @@
       "title": "เวอร์ชันแอปพลิเคชัน",
       "unavailable": "ข้อมูลเวอร์ชันไม่พร้อมใช้งาน",
       "unknownApp": "แอปพลิเคชันไม่ทราบ",
-      "unknownVersion": "เวอร์ชันไม่ทราบ"
+      "unknownVersion": "เวอร์ชันไม่ทราบ",
+      "updateAvailable": "(มีอัปเดต: {{version}})"
     }
   }
 }

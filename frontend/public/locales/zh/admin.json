@@ -529,7 +529,8 @@
       "accounts": "账户",
       "backupCleanup": "备份清理",
       "deployment": "在 docker-compose.yml 或 .env 中修改，然后重启",
-      "retention": "保留"
+      "retention": "保留",
+      "updates": "更新"
     },
     "loading": "正在加载设置...",
     "saveBar": {
@@ -544,6 +545,7 @@
       "backups": "备份",
       "data": "数据与存储",
       "deployment": "由部署设置",
+      "general": "常规",
       "users": "用户与登录"
     },
     "source": {
@@ -570,6 +572,12 @@
     "units": {
       "backups": "个",
       "days": "天"
+    },
+    "updates": {
+      "releaseCheck": "检查更新",
+      "releaseCheckDesc": "有更新的 MediKeep 版本时，在页面底部以及已登录用户设置中的版本号旁显示提示。",
+      "whatsNewPopup": "升级后显示版本说明",
+      "whatsNewPopupDesc": "升级后，每位用户首次登录时会看到一次新版本的说明。"
     },
     "userManagement": {
       "allowRegistration": "允许从登录页面创建新账户",

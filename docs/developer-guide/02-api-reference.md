@@ -5191,7 +5191,7 @@ Base path for the endpoints below: `/api/v1/system`
 `GET /system/releases`
 
 - **Authentication**: No (public information)
-- **Purpose**: Get application release notes from GitHub
+- **Purpose**: Get application release notes from GitHub, and whether a newer release exists
 - **Query Parameters**:
 
 | Parameter | Type    | Default | Description                                         |
@@ -5208,14 +5208,22 @@ Base path for the endpoints below: `/api/v1/system`
       "name": "v0.58.0",
       "body": "## Changes\n- Feature X\n- Bug fix Y",
       "published_at": "2026-03-15T00:00:00Z",
-      "html_url": "https://github.com/afairgiant/MediKeep/releases/tag/v0.58.0"
+      "html_url": "https://github.com/afairgiant/MediKeep/releases/tag/v0.58.0",
+      "prerelease": false
     }
   ],
   "current_version": "0.58.0",
+  "latest_version": "v0.59.0",
+  "whats_new_popup_enabled": true,
   "timestamp": "2026-03-15T12:00:00Z"
 }
 ```
 
+- `latest_version` is the newest stable (non-prerelease) release tag above `current_version`,
+  or `null` when the installed version is the latest or the admin turned off **Check for
+  updates** (`release_check_enabled`). The check covers every release fetched from GitHub,
+  not just the `limit` returned. `releases` is returned either way.
+- `whats_new_popup_enabled` mirrors the admin setting **Show release notes after an upgrade**.
 - **Error Handling**: Returns empty releases list on GitHub API failure (graceful degradation).
 
 ### 14.2 Utils
@@ -6187,7 +6195,7 @@ value until an admin saves one; a saved value then wins on every restart.
 - `source` is `saved` (a row exists), `env` (the variable is set) or `default` (built-in value).
 - `fallback` is the value used if the saved row is removed; `fallback_source` says where it comes from.
 - Keys: `allow_user_registration`, `trash_retention_days`, `backup_retention_days`,
-  `backup_min_count`, `backup_max_count`.
+  `backup_min_count`, `backup_max_count`, `release_check_enabled`, `whats_new_popup_enabled`.
 - `deployment` is a fixed allowlist (`SSO_ONLY_MODE`, `SSO_AUTO_REDIRECT`,
   `ALLOW_PRIVATE_INTEGRATION_URLS`, `LOG_LEVEL`); the environment is never enumerated.
 
