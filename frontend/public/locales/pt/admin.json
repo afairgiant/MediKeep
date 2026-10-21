@@ -575,9 +575,9 @@
     },
     "updates": {
       "releaseCheck": "Procurar atualizações",
-      "releaseCheckDesc": "Mostra aos utilizadores com sessão iniciada, no rodapé e junto ao número da versão nas suas definições, quando existe uma versão mais recente do MediKeep.",
+      "releaseCheckDesc": "Mostra aos usuários conectados, no rodapé e ao lado do número da versão nas configurações, quando há uma versão mais recente do MediKeep.",
       "whatsNewPopup": "Mostrar notas de versão após uma atualização",
-      "whatsNewPopupDesc": "Mostra as notas da nova versão uma vez a cada utilizador, na primeira vez que inicia sessão após uma atualização."
+      "whatsNewPopupDesc": "Mostra as notas da nova versão uma vez para cada usuário, na primeira vez que ele fizer login após uma atualização."
     },
     "userManagement": {
       "allowRegistration": "Permitir novas contas pela página de login",
