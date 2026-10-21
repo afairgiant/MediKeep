@@ -188,7 +188,8 @@
       "title": "Applicatieversie",
       "unavailable": "Versie-informatie niet beschikbaar",
       "unknownApp": "Onbekende applicatie",
-      "unknownVersion": "Onbekende versie"
+      "unknownVersion": "Onbekende versie",
+      "updateAvailable": "(update beschikbaar: {{version}})"
     }
   }
 }

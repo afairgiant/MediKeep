@@ -45,7 +45,7 @@ export const getSystemHealth = async () => {
 /**
  * Get application release notes from GitHub
  * @param {number} limit - Maximum number of releases to return
- * @returns {Promise<Object>} Release notes including releases array and current version
+ * @returns {Promise<Object>} Release notes, current and newer version, and the pop-up setting
  */
 export const getReleaseNotes = async (limit = 10) => {
   let response = await fetch(`/api/v1/system/releases?limit=${limit}`);
@@ -61,6 +61,8 @@ export const getReleaseNotes = async (limit = 10) => {
     return {
       releases: data.releases || [],
       current_version: data.current_version,
+      latest_version: data.latest_version ?? null,
+      whats_new_popup_enabled: data.whats_new_popup_enabled,
       timestamp: data.timestamp,
     };
   }

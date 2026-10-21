@@ -5,7 +5,9 @@ Fetches GitHub release notes for the MediKeep application and caches them
 in memory to avoid exceeding GitHub API rate limits on repeated requests.
 """
 
+import re
 import time
+from typing import Optional
 
 import httpx
 
@@ -13,6 +15,31 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 
 logger = get_logger(__name__, "app")
+
+_VERSION_RE = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
+
+
+def parse_version(tag: Optional[str]) -> Optional[tuple[int, int, int]]:
+    """Parse a plain release tag such as ``v0.72.0``; anything else returns None."""
+    match = _VERSION_RE.match((tag or "").strip())
+    return tuple(int(part) for part in match.groups()) if match else None
+
+
+def newer_release_tag(releases: list[dict], current_version: str) -> Optional[str]:
+    """Tag of the newest stable release above ``current_version``, or None."""
+    current = parse_version(current_version)
+    if current is None:
+        return None
+    stable = [
+        (version, release["tag_name"])
+        for release in releases
+        if not release.get("prerelease")
+        and (version := parse_version(release.get("tag_name"))) is not None
+    ]
+    if not stable:
+        return None
+    newest, tag = max(stable)
+    return tag if newest > current else None
 
 
 class ReleaseNotesService:
@@ -66,6 +93,7 @@ class ReleaseNotesService:
                     "body": release.get("body"),
                     "published_at": release.get("published_at"),
                     "html_url": release.get("html_url"),
+                    "prerelease": bool(release.get("prerelease")),
                 }
                 for release in response.json()
             ]
@@ -117,7 +145,7 @@ class ReleaseNotesService:
 
         return []
 
-    async def get_releases(self, limit: int = 10) -> list[dict]:
+    async def get_releases(self, limit: Optional[int] = 10) -> list[dict]:
         """
         Return the most recent GitHub releases up to *limit* entries.
 
@@ -125,7 +153,8 @@ class ReleaseNotesService:
         triggers a fresh fetch from the GitHub API.
 
         Args:
-            limit: Maximum number of releases to return. Defaults to 10.
+            limit: Maximum number of releases to return; None returns every
+                cached release. Defaults to 10.
 
         Returns:
             A list of release dicts, each containing tag_name, name, body,

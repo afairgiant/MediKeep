@@ -4,4 +4,5 @@ export interface Release {
   body: string;
   published_at: string;
   html_url: string;
+  prerelease?: boolean;
 }

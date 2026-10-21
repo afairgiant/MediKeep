@@ -529,7 +529,8 @@
       "accounts": "Gebruikersaccounts",
       "backupCleanup": "Back-ups opschonen",
       "deployment": "Wijzig deze in docker-compose.yml of .env en start daarna opnieuw",
-      "retention": "Bewaartermijn"
+      "retention": "Bewaartermijn",
+      "updates": "Updates"
     },
     "loading": "Instellingen laden...",
     "saveBar": {
@@ -544,6 +545,7 @@
       "backups": "Back-ups",
       "data": "Gegevens en opslag",
       "deployment": "Ingesteld via deployment",
+      "general": "Algemeen",
       "users": "Gebruikers en aanmelden"
     },
     "source": {
@@ -570,6 +572,12 @@
     "units": {
       "backups": "back-ups",
       "days": "dagen"
+    },
+    "updates": {
+      "releaseCheck": "Controleren op updates",
+      "releaseCheckDesc": "Toont aangemelde gebruikers in de voettekst en naast het versienummer in hun instellingen wanneer er een nieuwere MediKeep-versie is.",
+      "whatsNewPopup": "Release-opmerkingen tonen na een upgrade",
+      "whatsNewPopupDesc": "Toont de opmerkingen bij de nieuwe versie één keer aan elke gebruiker, bij de eerste aanmelding na een upgrade."
     },
     "userManagement": {
       "allowRegistration": "Nieuwe accounts via de aanmeldpagina toestaan",

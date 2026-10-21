@@ -188,7 +188,8 @@
       "title": "Applikationsversion",
       "unavailable": "Versionsinformation otillgänglig",
       "unknownApp": "Okänd app",
-      "unknownVersion": "Okänd version"
+      "unknownVersion": "Okänd version",
+      "updateAvailable": "(uppdatering tillgänglig: {{version}})"
     }
   }
 }

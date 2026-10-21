@@ -188,7 +188,8 @@
       "title": "应用程序版本",
       "unavailable": "版本信息不可用",
       "unknownApp": "未知应用",
-      "unknownVersion": "未知版本"
+      "unknownVersion": "未知版本",
+      "updateAvailable": "（有可用更新：{{version}}）"
     }
   }
 }

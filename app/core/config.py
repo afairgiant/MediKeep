@@ -341,6 +341,14 @@ class Settings:  # App Info
         os.getenv("ALLOW_USER_REGISTRATION", "True").lower() == "true"
     )  # Default: enabled to avoid lockout scenarios
 
+    # Admin-overridable at runtime; see persisted_settings
+    RELEASE_CHECK_ENABLED: bool = (
+        os.getenv("RELEASE_CHECK_ENABLED", "True").lower() == "true"
+    )
+    WHATS_NEW_POPUP_ENABLED: bool = (
+        os.getenv("WHATS_NEW_POPUP_ENABLED", "True").lower() == "true"
+    )
+
     # Integration URL SSRF Control
     # Controls whether user-configured integration URLs (Paperless/Papra) may
     # target private/loopback addresses (RFC1918 10/172.16/192.168, 127.x).

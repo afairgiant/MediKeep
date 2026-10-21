@@ -29,6 +29,8 @@ KEY_BACKUP_RETENTION_DAYS = "backup_retention_days"
 KEY_TRASH_RETENTION_DAYS = "trash_retention_days"
 KEY_BACKUP_MIN_COUNT = "backup_min_count"
 KEY_BACKUP_MAX_COUNT = "backup_max_count"
+KEY_RELEASE_CHECK_ENABLED = "release_check_enabled"
+KEY_WHATS_NEW_POPUP_ENABLED = "whats_new_popup_enabled"
 
 
 def _parse_bool(raw: str) -> bool:
@@ -70,6 +72,16 @@ class PersistedSetting:  # pylint: disable=too-many-instance-attributes
     max_value: Optional[int] = None
 
 
+def _bool_setting(key: str, attr: str) -> PersistedSetting:
+    return PersistedSetting(
+        key=key,
+        attr=attr,
+        value_type=bool,
+        parse=_parse_bool,
+        serialize=_serialize_bool,
+    )
+
+
 def _int_setting(key: str, attr: str, max_value: int) -> PersistedSetting:
     return PersistedSetting(
         key=key,
@@ -86,17 +98,13 @@ def _int_setting(key: str, attr: str, max_value: int) -> PersistedSetting:
 PERSISTED_SETTINGS: dict[str, PersistedSetting] = {
     entry.key: entry
     for entry in (
-        PersistedSetting(
-            key=KEY_ALLOW_USER_REGISTRATION,
-            attr="ALLOW_USER_REGISTRATION",
-            value_type=bool,
-            parse=_parse_bool,
-            serialize=_serialize_bool,
-        ),
+        _bool_setting(KEY_ALLOW_USER_REGISTRATION, "ALLOW_USER_REGISTRATION"),
         _int_setting(KEY_BACKUP_RETENTION_DAYS, "BACKUP_RETENTION_DAYS", 365),
         _int_setting(KEY_TRASH_RETENTION_DAYS, "TRASH_RETENTION_DAYS", 365),
         _int_setting(KEY_BACKUP_MIN_COUNT, "BACKUP_MIN_COUNT", 100),
         _int_setting(KEY_BACKUP_MAX_COUNT, "BACKUP_MAX_COUNT", 500),
+        _bool_setting(KEY_RELEASE_CHECK_ENABLED, "RELEASE_CHECK_ENABLED"),
+        _bool_setting(KEY_WHATS_NEW_POPUP_ENABLED, "WHATS_NEW_POPUP_ENABLED"),
     )
 }
 

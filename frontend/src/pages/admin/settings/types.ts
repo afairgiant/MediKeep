@@ -4,7 +4,12 @@ export type NumberSettingKey =
   | 'backup_min_count'
   | 'backup_max_count';
 
-export type SettingKey = 'allow_user_registration' | NumberSettingKey;
+export type BoolSettingKey =
+  | 'allow_user_registration'
+  | 'release_check_enabled'
+  | 'whats_new_popup_enabled';
+
+export type SettingKey = BoolSettingKey | NumberSettingKey;
 
 export type SettingValue = boolean | number;
 

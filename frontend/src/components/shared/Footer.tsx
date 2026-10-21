@@ -7,6 +7,9 @@ import React from 'react';
 import { Box, Text, Anchor, Group } from '@mantine/core';
 import { IconBrandGithub, IconHeartFilled } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
+import { useLatestVersion } from '../../hooks/useLatestVersion';
+import UpdateAvailableLabel from './UpdateAvailableLabel';
 
 interface FooterProps {
   className?: string;
@@ -15,6 +18,9 @@ interface FooterProps {
 const Footer: React.FC<FooterProps> = ({ className = '' }) => {
   const { t } = useTranslation('settings');
   const currentYear = new Date().getFullYear();
+  const { isAuthenticated } = useAuth() as { isAuthenticated: boolean };
+  // Signed-in users only, so the login page doesn't advertise an outdated instance.
+  const latestVersion = useLatestVersion(!!isAuthenticated);
 
   return (
     <Box
@@ -28,6 +34,7 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           {/* eslint-disable-next-line i18next/no-literal-string -- brand name with copyright */}
           {`© ${currentYear} MediKeep`}
         </Text>
+        <UpdateAvailableLabel version={latestVersion} size="sm" />
         <Text size="sm" c="dimmed">
           •
         </Text>

@@ -8,7 +8,6 @@ import {
   Button,
   Group,
   Stack,
-  Switch,
   Text,
 } from '@mantine/core';
 import {
@@ -21,6 +20,7 @@ import { authService } from '../../../services/auth/simpleAuthService';
 import { capitalizeFirst } from '../../../utils/dateFormatUtils';
 import SettingRow from './SettingRow';
 import SettingsGroup from './SettingsGroup';
+import SwitchSettingRow from './SwitchSettingRow';
 import type { SectionProps } from './useAdminSettings';
 
 interface FlagProps {
@@ -80,7 +80,9 @@ const UsersSection = ({ state }: SectionProps) => {
   return (
     <Stack gap="md">
       <SettingsGroup title={t('settings.groups.accounts', 'Accounts')}>
-        <SettingRow
+        <SwitchSettingRow
+          state={state}
+          settingKey={key}
           label={t(
             'settings.userManagement.allowRegistration',
             'Allow new accounts from the login page'
@@ -89,24 +91,6 @@ const UsersSection = ({ state }: SectionProps) => {
             'settings.userManagement.allowRegistrationDesc',
             'When off, only an admin can create accounts.'
           )}
-          state={settings[key]}
-          dirty={registrationDirty}
-          pendingReset={state.resets.has(key)}
-          onReset={() => state.reset(key)}
-          formatValue={value => (value ? enabled : disabled)}
-          control={
-            <Switch
-              size="md"
-              checked={draft[key] === true}
-              onChange={event =>
-                state.setValue(key, event.currentTarget.checked)
-              }
-              aria-label={t(
-                'settings.userManagement.allowRegistration',
-                'Allow new accounts from the login page'
-              )}
-            />
-          }
         >
           {sealedPreview && (
             <Alert
@@ -133,7 +117,7 @@ const UsersSection = ({ state }: SectionProps) => {
               {t(`settings.warnings.${warning.code}`, warning.message)}
             </Alert>
           ))}
-        </SettingRow>
+        </SwitchSettingRow>
       </SettingsGroup>
 
       <SettingsGroup title={t('settings.sso.title', 'Single Sign-On (SSO)')}>

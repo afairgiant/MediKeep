@@ -125,6 +125,7 @@ MediKeep includes a built-in backup system for database protection.
 
 **Admin Panel** > **Settings** holds the system-wide settings, grouped into sections:
 
+- **General** - **Check for updates** shows signed-in users when a newer MediKeep version is out, in the page footer and next to the version number in their settings. **Show release notes after an upgrade** opens the notes for the new version once for each user, the first time they sign in after an upgrade
 - **Users and sign-in** - whether people can create their own accounts from the login page, and the single sign-on status with a **Test SSO Connection** button
 - **Data and storage** - how long deleted files stay in the trash
 - **Backups** - the automatic backup schedule, how old a backup can get before clean-up removes it, and the minimum number to always keep

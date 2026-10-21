@@ -158,16 +158,29 @@ class TestCurrentVersion:
 class TestLimitParameter:
     """Tests for the limit query parameter validated via Query(ge=1, le=20)."""
 
-    def test_limit_parameter_is_forwarded_to_service(self, api_client: TestClient):
-        """The endpoint passes the limit value on to service.get_releases."""
+    def test_limit_caps_the_returned_releases(self, api_client: TestClient):
+        """The endpoint returns at most `limit` releases."""
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
+            mock_service = AsyncMock()
+            mock_service.get_releases = AsyncMock(
+                return_value=_make_sample_releases(20)
+            )
+            mock_factory.return_value = mock_service
+
+            response = api_client.get("/api/v1/system/releases?limit=5")
+
+        assert len(response.json()["releases"]) == 5
+
+    def test_scans_more_releases_than_it_returns(self, api_client: TestClient):
+        """A small limit must not hide a newer release from the update check."""
         with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=[])
             mock_factory.return_value = mock_service
 
-            api_client.get("/api/v1/system/releases?limit=5")
+            api_client.get("/api/v1/system/releases?limit=1")
 
-        mock_service.get_releases.assert_called_once_with(limit=5)
+        mock_service.get_releases.assert_called_once_with(limit=None)
 
     def test_limit_above_20_returns_422(self, api_client: TestClient):
         """When limit exceeds 20, FastAPI returns a 422 validation error."""
@@ -188,22 +201,22 @@ class TestLimitParameter:
             )
             mock_factory.return_value = mock_service
 
-            api_client.get("/api/v1/system/releases?limit=20")
+            response = api_client.get("/api/v1/system/releases?limit=20")
 
-        mock_service.get_releases.assert_called_once_with(limit=20)
+        assert len(response.json()["releases"]) == 20
 
     def test_default_limit_is_10(self, api_client: TestClient):
         """When no limit is provided, the endpoint defaults to 10."""
         with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(
-                return_value=_make_sample_releases(10)
+                return_value=_make_sample_releases(15)
             )
             mock_factory.return_value = mock_service
 
-            api_client.get("/api/v1/system/releases")
+            response = api_client.get("/api/v1/system/releases")
 
-        mock_service.get_releases.assert_called_once_with(limit=10)
+        assert len(response.json()["releases"]) == 10
 
 
 # ---------------------------------------------------------------------------
@@ -274,3 +287,78 @@ class TestErrorHandling:
             response = api_client.get("/api/v1/system/releases")
 
         assert response.status_code != 500
+
+
+# ---------------------------------------------------------------------------
+# Admin release settings and update check
+# ---------------------------------------------------------------------------
+
+
+def _release(tag: str, prerelease: bool = False) -> dict:
+    return {
+        "tag_name": tag,
+        "name": tag,
+        "body": "",
+        "published_at": "2024-01-01T00:00:00Z",
+        "html_url": f"https://github.com/example/repo/releases/tag/{tag}",
+        "prerelease": prerelease,
+    }
+
+
+def _get(api_client, releases, path="/api/v1/system/releases"):
+    with patch(_SERVICE_PATCH_TARGET) as mock_factory, patch.object(
+        settings, "VERSION", "0.72.0"
+    ):
+        mock_factory.return_value.get_releases = AsyncMock(return_value=releases)
+        return api_client.get(path).json()
+
+
+class TestAdminReleaseSettings:
+    def test_update_check_off_hides_latest_but_keeps_release_notes(
+        self, api_client: TestClient, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "RELEASE_CHECK_ENABLED", False)
+
+        body = _get(api_client, [_release("v0.73.0"), _release("v0.72.0")])
+
+        assert body["latest_version"] is None
+        assert [r["tag_name"] for r in body["releases"]] == ["v0.73.0", "v0.72.0"]
+
+    def test_popup_flag_is_independent_of_the_update_check(
+        self, api_client: TestClient, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "RELEASE_CHECK_ENABLED", False)
+        monkeypatch.setattr(settings, "WHATS_NEW_POPUP_ENABLED", True)
+
+        assert _get(api_client, [])["whats_new_popup_enabled"] is True
+
+    def test_popup_flag_reflects_setting(self, api_client: TestClient, monkeypatch):
+        monkeypatch.setattr(settings, "WHATS_NEW_POPUP_ENABLED", False)
+
+        assert _get(api_client, [])["whats_new_popup_enabled"] is False
+
+
+class TestUpdateAvailable:
+    @pytest.fixture(autouse=True)
+    def _check_on(self, monkeypatch):
+        monkeypatch.setattr(settings, "RELEASE_CHECK_ENABLED", True)
+
+    def test_newer_release_is_reported(self, api_client):
+        releases = [_release("v0.73.0"), _release("v0.72.0")]
+        body = _get(api_client, releases, "/api/v1/system/releases?limit=1")
+        assert body["latest_version"] == "v0.73.0"
+
+    def test_no_update_on_latest(self, api_client):
+        assert _get(api_client, [_release("v0.72.0")])["latest_version"] is None
+
+    def test_prerelease_is_not_an_update(self, api_client):
+        body = _get(api_client, [_release("v0.80.0", prerelease=True)])
+        assert body["latest_version"] is None
+
+    def test_no_update_when_github_fails(self, api_client):
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
+            mock_factory.return_value.get_releases = AsyncMock(
+                side_effect=RuntimeError("down")
+            )
+            body = api_client.get("/api/v1/system/releases").json()
+        assert body["latest_version"] is None

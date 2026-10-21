@@ -37,6 +37,8 @@ import {
 } from '../utils/notifyTranslated';
 import { timezoneService } from '../services/timezoneService';
 import ReleaseNotesHistory from '../components/settings/ReleaseNotesHistory';
+import UpdateAvailableLabel from '../components/shared/UpdateAvailableLabel';
+import { useLatestVersion } from '../hooks/useLatestVersion';
 import '../styles/pages/Settings.css';
 
 const SETTINGS_TABS = ['general', 'documents', 'notifications', 'about'];
@@ -129,6 +131,7 @@ const Settings = () => {
     useState(false);
   const [versionInfo, setVersionInfo] = useState(null);
   const [loadingVersion, setLoadingVersion] = useState(true);
+  const latestVersion = useLatestVersion();
   const [localPreferences, setLocalPreferences] = useState({});
   const [savingPreferences, setSavingPreferences] = useState(false);
   const [cleaningFiles, setCleaningFiles] = useState(false);
@@ -436,6 +439,8 @@ const Settings = () => {
       <span>
         <strong>{appName}</strong> {'v'}
         {version}
+        {latestVersion && ' '}
+        <UpdateAvailableLabel version={latestVersion} />
       </span>
     );
   }

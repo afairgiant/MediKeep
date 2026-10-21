@@ -529,7 +529,8 @@
       "accounts": "Comptes",
       "backupCleanup": "Nettoyage des sauvegardes",
       "deployment": "Modifiez-les dans docker-compose.yml ou .env, puis redémarrez",
-      "retention": "Conservation"
+      "retention": "Conservation",
+      "updates": "Mises à jour"
     },
     "loading": "Chargement des paramètres...",
     "saveBar": {
@@ -544,6 +545,7 @@
       "backups": "Sauvegardes",
       "data": "Données et stockage",
       "deployment": "Définis par le déploiement",
+      "general": "Général",
       "users": "Utilisateurs et connexion"
     },
     "source": {
@@ -570,6 +572,12 @@
     "units": {
       "backups": "sauvegardes",
       "days": "jours"
+    },
+    "updates": {
+      "releaseCheck": "Rechercher les mises à jour",
+      "releaseCheckDesc": "Indique aux utilisateurs connectés, dans le pied de page et à côté du numéro de version dans leurs paramètres, qu'une version plus récente de MediKeep est disponible.",
+      "whatsNewPopup": "Afficher les notes de version après une mise à jour",
+      "whatsNewPopupDesc": "Affiche les notes de la nouvelle version une fois à chaque utilisateur, lors de sa première connexion après une mise à jour."
     },
     "userManagement": {
       "allowRegistration": "Autoriser la création de comptes depuis la page de connexion",

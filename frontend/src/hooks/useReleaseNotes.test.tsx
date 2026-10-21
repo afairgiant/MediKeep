@@ -620,4 +620,48 @@ describe('useReleaseNotes', () => {
       expect(result.current.unseenReleases[0].tag_name).toBe('v0.58.0');
     });
   });
+
+  describe('admin release settings', () => {
+    const setup = (flags: { whats_new_popup_enabled?: boolean }) => {
+      const userId = 21;
+      mockLocalStorageGetItem(storageKey(userId), 'v0.57.0');
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({
+        releases: [makeRelease({ tag_name: 'v0.58.0' })],
+        ...flags,
+      } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      return userId;
+    };
+
+    it('does not show the modal when the pop-up is turned off', async () => {
+      const storage = captureLocalStorageSetItem();
+      const userId = setup({ whats_new_popup_enabled: false });
+
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.showModal).toBe(false);
+      expect(result.current.unseenReleases).toHaveLength(0);
+      // Marked as seen, so re-enabling later does not replay this release.
+      expect(storage.getLastCall(storageKey(userId))).toBe('0.58.0');
+    });
+
+    it('shows the modal when the pop-up is on', async () => {
+      setup({ whats_new_popup_enabled: true });
+
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
+
+      await waitFor(() => expect(result.current.showModal).toBe(true));
+    });
+  });
 });

@@ -529,7 +529,8 @@
       "accounts": "Accounts",
       "backupCleanup": "Backup clean-up",
       "deployment": "Change these in docker-compose.yml or .env, then restart",
-      "retention": "Retention"
+      "retention": "Retention",
+      "updates": "Updates"
     },
     "loading": "Loading settings...",
     "saveBar": {
@@ -544,6 +545,7 @@
       "backups": "Backups",
       "data": "Data and storage",
       "deployment": "Set by deployment",
+      "general": "General",
       "users": "Users and sign-in"
     },
     "source": {
@@ -570,6 +572,12 @@
     "units": {
       "backups": "backups",
       "days": "days"
+    },
+    "updates": {
+      "releaseCheck": "Check for updates",
+      "releaseCheckDesc": "Shows signed-in users when a newer MediKeep version is out, in the page footer and next to the version number in their settings.",
+      "whatsNewPopup": "Show release notes after an upgrade",
+      "whatsNewPopupDesc": "Opens the notes for the new version once for each user, the first time they sign in after an upgrade."
     },
     "userManagement": {
       "allowRegistration": "Allow new accounts from the login page",
