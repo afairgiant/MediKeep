@@ -61,6 +61,16 @@
     "urlPlaceholder": "https://la-tua-istanza-papra.com"
   },
   "preferences": {
+    "hemoglobinUnit": {
+      "description": "Unità usata per inserire e mostrare i valori di emoglobina delle donazioni di sangue. I valori salvati non cambiano.",
+      "title": "Unità dell'emoglobina"
+    },
+    "bloodDonationIntervals": {
+      "days": "giorni",
+      "description": "Numero minimo di giorni dopo una donazione prima di poter donare di nuovo. Regola questi valori in base alle linee guida del tuo servizio di donazione del sangue.",
+      "reset": "Ripristina valori predefiniti",
+      "title": "Intervalli di Donazione del Sangue"
+    },
     "dateFormat": {
       "description": "Scegli come vengono visualizzate le date nell'applicazione",
       "dmy": "DD/MM/YYYY (UK/Internazionale)",

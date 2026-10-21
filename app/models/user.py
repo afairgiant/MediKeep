@@ -137,6 +137,13 @@ class UserPreferences(Base):
     # Date format preference: 'mdy' (US), 'dmy' (European), 'ymd' (ISO)
     date_format = Column(String(10), default="mdy", nullable=False)
 
+    # Blood donation minimum intervals in days per donation type, e.g.
+    # {"whole_blood": 56}. NULL or missing keys fall back to defaults.
+    blood_donation_intervals = Column(JSON, nullable=True)
+
+    # Unit hemoglobin is entered and shown in (HemoglobinUnit value). NULL means g/dL.
+    hemoglobin_unit = Column(String(10), nullable=True)
+
     # Paperless-ngx integration fields
     paperless_enabled = Column(Boolean, default=False, nullable=False)
     paperless_url = Column(String(500), nullable=True)

@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "Bloeddonaties",
     "medications": "Medicatie",
     "conditions": "Aandoeningen",
     "procedures": "Ingrepen",
@@ -19,6 +20,9 @@
     "medical_equipment": "Medische apparatuur"
   },
   "fields": {
+    "donationDate": "Donatiedatum",
+    "donationType": "Donatietype",
+    "hemoglobin": "Hemoglobine",
     "prescribingProvider": "Voorschrijvend zorgverlener",
     "allergen": "Allergeen",
     "reaction": "Reactie",
@@ -375,6 +379,10 @@
     "noFilesAttached": "Geen bestanden bijgevoegd"
   },
   "values": {
+    "wholeBlood": "Volbloed",
+    "plasma": "Plasma",
+    "platelets": "Bloedplaatjes",
+    "doubleRedCells": "Dubbele rodebloedcellen",
     "active": "Actief",
     "inactive": "Inactief",
     "resolved": "Opgelost",

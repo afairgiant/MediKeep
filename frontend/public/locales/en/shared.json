@@ -7,6 +7,7 @@
   "categories": {
     "admin_dashboard": "Admin Dashboard",
     "allergies": "Allergies",
+    "blood_donations": "Blood Donations",
     "conditions": "Conditions",
     "count_active_prescriptions": "{{count}} active prescriptions",
     "count_active_prescriptions_one": "{{count}} active prescription",

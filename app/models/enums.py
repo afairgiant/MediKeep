@@ -222,6 +222,23 @@ class Laterality(Enum):
     NOT_APPLICABLE = "not_applicable"
 
 
+class DonationType(Enum):
+    """Types of blood donation"""
+
+    WHOLE_BLOOD = "whole_blood"
+    PLASMA = "plasma"
+    PLATELETS = "platelets"
+    DOUBLE_RED_CELLS = "double_red_cells"
+
+
+class HemoglobinUnit(Enum):
+    """Units a user can choose to enter and view hemoglobin in"""
+
+    G_DL = "g_dl"
+    G_L = "g_l"
+    MMOL_L = "mmol_l"
+
+
 class VaccineCategory(str, Enum):
     """Vaccine categories — mirrors frontend VaccineCategory union."""
 
@@ -327,6 +344,16 @@ def get_all_symptom_statuses():
 def get_all_injury_statuses():
     """Get all valid injury status values"""
     return get_status_values(InjuryStatus)
+
+
+def get_all_donation_types():
+    """Get all valid blood donation type values"""
+    return get_status_values(DonationType)
+
+
+def get_all_hemoglobin_units():
+    """Get all valid hemoglobin unit values"""
+    return get_status_values(HemoglobinUnit)
 
 
 def get_all_laterality_values():

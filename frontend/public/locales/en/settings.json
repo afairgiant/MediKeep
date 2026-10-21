@@ -61,6 +61,16 @@
     "urlPlaceholder": "https://your-papra-instance.com"
   },
   "preferences": {
+    "hemoglobinUnit": {
+      "description": "Unit used to enter and display hemoglobin values of blood donations. Stored values are not changed.",
+      "title": "Hemoglobin Unit"
+    },
+    "bloodDonationIntervals": {
+      "days": "days",
+      "description": "Minimum number of days after a donation before you may donate again. Adjust these to the guidelines of your blood donation service.",
+      "reset": "Reset to defaults",
+      "title": "Blood Donation Intervals"
+    },
     "dateFormat": {
       "description": "Choose how dates are displayed throughout the application",
       "dmy": "DD/MM/YYYY (UK/International)",

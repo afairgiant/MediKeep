@@ -1,8 +1,14 @@
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
+from pydantic import BaseModel, ConfigDict, StrictInt, ValidationInfo, field_validator
+
+from app.models.enums import get_all_donation_types, get_all_hemoglobin_units
+from app.services.blood_donation_eligibility import (
+    MAX_DONATION_INTERVAL_DAYS,
+    MIN_DONATION_INTERVAL_DAYS,
+)
 
 # Supported languages - single source of truth
 SUPPORTED_LANGUAGES = [
@@ -67,6 +73,41 @@ def _validate_integration_url(v: Optional[str]) -> Optional[str]:
     return v.rstrip("/")
 
 
+# Strict on writes; reads use a lenient Dict[str, Any] so a bad stored value never breaks GET.
+BloodDonationIntervals = Dict[str, StrictInt]
+
+
+def _validate_hemoglobin_unit(v: Optional[str]) -> Optional[str]:
+    if v is None:
+        return v
+    allowed = get_all_hemoglobin_units()
+    if v not in allowed:
+        raise ValueError(f"Hemoglobin unit must be one of: {', '.join(allowed)}")
+    return v
+
+
+def _validate_blood_donation_intervals(
+    v: Optional[BloodDonationIntervals],
+) -> Optional[BloodDonationIntervals]:
+    """Validate per-type blood donation intervals (days). Empty means defaults."""
+    if not v:
+        return None
+
+    allowed = get_all_donation_types()
+    for donation_type, days in v.items():
+        if donation_type not in allowed:
+            raise ValueError(
+                f"Unknown donation type '{donation_type}'. "
+                f"Must be one of: {', '.join(allowed)}"
+            )
+        if days < MIN_DONATION_INTERVAL_DAYS or days > MAX_DONATION_INTERVAL_DAYS:
+            raise ValueError(
+                f"Donation intervals must be between {MIN_DONATION_INTERVAL_DAYS} "
+                f"and {MAX_DONATION_INTERVAL_DAYS} days"
+            )
+    return v
+
+
 class UserPreferencesBase(BaseModel):
     """Base User Preferences schema with common fields."""
 
@@ -86,6 +127,9 @@ class UserPreferencesBase(BaseModel):
     papra_url: Optional[str] = None
     papra_api_token: Optional[str] = None
     papra_organization_id: Optional[str] = None
+    # Lenient on read; see the `BloodDonationIntervals` comment above for why.
+    blood_donation_intervals: Optional[Dict[str, Any]] = None
+    hemoglobin_unit: Optional[str] = None
 
     @field_validator("session_timeout_minutes")
     @classmethod
@@ -208,6 +252,21 @@ class UserPreferencesBase(BaseModel):
 class UserPreferencesCreate(UserPreferencesBase):
     """Schema for creating user preferences."""
 
+    # Stricter than the inherited read field: writes must be well-formed.
+    blood_donation_intervals: Optional[BloodDonationIntervals] = None
+
+    @field_validator("blood_donation_intervals")
+    @classmethod
+    def validate_blood_donation_intervals(cls, v):
+        """Validate blood donation intervals if provided."""
+        return _validate_blood_donation_intervals(v)
+
+    @field_validator("hemoglobin_unit")
+    @classmethod
+    def validate_hemoglobin_unit(cls, v):
+        """Validate hemoglobin unit if provided."""
+        return _validate_hemoglobin_unit(v)
+
 
 class UserPreferencesUpdate(BaseModel):
     """Schema for updating user preferences."""
@@ -227,6 +286,8 @@ class UserPreferencesUpdate(BaseModel):
     papra_url: Optional[str] = None
     papra_api_token: Optional[str] = None
     papra_organization_id: Optional[str] = None
+    blood_donation_intervals: Optional[BloodDonationIntervals] = None
+    hemoglobin_unit: Optional[str] = None
 
     @field_validator("session_timeout_minutes")
     @classmethod
@@ -302,6 +363,18 @@ class UserPreferencesUpdate(BaseModel):
     def validate_papra_url(cls, v):
         """Validate Papra URL format if provided."""
         return _validate_integration_url(v)
+
+    @field_validator("blood_donation_intervals")
+    @classmethod
+    def validate_blood_donation_intervals(cls, v):
+        """Validate blood donation intervals if provided."""
+        return _validate_blood_donation_intervals(v)
+
+    @field_validator("hemoglobin_unit")
+    @classmethod
+    def validate_hemoglobin_unit(cls, v):
+        """Validate hemoglobin unit if provided."""
+        return _validate_hemoglobin_unit(v)
 
 
 class UserPreferences(UserPreferencesBase):

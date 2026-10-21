@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "Αιμοδοσίες",
     "medications": "Φαρμακευτική Αγωγή",
     "lab_results": "Εργαστηριακά Αποτελέσματα",
     "allergies": "Αλλεργίες",
@@ -19,6 +20,9 @@
     "medical_equipment": "Ιατρικός Εξοπλισμός"
   },
   "fields": {
+    "donationDate": "Ημερομηνία αιμοδοσίας",
+    "donationType": "Τύπος αιμοδοσίας",
+    "hemoglobin": "Αιμοσφαιρίνη",
     "prescribingProvider": "Ιατρός Συνταγογράφησης",
     "allergen": "Αλλεργιογόνο",
     "reaction": "Αντίδραση",
@@ -375,6 +379,10 @@
     "noFilesAttached": "Δεν υπάρχουν συνημμένα αρχεία"
   },
   "values": {
+    "wholeBlood": "Ολικό αίμα",
+    "plasma": "Πλάσμα",
+    "platelets": "Αιμοπετάλια",
+    "doubleRedCells": "Διπλά ερυθρά αιμοσφαίρια",
     "active": "Ενεργό",
     "inactive": "Ανενεργό",
     "resolved": "Επιλύθηκε",

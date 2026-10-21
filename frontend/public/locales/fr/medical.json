@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "allergie",
+    "bloodDonation": "don de sang",
     "condition": "condition",
     "equipment": "équipement",
     "familyMember": "membre de la famille",
@@ -92,7 +93,7 @@
       }
     }
   },
-    "componentCatalog": {
+  "componentCatalog": {
     "fetchError": "Echec du chargement du catalogue de résultats d'analyse",
     "noData": "Ajoutez des résultats d'analyse avec des composants d'analyse pour les voir ici.",
     "noResults": "Aucun composant d'analyse trouvé",
@@ -1663,7 +1664,7 @@
         }
       },
       "locationOptions": {
-      "clinic": "Clinique",
+        "clinic": "Clinique",
         "doctorsOffice": "Cabinet du docteur",
         "emergencyRoom": "Service d'accueil des urgences",
         "homeVisit": "Visite à domicile",
@@ -1695,6 +1696,66 @@
       "chiefComplaint": "Affection principale",
       "followUpInstructions": "Instructions de suivi",
       "priority": "Priorité"
+    }
+  },
+  "bloodDonations": {
+    "loading": "Chargement des dons de sang...",
+    "add": "+ Ajouter un don",
+    "addTitle": "Ajouter un don de sang",
+    "editTitle": "Modifier le don de sang",
+    "noneFound": "Aucun don de sang trouvé",
+    "startAdding": "Commencez par enregistrer votre premier don de sang.",
+    "addFirst": "Enregistrer votre premier don",
+    "types": {
+      "whole_blood": "Sang total",
+      "plasma": "Plasma",
+      "platelets": "Plaquettes",
+      "double_red_cells": "Globules rouges doubles"
+    },
+    "fields": {
+      "donationDate": "Date du don",
+      "donationType": "Type de don",
+      "location": "Lieu",
+      "bloodPressure": "Pression artérielle",
+      "systolic": "Systolique (mmHg)",
+      "diastolic": "Diastolique (mmHg)",
+      "temperature": "Température",
+      "hemoglobin": "Hémoglobine"
+    },
+    "tabs": {
+      "donation": "Don",
+      "screening": "Bilan pré-don"
+    },
+    "form": {
+      "locationPlaceholder": "p. ex., collecte de la Croix-Rouge, hôpital municipal",
+      "notesPlaceholder": "Notes supplémentaires sur ce don",
+      "save": "Enregistrer le don",
+      "update": "Mettre à jour le don",
+      "saving": "Enregistrement du don..."
+    },
+    "viewModal": {
+      "title": "Détails du don de sang"
+    },
+    "eligibility": {
+      "title": "Prochain don",
+      "eligibleNow": "Don possible maintenant",
+      "nextDate": "De nouveau éligible le {{date}}",
+      "daysRemaining_one": "{{count}} jour restant",
+      "daysRemaining_other": "{{count}} jours restants",
+      "basedOn": "D'après le don de {{type}} du {{date}} et un intervalle de {{days}} jours",
+      "estimateNote": "Il ne s'agit que d'une estimation. Les règles du service de don prévalent.",
+      "noDonations": "Aucun don enregistré pour le moment",
+      "loadError": "Impossible de calculer la prochaine date de don"
+    },
+    "validation": {
+      "dateRequired": "La date du don est requise",
+      "typeRequired": "Le type de don est requis",
+      "bpOrder": "La pression systolique doit être supérieure à la diastolique",
+      "outOfRange": "{{field}} doit être compris entre {{min}} et {{max}}"
+    },
+    "filters": {
+      "allTypes": "Tous les types",
+      "allLocations": "Tous les lieux"
     }
   }
 }

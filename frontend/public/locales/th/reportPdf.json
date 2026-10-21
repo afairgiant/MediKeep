@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "การบริจาคเลือด",
     "medications": "ยาและการรักษา",
     "lab_results": "ผลการตรวจทางห้องปฏิบัติการ",
     "allergies": "การแพ้",
@@ -19,6 +20,9 @@
     "medical_equipment": "อุปกรณ์ทางการแพทย์"
   },
   "fields": {
+    "donationDate": "วันที่บริจาค",
+    "donationType": "ประเภทการบริจาค",
+    "hemoglobin": "ฮีโมโกลบิน",
     "prescribingProvider": "แพทย์ผู้สั่งจ่าย",
     "allergen": "สารก่อภูมิแพ้",
     "reaction": "อาการแพ้",
@@ -375,6 +379,10 @@
     "noFilesAttached": "ไม่มีไฟล์แนบ"
   },
   "values": {
+    "wholeBlood": "โลหิตรวม",
+    "plasma": "พลาสมา",
+    "platelets": "เกล็ดเลือด",
+    "doubleRedCells": "เม็ดเลือดแดงสองเท่า",
     "active": "ใช้งานอยู่",
     "inactive": "ไม่ได้ใช้งาน",
     "resolved": "หายแล้ว",

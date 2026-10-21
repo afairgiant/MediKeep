@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "allergie",
+    "bloodDonation": "bloeddonatie",
     "condition": "aandoening",
     "equipment": "apparatuur",
     "familyMember": "familielid",
@@ -90,6 +91,66 @@
         "onsetDate": "Startdatum",
         "severity": "Ernst"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "Bloeddonaties worden geladen...",
+    "add": "+ Donatie toevoegen",
+    "addTitle": "Bloeddonatie toevoegen",
+    "editTitle": "Bloeddonatie bewerken",
+    "noneFound": "Geen bloeddonaties gevonden",
+    "startAdding": "Begin met het registreren van uw eerste bloeddonatie.",
+    "addFirst": "Registreer uw eerste donatie",
+    "types": {
+      "whole_blood": "Volbloed",
+      "plasma": "Plasma",
+      "platelets": "Bloedplaatjes",
+      "double_red_cells": "Dubbele rodebloedcellen"
+    },
+    "fields": {
+      "donationDate": "Donatiedatum",
+      "donationType": "Donatietype",
+      "location": "Locatie",
+      "bloodPressure": "Bloeddruk",
+      "systolic": "Systolisch (mmHg)",
+      "diastolic": "Diastolisch (mmHg)",
+      "temperature": "Temperatuur",
+      "hemoglobin": "Hemoglobine"
+    },
+    "tabs": {
+      "donation": "Donatie",
+      "screening": "Keuring vóór donatie"
+    },
+    "form": {
+      "locationPlaceholder": "bijv. bloedinzamelactie Rode Kruis, Stadsziekenhuis",
+      "notesPlaceholder": "Extra notities over deze donatie",
+      "save": "Donatie opslaan",
+      "update": "Donatie bijwerken",
+      "saving": "Donatie wordt opgeslagen..."
+    },
+    "viewModal": {
+      "title": "Details van de bloeddonatie"
+    },
+    "eligibility": {
+      "title": "Volgende donatie",
+      "eligibleNow": "Doneren is nu mogelijk",
+      "nextDate": "Weer in aanmerking vanaf {{date}}",
+      "daysRemaining_one": "Nog {{count}} dag",
+      "daysRemaining_other": "Nog {{count}} dagen",
+      "basedOn": "Gebaseerd op de donatie ({{type}}) op {{date}} en een interval van {{days}} dagen",
+      "estimateNote": "Dit is slechts een schatting. De regels van de donatieorganisatie hebben voorrang.",
+      "noDonations": "Nog geen donaties geregistreerd",
+      "loadError": "De volgende donatiedatum kon niet worden berekend"
+    },
+    "validation": {
+      "dateRequired": "Donatiedatum is verplicht",
+      "typeRequired": "Donatietype is verplicht",
+      "bpOrder": "De systolische waarde moet hoger zijn dan de diastolische",
+      "outOfRange": "{{field}} moet tussen {{min}} en {{max}} liggen"
+    },
+    "filters": {
+      "allTypes": "Alle typen",
+      "allLocations": "Alle locaties"
     }
   },
   "componentCatalog": {
