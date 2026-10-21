@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "allergia",
+    "bloodDonation": "donazione di sangue",
     "condition": "condizione",
     "equipment": "attrezzatura",
     "familyMember": "familiare",
@@ -90,6 +91,66 @@
         "onsetDate": "Data di inizio",
         "severity": "Gravità"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "Caricamento delle donazioni di sangue...",
+    "add": "+ Aggiungi donazione",
+    "addTitle": "Aggiungi donazione di sangue",
+    "editTitle": "Modifica donazione di sangue",
+    "noneFound": "Nessuna donazione di sangue trovata",
+    "startAdding": "Inizia registrando la tua prima donazione di sangue.",
+    "addFirst": "Registra la tua prima donazione",
+    "types": {
+      "whole_blood": "Sangue intero",
+      "plasma": "Plasma",
+      "platelets": "Piastrine",
+      "double_red_cells": "Doppi globuli rossi"
+    },
+    "fields": {
+      "donationDate": "Data della donazione",
+      "donationType": "Tipo di donazione",
+      "location": "Luogo",
+      "bloodPressure": "Pressione arteriosa",
+      "systolic": "Sistolica (mmHg)",
+      "diastolic": "Diastolica (mmHg)",
+      "temperature": "Temperatura",
+      "hemoglobin": "Emoglobina",
+      "hemoglobinWithUnit": "Emoglobina (g/dL)"
+    },
+    "tabs": {
+      "donation": "Donazione",
+      "screening": "Visita pre-donazione"
+    },
+    "form": {
+      "locationPlaceholder": "ad es., raccolta sangue Croce Rossa, Ospedale Civile",
+      "notesPlaceholder": "Note aggiuntive su questa donazione",
+      "save": "Salva donazione",
+      "update": "Aggiorna donazione",
+      "saving": "Salvataggio della donazione..."
+    },
+    "viewModal": {
+      "title": "Dettagli della donazione di sangue"
+    },
+    "eligibility": {
+      "title": "Prossima donazione",
+      "eligibleNow": "Puoi donare adesso",
+      "nextDate": "Potrai donare di nuovo il {{date}}",
+      "daysRemaining_one": "{{count}} giorno rimanente",
+      "daysRemaining_other": "{{count}} giorni rimanenti",
+      "basedOn": "In base alla tua ultima donazione di {{type}} del {{date}} e a un intervallo di {{days}} giorni",
+      "noDonations": "Nessuna donazione ancora registrata",
+      "loadError": "Impossibile calcolare la prossima data di donazione"
+    },
+    "validation": {
+      "dateRequired": "La data della donazione è obbligatoria",
+      "typeRequired": "Il tipo di donazione è obbligatorio",
+      "bpOrder": "La pressione sistolica deve essere maggiore della diastolica",
+      "outOfRange": "{{field}} deve essere compreso tra {{min}} e {{max}}"
+    },
+    "filters": {
+      "allTypes": "Tutti i tipi",
+      "allLocations": "Tutti i luoghi"
     }
   },
   "componentCatalog": {

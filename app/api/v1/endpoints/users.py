@@ -234,6 +234,7 @@ def update_current_user_preferences(
             "session_timeout_minutes": updated_preferences.session_timeout_minutes,
             "language": updated_preferences.language,
             "date_format": updated_preferences.date_format,
+            "blood_donation_intervals": updated_preferences.blood_donation_intervals,
             "paperless_enabled": updated_preferences.paperless_enabled,
             "paperless_url": updated_preferences.paperless_url,
             "paperless_auto_sync": updated_preferences.paperless_auto_sync,

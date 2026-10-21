@@ -4,6 +4,7 @@ from app.api.v1 import admin
 from app.api.v1.endpoints import (
     allergy,
     auth,
+    blood_donation,
     condition,
     custom_reports,
     emergency_contact,
@@ -124,6 +125,9 @@ api_router.include_router(procedure.router, prefix="/procedures", tags=["procedu
 api_router.include_router(treatment.router, prefix="/treatments", tags=["treatments"])
 api_router.include_router(
     medical_equipment.router, prefix="/medical-equipment", tags=["medical-equipment"]
+)
+api_router.include_router(
+    blood_donation.router, prefix="/blood-donations", tags=["blood-donations"]
 )
 api_router.include_router(allergy.router, prefix="/allergies", tags=["allergies"])
 api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])

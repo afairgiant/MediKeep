@@ -63,6 +63,8 @@ const MantineFilters = ({
     showPractitioner = false,
     showPharmacy = false,
     showSearch = true,
+    typePlaceholder,
+    categoryPlaceholder,
   } = config;
 
   const { colorScheme } = useMantineColorScheme();
@@ -347,10 +349,10 @@ const MantineFilters = ({
                   categoryOptions &&
                   categoryOptions.length > 1 && (
                     <Select
-                      placeholder={t(
-                        'filters.placeholders.category',
-                        'Category'
-                      )}
+                      placeholder={
+                        categoryPlaceholder ||
+                        t('filters.placeholders.category', 'Category')
+                      }
                       value={filters.category}
                       onChange={value =>
                         updateFilter('category', value || 'all')
@@ -498,7 +500,10 @@ const MantineFilters = ({
                 {/* Type Filter */}
                 {showType && typeOptions && typeOptions.length > 1 && (
                   <Select
-                    placeholder={t('filters.placeholders.priority', 'Priority')}
+                    placeholder={
+                      typePlaceholder ||
+                      t('filters.placeholders.priority', 'Priority')
+                    }
                     value={filters.type}
                     onChange={value => updateFilter('type', value || 'all')}
                     data={typeOptions.map(option => ({

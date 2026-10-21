@@ -61,6 +61,12 @@
     "urlPlaceholder": "https://din-papra-instans.com"
   },
   "preferences": {
+    "bloodDonationIntervals": {
+      "days": "dagar",
+      "description": "Minsta antal dagar efter en blodgivning innan du kan ge blod igen. Justera dessa värden efter riktlinjerna från din blodgivningscentral.",
+      "reset": "Återställ till standardvärden",
+      "title": "Intervaller mellan blodgivningar"
+    },
     "dateFormat": {
       "description": "Välj hur datum visas genom hela applikationen",
       "dmy": "DD/MM/ÅÅÅÅ (Storbritannien/Internationell)",

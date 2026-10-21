@@ -528,9 +528,18 @@ Base path: `/api/v1/users`
 ```json
 {
   "theme": "dark",
-  "notifications_enabled": false
+  "notifications_enabled": false,
+  "blood_donation_intervals": {
+    "whole_blood": 84,
+    "plasma": 7
+  }
 }
 ```
+
+- **Note**: `blood_donation_intervals` overrides the minimum days between donations
+  per donation type (`whole_blood`, `plasma`, `platelets`, `double_red_cells`). Values
+  must be integers from 1 to 365; unknown types or malformed values are rejected with
+  `422`. An empty object resets all types to their defaults.
 
 ---
 
@@ -3520,6 +3529,144 @@ Base path: `/api/v1/standardized-vaccines`
   "count": 66
 }
 ```
+
+### 6.14 Blood Donations
+
+Base path: `/api/v1/blood-donations`
+
+**Purpose**: Log blood donations with optional pre-donation screening values and
+check when the patient may donate again.
+
+**Donation types**: `whole_blood`, `plasma`, `platelets`, `double_red_cells`
+
+##### Create Blood Donation
+
+`POST /blood-donations/`
+
+- **Purpose**: Create a new blood donation record
+- **Authentication**: Yes
+- **Request Body**:
+
+```json
+{
+  "patient_id": 1,
+  "donation_date": "2026-09-01",
+  "donation_type": "whole_blood",
+  "location": "DRK Blutspendedienst",
+  "systolic_bp": 125,
+  "diastolic_bp": 80,
+  "temperature": 98.4,
+  "hemoglobin": 14.5,
+  "notes": "Felt fine",
+  "tags": ["drk"]
+}
+```
+
+- **Required fields**: `patient_id`, `donation_date`, `donation_type`
+- **Validation**:
+  - `donation_date` must not be in the future
+  - `donation_type` is normalized (trimmed, lowercased) and must be one of the types above
+  - `systolic_bp`: 60-250 mmHg, `diastolic_bp`: 30-150 mmHg, systolic must be greater than diastolic
+  - `temperature`: 80-115 (stored in Fahrenheit; clients convert for metric users)
+  - `hemoglobin`: 3-25 g/dL
+  - `location`: max 200 characters, `notes`: max 5000 characters
+- **Success Response** (200): Blood donation object
+
+```json
+{
+  "id": 7,
+  "patient_id": 1,
+  "donation_date": "2026-09-01",
+  "donation_type": "whole_blood",
+  "location": "DRK Blutspendedienst",
+  "systolic_bp": 125,
+  "diastolic_bp": 80,
+  "temperature": 98.4,
+  "hemoglobin": 14.5,
+  "notes": "Felt fine",
+  "tags": ["drk"],
+  "created_at": "2026-09-01T10:00:00Z",
+  "updated_at": "2026-09-01T10:00:00Z"
+}
+```
+
+- **Error Responses**:
+  - `422`: Validation error
+
+##### List Blood Donations
+
+`GET /blood-donations/`
+
+- **Purpose**: List blood donations for the current or an accessible patient, newest first
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `patient_id` (integer, optional): Accessible patient (defaults to the user's own patient)
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 10000, max: 10000): Items per page
+  - `donation_type` (string, optional): Filter by donation type
+  - `tags` (array, optional): Filter by tags
+  - `tag_match_all` (boolean, default: false): Match ALL tags vs ANY
+- **Success Response** (200): Array of blood donation objects
+
+##### Get Blood Donation Eligibility
+
+`GET /blood-donations/eligibility`
+
+- **Purpose**: Next eligible donation date, based on the latest donation and the
+  requesting user's minimum intervals
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `patient_id` (integer, optional): Accessible patient (defaults to the user's own patient)
+- **Success Response** (200):
+
+```json
+{
+  "last_donation_date": "2026-09-01",
+  "last_donation_type": "whole_blood",
+  "interval_days": 56,
+  "next_eligible_date": "2026-10-27",
+  "days_remaining": 12,
+  "is_eligible": false
+}
+```
+
+- **Note**: Without any donation, `is_eligible` is `true`, `days_remaining` is `0`
+  and the date fields are `null`. Intervals come from the requesting user's
+  preferences (`blood_donation_intervals`), also when viewing a shared patient.
+  Default intervals in days: `whole_blood` 56, `plasma` 14, `platelets` 14,
+  `double_red_cells` 112.
+
+##### Get Blood Donation
+
+`GET /blood-donations/{donation_id}`
+
+- **Authentication**: Yes
+- **Success Response** (200): Blood donation object
+- **Error Responses**:
+  - `404`: Blood donation not found
+
+##### Update Blood Donation
+
+`PUT /blood-donations/{donation_id}`
+
+- **Purpose**: Partially update a blood donation (all fields optional)
+- **Authentication**: Yes
+- **Request Body**: Any subset of the create fields except `patient_id`
+- **Note**: The blood pressure order check uses the merged values, so sending only
+  `systolic_bp` is validated against the stored `diastolic_bp`.
+- **Success Response** (200): Updated blood donation object
+- **Error Responses**:
+  - `404`: Blood donation not found
+  - `422`: Validation error
+
+##### Delete Blood Donation
+
+`DELETE /blood-donations/{donation_id}`
+
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "BloodDonation deleted successfully"}`
+- **Error Responses**:
+  - `404`: Blood donation not found
 
 ---
 

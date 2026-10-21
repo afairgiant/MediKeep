@@ -16,6 +16,7 @@ import DeleteAccountModal from '../components/auth/DeleteAccountModal';
 import PaperlessSettings from '../components/settings/PaperlessSettings';
 import PapraSettings from '../components/settings/PapraSettings';
 import StoragePreferencesCard from '../components/settings/StoragePreferencesCard';
+import BloodDonationIntervalsCard from '../components/settings/BloodDonationIntervalsCard';
 import NotificationSettings from '../components/settings/NotificationSettings';
 import ProfileSettings from '../components/settings/ProfileSettings';
 import { useAuth } from '../contexts/AuthContext';
@@ -65,17 +66,30 @@ function buildDefaultPreferences(prefs) {
 }
 
 /**
+ * Compares two preference values for equality, treating objects (e.g.
+ * `blood_donation_intervals`) by value rather than by reference so that
+ * setting a field back to its original value doesn't register as a change.
+ */
+export function isSameValue(a, b) {
+  if (a === b) return true;
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+  return false;
+}
+
+/**
  * Returns the keys from localPreferences that differ from serverPreferences,
  * optionally filtered by a predicate on the key name.
  */
-function getChangedKeys(localPreferences, serverPreferences, keyFilter) {
+export function getChangedKeys(localPreferences, serverPreferences, keyFilter) {
   if (!serverPreferences || Object.keys(localPreferences).length === 0) {
     return [];
   }
 
   return Object.keys(localPreferences).filter(key => {
     if (keyFilter && !keyFilter(key)) return false;
-    return localPreferences[key] !== serverPreferences[key];
+    return !isSameValue(localPreferences[key], serverPreferences[key]);
   });
 }
 
@@ -208,7 +222,7 @@ const Settings = () => {
           serverValue = safeParseTimeout(serverValue);
         }
 
-        if (localValue !== serverValue) {
+        if (!isSameValue(localValue, serverValue)) {
           fieldsToUpdate[key] =
             key === 'session_timeout_minutes'
               ? localValue
@@ -744,6 +758,17 @@ const Settings = () => {
               </div>
             </div>
           </Card>
+
+          <BloodDonationIntervalsCard
+            intervals={localPreferences?.blood_donation_intervals ?? null}
+            onChange={newIntervals =>
+              setLocalPreferences(prev => ({
+                ...prev,
+                blood_donation_intervals: newIntervals,
+              }))
+            }
+            disabled={loadingPreferences || savingPreferences}
+          />
 
           <SaveResetBar
             visible={hasGeneralChanges}
