@@ -31,7 +31,7 @@ Mako==1.4.1
 MarkupSafe==3.0.3
 multidict==6.9.1
 packaging==26.3
-pillow==12.3.0
+pillow==13.0.0
 pluggy==1.6.0
 propcache==0.5.4
 psutil==7.2.2
