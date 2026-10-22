@@ -31,6 +31,8 @@ KEY_BACKUP_MIN_COUNT = "backup_min_count"
 KEY_BACKUP_MAX_COUNT = "backup_max_count"
 KEY_RELEASE_CHECK_ENABLED = "release_check_enabled"
 KEY_WHATS_NEW_POPUP_ENABLED = "whats_new_popup_enabled"
+KEY_ACTIVITY_LOG_RETENTION_DAYS = "activity_log_retention_days"
+KEY_NOTIFICATION_HISTORY_RETENTION_DAYS = "notification_history_retention_days"
 
 
 def _parse_bool(raw: str) -> bool:
@@ -49,6 +51,11 @@ def _serialize_bool(value: bool) -> str:
 def _require_positive_int(value: int) -> None:
     if value < 1:
         raise ValueError(f"must be >= 1, got {value}")
+
+
+def _require_non_negative_int(value: int) -> None:
+    if value < 0:
+        raise ValueError(f"must be >= 0, got {value}")
 
 
 class SettingValidationError(ValueError):
@@ -70,6 +77,8 @@ class PersistedSetting:  # pylint: disable=too-many-instance-attributes
     # Write-only bounds: the boot loader skips them so older stored values still load.
     min_value: Optional[int] = None
     max_value: Optional[int] = None
+    # 0 is accepted below min_value and means "keep forever".
+    zero_means_forever: bool = False
 
 
 def _bool_setting(key: str, attr: str) -> PersistedSetting:
@@ -82,16 +91,25 @@ def _bool_setting(key: str, attr: str) -> PersistedSetting:
     )
 
 
-def _int_setting(key: str, attr: str, max_value: int) -> PersistedSetting:
+def _int_setting(
+    key: str,
+    attr: str,
+    max_value: int,
+    min_value: int = 1,
+    zero_means_forever: bool = False,
+) -> PersistedSetting:
     return PersistedSetting(
         key=key,
         attr=attr,
         value_type=int,
         parse=int,
         serialize=str,
-        validate=_require_positive_int,
-        min_value=1,
+        validate=(
+            _require_non_negative_int if zero_means_forever else _require_positive_int
+        ),
+        min_value=min_value,
         max_value=max_value,
+        zero_means_forever=zero_means_forever,
     )
 
 
@@ -105,6 +123,20 @@ PERSISTED_SETTINGS: dict[str, PersistedSetting] = {
         _int_setting(KEY_BACKUP_MAX_COUNT, "BACKUP_MAX_COUNT", 500),
         _bool_setting(KEY_RELEASE_CHECK_ENABLED, "RELEASE_CHECK_ENABLED"),
         _bool_setting(KEY_WHATS_NEW_POPUP_ENABLED, "WHATS_NEW_POPUP_ENABLED"),
+        _int_setting(
+            KEY_ACTIVITY_LOG_RETENTION_DAYS,
+            "ACTIVITY_LOG_RETENTION_DAYS",
+            3650,
+            zero_means_forever=True,
+        ),
+        # Reminder dedup reads today's history rows; two days keeps a margin over DST.
+        _int_setting(
+            KEY_NOTIFICATION_HISTORY_RETENTION_DAYS,
+            "NOTIFICATION_HISTORY_RETENTION_DAYS",
+            3650,
+            min_value=2,
+            zero_means_forever=True,
+        ),
     )
 }
 
@@ -190,6 +222,7 @@ def describe_settings(db: Session) -> dict[str, dict[str, Any]]:
             "fallback_source": fallback_source,
             "min": entry.min_value,
             "max": entry.max_value,
+            "zero_means_forever": entry.zero_means_forever,
         }
     return described
 
@@ -200,6 +233,8 @@ def _check_value(entry: PersistedSetting, value: Any) -> None:
         raise SettingValidationError(
             f"{entry.key} must be of type {entry.value_type.__name__}"
         )
+    if entry.zero_means_forever and value == 0:
+        return
     if entry.min_value is not None and value < entry.min_value:
         raise SettingValidationError(f"{entry.key} must be at least {entry.min_value}")
     if entry.max_value is not None and value > entry.max_value:

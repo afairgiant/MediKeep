@@ -510,7 +510,12 @@
     },
     "dataRetention": {
       "trashRetention": "Conserver les fichiers supprimés dans la corbeille pendant",
-      "trashRetentionDesc": "Passé ce délai, les fichiers de la corbeille sont supprimés définitivement."
+      "trashRetentionDesc": "Passé ce délai, les fichiers de la corbeille sont supprimés définitivement.",
+      "keepForever": "Conserver indéfiniment",
+      "activityLogRetention": "Conserver l'historique d'activité pendant",
+      "activityLogRetentionDesc": "Si une limite est définie, les entrées plus anciennes, y compris les connexions et leurs adresses IP, sont supprimées une fois par jour. Elles disparaissent aussi du journal d'audit et de l'activité récente.",
+      "notificationHistoryRetention": "Conserver l'historique des notifications pendant",
+      "notificationHistoryRetentionDesc": "Si une limite est définie, les notifications envoyées plus anciennes sont supprimées une fois par jour, y compris de l'historique des notifications de chaque utilisateur dans ses paramètres."
     },
     "deployment": {
       "autoRedirectDesc": "Gardé hors de l'application pour la même raison que le mode SSO uniquement.",

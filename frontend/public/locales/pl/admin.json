@@ -510,7 +510,12 @@
     },
     "dataRetention": {
       "trashRetention": "Przechowuj usunięte pliki w koszu przez",
-      "trashRetentionDesc": "Po tym czasie pliki w koszu są usuwane na stałe."
+      "trashRetentionDesc": "Po tym czasie pliki w koszu są usuwane na stałe.",
+      "keepForever": "Przechowuj zawsze",
+      "activityLogRetention": "Przechowuj historię aktywności przez",
+      "activityLogRetentionDesc": "Gdy ustawiono limit, starsze wpisy, w tym logowania i ich adresy IP, są usuwane raz dziennie. Znikają również z dziennika audytu i ostatniej aktywności.",
+      "notificationHistoryRetention": "Przechowuj historię powiadomień przez",
+      "notificationHistoryRetentionDesc": "Gdy ustawiono limit, starsze wysłane powiadomienia są usuwane raz dziennie, również z historii powiadomień każdego użytkownika w jego ustawieniach."
     },
     "deployment": {
       "autoRedirectDesc": "Pozostaje poza aplikacją z tego samego powodu co tryb tylko SSO.",

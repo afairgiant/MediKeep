@@ -61,9 +61,10 @@ const validate = (
 ): Partial<Record<SettingKey, FieldError>> => {
   const errors: Partial<Record<SettingKey, FieldError>> = {};
   (Object.keys(settings) as SettingKey[]).forEach(key => {
-    const { min, max } = settings[key];
+    const { min, max, zero_means_forever } = settings[key];
     const value = draft[key];
     if (typeof settings[key].value !== 'number') return;
+    if (zero_means_forever && value === 0) return;
     if (
       typeof value !== 'number' ||
       (min !== null && value < min) ||

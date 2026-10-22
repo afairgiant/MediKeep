@@ -2,7 +2,9 @@ export type NumberSettingKey =
   | 'trash_retention_days'
   | 'backup_retention_days'
   | 'backup_min_count'
-  | 'backup_max_count';
+  | 'backup_max_count'
+  | 'activity_log_retention_days'
+  | 'notification_history_retention_days';
 
 export type BoolSettingKey =
   | 'allow_user_registration'
@@ -22,6 +24,7 @@ export interface SettingState {
   fallback_source: 'env' | 'default';
   min: number | null;
   max: number | null;
+  zero_means_forever: boolean;
 }
 
 export type SettingsMap = Record<SettingKey, SettingState>;

@@ -510,7 +510,12 @@
     },
     "dataRetention": {
       "trashRetention": "Gelöschte Dateien im Papierkorb behalten für",
-      "trashRetentionDesc": "Danach werden Dateien im Papierkorb endgültig gelöscht."
+      "trashRetentionDesc": "Danach werden Dateien im Papierkorb endgültig gelöscht.",
+      "keepForever": "Für immer behalten",
+      "activityLogRetention": "Aktivitätsverlauf aufbewahren für",
+      "activityLogRetentionDesc": "Wenn ein Zeitraum festgelegt ist, werden ältere Einträge, einschließlich Anmeldungen und deren IP-Adressen, einmal täglich gelöscht. Sie verschwinden auch aus dem Audit-Log und der letzten Aktivität.",
+      "notificationHistoryRetention": "Benachrichtigungsverlauf aufbewahren für",
+      "notificationHistoryRetentionDesc": "Wenn ein Zeitraum festgelegt ist, werden ältere gesendete Benachrichtigungen einmal täglich gelöscht, auch aus dem Benachrichtigungsverlauf jedes Benutzers in seinen Einstellungen."
     },
     "deployment": {
       "autoRedirectDesc": "Aus demselben Grund wie der Nur-SSO-Modus außerhalb der App.",

@@ -510,7 +510,12 @@
     },
     "dataRetention": {
       "trashRetention": "Keep deleted files in trash for",
-      "trashRetentionDesc": "After this, files in the trash are deleted for good."
+      "trashRetentionDesc": "After this, files in the trash are deleted for good.",
+      "keepForever": "Keep forever",
+      "activityLogRetention": "Keep activity history for",
+      "activityLogRetentionDesc": "When a limit is set, entries older than it, including sign-ins and their IP addresses, are deleted once a day. They also disappear from the Audit Log and Recent Activity.",
+      "notificationHistoryRetention": "Keep notification history for",
+      "notificationHistoryRetentionDesc": "When a limit is set, sent notifications older than it are deleted once a day, including from each user’s notification history in their settings."
     },
     "deployment": {
       "autoRedirectDesc": "Kept out of the app for the same reason as SSO-only mode.",

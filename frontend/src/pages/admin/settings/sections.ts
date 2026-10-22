@@ -23,7 +23,15 @@ export const SECTIONS: SectionDef[] = [
     Component: GeneralSection,
   },
   { id: 'users', keys: ['allow_user_registration'], Component: UsersSection },
-  { id: 'data', keys: ['trash_retention_days'], Component: DataSection },
+  {
+    id: 'data',
+    keys: [
+      'trash_retention_days',
+      'activity_log_retention_days',
+      'notification_history_retention_days',
+    ],
+    Component: DataSection,
+  },
   {
     id: 'backups',
     keys: ['backup_retention_days', 'backup_min_count', 'backup_max_count'],

@@ -223,7 +223,7 @@ describe('value source', () => {
     expect(
       screen.getByLabelText('Keep deleted files in trash for')
     ).toHaveValue('30 days');
-    expect(screen.getByText('Default')).toBeInTheDocument();
+    expect(screen.getAllByText('Default')).toHaveLength(3);
     expect(screen.getByText('1 unsaved changes')).toBeInTheDocument();
   });
 
@@ -242,7 +242,7 @@ describe('value source', () => {
 
     expect(
       await screen.findByText(
-        'Compose sets 14; the saved value is used instead.'
+        'Compose sets 14 days; the saved value is used instead.'
       )
     ).toBeInTheDocument();
   });
