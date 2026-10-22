@@ -12,6 +12,7 @@ const state = (overrides: Partial<SettingState>): SettingState => ({
   fallback_source: 'default',
   min: 1,
   max: 365,
+  zero_means_forever: false,
   ...overrides,
 });
 
@@ -46,6 +47,21 @@ export const makeSettings = (
   }),
   release_check_enabled: boolState(overrides.release_check_enabled),
   whats_new_popup_enabled: boolState(overrides.whats_new_popup_enabled),
+  activity_log_retention_days: state({
+    value: 0,
+    fallback: 0,
+    max: 3650,
+    zero_means_forever: true,
+    ...overrides.activity_log_retention_days,
+  }),
+  notification_history_retention_days: state({
+    value: 0,
+    fallback: 0,
+    min: 2,
+    max: 3650,
+    zero_means_forever: true,
+    ...overrides.notification_history_retention_days,
+  }),
 });
 
 export const makeResponse = (

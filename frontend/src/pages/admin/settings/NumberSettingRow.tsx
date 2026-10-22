@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { NumberInput } from '@mantine/core';
+import { Checkbox, Group, NumberInput } from '@mantine/core';
 import SettingRow from './SettingRow';
 import type { AdminSettingsState } from './useAdminSettings';
-import type { NumberSettingKey } from './types';
+import type { NumberSettingKey, SettingValue } from './types';
 
 interface NumberSettingRowProps {
   state: AdminSettingsState;
@@ -10,6 +10,8 @@ interface NumberSettingRowProps {
   label: string;
   description: string;
   unit: string;
+  /** Value filled in when "Keep forever" is unticked; only used when the setting allows 0. */
+  foreverOffValue?: number;
 }
 
 const NumberSettingRow = ({
@@ -18,6 +20,7 @@ const NumberSettingRow = ({
   label,
   description,
   unit,
+  foreverOffValue,
 }: NumberSettingRowProps) => {
   const { t } = useTranslation('admin');
   const setting = state.settings?.[settingKey];
@@ -39,6 +42,30 @@ const NumberSettingRow = ({
   }
 
   const value = state.draft[settingKey];
+  const allowsForever = setting.zero_means_forever;
+  const forever = allowsForever && value === 0;
+  const foreverLabel = t('settings.dataRetention.keepForever', 'Keep forever');
+  const formatValue = (v: SettingValue) =>
+    allowsForever && v === 0 ? foreverLabel : `${v} ${unit}`;
+
+  const input = (
+    <NumberInput
+      w={170}
+      min={setting.min ?? undefined}
+      max={setting.max ?? undefined}
+      allowDecimal={false}
+      allowNegative={false}
+      clampBehavior="none"
+      value={!forever && typeof value === 'number' ? value : ''}
+      onChange={next =>
+        state.setValue(settingKey, typeof next === 'number' ? next : '')
+      }
+      suffix={` ${unit}`}
+      error={errorText}
+      disabled={forever}
+      aria-label={label}
+    />
+  );
 
   return (
     <SettingRow
@@ -48,22 +75,27 @@ const NumberSettingRow = ({
       dirty={state.dirtyKeys.includes(settingKey)}
       pendingReset={state.resets.has(settingKey)}
       onReset={() => state.reset(settingKey)}
+      formatValue={formatValue}
       control={
-        <NumberInput
-          w={170}
-          min={setting.min ?? undefined}
-          max={setting.max ?? undefined}
-          allowDecimal={false}
-          allowNegative={false}
-          clampBehavior="none"
-          value={typeof value === 'number' ? value : ''}
-          onChange={next =>
-            state.setValue(settingKey, typeof next === 'number' ? next : '')
-          }
-          suffix={` ${unit}`}
-          error={errorText}
-          aria-label={label}
-        />
+        allowsForever ? (
+          <Group gap="sm" wrap="nowrap" align="center">
+            {input}
+            <Checkbox
+              label={foreverLabel}
+              checked={forever}
+              onChange={event =>
+                state.setValue(
+                  settingKey,
+                  event.currentTarget.checked
+                    ? 0
+                    : (foreverOffValue ?? setting.min ?? 1)
+                )
+              }
+            />
+          </Group>
+        ) : (
+          input
+        )
       }
     />
   );

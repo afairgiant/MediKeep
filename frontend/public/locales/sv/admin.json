@@ -510,7 +510,12 @@
     },
     "dataRetention": {
       "trashRetention": "Behåll borttagna filer i papperskorgen i",
-      "trashRetentionDesc": "Därefter tas filerna i papperskorgen bort permanent."
+      "trashRetentionDesc": "Därefter tas filerna i papperskorgen bort permanent.",
+      "keepForever": "Behåll för alltid",
+      "activityLogRetention": "Behåll aktivitetshistorik i",
+      "activityLogRetentionDesc": "Äldre poster, inklusive inloggningar och deras IP-adresser, tas bort dagligen. De försvinner också från granskningsloggen och senaste aktivitet.",
+      "notificationHistoryRetention": "Behåll aviseringshistorik i",
+      "notificationHistoryRetentionDesc": "Äldre skickade aviseringar tas bort dagligen, även från varje användares aviseringshistorik i deras inställningar."
     },
     "deployment": {
       "autoRedirectDesc": "Hålls utanför appen av samma skäl som läget endast SSO.",

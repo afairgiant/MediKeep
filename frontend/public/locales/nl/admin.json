@@ -510,7 +510,12 @@
     },
     "dataRetention": {
       "trashRetention": "Verwijderde bestanden in de prullenbak bewaren gedurende",
-      "trashRetentionDesc": "Daarna worden bestanden in de prullenbak definitief verwijderd."
+      "trashRetentionDesc": "Daarna worden bestanden in de prullenbak definitief verwijderd.",
+      "keepForever": "Voor altijd bewaren",
+      "activityLogRetention": "Activiteitengeschiedenis bewaren gedurende",
+      "activityLogRetentionDesc": "Oudere vermeldingen, inclusief aanmeldingen en hun IP-adressen, worden dagelijks verwijderd. Ze verdwijnen ook uit het auditlogboek en recente activiteit.",
+      "notificationHistoryRetention": "Meldingsgeschiedenis bewaren gedurende",
+      "notificationHistoryRetentionDesc": "Oudere verzonden meldingen worden dagelijks verwijderd, ook uit de meldingsgeschiedenis van elke gebruiker in diens instellingen."
     },
     "deployment": {
       "autoRedirectDesc": "Om dezelfde reden als de modus alleen-SSO buiten de app gehouden.",

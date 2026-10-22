@@ -11,10 +11,12 @@ from app.core import auth_mode, persisted_settings
 from app.core.auth_mode import SEALED_INSTANCE_EVENT
 from app.core.config import Settings, settings
 from app.core.persisted_settings import (
+    KEY_ACTIVITY_LOG_RETENTION_DAYS,
     KEY_ALLOW_USER_REGISTRATION,
     KEY_BACKUP_MAX_COUNT,
     KEY_BACKUP_MIN_COUNT,
     KEY_BACKUP_RETENTION_DAYS,
+    KEY_NOTIFICATION_HISTORY_RETENTION_DAYS,
     KEY_RELEASE_CHECK_ENABLED,
     KEY_TRASH_RETENTION_DAYS,
     KEY_WHATS_NEW_POPUP_ENABLED,
@@ -38,6 +40,8 @@ _TOUCHED_ATTRS = (
     "BACKUP_MAX_COUNT",
     "RELEASE_CHECK_ENABLED",
     "WHATS_NEW_POPUP_ENABLED",
+    "ACTIVITY_LOG_RETENTION_DAYS",
+    "NOTIFICATION_HISTORY_RETENTION_DAYS",
 )
 
 
@@ -194,6 +198,84 @@ class TestPatchPersists:
 
         assert response.status_code == 200
         assert response.json()["updated"] == []
+
+
+class TestRetentionSettings:
+    def test_described_with_forever_flag(self, admin_client, restore_settings):
+        body = admin_client.get(SETTINGS_URL).json()["settings"]
+
+        assert body[KEY_ACTIVITY_LOG_RETENTION_DAYS]["zero_means_forever"] is True
+        assert body[KEY_ACTIVITY_LOG_RETENTION_DAYS]["min"] == 1
+        assert body[KEY_NOTIFICATION_HISTORY_RETENTION_DAYS]["min"] == 2
+        assert body[KEY_TRASH_RETENTION_DAYS]["zero_means_forever"] is False
+
+    def test_defaults_keep_forever(self):
+        assert Settings.ACTIVITY_LOG_RETENTION_DAYS == 0
+        assert Settings.NOTIFICATION_HISTORY_RETENTION_DAYS == 0
+
+    def test_days_persist(self, admin_client, db_session, restore_settings):
+        response = _patch(
+            admin_client,
+            {
+                KEY_ACTIVITY_LOG_RETENTION_DAYS: 180,
+                KEY_NOTIFICATION_HISTORY_RETENTION_DAYS: 30,
+            },
+        )
+
+        assert response.status_code == 200
+        assert (
+            system_setting.get_setting(db_session, KEY_ACTIVITY_LOG_RETENTION_DAYS)
+            == "180"
+        )
+        assert settings.ACTIVITY_LOG_RETENTION_DAYS == 180
+        assert settings.NOTIFICATION_HISTORY_RETENTION_DAYS == 30
+
+    def test_zero_accepted_as_forever(self, admin_client, restore_settings):
+        settings.ACTIVITY_LOG_RETENTION_DAYS = 90
+
+        response = _patch(
+            admin_client,
+            {
+                KEY_ACTIVITY_LOG_RETENTION_DAYS: 0,
+                KEY_NOTIFICATION_HISTORY_RETENTION_DAYS: 0,
+            },
+        )
+
+        assert response.status_code == 200
+        assert settings.ACTIVITY_LOG_RETENTION_DAYS == 0
+
+    @pytest.mark.parametrize(
+        "changes",
+        [
+            {KEY_NOTIFICATION_HISTORY_RETENTION_DAYS: 1},
+            {KEY_ACTIVITY_LOG_RETENTION_DAYS: 3651},
+            {KEY_ACTIVITY_LOG_RETENTION_DAYS: -1},
+        ],
+        ids=["notification-below-min", "above-max", "negative"],
+    )
+    def test_out_of_bounds_rejected(
+        self, admin_client, db_session, restore_settings, changes
+    ):
+        response = _patch(admin_client, changes)
+
+        assert response.status_code == 400
+        assert system_setting.get_setting(db_session, next(iter(changes))) is None
+
+    def test_stored_zero_loads_at_boot(self, db_session, restore_settings):
+        settings.ACTIVITY_LOG_RETENTION_DAYS = 30
+        system_setting.set_setting(db_session, KEY_ACTIVITY_LOG_RETENTION_DAYS, "0")
+
+        load_persisted_settings(db_session)
+
+        assert settings.ACTIVITY_LOG_RETENTION_DAYS == 0
+
+    def test_stored_negative_is_skipped_at_boot(self, db_session, restore_settings):
+        settings.ACTIVITY_LOG_RETENTION_DAYS = 30
+        system_setting.set_setting(db_session, KEY_ACTIVITY_LOG_RETENTION_DAYS, "-5")
+
+        load_persisted_settings(db_session)
+
+        assert settings.ACTIVITY_LOG_RETENTION_DAYS == 30
 
 
 class TestPatchValidation:

@@ -336,6 +336,11 @@ class Settings:  # App Info
         os.getenv("TRASH_RETENTION_DAYS", "30")
     )  # Keep deleted files for 30 days
 
+    # Admin-overridable at runtime; 0 keeps rows forever
+    ACTIVITY_LOG_RETENTION_DAYS: int = int(
+        os.getenv("ACTIVITY_LOG_RETENTION_DAYS", "0")
+    )
+
     # User Registration Control
     ALLOW_USER_REGISTRATION: bool = (
         os.getenv("ALLOW_USER_REGISTRATION", "True").lower() == "true"
@@ -532,9 +537,10 @@ class Settings:  # App Info
     NOTIFICATION_RATE_LIMIT_PER_HOUR: int = int(
         os.getenv("NOTIFICATION_RATE_LIMIT_PER_HOUR", "100")
     )  # Max notifications per user per hour (TODO: enforce in send_notification)
+    # Admin-overridable at runtime; 0 keeps rows forever
     NOTIFICATION_HISTORY_RETENTION_DAYS: int = int(
-        os.getenv("NOTIFICATION_HISTORY_RETENTION_DAYS", "90")
-    )  # How long to keep notification history (TODO: implement cleanup job)
+        os.getenv("NOTIFICATION_HISTORY_RETENTION_DAYS", "0")
+    )
     # NOTIFICATION_ENCRYPTION_SALT: Derived from SECRET_KEY by default, or set explicitly via env var.
     # Note: Rotating SECRET_KEY will invalidate existing channel configs (see property docstring).
 

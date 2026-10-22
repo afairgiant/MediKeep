@@ -18,6 +18,7 @@ class SettingState(BaseModel):
     fallback_source: Literal["env", "default"]
     min: Optional[int] = None
     max: Optional[int] = None
+    zero_means_forever: bool = False
 
 
 class DeploymentValue(BaseModel):

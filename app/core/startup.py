@@ -293,4 +293,13 @@ async def startup_event():
         logger.warning(f"Could not initialize medication reminder scheduler: {e}")
         # Non-fatal - app still functions without reminders
 
+    try:
+        from app.services.data_retention_scheduler import (
+            DataRetentionSchedulerService,
+        )
+
+        await DataRetentionSchedulerService.get_instance().start()
+    except Exception as e:
+        logger.warning(f"Could not initialize data retention scheduler: {e}")
+
     logger.info("Application startup completed")

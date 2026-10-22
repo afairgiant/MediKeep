@@ -483,6 +483,19 @@ TRASH_DIR=/app/uploads/trash
 TRASH_RETENTION_DAYS=60
 ```
 
+### Activity and Notification History Retention
+
+A cleanup job runs daily at 03:30 (facility time) and once a few minutes after startup. `0` keeps rows forever.
+Both can be changed in **Admin > Settings > Data and storage**.
+
+| Variable                              | Type    | Default | Description                                                                                                   |
+| ------------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| `ACTIVITY_LOG_RETENTION_DAYS`         | integer | `0`     | Days to keep activity log entries (record changes, sign-ins and their IP addresses). `0`, or 1-3650 |
+| `NOTIFICATION_HISTORY_RETENTION_DAYS` | integer | `0`     | Days to keep sent-notification history. `0`, or 2-3650                                                       |
+
+Older activity entries also disappear from the Audit Log and Recent Activity. The `security.log` file is not
+affected; it follows the log rotation settings.
+
 ### SSO Configuration
 
 | Variable                        | Type       | Default | Required       | Description                                                               |

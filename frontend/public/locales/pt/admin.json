@@ -510,7 +510,12 @@
     },
     "dataRetention": {
       "trashRetention": "Manter arquivos excluídos na lixeira por",
-      "trashRetentionDesc": "Depois disso, os arquivos da lixeira são excluídos definitivamente."
+      "trashRetentionDesc": "Depois disso, os arquivos da lixeira são excluídos definitivamente.",
+      "keepForever": "Manter para sempre",
+      "activityLogRetention": "Manter o histórico de atividades por",
+      "activityLogRetentionDesc": "As entradas mais antigas, incluindo logins e seus endereços IP, são excluídas diariamente. Elas também somem do registro de auditoria e da atividade recente.",
+      "notificationHistoryRetention": "Manter o histórico de notificações por",
+      "notificationHistoryRetentionDesc": "As notificações enviadas mais antigas são excluídas diariamente, inclusive do histórico de notificações de cada usuário nas configurações dele."
     },
     "deployment": {
       "autoRedirectDesc": "Mantido fora do aplicativo pelo mesmo motivo do modo somente SSO.",
