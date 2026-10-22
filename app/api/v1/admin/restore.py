@@ -86,7 +86,7 @@ async def upload_backup_file(
 
         # Create temporary file to store upload
         temp_dir = Path(tempfile.mkdtemp(prefix="backup_upload_"))
-        temp_file = temp_dir / file.filename
+        temp_file = temp_dir / Path(file.filename).name
 
         try:
             # Save uploaded file

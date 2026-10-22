@@ -621,8 +621,19 @@ class RestoreService:
                     if not member.is_dir():
                         # Remove 'uploads/' prefix from archive path
                         target_path = Path(member.filename)
-                        if target_path.parts[0] == "uploads":
+                        if target_path.parts and target_path.parts[0] == "uploads":
                             target_path = Path(*target_path.parts[1:])
+                        # Reject absolute paths, traversal segments, and empty
+                        # names — same guard the full-backup restore applies.
+                        if (
+                            target_path.is_absolute()
+                            or not target_path.parts
+                            or ".." in target_path.parts
+                        ):
+                            logger.warning(
+                                f"Skipping potentially unsafe path: {member.filename}"
+                            )
+                            continue
 
                         full_target_path = self.upload_dir / target_path
                         full_target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -862,7 +873,9 @@ class RestoreService:
 
         Args:
             uploaded_file: Path to the uploaded backup file
-            uploaded_by: Username of the admin who uploaded the file
+            uploaded_by(
+                : Username of the admin who uploaded tPath(he filee.nam)
+            )
 
         Returns:
             BackupRecord: The created backup record
