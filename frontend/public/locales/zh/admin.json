@@ -513,9 +513,9 @@
       "trashRetentionDesc": "超过此期限后，回收站中的文件将被永久删除。",
       "keepForever": "永久保留",
       "activityLogRetention": "活动记录保留",
-      "activityLogRetentionDesc": "更早的条目（包括登录记录及其 IP 地址）每天删除，也会从审计日志和最近活动中消失。",
+      "activityLogRetentionDesc": "设置期限后，超过期限的条目（包括登录记录及其 IP 地址）每天删除一次，也会从审计日志和最近活动中消失。",
       "notificationHistoryRetention": "通知记录保留",
-      "notificationHistoryRetentionDesc": "更早的已发送通知每天删除，包括每位用户设置中的通知记录。"
+      "notificationHistoryRetentionDesc": "设置期限后，超过期限的已发送通知每天删除一次，包括每位用户设置中的通知记录。"
     },
     "deployment": {
       "autoRedirectDesc": "出于与仅 SSO 模式相同的原因保留在应用之外。",

@@ -513,9 +513,9 @@
       "trashRetentionDesc": "Después de este plazo, los archivos de la papelera se eliminan definitivamente.",
       "keepForever": "Conservar para siempre",
       "activityLogRetention": "Conservar el historial de actividad durante",
-      "activityLogRetentionDesc": "Las entradas más antiguas, incluidos los inicios de sesión y sus direcciones IP, se eliminan a diario. También desaparecen del registro de auditoría y de la actividad reciente.",
+      "activityLogRetentionDesc": "Si se fija un límite, las entradas más antiguas, incluidos los inicios de sesión y sus direcciones IP, se eliminan una vez al día. También desaparecen del registro de auditoría y de la actividad reciente.",
       "notificationHistoryRetention": "Conservar el historial de notificaciones durante",
-      "notificationHistoryRetentionDesc": "Las notificaciones enviadas más antiguas se eliminan a diario, también del historial de notificaciones de cada usuario en su configuración."
+      "notificationHistoryRetentionDesc": "Si se fija un límite, las notificaciones enviadas más antiguas se eliminan una vez al día, también del historial de notificaciones de cada usuario en su configuración."
     },
     "deployment": {
       "autoRedirectDesc": "Se mantiene fuera de la aplicación por la misma razón que el modo solo SSO.",

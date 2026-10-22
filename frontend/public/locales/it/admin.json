@@ -513,9 +513,9 @@
       "trashRetentionDesc": "Trascorso questo periodo, i file nel cestino vengono eliminati definitivamente.",
       "keepForever": "Conserva per sempre",
       "activityLogRetention": "Conserva la cronologia attività per",
-      "activityLogRetentionDesc": "Le voci più vecchie, compresi gli accessi e i relativi indirizzi IP, vengono eliminate ogni giorno. Scompaiono anche dal registro di controllo e dall'attività recente.",
+      "activityLogRetentionDesc": "Se è impostato un limite, le voci più vecchie, compresi gli accessi e i relativi indirizzi IP, vengono eliminate una volta al giorno. Scompaiono anche dal registro di controllo e dall'attività recente.",
       "notificationHistoryRetention": "Conserva la cronologia notifiche per",
-      "notificationHistoryRetentionDesc": "Le notifiche inviate più vecchie vengono eliminate ogni giorno, anche dalla cronologia notifiche di ciascun utente nelle sue impostazioni."
+      "notificationHistoryRetentionDesc": "Se è impostato un limite, le notifiche inviate più vecchie vengono eliminate una volta al giorno, anche dalla cronologia notifiche di ciascun utente nelle sue impostazioni."
     },
     "deployment": {
       "autoRedirectDesc": "Tenuto fuori dall'app per lo stesso motivo della modalità solo SSO.",

@@ -31,7 +31,7 @@ const DataSection = ({ state }: SectionProps) => {
         )}
         description={t(
           'settings.dataRetention.activityLogRetentionDesc',
-          'Older entries, including sign-ins and their IP addresses, are deleted daily. They also disappear from the Audit Log and Recent Activity.'
+          'When a limit is set, entries older than it, including sign-ins and their IP addresses, are deleted once a day. They also disappear from the Audit Log and Recent Activity.'
         )}
         unit={days}
         foreverOffValue={365}
@@ -45,7 +45,7 @@ const DataSection = ({ state }: SectionProps) => {
         )}
         description={t(
           'settings.dataRetention.notificationHistoryRetentionDesc',
-          'Older sent notifications are deleted daily, including from each user’s notification history in their settings.'
+          'When a limit is set, sent notifications older than it are deleted once a day, including from each user’s notification history in their settings.'
         )}
         unit={days}
         foreverOffValue={90}
