@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "allergi",
+    "bloodDonation": "blodgivning",
     "condition": "tillstånd",
     "equipment": "utrustning",
     "familyMember": "familjemedlem",
@@ -90,6 +91,66 @@
         "onsetDate": "Startdatum",
         "severity": "Allvarlighetsgrad"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "Laddar blodgivningar...",
+    "add": "+ Lägg till givning",
+    "addTitle": "Lägg till blodgivning",
+    "editTitle": "Redigera blodgivning",
+    "noneFound": "Inga blodgivningar hittades",
+    "startAdding": "Börja med att registrera din första blodgivning.",
+    "addFirst": "Registrera din första givning",
+    "types": {
+      "whole_blood": "Helblod",
+      "plasma": "Plasma",
+      "platelets": "Blodplättar",
+      "double_red_cells": "Dubbla röda blodkroppar"
+    },
+    "fields": {
+      "donationDate": "Givningsdatum",
+      "donationType": "Typ av givning",
+      "location": "Plats",
+      "bloodPressure": "Blodtryck",
+      "systolic": "Systoliskt (mmHg)",
+      "diastolic": "Diastoliskt (mmHg)",
+      "temperature": "Temperatur",
+      "hemoglobin": "Hemoglobin",
+      "hemoglobinWithUnit": "Hemoglobin (g/dL)"
+    },
+    "tabs": {
+      "donation": "Givning",
+      "screening": "Hälsokontroll före givning"
+    },
+    "form": {
+      "locationPlaceholder": "t.ex. Röda Korsets blodgivning, Stadssjukhuset",
+      "notesPlaceholder": "Ytterligare anteckningar om denna givning",
+      "save": "Spara givning",
+      "update": "Uppdatera givning",
+      "saving": "Sparar givning..."
+    },
+    "viewModal": {
+      "title": "Information om blodgivningen"
+    },
+    "eligibility": {
+      "title": "Nästa givning",
+      "eligibleNow": "Du kan ge blod nu",
+      "nextDate": "Berättigad igen {{date}}",
+      "daysRemaining_one": "{{count}} dag kvar",
+      "daysRemaining_other": "{{count}} dagar kvar",
+      "basedOn": "Baserat på din senaste {{type}}-givning den {{date}} och ett intervall på {{days}} dagar",
+      "noDonations": "Inga givningar registrerade än",
+      "loadError": "Kunde inte beräkna nästa givningsdatum"
+    },
+    "validation": {
+      "dateRequired": "Givningsdatum krävs",
+      "typeRequired": "Typ av givning krävs",
+      "bpOrder": "Systoliskt tryck måste vara högre än diastoliskt",
+      "outOfRange": "{{field}} måste vara mellan {{min}} och {{max}}"
+    },
+    "filters": {
+      "allTypes": "Alla typer",
+      "allLocations": "Alla platser"
     }
   },
   "componentCatalog": {

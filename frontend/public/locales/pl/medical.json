@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "alergia",
+    "bloodDonation": "donacja krwi",
     "condition": "schorzenie",
     "equipment": "sprzęt",
     "familyMember": "członek rodziny",
@@ -90,6 +91,68 @@
         "onsetDate": "Data rozpoczęcia",
         "severity": "Nasilenie"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "Wczytywanie donacji krwi...",
+    "add": "+ Dodaj donację",
+    "addTitle": "Dodaj donację krwi",
+    "editTitle": "Edytuj donację krwi",
+    "noneFound": "Nie znaleziono donacji krwi",
+    "startAdding": "Zacznij od zarejestrowania pierwszej donacji krwi.",
+    "addFirst": "Zarejestruj pierwszą donację",
+    "types": {
+      "whole_blood": "Krew pełna",
+      "plasma": "Plazma",
+      "platelets": "Płytki krwi",
+      "double_red_cells": "Podwójne erytrocyty"
+    },
+    "fields": {
+      "donationDate": "Data donacji",
+      "donationType": "Rodzaj donacji",
+      "location": "Miejsce",
+      "bloodPressure": "Ciśnienie krwi",
+      "systolic": "Skurczowe (mmHg)",
+      "diastolic": "Rozkurczowe (mmHg)",
+      "temperature": "Temperatura",
+      "hemoglobin": "Hemoglobina",
+      "hemoglobinWithUnit": "Hemoglobina (g/dL)"
+    },
+    "tabs": {
+      "donation": "Donacja",
+      "screening": "Badanie przed donacją"
+    },
+    "form": {
+      "locationPlaceholder": "np. akcja Czerwonego Krzyża, Szpital Miejski",
+      "notesPlaceholder": "Dodatkowe uwagi dotyczące tej donacji",
+      "save": "Zapisz donację",
+      "update": "Zaktualizuj donację",
+      "saving": "Zapisywanie donacji..."
+    },
+    "viewModal": {
+      "title": "Szczegóły donacji krwi"
+    },
+    "eligibility": {
+      "title": "Następna donacja",
+      "eligibleNow": "Możesz oddać krew teraz",
+      "nextDate": "Ponownie uprawniony od {{date}}",
+      "daysRemaining_one": "Pozostał {{count}} dzień",
+      "daysRemaining_few": "Pozostały {{count}} dni",
+      "daysRemaining_many": "Pozostało {{count}} dni",
+      "daysRemaining_other": "Pozostało {{count}} dni",
+      "basedOn": "Na podstawie ostatniej donacji ({{type}}) z dnia {{date}} i {{days}}-dniowego odstępu",
+      "noDonations": "Nie zarejestrowano jeszcze żadnych donacji",
+      "loadError": "Nie można obliczyć następnej daty donacji"
+    },
+    "validation": {
+      "dateRequired": "Data donacji jest wymagana",
+      "typeRequired": "Rodzaj donacji jest wymagany",
+      "bpOrder": "Wartość skurczowa musi być większa niż rozkurczowa",
+      "outOfRange": "{{field}} musi być między {{min}} a {{max}}"
+    },
+    "filters": {
+      "allTypes": "Wszystkie typy",
+      "allLocations": "Wszystkie miejsca"
     }
   },
   "componentCatalog": {

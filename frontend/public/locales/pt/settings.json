@@ -61,6 +61,12 @@
     "urlPlaceholder": "https://sua-instancia-papra.com"
   },
   "preferences": {
+    "bloodDonationIntervals": {
+      "days": "dias",
+      "description": "Número mínimo de dias após uma doação antes de poder doar novamente. Ajuste estes valores de acordo com as diretrizes do seu serviço de doação de sangue.",
+      "reset": "Redefinir para o padrão",
+      "title": "Intervalos de Doação de Sangue"
+    },
     "dateFormat": {
       "description": "Escolha como as datas são exibidas em todo o aplicativo",
       "dmy": "DD/MM/AAAA (Reino Unido/Internacional)",

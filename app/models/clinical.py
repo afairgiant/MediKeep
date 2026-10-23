@@ -630,3 +630,42 @@ class SymptomOccurrence(Base):
         Index("idx_symptom_occ_severity", "severity"),
         Index("idx_symptom_occ_symptom_date", "symptom_id", "occurrence_date"),
     )
+
+
+class BloodDonation(Base):
+    """
+    A single blood donation by a patient (whole blood, plasma, platelets, ...).
+    Optional screening values mirror what donation services record before a
+    donation. Temperature is stored in Fahrenheit like Vitals.
+    """
+
+    __tablename__ = "blood_donations"
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(
+        Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False
+    )
+
+    donation_date = Column(Date, nullable=False)
+    donation_type = Column(String(50), nullable=False)  # DonationType enum values
+    location = Column(String, nullable=True)
+
+    # Pre-donation screening (all optional)
+    systolic_bp = Column(Integer, nullable=True)  # mmHg
+    diastolic_bp = Column(Integer, nullable=True)  # mmHg
+    temperature = Column(Float, nullable=True)  # Fahrenheit
+    hemoglobin = Column(Float, nullable=True)  # g/dL
+
+    notes = Column(Text, nullable=True)
+    tags = Column(JSON, nullable=True, default=list)
+
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    patient = orm_relationship("Patient", back_populates="blood_donations")
+
+    __table_args__ = (
+        Index("idx_blood_donations_patient_date", "patient_id", "donation_date"),
+    )

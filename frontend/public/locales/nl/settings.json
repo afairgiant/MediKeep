@@ -61,6 +61,12 @@
     "urlPlaceholder": "https://uw-papra-instantie.com"
   },
   "preferences": {
+    "bloodDonationIntervals": {
+      "days": "dagen",
+      "description": "Minimaal aantal dagen na een donatie voordat u weer mag doneren. Pas deze waarden aan de richtlijnen van uw bloeddonatiedienst aan.",
+      "reset": "Standaardwaarden herstellen",
+      "title": "Intervallen tussen bloeddonaties"
+    },
     "dateFormat": {
       "description": "Kies hoe datums in de applicatie worden weergegeven",
       "dmy": "DD/MM/JJJJ (VK/Internationaal)",

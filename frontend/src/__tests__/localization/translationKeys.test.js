@@ -12,6 +12,10 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  splitPluralKey,
+  pluralCategoriesFor,
+} from '../../../scripts/lib/i18nCheck';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,7 +102,26 @@ describe('Translation Key Consistency', () => {
           const localeKeys = extractKeys(localeTranslations).sort();
 
           const missing = findMissingKeys(enKeys, localeKeys);
-          const extra = findMissingKeys(localeKeys, enKeys);
+          // A locale with richer CLDR plural rules (e.g. ru/pl _few/_many) may
+          // carry plural forms English doesn't need for the same base key.
+          // That's a legitimate extra, not a drift bug — scripts/check-translations.js
+          // (the CI gate) allows it the same way; mirror that here so this test
+          // doesn't fight the production rule set.
+          const enPluralBases = new Set(
+            enKeys
+              .map(key => splitPluralKey(key))
+              .filter(Boolean)
+              .map(split => split.base)
+          );
+          const localeCategories = pluralCategoriesFor(locale);
+          const extra = findMissingKeys(localeKeys, enKeys).filter(key => {
+            const split = splitPluralKey(key);
+            if (!split) return true;
+            return !(
+              enPluralBases.has(split.base) &&
+              localeCategories.includes(split.suffix)
+            );
+          });
 
           if (missing.length > 0) {
             console.warn(
