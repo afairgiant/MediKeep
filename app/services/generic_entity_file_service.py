@@ -3,7 +3,6 @@ Generic Entity File Service for handling file operations across all entity types
 Supports lab-results, insurance, visits, procedures, and future entity types.
 """
 
-import os
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -14,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import EntityFile, User, UserPreferences, get_utc_now
 from app.schemas.entity_file import (
     EntityFileCreate,
@@ -47,7 +47,6 @@ class GenericEntityFileService:
     """Service for managing files across all entity types."""
 
     def __init__(self):
-        self.uploads_dir = Path(settings.UPLOAD_DIR)
         self.file_management_service = FileManagementService()
 
         # Entity type to directory mapping
@@ -58,6 +57,11 @@ class GenericEntityFileService:
             EntityType.ENCOUNTER: "visits",  # encounters and visits use same directory
             EntityType.PROCEDURE: "procedures",
         }
+
+    @property
+    def uploads_dir(self) -> Path:
+        # Read on use so this always matches what resolve_stored_file accepts
+        return Path(settings.UPLOAD_DIR)
 
     def _get_entity_directory(self, entity_type: str) -> Path:
         """Get the directory path for a specific entity type."""
@@ -351,165 +355,6 @@ class GenericEntityFileService:
                 status_code=500, detail=f"Failed to retrieve file: {str(e)}"
             )
 
-    async def create_pending_file_record(
-        self,
-        db: Session,
-        entity_type: str,
-        entity_id: int,
-        file_name: str,
-        file_size: int,
-        file_type: str,
-        description: Optional[str] = None,
-        category: Optional[str] = None,
-        storage_backend: str = "local",
-        user_id: Optional[int] = None,
-    ) -> FileOperationResult:
-        """
-        Create a pending file record without actual file upload.
-        This allows tracking files that will be uploaded asynchronously.
-
-        Args:
-            db: Database session
-            entity_type: Type of entity
-            entity_id: ID of the entity
-            file_name: Name of the file
-            file_size: Size of the file in bytes
-            file_type: MIME type of the file
-            description: Optional description
-            category: Optional category
-            storage_backend: Storage backend to use
-            user_id: ID of the user creating the record
-
-        Returns:
-            FileOperationResult with the created pending file record
-        """
-        try:
-            # Create entity directory
-            entity_dir = self._get_entity_directory(entity_type)
-            os.makedirs(entity_dir, exist_ok=True)
-
-            # Generate a placeholder file path for the pending record
-            file_extension = Path(file_name).suffix
-            unique_filename = f"pending_{uuid.uuid4()}{file_extension}"
-            file_path = entity_dir / unique_filename
-
-            # Create pending file record
-            file_create = EntityFileCreate(
-                entity_type=entity_type,
-                entity_id=entity_id,
-                file_name=file_name,
-                file_path=str(file_path),
-                file_type=file_type,
-                file_size=file_size,
-                description=description,
-                category=category,
-                uploaded_at=get_utc_now(),
-                storage_backend=storage_backend,
-                sync_status="pending",  # Mark as pending
-                last_sync_at=None,
-            )
-
-            db_file = EntityFile(**file_create.model_dump())
-            db.add(db_file)
-            db.commit()
-            db.refresh(db_file)
-
-            logger.info(
-                f"Created pending file record: {file_name} for {entity_type} {entity_id}",
-                extra={
-                    "file_id": db_file.id,
-                    "entity_type": entity_type,
-                    "entity_id": entity_id,
-                    "file_name": file_name,
-                    "storage_backend": storage_backend,
-                    "user_id": user_id,
-                },
-            )
-
-            return FileOperationResult(
-                success=True, file_record=db_file, message="Pending file record created"
-            )
-
-        except Exception as e:
-            db.rollback()
-            logger.error(
-                f"Failed to create pending file record: {file_name}",
-                extra={
-                    "entity_type": entity_type,
-                    "entity_id": entity_id,
-                    "file_name": file_name,
-                    "error": str(e),
-                    "user_id": user_id,
-                },
-            )
-            return FileOperationResult(
-                success=False,
-                error_message=f"Failed to create pending file record: {str(e)}",
-            )
-
-    async def update_file_upload_status(
-        self,
-        db: Session,
-        file_id: int,
-        actual_file_path: str,
-        sync_status: str = "synced",
-        paperless_document_id: Optional[str] = None,
-    ) -> FileOperationResult:
-        """
-        Update a pending file record after successful upload.
-
-        Args:
-            db: Database session
-            file_id: ID of the file record to update
-            actual_file_path: Actual path where the file was saved
-            sync_status: New sync status ('synced', 'failed')
-            paperless_document_id: Paperless document ID if uploaded to paperless
-
-        Returns:
-            FileOperationResult with the updated file record
-        """
-        try:
-            db_file = db.query(EntityFile).filter(EntityFile.id == file_id).first()
-            if not db_file:
-                return FileOperationResult(
-                    success=False, error_message=f"File record {file_id} not found"
-                )
-
-            # Update file record
-            db_file.file_path = actual_file_path
-            db_file.sync_status = sync_status
-            db_file.last_sync_at = get_utc_now() if sync_status == "synced" else None
-            if paperless_document_id:
-                db_file.paperless_document_id = paperless_document_id
-
-            db.commit()
-            db.refresh(db_file)
-
-            logger.info(
-                f"Updated file record {file_id} status to {sync_status}",
-                extra={
-                    "file_id": file_id,
-                    "sync_status": sync_status,
-                    "actual_file_path": actual_file_path,
-                    "paperless_document_id": paperless_document_id,
-                },
-            )
-
-            return FileOperationResult(
-                success=True, file_record=db_file, message="File status updated"
-            )
-
-        except Exception as e:
-            db.rollback()
-            logger.error(
-                f"Failed to update file record {file_id}",
-                extra={"file_id": file_id, "error": str(e)},
-            )
-            return FileOperationResult(
-                success=False,
-                error_message=f"Failed to update file record: {str(e)}",
-            )
-
     async def _handle_remote_backend_deletion(
         self,
         db: Session,
@@ -638,10 +483,10 @@ class GenericEntityFileService:
                 )
             elif file_record.storage_backend == "local":
                 # Handle local file deletion
-                file_path = file_record.file_path
-                if os.path.exists(file_path):
+                file_path = resolve_stored_file(file_record)
+                if file_path:
                     trash_result = self.file_management_service.move_to_trash(
-                        file_path,
+                        str(file_path),
                         reason=f"Deleted via API for {file_record.entity_type} {file_record.entity_id}",
                     )
                     logger.info(f"File moved to trash: {trash_result}")
@@ -725,15 +570,15 @@ class GenericEntityFileService:
                     db, file_record, current_user_id
                 )
             if file_record.storage_backend == "local":
-                # Handle local file download
-                if not os.path.exists(file_record.file_path):
+                file_path = resolve_stored_file(file_record)
+                if not file_path:
                     raise HTTPException(
                         status_code=404,
                         detail=f"File not found on disk: {file_record.file_name}",
                     )
 
                 return (
-                    file_record.file_path,
+                    str(file_path),
                     file_record.file_name,
                     file_record.file_type or "application/octet-stream",
                 )
@@ -889,14 +734,13 @@ class GenericEntityFileService:
                     db, file_record, current_user_id
                 )
             if file_record.storage_backend == "local":
-                # Handle local files
-                file_path = file_record.file_path
-                if not os.path.exists(file_path):
+                file_path = resolve_stored_file(file_record)
+                if not file_path:
                     raise HTTPException(
                         status_code=404, detail="File not found on disk"
                     )
 
-                return file_path, file_record.file_name, file_record.file_type
+                return str(file_path), file_record.file_name, file_record.file_type
             raise HTTPException(
                 status_code=400,
                 detail=f"Unsupported storage backend: {file_record.storage_backend}",
@@ -2892,11 +2736,10 @@ class GenericEntityFileService:
                 try:
                     if file_record.storage_backend == "local":
                         # Delete local files (move to trash)
-                        if file_record.file_path and os.path.exists(
-                            file_record.file_path
-                        ):
+                        file_path = resolve_stored_file(file_record)
+                        if file_path:
                             trash_result = self.file_management_service.move_to_trash(
-                                file_record.file_path,
+                                str(file_path),
                                 reason=f"{entity_type} {entity_id} deletion",
                             )
                             logger.info(
@@ -2905,7 +2748,7 @@ class GenericEntityFileService:
                             deleted_local_files += 1
                         else:
                             logger.warning(
-                                f"Local file not found for deletion: {file_record.file_path}"
+                                f"Local file not found for deletion: file {file_record.id}"
                             )
 
                     elif file_record.storage_backend == "paperless":

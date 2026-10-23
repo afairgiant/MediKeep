@@ -20,7 +20,7 @@ from sqlalchemy import false
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import log_create, log_delete, log_update
+from app.api.activity_logging import log_create, log_delete
 from app.core.config import settings
 from app.core.http.error_handling import MedicalRecordsAPIException
 from app.core.logging.config import get_logger
@@ -30,6 +30,7 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_validation_error,
 )
+from app.core.utils.stored_files import resolve_stored_file
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
 from app.models.activity_log import EntityType
@@ -38,7 +39,6 @@ from app.schemas.lab_result_file import (
     FileBatchOperation,
     LabResultFileCreate,
     LabResultFileResponse,
-    LabResultFileUpdate,
 )
 
 logger = get_logger(__name__)
@@ -135,6 +135,15 @@ def _get_file_or_404(db: Session, file_id: int) -> LabResultFile:
     return file_obj
 
 
+def _remove_physical_file(file_obj: LabResultFile) -> bool:
+    """Delete the record's file from disk; False when missing or outside storage."""
+    file_path = resolve_stored_file(file_obj)
+    if not file_path:
+        return False
+    file_path.unlink()
+    return True
+
+
 def _accessible_files_query(db: Session, current_user: User):
     """Base query over lab result files scoped to the patients the current user
     can access, joined to LabResult and ordered newest-first.
@@ -153,38 +162,6 @@ def _accessible_files_query(db: Session, current_user: User):
     if not accessible:
         return query.filter(false())
     return query.filter(LabResult.patient_id.in_(accessible))
-
-
-@router.post(
-    "/", response_model=LabResultFileResponse, status_code=status.HTTP_201_CREATED
-)
-def create_lab_result_file(
-    *,
-    db: Session = Depends(deps.get_db),
-    file_in: LabResultFileCreate,
-    current_user_id: int = Depends(deps.get_current_user_id),
-    current_user: User = Depends(deps.get_current_user),
-) -> LabResultFile:
-    """
-    Create a new lab result file entry.
-    """
-    # Verify the lab result exists and the user has EDIT access to its patient
-    _verify_lab_result_access(
-        db, file_in.lab_result_id, current_user, permission="edit"
-    )
-
-    # Create the file entry
-    file_obj = lab_result_file.create(db=db, obj_in=file_in)
-
-    # Log the creation activity using centralized logging
-    log_create(
-        db=db,
-        entity_type=EntityType.LAB_RESULT_FILE,
-        entity_obj=file_obj,
-        user_id=current_user_id,
-    )
-
-    return file_obj
 
 
 @router.post(
@@ -405,36 +382,6 @@ def read_lab_result_file(
     return file_obj
 
 
-@router.put("/{file_id}", response_model=LabResultFileResponse)
-def update_lab_result_file(
-    *,
-    db: Session = Depends(deps.get_db),
-    file_id: int,
-    file_in: LabResultFileUpdate,
-    current_user_id: int = Depends(deps.get_current_user_id),
-    current_user: User = Depends(deps.get_current_user),
-) -> LabResultFile:
-    """
-    Update a lab result file.
-    """
-    file_obj = _get_file_or_404(db, file_id)
-    _verify_lab_result_access(
-        db, file_obj.lab_result_id, current_user, permission="edit"
-    )
-
-    file_obj = lab_result_file.update(db=db, db_obj=file_obj, obj_in=file_in)
-
-    # Log the update activity using centralized logging
-    log_update(
-        db=db,
-        entity_type=EntityType.LAB_RESULT_FILE,
-        entity_obj=file_obj,
-        user_id=current_user_id,
-    )
-
-    return file_obj
-
-
 @router.delete("/{file_id}")
 def delete_lab_result_file(
     *,
@@ -460,31 +407,26 @@ def delete_lab_result_file(
         user_id=current_user_id,
     )
 
-    # Delete physical file
     try:
-        file_path = getattr(file_obj, "file_path", None)
-        if file_path and os.path.exists(file_path):
-            os.remove(file_path)
+        if _remove_physical_file(file_obj):
             logger.info(
-                f"Physical file deleted: {file_path}",
+                f"Physical file deleted for lab result file {file_id}",
                 extra={
                     LogFields.CATEGORY: "app",
                     LogFields.EVENT: "physical_file_deleted",
                     LogFields.USER_ID: current_user_id,
-                    LogFields.FILE: file_path,
                     "file_id": file_id,
                 },
             )
     except Exception as e:
         # Log error but continue with database deletion
         logger.error(
-            f"Error deleting physical file: {file_path}",
+            f"Error deleting physical file for lab result file {file_id}",
             extra={
                 LogFields.CATEGORY: "app",
                 LogFields.EVENT: "file_deletion_error",
                 LogFields.USER_ID: current_user_id,
                 LogFields.ERROR: str(e),
-                LogFields.FILE: file_path,
                 "file_id": file_id,
             },
         )
@@ -519,13 +461,14 @@ async def download_file(
         db, file_obj.lab_result_id, current_user, permission="view"
     )
 
-    if not os.path.exists(getattr(file_obj, "file_path", "")):
+    file_path = resolve_stored_file(file_obj)
+    if not file_path:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Physical file not found"
         )
 
     return FileResponse(
-        path=getattr(file_obj, "file_path", ""),
+        path=str(file_path),
         filename=getattr(file_obj, "file_name", "file"),
         media_type=getattr(file_obj, "file_type", None) or "application/octet-stream",
     )
@@ -710,11 +653,8 @@ def batch_file_operation(
                 continue
 
             if operation.operation == "delete":
-                # Delete physical file
                 try:
-                    file_path = getattr(file_obj, "file_path", None)
-                    if file_path and os.path.exists(file_path):
-                        os.remove(file_path)
+                    _remove_physical_file(file_obj)
                 except Exception as e:
                     errors.append(f"Error deleting physical file {file_id}: {str(e)}")
 
@@ -762,10 +702,7 @@ def delete_all_files_for_lab_result(
 
     for file_obj in files:
         try:
-            file_path = getattr(file_obj, "file_path", None)
-            file_name = getattr(file_obj, "file_name", "unknown")
-            if file_path and os.path.exists(file_path):
-                os.remove(file_path)
+            if _remove_physical_file(file_obj):
                 deleted_files += 1
         except Exception as e:
             file_name = getattr(file_obj, "file_name", "unknown")

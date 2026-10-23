@@ -3,10 +3,21 @@ from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.logging.config import get_logger
+from app.core.utils.stored_files import resolve_stored_file
 from app.crud.base import CRUDBase
 from app.models.models import LabResultFile
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileUpdate
 from app.services.file_management_service import file_management_service
+
+logger = get_logger(__name__, "app")
+
+
+def _trash_physical_file(file_record: LabResultFile, reason: str) -> None:
+    """Move the record's file to trash; a missing or out-of-storage path is skipped."""
+    file_path = resolve_stored_file(file_record)
+    if file_path:
+        file_management_service.move_to_trash(str(file_path), reason=reason)
 
 
 class CRUDLabResultFile(
@@ -102,9 +113,8 @@ class CRUDLabResultFile(
         deleted_count = 0
         for file_record in files_to_delete:
             try:
-                # Move physical file to trash
-                file_management_service.move_to_trash(
-                    file_record.file_path, reason=f"Lab result {lab_result_id} deletion"
+                _trash_physical_file(
+                    file_record, reason=f"Lab result {lab_result_id} deletion"
                 )
 
                 # Remove database record
@@ -113,10 +123,7 @@ class CRUDLabResultFile(
 
             except Exception as e:
                 # Log error but continue with other files
-                from app.core.logging.config import get_logger
-
-                logger = get_logger(__name__, "app")
-                logger.error(f"Failed to delete file {file_record.file_path}: {str(e)}")
+                logger.error(f"Failed to delete file {file_record.id}: {str(e)}")
 
         db.commit()
         return deleted_count
@@ -129,10 +136,7 @@ class CRUDLabResultFile(
             return None
 
         try:
-            # Move physical file to trash
-            file_management_service.move_to_trash(
-                file_record.file_path, reason="Individual file deletion"
-            )
+            _trash_physical_file(file_record, reason="Individual file deletion")
 
             # Remove database record
             db.delete(file_record)
@@ -142,10 +146,7 @@ class CRUDLabResultFile(
 
         except Exception as e:
             # Log error and rollback
-            from app.core.logging.config import get_logger
-
-            logger = get_logger(__name__, "app")
-            logger.error(f"Failed to delete file {file_record.file_path}: {str(e)}")
+            logger.error(f"Failed to delete file {file_record.id}: {str(e)}")
             db.rollback()
             raise e
 

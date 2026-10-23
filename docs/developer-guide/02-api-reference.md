@@ -1937,6 +1937,8 @@ Base path: `/api/v1/entity-files`
 
 > **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them.
 
+> **Removed**: `POST /lab-result-files/`, `PUT /lab-result-files/{file_id}`, `POST /entity-files/{entity_type}/{entity_id}/files/pending` and `PUT /entity-files/files/{file_id}/status` accepted a client-supplied file path and were removed (GHSA-876g-4mgh-cqhf). Upload through `POST /entity-files/{entity_type}/{entity_id}/files` or `POST /lab-result-files/upload/{lab_result_id}`; the server always chooses where the file is stored. Downloads, views, deletes and exports only touch files inside `UPLOAD_DIR` or `TRASH_DIR`, and the admin model editor rejects a `file_path` outside them.
+
 #### Lab Result Statistics
 
 ##### Get Patient Lab Result Count

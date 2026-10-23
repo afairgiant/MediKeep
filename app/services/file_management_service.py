@@ -10,6 +10,7 @@ from typing import Dict, List, Optional
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.utils.stored_files import resolve_storage_path
 
 logger = get_logger(__name__, "app")
 
@@ -17,9 +18,14 @@ logger = get_logger(__name__, "app")
 class FileManagementService:
     """Service for managing file operations including trash functionality."""
 
-    def __init__(self):
-        self.uploads_dir = settings.UPLOAD_DIR
-        self.trash_dir = settings.TRASH_DIR
+    # Read on use so these always match what resolve_storage_path accepts
+    @property
+    def uploads_dir(self) -> Path:
+        return Path(settings.UPLOAD_DIR)
+
+    @property
+    def trash_dir(self) -> Path:
+        return Path(settings.TRASH_DIR)
 
     def move_to_trash(
         self, file_path: str, reason: Optional[str] = None
@@ -35,9 +41,11 @@ class FileManagementService:
             Dictionary with trash operation details
         """
         try:
-            source_path = Path(file_path)
+            source_path = resolve_storage_path(file_path)
+            if source_path is None:
+                raise ValueError("File is outside the storage directories")
 
-            if not source_path.exists():
+            if not source_path.is_file():
                 raise FileNotFoundError(f"File not found: {file_path}")
 
             # Create trash directory structure
@@ -127,16 +135,13 @@ class FileManagementService:
 
             # Determine restore destination
             if restore_path:
-                # Validate and normalize restore_path to prevent directory traversal
-                normalized_restore_path = os.path.normpath(restore_path)
-                # Only allow restore to uploads directory or its subdirectories
-                if not normalized_restore_path.startswith(str(self.uploads_dir)):
+                destination = resolve_storage_path(restore_path)
+                if destination is None:
                     raise ValueError(
                         f"Invalid restore path: {restore_path}. Files can only be restored to uploads directory."
                     )
-                destination = Path(normalized_restore_path)
-            elif original_path:
-                destination = Path(original_path)
+            elif original_destination := resolve_storage_path(original_path):
+                destination = original_destination
             else:
                 # Fallback to uploads directory
                 destination = self.uploads_dir / trash_file.name
