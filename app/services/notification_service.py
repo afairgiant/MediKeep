@@ -17,7 +17,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlparse
 
 from cryptography.fernet import Fernet
 from sqlalchemy import and_, desc
@@ -38,6 +38,7 @@ from app.schemas.notifications import (
     channel_destination_url,
     validate_channel_config,
 )
+from app.services.notification_delivery import DestinationPin, notify_pinned
 
 logger = get_logger(__name__, "app")
 security_logger = get_logger(__name__, "security")
@@ -418,13 +419,16 @@ class NotificationService:
 
     def _check_destination(
         self, channel: NotificationChannel, config: Dict[str, Any]
-    ) -> None:
-        """Raise BlockedDestinationError unless the channel may connect to its address."""
+    ) -> Optional[DestinationPin]:
+        """The address pin for a send, or None for fixed-host channels.
+
+        Raises BlockedDestinationError unless the channel may connect to its address.
+        """
         url = channel_destination_url(channel.channel_type, config)
         if url is None:
-            return
+            return None
         try:
-            validate_integration_url(
+            ips = validate_integration_url(
                 url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
             )
         except ValueError as exc:
@@ -439,6 +443,7 @@ class NotificationService:
                 },
             )
             raise BlockedDestinationError(str(exc)) from exc
+        return urlparse(url).hostname, ips
 
     # =========================================================================
     # Notification Sending
@@ -668,8 +673,6 @@ class NotificationService:
     ) -> None:
         """Send notification to a single channel and update history."""
         try:
-            import apprise
-
             # Build Apprise URL
             config = self._decrypt_config(channel.config_encrypted)
             builder = CHANNEL_BUILDERS.get(channel.channel_type)
@@ -677,20 +680,15 @@ class NotificationService:
             if not builder:
                 raise ValueError(f"Unknown channel type: {channel.channel_type}")
 
-            self._check_destination(channel, config)
+            pin = self._check_destination(channel, config)
             apprise_url = builder(config)
             if not apprise_url:
                 raise ValueError(
                     f"Failed to build URL for channel type: {channel.channel_type}"
                 )
 
-            # Create Apprise instance and add URL
-            apobj = apprise.Apprise()
-            apobj.add(apprise_url)
-
-            # Send notification
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda: apobj.notify(title=title, body=message)
+                None, notify_pinned, apprise_url, pin, title, message
             )
 
             if result:
@@ -771,24 +769,19 @@ class NotificationService:
         self.db.commit()
 
         try:
-            import apprise
-
             config = self._decrypt_config(channel.config_encrypted)
             builder = CHANNEL_BUILDERS.get(channel.channel_type)
 
             if not builder:
                 raise ChannelSendError(f"Unknown channel type: {channel.channel_type}")
 
-            self._check_destination(channel, config)
+            pin = self._check_destination(channel, config)
             apprise_url = builder(config)
             if not apprise_url:
                 raise ChannelSendError("Failed to build notification URL")
 
-            apobj = apprise.Apprise()
-            apobj.add(apprise_url)
-
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda: apobj.notify(title=test_title, body=test_message)
+                None, notify_pinned, apprise_url, pin, test_title, test_message
             )
 
             # Update channel test status

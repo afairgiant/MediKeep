@@ -4049,18 +4049,19 @@ Base path: `/api/v1/notifications`
 
 ```json
 {
-  "name": "My Telegram",
-  "channel_type": "telegram",
+  "name": "Home Gotify",
+  "channel_type": "gotify",
   "config": {
-    "chat_id": "123456789",
-    "bot_token": "your_bot_token"
+    "server_url": "https://gotify.example.com",
+    "app_token": "AbCdEf123456",
+    "priority": 5
   },
   "is_enabled": true
 }
 ```
 
 - **Channel types**: `discord`, `email`, `gotify`, `ntfy`, `webhook`
-- **Destination rules**: the Gotify and ntfy `server_url`, the webhook `url` and the email `smtp_host` must not resolve to a link-local or cloud-metadata address. Private and loopback addresses are accepted only while `ALLOW_PRIVATE_INTEGRATION_URLS` is true, and plain `http://` is accepted only for private addresses. The same rules are checked again before every send and test.
+- **Destination rules**: the Gotify and ntfy `server_url`, the webhook `url` and the email `smtp_host` must not resolve to a link-local or cloud-metadata address. Private and loopback addresses are accepted only while `ALLOW_PRIVATE_INTEGRATION_URLS` is true, and plain `http://` is accepted only for private addresses. The same rules are checked again before every send and test, and the send connects only to the addresses that check approved, so a hostname cannot be re-pointed in between.
 - **Success Response** (201): Created channel object
 - **Error Response** (422): Config does not match the channel type or breaks a destination rule
 
@@ -4075,15 +4076,16 @@ Base path: `/api/v1/notifications`
 ```json
 {
   "id": 1,
-  "name": "My Telegram",
-  "channel_type": "telegram",
+  "name": "Home Gotify",
+  "channel_type": "gotify",
   "is_enabled": true,
   "is_verified": true,
   "last_test_at": "2025-10-01T10:00:00Z",
   "last_test_status": "success",
   "config_masked": {
-    "chat_id": "123***789",
-    "bot_token": "***masked***"
+    "server_url": "https://gotify.example.com",
+    "app_token": "AbCd...3456",
+    "priority": 5
   }
 }
 ```
@@ -4100,7 +4102,7 @@ Base path: `/api/v1/notifications`
 {
   "name": "Updated Name",
   "config": {
-    "chat_id": "new_chat_id"
+    "priority": 8
   },
   "is_enabled": false
 }
@@ -4139,7 +4141,7 @@ Base path: `/api/v1/notifications`
 {
   "success": true,
   "message": "Test notification sent successfully",
-  "channel_name": "My Telegram",
+  "channel_name": "Home Gotify",
   "sent_at": "2025-10-04T10:30:00Z"
 }
 ```
@@ -4149,8 +4151,8 @@ Base path: `/api/v1/notifications`
 ```json
 {
   "success": false,
-  "message": "Channel configuration is invalid: missing bot_token",
-  "channel_name": "My Telegram",
+  "message": "Failed to send test notification",
+  "channel_name": "Home Gotify",
   "sent_at": null
 }
 ```
