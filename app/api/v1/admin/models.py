@@ -26,6 +26,7 @@ from app.core.logging.helpers import (
 )
 from app.core.utils.datetime_utils import convert_date_fields, convert_datetime_fields
 from app.core.utils.client_ip import get_client_ip
+from app.core.utils.stored_files import is_remote_placeholder, resolve_storage_path
 from app.crud import (
     allergy,
     condition,
@@ -1818,6 +1819,41 @@ def _block_user_update(
     )
 
 
+FILE_RECORD_MODELS = frozenset({"entity_file", "lab_result_file"})
+
+
+def _guard_file_path(
+    *,
+    model_name: str,
+    data: Dict[str, Any],
+    request: Request,
+    current_user: User,
+    current_path: Optional[str] = None,
+) -> None:
+    """Reject a file_path that would point a file record outside storage."""
+    if model_name not in FILE_RECORD_MODELS or "file_path" not in data:
+        return
+    file_path = data["file_path"]
+    if file_path == current_path:
+        return
+    if is_remote_placeholder(file_path) or (
+        isinstance(file_path, str) and resolve_storage_path(file_path)
+    ):
+        return
+    log_security_event(
+        logger,
+        "admin_file_path_rejected",
+        request,
+        "Admin tried to set a file path outside the storage directories",
+        user_id=current_user.id,
+        model=model_name,
+    )
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="File path must be inside the uploads or trash directory.",
+    )
+
+
 def _has_other_admin(db: Session, exclude_id: int, *, active_only: bool) -> bool:
     query = db.query(User.id).filter(
         User.role.in_(get_admin_roles_filter()),
@@ -1972,6 +2008,14 @@ def update_model_record(
                 request=request,
             )
 
+        _guard_file_path(
+            model_name=model_name,
+            data=update_data,
+            request=request,
+            current_user=current_user,
+            current_path=getattr(record, "file_path", None),
+        )
+
         # Process date and datetime fields using centralized mapping
         update_data = process_field_mappings(update_data, model_name)
 
@@ -2004,6 +2048,7 @@ def update_model_record(
 def create_model_record(
     model_name: str,
     create_data: Dict[str, Any],
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -2018,6 +2063,12 @@ def create_model_record(
     crud_instance = model_info["crud"]
 
     try:
+        _guard_file_path(
+            model_name=model_name,
+            data=create_data,
+            request=request,
+            current_user=current_user,
+        )
         create_data = process_field_mappings(create_data, model_name)
 
         create_schema = model_info["create_schema"]

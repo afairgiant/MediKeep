@@ -409,13 +409,13 @@ class TestEntityFileAPI:
             (
                 "local",
                 "view",
-                "app.services.generic_entity_file_service.os.path.exists",
+                "app.services.generic_entity_file_service.resolve_stored_file",
                 "Failed to retrieve file for viewing",
             ),
             (
                 "local",
                 "download",
-                "app.services.generic_entity_file_service.os.path.exists",
+                "app.services.generic_entity_file_service.resolve_stored_file",
                 "Failed to get file download info",
             ),
             (

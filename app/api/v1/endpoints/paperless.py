@@ -5,7 +5,6 @@ Provides API endpoints for paperless-ngx integration including connection testin
 settings management, and document operations.
 """
 
-import os
 import traceback
 from datetime import datetime
 from typing import Any, Dict
@@ -26,6 +25,7 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.core.utils.integration_http import UNSAFE_REDIRECT_MESSAGE
+from app.core.utils.stored_files import resolve_stored_file
 from app.crud.user_preferences import user_preferences
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
@@ -153,33 +153,30 @@ def _update_entity_file_from_task_result(
                 )
 
                 # Delete the database record and any local file copy
-                file_path = entity_file.file_path
+                file_path = resolve_stored_file(entity_file)
+                entity_file_id = entity_file.id
                 db.delete(entity_file)
                 db.commit()
 
-                # Also delete the physical file if it exists locally
                 if file_path:
                     try:
-                        if os.path.exists(file_path):
-                            os.remove(file_path)
-                            logger.info(
-                                f"Deleted local file: {file_path}",
-                                extra={
-                                    LogFields.CATEGORY: "app",
-                                    LogFields.EVENT: "local_file_deleted",
-                                    LogFields.FILE: file_path,
-                                    "entity_file_id": entity_file.id,
-                                },
-                            )
+                        file_path.unlink()
+                        logger.info(
+                            f"Deleted local file for EntityFile {entity_file_id}",
+                            extra={
+                                LogFields.CATEGORY: "app",
+                                LogFields.EVENT: "local_file_deleted",
+                                "entity_file_id": entity_file_id,
+                            },
+                        )
                     except Exception as e:
                         logger.warning(
-                            f"Could not delete local file {file_path}",
+                            f"Could not delete local file for EntityFile {entity_file_id}",
                             extra={
                                 LogFields.CATEGORY: "app",
                                 LogFields.EVENT: "file_deletion_failed",
-                                LogFields.FILE: file_path,
                                 LogFields.ERROR: str(e),
-                                "entity_file_id": entity_file.id,
+                                "entity_file_id": entity_file_id,
                             },
                         )
 

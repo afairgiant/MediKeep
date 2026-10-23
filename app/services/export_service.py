@@ -19,6 +19,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
+from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
     Allergy,
     Condition,
@@ -604,8 +605,6 @@ class ExportService:
 
         Returns files with storage backend info for proper handling of local vs paperless files.
         """
-        import os
-
         # Get the active patient for the user
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user or not user.active_patient_id:
@@ -632,23 +631,24 @@ class ExportService:
                 storage_backend = getattr(file, "storage_backend", "local") or "local"
                 paperless_doc_id = getattr(file, "paperless_document_id", None)
 
-                # For local files, verify the file exists
+                file_path = file.file_path
                 if storage_backend == "local":
-                    if not file.file_path or not os.path.exists(file.file_path):
+                    resolved = resolve_stored_file(file)
+                    if not resolved:
                         logger.warning(
-                            f"Local file not found: {file.file_path}",
+                            f"Local file not found for lab result file {file.id}",
                             extra={
                                 "category": "app",
                                 "event": "export_local_file_missing",
                                 "file_id": file.id,
-                                "file_path": file.file_path,
                             },
                         )
                         continue
+                    file_path = str(resolved)
 
                 files_info.append(
                     {
-                        "file_path": file.file_path,
+                        "file_path": file_path,
                         "file_name": file.file_name,
                         "file_type": file.file_type,
                         "test_name": result.test_name,

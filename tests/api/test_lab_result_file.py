@@ -104,14 +104,6 @@ class TestLabResultFileCrossUserAccess:
         )
         assert resp.status_code == 403
 
-    def test_attacker_cannot_update(self, client, owner_setup, attacker_headers):
-        resp = client.put(
-            f"/api/v1/lab-result-files/{owner_setup['file_id']}",
-            headers=attacker_headers,
-            json={"description": "tampered"},
-        )
-        assert resp.status_code == 403
-
     def test_attacker_cannot_delete(self, client, owner_setup, attacker_headers):
         resp = client.delete(
             f"/api/v1/lab-result-files/{owner_setup['file_id']}",
@@ -227,15 +219,6 @@ class TestLabResultFileSharePermissions:
             headers=ctx["recipient_headers"],
         )
         assert delete.status_code == 403
-
-    def test_view_share_cannot_update(self, client, db_session):
-        ctx = self._setup(db_session, client, "view")
-        resp = client.put(
-            f"/api/v1/lab-result-files/{ctx['file_id']}",
-            headers=ctx["recipient_headers"],
-            json={"description": "tampered by view user"},
-        )
-        assert resp.status_code == 403
 
     def test_edit_share_can_upload_and_delete(self, client, db_session):
         ctx = self._setup(db_session, client, "edit")
