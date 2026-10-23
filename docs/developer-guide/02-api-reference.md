@@ -4059,8 +4059,10 @@ Base path: `/api/v1/notifications`
 }
 ```
 
-- **Channel types**: `email`, `telegram`, `discord`, `slack`, `webhook`, `pushover`
+- **Channel types**: `discord`, `email`, `gotify`, `ntfy`, `webhook`
+- **Destination rules**: the Gotify and ntfy `server_url`, the webhook `url` and the email `smtp_host` must not resolve to a link-local or cloud-metadata address. Private and loopback addresses are accepted only while `ALLOW_PRIVATE_INTEGRATION_URLS` is true, and plain `http://` is accepted only for private addresses. The same rules are checked again before every send and test.
 - **Success Response** (201): Created channel object
+- **Error Response** (422): Config does not match the channel type or breaks a destination rule
 
 #### Get Channel Details
 
@@ -4104,7 +4106,9 @@ Base path: `/api/v1/notifications`
 }
 ```
 
+- **Config**: merged over the stored config, so only changed fields need to be sent. A field sent back exactly as `config_masked` shows it keeps its stored value. The merged config must pass the same checks as on create.
 - **Success Response** (200): Updated channel object
+- **Error Response** (400): Merged config is invalid or breaks a destination rule
 
 #### Delete Channel
 
@@ -4120,6 +4124,7 @@ Base path: `/api/v1/notifications`
 
 - **Purpose**: Send a test notification to verify channel configuration
 - **Authentication**: Yes
+- **Rate limit**: 10 tests per user per 10 minutes; further requests return 429 with `Retry-After`
 - **Request Body** (optional):
 
 ```json

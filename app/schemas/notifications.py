@@ -7,7 +7,17 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
+
+from app.core.config import settings
+from app.core.utils.url_security import validate_integration_url
 
 
 def _validate_url_protocol(
@@ -19,6 +29,25 @@ def _validate_url_protocol(
         protocols = " or ".join(allowed_protocols)
         raise ValueError(f"URL must start with {protocols}")
     return url
+
+
+def _validate_channel_url(url: str) -> str:
+    """Protocol check plus the integration address rules; unresolved hosts pass here."""
+    url = _validate_url_protocol(url)
+    validate_integration_url(
+        url,
+        allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
+        allow_unresolved=True,
+    )
+    return url
+
+
+def smtp_host_url(host: str) -> str:
+    """The SMTP host as a URL, so it can go through the integration address rules."""
+    # Bare IPv6 literals need brackets to parse as a URL host
+    if ":" in host and not host.startswith("["):
+        host = f"[{host}]"
+    return f"smtp://{host}"
 
 
 class ChannelType(str, Enum):
@@ -98,6 +127,11 @@ class EmailChannelConfig(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("SMTP host cannot be empty")
+        validate_integration_url(
+            smtp_host_url(v),
+            allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
+            allow_unresolved=True,
+        )
         return v
 
     @field_validator("from_email", "to_email")
@@ -119,7 +153,7 @@ class GotifyChannelConfig(BaseModel):
     @field_validator("server_url")
     @classmethod
     def validate_server_url(cls, v):
-        return _validate_url_protocol(v)
+        return _validate_channel_url(v)
 
     @field_validator("app_token")
     @classmethod
@@ -148,7 +182,7 @@ class NtfyChannelConfig(BaseModel):
     @field_validator("server_url")
     @classmethod
     def validate_server_url(cls, v):
-        return _validate_url_protocol(v)
+        return _validate_channel_url(v)
 
     @field_validator("topic")
     @classmethod
@@ -178,7 +212,7 @@ class WebhookChannelConfig(BaseModel):
     @field_validator("url")
     @classmethod
     def validate_url(cls, v):
-        return _validate_url_protocol(v)
+        return _validate_channel_url(v)
 
     @field_validator("method")
     @classmethod
@@ -187,6 +221,36 @@ class WebhookChannelConfig(BaseModel):
         if v not in ("GET", "POST"):
             raise ValueError("Method must be GET or POST")
         return v
+
+
+CHANNEL_CONFIG_SCHEMAS = {
+    ChannelType.DISCORD: DiscordChannelConfig,
+    ChannelType.EMAIL: EmailChannelConfig,
+    ChannelType.GOTIFY: GotifyChannelConfig,
+    ChannelType.NTFY: NtfyChannelConfig,
+    ChannelType.WEBHOOK: WebhookChannelConfig,
+}
+
+_CHANNEL_DESTINATIONS = {
+    ChannelType.GOTIFY.value: lambda c: c.get("server_url", ""),
+    ChannelType.NTFY.value: lambda c: c.get("server_url", "https://ntfy.sh"),
+    ChannelType.WEBHOOK.value: lambda c: c.get("url", ""),
+    ChannelType.EMAIL.value: lambda c: smtp_host_url(c.get("smtp_host", "")),
+}
+
+
+def validate_channel_config(channel_type: str, config: Dict[str, Any]) -> None:
+    """Check config against the channel type's schema; raises ValueError."""
+    try:
+        CHANNEL_CONFIG_SCHEMAS[ChannelType(channel_type)](**config)
+    except ValidationError as exc:
+        raise ValueError(exc.errors()[0]["msg"]) from exc
+
+
+def channel_destination_url(channel_type: str, config: Dict) -> Optional[str]:
+    """The user-supplied address a channel connects to; None for fixed-host channels."""
+    destination = _CHANNEL_DESTINATIONS.get(channel_type)
+    return destination(config) if destination else None
 
 
 # ============================================================================
@@ -213,15 +277,7 @@ class ChannelCreate(BaseModel):
     @model_validator(mode="after")
     def validate_config_for_type(self):
         """Validate that config matches channel type"""
-        config_validators = {
-            ChannelType.DISCORD: DiscordChannelConfig,
-            ChannelType.EMAIL: EmailChannelConfig,
-            ChannelType.GOTIFY: GotifyChannelConfig,
-            ChannelType.NTFY: NtfyChannelConfig,
-            ChannelType.WEBHOOK: WebhookChannelConfig,
-        }
-
-        validator = config_validators.get(self.channel_type)
+        validator = CHANNEL_CONFIG_SCHEMAS.get(self.channel_type)
         if validator:
             # This will raise validation errors if config is invalid
             validator(**self.config)

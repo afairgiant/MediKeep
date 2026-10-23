@@ -21,6 +21,7 @@ from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
 )
+from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.models.models import User
 from app.schemas.notifications import (
     ChannelCreate,
@@ -42,6 +43,9 @@ from app.services.notification_service import NotificationService
 
 logger = get_logger(__name__, "app")
 router = APIRouter()
+
+# Each test reports whether the address answered, so unlimited tests would map a network
+_test_limiter = SlidingWindowRateLimiter(max_requests=10, window_seconds=600)
 
 
 def _build_channels_lookup(service: NotificationService, user_id: int) -> dict:
@@ -339,6 +343,13 @@ async def test_channel(
     db: Session = Depends(get_db),
 ):
     """Send a test notification to a channel."""
+    if not _test_limiter.is_allowed(current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many test notifications. Try again later.",
+            headers=_test_limiter.rate_limit_headers(current_user.id),
+        )
+
     try:
         log_endpoint_access(
             logger,
