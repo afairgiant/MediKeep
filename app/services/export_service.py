@@ -41,6 +41,10 @@ from app.models.models import (
     Vitals,
 )
 from app.services.report_translations import get_translator
+from app.utils.notes_markdown import (
+    MARKDOWN_FIELDS_BY_SECTION,
+    notes_to_reportlab_markup,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -2165,6 +2169,8 @@ class ExportService:
 
             return str_value
 
+        markdown_fields = MARKDOWN_FIELDS_BY_SECTION.get(section_name, frozenset())
+
         # Limit records per section
         for i, record in enumerate(section_data[:MAX_PDF_RECORDS_PER_SECTION]):
             if i > 0:
@@ -2464,23 +2470,27 @@ class ExportService:
                     formatted_value = format_value(field_name, record[field_name], record)
 
                     if formatted_value is not None:  # Only show fields with values
+                        if field_name in markdown_fields:
+                            value_markup = notes_to_reportlab_markup(formatted_value)
                         # Use Paragraph for values that need text wrapping
                         # Convert newlines to <br/> tags for proper PDF rendering
-                        if "\n" in formatted_value or len(formatted_value) > 50:
+                        elif "\n" in formatted_value or len(formatted_value) > 50:
                             # Escape any HTML-like characters and convert newlines
-                            escaped_value = (
+                            value_markup = (
                                 formatted_value.replace("&", "&amp;")
                                 .replace("<", "&lt;")
                                 .replace(">", "&gt;")
                                 .replace("\n", "<br/>")
                             )
-                            value_paragraph = Paragraph(escaped_value, cell_value_style)
-                            label_paragraph = Paragraph(
-                                f"{display_name}:", cell_label_style
-                            )
-                            card_data.append([label_paragraph, value_paragraph])
                         else:
                             card_data.append([f"{display_name}:", formatted_value])
+                            continue
+                        card_data.append(
+                            [
+                                Paragraph(f"{display_name}:", cell_label_style),
+                                Paragraph(value_markup, cell_value_style),
+                            ]
+                        )
 
             # Create the card as a table with label-value pairs
             if card_data:

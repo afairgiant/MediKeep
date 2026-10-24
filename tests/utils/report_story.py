@@ -1,8 +1,12 @@
-"""Helpers for reading the text of a custom report story in tests."""
+"""Helpers for reading the text of report and export PDF stories in tests."""
 
 from typing import Any, Iterable, List
 
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, Table
+
+from app.services.export_service import ExportService
+from app.services.report_translations import get_translator
 
 
 def _cell_text(cell: Any) -> str:
@@ -28,3 +32,21 @@ def story_texts(story: Iterable[Any]) -> List[str]:
         elif hasattr(element, "text"):
             lines.append(str(element.text))
     return lines
+
+
+def export_card_rows(section_name: str, record: dict, language: str) -> List[tuple]:
+    """(label, value) text pairs of one export PDF card for ``record``."""
+    story: List[Any] = []
+    ExportService.__new__(ExportService)._add_card_based_section(
+        story,
+        [record],
+        section_name,
+        getSampleStyleSheet(),
+        translator=get_translator(language),
+    )
+    return [
+        (getattr(label, "text", label), getattr(value, "text", value))
+        for flowable in story
+        if isinstance(flowable, Table)
+        for label, value in flowable._cellvalues
+    ]

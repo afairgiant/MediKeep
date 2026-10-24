@@ -14,30 +14,13 @@ from app.services.report_translations import (
     _load_locale,
     get_translator,
 )
+from tests.utils.report_story import export_card_rows
 
 EXPORT_SERVICE_SOURCE = Path("app/services/export_service.py").read_text("utf-8")
 
 
 def _card_rows(section_name, record, language="de"):
-    story = []
-    ExportService.__new__(ExportService)._add_card_based_section(
-        story,
-        [record],
-        section_name,
-        getSampleStyleSheet(),
-        translator=get_translator(language),
-    )
-    rows = []
-    for flowable in story:
-        if isinstance(flowable, Table):
-            for label, value in flowable._cellvalues:
-                rows.append(
-                    (
-                        getattr(label, "text", label),
-                        getattr(value, "text", value),
-                    )
-                )
-    return rows
+    return export_card_rows(section_name, record, language)
 
 
 def _rendered_field_keys():

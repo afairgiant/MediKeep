@@ -128,6 +128,17 @@ Cross-cutting concerns (audit logging, notifications, collaboration) are handled
 - Structured logging with `LogFields` constants
 - User-friendly messages returned to frontend
 
+### Markdown Notes
+Notes and descriptive free-text fields are stored as the Markdown the user typed, in plain text columns. `app/utils/notes_markdown.py` renders them for the custom report PDF and the PDF data export; `MARKDOWN_FIELDS_BY_SECTION` lists which fields are Markdown. JSON and CSV exports keep the raw Markdown.
+
+The dialect must match the frontend notes renderer:
+- CommonMark plus strikethrough and task lists; a single newline is a line break
+- Links only for `http`, `https` and `mailto`; any other link shows its text only
+- Images show their alt text
+- Raw HTML, indented code blocks, setext headings and character references stay literal text
+
+`tests/fixtures/markdown_notes_cases.json` holds the cases both renderers are tested against.
+
 ## Database Architecture
 
 ### Design Principles
