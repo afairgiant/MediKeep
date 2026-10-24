@@ -680,7 +680,9 @@ class NotificationService:
             if not builder:
                 raise ValueError(f"Unknown channel type: {channel.channel_type}")
 
-            pin = self._check_destination(channel, config)
+            pin = await asyncio.get_event_loop().run_in_executor(
+                None, self._check_destination, channel, config
+            )
             apprise_url = builder(config)
             if not apprise_url:
                 raise ValueError(
@@ -775,7 +777,9 @@ class NotificationService:
             if not builder:
                 raise ChannelSendError(f"Unknown channel type: {channel.channel_type}")
 
-            pin = self._check_destination(channel, config)
+            pin = await asyncio.get_event_loop().run_in_executor(
+                None, self._check_destination, channel, config
+            )
             apprise_url = builder(config)
             if not apprise_url:
                 raise ChannelSendError("Failed to build notification URL")

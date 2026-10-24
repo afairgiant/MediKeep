@@ -4053,7 +4053,7 @@ Base path: `/api/v1/notifications`
   "channel_type": "gotify",
   "config": {
     "server_url": "https://gotify.example.com",
-    "app_token": "AbCdEf123456",
+    "app_token": "AbCdEf1234567890",
     "priority": 5
   },
   "is_enabled": true
@@ -4084,7 +4084,7 @@ Base path: `/api/v1/notifications`
   "last_test_status": "success",
   "config_masked": {
     "server_url": "https://gotify.example.com",
-    "app_token": "AbCd...3456",
+    "app_token": "AbCd...7890",
     "priority": 5
   }
 }
