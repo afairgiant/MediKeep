@@ -39,11 +39,20 @@ from app.services.report_fonts import (
     CJK_BOLD_FONT_PATHS,
     CJK_LANGUAGES,
     CJK_NORMAL_FONT_PATHS,
+    LATIN_BOLD_FONT_PATHS,
+    LATIN_BOLD_ITALIC_FONT_PATHS,
+    LATIN_ITALIC_FONT_PATHS,
+    LATIN_NORMAL_FONT_PATHS,
     THAI_BOLD_FONT_PATHS,
     THAI_LANGUAGES,
     THAI_NORMAL_FONT_PATHS,
 )
 from app.services.report_translations import get_translator
+from app.utils.notes_markdown import (
+    MARKDOWN_FIELDS_BY_SECTION,
+    NESTED_MARKDOWN_FIELDS,
+    notes_to_reportlab_markup,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -66,6 +75,27 @@ def escape_markup_values(value: Any) -> Any:
     if isinstance(value, tuple):
         return tuple(escape_markup_values(v) for v in value)
     return value
+
+
+def _render_markdown_fields(raw: Any, escaped: Any, fields) -> None:
+    for field in fields:
+        if raw.get(field):
+            escaped[field] = notes_to_reportlab_markup(str(raw[field]))
+
+
+def escape_report_data(report_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Escaped copy of ``report_data`` whose Markdown fields hold rendered markup instead."""
+    escaped = escape_markup_values(report_data)
+    for category, records in (report_data.get("data") or {}).items():
+        nested = NESTED_MARKDOWN_FIELDS.get(category, {})
+        for raw, out in zip(records or [], escaped["data"][category] or []):
+            _render_markdown_fields(
+                raw, out, MARKDOWN_FIELDS_BY_SECTION.get(category, ())
+            )
+            for key, fields in nested.items():
+                for raw_child, out_child in zip(raw.get(key) or [], out.get(key) or []):
+                    _render_markdown_fields(raw_child, out_child, fields)
+    return escaped
 
 
 class _PlainTextTable(Table):
@@ -153,38 +183,19 @@ class CustomReportPDFGenerator:
         """
         try:
             # --- Latin/Cyrillic fonts ---
-            font_paths = [
-                # DejaVu Sans (best Unicode support)
-                "C:/Windows/Fonts/DejaVuSans.ttf",  # Windows
-                "C:/Windows/Fonts/dejavu-sans/DejaVuSans.ttf",
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
-                "/usr/share/fonts/dejavu/DejaVuSans.ttf",
-                "/Library/Fonts/DejaVuSans.ttf",  # macOS
-                "/System/Library/Fonts/Supplemental/DejaVuSans.ttf",
-                # Arial (fallback, available on most Windows systems, supports Cyrillic)
-                "C:/Windows/Fonts/arial.ttf",
-                "C:/Windows/Fonts/Arial.ttf",
-                "/usr/share/fonts/truetype/msttcorefonts/arial.ttf",
-                "/System/Library/Fonts/Supplemental/Arial.ttf",
-            ]
 
-            bold_paths = [
-                # DejaVu Sans Bold
-                "C:/Windows/Fonts/DejaVuSans-Bold.ttf",
-                "C:/Windows/Fonts/dejavu-sans/DejaVuSans-Bold.ttf",
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
-                "/Library/Fonts/DejaVuSans-Bold.ttf",
-                "/System/Library/Fonts/Supplemental/DejaVuSans-Bold.ttf",
-                # Arial Bold (fallback)
-                "C:/Windows/Fonts/arialbd.ttf",
-                "C:/Windows/Fonts/Arial Bold.ttf",
-                "/usr/share/fonts/truetype/msttcorefonts/arialbd.ttf",
-                "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-            ]
-
-            font_registered = self._try_register_font("UnicodeFont", font_paths)
-            bold_registered = self._try_register_font("UnicodeFont-Bold", bold_paths)
+            font_registered = self._try_register_font(
+                "UnicodeFont", LATIN_NORMAL_FONT_PATHS
+            )
+            bold_registered = self._try_register_font(
+                "UnicodeFont-Bold", LATIN_BOLD_FONT_PATHS
+            )
+            italic_registered = self._try_register_font(
+                "UnicodeFont-Italic", LATIN_ITALIC_FONT_PATHS
+            )
+            bold_italic_registered = self._try_register_font(
+                "UnicodeFont-BoldItalic", LATIN_BOLD_ITALIC_FONT_PATHS
+            )
 
             if not font_registered:
                 logger.warning(
@@ -195,6 +206,19 @@ class CustomReportPDFGenerator:
 
             self.font_normal = "UnicodeFont" if font_registered else "Helvetica"
             self.font_bold = "UnicodeFont-Bold" if bold_registered else "Helvetica-Bold"
+            if font_registered:
+                # Without a family, <b> and <i> in Paragraph markup render as regular text.
+                pdfmetrics.registerFontFamily(
+                    "UnicodeFont",
+                    normal="UnicodeFont",
+                    bold=self.font_bold,
+                    italic="UnicodeFont-Italic" if italic_registered else "UnicodeFont",
+                    boldItalic=(
+                        "UnicodeFont-BoldItalic"
+                        if bold_italic_registered
+                        else self.font_bold
+                    ),
+                )
 
             # --- CJK fonts (Chinese, Japanese, Korean) ---
             cjk_registered = self._try_register_font(
@@ -210,6 +234,14 @@ class CustomReportPDFGenerator:
                 "CJKFont-Bold" if cjk_bold_registered else self.font_cjk_normal
             )
             self._has_cjk_font = cjk_registered
+            if cjk_registered:
+                pdfmetrics.registerFontFamily(
+                    "CJKFont",
+                    normal="CJKFont",
+                    bold=self.font_cjk_bold,
+                    italic="CJKFont",
+                    boldItalic=self.font_cjk_bold,
+                )
 
             # --- Thai fonts ---
             thai_registered = self._try_register_font(
@@ -505,7 +537,7 @@ class CustomReportPDFGenerator:
             output_buffer = io.BytesIO()
 
         # User-supplied text goes into ReportLab Paragraph markup: escape it once
-        report_data = escape_markup_values(report_data)
+        report_data = escape_report_data(report_data)
 
         # Apply user preferences for this report
         language = report_data.get("language", "en")
@@ -1593,7 +1625,7 @@ class CustomReportPDFGenerator:
                 details.append([f"{t.field('recorded_by')}:", str(recorded_by)])
 
             if record.get("notes"):
-                details.append([f"{t.field('notes')}:", str(record["notes"])])
+                details.append([f"{t.field('notes')}:", record["notes"]])
 
             story.extend(self._detail_table(details))
 
@@ -1847,8 +1879,13 @@ class CustomReportPDFGenerator:
                 rows.append((t.field("status"), t.value(record["status"])))
             if record.get("outcome"):
                 rows.append((t.field("outcome"), t.value(record["outcome"])))
-            if record.get("complications"):
-                rows.append((t.field("complications"), record["complications"]))
+            if record.get("procedure_complications"):
+                rows.append(
+                    (
+                        t.field("complications"),
+                        record["procedure_complications"],
+                    )
+                )
             if record.get("follow_up_required"):
                 rows.append(
                     (t.field("follow_up_required"), record["follow_up_required"])
@@ -1860,7 +1897,12 @@ class CustomReportPDFGenerator:
             if record.get("notes"):
                 rows.append((t.field("procedure_notes"), record["notes"]))
             if record.get("anesthesia_notes"):
-                rows.append((t.field("anesthesia_notes"), record["anesthesia_notes"]))
+                rows.append(
+                    (
+                        t.field("anesthesia_notes"),
+                        record["anesthesia_notes"],
+                    )
+                )
             rows.append((t.field("tags"), self._tags_text(record)))
 
             story.extend(self._detail_table(rows))
@@ -2320,7 +2362,12 @@ class CustomReportPDFGenerator:
             if record.get("facility"):
                 rows.append((t.field("facility"), record["facility"]))
             if record.get("follow_up_instructions"):
-                rows.append((t.field("follow_up"), record["follow_up_instructions"]))
+                rows.append(
+                    (
+                        t.field("follow_up"),
+                        record["follow_up_instructions"],
+                    )
+                )
             if record.get("notes"):
                 rows.append((t.field("visit_notes"), record["notes"]))
             rows.append((t.field("tags"), self._tags_text(record)))
@@ -2455,6 +2502,8 @@ class CustomReportPDFGenerator:
                 rows.append((t.field("email"), record["email"]))
             if record.get("address"):
                 rows.append((t.field("address"), record["address"]))
+            if record.get("notes"):
+                rows.append((t.field("notes"), record["notes"]))
 
             story.extend(self._detail_table(rows))
             story.append(Spacer(1, 0.08 * inch))
@@ -2613,7 +2662,7 @@ class CustomReportPDFGenerator:
                     condition_text += f" ({', '.join(condition_details)})"
                 if condition.get("notes"):
                     condition_text += (
-                        f"<br/>&nbsp;&nbsp;{t.field('notes')}: {condition['notes']}"
+                        f"<br/>&nbsp;&nbsp;{t.field('notes')}: " f"{condition['notes']}"
                     )
                 condition_lines.append(condition_text)
 
@@ -2858,9 +2907,14 @@ class CustomReportPDFGenerator:
         if record.get("mechanism"):
             rows.append((t.field("reason"), record["mechanism"]))
         if record.get("treatment_received"):
-            rows.append((t.field("treatment_received"), record["treatment_received"]))
+            rows.append(
+                (
+                    t.field("treatment_received"),
+                    record["treatment_received"],
+                )
+            )
         if record.get("recovery_notes"):
-            rows.append(("Recovery Notes", record["recovery_notes"]))
+            rows.append((t.field("recovery_notes"), record["recovery_notes"]))
         if record.get("practitioner"):
             rows.append((t.field("treating_provider"), record["practitioner"]))
         if record.get("notes"):
@@ -3019,7 +3073,12 @@ class CustomReportPDFGenerator:
                 if record.get("prescribed_by"):
                     rows.append((t.field("prescribed_by"), record["prescribed_by"]))
                 if record.get("usage_instructions"):
-                    rows.append(("Usage", record["usage_instructions"]))
+                    rows.append(
+                        (
+                            t.field("usage_instructions"),
+                            record["usage_instructions"],
+                        )
+                    )
                 if record.get("notes"):
                     rows.append((t.field("notes"), record["notes"]))
                 rows.append((t.field("tags"), self._tags_text(record)))

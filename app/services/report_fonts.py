@@ -1,7 +1,62 @@
-"""Shared non-Latin font lookup for PDF report text and matplotlib trend charts."""
+"""Shared font lookup for PDF report text and matplotlib trend charts."""
 
 from pathlib import Path
 from typing import List, Optional
+
+# Latin, Cyrillic and Greek; DejaVu Sans first for its wider coverage.
+LATIN_NORMAL_FONT_PATHS: List[str] = [
+    # DejaVu Sans (best Unicode support)
+    "C:/Windows/Fonts/DejaVuSans.ttf",  # Windows
+    "C:/Windows/Fonts/dejavu-sans/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
+    "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+    "/Library/Fonts/DejaVuSans.ttf",  # macOS
+    "/System/Library/Fonts/Supplemental/DejaVuSans.ttf",
+    # Arial (fallback, available on most Windows systems, supports Cyrillic)
+    "C:/Windows/Fonts/arial.ttf",
+    "C:/Windows/Fonts/Arial.ttf",
+    "/usr/share/fonts/truetype/msttcorefonts/arial.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+]
+
+LATIN_BOLD_FONT_PATHS: List[str] = [
+    # DejaVu Sans Bold
+    "C:/Windows/Fonts/DejaVuSans-Bold.ttf",
+    "C:/Windows/Fonts/dejavu-sans/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
+    "/Library/Fonts/DejaVuSans-Bold.ttf",
+    "/System/Library/Fonts/Supplemental/DejaVuSans-Bold.ttf",
+    # Arial Bold (fallback)
+    "C:/Windows/Fonts/arialbd.ttf",
+    "C:/Windows/Fonts/Arial Bold.ttf",
+    "/usr/share/fonts/truetype/msttcorefonts/arialbd.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+]
+
+LATIN_ITALIC_FONT_PATHS: List[str] = [
+    "C:/Windows/Fonts/DejaVuSans-Oblique.ttf",
+    "C:/Windows/Fonts/dejavu-sans/DejaVuSans-Oblique.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans-Oblique.ttf",
+    "/Library/Fonts/DejaVuSans-Oblique.ttf",
+    "/System/Library/Fonts/Supplemental/DejaVuSans-Oblique.ttf",
+    "C:/Windows/Fonts/ariali.ttf",
+    "/usr/share/fonts/truetype/msttcorefonts/ariali.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Italic.ttf",
+]
+
+LATIN_BOLD_ITALIC_FONT_PATHS: List[str] = [
+    "C:/Windows/Fonts/DejaVuSans-BoldOblique.ttf",
+    "C:/Windows/Fonts/dejavu-sans/DejaVuSans-BoldOblique.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans-BoldOblique.ttf",
+    "/Library/Fonts/DejaVuSans-BoldOblique.ttf",
+    "/System/Library/Fonts/Supplemental/DejaVuSans-BoldOblique.ttf",
+    "C:/Windows/Fonts/arialbi.ttf",
+    "/usr/share/fonts/truetype/msttcorefonts/arialbi.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold Italic.ttf",
+]
 
 CJK_NORMAL_FONT_PATHS: List[str] = [
     # Microsoft YaHei (Windows - ships with all modern versions)

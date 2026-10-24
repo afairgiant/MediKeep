@@ -1,0 +1,175 @@
+{
+  "description": "Markdown notes cases shared by the backend PDF renderer and the frontend notes renderer. 'pdf' is the expected app.utils.notes_markdown.notes_to_reportlab_markup output.",
+  "cases": [
+    {
+      "name": "empty",
+      "input": "",
+      "pdf": ""
+    },
+    {
+      "name": "whitespace_only",
+      "input": "   \n  ",
+      "pdf": ""
+    },
+    {
+      "name": "plain_single_line",
+      "input": "Took 2 tablets with food",
+      "pdf": "Took 2 tablets with food"
+    },
+    {
+      "name": "single_newline_is_line_break",
+      "input": "Morning: fine\nEvening: dizzy",
+      "pdf": "Morning: fine<br/>Evening: dizzy"
+    },
+    {
+      "name": "blank_line_separates_paragraphs",
+      "input": "First visit.\n\nSecond visit.",
+      "pdf": "First visit.<br/><br/>Second visit."
+    },
+    {
+      "name": "bold_italic_strike",
+      "input": "**bold** *italic* _also italic_ ~~gone~~",
+      "pdf": "<b>bold</b> <i>italic</i> <i>also italic</i> <strike>gone</strike>"
+    },
+    {
+      "name": "heading_levels",
+      "input": "# One\n## Two\n### Three\n#### Four",
+      "pdf": "<font size=\"+3\"><b>One</b></font><br/><font size=\"+2\"><b>Two</b></font><br/><font size=\"+1\"><b>Three</b></font><br/><b>Four</b>"
+    },
+    {
+      "name": "heading_then_text",
+      "input": "## Plan\nRest for a week",
+      "pdf": "<font size=\"+2\"><b>Plan</b></font><br/>Rest for a week"
+    },
+    {
+      "name": "bullet_list",
+      "input": "- eggs\n- milk",
+      "pdf": "&bull; eggs<br/>&bull; milk"
+    },
+    {
+      "name": "nested_list",
+      "input": "- outer\n  - inner",
+      "pdf": "&bull; outer<br/>&nbsp;&nbsp;&nbsp;&nbsp;&bull; inner"
+    },
+    {
+      "name": "ordered_list_keeps_start",
+      "input": "3. third\n4. fourth",
+      "pdf": "3. third<br/>4. fourth"
+    },
+    {
+      "name": "task_list",
+      "input": "- [x] booked\n- [ ] follow-up",
+      "pdf": "[x] booked<br/>[&nbsp;&nbsp;] follow-up"
+    },
+    {
+      "name": "link_https",
+      "input": "[portal](https://example.com/a?b=1&c=2)",
+      "pdf": "<a href=\"https://example.com/a?b=1&amp;c=2\"><u>portal</u></a>"
+    },
+    {
+      "name": "link_mailto",
+      "input": "[email](mailto:dr@example.com)",
+      "pdf": "<a href=\"mailto:dr@example.com\"><u>email</u></a>"
+    },
+    {
+      "name": "autolink",
+      "input": "<https://example.com>",
+      "pdf": "<a href=\"https://example.com\"><u>https://example.com</u></a>"
+    },
+    {
+      "name": "link_javascript_is_text",
+      "input": "[x](javascript:alert(1))",
+      "pdf": "x"
+    },
+    {
+      "name": "link_javascript_mixed_case_is_text",
+      "input": "[x](JaVaScRiPt:alert(1))",
+      "pdf": "x"
+    },
+    {
+      "name": "link_data_is_text",
+      "input": "[x](data:text/html,hi)",
+      "pdf": "x"
+    },
+    {
+      "name": "link_relative_is_text",
+      "input": "[x](relative/path)",
+      "pdf": "x"
+    },
+    {
+      "name": "link_quote_in_url",
+      "input": "[q](https://e.com/\"onmouseover=x)",
+      "pdf": "<a href=\"https://e.com/%22onmouseover=x\"><u>q</u></a>"
+    },
+    {
+      "name": "image_shows_alt_text",
+      "input": "![x-ray](https://example.com/x.png)",
+      "pdf": "x-ray"
+    },
+    {
+      "name": "raw_html_is_literal",
+      "input": "<script>alert(1)</script>",
+      "pdf": "&lt;script&gt;alert(1)&lt;/script&gt;"
+    },
+    {
+      "name": "html_img_is_literal",
+      "input": "<img src=x onerror=\"alert(1)\">",
+      "pdf": "&lt;img src=x onerror=\"alert(1)\"&gt;"
+    },
+    {
+      "name": "reportlab_markup_is_literal",
+      "input": "<font size='500'>HUGE</font> <b>no</b>",
+      "pdf": "&lt;font size='500'&gt;HUGE&lt;/font&gt; &lt;b&gt;no&lt;/b&gt;"
+    },
+    {
+      "name": "comparison_signs",
+      "input": "BP <120 and > 80, A & B",
+      "pdf": "BP &lt;120 and &gt; 80, A &amp; B"
+    },
+    {
+      "name": "character_references_are_literal",
+      "input": "&amp; &#65; &copy;",
+      "pdf": "&amp;amp; &amp;#65; &amp;copy;"
+    },
+    {
+      "name": "indented_text_is_not_code",
+      "input": "    four spaces in",
+      "pdf": "four spaces in"
+    },
+    {
+      "name": "setext_underline_is_not_heading",
+      "input": "Title\n===",
+      "pdf": "Title<br/>==="
+    },
+    {
+      "name": "blockquote",
+      "input": "> as told by patient",
+      "pdf": "&nbsp;&nbsp;&nbsp;&nbsp;<i>as told by patient</i>"
+    },
+    {
+      "name": "fenced_code",
+      "input": "```\nraw <x>\nline\n```",
+      "pdf": "raw &lt;x&gt;<br/>line"
+    },
+    {
+      "name": "unclosed_emphasis",
+      "input": "**unclosed and *also",
+      "pdf": "**unclosed and *also"
+    },
+    {
+      "name": "backslash_escape",
+      "input": "\\*not italic\\*",
+      "pdf": "*not italic*"
+    },
+    {
+      "name": "autolink_javascript_is_text",
+      "input": "<javascript:alert(1)>",
+      "pdf": "javascript:alert(1)"
+    },
+    {
+      "name": "image_with_javascript_src_shows_alt",
+      "input": "![a](javascript:x)",
+      "pdf": "a"
+    }
+  ]
+}

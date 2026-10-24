@@ -58,11 +58,19 @@ from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.export_service import ExportService, UnitConverter
 from app.services.report_translations import get_translator
+from app.utils.notes_markdown import MARKDOWN_FIELDS_BY_SECTION, notes_to_plain_text
 
 logger = get_logger(__name__, "app")
 
 # Maximum records per category offered for selection in the report builder
 MAX_SUMMARY_RECORDS_PER_CATEGORY = 250
+
+# Record-picker previews are short; parsing the start of a long Markdown field is enough.
+_PREVIEW_SOURCE_CHARS = 500
+
+
+def _markdown_preview(value: Any) -> str:
+    return notes_to_plain_text(str(value)[:_PREVIEW_SOURCE_CHARS])
 
 
 class CustomReportService:
@@ -504,7 +512,7 @@ class CustomReportService:
             value = getattr(item, field_name, None)
             if value and str(value).strip():
                 logger.debug(f"Using fallback field '{field_name}' for {category}")
-                return f"{str(value).strip()}"
+                return self._field_text(category, field_name, value)
 
         # Final fallback to common generic fields
         common_fields = ["name", "title", "full_name", "description", "notes"]
@@ -512,10 +520,17 @@ class CustomReportService:
             value = getattr(item, field, None)
             if value and str(value).strip():
                 logger.debug(f"Using common fallback field '{field}' for {category}")
-                return str(value).strip()
+                return self._field_text(category, field, value)
 
         logger.info(f"No title field found for {category}")
         return None
+
+    @staticmethod
+    def _field_text(category: str, field_name: str, value: Any) -> str:
+        """Display text for a record-picker field; Markdown fields become plain text."""
+        if field_name in MARKDOWN_FIELDS_BY_SECTION.get(category, ()):
+            return _markdown_preview(value)
+        return str(value).strip()
 
     # Primary date column per category. Shared by the selection summary and the
     # report date filter. Categories without a clinically meaningful date
@@ -566,8 +581,13 @@ class CustomReportService:
         try:
             parts: List[str] = []
 
+            markdown_fields = MARKDOWN_FIELDS_BY_SECTION.get(category, ())
+
             def get(name):
-                return getattr(item, name, None)
+                value = getattr(item, name, None)
+                if value and name in markdown_fields:
+                    return _markdown_preview(value)
+                return value
 
             if category == "medications":
                 if get("dosage"):
