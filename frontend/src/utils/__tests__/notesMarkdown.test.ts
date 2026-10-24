@@ -32,6 +32,19 @@ describe('notesToPlainText', () => {
     );
   });
 
+  it.each(['**unclosed and *also', 'a ~~b and ` c', 'rating 5* and 4*'])(
+    'keeps unmatched delimiters in %j',
+    input => {
+      expect(notesToPlainText(input)).toBe(input);
+    }
+  );
+
+  it('strips nested and combined pairs', () => {
+    expect(notesToPlainText('***both*** and **bold _inner_**')).toBe(
+      'both and bold inner'
+    );
+  });
+
   it('keeps backslash-escaped markers as literal text', () => {
     expect(
       notesToPlainText(String.raw`\*not italic\* and \# not a heading`)
@@ -60,6 +73,9 @@ describe('notesToPlainText', () => {
       '[a]('.repeat(1250),
       '> - '.repeat(1250),
       `${'**a '.repeat(1250)}`,
+      '**x '.repeat(1250),
+      '*x '.repeat(1666),
+      '_x '.repeat(1666),
     ];
     const start = performance.now();
     inputs.forEach(input => notesToPlainText(input, { keepLineBreaks: true }));

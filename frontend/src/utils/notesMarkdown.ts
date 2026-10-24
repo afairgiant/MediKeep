@@ -62,13 +62,17 @@ function stripLine(line: string): string {
   ) {
     return '';
   }
-  return text
-    .replace(/!\[([^\]\n]*)\]\([^)\n]*\)/g, '$1')
-    .replace(/\[([^\]\n]*)\]\([^)\n]*\)/g, '$1')
-    .replace(/<((?:https?:|mailto:)[^>\s]*)>/gi, '$1')
-    .replace(/(\*\*|__|~~|`)/g, '')
-    .replace(/(^|[\s(])[*_](?=\S)/g, '$1')
-    .replace(/(\S)[*_](?=$|[\s.,;:!?)])/g, '$1');
+  return (
+    text
+      .replace(/!\[([^\]\n]*)\]\([^)\n]*\)/g, '$1')
+      .replace(/\[([^\]\n]*)\]\([^)\n]*\)/g, '$1')
+      .replace(/<((?:https?:|mailto:)[^>\s]*)>/gi, '$1')
+      // Only matched pairs are formatting; a lone delimiter stays, as in the rendered note.
+      .replace(/`([^`\n]+)`/g, '$1')
+      .replace(/(\*\*|__|~~)(?=\S)([^\n]*?\S)\1/g, '$2')
+      .replace(/(^|[^\w*])\*(?=[^\s*])([^*\n]*?[^\s*])\*(?!\*)/g, '$1$2')
+      .replace(/(^|[^\w_])_(?=[^\s_])([^_\n]*?[^\s_])_(?![\w_])/g, '$1$2')
+  );
 }
 
 /**
