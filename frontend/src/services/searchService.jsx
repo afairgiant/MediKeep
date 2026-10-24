@@ -6,6 +6,7 @@
 
 import { apiService } from './api';
 import logger from './logger';
+import { notesToPlainText } from '../utils/notesMarkdown';
 
 class SearchService {
   /**
@@ -25,7 +26,12 @@ class SearchService {
       typeResults.items.forEach(item => {
         const formattedItem = this.formatResultItem(recordType, item);
         if (formattedItem) {
-          matchedResults.push(formattedItem);
+          // Descriptions and subtitles are often Markdown notes; results show them as plain text.
+          matchedResults.push({
+            ...formattedItem,
+            subtitle: notesToPlainText(formattedItem.subtitle),
+            description: notesToPlainText(formattedItem.description),
+          });
         }
       });
     });

@@ -43,6 +43,7 @@ import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { applyOccurrenceSeverityAutoFill } from '../../utils/anticipatoryAutoFill';
+import { notesToPlainText } from '../../utils/notesMarkdown';
 import {
   applySymptomInputChange,
   buildSymptomPayload,
@@ -651,7 +652,7 @@ const Symptoms = () => {
 
                         {symptom.general_notes && (
                           <Text size="sm" lineClamp={2}>
-                            {symptom.general_notes}
+                            {notesToPlainText(symptom.general_notes)}
                           </Text>
                         )}
 

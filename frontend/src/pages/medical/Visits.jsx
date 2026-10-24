@@ -545,8 +545,8 @@ const Visits = () => {
                   location: visitsBaseFormatters.simple,
                   practitioner_name: visitsBaseFormatters.practitioner_name,
                   condition_name: formatters.condition_name,
-                  diagnosis: visitsBaseFormatters.text,
-                  notes: visitsBaseFormatters.text,
+                  diagnosis: visitsBaseFormatters.diagnosis,
+                  notes: visitsBaseFormatters.notes,
                 }}
                 dataType="medical"
                 responsive={responsive}

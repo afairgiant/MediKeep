@@ -20,6 +20,7 @@ import apiService from '../../../services/api';
 import logger from '../../../services/logger';
 import PracticeEditModal from './PracticeEditModal';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const PractitionerViewModal = ({
   isOpen,
@@ -427,13 +428,10 @@ const PractitionerViewModal = ({
                     <Text size="sm" fw={500} w={100}>
                       {t('shared:tabs.notes', 'Notes')}:
                     </Text>
-                    <Text
-                      size="sm"
-                      c={practiceDetails.notes ? 'inherit' : 'dimmed'}
-                      style={{ whiteSpace: 'pre-wrap' }}
-                    >
-                      {practiceDetails.notes || notSpecified}
-                    </Text>
+                    <NotesView
+                      value={practiceDetails.notes}
+                      emptyText={notSpecified}
+                    />
                   </Group>
 
                   {/* Locations */}

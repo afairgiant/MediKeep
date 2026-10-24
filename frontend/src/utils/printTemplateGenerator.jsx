@@ -6,6 +6,7 @@ import logger from '../services/logger';
 import { timezoneService } from '../services/timezoneService';
 
 import { formatDateWithPreference } from './dateFormatUtils';
+import { notesToPlainText } from './notesMarkdown';
 import {
   formatFieldLabel,
   formatFieldValue,
@@ -373,7 +374,9 @@ export const generateInsurancePrint = (
           <div class="section">
             <div class="section-title">Notes</div>
             <div style="padding: 5px; background-color: #f8f9fa; border-radius: 3px;">
-              ${escapeHtml(insurance.notes).replace(/\n/g, '<br>')}
+              ${escapeHtml(
+                notesToPlainText(insurance.notes, { keepLineBreaks: true })
+              ).replace(/\n/g, '<br>')}
             </div>
           </div>
         `,

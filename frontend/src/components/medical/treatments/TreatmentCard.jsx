@@ -4,6 +4,7 @@ import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import logger from '../../../services/logger';
+import { notesToPlainText } from '../../../utils/notesMarkdown';
 
 const TreatmentCard = ({
   treatment,
@@ -121,7 +122,7 @@ const TreatmentCard = ({
       },
       {
         label: t('shared:labels.description'),
-        value: treatment.description,
+        value: notesToPlainText(treatment.description),
         render: value => value || t('shared:labels.notSpecified'),
         style: { flex: 1 },
       },

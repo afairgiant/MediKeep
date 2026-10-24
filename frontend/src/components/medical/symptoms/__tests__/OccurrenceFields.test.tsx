@@ -1,6 +1,6 @@
 import { vi, describe, it, expect } from 'vitest';
 import '@testing-library/jest-dom';
-import render, { screen } from '../../../../test-utils/render';
+import render, { screen, waitFor } from '../../../../test-utils/render';
 import OccurrenceFields from '../OccurrenceFields';
 import type { OccurrenceDetails } from '../OccurrenceFields';
 import { symptomOccurrenceFormFields } from '../../../../utils/medicalFormFields/symptomOccurrence';
@@ -71,15 +71,16 @@ describe('OccurrenceFields', () => {
     expect(screen.getByText('Nausea')).toBeInTheDocument();
     expect(screen.getByText('Dizziness')).toBeInTheDocument();
     expect(fields).toHaveTextContent('Resolved: date:2026-03-02 9:05 AM');
-    expect(fields).toHaveTextContent('Resolution Notes: Faded after sleep');
+    expect(fields).toHaveTextContent('Resolution Notes:Faded after sleep');
   });
 
-  it('shows multi-line notes in full', () => {
-    renderFields({ notes: 'First line\nSecond line\nThird line' });
+  it('shows multi-line notes in full with their line breaks', async () => {
+    const fields = renderFields({
+      notes: 'First line\nSecond line\nThird line',
+    });
 
-    const notes = screen.getByText(/First line/);
-    expect(notes).toHaveTextContent('Third line');
-    expect(notes).toHaveStyle({ whiteSpace: 'pre-wrap' });
+    expect(fields).toHaveTextContent('Third line');
+    await waitFor(() => expect(fields.querySelectorAll('br')).toHaveLength(2));
   });
 
   it('falls back to a readable label for an unmapped impact level', () => {

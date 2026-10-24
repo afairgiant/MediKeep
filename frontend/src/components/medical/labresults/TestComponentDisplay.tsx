@@ -36,6 +36,7 @@ import {
   getQualitativeColor,
 } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
+import NotesView from '../../shared/NotesView';
 
 interface TestComponentDisplayProps {
   components: LabTestComponent[];
@@ -193,9 +194,9 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
       const handleCardClick = React.useCallback(
         (e: React.MouseEvent) => {
           if (isTextual) return;
-          // Don't trigger if clicking on action buttons
+          // Don't trigger if clicking on action buttons or links in the notes
           const target = e.target as HTMLElement;
-          if (target.closest('button')) {
+          if (target.closest('button, a')) {
             return;
           }
           onTrendClick?.(trendTestName, trendUnit);
@@ -205,7 +206,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
 
       const handleKeyDown = React.useCallback(
         (e: React.KeyboardEvent) => {
-          if (isTextual) return;
+          // Keys pressed on a focused link or button inside the card belong to that element.
+          if (isTextual || e.target !== e.currentTarget) return;
           // Support Enter and Space keys for accessibility
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -338,9 +340,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                     size={14}
                     style={{ marginTop: 2, flexShrink: 0 }}
                   />
-                  <Text size="xs" c="dimmed" style={{ lineHeight: 1.4 }}>
-                    {component.notes}
-                  </Text>
+                  <NotesView value={component.notes} size="xs" c="dimmed" />
                 </Group>
               </Box>
             )}

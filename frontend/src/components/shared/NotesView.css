@@ -1,0 +1,108 @@
+.notes-view {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.notes-view > :first-child {
+  margin-top: 0;
+}
+
+.notes-view > :last-child {
+  margin-bottom: 0;
+}
+
+.notes-view p,
+.notes-view ul,
+.notes-view ol,
+.notes-view pre,
+.notes-view blockquote {
+  margin: 0 0 0.5em;
+}
+
+/* Headings stay close to body size so a note never outweighs the modal title. */
+.notes-view h1,
+.notes-view h2,
+.notes-view h3,
+.notes-view h4,
+.notes-view h5,
+.notes-view h6 {
+  margin: 0.6em 0 0.25em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.notes-view h1 {
+  font-size: 1.25em;
+}
+
+.notes-view h2 {
+  font-size: 1.15em;
+}
+
+.notes-view h3 {
+  font-size: 1.05em;
+}
+
+.notes-view h4,
+.notes-view h5,
+.notes-view h6 {
+  font-size: 1em;
+}
+
+.notes-view ul,
+.notes-view ol {
+  padding-left: 1.5em;
+}
+
+.notes-view li > ul,
+.notes-view li > ol {
+  margin-bottom: 0;
+}
+
+.notes-view li:has(> input[type='checkbox']) {
+  list-style: none;
+  margin-left: -1.25em;
+}
+
+.notes-view input[type='checkbox'] {
+  margin: 0 0.4em 0 0;
+  vertical-align: middle;
+}
+
+.notes-view blockquote {
+  padding-left: 0.75em;
+  border-left: 3px solid var(--mantine-color-default-border);
+  color: var(--mantine-color-dimmed);
+  font-style: italic;
+}
+
+.notes-view code {
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 0.9em;
+  padding: 0.1em 0.3em;
+  border-radius: var(--mantine-radius-xs);
+  background: var(--mantine-color-default-hover);
+}
+
+.notes-view pre {
+  padding: 0.5em 0.75em;
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-default-hover);
+  white-space: pre-wrap;
+}
+
+.notes-view pre code {
+  padding: 0;
+  background: none;
+}
+
+.notes-view hr {
+  border: 0;
+  border-top: 1px solid var(--mantine-color-default-border);
+  margin: 0.75em 0;
+}
+
+.notes-view a {
+  color: var(--mantine-color-anchor);
+  text-decoration: underline;
+}

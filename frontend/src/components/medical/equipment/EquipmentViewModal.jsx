@@ -18,6 +18,7 @@ import {
   getEquipmentStatusColor,
 } from '../../../constants/equipmentConstants';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const EquipmentViewModal = ({
   isOpen,
@@ -255,7 +256,7 @@ const EquipmentViewModal = ({
                     'Usage Instructions'
                   )}
                 </Title>
-                <Text size="sm">{equipment.usage_instructions}</Text>
+                <NotesView value={equipment.usage_instructions} />
               </div>
             )}
 
@@ -265,7 +266,7 @@ const EquipmentViewModal = ({
                 <Title order={4} mb="sm">
                   {t('shared:tabs.notes', 'Notes')}
                 </Title>
-                <Text size="sm">{equipment.notes}</Text>
+                <NotesView value={equipment.notes} />
               </div>
             )}
 

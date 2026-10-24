@@ -40,6 +40,7 @@ import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { OCCURRENCE_SEVERITY_LABEL_KEYS } from '../../../utils/medicalFormFields/symptomOccurrence';
 import { usePagination } from '../../../hooks/usePagination';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const SymptomViewModal = ({
   navigate,
@@ -551,17 +552,13 @@ const SymptomViewModal = ({
                     {t('symptoms.viewModal.generalNotes', 'General Notes')}
                   </Title>
                   <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                    <Text
-                      size="sm"
-                      style={{ whiteSpace: 'pre-wrap' }}
-                      c={symptom.general_notes ? 'inherit' : 'dimmed'}
-                    >
-                      {symptom.general_notes ||
-                        t(
-                          'symptoms.viewModal.noNotesProvided',
-                          'No notes provided'
-                        )}
-                    </Text>
+                    <NotesView
+                      value={symptom.general_notes}
+                      emptyText={t(
+                        'symptoms.viewModal.noNotesProvided',
+                        'No notes provided'
+                      )}
+                    />
                   </Paper>
                 </div>
               </Stack>

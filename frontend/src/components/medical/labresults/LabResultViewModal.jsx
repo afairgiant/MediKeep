@@ -33,6 +33,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import { listCountState } from '../../../utils/linkCountStore';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const LabResultViewModal = ({
   isOpen,
@@ -602,9 +603,7 @@ const LabResultViewModal = ({
                     <Title order={4}>{t('shared:tabs.notes', 'Notes')}</Title>
                     <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <ScrollArea.Autosize mah={400}>
-                        <Text style={{ whiteSpace: 'pre-wrap' }}>
-                          {labResult.notes}
-                        </Text>
+                        <NotesView value={labResult.notes} size="md" />
                       </ScrollArea.Autosize>
                     </Paper>
                   </Stack>

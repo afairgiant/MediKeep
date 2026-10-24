@@ -35,6 +35,7 @@ import { rememberEditTab } from '../../../utils/editTabHandoff';
 import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
 import CollapsibleLinkTabs from '../../shared/CollapsibleLinkTabs';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const TreatmentViewModal = ({
   isOpen,
@@ -320,13 +321,13 @@ const TreatmentViewModal = ({
                       <Text fw={500} size="sm" c="dimmed">
                         {t('shared:labels.description', 'Description')}
                       </Text>
-                      <Text
-                        size="sm"
-                        c={treatment.description ? 'inherit' : 'dimmed'}
-                      >
-                        {treatment.description ||
-                          t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
+                      <NotesView
+                        value={treatment.description}
+                        emptyText={t(
+                          'shared:labels.notSpecified',
+                          'Not specified'
+                        )}
+                      />
                     </Stack>
                   </SimpleGrid>
                 </div>
@@ -615,10 +616,13 @@ const TreatmentViewModal = ({
                       'Treatment Notes'
                     )}
                   </Title>
-                  <Text size="sm" c={treatment.notes ? 'inherit' : 'dimmed'}>
-                    {treatment.notes ||
-                      t('shared:labels.noNotesAvailable', 'No notes available')}
-                  </Text>
+                  <NotesView
+                    value={treatment.notes}
+                    emptyText={t(
+                      'shared:labels.noNotesAvailable',
+                      'No notes available'
+                    )}
+                  />
                 </div>
               </Stack>
             </Box>

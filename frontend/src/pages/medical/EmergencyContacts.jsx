@@ -40,6 +40,7 @@ import { useTranslation } from 'react-i18next';
 import { phoneTelHref } from '../../utils/phoneUtils';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { EMERGENCY_CONTACT_RELATIONSHIPS } from '../../constants/emergencyContactRelationships';
+import NotesView from '../../components/shared/NotesView';
 import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
@@ -490,7 +491,7 @@ const EmergencyContacts = () => {
                       <Text size="sm" c="dimmed" mb="xs">
                         {t('emergencyContacts.card.notes')}
                       </Text>
-                      <Text size="sm">{contact.notes}</Text>
+                      <NotesView value={contact.notes} />
                     </Box>
                   )}
 
@@ -812,13 +813,11 @@ const EmergencyContacts = () => {
               <Title order={4} mb="md">
                 {t('emergencyContacts.viewModal.notes')}
               </Title>
-              {viewingContact.notes ? (
-                <Text size="md">{viewingContact.notes}</Text>
-              ) : (
-                <Text size="md" c="dimmed">
-                  {t('shared:labels.noNotesAvailable')}
-                </Text>
-              )}
+              <NotesView
+                value={viewingContact.notes}
+                emptyText={t('shared:labels.noNotesAvailable')}
+                size="md"
+              />
             </Card>
 
             <ViewModalFooter
