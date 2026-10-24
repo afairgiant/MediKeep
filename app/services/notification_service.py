@@ -17,7 +17,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlparse
 
 from cryptography.fernet import Fernet
 from sqlalchemy import and_, desc
@@ -25,6 +25,8 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.utils.url_security import validate_integration_url
 from app.models.models import (
     NotificationChannel,
     NotificationHistory,
@@ -33,9 +35,23 @@ from app.models.models import (
 from app.schemas.notifications import (
     ChannelType,
     NotificationStatus,
+    channel_destination_url,
+    validate_channel_config,
 )
+from app.services.notification_delivery import DestinationPin, notify_pinned
 
 logger = get_logger(__name__, "app")
+security_logger = get_logger(__name__, "security")
+
+TEST_ERROR_MESSAGE = "Failed to send test notification"
+
+
+class ChannelSendError(ValueError):
+    """A send that failed for a reason safe to show the user."""
+
+
+class BlockedDestinationError(ChannelSendError):
+    """A channel's destination is not an allowed address."""
 
 
 def _derive_encryption_key() -> bytes:
@@ -139,6 +155,26 @@ def _build_webhook_url(config: Dict) -> str:
         apprise_url += f"?+Authorization=Bearer {auth_token}"
 
     return apprise_url
+
+
+def _mask_token(value: str) -> str:
+    """Mask a token, showing first 4 and last 4 characters if long enough."""
+    str_value = str(value)
+    if len(str_value) > 12:
+        return f"{str_value[:4]}...{str_value[-4:]}"
+    if len(str_value) > 6:
+        return f"{str_value[:2]}...{str_value[-2:]}"
+    return "****"
+
+
+def _mask_value(key: str, value: Any) -> Any:
+    if not value:
+        return value
+    if key == "smtp_password":
+        return "****"
+    if key in {"app_token", "auth_token"}:
+        return _mask_token(value)
+    return value
 
 
 # Registry of channel URL builders
@@ -311,7 +347,9 @@ class NotificationService:
             channel.name = name
 
         if config is not None:
-            channel.config_encrypted = self._encrypt_config(config)
+            merged = self._merge_config(channel, config)
+            validate_channel_config(channel.channel_type, merged)
+            channel.config_encrypted = self._encrypt_config(merged)
             # Reset verification when config changes
             channel.is_verified = False
 
@@ -362,30 +400,50 @@ class NotificationService:
     def get_masked_config(self, channel: NotificationChannel) -> Dict[str, Any]:
         """Get channel config with sensitive fields masked for display."""
         config = self._decrypt_config(channel.config_encrypted)
+        return {key: _mask_value(key, value) for key, value in config.items()}
 
-        masked = {}
-        for key, value in config.items():
-            if not value:
-                masked[key] = value
-            elif key == "smtp_password":
-                masked[key] = "****"  # Never show passwords
-            elif key in {"app_token", "auth_token"}:
-                masked[key] = self._mask_token(value)
-            else:
-                # Show webhook_url and other fields in full for identification
-                masked[key] = value
+    def _merge_config(
+        self, channel: NotificationChannel, changes: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Stored config overlaid with changes; a value still showing its mask is ignored."""
+        try:
+            stored = self._decrypt_config(channel.config_encrypted)
+        except ValueError:
+            stored = {}
+        merged = dict(stored)
+        for key, value in changes.items():
+            if key in stored and value == _mask_value(key, stored[key]) != stored[key]:
+                continue
+            merged[key] = value
+        return merged
 
-        return masked
+    def _check_destination(
+        self, channel: NotificationChannel, config: Dict[str, Any]
+    ) -> Optional[DestinationPin]:
+        """The address pin for a send, or None for fixed-host channels.
 
-    @staticmethod
-    def _mask_token(value: str) -> str:
-        """Mask a token, showing first 4 and last 4 characters if long enough."""
-        str_value = str(value)
-        if len(str_value) > 12:
-            return f"{str_value[:4]}...{str_value[-4:]}"
-        if len(str_value) > 6:
-            return f"{str_value[:2]}...{str_value[-2:]}"
-        return "****"
+        Raises BlockedDestinationError unless the channel may connect to its address.
+        """
+        url = channel_destination_url(channel.channel_type, config)
+        if url is None:
+            return None
+        try:
+            ips = validate_integration_url(
+                url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
+            )
+        except ValueError as exc:
+            security_logger.warning(
+                "Blocked a notification to a disallowed address",
+                extra={
+                    LogFields.CATEGORY: "security",
+                    LogFields.EVENT: "notification_destination_blocked",
+                    LogFields.USER_ID: channel.user_id,
+                    LogFields.RECORD_ID: channel.id,
+                    "channel_type": channel.channel_type,
+                },
+            )
+            raise BlockedDestinationError(str(exc)) from exc
+        return urlparse(url).hostname, ips
 
     # =========================================================================
     # Notification Sending
@@ -615,8 +673,6 @@ class NotificationService:
     ) -> None:
         """Send notification to a single channel and update history."""
         try:
-            import apprise
-
             # Build Apprise URL
             config = self._decrypt_config(channel.config_encrypted)
             builder = CHANNEL_BUILDERS.get(channel.channel_type)
@@ -624,19 +680,17 @@ class NotificationService:
             if not builder:
                 raise ValueError(f"Unknown channel type: {channel.channel_type}")
 
+            pin = await asyncio.get_event_loop().run_in_executor(
+                None, self._check_destination, channel, config
+            )
             apprise_url = builder(config)
             if not apprise_url:
                 raise ValueError(
                     f"Failed to build URL for channel type: {channel.channel_type}"
                 )
 
-            # Create Apprise instance and add URL
-            apobj = apprise.Apprise()
-            apobj.add(apprise_url)
-
-            # Send notification
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda: apobj.notify(title=title, body=message)
+                None, notify_pinned, apprise_url, pin, title, message
             )
 
             if result:
@@ -717,29 +771,21 @@ class NotificationService:
         self.db.commit()
 
         try:
-            import apprise
-
             config = self._decrypt_config(channel.config_encrypted)
             builder = CHANNEL_BUILDERS.get(channel.channel_type)
 
             if not builder:
-                history.status = NotificationStatus.FAILED.value
-                history.error_message = f"Unknown channel type: {channel.channel_type}"
-                self.db.commit()
-                return False, f"Unknown channel type: {channel.channel_type}"
+                raise ChannelSendError(f"Unknown channel type: {channel.channel_type}")
 
+            pin = await asyncio.get_event_loop().run_in_executor(
+                None, self._check_destination, channel, config
+            )
             apprise_url = builder(config)
             if not apprise_url:
-                history.status = NotificationStatus.FAILED.value
-                history.error_message = "Failed to build notification URL"
-                self.db.commit()
-                return False, "Failed to build notification URL"
-
-            apobj = apprise.Apprise()
-            apobj.add(apprise_url)
+                raise ChannelSendError("Failed to build notification URL")
 
             result = await asyncio.get_event_loop().run_in_executor(
-                None, lambda: apobj.notify(title=test_title, body=test_message)
+                None, notify_pinned, apprise_url, pin, test_title, test_message
             )
 
             # Update channel test status
@@ -763,20 +809,31 @@ class NotificationService:
             history.status = NotificationStatus.FAILED.value
             history.error_message = "Apprise returned failure"
             self.db.commit()
-            return False, "Failed to send test notification"
+            return False, TEST_ERROR_MESSAGE
+
+        except ChannelSendError as e:
+            return self._record_test_error(channel, history, str(e))
 
         except Exception as e:
-            channel.last_test_at = datetime.now(timezone.utc)
-            channel.last_test_status = "error"
-            history.status = NotificationStatus.FAILED.value
-            history.error_message = str(e)[:500]
-            self.db.commit()
-
             logger.error(
                 "notification_test_error",
                 extra={"channel_id": channel_id, "user_id": user_id, "error": str(e)},
             )
-            return False, f"Error: {str(e)}"
+            # Connection details would tell the caller what is listening at the address
+            return self._record_test_error(channel, history, TEST_ERROR_MESSAGE)
+
+    def _record_test_error(
+        self,
+        channel: NotificationChannel,
+        history: NotificationHistory,
+        message: str,
+    ) -> Tuple[bool, str]:
+        channel.last_test_at = datetime.now(timezone.utc)
+        channel.last_test_status = "error"
+        history.status = NotificationStatus.FAILED.value
+        history.error_message = message[:500]
+        self.db.commit()
+        return False, message
 
     # =========================================================================
     # Preference Management
