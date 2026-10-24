@@ -37,6 +37,7 @@ import {
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 // BMI conversion factor for imperial units (pounds and inches)
 const BMI_IMPERIAL_CONVERSION_FACTOR = 703;
@@ -335,9 +336,7 @@ const VitalViewModal = ({
               </ActionIcon>
               <Title order={4}>{t('shared:tabs.notes', 'Notes')}</Title>
             </Group>
-            <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
-              {vital.notes}
-            </Text>
+            <NotesView value={vital.notes} />
           </Paper>
         )}
 

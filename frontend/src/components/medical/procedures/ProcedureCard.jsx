@@ -4,6 +4,7 @@ import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { notesToPlainText } from '../../../utils/notesMarkdown';
 import logger from '../../../services/logger';
 
 const ProcedureCard = ({
@@ -123,7 +124,7 @@ const ProcedureCard = ({
       },
       {
         label: t('shared:labels.description'),
-        value: procedure.description,
+        value: notesToPlainText(procedure.description),
         align: 'flex-start',
         style: { flex: 1 },
       },
@@ -133,7 +134,7 @@ const ProcedureCard = ({
     if (procedure.procedure_complications) {
       fields.push({
         label: t('shared:fields.complications'),
-        value: procedure.procedure_complications,
+        value: notesToPlainText(procedure.procedure_complications),
         align: 'flex-start',
         style: { flex: 1, color: '#d63384' },
       });

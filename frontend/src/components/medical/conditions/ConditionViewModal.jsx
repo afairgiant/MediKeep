@@ -28,6 +28,7 @@ import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const ConditionViewModal = ({
   isOpen,
@@ -434,13 +435,13 @@ const ConditionViewModal = ({
                   <Title order={4} mb="sm">
                     {t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   </Title>
-                  <Text size="sm" c={condition.notes ? 'inherit' : 'dimmed'}>
-                    {condition.notes ||
-                      t(
-                        'conditions.modal.noNotesAvailable',
-                        'No clinical notes available'
-                      )}
-                  </Text>
+                  <NotesView
+                    value={condition.notes}
+                    emptyText={t(
+                      'conditions.modal.noNotesAvailable',
+                      'No clinical notes available'
+                    )}
+                  />
                 </div>
               </Stack>
             </Box>

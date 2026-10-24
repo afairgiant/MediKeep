@@ -5,6 +5,7 @@ import BaseMedicalCard from '../base/BaseMedicalCard';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
+import NotesView from '../../shared/NotesView';
 
 const VisitCard = ({
   visit,
@@ -209,7 +210,7 @@ const VisitCard = ({
             <Text size="sm" c="dimmed" mb="xs">
               📋 {t('visits.diagnosisAssessment.label')}
             </Text>
-            <Text size="sm">{visit.diagnosis}</Text>
+            <NotesView value={visit.diagnosis} />
           </Box>
         )}
 
@@ -224,7 +225,7 @@ const VisitCard = ({
             <Text size="sm" c="dimmed" mb="xs">
               💊 {t('shared:labels.treatmentPlan')}
             </Text>
-            <Text size="sm">{visit.treatment_plan}</Text>
+            <NotesView value={visit.treatment_plan} />
           </Box>
         )}
 
@@ -239,7 +240,7 @@ const VisitCard = ({
             <Text size="sm" c="dimmed" mb="xs">
               📅 {t('visits.followUpInstructions.label')}
             </Text>
-            <Text size="sm">{visit.follow_up_instructions}</Text>
+            <NotesView value={visit.follow_up_instructions} />
           </Box>
         )}
       </>

@@ -137,7 +137,9 @@ The dialect must match the frontend notes renderer:
 - Images show their alt text
 - Raw HTML, indented code blocks, setext headings and character references stay literal text
 
-`tests/fixtures/markdown_notes_cases.json` holds the cases both renderers are tested against.
+`tests/fixtures/markdown_notes_cases.json` holds the cases both renderers are tested against: `pdf` is the expected backend output, `html` the expected frontend output.
+
+On the frontend, `components/shared/NotesView` shows a formatted note. It lazy-loads `NotesMarkdown` (react-markdown with remark-gfm, remark-breaks and the `remarkNotesDialect` plugin from `utils/notesMarkdown.ts`), so pages without notes never download the renderer. Collapsed long notes on cards, table cells, search results and print use `notesToPlainText` from the same file instead.
 
 ## Database Architecture
 

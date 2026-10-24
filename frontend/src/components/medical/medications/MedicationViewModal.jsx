@@ -34,6 +34,7 @@ import logger from '../../../services/logger';
 import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const MedicationViewModal = ({
   isOpen,
@@ -606,17 +607,13 @@ const MedicationViewModal = ({
                     {t('shared:fields.additionalNotes', 'Additional Notes')}
                   </Title>
                   <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-                    <Text
-                      size="sm"
-                      style={{ whiteSpace: 'pre-wrap' }}
-                      c={medication.notes ? 'inherit' : 'dimmed'}
-                    >
-                      {medication.notes ||
-                        t(
-                          'shared:labels.noNotesAvailable',
-                          'No notes available'
-                        )}
-                    </Text>
+                    <NotesView
+                      value={medication.notes}
+                      emptyText={t(
+                        'shared:labels.noNotesAvailable',
+                        'No notes available'
+                      )}
+                    />
                   </Paper>
                 </div>
 
@@ -625,17 +622,13 @@ const MedicationViewModal = ({
                     {t('shared:labels.sideEffects', 'Side Effects')}
                   </Title>
                   <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-                    <Text
-                      size="sm"
-                      style={{ whiteSpace: 'pre-wrap' }}
-                      c={medication.side_effects ? 'inherit' : 'dimmed'}
-                    >
-                      {medication.side_effects ||
-                        t(
-                          'medications.modal.noSideEffects',
-                          'No side effects reported'
-                        )}
-                    </Text>
+                    <NotesView
+                      value={medication.side_effects}
+                      emptyText={t(
+                        'medications.modal.noSideEffects',
+                        'No side effects reported'
+                      )}
+                    />
                   </Paper>
                 </div>
               </Stack>

@@ -25,6 +25,7 @@ import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const ImmunizationViewModal = ({
   isOpen,
@@ -398,10 +399,13 @@ const ImmunizationViewModal = ({
                   <Title order={4} mb="sm">
                     {t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   </Title>
-                  <Text size="sm" c={immunization.notes ? 'inherit' : 'dimmed'}>
-                    {immunization.notes ||
-                      t('shared:labels.noNotesAvailable', 'No notes available')}
-                  </Text>
+                  <NotesView
+                    value={immunization.notes}
+                    emptyText={t(
+                      'shared:labels.noNotesAvailable',
+                      'No notes available'
+                    )}
+                  />
                 </div>
               </Stack>
             </Box>

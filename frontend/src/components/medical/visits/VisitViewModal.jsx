@@ -28,6 +28,7 @@ import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const VisitViewModal = ({
   isOpen,
@@ -411,10 +412,14 @@ const VisitViewModal = ({
                         <Text fw={500} size="sm" c="dimmed">
                           {t('shared:labels.diagnosis', 'Diagnosis')}
                         </Text>
-                        <Text c={visit.diagnosis ? 'inherit' : 'dimmed'}>
-                          {visit.diagnosis ||
-                            t('shared:labels.notSpecified', 'Not specified')}
-                        </Text>
+                        <NotesView
+                          value={visit.diagnosis}
+                          emptyText={t(
+                            'shared:labels.notSpecified',
+                            'Not specified'
+                          )}
+                          size="md"
+                        />
                       </Stack>
                     </SimpleGrid>
                   </div>
@@ -443,9 +448,7 @@ const VisitViewModal = ({
                         {t('visits.viewModal.treatmentPlan', 'Treatment Plan')}
                       </Title>
                       <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-                        <Text style={{ whiteSpace: 'pre-wrap' }}>
-                          {visit.treatment_plan}
-                        </Text>
+                        <NotesView value={visit.treatment_plan} size="md" />
                       </Paper>
                     </div>
                   )}
@@ -460,9 +463,10 @@ const VisitViewModal = ({
                         )}
                       </Title>
                       <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-                        <Text style={{ whiteSpace: 'pre-wrap' }}>
-                          {visit.follow_up_instructions}
-                        </Text>
+                        <NotesView
+                          value={visit.follow_up_instructions}
+                          size="md"
+                        />
                       </Paper>
                     </div>
                   )}
@@ -473,16 +477,14 @@ const VisitViewModal = ({
                       {t('shared:fields.additionalNotes', 'Additional Notes')}
                     </Title>
                     <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-                      <Text
-                        style={{ whiteSpace: 'pre-wrap' }}
-                        c={visit.notes ? 'inherit' : 'dimmed'}
-                      >
-                        {visit.notes ||
-                          t(
-                            'shared:labels.noNotesAvailable',
-                            'No notes available'
-                          )}
-                      </Text>
+                      <NotesView
+                        value={visit.notes}
+                        emptyText={t(
+                          'shared:labels.noNotesAvailable',
+                          'No notes available'
+                        )}
+                        size="md"
+                      />
                     </Paper>
                   </div>
                 </Stack>

@@ -1,175 +1,209 @@
 {
-  "description": "Markdown notes cases shared by the backend PDF renderer and the frontend notes renderer. 'pdf' is the expected app.utils.notes_markdown.notes_to_reportlab_markup output.",
+  "description": "Markdown notes cases shared by the backend PDF renderer and the frontend notes renderer. 'pdf' is the expected app.utils.notes_markdown.notes_to_reportlab_markup output; 'html' is the expected frontend NotesMarkdown output.",
   "cases": [
     {
       "name": "empty",
       "input": "",
-      "pdf": ""
+      "pdf": "",
+      "html": ""
     },
     {
       "name": "whitespace_only",
       "input": "   \n  ",
-      "pdf": ""
+      "pdf": "",
+      "html": ""
     },
     {
       "name": "plain_single_line",
       "input": "Took 2 tablets with food",
-      "pdf": "Took 2 tablets with food"
+      "pdf": "Took 2 tablets with food",
+      "html": "<p>Took 2 tablets with food</p>"
     },
     {
       "name": "single_newline_is_line_break",
       "input": "Morning: fine\nEvening: dizzy",
-      "pdf": "Morning: fine<br/>Evening: dizzy"
+      "pdf": "Morning: fine<br/>Evening: dizzy",
+      "html": "<p>Morning: fine<br/>\nEvening: dizzy</p>"
     },
     {
       "name": "blank_line_separates_paragraphs",
       "input": "First visit.\n\nSecond visit.",
-      "pdf": "First visit.<br/><br/>Second visit."
+      "pdf": "First visit.<br/><br/>Second visit.",
+      "html": "<p>First visit.</p>\n<p>Second visit.</p>"
     },
     {
       "name": "bold_italic_strike",
       "input": "**bold** *italic* _also italic_ ~~gone~~",
-      "pdf": "<b>bold</b> <i>italic</i> <i>also italic</i> <strike>gone</strike>"
+      "pdf": "<b>bold</b> <i>italic</i> <i>also italic</i> <strike>gone</strike>",
+      "html": "<p><strong>bold</strong> <em>italic</em> <em>also italic</em> <del>gone</del></p>"
     },
     {
       "name": "heading_levels",
       "input": "# One\n## Two\n### Three\n#### Four",
-      "pdf": "<font size=\"+3\"><b>One</b></font><br/><font size=\"+2\"><b>Two</b></font><br/><font size=\"+1\"><b>Three</b></font><br/><b>Four</b>"
+      "pdf": "<font size=\"+3\"><b>One</b></font><br/><font size=\"+2\"><b>Two</b></font><br/><font size=\"+1\"><b>Three</b></font><br/><b>Four</b>",
+      "html": "<h1>One</h1>\n<h2>Two</h2>\n<h3>Three</h3>\n<h4>Four</h4>"
     },
     {
       "name": "heading_then_text",
       "input": "## Plan\nRest for a week",
-      "pdf": "<font size=\"+2\"><b>Plan</b></font><br/>Rest for a week"
+      "pdf": "<font size=\"+2\"><b>Plan</b></font><br/>Rest for a week",
+      "html": "<h2>Plan</h2>\n<p>Rest for a week</p>"
     },
     {
       "name": "bullet_list",
       "input": "- eggs\n- milk",
-      "pdf": "&bull; eggs<br/>&bull; milk"
+      "pdf": "&bull; eggs<br/>&bull; milk",
+      "html": "<ul>\n<li>eggs</li>\n<li>milk</li>\n</ul>"
     },
     {
       "name": "nested_list",
       "input": "- outer\n  - inner",
-      "pdf": "&bull; outer<br/>&nbsp;&nbsp;&nbsp;&nbsp;&bull; inner"
+      "pdf": "&bull; outer<br/>&nbsp;&nbsp;&nbsp;&nbsp;&bull; inner",
+      "html": "<ul>\n<li>outer\n<ul>\n<li>inner</li>\n</ul>\n</li>\n</ul>"
     },
     {
       "name": "ordered_list_keeps_start",
       "input": "3. third\n4. fourth",
-      "pdf": "3. third<br/>4. fourth"
+      "pdf": "3. third<br/>4. fourth",
+      "html": "<ol start=\"3\">\n<li>third</li>\n<li>fourth</li>\n</ol>"
     },
     {
       "name": "task_list",
       "input": "- [x] booked\n- [ ] follow-up",
-      "pdf": "[x] booked<br/>[&nbsp;&nbsp;] follow-up"
+      "pdf": "[x] booked<br/>[&nbsp;&nbsp;] follow-up",
+      "html": "<ul class=\"contains-task-list\">\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled=\"\" checked=\"\"/> booked</li>\n<li class=\"task-list-item\"><input type=\"checkbox\" disabled=\"\"/> follow-up</li>\n</ul>"
     },
     {
       "name": "link_https",
       "input": "[portal](https://example.com/a?b=1&c=2)",
-      "pdf": "<a href=\"https://example.com/a?b=1&amp;c=2\"><u>portal</u></a>"
+      "pdf": "<a href=\"https://example.com/a?b=1&amp;c=2\"><u>portal</u></a>",
+      "html": "<p><a href=\"https://example.com/a?b=1&amp;c=2\" target=\"_blank\" rel=\"noopener noreferrer\">portal</a></p>"
     },
     {
       "name": "link_mailto",
       "input": "[email](mailto:dr@example.com)",
-      "pdf": "<a href=\"mailto:dr@example.com\"><u>email</u></a>"
+      "pdf": "<a href=\"mailto:dr@example.com\"><u>email</u></a>",
+      "html": "<p><a href=\"mailto:dr@example.com\" target=\"_blank\" rel=\"noopener noreferrer\">email</a></p>"
     },
     {
       "name": "autolink",
       "input": "<https://example.com>",
-      "pdf": "<a href=\"https://example.com\"><u>https://example.com</u></a>"
+      "pdf": "<a href=\"https://example.com\"><u>https://example.com</u></a>",
+      "html": "<p><a href=\"https://example.com\" target=\"_blank\" rel=\"noopener noreferrer\">https://example.com</a></p>"
     },
     {
       "name": "link_javascript_is_text",
       "input": "[x](javascript:alert(1))",
-      "pdf": "x"
+      "pdf": "x",
+      "html": "<p>x</p>"
     },
     {
       "name": "link_javascript_mixed_case_is_text",
       "input": "[x](JaVaScRiPt:alert(1))",
-      "pdf": "x"
+      "pdf": "x",
+      "html": "<p>x</p>"
     },
     {
       "name": "link_data_is_text",
       "input": "[x](data:text/html,hi)",
-      "pdf": "x"
+      "pdf": "x",
+      "html": "<p>x</p>"
     },
     {
       "name": "link_relative_is_text",
       "input": "[x](relative/path)",
-      "pdf": "x"
+      "pdf": "x",
+      "html": "<p>x</p>"
     },
     {
       "name": "link_quote_in_url",
       "input": "[q](https://e.com/\"onmouseover=x)",
-      "pdf": "<a href=\"https://e.com/%22onmouseover=x\"><u>q</u></a>"
+      "pdf": "<a href=\"https://e.com/%22onmouseover=x\"><u>q</u></a>",
+      "html": "<p><a href=\"https://e.com/%22onmouseover=x\" target=\"_blank\" rel=\"noopener noreferrer\">q</a></p>"
     },
     {
       "name": "image_shows_alt_text",
       "input": "![x-ray](https://example.com/x.png)",
-      "pdf": "x-ray"
+      "pdf": "x-ray",
+      "html": "<p>x-ray</p>"
     },
     {
       "name": "raw_html_is_literal",
       "input": "<script>alert(1)</script>",
-      "pdf": "&lt;script&gt;alert(1)&lt;/script&gt;"
+      "pdf": "&lt;script&gt;alert(1)&lt;/script&gt;",
+      "html": "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>"
     },
     {
       "name": "html_img_is_literal",
       "input": "<img src=x onerror=\"alert(1)\">",
-      "pdf": "&lt;img src=x onerror=\"alert(1)\"&gt;"
+      "pdf": "&lt;img src=x onerror=\"alert(1)\"&gt;",
+      "html": "<p>&lt;img src=x onerror=&quot;alert(1)&quot;&gt;</p>"
     },
     {
       "name": "reportlab_markup_is_literal",
       "input": "<font size='500'>HUGE</font> <b>no</b>",
-      "pdf": "&lt;font size='500'&gt;HUGE&lt;/font&gt; &lt;b&gt;no&lt;/b&gt;"
+      "pdf": "&lt;font size='500'&gt;HUGE&lt;/font&gt; &lt;b&gt;no&lt;/b&gt;",
+      "html": "<p>&lt;font size=&#x27;500&#x27;&gt;HUGE&lt;/font&gt; &lt;b&gt;no&lt;/b&gt;</p>"
     },
     {
       "name": "comparison_signs",
       "input": "BP <120 and > 80, A & B",
-      "pdf": "BP &lt;120 and &gt; 80, A &amp; B"
+      "pdf": "BP &lt;120 and &gt; 80, A &amp; B",
+      "html": "<p>BP &lt;120 and &gt; 80, A &amp; B</p>"
     },
     {
       "name": "character_references_are_literal",
       "input": "&amp; &#65; &copy;",
-      "pdf": "&amp;amp; &amp;#65; &amp;copy;"
+      "pdf": "&amp;amp; &amp;#65; &amp;copy;",
+      "html": "<p>&amp;amp; &amp;#65; &amp;copy;</p>"
     },
     {
       "name": "indented_text_is_not_code",
       "input": "    four spaces in",
-      "pdf": "four spaces in"
+      "pdf": "four spaces in",
+      "html": "<p>four spaces in</p>"
     },
     {
       "name": "setext_underline_is_not_heading",
       "input": "Title\n===",
-      "pdf": "Title<br/>==="
+      "pdf": "Title<br/>===",
+      "html": "<p>Title<br/>\n===</p>"
     },
     {
       "name": "blockquote",
       "input": "> as told by patient",
-      "pdf": "&nbsp;&nbsp;&nbsp;&nbsp;<i>as told by patient</i>"
+      "pdf": "&nbsp;&nbsp;&nbsp;&nbsp;<i>as told by patient</i>",
+      "html": "<blockquote>\n<p>as told by patient</p>\n</blockquote>"
     },
     {
       "name": "fenced_code",
       "input": "```\nraw <x>\nline\n```",
-      "pdf": "raw &lt;x&gt;<br/>line"
+      "pdf": "raw &lt;x&gt;<br/>line",
+      "html": "<pre><code>raw &lt;x&gt;\nline\n</code></pre>"
     },
     {
       "name": "unclosed_emphasis",
       "input": "**unclosed and *also",
-      "pdf": "**unclosed and *also"
+      "pdf": "**unclosed and *also",
+      "html": "<p>**unclosed and *also</p>"
     },
     {
       "name": "backslash_escape",
       "input": "\\*not italic\\*",
-      "pdf": "*not italic*"
+      "pdf": "*not italic*",
+      "html": "<p>*not italic*</p>"
     },
     {
       "name": "autolink_javascript_is_text",
       "input": "<javascript:alert(1)>",
-      "pdf": "javascript:alert(1)"
+      "pdf": "javascript:alert(1)",
+      "html": "<p>javascript:alert(1)</p>"
     },
     {
       "name": "image_with_javascript_src_shows_alt",
       "input": "![a](javascript:x)",
-      "pdf": "a"
+      "pdf": "a",
+      "html": "<p>a</p>"
     }
   ]
 }

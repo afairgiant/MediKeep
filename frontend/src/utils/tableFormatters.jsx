@@ -2,6 +2,7 @@ import { createEntityLinkProps } from './linkNavigation';
 import { MEDICATION_TYPE_LABELS } from '../constants/medicationTypes';
 import { formatDateWithPreference } from './dateFormatUtils';
 import { timezoneService } from '../services/timezoneService';
+import { notesToPlainText } from './notesMarkdown';
 
 /**
  * Standardized table formatters for medical pages
@@ -40,6 +41,17 @@ export const createStandardFormatters = formatDate => {
     );
   };
 
+  const truncatedText = (value, maxLength = 50) =>
+    value ? (
+      <span title={value}>
+        {value.length > maxLength
+          ? `${value.substring(0, maxLength)}...`
+          : value}
+      </span>
+    ) : (
+      '-'
+    );
+
   return {
     // Primary name fields (medication_name, procedure_name, etc.)
     primaryName: value => (
@@ -66,16 +78,10 @@ export const createStandardFormatters = formatDate => {
     duration: (value, unit = 'min') => (value ? `${value} ${unit}` : '-'),
 
     // Text fields with truncation
-    text: (value, maxLength = 50) =>
-      value ? (
-        <span title={value}>
-          {value.length > maxLength
-            ? `${value.substring(0, maxLength)}...`
-            : value}
-        </span>
-      ) : (
-        '-'
-      ),
+    text: truncatedText,
+
+    // Markdown fields: truncated plain text
+    notes: value => truncatedText(notesToPlainText(value)),
 
     // Practitioner/Doctor fields
     practitioner: (value, item, practitioners = []) => {
@@ -251,8 +257,8 @@ export const getEntityFormatters = (
               )
           : (value, item) =>
               formatters.practitioner(value, item, practitioners),
-        description: value => formatters.text(value, 50),
-        notes: value => formatters.text(value, 50),
+        description: formatters.notes,
+        notes: formatters.notes,
       };
 
     case 'allergies':
@@ -263,7 +269,7 @@ export const getEntityFormatters = (
         severity: formatters.status,
         reaction: value => formatters.text(value, 50),
         onset_date: formatters.date,
-        notes: value => formatters.text(value, 50),
+        notes: formatters.notes,
       };
 
     case 'conditions':
@@ -274,7 +280,7 @@ export const getEntityFormatters = (
         severity: formatters.status,
         onset_date: formatters.date,
         end_date: formatters.date,
-        notes: value => formatters.text(value, 50),
+        notes: formatters.notes,
       };
 
     case 'lab_results':
@@ -287,7 +293,7 @@ export const getEntityFormatters = (
         reference_range: formatters.simple,
         result_date: formatters.date,
         status: formatters.status,
-        notes: value => formatters.text(value, 50),
+        notes: formatters.notes,
       };
 
     case 'immunizations':
@@ -298,7 +304,7 @@ export const getEntityFormatters = (
         administration_date: formatters.date,
         next_due_date: formatters.date,
         lot_number: formatters.code,
-        notes: value => formatters.text(value, 50),
+        notes: formatters.notes,
       };
 
     case 'treatments':
@@ -310,7 +316,7 @@ export const getEntityFormatters = (
         end_date: formatters.date,
         dosage: formatters.code,
         frequency: formatters.simple,
-        notes: value => formatters.text(value, 50),
+        notes: formatters.notes,
       };
 
     case 'visits':
@@ -331,8 +337,8 @@ export const getEntityFormatters = (
           : (value, item) =>
               formatters.practitioner(value, item, practitioners),
         reason: value => formatters.text(value, 50),
-        diagnosis: value => formatters.text(value, 50),
-        notes: value => formatters.text(value, 50),
+        diagnosis: formatters.notes,
+        notes: formatters.notes,
       };
 
     case 'vitals':
@@ -342,7 +348,7 @@ export const getEntityFormatters = (
         vital_value: formatters.simple,
         unit: formatters.simple,
         measurement_date: formatters.date,
-        notes: value => formatters.text(value, 50),
+        notes: formatters.notes,
       };
 
     default:

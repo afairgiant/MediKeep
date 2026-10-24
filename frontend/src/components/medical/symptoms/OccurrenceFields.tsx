@@ -4,6 +4,7 @@ import type { MantineSize } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { formatTimeToAmPm } from '../../../utils/dateUtils';
+import NotesView from '../../shared/NotesView';
 import { OCCURRENCE_IMPACT_LABEL_KEYS } from '../../../utils/medicalFormFields/symptomOccurrence';
 import type { TimelineDataPoint } from '../../../services/api/symptomApi';
 
@@ -40,16 +41,22 @@ function OccurrenceFields({ occurrence, size = 'sm' }: OccurrenceFieldsProps) {
   const { t } = useTranslation(['common', 'shared', 'medical']);
   const { formatDate } = useDateFormat() as DateFormatHook;
 
-  const textRow = (label: string, value: ReactNode, preserveLines = false) => (
-    <Text
-      size={size}
-      style={preserveLines ? { whiteSpace: 'pre-wrap' } : undefined}
-    >
+  const textRow = (label: string, value: ReactNode) => (
+    <Text size={size}>
       <Text span fw={600} c="dimmed">
         {label}:
       </Text>{' '}
       {value}
     </Text>
+  );
+
+  const notesRow = (label: string, value: string) => (
+    <div>
+      <Text size={size} fw={600} c="dimmed">
+        {label}:
+      </Text>
+      <NotesView value={value} size={size} />
+    </div>
   );
 
   const badgeRow = (label: string, items?: string[] | null, color?: string) =>
@@ -115,19 +122,17 @@ function OccurrenceFields({ occurrence, size = 'sm' }: OccurrenceFieldsProps) {
       )}
       {resolved && textRow(t('shared:labels.resolved', 'Resolved'), resolved)}
       {occurrence.resolution_notes &&
-        textRow(
+        notesRow(
           t(
             'medical:symptoms.occurrence.resolutionNotes.label',
             'Resolution Notes'
           ),
-          occurrence.resolution_notes,
-          true
+          occurrence.resolution_notes
         )}
       {occurrence.notes &&
-        textRow(
+        notesRow(
           t('shared:fields.additionalNotes', 'Additional Notes'),
-          occurrence.notes,
-          true
+          occurrence.notes
         )}
     </Stack>
   );

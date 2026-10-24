@@ -36,6 +36,7 @@ import {
   getQualitativeColor,
 } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
+import NotesView from '../../shared/NotesView';
 
 interface TestComponentDisplayProps {
   components: LabTestComponent[];
@@ -338,9 +339,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                     size={14}
                     style={{ marginTop: 2, flexShrink: 0 }}
                   />
-                  <Text size="xs" c="dimmed" style={{ lineHeight: 1.4 }}>
-                    {component.notes}
-                  </Text>
+                  <NotesView value={component.notes} size="xs" c="dimmed" />
                 </Group>
               </Box>
             )}

@@ -81,7 +81,7 @@ describe('SymptomViewModal - episode history', () => {
     expect(screen.getByText('Nausea')).toBeInTheDocument();
     expect(screen.getByText('Dizziness')).toBeInTheDocument();
     expect(panel).toHaveTextContent('Resolved: date:2026-03-02 9:05 AM');
-    expect(panel).toHaveTextContent('Resolution Notes: Faded after sleep');
+    expect(panel).toHaveTextContent('Resolution Notes:Faded after sleep');
     expect(panel).toHaveTextContent('Third line');
   });
 

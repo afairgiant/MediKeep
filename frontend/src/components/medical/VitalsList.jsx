@@ -70,6 +70,7 @@ import {
   unitLabels,
 } from '../../utils/unitConversion';
 import logger from '../../services/logger';
+import NotesView from '../shared/NotesView';
 import { timezoneService } from '../../services/timezoneService';
 import {
   GLUCOSE_CONTEXT_MANTINE_COLORS,
@@ -547,9 +548,7 @@ const VitalsList = ({
               </ActionIcon>
               <Title order={4}>{t('shared:tabs.notes')}</Title>
             </Group>
-            <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
-              {selectedVital.notes}
-            </Text>
+            <NotesView value={selectedVital.notes} />
           </Paper>
         )}
 

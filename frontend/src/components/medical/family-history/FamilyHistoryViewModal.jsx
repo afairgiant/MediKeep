@@ -18,6 +18,7 @@ import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 // Style constants matching the main component
 const CARD_STYLES = {
@@ -310,10 +311,12 @@ const FamilyHistoryViewModal = ({
                 </Text>
               )}
               {member.notes && (
-                <Text size="sm">
-                  <strong>{t('shared:tabs.notes', 'Notes')}:</strong>{' '}
-                  {member.notes}
-                </Text>
+                <div>
+                  <Text size="sm" fw={700}>
+                    {t('shared:tabs.notes', 'Notes')}:
+                  </Text>
+                  <NotesView value={member.notes} />
+                </div>
               )}
             </Stack>
           </Card>
@@ -490,9 +493,7 @@ const FamilyHistoryViewModal = ({
                     )}
 
                     {condition.notes && (
-                      <Text size="sm" c="dimmed">
-                        {condition.notes}
-                      </Text>
+                      <NotesView value={condition.notes} c="dimmed" />
                     )}
                   </Box>
                 ))}

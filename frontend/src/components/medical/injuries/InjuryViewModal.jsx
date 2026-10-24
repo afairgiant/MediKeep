@@ -26,6 +26,7 @@ import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const InjuryViewModal = ({
   isOpen,
@@ -120,16 +121,22 @@ const InjuryViewModal = ({
   };
 
   // Field display component
-  const FieldDisplay = ({ label, value, children }) => (
+  const FieldDisplay = ({ label, value, markdown, children }) => (
     <Box mb="sm">
       <Text size="xs" c="dimmed" mb={2}>
         {label}
       </Text>
-      {children || (
-        <Text size="sm" fw={500}>
-          {value || t('shared:labels.notSpecified', 'Not specified')}
-        </Text>
-      )}
+      {children ||
+        (markdown ? (
+          <NotesView
+            value={value}
+            emptyText={t('shared:labels.notSpecified', 'Not specified')}
+          />
+        ) : (
+          <Text size="sm" fw={500}>
+            {value || t('shared:labels.notSpecified', 'Not specified')}
+          </Text>
+        ))}
     </Box>
   );
 
@@ -297,6 +304,7 @@ const InjuryViewModal = ({
                 <FieldDisplay
                   label={t('injuries.mechanism.label', 'How It Happened')}
                   value={injury.mechanism}
+                  markdown
                 />
                 <Divider my="md" />
                 <FieldDisplay
@@ -305,11 +313,13 @@ const InjuryViewModal = ({
                     'Treatment Received'
                   )}
                   value={injury.treatment_received}
+                  markdown
                 />
                 <Divider my="md" />
                 <FieldDisplay
                   label={t('injuries.recoveryNotes.label', 'Recovery Notes')}
                   value={injury.recovery_notes}
+                  markdown
                 />
               </Paper>
             </Box>
@@ -347,6 +357,7 @@ const InjuryViewModal = ({
                 <FieldDisplay
                   label={t('shared:fields.additionalNotes', 'Additional Notes')}
                   value={injury.notes}
+                  markdown
                 />
               </Paper>
             </Box>

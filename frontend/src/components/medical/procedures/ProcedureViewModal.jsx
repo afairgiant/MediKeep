@@ -30,6 +30,7 @@ import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 
 const ProcedureViewModal = ({
   isOpen,
@@ -360,16 +361,13 @@ const ProcedureViewModal = ({
                     <Title order={4} mb="sm">
                       {t('shared:labels.description', 'Description')}
                     </Title>
-                    <Text
-                      size="sm"
-                      c={procedure.description ? 'inherit' : 'dimmed'}
-                    >
-                      {procedure.description ||
-                        t(
-                          'procedures.viewModal.noDescription',
-                          'No description available'
-                        )}
-                    </Text>
+                    <NotesView
+                      value={procedure.description}
+                      emptyText={t(
+                        'procedures.viewModal.noDescription',
+                        'No description available'
+                      )}
+                    />
                   </div>
 
                   {/* Tags Section */}
@@ -425,16 +423,13 @@ const ProcedureViewModal = ({
                             'Anesthesia Notes'
                           )}
                         </Text>
-                        <Text
-                          size="sm"
-                          c={procedure.anesthesia_notes ? 'inherit' : 'dimmed'}
-                        >
-                          {procedure.anesthesia_notes ||
-                            t(
-                              'procedures.viewModal.noAnesthesiaNotes',
-                              'No anesthesia notes available'
-                            )}
-                        </Text>
+                        <NotesView
+                          value={procedure.anesthesia_notes}
+                          emptyText={t(
+                            'procedures.viewModal.noAnesthesiaNotes',
+                            'No anesthesia notes available'
+                          )}
+                        />
                       </Stack>
                     </SimpleGrid>
                   </div>
@@ -444,18 +439,14 @@ const ProcedureViewModal = ({
                     <Title order={4} mb="sm">
                       {t('shared:fields.complications', 'Complications')}
                     </Title>
-                    <Text
-                      size="sm"
-                      c={
-                        procedure.procedure_complications ? '#d63384' : 'dimmed'
-                      }
-                    >
-                      {procedure.procedure_complications ||
-                        t(
-                          'procedures.viewModal.noComplications',
-                          'No complications reported'
-                        )}
-                    </Text>
+                    <NotesView
+                      value={procedure.procedure_complications}
+                      emptyText={t(
+                        'procedures.viewModal.noComplications',
+                        'No complications reported'
+                      )}
+                      c="#d63384"
+                    />
                   </div>
                 </Stack>
               </Box>
@@ -498,13 +489,13 @@ const ProcedureViewModal = ({
                     <Title order={4} mb="sm">
                       {t('shared:labels.clinicalNotes', 'Clinical Notes')}
                     </Title>
-                    <Text size="sm" c={procedure.notes ? 'inherit' : 'dimmed'}>
-                      {procedure.notes ||
-                        t(
-                          'procedures.viewModal.noClinicalNotes',
-                          'No clinical notes available'
-                        )}
-                    </Text>
+                    <NotesView
+                      value={procedure.notes}
+                      emptyText={t(
+                        'procedures.viewModal.noClinicalNotes',
+                        'No clinical notes available'
+                      )}
+                    />
                   </div>
                 </Stack>
               </Box>

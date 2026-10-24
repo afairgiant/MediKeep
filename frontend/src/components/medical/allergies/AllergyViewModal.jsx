@@ -28,6 +28,7 @@ import { useTagColors } from '../../../hooks/useTagColors';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import ViewModalFooter from '../../shared/ViewModalFooter';
+import NotesView from '../../shared/NotesView';
 import logger from '../../../services/logger';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 
@@ -388,13 +389,13 @@ const AllergyViewModal = ({
                     <Title order={4} mb="sm">
                       {t('shared:labels.clinicalNotes', 'Clinical Notes')}
                     </Title>
-                    <Text size="sm" c={allergy.notes ? 'inherit' : 'dimmed'}>
-                      {allergy.notes ||
-                        t(
-                          'shared:labels.noNotesAvailable',
-                          'No notes available'
-                        )}
-                    </Text>
+                    <NotesView
+                      value={allergy.notes}
+                      emptyText={t(
+                        'shared:labels.noNotesAvailable',
+                        'No notes available'
+                      )}
+                    />
                   </div>
                 </Stack>
               </Box>

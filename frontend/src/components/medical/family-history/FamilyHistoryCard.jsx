@@ -22,6 +22,7 @@ import BaseMedicalCard from '../base/BaseMedicalCard';
 import { useMantineColorScheme } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import logger from '../../../services/logger';
+import { notesToPlainText } from '../../../utils/notesMarkdown';
 
 // Style constants for consistency
 const CARD_STYLES = {
@@ -406,7 +407,7 @@ const FamilyHistoryCard = ({
 
                       {condition.notes && (
                         <Text size="xs" c="dimmed" lineClamp={2}>
-                          {condition.notes}
+                          {notesToPlainText(condition.notes)}
                         </Text>
                       )}
                     </div>
