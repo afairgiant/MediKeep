@@ -299,3 +299,33 @@ class TestThreadSafety:
         limiter.reset()
 
         assert limiter.is_allowed("k") is True
+
+
+class TestRelease:
+    def test_release_frees_one_slot(self, limiter):
+        for _ in range(3):
+            limiter.is_allowed("k")
+
+        limiter.release("k")
+
+        assert limiter.get_remaining_requests("k") == 1
+
+    def test_release_of_unknown_key_is_a_no_op(self, limiter):
+        limiter.release("never-seen")
+
+        assert limiter.get_remaining_requests("never-seen") == 3
+
+
+class TestTooManyRequests:
+    def test_carries_standard_headers_and_error_code(self, limiter):
+        for _ in range(3):
+            limiter.is_allowed("k")
+
+        rejection = limiter.too_many_requests("k", "Slow down.", "some_code")
+
+        assert rejection.status_code == 429
+        assert rejection.headers["X-Error-Code"] == "some_code"
+        assert {"Retry-After", "X-RateLimit-Limit", "X-RateLimit-Reset"} <= set(
+            rejection.headers
+        )
+        assert rejection.detail.startswith("Slow down. Please wait ")

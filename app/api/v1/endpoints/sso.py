@@ -1,13 +1,9 @@
-from datetime import timedelta
-
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import safe_log_activity
 from app.api.deps import UnauthorizedException
 from app.core.http.auth_codes import AuthErrorCode
 from app.auth.sso.exceptions import *
@@ -20,15 +16,11 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.core.utils.client_ip import get_client_ip
-from app.core.utils.cookie_auth import set_auth_cookie
 from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.core.utils.return_url import is_safe_return_url
-from app.core.utils.security import create_access_token
-from app.crud.user_preferences import user_preferences
-from app.models.activity_log import ActionType, EntityType
-from app.models.base import get_utc_now
 from app.models.models import User
-from app.services.patient_management import PatientManagementService
+from app.services.auth_session import complete_login
+from app.services.login_throttle import login_throttle
 from app.services.sso_service import SSOService
 
 logger = get_logger(__name__, "sso")
@@ -91,138 +83,30 @@ def _complete_sso_login(
     db: Session,
     log_event_name: str,
     activity_description: str,
-) -> dict:
-    """Shared post-authentication logic for all SSO login paths.
-
-    Logs the login activity, updates last_login_at, clears an unsatisfiable forced
-    password change for SSO-only accounts, creates a JWT token, and returns the
-    standard SSO login response dict.
-    """
+) -> JSONResponse:
+    """Finish an SSO login through the shared login completion, adding SSO body keys."""
     sso_user = result["user"]
-
-    safe_log_activity(
-        db=db,
-        action=ActionType.LOGIN,
-        entity_type=EntityType.USER,
-        entity_obj=sso_user,
-        user_id=sso_user.id,
-        description=activity_description,
-        request=req,
-    )
-
-    # Auto-set active patient if not already set (matches regular login behavior)
-    if not sso_user.active_patient_id:
-        try:
-            patient_service = PatientManagementService(db)
-            patient_service.ensure_active_patient(sso_user)
-        except (SQLAlchemyError, ValueError) as e:
-            db.rollback()
-            log_endpoint_error(
-                logger,
-                req,
-                "Failed to set active patient during SSO login",
-                e,
-                user_id=sso_user.id,
-            )
-            # Continue login without active patient - user can set it later
-
-    # A forced password change is unsatisfiable for a pure-SSO user: the account was
-    # created with a random password that was discarded immediately (crud/user.py
-    # create_from_sso), and /auth/change-password requires the current password. The
-    # flag would lock the account out permanently, so clear it on successful SSO login.
-    # Hybrid users are deliberately excluded - they have a real local password they
-    # know, so the normal forced-change flow works for them.
-    clear_forced_password_change = (
-        bool(sso_user.must_change_password) and not sso_user.has_usable_password
-    )
-
-    try:
-        sso_user.last_login_at = get_utc_now()
-        if clear_forced_password_change:
-            sso_user.must_change_password = False
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        if clear_forced_password_change:
-            # The flag is still set in the database. Issuing a session now would
-            # send the user to the forced-change form they cannot satisfy - the
-            # exact lockout this clear exists to prevent - so fail the login
-            # instead and let the next attempt retry the clear.
-            log_endpoint_error(
-                logger,
-                req,
-                "Failed to clear forced password change during SSO login",
-                e,
-                user_id=sso_user.id,
-            )
-            raise
-        # A failed last_login_at update on its own is not worth failing a login
-        # over; this tolerance predates the clear and is deliberate.
-
-    if clear_forced_password_change:
-        log_security_event(
-            logger,
-            "sso_forced_password_change_cleared",
-            req,
-            "Cleared unsatisfiable forced password change for SSO-only user",
-            user_id=sso_user.id,
-            username=sso_user.username,
-            auth_method=sso_user.auth_method,
-        )
-
-    preferences = user_preferences.get_or_create_by_user_id(db, user_id=sso_user.id)
-    session_timeout_minutes = (
-        preferences.session_timeout_minutes
-        if preferences
-        else settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-
-    jwt_lifetime = max(settings.ACCESS_TOKEN_EXPIRE_MINUTES, session_timeout_minutes)
-    access_token = create_access_token(
-        data={
-            "sub": sso_user.username,
-            "role": (
-                sso_user.role if sso_user.role in ["admin", "user", "guest"] else "user"
-            ),
-            "user_id": sso_user.id,
-        },
-        expires_delta=timedelta(minutes=jwt_lifetime),
-    )
-
-    log_endpoint_access(
-        logger,
+    return complete_login(
+        db,
+        sso_user,
         req,
-        sso_user.id,
-        log_event_name,
-        message=f"SSO JWT token created with {jwt_lifetime} minute expiration",
-        username=sso_user.username,
-        jwt_expiry_minutes=jwt_lifetime,
-        inactivity_timeout_minutes=session_timeout_minutes,
-    )
-
-    response_data = {
-        "access_token": access_token,
-        "token_type": "bearer",  # nosec B105 - OAuth2 token type, not a password
-        "user": {
-            "id": sso_user.id,
-            "username": sso_user.username,
-            "email": sso_user.email,
-            "full_name": sso_user.full_name,
-            "role": sso_user.role,
-            "auth_method": sso_user.auth_method,
+        method="sso",
+        activity_description=activity_description,
+        log_event_name=log_event_name,
+        extra_body={
+            "user": {
+                "id": sso_user.id,
+                "username": sso_user.username,
+                "email": sso_user.email,
+                "full_name": sso_user.full_name,
+                "role": sso_user.role,
+                "auth_method": sso_user.auth_method,
+            },
+            "is_new_user": result["is_new_user"],
+            # Deep link carried through the state entry; no frontend reads it yet
+            "return_url": result.get("return_url"),
         },
-        "is_new_user": result["is_new_user"],
-        "session_timeout_minutes": session_timeout_minutes,
-        "must_change_password": bool(sso_user.must_change_password),
-        # The deep link /auth/sso/initiate was given, carried through the state entry.
-        # Ships inert: no frontend reads it yet (deep links currently survive via
-        # sessionStorage, which fails in private browsing) - the consumer is a
-        # later PR.
-        "return_url": result.get("return_url"),
-    }
-    response = JSONResponse(content=response_data)
-    set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)
-    return response
+    )
 
 
 @router.get("/config")
@@ -262,31 +146,20 @@ async def initiate_sso_login(
     # entry - throttling this endpoint is what bounds the in-memory state store.
     client_ip = get_client_ip(request)
     if not _initiate_limiter.is_allowed(client_ip):
-        headers = _initiate_limiter.rate_limit_headers(client_ip)
-
+        rejection = _initiate_limiter.too_many_requests(
+            client_ip,
+            "Too many SSO sign-in attempts.",
+            AuthErrorCode.SSO_RATE_LIMITED,
+        )
         log_security_event(
             logger,
             "sso_initiate_rate_limited",
             request,
             "Rate limit exceeded for SSO initiate endpoint",
             endpoint="/api/v1/auth/sso/initiate",
-            retry_after_seconds=headers["Retry-After"],
+            retry_after_seconds=rejection.headers["Retry-After"],
         )
-
-        raise HTTPException(
-            status_code=429,
-            detail=(
-                "Too many SSO sign-in attempts. "
-                f"Please wait {headers['Retry-After']} seconds and try again."
-            ),
-            headers={
-                **headers,
-                # http_exception_handler copies this into the body's error_code,
-                # which is what clients branch on. Also exposed via CORS
-                # (main.py) so the header itself stays readable.
-                "X-Error-Code": AuthErrorCode.SSO_RATE_LIMITED,
-            },
-        )
+        raise rejection
 
     # Outside the try below on purpose: an HTTPException raised inside it is caught
     # by the broad handler and re-reported as a 500, which is the same defect this
@@ -494,10 +367,18 @@ async def resolve_github_manual_link(
     whose email the provider does not expose is routed here, so under SSO-only this
     is their only route into the app.
     """
+    login_throttle.reserve(req, request.username)
     try:
-        result = sso_service.resolve_github_manual_link(
-            request.temp_token, request.username, request.password, db
-        )
+        try:
+            result = sso_service.resolve_github_manual_link(
+                request.temp_token, request.username, request.password, db
+            )
+        except Exception as e:
+            # Only a wrong password keeps its slot in the failed-login count
+            if getattr(e, "error_code", None) != AuthErrorCode.INVALID_CREDENTIALS:
+                login_throttle.release(req, request.username)
+            raise
+        login_throttle.release(req, request.username)
 
         _check_user_active(result["user"], "github_link_login_rejected_inactive", req)
 

@@ -279,7 +279,7 @@ class TestClearFailure:
         user = make_sso_user(db_session, auth_method="sso", must_change_password=False)
 
         with patch(
-            "app.api.v1.endpoints.sso.get_utc_now",
+            "app.services.auth_session.get_utc_now",
             side_effect=SQLAlchemyError("clock failed"),
         ):
             with patch_callback(user):

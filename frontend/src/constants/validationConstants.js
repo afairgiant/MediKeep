@@ -25,7 +25,7 @@ export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
  * Field types that should be excluded from validation in edit mode
  */
-export const EDIT_EXCLUDED_FIELDS = ['password_hash', 'password'];
+export const EDIT_EXCLUDED_FIELDS = ['password_hash', 'password', 'session_version'];
 
 /**
  * Fields that should be hidden for user model creation

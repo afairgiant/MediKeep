@@ -13,6 +13,7 @@ class AuthErrorCode:
     INVALID_CREDENTIALS = "invalid_credentials"
     ACCOUNT_DEACTIVATED = "account_deactivated"
     ACCOUNT_INCOMPLETE = "account_incomplete"
+    LOGIN_RATE_LIMITED = "login_rate_limited"
 
     # Registration
     REGISTRATION_DISABLED = "registration_disabled"

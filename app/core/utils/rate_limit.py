@@ -16,6 +16,8 @@ from collections import deque
 from collections.abc import Hashable
 from typing import Deque, Dict, Optional
 
+from fastapi import HTTPException
+
 
 class SlidingWindowRateLimiter:
     """Allow at most ``max_requests`` per key within a rolling ``window_seconds``.
@@ -112,6 +114,15 @@ class SlidingWindowRateLimiter:
 
             return False
 
+    def release(self, key: Hashable) -> None:
+        """Give back the most recent request recorded for this key, if any."""
+        with self._lock:
+            window = self._requests.get(key)
+            if window:
+                window.pop()
+                if not window:
+                    del self._requests[key]
+
     def get_remaining_requests(self, key: Hashable) -> int:
         """Requests still available to this key in the current window."""
         with self._lock:
@@ -161,6 +172,23 @@ class SlidingWindowRateLimiter:
                 "X-RateLimit-Remaining": str(self.get_remaining_requests(key)),
                 "X-RateLimit-Reset": str(int(self.get_reset_time(key))),
             }
+
+    def too_many_requests(
+        self, key: Hashable, message: str, error_code: str
+    ) -> HTTPException:
+        """The 429 for a rejected key: standard headers, wait time in the detail.
+
+        error_code travels in X-Error-Code, which the error handler copies into the body.
+        """
+        headers = self.rate_limit_headers(key)
+        return HTTPException(
+            status_code=429,
+            detail=(
+                f"{message} Please wait {headers['Retry-After']} seconds "
+                "and try again."
+            ),
+            headers={**headers, "X-Error-Code": error_code},
+        )
 
     def reset(self) -> None:
         """Discard all recorded requests. For tests - module-scope limiter state

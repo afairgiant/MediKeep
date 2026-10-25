@@ -400,6 +400,15 @@ class Settings:  # App Info
         os.getenv("SSO_RATE_LIMIT_WINDOW_MINUTES", "10")
     )
 
+    # Per IP is higher: behind Docker's userland proxy every client can share one address
+    LOGIN_MAX_FAILED_ATTEMPTS: int = int(os.getenv("LOGIN_MAX_FAILED_ATTEMPTS", "10"))
+    LOGIN_MAX_FAILED_ATTEMPTS_PER_IP: int = int(
+        os.getenv("LOGIN_MAX_FAILED_ATTEMPTS_PER_IP", "30")
+    )
+    LOGIN_FAILED_WINDOW_MINUTES: int = int(
+        os.getenv("LOGIN_FAILED_WINDOW_MINUTES", "15")
+    )
+
     # SSO-only mode and IdP auto-redirect.
     #
     # Both default off, so a deployment upgrading to this release behaves exactly

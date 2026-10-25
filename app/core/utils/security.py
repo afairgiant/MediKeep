@@ -12,6 +12,9 @@ from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 
+# The "typ" claim of a login session; any other typ must never authenticate a request
+ACCESS_TOKEN_TYPE = "access"
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """

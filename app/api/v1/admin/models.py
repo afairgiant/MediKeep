@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
 from sqlalchemy import inspect as sql_inspect
 from sqlalchemy.orm import Session, joinedload
@@ -114,6 +115,7 @@ from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
 from app.schemas.treatment import TreatmentCreate
 from app.schemas.user import UserCreate
 from app.schemas.vitals import VALID_GLUCOSE_CONTEXTS, VitalsCreate
+from app.services.auth_session import reissue_session
 
 router = APIRouter()
 
@@ -2209,7 +2211,11 @@ def admin_reset_password(
             },
         )
 
-        return {"message": "Password reset successfully"}
+        response = JSONResponse(content={"message": "Password reset successfully"})
+        # The reset ended every session; an admin resetting their own keeps this one
+        if updated_user.id == current_user.id:
+            reissue_session(db, updated_user, request, response)
+        return response
 
     except Exception as e:
         logger.error(

@@ -1,10 +1,9 @@
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -25,14 +24,15 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
 )
-from app.core.utils.cookie_auth import clear_auth_cookie, set_auth_cookie
-from app.core.utils.security import create_access_token, verify_password
+from app.core.utils.cookie_auth import clear_auth_cookie
+from app.core.utils.security import verify_password
 from app.crud.user import user
 from app.events.security_events import PasswordChangedEvent
 from app.models.activity_log import ActionType, EntityType
-from app.models.base import get_utc_now
 from app.models.models import User as DBUser
 from app.schemas.user import Token, User, UserCreate, UserRegistration
+from app.services.auth_session import complete_login, reissue_session
+from app.services.login_throttle import login_throttle
 
 router = APIRouter()
 
@@ -324,9 +324,7 @@ def login(
             error_code=AuthErrorCode.SSO_ONLY_PASSWORD_LOGIN_DISABLED,
         )
 
-    user_ip = (
-        getattr(request.client, "host", "unknown") if request.client else "unknown"
-    )
+    login_throttle.reserve(request, form_data.username)
 
     # Log login attempt
     log_security_event(
@@ -338,12 +336,15 @@ def login(
     )
 
     # Authenticate user
-    db_user = user.authenticate(
-        db, username=form_data.username, password=form_data.password
-    )
+    try:
+        db_user = user.authenticate(
+            db, username=form_data.username, password=form_data.password
+        )
+    except Exception:
+        login_throttle.release(request, form_data.username)
+        raise
 
     if not db_user:
-        # Log failed login attempt
         log_security_event(
             logger,
             "login_failed",
@@ -357,6 +358,7 @@ def login(
             request=request,
             error_code=AuthErrorCode.INVALID_CREDENTIALS,
         )
+    login_throttle.release(request, form_data.username)
 
     # Validate required fields
     if db_user.id is None:
@@ -381,93 +383,15 @@ def login(
             error_code=AuthErrorCode.ACCOUNT_DEACTIVATED,
         )
 
-    # Check if user has an active patient, if not try to set one
-    if not db_user.active_patient_id:
-        from app.services.patient_management import PatientManagementService
-
-        try:
-            patient_service = PatientManagementService(db)
-            patient_service.ensure_active_patient(db_user)
-        except (SQLAlchemyError, ValueError) as e:
-            db.rollback()
-            log_endpoint_error(
-                logger,
-                request,
-                "Failed to set active patient during login",
-                e,
-                user_id=db_user.id,
-            )
-            # Continue login without active patient - user can set it later
-
-    # Get full name, use username as fallback if not set
-    full_name = getattr(db_user, "full_name", None) or db_user.username
-
-    # Get user's timeout preference for the frontend inactivity timer
-    from app.crud.user_preferences import user_preferences
-
-    preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
-    session_timeout_minutes = (
-        preferences.session_timeout_minutes
-        if preferences
-        else settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-
-    # JWT must outlive the user's inactivity timeout, otherwise the cookie
-    # expires before the frontend timer fires and the user gets a hard 401.
-    jwt_lifetime = max(settings.ACCESS_TOKEN_EXPIRE_MINUTES, session_timeout_minutes)
-    access_token_expires = timedelta(minutes=jwt_lifetime)
-    access_token = create_access_token(
-        data={
-            "sub": db_user.username,
-            "role": (
-                db_user.role if db_user.role in ["admin", "user", "guest"] else "user"
-            ),
-            "user_id": db_user.id,
-            "full_name": full_name,
-        },
-        expires_delta=access_token_expires,
-    )
-
-    # Log login in activity log
-    safe_log_activity(
-        db=db,
-        action=ActionType.LOGIN,
-        entity_type=EntityType.USER,
-        entity_obj=db_user,
-        user_id=db_user.id,
-        description=f"User logged in: {db_user.username}",
-        request=request,
-    )
-
-    # Update last login timestamp
-    try:
-        db_user.last_login_at = get_utc_now()
-        db.commit()
-    except Exception:
-        db.rollback()
-
-    # Log successful login with token expiration details
-    log_successful_login(getattr(db_user, "id", 0), form_data.username, request)
-    log_endpoint_access(
-        logger,
+    response = complete_login(
+        db,
+        db_user,
         request,
-        db_user.id,
-        "token_created",
-        message=f"JWT token created with {jwt_lifetime} minute expiration",
-        username=form_data.username,
-        jwt_expiry_minutes=jwt_lifetime,
-        inactivity_timeout_minutes=session_timeout_minutes,
+        method="password",
+        activity_description=f"User logged in: {db_user.username}",
+        log_event_name="token_created",
     )
-
-    response = JSONResponse(
-        content={
-            "access_token": access_token,
-            "token_type": "bearer",
-            "session_timeout_minutes": session_timeout_minutes,
-            "must_change_password": bool(db_user.must_change_password),
-        }
-    )
-    set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)
+    log_successful_login(db_user.id, form_data.username, request)
     return response
 
 
@@ -568,7 +492,7 @@ async def change_password(
             error_code=AuthErrorCode.PASSWORD_COMPLEXITY,
         )
 
-    # Update password (also clears must_change_password flag)
+    # Also clears must_change_password and ends every session, including this one
     user.update_password_by_user(
         db, user_obj=current_user, new_password=password_data.newPassword
     )
@@ -600,4 +524,6 @@ async def change_password(
     )
     await get_event_bus().publish(event)
 
-    return {"message": "Password changed successfully"}
+    response = JSONResponse(content={"message": "Password changed successfully"})
+    reissue_session(db, current_user, request, response)
+    return response
