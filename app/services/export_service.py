@@ -22,6 +22,7 @@ from app.core.logging.config import get_logger
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
     Allergy,
+    BloodDonation,
     Condition,
     EmergencyContact,
     Encounter,
@@ -39,6 +40,11 @@ from app.models.models import (
     Treatment,
     User,
     Vitals,
+)
+from app.services.blood_donation_units import (
+    HEMOGLOBIN_UNIT_LABELS,
+    convert_hemoglobin_from_g_dl,
+    resolve_hemoglobin_unit,
 )
 from app.services.report_translations import get_translator
 from app.utils.notes_markdown import (
@@ -76,6 +82,7 @@ _CHOICE_FIELDS_BY_SECTION = {
     "injuries": frozenset({"status", "severity", "laterality"}),
     "insurance": frozenset({"status", "insurance_type", "relationship_to_holder"}),
     "medical_equipment": frozenset({"status", "equipment_type"}),
+    "blood_donations": frozenset({"donation_type"}),
 }
 
 # Sections whose "relationship" / "gender" fields hold stored choice values
@@ -95,6 +102,7 @@ _VITAL_UNIT_FIELDS = {
     "temperature": "temperature_unit",
     "weight": "weight_unit",
     "height": "height_unit",
+    "hemoglobin": "hemoglobin_unit",
 }
 
 
@@ -159,6 +167,7 @@ class ExportService:
         unit_system: str = "imperial",
         language: str = "en",
         date_format: str = "mdy",
+        hemoglobin_unit: Optional[str] = None,
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """
         Export patient data based on specified parameters.
@@ -172,6 +181,7 @@ class ExportService:
             include_files: Whether to include file attachments
             include_patient_info: Whether to include patient information
             unit_system: Unit system for measurements ('imperial' or 'metric')
+            hemoglobin_unit: Unit for blood donation hemoglobin (defaults to g/dL)
 
         Returns:
             Dictionary containing exported data
@@ -229,7 +239,12 @@ class ExportService:
             if scope == "all":
                 export_data.update(
                     await self._export_all_data(
-                        patient, start_date, end_date, include_files, unit_system
+                        patient,
+                        start_date,
+                        end_date,
+                        include_files,
+                        unit_system,
+                        hemoglobin_unit,
                     )
                 )
             elif scope == "medications":
@@ -308,6 +323,10 @@ class ExportService:
                 export_data["medical_equipment"] = self._export_medical_equipment(
                     patient, start_date, end_date
                 )
+            elif scope == "blood_donations":
+                export_data["blood_donations"] = self._export_blood_donations(
+                    patient, start_date, end_date, unit_system, hemoglobin_unit
+                )
             else:
                 raise ValueError(f"Unsupported export scope: {scope}")
 
@@ -373,6 +392,7 @@ class ExportService:
         end_date: Optional[date],
         include_files: bool = False,
         unit_system: str = "imperial",
+        hemoglobin_unit: Optional[str] = None,
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """Export all patient data."""
         return {
@@ -401,6 +421,9 @@ class ExportService:
             "medical_equipment": self._export_medical_equipment(
                 patient, start_date, end_date
             ),
+            "blood_donations": self._export_blood_donations(
+                patient, start_date, end_date, unit_system, hemoglobin_unit
+            ),
         }
 
     def _apply_date_filter(
@@ -428,6 +451,8 @@ class ExportService:
             date_field = model.recorded_date
         elif hasattr(model, "prescribed_date"):  # MedicalEquipment model
             date_field = model.prescribed_date
+        elif hasattr(model, "donation_date"):  # BloodDonation model
+            date_field = model.donation_date
         elif hasattr(model, "created_at"):
             date_field = model.created_at
 
@@ -1400,6 +1425,50 @@ class ExportService:
             for equip in equipment_list
         ]
 
+    def _export_blood_donations(
+        self,
+        patient: Patient,
+        start_date: Optional[date],
+        end_date: Optional[date],
+        unit_system: str = "imperial",
+        hemoglobin_unit: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Export blood donations, newest first, in the requested units."""
+        query = self.db.query(BloodDonation).filter(
+            BloodDonation.patient_id == patient.id
+        )
+        query = self._apply_date_filter(query, BloodDonation, start_date, end_date)
+        donations = query.order_by(
+            BloodDonation.donation_date.desc(), BloodDonation.id.desc()
+        ).all()
+
+        hemoglobin_unit = resolve_hemoglobin_unit(hemoglobin_unit)
+        temperature_label = UnitConverter.get_unit_labels(unit_system)["temperature"]
+
+        return [
+            {
+                "id": donation.id,
+                "donation_date": donation.donation_date.isoformat(),
+                "donation_type": donation.donation_type,
+                "location": donation.location,
+                "systolic_bp": donation.systolic_bp,
+                "diastolic_bp": donation.diastolic_bp,
+                "temperature": (
+                    UnitConverter.fahrenheit_to_celsius(donation.temperature)
+                    if unit_system == "metric"
+                    else donation.temperature
+                ),
+                "temperature_unit": temperature_label,
+                "hemoglobin": convert_hemoglobin_from_g_dl(
+                    donation.hemoglobin, hemoglobin_unit
+                ),
+                "hemoglobin_unit": HEMOGLOBIN_UNIT_LABELS[hemoglobin_unit],
+                "notes": donation.notes,
+                "tags": donation.tags,
+            }
+            for donation in donations
+        ]
+
     async def get_export_summary(self, user_id: int) -> Dict[str, Any]:
         """Get summary of available data for export using active patient."""
         # Get the active patient for the user
@@ -1472,6 +1541,9 @@ class ExportService:
                 .filter(Insurance.patient_id == patient.id)
                 .count(),
                 "medical_equipment": self._count_medical_equipment(patient.id),
+                "blood_donations": self.db.query(BloodDonation)
+                .filter(BloodDonation.patient_id == patient.id)
+                .count(),
             },
         }
 
@@ -2034,6 +2106,7 @@ class ExportService:
             "prescribed_date",
             "last_service_date",
             "next_service_date",
+            "donation_date",
         }
 
         def format_value(field_name, value, record):
@@ -2407,6 +2480,18 @@ class ExportService:
                     "supplier",
                     "usage_instructions",
                     "prescribed_by",
+                    "notes",
+                    "tags",
+                ]
+            elif section_name == "blood_donations":
+                field_order = [
+                    "donation_date",
+                    "donation_type",
+                    "location",
+                    "systolic_bp",
+                    "diastolic_bp",
+                    "temperature",
+                    "hemoglobin",
                     "notes",
                     "tags",
                 ]

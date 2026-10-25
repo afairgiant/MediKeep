@@ -61,6 +61,16 @@
     "urlPlaceholder": "https://su-instancia-papra.com"
   },
   "preferences": {
+    "hemoglobinUnit": {
+      "description": "Unidad para introducir y mostrar los valores de hemoglobina de las donaciones de sangre. Los valores guardados no cambian.",
+      "title": "Unidad de hemoglobina"
+    },
+    "bloodDonationIntervals": {
+      "days": "días",
+      "description": "Número mínimo de días después de una donación antes de poder donar de nuevo. Ajuste estos valores según las directrices de su servicio de donación de sangre.",
+      "reset": "Restablecer valores predeterminados",
+      "title": "Intervalos de donación de sangre"
+    },
     "dateFormat": {
       "description": "Elija cómo se muestran las fechas en toda la aplicación",
       "dmy": "DD/MM/AAAA (R. Unido/Internacional)",

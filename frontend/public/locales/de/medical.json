@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "Allergie",
+    "bloodDonation": "Blutspende",
     "condition": "Erkrankung",
     "equipment": "Ausrüstung",
     "familyMember": "Familienmitglied",
@@ -90,6 +91,66 @@
         "onsetDate": "Beginn",
         "severity": "Schweregrad"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "Blutspenden werden geladen...",
+    "add": "+ Spende hinzufügen",
+    "addTitle": "Blutspende hinzufügen",
+    "editTitle": "Blutspende bearbeiten",
+    "noneFound": "Keine Blutspenden gefunden",
+    "startAdding": "Erfassen Sie Ihre erste Blutspende.",
+    "addFirst": "Erste Spende erfassen",
+    "types": {
+      "whole_blood": "Vollblut",
+      "plasma": "Plasma",
+      "platelets": "Thrombozyten",
+      "double_red_cells": "Doppel-Erythrozyten"
+    },
+    "fields": {
+      "donationDate": "Spendedatum",
+      "donationType": "Spendenart",
+      "location": "Ort",
+      "bloodPressure": "Blutdruck",
+      "systolic": "Systolisch (mmHg)",
+      "diastolic": "Diastolisch (mmHg)",
+      "temperature": "Temperatur",
+      "hemoglobin": "Hämoglobin"
+    },
+    "tabs": {
+      "donation": "Spende",
+      "screening": "Voruntersuchung"
+    },
+    "form": {
+      "locationPlaceholder": "z. B. DRK-Blutspendetermin, Uniklinik",
+      "notesPlaceholder": "Weitere Notizen zu dieser Spende",
+      "save": "Spende speichern",
+      "update": "Spende aktualisieren",
+      "saving": "Spende wird gespeichert..."
+    },
+    "viewModal": {
+      "title": "Details zur Blutspende"
+    },
+    "eligibility": {
+      "title": "Nächste Spende",
+      "eligibleNow": "Spenden ist jetzt möglich",
+      "nextDate": "Wieder spenden ab {{date}}",
+      "daysRemaining_one": "Noch {{count}} Tag",
+      "daysRemaining_other": "Noch {{count}} Tage",
+      "basedOn": "Basierend auf der Spende ({{type}}) am {{date}} und einem Abstand von {{days}} Tagen",
+      "estimateNote": "Dies ist nur eine Schätzung. Es gelten die Regeln des Spendedienstes.",
+      "noDonations": "Noch keine Spenden erfasst",
+      "loadError": "Der nächste Spendetermin konnte nicht berechnet werden"
+    },
+    "validation": {
+      "dateRequired": "Spendedatum ist erforderlich",
+      "typeRequired": "Spendenart ist erforderlich",
+      "bpOrder": "Der systolische Wert muss größer als der diastolische sein",
+      "outOfRange": "{{field}} muss zwischen {{min}} und {{max}} liegen"
+    },
+    "filters": {
+      "allTypes": "Alle Typen",
+      "allLocations": "Alle Orte"
     }
   },
   "componentCatalog": {

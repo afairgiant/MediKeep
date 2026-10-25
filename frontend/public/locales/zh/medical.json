@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "过敏",
+    "bloodDonation": "献血",
     "condition": "病症",
     "equipment": "设备",
     "familyMember": "家庭成员",
@@ -90,6 +91,65 @@
         "allergen": "过敏原",
         "onsetDate": "开始日期"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "正在加载献血记录...",
+    "add": "+ 添加献血记录",
+    "addTitle": "添加献血记录",
+    "editTitle": "编辑献血记录",
+    "noneFound": "未找到献血记录",
+    "startAdding": "请先记录您的第一次献血。",
+    "addFirst": "记录您的第一次献血",
+    "types": {
+      "whole_blood": "全血",
+      "plasma": "血浆",
+      "platelets": "血小板",
+      "double_red_cells": "双倍红细胞"
+    },
+    "fields": {
+      "donationDate": "献血日期",
+      "donationType": "献血类型",
+      "location": "地点",
+      "bloodPressure": "血压",
+      "systolic": "收缩压 (mmHg)",
+      "diastolic": "舒张压 (mmHg)",
+      "temperature": "体温",
+      "hemoglobin": "血红蛋白"
+    },
+    "tabs": {
+      "donation": "献血",
+      "screening": "献血前筛查"
+    },
+    "form": {
+      "locationPlaceholder": "例如：红十字会献血活动、市立医院",
+      "notesPlaceholder": "关于此次献血的补充说明",
+      "save": "保存献血记录",
+      "update": "更新献血记录",
+      "saving": "正在保存献血记录..."
+    },
+    "viewModal": {
+      "title": "献血详情"
+    },
+    "eligibility": {
+      "title": "下次献血",
+      "eligibleNow": "现在可以捐献",
+      "nextDate": "将于 {{date}} 再次符合献血条件",
+      "daysRemaining_other": "还需等待 {{count}} 天",
+      "basedOn": "根据 {{date}} 的{{type}}捐献和 {{days}} 天的间隔",
+      "estimateNote": "此结果仅为估算，请以献血机构的规定为准。",
+      "noDonations": "尚未记录任何献血",
+      "loadError": "无法计算下次献血日期"
+    },
+    "validation": {
+      "dateRequired": "献血日期为必填项",
+      "typeRequired": "献血类型为必填项",
+      "bpOrder": "收缩压必须大于舒张压",
+      "outOfRange": "{{field}}必须介于 {{min}} 和 {{max}} 之间"
+    },
+    "filters": {
+      "allTypes": "所有类型",
+      "allLocations": "所有地点"
     }
   },
   "componentCatalog": {

@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "献血记录",
     "medications": "药物",
     "lab_results": "检验结果",
     "allergies": "过敏史",
@@ -19,6 +20,9 @@
     "medical_equipment": "医疗设备"
   },
   "fields": {
+    "donationDate": "献血日期",
+    "donationType": "献血类型",
+    "hemoglobin": "血红蛋白",
     "prescribingProvider": "开方医师",
     "allergen": "过敏原",
     "reaction": "过敏反应",
@@ -375,6 +379,10 @@
     "noFilesAttached": "无附件"
   },
   "values": {
+    "wholeBlood": "全血",
+    "plasma": "血浆",
+    "platelets": "血小板",
+    "doubleRedCells": "双倍红细胞",
     "active": "活动",
     "inactive": "非活动",
     "resolved": "已缓解",

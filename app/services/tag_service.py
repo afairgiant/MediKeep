@@ -34,6 +34,7 @@ class TagService:
         "injury": "injuries",
         "symptom": "symptoms",
         "medical_equipment": "medical_equipment",
+        "blood_donation": "blood_donations",
     }
 
     def _validate_entity_type(self, entity_type: str) -> str:
@@ -76,6 +77,7 @@ class TagService:
                 "injury",
                 "symptom",
                 "medical_equipment",
+                "blood_donation",
             ]
 
         # Build subquery for usage counts across all entity types
@@ -208,6 +210,7 @@ class TagService:
                 "injury",
                 "symptom",
                 "medical_equipment",
+                "blood_donation",
             ]
 
         results = {}

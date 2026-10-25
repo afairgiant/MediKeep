@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "Donaciones de sangre",
     "medications": "Medicamentos",
     "conditions": "Condiciones médicas",
     "procedures": "Procedimientos médicos",
@@ -19,6 +20,9 @@
     "medical_equipment": "Equipo médico"
   },
   "fields": {
+    "donationDate": "Fecha de donación",
+    "donationType": "Tipo de donación",
+    "hemoglobin": "Hemoglobina",
     "prescribingProvider": "Médico prescriptor",
     "allergen": "Alérgeno",
     "reaction": "Reacción",
@@ -375,6 +379,10 @@
     "noFilesAttached": "Sin archivos adjuntos"
   },
   "values": {
+    "wholeBlood": "Sangre total",
+    "plasma": "Plasma",
+    "platelets": "Plaquetas",
+    "doubleRedCells": "Glóbulos rojos dobles",
     "active": "Activo",
     "inactive": "Inactivo",
     "resolved": "Resuelto",

@@ -56,6 +56,7 @@ class ExportFormat(str, Enum):
 class ExportScope(str, Enum):
     ALL = "all"
     ALLERGIES = "allergies"
+    BLOOD_DONATIONS = "blood_donations"
     CONDITIONS = "conditions"
     EMERGENCY_CONTACTS = "emergency_contacts"
     ENCOUNTERS = "encounters"
@@ -142,6 +143,7 @@ async def export_patient_data(
         user_prefs = user_preferences_crud.get_by_user_id(db, user_id=current_user_id)
         language = (user_prefs and user_prefs.language) or "en"
         date_format_pref = (user_prefs and user_prefs.date_format) or "mdy"
+        hemoglobin_unit = user_prefs and user_prefs.hemoglobin_unit
 
         export_service = ExportService(db)
 
@@ -157,6 +159,7 @@ async def export_patient_data(
             unit_system=unit_system,
             language=language,
             date_format=date_format_pref,
+            hemoglobin_unit=hemoglobin_unit,
         )
 
         # Determine content type and filename
@@ -528,6 +531,11 @@ async def get_supported_formats():
                 "description": "Known allergies and reactions",
             },
             {
+                "value": "blood_donations",
+                "label": "Blood Donations",
+                "description": "Blood, plasma and platelet donation records",
+            },
+            {
                 "value": "emergency_contacts",
                 "label": "Emergency Contacts",
                 "description": "Emergency contact information",
@@ -636,6 +644,7 @@ async def create_bulk_export(
         user_prefs = user_preferences_crud.get_by_user_id(db, user_id=current_user_id)
         language = (user_prefs and user_prefs.language) or "en"
         date_format_pref = (user_prefs and user_prefs.date_format) or "mdy"
+        hemoglobin_unit = user_prefs and user_prefs.hemoglobin_unit
 
         export_service = ExportService(db)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -660,6 +669,7 @@ async def create_bulk_export(
                         unit_system=request.unit_system,
                         language=language,
                         date_format=date_format_pref,
+                        hemoglobin_unit=hemoglobin_unit,
                     )
 
                     # Convert to appropriate format

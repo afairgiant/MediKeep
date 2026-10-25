@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "Донации крови",
     "medications": "Лекарства",
     "conditions": "Заболевания",
     "procedures": "Процедуры",
@@ -19,6 +20,9 @@
     "medical_equipment": "Медицинское оборудование"
   },
   "fields": {
+    "donationDate": "Дата донации",
+    "donationType": "Тип донации",
+    "hemoglobin": "Гемоглобин",
     "prescribingProvider": "Назначивший врач",
     "allergen": "Аллерген",
     "reaction": "Реакция",
@@ -375,6 +379,10 @@
     "noFilesAttached": "Нет прикреплённых файлов"
   },
   "values": {
+    "wholeBlood": "Цельная кровь",
+    "plasma": "Плазма",
+    "platelets": "Тромбоциты",
+    "doubleRedCells": "Двойные эритроциты",
     "active": "Активно",
     "inactive": "Неактивно",
     "resolved": "Разрешилось",

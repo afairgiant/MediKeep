@@ -1,6 +1,7 @@
 {
   "entityNames": {
     "allergy": "alergia",
+    "bloodDonation": "doação de sangue",
     "condition": "condição",
     "equipment": "equipamento",
     "familyMember": "familiar",
@@ -90,6 +91,66 @@
         "onsetDate": "Data de Início",
         "severity": "Gravidade"
       }
+    }
+  },
+  "bloodDonations": {
+    "loading": "A carregar doações de sangue...",
+    "add": "+ Adicionar doação",
+    "addTitle": "Adicionar doação de sangue",
+    "editTitle": "Editar doação de sangue",
+    "noneFound": "Nenhuma doação de sangue encontrada",
+    "startAdding": "Comece por registar a sua primeira doação de sangue.",
+    "addFirst": "Registar a primeira doação",
+    "types": {
+      "whole_blood": "Sangue total",
+      "plasma": "Plasma",
+      "platelets": "Plaquetas",
+      "double_red_cells": "Glóbulos vermelhos duplos"
+    },
+    "fields": {
+      "donationDate": "Data da doação",
+      "donationType": "Tipo de doação",
+      "location": "Local",
+      "bloodPressure": "Pressão Arterial",
+      "systolic": "Sistólica (mmHg)",
+      "diastolic": "Diastólica (mmHg)",
+      "temperature": "Temperatura",
+      "hemoglobin": "Hemoglobina"
+    },
+    "tabs": {
+      "donation": "Doação",
+      "screening": "Triagem pré-doação"
+    },
+    "form": {
+      "locationPlaceholder": "ex.: campanha da Cruz Vermelha, Hospital Central",
+      "notesPlaceholder": "Notas adicionais sobre esta doação",
+      "save": "Guardar doação",
+      "update": "Atualizar doação",
+      "saving": "A guardar a doação..."
+    },
+    "viewModal": {
+      "title": "Detalhes da doação de sangue"
+    },
+    "eligibility": {
+      "title": "Próxima doação",
+      "eligibleNow": "É possível doar agora",
+      "nextDate": "Elegível novamente em {{date}}",
+      "daysRemaining_one": "Falta {{count}} dia",
+      "daysRemaining_other": "Faltam {{count}} dias",
+      "basedOn": "Com base na doação de {{type}} em {{date}} e num intervalo de {{days}} dias",
+      "estimateNote": "Esta é apenas uma estimativa. As regras do serviço de doação prevalecem.",
+      "noDonations": "Ainda não há doações registadas",
+      "loadError": "Não foi possível calcular a próxima data de doação"
+    },
+    "validation": {
+      "dateRequired": "A data da doação é obrigatória",
+      "typeRequired": "O tipo de doação é obrigatório",
+      "bpOrder": "A pressão sistólica deve ser maior do que a diastólica",
+      "outOfRange": "{{field}} deve estar entre {{min}} e {{max}}"
+    },
+    "filters": {
+      "allTypes": "Todos os tipos",
+      "allLocations": "Todos os locais"
     }
   },
   "componentCatalog": {

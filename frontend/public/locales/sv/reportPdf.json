@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "Blodgivningar",
     "medications": "Läkemedel",
     "conditions": "Diagnoser",
     "procedures": "Ingrepp",
@@ -19,6 +20,9 @@
     "medical_equipment": "Medicinsk utrustning"
   },
   "fields": {
+    "donationDate": "Givningsdatum",
+    "donationType": "Typ av givning",
+    "hemoglobin": "Hemoglobin",
     "prescribingProvider": "Förskrivande vårdgivare",
     "allergen": "Allergen",
     "reaction": "Reaktion",
@@ -375,6 +379,10 @@
     "noFilesAttached": "Inga filer bifogade"
   },
   "values": {
+    "wholeBlood": "Helblod",
+    "plasma": "Plasma",
+    "platelets": "Blodplättar",
+    "doubleRedCells": "Dubbla röda blodkroppar",
     "active": "Aktiv",
     "inactive": "Inaktiv",
     "resolved": "Läkt",

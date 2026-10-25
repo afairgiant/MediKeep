@@ -43,6 +43,7 @@ import {
   IconShield,
   IconBandage,
   IconDeviceDesktop,
+  IconDroplet,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
@@ -347,6 +348,12 @@ const Dashboard = () => {
       icon: IconVaccine,
       color: 'violet',
       link: '/immunizations',
+    },
+    {
+      title: t('shared:categories.blood_donations', 'Blood Donations'),
+      icon: IconDroplet,
+      color: 'red',
+      link: '/blood-donations',
     },
     {
       title: t('dashboard.modules.visitHistory', 'Visit History'),

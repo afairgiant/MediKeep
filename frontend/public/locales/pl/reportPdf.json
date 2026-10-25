@@ -1,5 +1,6 @@
 {
   "categories": {
+    "blood_donations": "Donacje krwi",
     "medications": "Leki",
     "conditions": "Stany zdrowotne",
     "procedures": "Procedury",
@@ -19,6 +20,9 @@
     "medical_equipment": "Sprzęt medyczny"
   },
   "fields": {
+    "donationDate": "Data donacji",
+    "donationType": "Rodzaj donacji",
+    "hemoglobin": "Hemoglobina",
     "prescribingProvider": "Lekarz przepisujący",
     "allergen": "Alergen",
     "reaction": "Reakcja",
@@ -375,6 +379,10 @@
     "noFilesAttached": "Brak załączonych plików"
   },
   "values": {
+    "wholeBlood": "Krew pełna",
+    "plasma": "Plazma",
+    "platelets": "Płytki krwi",
+    "doubleRedCells": "Podwójne erytrocyty",
     "active": "Aktywne",
     "inactive": "Nieaktywne",
     "resolved": "Ustąpiło",

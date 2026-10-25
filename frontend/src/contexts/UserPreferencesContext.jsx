@@ -300,6 +300,7 @@ export const UserPreferencesProvider = ({ children }) => {
     unitSystem: preferences?.unit_system || 'imperial',
     isMetric: preferences?.unit_system === 'metric',
     isImperial: preferences?.unit_system === 'imperial',
+    hemoglobinUnit: preferences?.hemoglobin_unit || 'g_dl',
     // Convenience getters for date format
     dateFormat: preferences?.date_format || 'mdy',
     isUSDateFormat:

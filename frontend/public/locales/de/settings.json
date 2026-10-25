@@ -61,6 +61,16 @@
     "urlPlaceholder": "https://ihre-papra-instanz.com"
   },
   "preferences": {
+    "hemoglobinUnit": {
+      "description": "Einheit, in der Hämoglobinwerte von Blutspenden eingegeben und angezeigt werden. Gespeicherte Werte ändern sich dadurch nicht.",
+      "title": "Einheit für Hämoglobin"
+    },
+    "bloodDonationIntervals": {
+      "days": "Tage",
+      "description": "Mindestanzahl an Tagen nach einer Spende, bevor Sie wieder spenden dürfen. Passen Sie die Werte an die Vorgaben Ihres Blutspendedienstes an.",
+      "reset": "Auf Standard zurücksetzen",
+      "title": "Abstände zwischen Blutspenden"
+    },
     "dateFormat": {
       "description": "Wählen Sie, wie Datumsangaben in der gesamten Anwendung angezeigt werden",
       "dmy": "TT/MM/JJJJ (Vereinigtes Königreich/International)",
