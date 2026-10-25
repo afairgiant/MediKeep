@@ -42,18 +42,26 @@ export function toggleWrap(
   const selected = text.slice(start, end);
   const after = text.slice(end);
   const size = marker.length;
+  const char = marker[0];
+  const leadingRun = (value: string) =>
+    value.length - value.replace(new RegExp(`^\\${char}+`), '').length;
+  const trailingRun = (value: string) =>
+    value.length - value.replace(new RegExp(`\\${char}+$`), '').length;
+  // A run of the marker character is ours only if it is exactly the marker, or bold+italic.
+  const isMarkerRun = (run: number) => run === size || (run === 3 && size < 3);
 
-  if (before.endsWith(marker) && after.startsWith(marker)) {
+  if (isMarkerRun(trailingRun(before)) && isMarkerRun(leadingRun(after))) {
     return {
       text: before.slice(0, -size) + selected + after.slice(size),
       selectionStart: start - size,
       selectionEnd: end - size,
     };
   }
+  const lead = leadingRun(selected);
   if (
-    selected.length >= size * 2 &&
-    selected.startsWith(marker) &&
-    selected.endsWith(marker)
+    lead < selected.length &&
+    isMarkerRun(lead) &&
+    isMarkerRun(trailingRun(selected))
   ) {
     const inner = selected.slice(size, -size);
     return {

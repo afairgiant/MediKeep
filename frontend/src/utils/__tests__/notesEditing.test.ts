@@ -53,6 +53,24 @@ describe('toggleWrap', () => {
     expect(wrap('take |**two**| daily')).toBe('take |two| daily');
   });
 
+  it('adds italic inside bold instead of stripping a bold asterisk', () => {
+    expect(wrap('**|two|**', '*')).toBe('***|two|***');
+    expect(wrap('|**two**|', '*')).toBe('*|**two**|*');
+  });
+
+  it('removes only the italic asterisk from bold italic text', () => {
+    expect(wrap('***|two|***', '*')).toBe('**|two|**');
+    expect(wrap('|***two***|', '*')).toBe('|**two**|');
+  });
+
+  it('removes only the bold asterisks from bold italic text', () => {
+    expect(wrap('***|two|***')).toBe('*|two|*');
+  });
+
+  it('does not treat an italic span as bold', () => {
+    expect(wrap('*|two|*')).toBe('***|two|***');
+  });
+
   it('wraps a multi-line selection as one span', () => {
     expect(wrap('|a\nb|', '*')).toBe('*|a\nb|*');
   });
