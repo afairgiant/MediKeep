@@ -153,7 +153,7 @@ class TestReservation:
     """The slot is taken before the password check, so parallel guesses cannot overrun."""
 
     @staticmethod
-    def _request():
+    def _request(client_ip: str = "203.0.113.9"):
         from starlette.requests import Request
 
         return Request(
@@ -162,9 +162,20 @@ class TestReservation:
                 "method": "POST",
                 "path": "/api/v1/auth/login",
                 "headers": [],
-                "client": ("203.0.113.9", 50000),
+                "client": (client_ip, 50000),
             }
         )
+
+    def test_username_lockout_does_not_reach_other_addresses(self, per_username):
+        from fastapi import HTTPException
+
+        per_username(1)
+        attacker = self._request("203.0.113.9")
+        login_throttle.reserve(attacker, "racer")
+        with pytest.raises(HTTPException):
+            login_throttle.reserve(attacker, "racer")
+
+        login_throttle.reserve(self._request("198.51.100.4"), "racer")
 
     def test_unreleased_attempts_use_up_the_limit(self, per_username):
         from fastapi import HTTPException
@@ -196,3 +207,33 @@ class TestReservation:
             assert _login(client, "throttled", "wrong-pass1").status_code == 401
 
         assert _login(client, "throttled", PASSWORD).status_code == 200
+
+
+class TestConfigValidation:
+    @pytest.mark.parametrize(
+        "name", ["LOGIN_MAX_FAILED_ATTEMPTS", "LOGIN_MAX_FAILED_ATTEMPTS_PER_IP"]
+    )
+    def test_negative_limit_fails_startup_validation(self, name, monkeypatch):
+        from app.core.config import settings
+
+        monkeypatch.setattr(settings, name, -1)
+
+        with pytest.raises(ValueError, match=name):
+            settings.validate_auth_mode_config()
+
+    @pytest.mark.parametrize("minutes", [0, -5])
+    def test_window_below_one_minute_is_rejected(self, minutes, monkeypatch):
+        from app.core.config import settings
+
+        monkeypatch.setattr(settings, "LOGIN_FAILED_WINDOW_MINUTES", minutes)
+
+        with pytest.raises(ValueError, match="LOGIN_FAILED_WINDOW_MINUTES"):
+            settings.validate_login_throttle_config()
+
+    def test_zero_limits_are_accepted(self, monkeypatch):
+        from app.core.config import settings
+
+        monkeypatch.setattr(settings, "LOGIN_MAX_FAILED_ATTEMPTS", 0)
+        monkeypatch.setattr(settings, "LOGIN_MAX_FAILED_ATTEMPTS_PER_IP", 0)
+
+        settings.validate_login_throttle_config()

@@ -88,8 +88,8 @@
 - System monitoring endpoints: 60 requests/minute per IP (`/system/log-level`, `/system/log-rotation-config`)
 - SSO sign-in: `SSO_RATE_LIMIT_ATTEMPTS` per `SSO_RATE_LIMIT_WINDOW_MINUTES` per IP,
   default 10 per 10 minutes (`/auth/sso/initiate`)
-- Failed password checks: `LOGIN_MAX_FAILED_ATTEMPTS` per username and
-  `LOGIN_MAX_FAILED_ATTEMPTS_PER_IP` per IP within `LOGIN_FAILED_WINDOW_MINUTES`,
+- Failed password checks: `LOGIN_MAX_FAILED_ATTEMPTS` per username from each IP
+  and `LOGIN_MAX_FAILED_ATTEMPTS_PER_IP` per IP within `LOGIN_FAILED_WINDOW_MINUTES`,
   default 10 / 30 per 15 minutes (`/auth/login`, `/auth/sso/resolve-github-link`).
   Only failures count. The 429 carries `error_code: login_rate_limited`
 - Medical specialty creation: 20 requests/hour per **user** (`POST /medical-specialties/`)

@@ -11,7 +11,7 @@ logger = get_logger(__name__, "security")
 
 
 class LoginThrottle:
-    """Limits failed password checks per username and per client IP.
+    """Limits failed password checks per username+IP pair and per client IP.
 
     Each attempt reserves a slot before the password is checked and gives it back
     when the password was right, so only failures stay counted and parallel guesses
@@ -26,9 +26,11 @@ class LoginThrottle:
         self.by_ip = SlidingWindowRateLimiter(max_per_ip, window_seconds)
 
     def _keys(self, username: str, request: Request):
+        client_ip = get_client_ip(request)
         pairs = (
-            (self.by_username, username.strip().lower()),
-            (self.by_ip, get_client_ip(request)),
+            # Keyed with the IP so one source cannot lock an account out for everyone
+            (self.by_username, (username.strip().lower(), client_ip)),
+            (self.by_ip, client_ip),
         )
         return [(limiter, key) for limiter, key in pairs if limiter.max_requests > 0]
 

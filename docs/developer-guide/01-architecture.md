@@ -120,7 +120,7 @@ HTTP Request
   issues the token and cookie, so password and SSO sessions are identical
 - Tokens carry the user's `session_version`; raising it (`user.end_sessions`) ends every
   existing session. `get_current_user` also rejects deactivated accounts
-- Failed password checks are throttled per username and per IP
+- Failed password checks are throttled per username from each IP and per IP
   (`app/services/login_throttle.py`)
 - Dependency injection for auth: `current_user: User = Depends(get_current_user)`
 - Patient ownership verified on every data access
