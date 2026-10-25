@@ -67,6 +67,11 @@ describe('toggleWrap', () => {
     expect(wrap('***|two|***')).toBe('*|two|*');
   });
 
+  it('treats a triple run as two markers only for emphasis', () => {
+    expect(wrap('___|two|___', '_')).toBe('__|two|__');
+    expect(wrap('~~~|two|~~~', '~~')).toBe('~~~~~|two|~~~~~');
+  });
+
   it('does not treat an italic span as bold', () => {
     expect(wrap('*|two|*')).toBe('***|two|***');
   });

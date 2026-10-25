@@ -48,7 +48,9 @@ export function toggleWrap(
   const trailingRun = (value: string) =>
     value.length - value.replace(new RegExp(`\\${char}+$`), '').length;
   // A run of the marker character is ours only if it is exactly the marker, or bold+italic.
-  const isMarkerRun = (run: number) => run === size || (run === 3 && size < 3);
+  const combinesEmphasis = (char === '*' || char === '_') && size < 3;
+  const isMarkerRun = (run: number) =>
+    run === size || (run === 3 && combinesEmphasis);
 
   if (isMarkerRun(trailingRun(before)) && isMarkerRun(leadingRun(after))) {
     return {
