@@ -23,7 +23,7 @@ from app.core.logging.config import get_logger, log_security_event
 from app.core.logging.constants import LogFields, sanitize_log_input
 from app.core.utils.client_ip import get_client_ip
 from app.core.utils.cookie_auth import get_token_from_cookie
-from app.core.utils.security import decode_access_token
+from app.core.utils.security import ACCESS_TOKEN_TYPE, decode_access_token
 from app.crud.user import user
 from app.models.models import User
 
@@ -129,6 +129,23 @@ def _validate_and_decode_token(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
+        # Tokens issued before typ existed carry none and are sessions
+        token_type = payload.get("typ")
+        if token_type is not None and token_type != ACCESS_TOKEN_TYPE:
+            log_security_event(
+                security_logger,
+                event="token_wrong_type",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                message=f"Non-session token presented (auth method: {auth_method})",
+                username=username,
+            )
+            raise UnauthorizedException(
+                message="Authentication failed",
+                request=request,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
         security_logger.info(
             f"AUTH ({auth_method}): Token decoded successfully for user: {username}"
         )
@@ -149,6 +166,39 @@ def _validate_and_decode_token(
             request=request,
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def _enforce_current_session(
+    db_user: User,
+    payload: dict,
+    request: Request,
+    client_ip: str,
+    user_agent: str,
+    auth_method: str,
+) -> None:
+    """Reject a token whose account is deactivated or whose sessions were ended since."""
+    if not db_user.is_active:
+        event, reason = "token_user_inactive", "Token presented for deactivated user"
+    # Tokens issued before session versions existed carry none and count as 0
+    elif payload.get("sv", 0) != db_user.session_version:
+        event, reason = "token_session_ended", "Token from an ended session presented"
+    else:
+        return
+
+    log_security_event(
+        security_logger,
+        event=event,
+        user_id=db_user.id,
+        ip_address=client_ip,
+        user_agent=user_agent,
+        message=f"{reason} (auth method: {auth_method})",
+        username=db_user.username,
+    )
+    raise UnauthorizedException(
+        message="Authentication failed",
+        request=request,
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 def get_current_user(
@@ -242,6 +292,10 @@ def get_current_user(
             request=request,
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    _enforce_current_session(
+        db_user, result.payload, request, client_ip, user_agent, auth_method
+    )
 
     # Log successful token validation
     user_id = getattr(db_user, "id", None)
@@ -392,6 +446,10 @@ def get_current_user_flexible_auth(
             request=request,
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    _enforce_current_session(
+        db_user, result.payload, request, client_ip, user_agent, auth_method
+    )
 
     # Log successful token validation with auth method
     user_id = getattr(db_user, "id", None)

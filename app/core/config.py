@@ -400,6 +400,15 @@ class Settings:  # App Info
         os.getenv("SSO_RATE_LIMIT_WINDOW_MINUTES", "10")
     )
 
+    # Per IP is higher: behind Docker's userland proxy every client can share one address
+    LOGIN_MAX_FAILED_ATTEMPTS: int = int(os.getenv("LOGIN_MAX_FAILED_ATTEMPTS", "10"))
+    LOGIN_MAX_FAILED_ATTEMPTS_PER_IP: int = int(
+        os.getenv("LOGIN_MAX_FAILED_ATTEMPTS_PER_IP", "30")
+    )
+    LOGIN_FAILED_WINDOW_MINUTES: int = int(
+        os.getenv("LOGIN_FAILED_WINDOW_MINUTES", "15")
+    )
+
     # SSO-only mode and IdP auto-redirect.
     #
     # Both default off, so a deployment upgrading to this release behaves exactly
@@ -680,6 +689,22 @@ class Settings:  # App Info
         # any flag reaching here implies it is true. A half-configured provider must
         # fail the boot rather than the first login attempt.
         self.validate_sso_config()
+        self.validate_login_throttle_config()
+
+    def validate_login_throttle_config(self) -> None:
+        """Raise ValueError for a sign-in throttle setting that is out of range."""
+        # A negative limit or a zero window would silently switch the throttle off
+        for name in ("LOGIN_MAX_FAILED_ATTEMPTS", "LOGIN_MAX_FAILED_ATTEMPTS_PER_IP"):
+            if getattr(self, name) < 0:
+                raise ValueError(
+                    f"{name} must be 0 or more (0 turns that limit off), "
+                    f"got {getattr(self, name)}."
+                )
+        if self.LOGIN_FAILED_WINDOW_MINUTES < 1:
+            raise ValueError(
+                "LOGIN_FAILED_WINDOW_MINUTES must be at least 1, "
+                f"got {self.LOGIN_FAILED_WINDOW_MINUTES}."
+            )
 
     def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:
         """Ensure directory exists with proper permission error handling for Docker bind mounts."""

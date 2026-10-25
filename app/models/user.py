@@ -52,6 +52,9 @@ class User(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     last_login_at = Column(DateTime, nullable=True)
 
+    # Carried in each JWT as "sv"; raising it ends every session issued before
+    session_version = Column(Integer, default=0, server_default="0", nullable=False)
+
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(

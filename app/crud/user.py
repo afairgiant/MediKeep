@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional, Union
 
 from sqlalchemy.orm import Session
 
@@ -184,7 +184,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         self, db: Session, *, user_id: int, new_password: str
     ) -> Optional[User]:
         """
-        Update a user's password.
+        Update a user's password. Ends every session issued before the change.
 
         Args:
             db: SQLAlchemy database session
@@ -197,29 +197,19 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Example:
             updated_user = user_crud.update_password(db, user_id=5, new_password="new_password123")
         """
-        # Get the existing user
         user = self.get(db, id=user_id)
-
         if not user:
-            return None  # Hash the new password
-        hashed_password = get_password_hash(new_password)
-
-        # Update the password hash and clear the forced-change flag
-        setattr(user, "password_hash", hashed_password)
-        setattr(user, "must_change_password", False)
-
-        # Commit the changes
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-
-        return user
+            return None
+        return self.update_password_by_user(
+            db, user_obj=user, new_password=new_password
+        )
 
     def update_password_by_user(
         self, db: Session, *, user_obj: User, new_password: str
     ) -> User:
         """
-        Update a user's password using the user object.
+        Update a user's password using the user object. Ends every session issued
+        before the change; reissue the caller's own session if it should survive.
 
         Args:
             db: SQLAlchemy database session
@@ -238,6 +228,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         # Update the password hash and clear the forced-change flag
         setattr(user_obj, "password_hash", hashed_password)
         setattr(user_obj, "must_change_password", False)
+        self.end_sessions(user_obj)
 
         # Commit the changes
         db.add(user_obj)
@@ -245,6 +236,31 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db.refresh(user_obj)
 
         return user_obj
+
+    @staticmethod
+    def end_sessions(user_obj: User) -> None:
+        """Invalidate every access token issued to this user so far. Does not commit."""
+        # Incremented in SQL so two concurrent bumps cannot collapse into one
+        user_obj.session_version = User.session_version + 1
+
+    def update(
+        self,
+        db: Session,
+        *,
+        db_obj: User,
+        obj_in: Union[UserUpdate, Dict[str, Any]],
+    ) -> User:
+        """Update a user. Deactivating the account ends its sessions.
+
+        session_version is server-owned and ignored if present in obj_in.
+        """
+        changes = self._normalize_input(obj_in, exclude_unset=True)
+        # Admin forms echo every column back; a stale value would revive ended sessions
+        changes.pop("session_version", None)
+        # So reactivating the account does not revive its old sessions
+        if changes.get("is_active") is False and db_obj.is_active:
+            self.end_sessions(db_obj)
+        return super().update(db, db_obj=db_obj, obj_in=changes)
 
     def is_username_taken(
         self, db: Session, *, username: str, exclude_user_id: Optional[int] = None
@@ -377,7 +393,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         username: str,
         full_name: str,
         external_id: str,
-        sso_provider: str
+        sso_provider: str,
     ) -> User:
         """
         Create a new user from SSO authentication.

@@ -496,6 +496,33 @@ Both can be changed in **Admin > Settings > Data and storage**.
 Older activity entries also disappear from the Audit Log and Recent Activity. The `security.log` file is not
 affected; it follows the log rotation settings.
 
+### Sign-in Throttling
+
+| Variable                           | Type    | Default | Description                                                        |
+| ---------------------------------- | ------- | ------- | ------------------------------------------------------------------ |
+| `LOGIN_MAX_FAILED_ATTEMPTS`        | integer | `10`    | Failed password checks allowed per username from one client IP per window; `0` turns this limit off |
+| `LOGIN_MAX_FAILED_ATTEMPTS_PER_IP` | integer | `30`    | Failed password checks allowed per client IP per window; `0` turns this limit off |
+| `LOGIN_FAILED_WINDOW_MINUTES`      | integer | `15`    | Window length; at least `1`                                        |
+
+Covers password sign-in and the GitHub account-linking step. Only failures count, so
+someone who signs in correctly is never slowed down. Once a username or address runs
+out, sign-in answers `429` until the oldest failure is more than one window old, even
+with the right password. Counters live in process memory and reset when the container
+restarts, so restarting is the quickest way to let a locked-out person back in.
+
+The username limit is counted separately for each client IP, so wrong passwords sent
+from one address do not lock the account for people signing in from elsewhere. Where
+every client appears to come from the same address (see below), the username limit is
+effectively shared, and someone who knows a username can keep that account locked out
+of password sign-in. If that happens, restart the container, or set
+`LOGIN_MAX_FAILED_ATTEMPTS=0` and rely on the per-IP limit.
+
+A negative limit, or a window under one minute, stops the container at startup.
+
+The per-IP limit is higher because behind Docker's userland proxy, or a reverse proxy
+that is not trusted (see [Trusted Proxy Configuration](#trusted-proxy-configuration)),
+every client can appear to come from the same address.
+
 ### SSO Configuration
 
 | Variable                        | Type       | Default | Required       | Description                                                               |

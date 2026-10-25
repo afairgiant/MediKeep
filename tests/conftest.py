@@ -36,6 +36,7 @@ from app.crud.patient import patient as patient_crud
 from app.schemas.user import UserCreate
 from app.schemas.patient import PatientCreate
 from app.core.utils.security import create_access_token
+from app.services.login_throttle import login_throttle
 from tests.utils.user import create_random_user, create_user_authentication_headers
 from app.core.events import setup_event_system
 
@@ -571,9 +572,8 @@ def cleanup_after_test():
     """Automatically cleanup after each test."""
     yield
 
-    # Clear any global state
-    # Reset singletons, clear caches, etc.
-    pass
+    # Failed logins from the shared test client IP would otherwise add up across tests
+    login_throttle.reset()
 
 
 @pytest.fixture

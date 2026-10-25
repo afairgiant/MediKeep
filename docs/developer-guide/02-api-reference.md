@@ -88,6 +88,10 @@
 - System monitoring endpoints: 60 requests/minute per IP (`/system/log-level`, `/system/log-rotation-config`)
 - SSO sign-in: `SSO_RATE_LIMIT_ATTEMPTS` per `SSO_RATE_LIMIT_WINDOW_MINUTES` per IP,
   default 10 per 10 minutes (`/auth/sso/initiate`)
+- Failed password checks: `LOGIN_MAX_FAILED_ATTEMPTS` per username from each IP
+  and `LOGIN_MAX_FAILED_ATTEMPTS_PER_IP` per IP within `LOGIN_FAILED_WINDOW_MINUTES`,
+  default 10 / 30 per 15 minutes (`/auth/login`, `/auth/sso/resolve-github-link`).
+  Only failures count. The 429 carries `error_code: login_rate_limited`
 - Medical specialty creation: 20 requests/hour per **user** (`POST /medical-specialties/`)
 
 Every rate-limited endpoint returns `429` with `Retry-After`, `X-RateLimit-Limit`,
@@ -99,6 +103,24 @@ reset on restart, so they are abuse prevention rather than hard quotas.
 ## 2. Authentication
 
 Base path: `/api/v1/auth`
+
+### Sessions
+
+Every login (password or SSO) returns the same body and sets the same HttpOnly cookie.
+The JWT carries `sub`, `role`, `user_id`, `full_name`, `typ: "access"` and `sv`, the
+user's session version.
+
+- A token whose `typ` is present and not `"access"`, or that carries an `aud` claim,
+  is rejected with 401 on every auth path (header, cookie, `?token=`). Tokens without
+  `typ` are accepted
+- A token is rejected with 401 when its `sv` (0 if absent) differs from the user's
+  current `session_version`, or when the account is deactivated
+- `session_version` is raised, ending every existing session, by: changing your
+  password (the response sets a fresh cookie, so the current session continues), an
+  admin password reset (an admin resetting their own keeps their session), and
+  deactivating an account through `PUT /admin/models/user/{id}` or a bulk update.
+  `session_version` is server-owned: a value sent to the admin model endpoints is
+  ignored
 
 ### Check Registration Status
 
@@ -181,17 +203,21 @@ username=johndoe&password=SecurePass123!
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "token_type": "bearer",
-  "session_timeout_minutes": 60
+  "session_timeout_minutes": 60,
+  "must_change_password": false
 }
 ```
 
 - **Note**: The response does NOT include a user object. Use `GET /users/me` to retrieve user details after login. The `session_timeout_minutes` reflects the user's session timeout preference (or system default if not set).
 - **Error Responses**:
-  - `401`: Invalid credentials
+  - `401`: Invalid credentials. Counts toward the failed-login limit
   - `403`: Password login disabled (`SSO_ONLY_MODE=true`). Returned before any
     credential check, so valid credentials are refused too. Recorded as
     `password_login_blocked_sso_only` in the security log
-  - `429`: Too many login attempts (rate limited)
+  - `429`: Too many failed attempts for this username or IP
+    (`error_code: login_rate_limited`, `Retry-After` header). Checked before the
+    password, so correct credentials are refused too until the window rolls off.
+    Recorded as `login_rate_limited`
 
 ### Change Password
 
@@ -216,6 +242,8 @@ username=johndoe&password=SecurePass123!
 }
 ```
 
+- **Side effect**: ends every other session for the user. The response sets a fresh
+  session cookie, so the caller stays signed in
 - **Error Responses**:
   - `400`: Password validation failed (too weak, same as old)
   - `401`: Current password incorrect
@@ -5907,6 +5935,8 @@ Base path: `/api/v1/admin/models`
   password was set. The promotion makes the stored label match that reality, which is
   what the forced-password-change guard and the SSO login flow both key off. Audited
   as `sso_account_promoted_to_hybrid`. `local` and `hybrid` accounts are untouched.
+- **Side effect**: ends every session of the target user. When admins reset their own
+  password, the response sets a fresh cookie so their session continues.
 
 ### 15.3 Backup Operations
 
