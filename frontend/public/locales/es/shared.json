@@ -346,5 +346,23 @@
     "treatments": "Tratamientos",
     "visits": "Visitas",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Formato",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "heading": "Encabezado",
+    "bulletList": "Lista con viñetas",
+    "numberedList": "Lista numerada",
+    "checklist": "Lista de tareas",
+    "link": "Enlace",
+    "boldPlaceholder": "texto en negrita",
+    "italicPlaceholder": "texto en cursiva",
+    "linkPlaceholder": "texto del enlace",
+    "help": "Ayuda de formato",
+    "helpTitle": "Se admite Markdown",
+    "write": "Escribir",
+    "preview": "Vista previa",
+    "previewEmpty": "Nada que mostrar"
   }
 }

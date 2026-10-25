@@ -346,5 +346,23 @@
     "treatments": "Tratamentos",
     "visits": "Consultas",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Formatação",
+    "bold": "Negrito",
+    "italic": "Itálico",
+    "heading": "Título",
+    "bulletList": "Lista com marcadores",
+    "numberedList": "Lista numerada",
+    "checklist": "Lista de verificação",
+    "link": "Link",
+    "boldPlaceholder": "texto em negrito",
+    "italicPlaceholder": "texto em itálico",
+    "linkPlaceholder": "texto do link",
+    "help": "Ajuda de formatação",
+    "helpTitle": "Markdown é suportado",
+    "write": "Escrever",
+    "preview": "Pré-visualizar",
+    "previewEmpty": "Nada para pré-visualizar"
   }
 }

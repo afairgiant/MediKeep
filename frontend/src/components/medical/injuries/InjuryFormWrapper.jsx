@@ -10,7 +10,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
@@ -36,6 +35,7 @@ import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
+import NotesField from '../../shared/NotesField';
 
 const InjuryFormWrapper = ({
   formError,
@@ -458,7 +458,8 @@ const InjuryFormWrapper = ({
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="mechanism"
                       label={t('injuries.mechanism.label', 'How It Happened')}
                       value={formData.mechanism || ''}
                       onChange={handleTextInputChange('mechanism')}
@@ -466,8 +467,6 @@ const InjuryFormWrapper = ({
                         'injuries.mechanism.placeholder',
                         'e.g., Fell while hiking'
                       )}
-                      minRows={3}
-                      maxRows={6}
                       description={t(
                         'injuries.mechanism.description',
                         'Describe how the injury occurred'
@@ -475,7 +474,8 @@ const InjuryFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="treatment_received"
                       label={t(
                         'shared:fields.treatmentReceived',
                         'Treatment Received'
@@ -486,8 +486,6 @@ const InjuryFormWrapper = ({
                         'injuries.treatmentReceived.placeholder',
                         'e.g., RICE protocol, cast applied'
                       )}
-                      minRows={3}
-                      maxRows={6}
                       description={t(
                         'injuries.treatmentReceived.description',
                         'Description of treatment received'
@@ -495,7 +493,8 @@ const InjuryFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="recovery_notes"
                       label={t(
                         'injuries.recoveryNotes.label',
                         'Recovery Notes'
@@ -506,8 +505,6 @@ const InjuryFormWrapper = ({
                         'injuries.recoveryNotes.placeholder',
                         'Progress updates, milestones, or observations'
                       )}
-                      minRows={3}
-                      maxRows={6}
                       description={t(
                         'injuries.recoveryNotes.description',
                         'Notes about recovery progress'
@@ -561,7 +558,8 @@ const InjuryFormWrapper = ({
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="notes"
                       label={t(
                         'shared:fields.additionalNotes',
                         'Additional Notes'
@@ -572,8 +570,6 @@ const InjuryFormWrapper = ({
                         'injuries.notes.placeholder',
                         'Any other relevant information...'
                       )}
-                      minRows={3}
-                      maxRows={6}
                       description={t(
                         'injuries.notes.description',
                         'General notes or additional details'

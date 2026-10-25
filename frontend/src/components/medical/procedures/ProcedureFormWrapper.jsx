@@ -10,7 +10,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
   Text,
   NumberInput,
@@ -41,6 +40,7 @@ import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
+import NotesField from '../../shared/NotesField';
 
 const ProcedureFormWrapper = ({
   formError,
@@ -477,7 +477,8 @@ const ProcedureFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="description"
                       label={t('shared:labels.description', 'Description')}
                       value={formData.description || ''}
                       onChange={handleTextInputChange('description')}
@@ -489,9 +490,6 @@ const ProcedureFormWrapper = ({
                         'procedures.form.descriptionDesc',
                         'Brief description of the procedure'
                       )}
-                      rows={3}
-                      minRows={2}
-                      autosize
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
@@ -543,7 +541,8 @@ const ProcedureFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="anesthesia_notes"
                       label={t(
                         'shared:fields.anesthesiaNotes',
                         'Anesthesia Notes'
@@ -558,13 +557,11 @@ const ProcedureFormWrapper = ({
                         'procedures.form.anesthesiaNotesDesc',
                         'Additional anesthesia information'
                       )}
-                      rows={3}
-                      minRows={2}
-                      autosize
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="procedure_complications"
                       label={t('shared:fields.complications', 'Complications')}
                       value={formData.procedure_complications || ''}
                       onChange={handleTextInputChange(
@@ -578,9 +575,6 @@ const ProcedureFormWrapper = ({
                         'procedures.form.complicationsDesc',
                         'Any issues or complications that occurred'
                       )}
-                      rows={3}
-                      minRows={2}
-                      autosize
                     />
                   </Grid.Col>
                 </Grid>
@@ -640,7 +634,8 @@ const ProcedureFormWrapper = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                <Textarea
+                <NotesField
+                  name="notes"
                   label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
@@ -652,9 +647,6 @@ const ProcedureFormWrapper = ({
                     'procedures.form.clinicalNotesDesc',
                     'Additional information about this procedure'
                   )}
-                  rows={5}
-                  minRows={3}
-                  autosize
                 />
               </Box>
             </Tabs.Panel>

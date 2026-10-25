@@ -346,5 +346,23 @@
     "treatments": "Traitements",
     "visits": "Visites",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Mise en forme",
+    "bold": "Gras",
+    "italic": "Italique",
+    "heading": "Titre",
+    "bulletList": "Liste à puces",
+    "numberedList": "Liste numérotée",
+    "checklist": "Liste de tâches",
+    "link": "Lien",
+    "boldPlaceholder": "texte en gras",
+    "italicPlaceholder": "texte en italique",
+    "linkPlaceholder": "texte du lien",
+    "help": "Aide à la mise en forme",
+    "helpTitle": "Le Markdown est pris en charge",
+    "write": "Écrire",
+    "preview": "Aperçu",
+    "previewEmpty": "Rien à afficher"
   }
 }

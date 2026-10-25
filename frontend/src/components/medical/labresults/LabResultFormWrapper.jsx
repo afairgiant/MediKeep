@@ -10,7 +10,6 @@ import {
   TextInput,
   Autocomplete,
   NumberInput,
-  Textarea,
   Select,
   Text,
   Paper,
@@ -55,6 +54,7 @@ import {
 } from '../../../constants/labResultRecordLinks';
 import logger from '../../../services/logger';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
+import NotesField from '../../shared/NotesField';
 
 const LabResultFormWrapper = ({
   isOpen,
@@ -1071,15 +1071,13 @@ const LabResultFormWrapper = ({
             {showAdvancedTabs && (
               <Tabs.Panel value="notes">
                 <Box mt="md">
-                  <Textarea
+                  <NotesField
+                    name="notes"
                     label={t('shared:fields.additionalNotes')}
                     value={formData.notes || ''}
                     onChange={handleTextInputChange('notes')}
                     placeholder={t('labresults:additionalNotes.placeholder')}
                     description={t('labresults:additionalNotes.description')}
-                    rows={5}
-                    minRows={3}
-                    autosize
                     maxLength={5000}
                   />
                 </Box>

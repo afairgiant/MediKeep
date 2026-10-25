@@ -141,6 +141,8 @@ The dialect must match the frontend notes renderer:
 
 On the frontend, `components/shared/NotesView` shows a formatted note. It lazy-loads `NotesMarkdown` (react-markdown with remark-gfm, remark-breaks and the `remarkNotesDialect` plugin from `utils/notesMarkdown.ts`), so pages without notes never download the renderer. Collapsed long notes on cards, table cells, search results and print use `notesToPlainText` from the same file instead.
 
+Notes are edited with `components/shared/NotesField`, a drop-in for Mantine `Textarea` with a formatting toolbar (Ctrl/Cmd+B, I, K), a Write/Preview switch and a resizable box. Toolbar edits call `onChange` with `{ target: { name, value } }`, so the existing form handlers work unchanged; the text edits themselves are pure functions in `utils/notesEditing.ts`. In field configs (`utils/medicalFormFields/`), Markdown fields use `type: 'markdown'`, which `BaseMedicalForm`, the medication, visit and insurance forms and `VitalsForm` render as `NotesField`; hand-written forms use `NotesField` directly.
+
 ## Database Architecture
 
 ### Design Principles

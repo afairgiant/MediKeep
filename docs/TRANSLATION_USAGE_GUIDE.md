@@ -172,7 +172,7 @@ function FileUploader() {
 - **reportPdf** - Generated PDF report text (sections: `categories`, `fields`, `insuranceDetails`, `relationships`, `values`, `report`). Stored enum values (status, severity, type, ...) are translated at render time with `ReportTranslator.value()` from the `values` section; unknown or free-text values are printed unchanged.
 - **reports** - Custom report builder, export page
 - **settings** - User, notification, and Paperless settings
-- **shared** - Field and label definitions reused across namespaces
+- **shared** - Field and label definitions reused across namespaces. `shared:notesEditor.*` holds the Markdown notes editor's toolbar, preview and help text, plus the placeholder words it inserts (`boldPlaceholder`, `italicPlaceholder`, `linkPlaceholder`); Markdown syntax itself is never translated
 - **vitals** - Vitals forms, stats, trends
 
 Check **shared** before adding a label or field name; most common ones already

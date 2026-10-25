@@ -28,6 +28,7 @@ import {
   MAX_REF_RANGE_TEXT_LENGTH,
   calculateStatus,
 } from '../../../utils/labTestComponentUtils';
+import NotesField from '../../shared/NotesField';
 
 interface TestComponentEditModalProps {
   component: LabTestComponent | null;
@@ -750,13 +751,13 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
           )}
 
           {/* Notes */}
-          <Textarea
+          <NotesField
+            name="notes"
             label={t('shared:tabs.notes', 'Notes')}
             placeholder={t(
               'labresults:testComponents.editModal.placeholders.notes',
               'Additional notes about this test result'
             )}
-            rows={3}
             value={formData.notes || ''}
             onChange={e =>
               setFormData(prev => ({ ...prev, notes: e.target.value }))

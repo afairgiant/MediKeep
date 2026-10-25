@@ -8,7 +8,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
   Text,
   Alert,
@@ -47,6 +46,7 @@ import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
 import CollapsibleLinkTabs from '../../shared/CollapsibleLinkTabs';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
+import NotesField from '../../shared/NotesField';
 
 const EMPTY_PENDING_RELATIONSHIPS = {
   medications: [],
@@ -767,7 +767,8 @@ const TreatmentFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="description"
                       label={t('shared:labels.description', 'Description')}
                       value={formData.description || ''}
                       onChange={handleTextInputChange('description')}
@@ -779,9 +780,6 @@ const TreatmentFormWrapper = ({
                         'treatments.form.descriptionDesc',
                         'Brief description of the treatment'
                       )}
-                      rows={3}
-                      minRows={2}
-                      autosize
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
@@ -896,7 +894,8 @@ const TreatmentFormWrapper = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                <Textarea
+                <NotesField
+                  name="notes"
                   label={t('treatments.form.treatmentNotes', 'Treatment Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
@@ -908,9 +907,6 @@ const TreatmentFormWrapper = ({
                     'treatments.form.notesDesc',
                     'Additional information about this treatment'
                   )}
-                  rows={5}
-                  minRows={3}
-                  autosize
                 />
               </Box>
             </Tabs.Panel>

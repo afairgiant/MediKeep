@@ -75,13 +75,11 @@ export const allergyFormFields = [
   },
   {
     name: 'notes',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:tabs.notes',
     placeholderKey: 'common:fields.notes.placeholder',
     descriptionKey: 'common:fields.notes.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
   },
   tagsFieldConfig,
 ];

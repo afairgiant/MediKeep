@@ -10,7 +10,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
   Checkbox,
   Text,
@@ -40,6 +39,7 @@ import RecordVisitsTab from '../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import { useSubDialog } from '../../contexts/SubDialogContext';
 import RecordLinkTabButtons from '../shared/RecordLinkTabButtons';
+import NotesField from '../shared/NotesField';
 
 /**
  * Form for creating/editing a symptom definition (parent record).
@@ -404,16 +404,14 @@ const MantineSymptomForm = ({
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="general_notes"
                       label={t('symptoms.parent.generalNotes.label')}
                       value={formData.general_notes || ''}
                       onChange={handleTextInputChange('general_notes')}
                       placeholder={t(
                         'symptoms.parent.generalNotes.placeholder'
                       )}
-                      rows={5}
-                      minRows={3}
-                      autosize
                       maxLength={2000}
                     />
                   </Grid.Col>

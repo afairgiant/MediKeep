@@ -12,7 +12,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
   Text,
 } from '@mantine/core';
@@ -37,6 +36,7 @@ import RecordVisitsTab from '../../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
+import NotesField from '../../shared/NotesField';
 
 const ConditionFormWrapper = ({
   formError,
@@ -535,7 +535,8 @@ const ConditionFormWrapper = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                <Textarea
+                <NotesField
+                  name="notes"
                   label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
@@ -547,9 +548,6 @@ const ConditionFormWrapper = ({
                     'conditions.form.descriptions.notes',
                     'Additional information about this condition'
                   )}
-                  rows={5}
-                  minRows={3}
-                  autosize
                 />
               </Box>
             </Tabs.Panel>

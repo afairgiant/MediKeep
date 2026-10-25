@@ -631,13 +631,11 @@ export const insuranceFormFields = [
   },
   {
     name: 'notes',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:insurance.form.notes.placeholder',
     descriptionKey: 'medical:insurance.form.notes.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
   },
   tagsFieldConfig,
 ];

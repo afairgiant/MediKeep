@@ -72,12 +72,10 @@ export const emergencyContactFormFields = [
   },
   {
     name: 'notes',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:emergencyContacts.form.notes.placeholder',
     descriptionKey: 'medical:emergencyContacts.form.notes.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
   },
 ];

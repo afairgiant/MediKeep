@@ -8,7 +8,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
   Checkbox,
 } from '@mantine/core';
@@ -20,6 +19,7 @@ import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { isValidPhoneNumber } from '../../utils/phoneUtils';
 import logger from '../../services/logger';
 import { EMERGENCY_CONTACT_RELATIONSHIPS } from '../../constants/emergencyContactRelationships';
+import NotesField from '../shared/NotesField';
 
 const MantineEmergencyContactForm = ({
   isOpen,
@@ -288,16 +288,14 @@ const MantineEmergencyContactForm = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                <Textarea
+                <NotesField
+                  name="notes"
                   label={t('shared:tabs.notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t(
                     'medical:emergencyContacts.form.notes.placeholder'
                   )}
-                  rows={5}
-                  minRows={3}
-                  autosize
                 />
               </Box>
             </Tabs.Panel>

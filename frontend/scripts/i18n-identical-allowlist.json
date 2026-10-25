@@ -54,7 +54,8 @@
     "kg",
     "lbs",
     "mmHg",
-    "{{name}} - Details"
+    "{{name}} - Details",
+    "Link"
   ],
   "el": [
     "Email",
@@ -217,7 +218,8 @@
     "{{count}} backup",
     "{{count}} file",
     "{{count}} record",
-    "{{count}} test"
+    "{{count}} test",
+    "Link"
   ],
   "nl": [
     "Account",
@@ -273,7 +275,9 @@
     "{{count}} doses",
     "{{count}} test",
     "{{count}} tests",
-    "{{name}} - Details"
+    "{{name}} - Details",
+    "Checklist",
+    "Link"
   ],
   "pl": [
     "Administrator",
@@ -291,7 +295,8 @@
     "cm",
     "kg",
     "lbs",
-    "mmHg"
+    "mmHg",
+    "Link"
   ],
   "pt": [
     "1 dose",
@@ -327,7 +332,8 @@
     "{{count}} backup",
     "{{count}} backups",
     "{{count}} doses",
-    "{{count}} total"
+    "{{count}} total",
+    "Link"
   ],
   "ru": [
     "GitHub ID:"

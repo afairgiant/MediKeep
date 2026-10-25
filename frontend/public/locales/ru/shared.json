@@ -346,5 +346,23 @@
     "treatments": "Лечение",
     "visits": "Визиты",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Форматирование",
+    "bold": "Жирный",
+    "italic": "Курсив",
+    "heading": "Заголовок",
+    "bulletList": "Маркированный список",
+    "numberedList": "Нумерованный список",
+    "checklist": "Список задач",
+    "link": "Ссылка",
+    "boldPlaceholder": "жирный текст",
+    "italicPlaceholder": "курсивный текст",
+    "linkPlaceholder": "текст ссылки",
+    "help": "Справка по форматированию",
+    "helpTitle": "Поддерживается Markdown",
+    "write": "Редактор",
+    "preview": "Просмотр",
+    "previewEmpty": "Нечего показать"
   }
 }

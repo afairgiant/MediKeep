@@ -346,5 +346,23 @@
     "delete": "ลบ",
     "edit": "แก้ไข",
     "view": "ดู"
+  },
+  "notesEditor": {
+    "toolbar": "การจัดรูปแบบ",
+    "bold": "ตัวหนา",
+    "italic": "ตัวเอียง",
+    "heading": "หัวข้อ",
+    "bulletList": "รายการสัญลักษณ์",
+    "numberedList": "รายการลำดับเลข",
+    "checklist": "รายการตรวจสอบ",
+    "link": "ลิงก์",
+    "boldPlaceholder": "ข้อความตัวหนา",
+    "italicPlaceholder": "ข้อความตัวเอียง",
+    "linkPlaceholder": "ข้อความลิงก์",
+    "help": "ความช่วยเหลือการจัดรูปแบบ",
+    "helpTitle": "รองรับ Markdown",
+    "write": "เขียน",
+    "preview": "แสดงตัวอย่าง",
+    "previewEmpty": "ไม่มีเนื้อหาให้แสดงตัวอย่าง"
   }
 }

@@ -871,6 +871,7 @@ export class MedicalFormLayoutStrategy extends LayoutStrategy {
     // Full-width fields
     if (
       type === 'textarea' ||
+      type === 'markdown' ||
       type === 'divider' ||
       name.includes('notes') ||
       name.includes('description') ||

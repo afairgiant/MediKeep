@@ -173,47 +173,39 @@ export const visitFormFields = [
   },
   {
     name: 'diagnosis',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'medical:visits.form.fields.diagnosisAssessment.label',
     placeholderKey:
       'medical:visits.form.fields.diagnosisAssessment.placeholder',
     descriptionKey:
       'medical:visits.form.fields.diagnosisAssessment.description',
     gridColumn: 12,
-    minRows: 2,
-    maxRows: 4,
   },
   {
     name: 'treatment_plan',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:labels.treatmentPlan',
     placeholderKey: 'medical:visits.form.fields.treatmentPlan.placeholder',
     descriptionKey: 'medical:visits.form.fields.treatmentPlan.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
   },
   {
     name: 'follow_up_instructions',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'medical:visits.viewModal.followUpInstructions',
     placeholderKey:
       'medical:visits.form.fields.followUpInstructions.placeholder',
     descriptionKey:
       'medical:visits.form.fields.followUpInstructions.description',
     gridColumn: 12,
-    minRows: 2,
-    maxRows: 4,
   },
   {
     name: 'notes',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:visits.form.fields.additionalNotes.placeholder',
     descriptionKey: 'medical:visits.form.fields.additionalNotes.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
   },
   tagsFieldConfig,
 ];

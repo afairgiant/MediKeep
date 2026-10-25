@@ -346,5 +346,23 @@
     "treatments": "Trattamenti",
     "visits": "Visite",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Formattazione",
+    "bold": "Grassetto",
+    "italic": "Corsivo",
+    "heading": "Titolo",
+    "bulletList": "Elenco puntato",
+    "numberedList": "Elenco numerato",
+    "checklist": "Elenco di controllo",
+    "link": "Link",
+    "boldPlaceholder": "testo in grassetto",
+    "italicPlaceholder": "testo in corsivo",
+    "linkPlaceholder": "testo del link",
+    "help": "Guida alla formattazione",
+    "helpTitle": "Markdown è supportato",
+    "write": "Scrivi",
+    "preview": "Anteprima",
+    "previewEmpty": "Niente da visualizzare"
   }
 }

@@ -35,6 +35,7 @@ import { TagInput } from '../common/TagInput';
 import SpecialtySelect from '../admin/SpecialtySelect';
 import { translateField } from '../../utils/translateField';
 import logger from '../../services/logger';
+import NotesField from '../shared/NotesField';
 import { useDateFormat } from '../../hooks/useDateFormat';
 
 // Initialize medical form layout strategy
@@ -220,6 +221,17 @@ const BaseMedicalForm = ({
         />
       );
     },
+    [handleTextInputChange]
+  );
+
+  const renderMarkdownField = useCallback(
+    (fieldConfig, baseProps) => (
+      <NotesField
+        {...baseProps}
+        name={fieldConfig.name}
+        onChange={handleTextInputChange(fieldConfig.name)}
+      />
+    ),
     [handleTextInputChange]
   );
 
@@ -449,6 +461,9 @@ const BaseMedicalForm = ({
 
         case 'textarea':
           return renderTextareaField(fieldConfig, baseProps);
+
+        case 'markdown':
+          return renderMarkdownField(fieldConfig, baseProps);
 
         case 'select':
           return renderSelectField(
@@ -741,6 +756,7 @@ const BaseMedicalForm = ({
       customFieldRenderers,
       renderTextInputField,
       renderTextareaField,
+      renderMarkdownField,
       renderSelectField,
       renderNumberField,
       renderDateField,

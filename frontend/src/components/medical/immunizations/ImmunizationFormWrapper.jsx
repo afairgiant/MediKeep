@@ -9,7 +9,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
   Text,
   NumberInput,
@@ -41,6 +40,7 @@ import {
   extractVaccineName,
 } from '../../../constants/vaccineLibrary';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
+import NotesField from '../../shared/NotesField';
 
 const ImmunizationFormWrapper = ({
   isOpen,
@@ -716,7 +716,8 @@ const ImmunizationFormWrapper = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                <Textarea
+                <NotesField
+                  name="notes"
                   label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
@@ -728,9 +729,6 @@ const ImmunizationFormWrapper = ({
                     'immunizations.form.clinicalNotesDesc',
                     'Additional information about this immunization'
                   )}
-                  rows={5}
-                  minRows={3}
-                  autosize
                 />
               </Box>
             </Tabs.Panel>

@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react';
-import {
-  Modal,
-  Stack,
-  TextInput,
-  Textarea,
-  Group,
-  Button,
-  Divider,
-} from '@mantine/core';
+import { Modal, Stack, TextInput, Group, Button, Divider } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import apiService from '../../../services/api';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import LocationsEditor from '../../admin/LocationsEditor';
+import NotesField from '../../shared/NotesField';
 
 const emptyForm = {
   name: '',
@@ -173,13 +166,13 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
           value={formData.patient_portal_url}
           onChange={handleChange('patient_portal_url')}
         />
-        <Textarea
+        <NotesField
+          name="notes"
           label={t('shared:tabs.notes')}
           placeholder={t('medical:practices.form.notes.placeholder')}
           description={t('medical:practices.form.notes.description')}
           value={formData.notes}
           onChange={handleChange('notes')}
-          minRows={3}
         />
         <Divider />
         <LocationsEditor

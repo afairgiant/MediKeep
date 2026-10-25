@@ -8,7 +8,6 @@ import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import {
   TextInput,
   NumberInput,
-  Textarea,
   Button,
   Group,
   Stack,
@@ -58,6 +57,7 @@ import {
 import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
+import NotesField from '../shared/NotesField';
 import './VitalsForm.css';
 
 const VitalsForm = ({
@@ -427,13 +427,12 @@ const VitalsForm = ({
       },
       notes: {
         label: t('shared:tabs.notes', 'Notes'),
-        type: 'textarea',
+        type: 'markdown',
         placeholder: t(
           'vitals.form.notesPlaceholder',
           'Additional notes about the vital signs measurement...'
         ),
         icon: IconNotes,
-        rows: 3,
         validation: {
           maxLength: {
             value: 5000,
@@ -950,15 +949,15 @@ const VitalsForm = ({
       );
     }
 
-    if (config.type === 'textarea') {
+    if (config.type === 'markdown') {
       return (
-        <Textarea
+        <NotesField
           key={fieldName}
+          name={fieldName}
           label={config.label}
           placeholder={config.placeholder}
           value={value || ''} // Ensure value is never null or undefined
           onChange={e => handleInputChange(fieldName, e.target.value)}
-          rows={config.rows}
           error={error}
         />
       );

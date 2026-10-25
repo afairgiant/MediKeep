@@ -346,5 +346,23 @@
     "treatments": "Behandelingen",
     "visits": "Consulten",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Opmaak",
+    "bold": "Vet",
+    "italic": "Cursief",
+    "heading": "Kop",
+    "bulletList": "Lijst met opsommingstekens",
+    "numberedList": "Genummerde lijst",
+    "checklist": "Checklist",
+    "link": "Link",
+    "boldPlaceholder": "vetgedrukte tekst",
+    "italicPlaceholder": "cursieve tekst",
+    "linkPlaceholder": "linktekst",
+    "help": "Hulp bij opmaak",
+    "helpTitle": "Markdown wordt ondersteund",
+    "write": "Schrijven",
+    "preview": "Voorbeeld",
+    "previewEmpty": "Niets om te tonen"
   }
 }
