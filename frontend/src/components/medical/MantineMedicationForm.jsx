@@ -43,6 +43,7 @@ import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
+import NotesField from '../shared/NotesField';
 import { apiService } from '../../services/api';
 import notificationApi from '../../services/api/notificationApi';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
@@ -341,6 +342,16 @@ const MantineMedicationForm = ({
             onChange={handleTextInputChange(field.name)}
             minRows={field.minRows || 3}
             maxRows={field.maxRows || 6}
+          />
+        );
+
+      case 'markdown':
+        return (
+          <NotesField
+            {...commonProps}
+            name={field.name}
+            value={formData[field.name] || ''}
+            onChange={handleTextInputChange(field.name)}
           />
         );
 

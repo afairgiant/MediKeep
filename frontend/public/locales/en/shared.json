@@ -345,5 +345,23 @@
     "treatments": "Treatments",
     "visits": "Visits",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Formatting",
+    "bold": "Bold",
+    "italic": "Italic",
+    "heading": "Heading",
+    "bulletList": "Bulleted list",
+    "numberedList": "Numbered list",
+    "checklist": "Checklist",
+    "link": "Link",
+    "boldPlaceholder": "bold text",
+    "italicPlaceholder": "italic text",
+    "linkPlaceholder": "link text",
+    "help": "Formatting help",
+    "helpTitle": "Markdown is supported",
+    "write": "Write",
+    "preview": "Preview",
+    "previewEmpty": "Nothing to preview"
   }
 }

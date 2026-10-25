@@ -36,6 +36,7 @@ import {
 } from './visits/VisitLinkTabs';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
+import NotesField from '../shared/NotesField';
 import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import { useSubDialog } from '../../contexts/SubDialogContext';
@@ -225,6 +226,16 @@ const MantineVisitForm = ({
             onChange={handleTextInputChange(translatedField.name)}
             minRows={translatedField.minRows || 3}
             maxRows={translatedField.maxRows || 6}
+          />
+        );
+
+      case 'markdown':
+        return (
+          <NotesField
+            {...commonProps}
+            name={translatedField.name}
+            value={formData[translatedField.name] || ''}
+            onChange={handleTextInputChange(translatedField.name)}
           />
         );
 

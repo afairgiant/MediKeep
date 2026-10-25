@@ -345,5 +345,23 @@
     "treatments": "Leczenie",
     "visits": "Wizyty",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Formatowanie",
+    "bold": "Pogrubienie",
+    "italic": "Kursywa",
+    "heading": "Nagłówek",
+    "bulletList": "Lista punktowana",
+    "numberedList": "Lista numerowana",
+    "checklist": "Lista kontrolna",
+    "link": "Link",
+    "boldPlaceholder": "pogrubiony tekst",
+    "italicPlaceholder": "tekst kursywą",
+    "linkPlaceholder": "tekst linku",
+    "help": "Pomoc dotycząca formatowania",
+    "helpTitle": "Obsługiwany jest Markdown",
+    "write": "Pisz",
+    "preview": "Podgląd",
+    "previewEmpty": "Brak treści do podglądu"
   }
 }

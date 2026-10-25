@@ -154,14 +154,22 @@ const InsuranceViewModal = ({
       case 'textarea': {
         valueNode = hasValue ? (
           <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-            {/* Stopgap until insurance notes get the markdown field type. */}
-            {field.name === 'notes' ? (
-              <NotesView value={String(rawValue)} />
-            ) : (
-              <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
-                {rawValue}
-              </Text>
-            )}
+            <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+              {rawValue}
+            </Text>
+          </Paper>
+        ) : (
+          <Text size="sm" c="dimmed">
+            {notSpecifiedText}
+          </Text>
+        );
+        break;
+      }
+
+      case 'markdown': {
+        valueNode = hasValue ? (
+          <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
+            <NotesView value={String(rawValue)} />
           </Paper>
         ) : (
           <Text size="sm" c="dimmed">

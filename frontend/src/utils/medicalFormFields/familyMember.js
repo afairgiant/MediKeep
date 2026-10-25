@@ -122,12 +122,10 @@ export const familyMemberFormFields = [
   },
   {
     name: 'notes',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:familyHistory.form.member.notes.placeholder',
     descriptionKey: 'medical:familyHistory.form.member.notes.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
   },
 ];

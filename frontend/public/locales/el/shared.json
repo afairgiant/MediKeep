@@ -345,5 +345,23 @@
     "treatments": "Θεραπείες",
     "visits": "Επισκέψεις",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Μορφοποίηση",
+    "bold": "Έντονα",
+    "italic": "Πλάγια",
+    "heading": "Επικεφαλίδα",
+    "bulletList": "Λίστα με κουκκίδες",
+    "numberedList": "Αριθμημένη λίστα",
+    "checklist": "Λίστα ελέγχου",
+    "link": "Σύνδεσμος",
+    "boldPlaceholder": "έντονο κείμενο",
+    "italicPlaceholder": "πλάγιο κείμενο",
+    "linkPlaceholder": "κείμενο συνδέσμου",
+    "help": "Βοήθεια μορφοποίησης",
+    "helpTitle": "Υποστηρίζεται Markdown",
+    "write": "Γραφή",
+    "preview": "Προεπισκόπηση",
+    "previewEmpty": "Δεν υπάρχει κάτι για προεπισκόπηση"
   }
 }

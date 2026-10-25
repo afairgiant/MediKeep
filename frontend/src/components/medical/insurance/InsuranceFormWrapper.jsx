@@ -43,6 +43,7 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
+import NotesField from '../../shared/NotesField';
 import { useTranslation } from 'react-i18next';
 import { translateField } from '../../../utils/translateField';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
@@ -336,6 +337,15 @@ const InsuranceFormWrapper = ({
             onChange={handleTextInputChange(field.name)}
             minRows={field.minRows || 3}
             maxRows={field.maxRows || 6}
+          />
+        );
+
+      case 'markdown':
+        return (
+          <NotesField
+            {...commonProps}
+            name={field.name}
+            onChange={handleTextInputChange(field.name)}
           />
         );
 

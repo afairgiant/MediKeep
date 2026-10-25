@@ -7,7 +7,6 @@ import {
   Button,
   Grid,
   TextInput,
-  Textarea,
   Select,
   Tabs,
   Box,
@@ -36,6 +35,7 @@ import {
 } from '../../../constants/equipmentConstants';
 import logger from '../../../services/logger';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
+import NotesField from '../../shared/NotesField';
 
 const EquipmentFormWrapper = ({
   isOpen,
@@ -338,7 +338,8 @@ const EquipmentFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="usage_instructions"
                       label={t(
                         'equipment.form.usageInstructions',
                         'Usage Instructions'
@@ -349,9 +350,6 @@ const EquipmentFormWrapper = ({
                         'equipment.form.usagePlaceholder',
                         'How to use this equipment'
                       )}
-                      rows={3}
-                      autosize
-                      minRows={2}
                     />
                   </Grid.Col>
                 </Grid>
@@ -363,7 +361,8 @@ const EquipmentFormWrapper = ({
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={12}>
-                    <Textarea
+                    <NotesField
+                      name="notes"
                       label={t('shared:tabs.notes', 'Notes')}
                       value={formData.notes || ''}
                       onChange={handleTextInputChange('notes')}
@@ -371,9 +370,6 @@ const EquipmentFormWrapper = ({
                         'equipment.form.notesPlaceholder',
                         'Additional notes about this equipment'
                       )}
-                      rows={3}
-                      autosize
-                      minRows={2}
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>

@@ -33,6 +33,7 @@ import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgres
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
+import NotesField from '../../shared/NotesField';
 
 const AllergyFormWrapper = ({
   isOpen,
@@ -415,15 +416,13 @@ const AllergyFormWrapper = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                <Textarea
+                <NotesField
+                  name="notes"
                   label={t('shared:tabs.notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('common:fields.notes.placeholder')}
                   description={t('common:fields.notes.description')}
-                  rows={5}
-                  minRows={3}
-                  autosize
                 />
               </Box>
             </Tabs.Panel>

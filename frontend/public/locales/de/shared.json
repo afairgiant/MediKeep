@@ -345,5 +345,23 @@
     "treatments": "Behandlungen",
     "visits": "Besuche",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Formatierung",
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "heading": "Überschrift",
+    "bulletList": "Aufzählung",
+    "numberedList": "Nummerierte Liste",
+    "checklist": "Checkliste",
+    "link": "Link",
+    "boldPlaceholder": "fetter Text",
+    "italicPlaceholder": "kursiver Text",
+    "linkPlaceholder": "Linktext",
+    "help": "Hilfe zur Formatierung",
+    "helpTitle": "Markdown wird unterstützt",
+    "write": "Schreiben",
+    "preview": "Vorschau",
+    "previewEmpty": "Keine Vorschau verfügbar"
   }
 }

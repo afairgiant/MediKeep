@@ -345,5 +345,23 @@
     "treatments": "Behandlingar",
     "visits": "Besök",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "Formatering",
+    "bold": "Fet",
+    "italic": "Kursiv",
+    "heading": "Rubrik",
+    "bulletList": "Punktlista",
+    "numberedList": "Numrerad lista",
+    "checklist": "Checklista",
+    "link": "Länk",
+    "boldPlaceholder": "fet text",
+    "italicPlaceholder": "kursiv text",
+    "linkPlaceholder": "länktext",
+    "help": "Hjälp med formatering",
+    "helpTitle": "Markdown stöds",
+    "write": "Skriv",
+    "preview": "Förhandsgranska",
+    "previewEmpty": "Inget att förhandsgranska"
   }
 }

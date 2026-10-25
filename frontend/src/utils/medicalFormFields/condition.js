@@ -90,13 +90,11 @@ export const conditionFormFields = [
   },
   {
     name: 'notes',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:tabs.notes',
     placeholderKey: 'common:fields.notes.placeholder',
     descriptionKey: 'medical:conditions.notes.description',
     gridColumn: 12,
-    minRows: 4,
-    maxRows: 8,
   },
   tagsFieldConfig,
 ];

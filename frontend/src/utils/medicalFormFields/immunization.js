@@ -98,13 +98,11 @@ export const immunizationFormFields = [
   },
   {
     name: 'notes',
-    type: 'textarea',
+    type: 'markdown',
     labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:immunizations.notes.placeholder',
     descriptionKey: 'medical:immunizations.notes.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
   },
   tagsFieldConfig,
 ];

@@ -345,5 +345,23 @@
     "treatments": "治疗",
     "visits": "就诊",
     "withCount": "{{label}} ({{count}})"
+  },
+  "notesEditor": {
+    "toolbar": "格式",
+    "bold": "粗体",
+    "italic": "斜体",
+    "heading": "标题",
+    "bulletList": "项目符号列表",
+    "numberedList": "编号列表",
+    "checklist": "任务清单",
+    "link": "链接",
+    "boldPlaceholder": "粗体文本",
+    "italicPlaceholder": "斜体文本",
+    "linkPlaceholder": "链接文本",
+    "help": "格式帮助",
+    "helpTitle": "支持 Markdown",
+    "write": "编辑",
+    "preview": "预览",
+    "previewEmpty": "没有可预览的内容"
   }
 }
