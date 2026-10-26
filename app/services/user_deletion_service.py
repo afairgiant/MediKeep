@@ -17,7 +17,9 @@ from app.models.models import (
     Patient,
     PatientShare,
     User,
+    UserBackupCode,
     UserPreferences,
+    UserTotp,
 )
 
 logger = get_logger(__name__, "app")
@@ -81,6 +83,18 @@ class UserDeletionService:
         )
 
         deletion_stats["deleted_records"]["user_preferences"] = deleted_prefs
+
+        # The foreign keys cascade too; deleting here keeps the counts in the stats
+        deletion_stats["deleted_records"]["backup_codes"] = (
+            db.query(UserBackupCode)
+            .filter(UserBackupCode.user_id == user_id)
+            .delete(synchronize_session=False)
+        )
+        deletion_stats["deleted_records"]["totp"] = (
+            db.query(UserTotp)
+            .filter(UserTotp.user_id == user_id)
+            .delete(synchronize_session=False)
+        )
 
         if deleted_prefs > 0:
             logger.info(

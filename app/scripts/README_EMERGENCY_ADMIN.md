@@ -209,6 +209,36 @@ was deliberately demoted for security, and the secondary admin was later
 lost). Only the explicit CLI invocation of this script is treated as
 consent to change a user's role.
 
+## Related: resetting a user's two-factor
+
+`reset_user_mfa.py` is the recovery tool for a user (admin or not) who has
+two-factor authentication on and can no longer pass it: a lost phone and no
+backup codes left, or authenticator secrets made unreadable by a changed
+`SECRET_KEY`.
+
+```bash
+docker exec -it medikeep-app python app/scripts/reset_user_mfa.py --username alice
+# skip the confirmation prompt
+docker exec -it medikeep-app python app/scripts/reset_user_mfa.py --username alice --yes
+```
+
+It deletes the user's authenticator secret and backup codes and signs out all
+their sessions. Their password and role are unchanged, so they sign in with the
+password and can set two-factor up again in Settings.
+
+| Exit code | Meaning |
+|---|---|
+| `0` | Reset done (or the user had no two-factor; their sessions were still signed out) |
+| `1` | No user with that username |
+| `2` | Cancelled at the prompt; nothing changed |
+| `3` | Error; nothing changed |
+
+Each run writes `mfa_reset_by_cli` to `logs/security.log` and a
+`two_factor_reset` activity entry with `metadata.source='reset_user_mfa_script'`.
+
+When many users are locked out at once, set `TWO_FACTOR_ENABLED=false` and
+restart instead; see the deployment guide's Two-Factor Authentication section.
+
 ## Security notes
 
 1. **Not for routine use.** This script is for emergency recovery only.

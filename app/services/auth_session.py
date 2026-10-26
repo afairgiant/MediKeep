@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.api.activity_logging import safe_log_activity
 from app.core.config import settings
+from app.core.http.auth_codes import AuthErrorCode
+from app.core.http.error_handling import ForbiddenException, UnauthorizedException
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
@@ -16,10 +18,12 @@ from app.core.logging.helpers import (
 )
 from app.core.utils.cookie_auth import set_auth_cookie
 from app.core.utils.security import ACCESS_TOKEN_TYPE, create_access_token
+from app.crud.user import user as user_crud
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActionType, EntityType
 from app.models.base import get_utc_now
 from app.models.models import User
+from app.services import two_factor_service
 from app.services.patient_management import PatientManagementService
 
 logger = get_logger(__name__, "app")
@@ -51,6 +55,83 @@ def _issue_access_token(user: User, lifetime_minutes: int) -> str:
         },
         expires_delta=timedelta(minutes=lifetime_minutes),
     )
+
+
+def require_password_login_allowed(request: Request, username: str) -> None:
+    """Raise 403 under SSO_ONLY_MODE, the server-side boundary for password sign-in."""
+    if not settings.SSO_ONLY_MODE:
+        return
+    log_security_event(
+        logger,
+        "password_login_blocked_sso_only",
+        request,
+        f"Password login blocked - SSO-only mode. Username: {username}",
+        username=username,
+    )
+    raise ForbiddenException(
+        message=(
+            "Password sign-in is disabled on this instance. Please sign in "
+            "with your identity provider."
+        ),
+        request=request,
+        error_code=AuthErrorCode.SSO_ONLY_PASSWORD_LOGIN_DISABLED,
+    )
+
+
+def require_active(request: Request, user: User, event: str) -> None:
+    """Raise 401 account_deactivated, logging event, when the account is inactive."""
+    if user.is_active:
+        return
+    log_security_event(
+        logger,
+        event,
+        request,
+        f"Login rejected for inactive user: {user.username}",
+        user_id=user.id,
+        username=user.username,
+    )
+    raise UnauthorizedException(
+        message="This account has been deactivated. Please contact an administrator.",
+        request=request,
+        error_code=AuthErrorCode.ACCOUNT_DEACTIVATED,
+    )
+
+
+def record_account_change(
+    db: Session,
+    request: Request,
+    user: User,
+    *,
+    action: str,
+    event: str,
+    message: str,
+) -> None:
+    """Write the activity entry and the security log entry for a change to user."""
+    safe_log_activity(
+        db=db,
+        action=action,
+        entity_type=EntityType.USER,
+        entity_obj=user,
+        user_id=user.id,
+        description=f"{message}: {user.username}",
+        request=request,
+    )
+    log_security_event(
+        logger,
+        event,
+        request,
+        f"{message}: {user.username}",
+        user_id=user.id,
+        username=user.username,
+    )
+
+
+def end_other_sessions(
+    db: Session, user: User, request: Request, response: Response
+) -> None:
+    """End every session of user and set a fresh cookie on response for this one."""
+    user_crud.commit_ending_sessions(db, user)
+    reissue_session(db, user, request, response)
 
 
 def reissue_session(
@@ -176,4 +257,39 @@ def complete_login(
     }
     response = JSONResponse(content=body)
     set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)
+    return response
+
+
+def finish_password_login(db: Session, user: User, request: Request) -> JSONResponse:
+    """Complete a verified password sign-in, or start the second step when one is due.
+
+    The caller must already have verified the password and is_active.
+    """
+    if two_factor_service.is_required_at_login(db, user):
+        log_security_event(
+            logger,
+            "login_password_verified_mfa_required",
+            request,
+            f"Password verified, second factor required for: {user.username}",
+            user_id=user.id,
+            username=user.username,
+        )
+        return JSONResponse(content=two_factor_service.issue_challenge(user))
+
+    response = complete_login(
+        db,
+        user,
+        request,
+        method="password",
+        activity_description=f"User logged in: {user.username}",
+        log_event_name="token_created",
+    )
+    log_endpoint_access(
+        logger,
+        request,
+        user.id,
+        "login_success",
+        message=f"Login successful for username: {user.username}",
+        username=user.username,
+    )
     return response

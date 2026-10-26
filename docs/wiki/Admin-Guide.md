@@ -70,6 +70,21 @@ The script auto-detects state and picks promote-vs-create, shows a plan, asks fo
 
 Full CLI documentation: [`app/scripts/README_EMERGENCY_ADMIN.md`](../../app/scripts/README_EMERGENCY_ADMIN.md).
 
+### Two-Factor Recovery
+
+Users turn two-factor authentication on for their own account in Settings. When one of them cannot get past the code step:
+
+1. **They still have a backup code.** They choose "Use a backup code" at sign-in, then turn two-factor off and on again in Settings to set up a new phone and get new codes. Nothing for you to do.
+2. **No backup codes left.** Reset their two-factor from the host. This removes their authenticator and backup codes and signs out all their sessions; their password is unchanged:
+
+   ```bash
+   docker exec -it <container_name> python app/scripts/reset_user_mfa.py --username alice
+   ```
+
+3. **Everyone is locked out**, usually because `SECRET_KEY` changed or a backup was restored onto a server with a different one. Set `TWO_FACTOR_ENABLED=false` in the container environment and restart. Users then sign in with their password alone. Restore the original `SECRET_KEY` if you can, then remove the setting. MediKeep logs a warning at every startup while it is off and users are enrolled.
+
+Backup codes keep working after a `SECRET_KEY` change; authenticator codes do not. Keep `SECRET_KEY` set and stable: while it is unset, nobody can turn two-factor on. Details: [Deployment Guide, Two-Factor Authentication](../developer-guide/04-deployment.md#two-factor-authentication).
+
 ---
 
 ## Data Model Management

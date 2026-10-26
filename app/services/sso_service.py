@@ -12,6 +12,7 @@ from app.auth.sso.providers import create_sso_provider
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.crud.user import user as user_crud
+from app.services import two_factor_service
 
 logger = get_logger(__name__, "sso")
 
@@ -732,6 +733,14 @@ class SSOService:
             raise SSOAuthenticationError(
                 "Invalid username or password",
                 error_code=AuthErrorCode.INVALID_CREDENTIALS,
+            )
+
+        # A link is a lasting sign-in route that never asks for the second factor
+        if two_factor_service.is_totp_enabled(db, existing_user):
+            raise SSOAuthenticationError(
+                "Two-factor authentication is on for this account, so GitHub cannot "
+                "be linked with a password. Sign in with your password and code instead.",
+                error_code=AuthErrorCode.SSO_GITHUB_LINK_TWO_FACTOR,
             )
 
         # Link the GitHub account to the existing user

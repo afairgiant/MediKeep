@@ -9,7 +9,11 @@ from unittest.mock import patch
 
 import pytest
 
-from app.core.utils.rate_limit import SlidingWindowRateLimiter
+from app.core.utils.rate_limit import (
+    SlidingWindowRateLimiter,
+    failure_slots,
+    reserve_all,
+)
 
 
 @pytest.fixture
@@ -316,6 +320,31 @@ class TestRelease:
         assert limiter.get_remaining_requests("never-seen") == 3
 
 
+class TestFailureSlot:
+    def test_success_gives_the_slot_back(self, limiter):
+        limiter.is_allowed("k")
+        with limiter.failure_slot("k", counted=(ValueError,)):
+            pass
+
+        assert limiter.get_remaining_requests("k") == 3
+
+    def test_counted_failure_keeps_the_slot(self, limiter):
+        limiter.is_allowed("k")
+        with pytest.raises(ValueError):
+            with limiter.failure_slot("k", counted=(ValueError,)):
+                raise ValueError
+
+        assert limiter.get_remaining_requests("k") == 2
+
+    def test_unexpected_error_gives_the_slot_back(self, limiter):
+        limiter.is_allowed("k")
+        with pytest.raises(RuntimeError):
+            with limiter.failure_slot("k", counted=(ValueError,)):
+                raise RuntimeError
+
+        assert limiter.get_remaining_requests("k") == 3
+
+
 class TestTooManyRequests:
     def test_carries_standard_headers_and_error_code(self, limiter):
         for _ in range(3):
@@ -329,3 +358,60 @@ class TestTooManyRequests:
             rejection.headers
         )
         assert rejection.detail.startswith("Slow down. Please wait ")
+
+
+class TestReserveAll:
+    def test_takes_a_slot_under_every_limit(self):
+        first, second = SlidingWindowRateLimiter(2, 60), SlidingWindowRateLimiter(2, 60)
+
+        assert reserve_all([(first, "a"), (second, "b")]) is None
+
+        assert first.get_remaining_requests("a") == 1
+        assert second.get_remaining_requests("b") == 1
+
+    def test_full_limit_gives_back_the_slots_already_taken(self):
+        first, full = SlidingWindowRateLimiter(2, 60), SlidingWindowRateLimiter(1, 60)
+        full.is_allowed("b")
+
+        assert reserve_all([(first, "a"), (full, "b")]) == (full, "b")
+
+        assert first.get_remaining_requests("a") == 2
+
+    def test_empty_list_reserves_nothing(self):
+        assert reserve_all([]) is None
+
+
+class TestFailureSlots:
+    def _reserved(self):
+        limits = [
+            (SlidingWindowRateLimiter(3, 60), "k"),
+            (SlidingWindowRateLimiter(3, 60), "k"),
+        ]
+        assert reserve_all(limits) is None
+        return limits
+
+    def test_success_releases_every_slot(self):
+        limits = self._reserved()
+
+        with failure_slots(limits, counted=(ValueError,)):
+            pass
+
+        assert all(l.get_remaining_requests(k) == 3 for l, k in limits)
+
+    def test_counted_failure_keeps_every_slot(self):
+        limits = self._reserved()
+
+        with pytest.raises(ValueError):
+            with failure_slots(limits, counted=(ValueError,)):
+                raise ValueError()
+
+        assert all(l.get_remaining_requests(k) == 2 for l, k in limits)
+
+    def test_other_error_releases_every_slot(self):
+        limits = self._reserved()
+
+        with pytest.raises(KeyError):
+            with failure_slots(limits, counted=(ValueError,)):
+                raise KeyError()
+
+        assert all(l.get_remaining_requests(k) == 3 for l, k in limits)

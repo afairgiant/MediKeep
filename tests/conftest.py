@@ -36,6 +36,7 @@ from app.crud.patient import patient as patient_crud
 from app.schemas.user import UserCreate
 from app.schemas.patient import PatientCreate
 from app.core.utils.security import create_access_token
+from app.services import two_factor_service
 from app.services.login_throttle import login_throttle
 from tests.utils.user import create_random_user, create_user_authentication_headers
 from app.core.events import setup_event_system
@@ -140,18 +141,19 @@ def db_session(test_db_engine) -> Generator[Session, None, None]:
     # cycle makes topological deletion impossible, so drop FKs just for the
     # teardown sweep and restore immediately after.
     session.rollback()
-
-    from sqlalchemy import text as _sql_text
-
-    session.execute(_sql_text("PRAGMA foreign_keys=OFF"))
-    try:
-        for table in reversed(Base.metadata.sorted_tables):
-            session.execute(table.delete())
-        session.commit()
-    finally:
-        session.execute(_sql_text("PRAGMA foreign_keys=ON"))
-
     session.close()
+
+    # One connection throughout: a session may return to the pool on commit, and the
+    # restoring pragma would then land on another connection, leaving this one off
+    with test_db_engine.connect() as conn:
+        conn.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        try:
+            for table in reversed(Base.metadata.sorted_tables):
+                conn.execute(table.delete())
+            conn.commit()
+        finally:
+            conn.rollback()
+            conn.exec_driver_sql("PRAGMA foreign_keys=ON")
 
 
 @pytest.fixture(scope="function")
@@ -574,6 +576,7 @@ def cleanup_after_test():
 
     # Failed logins from the shared test client IP would otherwise add up across tests
     login_throttle.reset()
+    two_factor_service.reset_state()
 
 
 @pytest.fixture

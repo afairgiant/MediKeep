@@ -50,6 +50,18 @@ class TestLoginCodes:
         assert response.status_code == 401
         assert response.json()["error_code"] == AuthErrorCode.INVALID_CREDENTIALS
 
+    def test_password_past_bcrypt_limit_is_bad_credentials_not_an_error(
+        self, client: TestClient, db_session
+    ):
+        user_data = create_random_user(db_session)
+
+        response = client.post(
+            LOGIN_URL, data={"username": user_data["username"], "password": "x" * 73}
+        )
+
+        assert response.status_code == 401
+        assert response.json()["error_code"] == AuthErrorCode.INVALID_CREDENTIALS
+
     def test_deactivated_account_is_distinct_from_bad_credentials(
         self, client: TestClient, db_session
     ):
@@ -166,6 +178,18 @@ class TestChangePasswordCodes:
                 "currentPassword": "not-the-current-password",
                 "newPassword": "newpass123",
             },
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 401
+        assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
+
+    def test_current_password_past_bcrypt_limit_is_incorrect_not_an_error(
+        self, client: TestClient, authenticated_headers
+    ):
+        response = client.post(
+            CHANGE_PASSWORD_URL,
+            json={"currentPassword": "x" * 73, "newPassword": "newpass123"},
             headers=authenticated_headers,
         )
 

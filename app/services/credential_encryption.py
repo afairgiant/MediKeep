@@ -26,9 +26,9 @@ class SecurityError(Exception):
 class CredentialEncryption:
     """Secure encryption/decryption of paperless API tokens."""
 
-    def __init__(self):
-        """Initialize the encryption service with derived key."""
-        self.salt = settings.PAPERLESS_SALT.encode()
+    def __init__(self, salt: Optional[str] = None):
+        """Derive the key from SECRET_KEY and salt (default: the Paperless salt)."""
+        self.salt = (salt or settings.PAPERLESS_SALT).encode()
 
         # Derive encryption key from SECRET_KEY + salt
         self.key = self._derive_key(settings.SECRET_KEY.encode(), self.salt)
@@ -154,17 +154,9 @@ class CredentialEncryption:
 credential_encryption = CredentialEncryption()
 
 
-class PapraCredentialEncryption(CredentialEncryption):
-    """Credential encryption using Papra-specific salt for key isolation."""
-
-    def __init__(self):
-        """Initialize with Papra-specific salt."""
-        self.salt = settings.PAPRA_SALT.encode()
-        self.key = self._derive_key(settings.SECRET_KEY.encode(), self.salt)
-        self.cipher = Fernet(self.key)
-
-
-papra_credential_encryption = PapraCredentialEncryption()
+# Separate salts so one integration's key cannot decrypt another's credentials
+papra_credential_encryption = CredentialEncryption(settings.PAPRA_SALT)
+mfa_credential_encryption = CredentialEncryption(settings.MFA_SALT)
 
 
 def encrypt_paperless_token(token: str) -> Optional[str]:

@@ -12,18 +12,22 @@ password hash. Nothing here may patch resolve_github_manual_link.
 
 import inspect
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import pytest
 
 from app.auth.sso.base_provider import SSOUserInfo
 from app.auth.sso.exceptions import SSOAuthenticationError
 from app.auth.sso.providers import GitHubProvider
+from app.core.config import settings
+from app.core.http.auth_codes import AuthErrorCode
 from app.core.utils.security import verify_password
 from app.crud.user import user as user_crud
 from app.models.models import User
 from app.schemas.user import UserCreate
 from app.services.sso_service import _STATE_TTL, SSOService, _state_storage
 from tests.utils.sso import store_github_link_token
+from tests.utils.two_factor import enroll
 
 PASSWORD = "linkpassword123"
 TEMP_TOKEN = "github-temp-token"
@@ -144,6 +148,71 @@ class TestRejectedCredentials:
         db_session.refresh(local_user)
         assert local_user.external_id is None
         assert local_user.auth_method == "local"
+
+
+class TestTwoFactorAccount:
+
+    def test_correct_password_is_refused(self, service, db_session, local_user):
+        enroll(db_session, local_user)
+        store_link_token()
+
+        with pytest.raises(SSOAuthenticationError) as raised:
+            service.resolve_github_manual_link(
+                TEMP_TOKEN, "githublinker", PASSWORD, db_session
+            )
+
+        assert raised.value.error_code == AuthErrorCode.SSO_GITHUB_LINK_TWO_FACTOR
+        db_session.refresh(local_user)
+        assert local_user.external_id is None
+        assert local_user.auth_method == "local"
+
+    def test_refused_while_the_kill_switch_is_off(
+        self, service, db_session, local_user
+    ):
+        enroll(db_session, local_user)
+        store_link_token()
+
+        with patch.object(settings, "TWO_FACTOR_ENABLED", False):
+            with pytest.raises(SSOAuthenticationError) as raised:
+                service.resolve_github_manual_link(
+                    TEMP_TOKEN, "githublinker", PASSWORD, db_session
+                )
+
+        assert raised.value.error_code == AuthErrorCode.SSO_GITHUB_LINK_TWO_FACTOR
+
+    def test_wrong_password_does_not_reveal_two_factor(
+        self, service, db_session, local_user
+    ):
+        enroll(db_session, local_user)
+        store_link_token()
+
+        with pytest.raises(SSOAuthenticationError) as raised:
+            service.resolve_github_manual_link(
+                TEMP_TOKEN, "githublinker", "wrongpassword", db_session
+            )
+
+        assert raised.value.error_code == AuthErrorCode.INVALID_CREDENTIALS
+
+    def test_endpoint_issues_no_session(self, client, db_session, local_user):
+        enroll(db_session, local_user)
+        store_link_token()
+        client.cookies.clear()
+
+        response = client.post(
+            "/api/v1/auth/sso/resolve-github-link",
+            json={
+                "temp_token": TEMP_TOKEN,
+                "username": "githublinker",
+                "password": PASSWORD,
+            },
+        )
+
+        assert response.status_code == 400
+        assert (
+            response.headers["X-Error-Code"] == AuthErrorCode.SSO_GITHUB_LINK_TWO_FACTOR
+        )
+        assert "access_token" not in response.json()
+        assert settings.AUTH_COOKIE_NAME not in response.cookies
 
 
 class TestTokenExpiry:

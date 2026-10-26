@@ -181,7 +181,8 @@ JUNCTION TABLES (Many-to-Many)
 - Username and email must be unique across the system
 - SSO users may have external_id instead of password_hash
 - active_patient_id determines which patient's records are currently active
-- session_version is raised on password change, admin password reset and deactivation
+- session_version is raised on password change, admin password reset, deactivation,
+  turning two-factor off, and "sign out other sessions"
 
 ### patients
 **Purpose**: Core patient demographic and profile information
@@ -269,6 +270,48 @@ JUNCTION TABLES (Many-to-Many)
 - One preference record per user (UNIQUE constraint on user_id)
 - Paperless credentials stored encrypted
 - Cascade delete with user account
+
+### user_totp
+**Purpose**: A user's authenticator-app (TOTP) secret
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique ID |
+| user_id | Integer | FK(users.id) ON DELETE CASCADE, NOT NULL, UNIQUE | Owner |
+| secret_encrypted | Text | NOT NULL | Base32 secret, Fernet-encrypted with a key derived from `SECRET_KEY` and `MFA_SALT` |
+| enabled_at | DateTime | NULL | When setup was confirmed; NULL means setup was started but not finished |
+| last_used_step | BigInteger | NULL | Highest 30-second step accepted, so a code works once |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Business Rules**:
+- Two-factor is on for a user only when a row exists with enabled_at set
+- last_used_step is only ever raised, with a conditional UPDATE, so two requests with
+  one code cannot both pass
+- A changed `SECRET_KEY` makes the secret unreadable; the user signs in with a backup
+  code, or an operator runs `app/scripts/reset_user_mfa.py`
+- No ORM relationship on User: removed by the FK cascade and explicitly by the user
+  deletion service
+
+### user_backup_codes
+**Purpose**: Single-use two-factor recovery codes
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique ID |
+| user_id | Integer | FK(users.id) ON DELETE CASCADE, NOT NULL | Owner |
+| code_hash | String(100) | NOT NULL | bcrypt hash of the normalized code |
+| used_at | DateTime | NULL | When the code was used; NULL means still available |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Indexes**:
+- `idx_user_backup_codes_user_id` on user_id
+
+**Business Rules**:
+- Ten per user, replaced as a set on regenerate
+- Hashed with bcrypt rather than encrypted, so they keep working after `SECRET_KEY` changes
+- Marked used with a conditional UPDATE, so a code cannot be used twice
 
 ### activity_log
 **Purpose**: Audit trail for user and system activities (referenced in code, table definition in separate migration)
@@ -1700,6 +1743,8 @@ JUNCTION TABLES (Many-to-Many)
 - created, updated, deleted, viewed
 - uploaded, downloaded
 - login, logout
+- two_factor_enabled, two_factor_disabled, two_factor_reset, backup_codes_regenerated,
+  sessions_revoked
 - activated, deactivated, completed, cancelled
 - backup_created, maintenance_started, maintenance_completed
 
