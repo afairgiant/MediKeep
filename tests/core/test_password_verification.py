@@ -28,3 +28,9 @@ def test_long_password_hashed_by_bcrypt_4_still_signs_in():
 
 def test_limit_counts_bytes_not_characters():
     assert verify_password("\u00e9" * 37, get_password_hash("x")) is False
+
+
+def test_password_past_the_limit_hashes_and_checks():
+    password = "\u00e9" * 37 + "tail"
+
+    assert verify_password(password, get_password_hash(password)) is True

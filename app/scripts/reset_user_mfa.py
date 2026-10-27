@@ -88,7 +88,8 @@ def reset_user_mfa(username: str) -> tuple[int, str]:
         )
     except Exception as e:
         db.rollback()
-        return EXIT_ERROR, f"Error resetting two-factor: {e}"
+        # Database errors can echo bound values, which include secret material
+        return EXIT_ERROR, f"Error resetting two-factor: {type(e).__name__}"
     finally:
         db.close()
 
