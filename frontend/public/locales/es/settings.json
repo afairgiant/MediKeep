@@ -160,6 +160,73 @@
       },
       "newPassword": "Nueva contraseña",
       "passwordHelp": "Al menos 6 caracteres, debe incluir una letra y un número."
+    },
+    "sessions": {
+      "button": "Cerrar sesión en otros dispositivos",
+      "confirmBody": "Se cerrará la sesión en todos los demás navegadores y dispositivos conectados a su cuenta. Usted seguirá conectado aquí.",
+      "confirmTitle": "¿Cerrar sesión en otros dispositivos?",
+      "description": "Cerrar sesión en MediKeep en todas partes excepto en este navegador.",
+      "title": "Otros dispositivos"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "He guardado estos códigos en un lugar seguro",
+        "copied": "Copiado",
+        "copy": "Copiar",
+        "description": "Use un código de respaldo para iniciar sesión si pierde el acceso a su aplicación de autenticación. Cada código funciona una sola vez.",
+        "done": "Listo",
+        "download": "Descargar",
+        "fileHeader": "Códigos de respaldo de MediKeep. Cada código funciona una sola vez.",
+        "listLabel": "Códigos de respaldo",
+        "onlyOnce": "Estos códigos no se volverán a mostrar. Guárdelos antes de cerrar esta ventana.",
+        "print": "Imprimir",
+        "title": "Sus códigos de respaldo"
+      },
+      "blocked": {
+        "disabled_by_operator": "El administrador ha desactivado la autenticación en dos pasos en este servidor.",
+        "secret_key_not_configured": "La autenticación en dos pasos necesita una SECRET_KEY permanente en este servidor. Pida a su administrador que configure una.",
+        "sso_account": "Su cuenta inicia sesión a través de su proveedor de identidad. Configure allí la autenticación en dos pasos.",
+        "sso_only_mode": "Este servidor solo permite iniciar sesión a través de su proveedor de identidad. Configure allí la autenticación en dos pasos.",
+        "unknown": "La autenticación en dos pasos no se puede activar en esta cuenta."
+      },
+      "cancel": "Cancelar",
+      "codesRemaining_one": "Queda {{count}} código de respaldo.",
+      "codesRemaining_other": "Quedan {{count}} códigos de respaldo.",
+      "confirmIdentity": {
+        "codeHelp": "Un código de 6 dígitos de su aplicación de autenticación o uno de sus códigos de respaldo.",
+        "codeLabel": "Código de autenticación"
+      },
+      "description": "Pedir un código de una aplicación de autenticación cada vez que inicie sesión con su contraseña.",
+      "disable": "Desactivar",
+      "disableModal": {
+        "description": "Para iniciar sesión solo se pedirá su contraseña. Se cerrarán todas sus demás sesiones.",
+        "title": "Desactivar la autenticación en dos pasos"
+      },
+      "enable": "Activar",
+      "enabledDescription": "Iniciar sesión con su contraseña también requiere un código de su aplicación de autenticación.",
+      "failed": "Algo salió mal. Inténtelo de nuevo.",
+      "loadFailed": "No se pudo cargar el estado de la autenticación en dos pasos.",
+      "lowCodes_one": "Solo queda {{count}} código de respaldo. Genere otros nuevos para no perder el acceso.",
+      "lowCodes_other": "Solo quedan {{count}} códigos de respaldo. Genere otros nuevos para no perder el acceso.",
+      "regenerate": "Nuevos códigos de respaldo",
+      "regenerateModal": {
+        "description": "Sus códigos de respaldo actuales dejarán de funcionar y recibirá un nuevo juego.",
+        "title": "Generar nuevos códigos de respaldo"
+      },
+      "retry": "Reintentar",
+      "setup": {
+        "codeStep": "Introduzca el código de 6 dígitos que muestra la aplicación para terminar.",
+        "confirm": "Activar",
+        "continue": "Continuar",
+        "manualKey": "¿No puede escanear el código? Introduzca esta clave en la aplicación:",
+        "passwordStep": "Introduzca su contraseña actual para empezar.",
+        "qrLabel": "Código QR para su aplicación de autenticación",
+        "scanStep": "Escanee este código QR con una aplicación de autenticación como Google Authenticator, Microsoft Authenticator, Aegis o 1Password.",
+        "title": "Configurar la autenticación en dos pasos"
+      },
+      "statusOff": "Desactivada",
+      "statusOn": "Activada",
+      "title": "Autenticación en dos pasos"
     }
   },
   "settings": {

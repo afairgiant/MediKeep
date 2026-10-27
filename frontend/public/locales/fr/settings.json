@@ -160,6 +160,73 @@
       },
       "newPassword": "Nouveau mot de passe",
       "passwordHelp": "Le mot de passe doit contenir au moins 6 caractères et au moins une lettre et un chiffre."
+    },
+    "sessions": {
+      "button": "Déconnecter les autres appareils",
+      "confirmBody": "Tous les autres navigateurs et appareils connectés à votre compte seront déconnectés. Vous restez connecté ici.",
+      "confirmTitle": "Déconnecter les autres appareils ?",
+      "description": "Se déconnecter de MediKeep partout sauf dans ce navigateur.",
+      "title": "Autres appareils"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "J'ai enregistré ces codes en lieu sûr",
+        "copied": "Copié",
+        "copy": "Copier",
+        "description": "Utilisez un code de secours pour vous connecter si vous perdez l'accès à votre application d'authentification. Chaque code ne fonctionne qu'une fois.",
+        "done": "Terminé",
+        "download": "Télécharger",
+        "fileHeader": "Codes de secours MediKeep. Chaque code ne fonctionne qu'une fois.",
+        "listLabel": "Codes de secours",
+        "onlyOnce": "Ces codes ne seront plus affichés. Enregistrez-les avant de fermer cette fenêtre.",
+        "print": "Imprimer",
+        "title": "Vos codes de secours"
+      },
+      "blocked": {
+        "disabled_by_operator": "L'authentification à deux facteurs est désactivée sur ce serveur par l'administrateur.",
+        "secret_key_not_configured": "L'authentification à deux facteurs nécessite une SECRET_KEY permanente sur ce serveur. Demandez à votre administrateur d'en définir une.",
+        "sso_account": "Votre compte se connecte via votre fournisseur d'identité. Configurez l'authentification à deux facteurs chez celui-ci.",
+        "sso_only_mode": "Ce serveur n'autorise que la connexion via votre fournisseur d'identité. Configurez l'authentification à deux facteurs chez celui-ci.",
+        "unknown": "L'authentification à deux facteurs ne peut pas être activée pour ce compte."
+      },
+      "cancel": "Annuler",
+      "codesRemaining_one": "{{count}} code de secours restant.",
+      "codesRemaining_other": "{{count}} codes de secours restants.",
+      "confirmIdentity": {
+        "codeHelp": "Un code à 6 chiffres de votre application d'authentification, ou l'un de vos codes de secours.",
+        "codeLabel": "Code d'authentification"
+      },
+      "description": "Demander un code d'une application d'authentification à chaque connexion avec votre mot de passe.",
+      "disable": "Désactiver",
+      "disableModal": {
+        "description": "La connexion ne demandera plus que votre mot de passe. Toutes vos autres sessions seront déconnectées.",
+        "title": "Désactiver l'authentification à deux facteurs"
+      },
+      "enable": "Activer",
+      "enabledDescription": "La connexion avec votre mot de passe demande aussi un code de votre application d'authentification.",
+      "failed": "Une erreur s'est produite. Veuillez réessayer.",
+      "loadFailed": "Impossible de charger l'état de l'authentification à deux facteurs.",
+      "lowCodes_one": "Il ne reste que {{count}} code de secours. Générez-en de nouveaux pour ne pas perdre l'accès.",
+      "lowCodes_other": "Il ne reste que {{count}} codes de secours. Générez-en de nouveaux pour ne pas perdre l'accès.",
+      "regenerate": "Nouveaux codes de secours",
+      "regenerateModal": {
+        "description": "Vos codes de secours actuels cesseront de fonctionner et vous recevrez une nouvelle série.",
+        "title": "Générer de nouveaux codes de secours"
+      },
+      "retry": "Réessayer",
+      "setup": {
+        "codeStep": "Saisissez le code à 6 chiffres affiché par l'application pour terminer.",
+        "confirm": "Activer",
+        "continue": "Continuer",
+        "manualKey": "Impossible de scanner le code ? Saisissez plutôt cette clé dans l'application :",
+        "passwordStep": "Saisissez votre mot de passe actuel pour commencer.",
+        "qrLabel": "Code QR pour votre application d'authentification",
+        "scanStep": "Scannez ce code QR avec une application d'authentification telle que Google Authenticator, Microsoft Authenticator, Aegis ou 1Password.",
+        "title": "Configurer l'authentification à deux facteurs"
+      },
+      "statusOff": "Désactivée",
+      "statusOn": "Activée",
+      "title": "Authentification à deux facteurs"
     }
   },
   "settings": {

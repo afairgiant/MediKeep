@@ -379,6 +379,16 @@
       "templateSaveFailed": "Kunde inte spara mallen",
       "validationError": "Valideringsfel"
     },
+    "security": {
+      "backupCodesLow_one": "Du har {{count}} reservkod kvar. Skapa nya under Inställningar.",
+      "backupCodesLow_other": "Du har {{count}} reservkoder kvar. Skapa nya under Inställningar.",
+      "backupCodesRegenerated": "Nya reservkoder har skapats. De gamla fungerar inte längre.",
+      "otherSessionsFailed": "Det gick inte att logga ut dina andra enheter. Försök igen.",
+      "otherSessionsSignedOut": "Dina andra enheter har loggats ut.",
+      "printBlocked": "Utskriftsfönstret blockerades av webbläsaren. Tillåt popup-fönster för den här webbplatsen eller använd Ladda ner i stället.",
+      "twoFactorDisabled": "Tvåfaktorsautentisering avstängd.",
+      "twoFactorEnabled": "Tvåfaktorsautentisering aktiverad. Dina andra enheter har loggats ut."
+    },
     "settings": {
       "cleanupComplete": "Rensning slutförd: {{cleaned}} filer rensade, {{deleted}} filer borttagna",
       "cleanupFailed": "Kunde inte rensa filer. Vänligen försök igen senare.",

@@ -59,11 +59,12 @@ class TotpSecretUnavailable(Exception):
 
 
 class CodeRejected(Exception):
-    """A submitted code was wrong, or was already used."""
+    """A submitted code was wrong, or was already used (replayed, with its method)."""
 
-    def __init__(self, replayed: bool = False):
+    def __init__(self, replayed: bool = False, method: Optional[str] = None):
         super().__init__("code rejected")
         self.replayed = replayed
+        self.method = method
 
 
 @dataclass
@@ -212,7 +213,7 @@ def verify_totp(
     )
     db.commit()
     if claimed != 1:
-        raise CodeRejected(replayed=True)
+        raise CodeRejected(replayed=True, method=METHOD_TOTP)
 
 
 def verify_backup_code(db: Session, user: User, code: str) -> int:
@@ -221,14 +222,13 @@ def verify_backup_code(db: Session, user: User, code: str) -> int:
     if len(normalized) != BACKUP_CODE_GROUP * 2:
         raise CodeRejected()
 
-    unused = (
-        db.query(UserBackupCode)
-        .filter(UserBackupCode.user_id == user.id, UserBackupCode.used_at.is_(None))
-        .all()
-    )
-    for candidate in unused:
+    # Used codes are checked too, so a reused one is reported as reused
+    codes = db.query(UserBackupCode).filter(UserBackupCode.user_id == user.id).all()
+    for candidate in codes:
         if not verify_password(normalized, candidate.code_hash):
             continue
+        if candidate.used_at is not None:
+            raise CodeRejected(replayed=True, method=METHOD_BACKUP_CODE)
         claimed = (
             db.query(UserBackupCode)
             .filter(UserBackupCode.id == candidate.id, UserBackupCode.used_at.is_(None))
@@ -236,7 +236,7 @@ def verify_backup_code(db: Session, user: User, code: str) -> int:
         )
         db.commit()
         if claimed != 1:
-            raise CodeRejected(replayed=True)
+            raise CodeRejected(replayed=True, method=METHOD_BACKUP_CODE)
         return backup_codes_remaining(db, user)
 
     raise CodeRejected()
@@ -296,6 +296,10 @@ def issue_challenge(user: User) -> dict:
 def take_ticket(token: str) -> Optional[StoredEntry]:
     """Hold the ticket for one verification attempt; None if unknown or expired."""
     return mfa_tickets.take(token)
+
+
+def ticket_attempts_left(entry: StoredEntry) -> int:
+    return MFA_TICKET_MAX_ATTEMPTS - entry.value.attempts
 
 
 def return_ticket(token: str, entry: StoredEntry, count_attempt: bool) -> None:

@@ -158,6 +158,10 @@ class TestVerify:
         wrong = _verify(client, ticket, "000000")
         assert wrong.status_code == 401
         assert wrong.json()["error_code"] == AuthErrorCode.MFA_CODE_INVALID
+        assert wrong.json()["data"] == {
+            "attempts_remaining": 4,
+            "after_last": "sign_in_again",
+        }
 
         assert _verify(client, ticket, code_at(secret)).status_code == 200
 
@@ -169,7 +173,32 @@ class TestVerify:
         response = _verify(client, _ticket(client), code)
 
         assert response.status_code == 401
-        assert response.json()["error_code"] == AuthErrorCode.MFA_CODE_INVALID
+        assert response.json()["error_code"] == AuthErrorCode.MFA_CODE_REUSED
+
+    def test_used_backup_code_is_reported_as_used(self, client: TestClient, enrolled):
+        _, codes = enrolled
+        assert (
+            _verify(client, _ticket(client), codes[0], method="backup_code").status_code
+            == 200
+        )
+
+        response = _verify(client, _ticket(client), codes[0], method="backup_code")
+
+        assert response.status_code == 401
+        assert response.json()["error_code"] == AuthErrorCode.MFA_BACKUP_CODE_REUSED
+
+    def test_last_attempt_before_the_lock_says_wait(
+        self, client: TestClient, enrolled, limiter_ceiling
+    ):
+        limiter_ceiling(two_factor_service.mfa_verify_limiter, 3)
+        _verify(client, _ticket(client), "000000")
+
+        response = _verify(client, _ticket(client), "000000")
+
+        assert response.json()["data"] == {
+            "attempts_remaining": 1,
+            "after_last": "wait",
+        }
 
     def test_ticket_is_single_use(self, client: TestClient, enrolled):
         secret, _ = enrolled

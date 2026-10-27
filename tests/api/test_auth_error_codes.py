@@ -199,7 +199,7 @@ class TestChangePasswordCodes:
             headers=authenticated_headers,
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 400
         assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
 
     def test_current_password_past_bcrypt_limit_is_incorrect_not_an_error(
@@ -211,7 +211,7 @@ class TestChangePasswordCodes:
             headers=authenticated_headers,
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 400
         assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
 
     def test_new_password_past_bcrypt_limit_is_set_and_signs_in(

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authErrorCopy } from '../../utils/authErrorCopy';
 import { useAuth } from '../../contexts/AuthContext';
-import { notifyError } from '../../utils/notifyTranslated';
+import { notifyError, notifyWarning } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
 import { safeInternalPath } from '../../utils/safeInternalPath';
@@ -11,6 +11,8 @@ import { storeSSOReturnUrl } from '../../utils/ssoReturnUrl';
 import { shouldSuppressAutoRedirect } from '../../utils/loginRedirect';
 import { useAutoRedirectToProvider } from '../../hooks/useAutoRedirectToProvider';
 import { IconUser, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
+import TwoFactorChallenge from '../../components/auth/TwoFactorChallenge';
+import { LOW_BACKUP_CODES } from '../../constants/twoFactor';
 import styles from '../../styles/pages/Login.module.css';
 
 /**
@@ -43,11 +45,15 @@ const Login = () => {
   const [configLoaded, setConfigLoaded] = useState(false);
   const [configError, setConfigError] = useState(false);
   const [registrationMessageCode, setRegistrationMessageCode] = useState('');
+  // Held only here: the ticket must never outlive this page or reach storage
+  const [challenge, setChallenge] = useState(null);
+  const [challengeEnded, setChallengeEnded] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const {
     login,
+    completeTwoFactorLogin,
     error,
     errorCode,
     clearError,
@@ -131,7 +137,7 @@ const Login = () => {
   // it independently is how the page ended up drawing a rule and the word "or"
   // across empty space with nothing above them.
   const passwordFormVisible =
-    !ssoOnly && autoRedirect.status !== 'redirecting';
+    !ssoOnly && autoRedirect.status !== 'redirecting' && !challenge;
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -292,27 +298,51 @@ const Login = () => {
 
   const handleChange = e => {
     clearError(); // Clear any existing errors
+    setChallengeEnded(false);
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
+  const finishSignIn = async result => {
+    // Add a small delay to ensure auth state is fully saved before navigation
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (result.mustChangePassword) {
+      navigate('/change-password', { replace: true });
+    } else {
+      navigate(returnPath, { replace: true });
+    }
+  };
+
+  const handleVerify = async (code, method) => {
+    const result = await completeTwoFactorLogin(challenge.ticket, code, method);
+    if (result.success) {
+      const remaining = result.backupCodesRemaining;
+      if (remaining != null && remaining <= LOW_BACKUP_CODES) {
+        notifyWarning('notifications:toasts.security.backupCodesLow', {
+          interpolation: { count: remaining },
+          autoClose: false,
+        });
+      }
+      await finishSignIn(result);
+    }
+    return result;
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
+    setChallengeEnded(false);
 
     try {
       const result = await login(formData);
-      if (result.success) {
-        // Add a small delay to ensure auth state is fully saved before navigation
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (result.mustChangePassword) {
-          navigate('/change-password', { replace: true });
-        } else {
-          navigate(returnPath, { replace: true });
-        }
+      if (result.success && result.mfaRequired) {
+        setFormData(prev => ({ ...prev, password: '' }));
+        setChallenge({ ticket: result.mfaTicket, methods: result.methods });
+      } else if (result.success) {
+        await finishSignIn(result);
       } else {
         notifyError('notifications:toasts.auth.loginFailed');
       }
@@ -395,6 +425,24 @@ const Login = () => {
           <div className={styles.errorMessage}>
             {authErrorCopy(t, errorCode, error)}
           </div>
+        )}
+
+        {challengeEnded && (
+          <div className={styles.errorMessage} role="alert">
+            {t('errors.mfa_ticket_invalid')}
+          </div>
+        )}
+
+        {challenge && (
+          <TwoFactorChallenge
+            methods={challenge.methods}
+            onVerify={handleVerify}
+            onExpired={() => {
+              setChallenge(null);
+              setChallengeEnded(true);
+            }}
+            onCancel={() => setChallenge(null)}
+          />
         )}
 
         {passwordFormVisible && (
@@ -493,6 +541,7 @@ const Login = () => {
             the manual way in once auto-redirect has stopped trying. */}
         {configReady &&
           ssoConfig.enabled &&
+          !challenge &&
           autoRedirect.status !== 'redirecting' && (
             <div className={styles.ssoSection} data-testid="sso-section">
               {/* Only meaningful with the password form above it to divide
@@ -533,7 +582,7 @@ const Login = () => {
           </div>
         )}
 
-        {configReady && !ssoOnly && (
+        {configReady && !ssoOnly && !challenge && (
           <div className={styles.loginActions}>
             {registrationEnabled ? (
               <button

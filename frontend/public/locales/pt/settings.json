@@ -160,6 +160,73 @@
       },
       "newPassword": "Nova Senha",
       "passwordHelp": "Pelo menos 6 caracteres, deve incluir uma letra e um número."
+    },
+    "sessions": {
+      "button": "Terminar sessão noutros dispositivos",
+      "confirmBody": "A sessão será terminada em todos os outros navegadores e dispositivos ligados à sua conta. Aqui continuará com sessão iniciada.",
+      "confirmTitle": "Terminar sessão noutros dispositivos?",
+      "description": "Terminar sessão no MediKeep em todo o lado exceto neste navegador.",
+      "title": "Outros dispositivos"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "Guardei estes códigos num local seguro",
+        "copied": "Copiado",
+        "copy": "Copiar",
+        "description": "Use um código de backup para iniciar sessão se perder o acesso à sua aplicação de autenticação. Cada código funciona apenas uma vez.",
+        "done": "Concluído",
+        "download": "Transferir",
+        "fileHeader": "Códigos de backup do MediKeep. Cada código funciona apenas uma vez.",
+        "listLabel": "Códigos de backup",
+        "onlyOnce": "Estes códigos não voltarão a ser mostrados. Guarde-os antes de fechar esta janela.",
+        "print": "Imprimir",
+        "title": "Os seus códigos de backup"
+      },
+      "blocked": {
+        "disabled_by_operator": "A autenticação de dois fatores foi desativada neste servidor pelo administrador.",
+        "secret_key_not_configured": "A autenticação de dois fatores precisa de uma SECRET_KEY permanente neste servidor. Peça ao seu administrador para definir uma.",
+        "sso_account": "A sua conta inicia sessão através do seu fornecedor de identidade. Configure lá a autenticação de dois fatores.",
+        "sso_only_mode": "Este servidor só permite iniciar sessão através do seu fornecedor de identidade. Configure lá a autenticação de dois fatores.",
+        "unknown": "A autenticação de dois fatores não pode ser ativada nesta conta."
+      },
+      "cancel": "Cancelar",
+      "codesRemaining_one": "Resta {{count}} código de backup.",
+      "codesRemaining_other": "Restam {{count}} códigos de backup.",
+      "confirmIdentity": {
+        "codeHelp": "Um código de 6 dígitos da sua aplicação de autenticação ou um dos seus códigos de backup.",
+        "codeLabel": "Código de autenticação"
+      },
+      "description": "Pedir um código de uma aplicação de autenticação sempre que iniciar sessão com a palavra-passe.",
+      "disable": "Desativar",
+      "disableModal": {
+        "description": "Para iniciar sessão só será pedida a palavra-passe. Todas as outras sessões serão terminadas.",
+        "title": "Desativar a autenticação de dois fatores"
+      },
+      "enable": "Ativar",
+      "enabledDescription": "Iniciar sessão com a palavra-passe também exige um código da sua aplicação de autenticação.",
+      "failed": "Ocorreu um erro. Tente novamente.",
+      "loadFailed": "Não foi possível carregar o estado da autenticação de dois fatores.",
+      "lowCodes_one": "Resta apenas {{count}} código de backup. Gere novos para não ficar sem acesso.",
+      "lowCodes_other": "Restam apenas {{count}} códigos de backup. Gere novos para não ficar sem acesso.",
+      "regenerate": "Novos códigos de backup",
+      "regenerateModal": {
+        "description": "Os seus códigos de backup atuais deixarão de funcionar e receberá um novo conjunto.",
+        "title": "Gerar novos códigos de backup"
+      },
+      "retry": "Tentar novamente",
+      "setup": {
+        "codeStep": "Introduza o código de 6 dígitos mostrado pela aplicação para concluir.",
+        "confirm": "Ativar",
+        "continue": "Continuar",
+        "manualKey": "Não consegue ler o código? Introduza esta chave na aplicação:",
+        "passwordStep": "Introduza a sua palavra-passe atual para começar.",
+        "qrLabel": "Código QR para a sua aplicação de autenticação",
+        "scanStep": "Leia este código QR com uma aplicação de autenticação como Google Authenticator, Microsoft Authenticator, Aegis ou 1Password.",
+        "title": "Configurar a autenticação de dois fatores"
+      },
+      "statusOff": "Desativada",
+      "statusOn": "Ativada",
+      "title": "Autenticação de dois fatores"
     }
   },
   "settings": {

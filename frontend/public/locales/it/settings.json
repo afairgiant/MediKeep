@@ -160,6 +160,73 @@
       },
       "newPassword": "Nuova Password",
       "passwordHelp": "Almeno 6 caratteri, deve includere una lettera e un numero."
+    },
+    "sessions": {
+      "button": "Disconnetti gli altri dispositivi",
+      "confirmBody": "Tutti gli altri browser e dispositivi connessi al tuo account verranno disconnessi. Qui rimarrai connesso.",
+      "confirmTitle": "Disconnettere gli altri dispositivi?",
+      "description": "Esci da MediKeep ovunque tranne che in questo browser.",
+      "title": "Altri dispositivi"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "Ho salvato questi codici in un posto sicuro",
+        "copied": "Copiato",
+        "copy": "Copia",
+        "description": "Usa un codice di backup per accedere se perdi l'accesso alla tua app di autenticazione. Ogni codice funziona una sola volta.",
+        "done": "Fatto",
+        "download": "Scarica",
+        "fileHeader": "Codici di backup MediKeep. Ogni codice funziona una sola volta.",
+        "listLabel": "Codici di backup",
+        "onlyOnce": "Questi codici non verranno mostrati di nuovo. Salvali prima di chiudere questa finestra.",
+        "print": "Stampa",
+        "title": "I tuoi codici di backup"
+      },
+      "blocked": {
+        "disabled_by_operator": "L'autenticazione a due fattori è stata disattivata su questo server dall'amministratore.",
+        "secret_key_not_configured": "L'autenticazione a due fattori richiede una SECRET_KEY permanente su questo server. Chiedi al tuo amministratore di impostarne una.",
+        "sso_account": "Il tuo account accede tramite il tuo provider di identità. Configura lì l'autenticazione a due fattori.",
+        "sso_only_mode": "Questo server consente l'accesso solo tramite il tuo provider di identità. Configura lì l'autenticazione a due fattori.",
+        "unknown": "L'autenticazione a due fattori non può essere attivata per questo account."
+      },
+      "cancel": "Annulla",
+      "codesRemaining_one": "{{count}} codice di backup rimasto.",
+      "codesRemaining_other": "{{count}} codici di backup rimasti.",
+      "confirmIdentity": {
+        "codeHelp": "Un codice a 6 cifre della tua app di autenticazione o uno dei tuoi codici di backup.",
+        "codeLabel": "Codice di autenticazione"
+      },
+      "description": "Richiedi un codice da un'app di autenticazione a ogni accesso con password.",
+      "disable": "Disattiva",
+      "disableModal": {
+        "description": "Per accedere servirà solo la password. Tutte le altre sessioni verranno disconnesse.",
+        "title": "Disattiva l'autenticazione a due fattori"
+      },
+      "enable": "Attiva",
+      "enabledDescription": "L'accesso con password richiede anche un codice dalla tua app di autenticazione.",
+      "failed": "Qualcosa è andato storto. Riprova.",
+      "loadFailed": "Impossibile caricare lo stato dell'autenticazione a due fattori.",
+      "lowCodes_one": "Rimane solo {{count}} codice di backup. Generane di nuovi per non restare bloccato.",
+      "lowCodes_other": "Rimangono solo {{count}} codici di backup. Generane di nuovi per non restare bloccato.",
+      "regenerate": "Nuovi codici di backup",
+      "regenerateModal": {
+        "description": "I codici di backup attuali smetteranno di funzionare e ne riceverai di nuovi.",
+        "title": "Genera nuovi codici di backup"
+      },
+      "retry": "Riprova",
+      "setup": {
+        "codeStep": "Per terminare, inserisci il codice a 6 cifre mostrato dall'app.",
+        "confirm": "Attiva",
+        "continue": "Continua",
+        "manualKey": "Non riesci a scansionare il codice? Inserisci invece questa chiave nell'app:",
+        "passwordStep": "Inserisci la password attuale per iniziare.",
+        "qrLabel": "Codice QR per la tua app di autenticazione",
+        "scanStep": "Scansiona questo codice QR con un'app di autenticazione come Google Authenticator, Microsoft Authenticator, Aegis o 1Password.",
+        "title": "Configura l'autenticazione a due fattori"
+      },
+      "statusOff": "Disattivata",
+      "statusOn": "Attiva",
+      "title": "Autenticazione a due fattori"
     }
   },
   "settings": {

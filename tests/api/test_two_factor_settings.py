@@ -126,7 +126,7 @@ class TestEnrollment:
     def test_wrong_password(self, signed_in: TestClient):
         response = self._setup(signed_in, password="wrong-pass1")
 
-        assert response.status_code == 401
+        assert response.status_code == 400
         assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
 
     @pytest.mark.parametrize("password", ["x" * 73, "é" * 40])
@@ -135,7 +135,7 @@ class TestEnrollment:
     ):
         response = self._setup(signed_in, password=password)
 
-        assert response.status_code == 401
+        assert response.status_code == 400
         assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
 
     def test_already_enabled(self, signed_in: TestClient, db_session, user):
@@ -161,6 +161,7 @@ class TestEnrollment:
 
         assert response.status_code == 400
         assert response.json()["error_code"] == AuthErrorCode.MFA_CODE_INVALID
+        assert response.json()["data"]["after_last"] == "wait"
         assert signed_in.get(STATUS_URL).json()["totp_enabled"] is False
 
     @pytest.mark.parametrize(
@@ -188,8 +189,10 @@ class TestEnrollment:
 
     def test_failed_checks_are_limited(self, signed_in: TestClient, limiter_ceiling):
         limiter_ceiling(two_factor_service.settings_check_limiter, 2)
-        for _ in range(2):
-            assert self._setup(signed_in, password="wrong-pass1").status_code == 401
+        first = self._setup(signed_in, password="wrong-pass1")
+        assert first.status_code == 400
+        assert first.json()["data"] == {"attempts_remaining": 1, "after_last": "wait"}
+        assert self._setup(signed_in, password="wrong-pass1").status_code == 400
 
         response = self._setup(signed_in)
 
@@ -246,9 +249,22 @@ class TestDisable:
             DISABLE_URL, json={"current_password": PASSWORD, "code": "000000"}
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 400
         assert response.json()["error_code"] == AuthErrorCode.MFA_CODE_INVALID
         assert signed_in.get(STATUS_URL).json()["totp_enabled"] is True
+
+    def test_used_backup_code_is_reported_as_used(
+        self, signed_in: TestClient, db_session, user
+    ):
+        _, codes = _enroll_here(signed_in)
+        two_factor_service.verify_backup_code(db_session, user, codes[0])
+
+        response = signed_in.post(
+            DISABLE_URL, json={"current_password": PASSWORD, "code": codes[0]}
+        )
+
+        assert response.status_code == 400
+        assert response.json()["error_code"] == AuthErrorCode.MFA_BACKUP_CODE_REUSED
 
     def test_wrong_password(self, signed_in: TestClient, db_session, user):
         secret, _ = _enroll_here(signed_in)
@@ -257,7 +273,7 @@ class TestDisable:
             DISABLE_URL, json={"current_password": "nope", "code": code_at(secret)}
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 400
         assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
 
     def test_not_enabled(self, signed_in: TestClient):

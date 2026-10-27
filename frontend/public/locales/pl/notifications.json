@@ -379,6 +379,18 @@
       "templateSaveFailed": "Nie udało się zapisać szablonu",
       "validationError": "Błąd walidacji"
     },
+    "security": {
+      "backupCodesLow_few": "Pozostały Ci {{count}} kody zapasowe. Wygeneruj nowe w Ustawieniach.",
+      "backupCodesLow_many": "Pozostało Ci {{count}} kodów zapasowych. Wygeneruj nowe w Ustawieniach.",
+      "backupCodesLow_one": "Pozostał Ci {{count}} kod zapasowy. Wygeneruj nowe w Ustawieniach.",
+      "backupCodesLow_other": "Pozostało Ci {{count}} kodów zapasowych. Wygeneruj nowe w Ustawieniach.",
+      "backupCodesRegenerated": "Wygenerowano nowe kody zapasowe. Stare już nie działają.",
+      "otherSessionsFailed": "Nie udało się wylogować innych urządzeń. Spróbuj ponownie.",
+      "otherSessionsSignedOut": "Inne urządzenia zostały wylogowane.",
+      "printBlocked": "Przeglądarka zablokowała okno drukowania. Zezwól na wyskakujące okna dla tej witryny lub użyj opcji Pobierz.",
+      "twoFactorDisabled": "Uwierzytelnianie dwuskładnikowe wyłączone.",
+      "twoFactorEnabled": "Uwierzytelnianie dwuskładnikowe włączone. Inne urządzenia zostały wylogowane."
+    },
     "settings": {
       "cleanupComplete": "Czyszczenie ukończone: wyczyszczono {{cleaned}} plików, usunięto {{deleted}} plików",
       "cleanupFailed": "Nie udało się wyczyścić plików. Spróbuj ponownie później.",

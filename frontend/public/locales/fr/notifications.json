@@ -379,6 +379,16 @@
       "templateSaveFailed": "Echec de la sauvegarde du modèle",
       "validationError": "Erreur de validation"
     },
+    "security": {
+      "backupCodesLow_one": "Il vous reste {{count}} code de secours. Générez-en de nouveaux dans les Paramètres.",
+      "backupCodesLow_other": "Il vous reste {{count}} codes de secours. Générez-en de nouveaux dans les Paramètres.",
+      "backupCodesRegenerated": "Nouveaux codes de secours générés. Les anciens ne fonctionnent plus.",
+      "otherSessionsFailed": "Impossible de déconnecter vos autres appareils. Veuillez réessayer.",
+      "otherSessionsSignedOut": "Vos autres appareils ont été déconnectés.",
+      "printBlocked": "La fenêtre d'impression a été bloquée par votre navigateur. Autorisez les fenêtres pop-up pour ce site ou utilisez plutôt Télécharger.",
+      "twoFactorDisabled": "Authentification à deux facteurs désactivée.",
+      "twoFactorEnabled": "Authentification à deux facteurs activée. Vos autres appareils ont été déconnectés."
+    },
     "settings": {
       "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
       "cleanupFailed": "Echec du nettoyage des fichiers. Veuillez réessayer ultérieurement.",

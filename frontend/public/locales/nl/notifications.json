@@ -379,6 +379,16 @@
       "templateSaveFailed": "Sjabloon opslaan mislukt",
       "validationError": "Validatiefout"
     },
+    "security": {
+      "backupCodesLow_one": "Je hebt nog {{count}} back-upcode. Maak nieuwe aan in Instellingen.",
+      "backupCodesLow_other": "Je hebt nog {{count}} back-upcodes. Maak nieuwe aan in Instellingen.",
+      "backupCodesRegenerated": "Nieuwe back-upcodes gemaakt. De oude werken niet meer.",
+      "otherSessionsFailed": "Je andere apparaten konden niet worden afgemeld. Probeer het opnieuw.",
+      "otherSessionsSignedOut": "Je andere apparaten zijn afgemeld.",
+      "printBlocked": "Het afdrukvenster is door je browser geblokkeerd. Sta pop-ups toe voor deze site of gebruik Downloaden.",
+      "twoFactorDisabled": "Tweestapsverificatie uitgezet.",
+      "twoFactorEnabled": "Tweestapsverificatie aangezet. Je andere apparaten zijn afgemeld."
+    },
     "settings": {
       "cleanupComplete": "Opschoning voltooid: {{cleaned}} bestanden opgeschoond, {{deleted}} bestanden verwijderd",
       "cleanupFailed": "Bestanden opschonen mislukt. Probeer het later opnieuw.",

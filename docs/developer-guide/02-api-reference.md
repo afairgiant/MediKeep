@@ -265,7 +265,7 @@ username=johndoe&password=SecurePass123!
   session cookie, so the caller stays signed in
 - **Error Responses**:
   - `400`: Password validation failed (too weak, same as old)
-  - `401`: Current password incorrect
+  - `400` `current_password_incorrect` (was 401 before 2FA shipped; a 401 now always means no valid session)
 
 ### Two-Factor Sign-In
 
@@ -294,13 +294,21 @@ username=johndoe&password=SecurePass123!
   earlier ticket
 - Anything that ends the user's sessions (password change, sign out other sessions,
   two-factor turned off or reset) also ends the ticket
-- Each authenticator code works once; a second use is rejected like a wrong code
+- Each authenticator code and backup code works once; a second use is refused with
+  its own code (below) and counts as a failed attempt
 - If the operator turned two-factor off (`TWO_FACTOR_ENABLED=false`) between the two
   steps, the sign-in completes
 - **Error Responses**:
   - `401` `mfa_ticket_invalid`: unknown, expired, used up, replaced, ended with the
     user's sessions, or the user was deleted. Sign in with the password again
-  - `401` `mfa_code_invalid`: wrong or already used code
+  - `401` `mfa_code_invalid`: wrong code
+  - `401` `mfa_code_reused`: an authenticator code from a step already used; wait for
+    the next one
+  - `401` `mfa_backup_code_reused`: a backup code already used
+  - Each of these three carries `data`: `{"attempts_remaining": n, "after_last":
+    "wait" | "sign_in_again"}`. `attempts_remaining` is the lower of the ticket's tries
+    and the rate limits'; `after_last` is `sign_in_again` when the ticket runs out
+    first, else `wait` (the next failure after the last is a `429`)
   - `401` `mfa_secret_unavailable`: the stored secret cannot be decrypted (usually a
     changed `SECRET_KEY`); the ticket stays valid for a backup code
   - `401` `account_deactivated`
@@ -616,7 +624,7 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 
 - Returns `{"secret", "otpauth_uri"}` for the authenticator app. Nothing changes at
   sign-in until confirmed; calling it again replaces the pending secret
-- `401` `current_password_incorrect`; `403` `two_factor_enrollment_blocked`;
+- `400` `current_password_incorrect`; `403` `two_factor_enrollment_blocked`;
   `409` `two_factor_already_enabled`; `429` `two_factor_rate_limited`
 
 `POST /users/me/two-factor/totp/confirm` `{"code": "123456"}`
@@ -632,8 +640,11 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 - `code` is an authenticator code or a backup code. Deletes the secret and backup
   codes and ends every other session; the response sets a fresh cookie. Allowed while
   `TWO_FACTOR_ENABLED=false`
-- `401` `current_password_incorrect` or `mfa_code_invalid`;
-  `409` `two_factor_not_enabled`; `429`
+- `400` `current_password_incorrect`, `mfa_code_invalid`, `mfa_code_reused` or
+  `mfa_backup_code_reused`; `409` `two_factor_not_enabled`; `429`
+- Every `400` refusal on these settings endpoints (including setup and confirm) carries
+  `data`: `{"attempts_remaining": n, "after_last": "wait"}`, the tries left before the
+  shared settings limit returns `429`
 
 `POST /users/me/two-factor/backup-codes/regenerate` `{"current_password": "...", "code": "..."}`
 

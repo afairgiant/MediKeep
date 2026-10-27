@@ -108,6 +108,8 @@ class ApiService {
       logger.apiError('API Error', method, url, response.status, errorMessage);
       const err = new Error(errorMessage);
       err.status = response.status;
+      err.errorCode = fullErrorData?.error_code || null;
+      err.data = fullErrorData?.data ?? null;
       throw err;
     }
 

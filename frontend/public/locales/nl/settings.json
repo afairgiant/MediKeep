@@ -160,6 +160,73 @@
       },
       "newPassword": "Nieuw wachtwoord",
       "passwordHelp": "Minimaal 6 tekens, moet een letter en een cijfer bevatten."
+    },
+    "sessions": {
+      "button": "Andere apparaten afmelden",
+      "confirmBody": "Alle andere browsers en apparaten die bij je account zijn aangemeld, worden afgemeld. Hier blijf je aangemeld.",
+      "confirmTitle": "Andere apparaten afmelden?",
+      "description": "Overal afmelden bij MediKeep behalve in deze browser.",
+      "title": "Andere apparaten"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "Ik heb deze codes op een veilige plek bewaard",
+        "copied": "Gekopieerd",
+        "copy": "Kopiëren",
+        "description": "Gebruik een back-upcode om je aan te melden als je geen toegang meer hebt tot je authenticator-app. Elke code werkt één keer.",
+        "done": "Klaar",
+        "download": "Downloaden",
+        "fileHeader": "MediKeep back-upcodes. Elke code werkt één keer.",
+        "listLabel": "Back-upcodes",
+        "onlyOnce": "Deze codes worden niet opnieuw getoond. Bewaar ze voordat je dit venster sluit.",
+        "print": "Afdrukken",
+        "title": "Je back-upcodes"
+      },
+      "blocked": {
+        "disabled_by_operator": "Tweestapsverificatie is op deze server uitgeschakeld door de beheerder.",
+        "secret_key_not_configured": "Tweestapsverificatie vereist een vaste SECRET_KEY op deze server. Vraag je beheerder er een in te stellen.",
+        "sso_account": "Je account meldt zich aan via je identiteitsprovider. Stel tweestapsverificatie daar in.",
+        "sso_only_mode": "Deze server staat alleen aanmelden via je identiteitsprovider toe. Stel tweestapsverificatie daar in.",
+        "unknown": "Tweestapsverificatie kan voor dit account niet worden aangezet."
+      },
+      "cancel": "Annuleren",
+      "codesRemaining_one": "Nog {{count}} back-upcode over.",
+      "codesRemaining_other": "Nog {{count}} back-upcodes over.",
+      "confirmIdentity": {
+        "codeHelp": "Een 6-cijferige code uit je authenticator-app of een van je back-upcodes.",
+        "codeLabel": "Verificatiecode"
+      },
+      "description": "Vraag bij elke aanmelding met je wachtwoord om een code uit een authenticator-app.",
+      "disable": "Uitzetten",
+      "disableModal": {
+        "description": "Aanmelden vraagt dan alleen nog je wachtwoord. Al je andere sessies worden afgemeld.",
+        "title": "Tweestapsverificatie uitzetten"
+      },
+      "enable": "Aanzetten",
+      "enabledDescription": "Aanmelden met je wachtwoord vraagt ook een code uit je authenticator-app.",
+      "failed": "Er ging iets mis. Probeer het opnieuw.",
+      "loadFailed": "De status van tweestapsverificatie kon niet worden geladen.",
+      "lowCodes_one": "Nog maar {{count}} back-upcode over. Maak nieuwe aan zodat je niet buitengesloten raakt.",
+      "lowCodes_other": "Nog maar {{count}} back-upcodes over. Maak nieuwe aan zodat je niet buitengesloten raakt.",
+      "regenerate": "Nieuwe back-upcodes",
+      "regenerateModal": {
+        "description": "Je huidige back-upcodes werken dan niet meer en je krijgt een nieuwe set.",
+        "title": "Nieuwe back-upcodes maken"
+      },
+      "retry": "Opnieuw proberen",
+      "setup": {
+        "codeStep": "Voer ter afronding de 6-cijferige code in die de app toont.",
+        "confirm": "Aanzetten",
+        "continue": "Doorgaan",
+        "manualKey": "Kun je de code niet scannen? Voer dan deze sleutel in de app in:",
+        "passwordStep": "Voer je huidige wachtwoord in om te beginnen.",
+        "qrLabel": "QR-code voor je authenticator-app",
+        "scanStep": "Scan deze QR-code met een authenticator-app zoals Google Authenticator, Microsoft Authenticator, Aegis of 1Password.",
+        "title": "Tweestapsverificatie instellen"
+      },
+      "statusOff": "Uit",
+      "statusOn": "Aan",
+      "title": "Tweestapsverificatie"
     }
   },
   "settings": {
