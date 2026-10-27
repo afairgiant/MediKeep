@@ -160,6 +160,77 @@
       },
       "newPassword": "Nowe hasło",
       "passwordHelp": "Co najmniej 6 znaków, musi zawierać literę i cyfrę."
+    },
+    "sessions": {
+      "button": "Wyloguj inne urządzenia",
+      "confirmBody": "Wszystkie inne przeglądarki i urządzenia zalogowane na Twoje konto zostaną wylogowane. Tutaj pozostaniesz zalogowany.",
+      "confirmTitle": "Wylogować inne urządzenia?",
+      "description": "Wyloguj się z MediKeep wszędzie poza tą przeglądarką.",
+      "title": "Inne urządzenia"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "Zapisałem te kody w bezpiecznym miejscu",
+        "copied": "Skopiowano",
+        "copy": "Kopiuj",
+        "description": "Użyj kodu zapasowego, aby się zalogować, jeśli stracisz dostęp do aplikacji uwierzytelniającej. Każdy kod działa tylko raz.",
+        "done": "Gotowe",
+        "download": "Pobierz",
+        "fileHeader": "Kody zapasowe MediKeep. Każdy kod działa tylko raz.",
+        "listLabel": "Kody zapasowe",
+        "onlyOnce": "Te kody nie zostaną pokazane ponownie. Zapisz je przed zamknięciem tego okna.",
+        "print": "Drukuj",
+        "title": "Twoje kody zapasowe"
+      },
+      "blocked": {
+        "disabled_by_operator": "Administrator wyłączył uwierzytelnianie dwuskładnikowe na tym serwerze.",
+        "secret_key_not_configured": "Uwierzytelnianie dwuskładnikowe wymaga stałego SECRET_KEY na tym serwerze. Poproś administratora o jego ustawienie.",
+        "sso_account": "Twoje konto loguje się przez dostawcę tożsamości. Skonfiguruj tam uwierzytelnianie dwuskładnikowe.",
+        "sso_only_mode": "Ten serwer pozwala logować się tylko przez dostawcę tożsamości. Skonfiguruj tam uwierzytelnianie dwuskładnikowe.",
+        "unknown": "Dla tego konta nie można włączyć uwierzytelniania dwuskładnikowego."
+      },
+      "cancel": "Anuluj",
+      "codesRemaining_few": "Pozostały {{count}} kody zapasowe.",
+      "codesRemaining_many": "Pozostało {{count}} kodów zapasowych.",
+      "codesRemaining_one": "Pozostał {{count}} kod zapasowy.",
+      "codesRemaining_other": "Pozostało {{count}} kodów zapasowych.",
+      "confirmIdentity": {
+        "codeHelp": "6-cyfrowy kod z aplikacji uwierzytelniającej lub jeden z kodów zapasowych.",
+        "codeLabel": "Kod uwierzytelniający"
+      },
+      "description": "Wymagaj kodu z aplikacji uwierzytelniającej przy każdym logowaniu hasłem.",
+      "disable": "Wyłącz",
+      "disableModal": {
+        "description": "Do logowania wystarczy samo hasło. Wszystkie pozostałe sesje zostaną wylogowane.",
+        "title": "Wyłącz uwierzytelnianie dwuskładnikowe"
+      },
+      "enable": "Włącz",
+      "enabledDescription": "Logowanie hasłem wymaga także kodu z aplikacji uwierzytelniającej.",
+      "failed": "Coś poszło nie tak. Spróbuj ponownie.",
+      "loadFailed": "Nie udało się wczytać stanu uwierzytelniania dwuskładnikowego.",
+      "lowCodes_few": "Pozostały tylko {{count}} kody zapasowe. Wygeneruj nowe, aby nie stracić dostępu.",
+      "lowCodes_many": "Pozostało tylko {{count}} kodów zapasowych. Wygeneruj nowe, aby nie stracić dostępu.",
+      "lowCodes_one": "Pozostał tylko {{count}} kod zapasowy. Wygeneruj nowe, aby nie stracić dostępu.",
+      "lowCodes_other": "Pozostało tylko {{count}} kodów zapasowych. Wygeneruj nowe, aby nie stracić dostępu.",
+      "regenerate": "Nowe kody zapasowe",
+      "regenerateModal": {
+        "description": "Obecne kody zapasowe przestaną działać, a Ty otrzymasz nowy zestaw.",
+        "title": "Wygeneruj nowe kody zapasowe"
+      },
+      "retry": "Ponów",
+      "setup": {
+        "codeStep": "Aby zakończyć, wpisz 6-cyfrowy kod wyświetlony w aplikacji.",
+        "confirm": "Włącz",
+        "continue": "Dalej",
+        "manualKey": "Nie możesz zeskanować kodu? Wpisz w aplikacji ten klucz:",
+        "passwordStep": "Aby rozpocząć, wpisz obecne hasło.",
+        "qrLabel": "Kod QR dla aplikacji uwierzytelniającej",
+        "scanStep": "Zeskanuj ten kod QR aplikacją uwierzytelniającą, np. Google Authenticator, Microsoft Authenticator, Aegis lub 1Password.",
+        "title": "Konfiguracja uwierzytelniania dwuskładnikowego"
+      },
+      "statusOff": "Wyłączone",
+      "statusOn": "Włączone",
+      "title": "Uwierzytelnianie dwuskładnikowe"
     }
   },
   "settings": {

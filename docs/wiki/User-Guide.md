@@ -351,6 +351,43 @@ MediKeep keeps a history of all sent notifications so you can review past alerts
 
 ---
 
+## Account Security
+
+Both settings are under **Settings > Security**.
+
+### Two-Factor Authentication
+
+With two-factor authentication on, signing in with your password also asks for a 6-digit code from an authenticator app on your phone, such as Google Authenticator, Microsoft Authenticator, Aegis or 1Password. Someone who learns your password still cannot sign in without the phone.
+
+**Turning it on**
+
+1. Click **Turn on** next to Two-factor authentication and enter your current password.
+2. Scan the QR code with your authenticator app. If you cannot scan it, type the key shown below the code into the app instead.
+3. Enter the 6-digit code the app shows.
+4. Save your **backup codes**: copy, download or print them, then tick the box to confirm. They are shown only once.
+
+Turning it on signs you out on every other device. You stay signed in where you turned it on.
+
+**Signing in**
+
+After your password, enter the current code from the app. If you do not have your phone, choose **Use a backup code** and enter one of your saved codes. Each backup code works once. When you have two or fewer left, MediKeep reminds you to make new ones.
+
+**New backup codes**
+
+Click **New backup codes** and confirm with your password and a code. Your old backup codes stop working.
+
+**Turning it off**
+
+Click **Turn off** and confirm with your password and a code (from the app or a backup code). This also signs you out on every other device.
+
+**Lost your phone?** Sign in with a backup code, then turn two-factor off and on again to set up your new phone. If you have no backup codes left, ask your administrator to reset two-factor for your account.
+
+If you sign in with Google, GitHub or another identity provider, set up two-factor authentication with that provider instead. MediKeep then shows why it cannot be turned on here.
+
+### Signing Out Other Devices
+
+Click **Sign out other devices** to sign out of MediKeep in every other browser and on every other device, for example after using a shared computer. You stay signed in where you clicked it.
+
 ## Generating Reports
 
 ### Health Summary PDF

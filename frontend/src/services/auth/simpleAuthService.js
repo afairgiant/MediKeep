@@ -25,15 +25,17 @@ class SimpleAuthService {
       : 'http://localhost:8000/api/v1'; // Fallback for development
     this.tokenKey = 'token';
     this.userKey = 'user';
+    this.workingBaseURL = null;
   } // Make API request with fallback
   async makeRequest(endpoint, options = {}) {
     // Pull `signal` out so we can react to AbortError separately from other
     // fetch errors (don't log, don't fire /health ping on intentional abort).
-    const { signal, ...fetchOptions } = options;
-    const urls = [
-      `${this.directBackendURL}${endpoint}`, // Try direct backend first
-      `${this.baseURL}${endpoint}`, // Then try proxy
-    ];
+    const { signal, singleAttempt = false, ...fetchOptions } = options;
+    // Direct backend first, then the proxy; a single attempt reuses whichever answered last
+    const bases = singleAttempt
+      ? [this.workingBaseURL || this.directBackendURL]
+      : [this.directBackendURL, this.baseURL];
+    const urls = bases.map(base => `${base}${endpoint}`);
 
     let lastError = null;
 
@@ -70,6 +72,7 @@ class SimpleAuthService {
           category: 'auth_connection',
         });
 
+        this.workingBaseURL = bases[i];
         // Return response regardless of status (let caller handle HTTP errors)
         return response;
       } catch (error) {
@@ -205,6 +208,94 @@ class SimpleAuthService {
       return null;
     }
   }
+  /** The result of a completed sign-in, from a login or two-factor response body. */
+  buildLoginResult(data) {
+    logger.info('Login successful', {
+      hasToken: !!data.access_token,
+      tokenType: data.token_type,
+      category: 'auth_login_success',
+    });
+
+    if (!data.access_token) {
+      return {
+        success: false,
+        error: 'No access token received',
+      };
+    }
+
+    // Extract user info from the JWT in the response body (token itself is in HttpOnly cookie)
+    const payload = this.parseJWT(data.access_token);
+    logger.info('Token payload extracted from access token', {
+      userId: payload?.user_id,
+      username: payload?.sub,
+      role: payload?.role,
+      hasExpiry: !!payload?.exp,
+      category: 'auth_token_info',
+    });
+
+    const user = {
+      id: payload.user_id,
+      username: payload.sub,
+      role: payload.role || 'user',
+      fullName: payload.full_name || payload.sub,
+      isAdmin: isAdminRole(payload.role),
+    };
+
+    return {
+      success: true,
+      user,
+      token: null,
+      tokenExpiry: null,
+      sessionTimeoutMinutes: data.session_timeout_minutes || 120,
+      mustChangePassword: data.must_change_password || false,
+      backupCodesRemaining: data.backup_codes_remaining ?? null,
+    };
+  }
+
+  /**
+   * Finish a sign-in that returned mfaRequired.
+   *
+   * @param {string} mfaTicket - from the login result
+   * @param {string} code - authenticator or backup code as typed
+   * @param {'totp'|'backup_code'} method
+   */
+  async verifyTwoFactor(mfaTicket, code, method) {
+    try {
+      // One attempt: a resent code is already used and would read as a wrong code
+      const response = await this.makeRequest('/auth/two-factor/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mfa_ticket: mfaTicket, code, method }),
+        singleAttempt: true,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        logger.warn('Second factor rejected', {
+          status: response.status,
+          errorCode: errorData.error_code || null,
+          category: 'auth_login_mfa_failure',
+        });
+        return authFailure(
+          errorData,
+          `HTTP ${response.status}: Verification failed`
+        );
+      }
+
+      return this.buildLoginResult(await response.json());
+    } catch (error) {
+      logger.error('Second factor verification error', {
+        error: error.message,
+        category: 'auth_login_mfa_error',
+      });
+      return {
+        success: false,
+        error: error.message || 'Network error during verification',
+        errorCode: null,
+      };
+    }
+  }
+
   // Login user
   async login(credentials) {
     try {
@@ -245,45 +336,20 @@ class SimpleAuthService {
       }
 
       const data = await response.json();
-      logger.info('Login successful', {
-        hasToken: !!data.access_token,
-        tokenType: data.token_type,
-        category: 'auth_login_success',
-      });
 
-      if (!data.access_token) {
+      if (data.mfa_required === true) {
+        logger.info('Password accepted, second factor required', {
+          category: 'auth_login_mfa_required',
+        });
         return {
-          success: false,
-          error: 'No access token received',
+          success: true,
+          mfaRequired: true,
+          mfaTicket: data.mfa_ticket,
+          methods: data.methods || [],
         };
       }
 
-      // Extract user info from the JWT in the response body (token itself is in HttpOnly cookie)
-      const payload = this.parseJWT(data.access_token);
-      logger.info('Token payload extracted from access token', {
-        userId: payload?.user_id,
-        username: payload?.sub,
-        role: payload?.role,
-        hasExpiry: !!payload?.exp,
-        category: 'auth_token_info',
-      });
-
-      const user = {
-        id: payload.user_id,
-        username: payload.sub,
-        role: payload.role || 'user',
-        fullName: payload.full_name || payload.sub,
-        isAdmin: isAdminRole(payload.role),
-      };
-
-      return {
-        success: true,
-        user,
-        token: null,
-        tokenExpiry: null,
-        sessionTimeoutMinutes: data.session_timeout_minutes || 120,
-        mustChangePassword: data.must_change_password || false,
-      };
+      return this.buildLoginResult(data);
     } catch (error) {
       logger.error('Login error occurred', {
         error: error.message,

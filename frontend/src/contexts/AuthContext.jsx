@@ -348,6 +348,70 @@ export function AuthProvider({ children }) {
     return updatedUser;
   };
 
+  const establishSession = ({
+    user,
+    sessionTimeoutMinutes,
+    mustChangePassword,
+  }) => {
+    // Clear any existing cached data from localStorage
+    const cacheKeys = Object.keys(localStorage).filter(
+      key =>
+        key.startsWith('appData_') ||
+        key.startsWith('patient_') ||
+        key.startsWith('cache_')
+    );
+    cacheKeys.forEach(key => localStorage.removeItem(key));
+
+    // Store session timeout preference in localStorage (not sensitive)
+    localStorage.setItem(
+      'medapp_sessionTimeoutMinutes',
+      sessionTimeoutMinutes.toString()
+    );
+
+    dispatch({
+      type: AUTH_ACTIONS.LOGIN_SUCCESS,
+      payload: {
+        user,
+        sessionTimeoutMinutes,
+        mustChangePassword,
+      },
+    });
+
+    // Language preference is applied by UserPreferencesContext once isAuthenticated flips
+
+    notifySuccess('notifications:toasts.auth.loginSuccess');
+
+    return {
+      success: true,
+      isFirstLogin: isFirstLogin(user.username),
+      mustChangePassword,
+    };
+  };
+
+  // Refusals are returned, not stored, so the password form's error stays clear
+  const completeTwoFactorLogin = async (mfaTicket, code, method) => {
+    const result = await authService.verifyTwoFactor(mfaTicket, code, method);
+    if (!result.success) {
+      return result;
+    }
+    try {
+      return {
+        ...establishSession({
+          user: result.user,
+          sessionTimeoutMinutes: result.sessionTimeoutMinutes,
+          mustChangePassword: result.mustChangePassword,
+        }),
+        backupCodesRemaining: result.backupCodesRemaining,
+      };
+    } catch (error) {
+      logger.error('Failed to establish session after two-factor', {
+        category: 'auth_login_mfa_error',
+        error: error.message,
+      });
+      return { success: false, error: error.message, errorCode: null };
+    }
+  };
+
   // Auth Actions - handles both username/password credentials and SSO user object.
   // The token is stored as an HttpOnly cookie by the server -- the frontend
   // only manages user state and session timeout preferences.
@@ -355,9 +419,6 @@ export function AuthProvider({ children }) {
   // from regular login and carry through flags from the SSO login response.
   const login = async (credentialsOrUser, ssoFlag = null) => {
     try {
-      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
-      dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
-
       // Check if this is SSO login (user object) or regular login (credentials).
       // Requires sso === true, not merely a present options object: { sso: false }
       // must fall through to a credential login rather than trusting the first
@@ -366,6 +427,8 @@ export function AuthProvider({ children }) {
         ssoFlag?.sso === true &&
         typeof credentialsOrUser === 'object' &&
         credentialsOrUser.username;
+
+      dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
       let user, result;
 
@@ -398,6 +461,10 @@ export function AuthProvider({ children }) {
           return { success: false, error: result.error };
         }
 
+        if (result.mfaRequired) {
+          return result;
+        }
+
         user = result.user;
 
         logger.info('Processing regular login', {
@@ -408,48 +475,16 @@ export function AuthProvider({ children }) {
         });
       }
 
-      // Clear any existing cached data from localStorage
-      const cacheKeys = Object.keys(localStorage).filter(
-        key =>
-          key.startsWith('appData_') ||
-          key.startsWith('patient_') ||
-          key.startsWith('cache_')
-      );
-      cacheKeys.forEach(key => localStorage.removeItem(key));
-
-      // Get session timeout from result or use default
-      const sessionTimeoutMinutes =
-        (isSSO ? 120 : result?.sessionTimeoutMinutes) || 120;
       // SSO callers read the flag from the login response and pass it in the options
       // object; regular logins get it from the login result.
-      const mustChangePassword =
-        (isSSO ? ssoFlag?.mustChangePassword : result?.mustChangePassword) ||
-        false;
-
-      // Store session timeout preference in localStorage (not sensitive)
-      localStorage.setItem(
-        'medapp_sessionTimeoutMinutes',
-        sessionTimeoutMinutes.toString()
-      );
-
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: {
-          user,
-          sessionTimeoutMinutes,
-          mustChangePassword,
-        },
+      return establishSession({
+        user,
+        sessionTimeoutMinutes:
+          (isSSO ? 120 : result?.sessionTimeoutMinutes) || 120,
+        mustChangePassword:
+          (isSSO ? ssoFlag?.mustChangePassword : result?.mustChangePassword) ||
+          false,
       });
-
-      // Language preference is applied by UserPreferencesContext once isAuthenticated flips
-
-      notifySuccess('notifications:toasts.auth.loginSuccess');
-
-      return {
-        success: true,
-        isFirstLogin: isFirstLogin(user.username),
-        mustChangePassword,
-      };
     } catch (error) {
       const errorMessage = error.message || 'Login failed';
       dispatch({
@@ -577,6 +612,7 @@ export function AuthProvider({ children }) {
 
     // Actions
     login,
+    completeTwoFactorLogin,
     logout,
     updateActivity,
     clearError,

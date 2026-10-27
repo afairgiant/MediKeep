@@ -260,3 +260,25 @@ describe('apiService (services/api/index.js) 401 handling', () => {
     expect(assign).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('apiService refusal of what the user typed', () => {
+  test.each(['current_password_incorrect', 'mfa_code_invalid'])(
+    'a 400 %s stays on the page and carries the code',
+    async errorCode => {
+      fetch.mockResolvedValue(
+        jsonResponse(400, '/api/v1/auth/change-password', {
+          message: 'Current password is incorrect',
+          error_code: errorCode,
+        })
+      );
+
+      const error = await apiService
+        .post('/auth/change-password', {})
+        .catch(e => e);
+
+      expect(error.status).toBe(400);
+      expect(error.errorCode).toBe(errorCode);
+      expect(assign).not.toHaveBeenCalled();
+    }
+  );
+});

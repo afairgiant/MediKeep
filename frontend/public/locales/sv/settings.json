@@ -160,6 +160,73 @@
       },
       "newPassword": "Nytt lösenord",
       "passwordHelp": "Minst 6 tecken, måste innehålla en bokstav och en siffra."
+    },
+    "sessions": {
+      "button": "Logga ut andra enheter",
+      "confirmBody": "Alla andra webbläsare och enheter som är inloggade på ditt konto loggas ut. Här förblir du inloggad.",
+      "confirmTitle": "Logga ut andra enheter?",
+      "description": "Logga ut från MediKeep överallt utom i den här webbläsaren.",
+      "title": "Andra enheter"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "Jag har sparat koderna på ett säkert ställe",
+        "copied": "Kopierat",
+        "copy": "Kopiera",
+        "description": "Använd en reservkod för att logga in om du förlorar åtkomsten till din autentiseringsapp. Varje kod fungerar en gång.",
+        "done": "Klar",
+        "download": "Ladda ner",
+        "fileHeader": "Reservkoder för MediKeep. Varje kod fungerar en gång.",
+        "listLabel": "Reservkoder",
+        "onlyOnce": "Koderna visas inte igen. Spara dem innan du stänger fönstret.",
+        "print": "Skriv ut",
+        "title": "Dina reservkoder"
+      },
+      "blocked": {
+        "disabled_by_operator": "Administratören har stängt av tvåfaktorsautentisering på den här servern.",
+        "secret_key_not_configured": "Tvåfaktorsautentisering kräver en permanent SECRET_KEY på den här servern. Be din administratör att ange en.",
+        "sso_account": "Ditt konto loggar in via din identitetsleverantör. Konfigurera tvåfaktorsautentisering där.",
+        "sso_only_mode": "Den här servern tillåter bara inloggning via din identitetsleverantör. Konfigurera tvåfaktorsautentisering där.",
+        "unknown": "Tvåfaktorsautentisering kan inte aktiveras för det här kontot."
+      },
+      "cancel": "Avbryt",
+      "codesRemaining_one": "{{count}} reservkod kvar.",
+      "codesRemaining_other": "{{count}} reservkoder kvar.",
+      "confirmIdentity": {
+        "codeHelp": "En 6-siffrig kod från din autentiseringsapp eller en av dina reservkoder.",
+        "codeLabel": "Autentiseringskod"
+      },
+      "description": "Be om en kod från en autentiseringsapp varje gång du loggar in med ditt lösenord.",
+      "disable": "Stäng av",
+      "disableModal": {
+        "description": "Inloggning kräver då bara ditt lösenord. Alla dina andra sessioner loggas ut.",
+        "title": "Stäng av tvåfaktorsautentisering"
+      },
+      "enable": "Aktivera",
+      "enabledDescription": "Inloggning med lösenord kräver också en kod från din autentiseringsapp.",
+      "failed": "Något gick fel. Försök igen.",
+      "loadFailed": "Det gick inte att läsa in statusen för tvåfaktorsautentisering.",
+      "lowCodes_one": "Bara {{count}} reservkod kvar. Skapa nya så att du inte blir utelåst.",
+      "lowCodes_other": "Bara {{count}} reservkoder kvar. Skapa nya så att du inte blir utelåst.",
+      "regenerate": "Nya reservkoder",
+      "regenerateModal": {
+        "description": "Dina nuvarande reservkoder slutar fungera och du får en ny uppsättning.",
+        "title": "Skapa nya reservkoder"
+      },
+      "retry": "Försök igen",
+      "setup": {
+        "codeStep": "Ange den 6-siffriga koden som appen visar för att slutföra.",
+        "confirm": "Aktivera",
+        "continue": "Fortsätt",
+        "manualKey": "Kan du inte skanna koden? Ange den här nyckeln i appen i stället:",
+        "passwordStep": "Ange ditt nuvarande lösenord för att börja.",
+        "qrLabel": "QR-kod för din autentiseringsapp",
+        "scanStep": "Skanna QR-koden med en autentiseringsapp som Google Authenticator, Microsoft Authenticator, Aegis eller 1Password.",
+        "title": "Konfigurera tvåfaktorsautentisering"
+      },
+      "statusOff": "Av",
+      "statusOn": "På",
+      "title": "Tvåfaktorsautentisering"
     }
   },
   "settings": {

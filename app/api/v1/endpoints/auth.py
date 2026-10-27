@@ -426,7 +426,8 @@ async def change_password(
             user_id=current_user.id,
             username=current_user.username,
         )
-        raise UnauthorizedException(
+        # Not 401: the session is still valid, and clients end the session on a 401
+        raise BusinessLogicException(
             message="Current password is incorrect",
             request=request,
             error_code=AuthErrorCode.CURRENT_PASSWORD_INCORRECT,

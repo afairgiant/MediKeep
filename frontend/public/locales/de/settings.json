@@ -160,6 +160,73 @@
       },
       "newPassword": "Neues Passwort",
       "passwordHelp": "Mindestens 6 Zeichen, muss einen Buchstaben und eine Zahl enthalten."
+    },
+    "sessions": {
+      "button": "Andere Geräte abmelden",
+      "confirmBody": "Alle anderen Browser und Geräte, die bei Ihrem Konto angemeldet sind, werden abgemeldet. Hier bleiben Sie angemeldet.",
+      "confirmTitle": "Andere Geräte abmelden?",
+      "description": "Überall außer in diesem Browser von MediKeep abmelden.",
+      "title": "Andere Geräte"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "Ich habe diese Codes sicher aufbewahrt",
+        "copied": "Kopiert",
+        "copy": "Kopieren",
+        "description": "Verwenden Sie einen Backup-Code zur Anmeldung, wenn Sie keinen Zugriff mehr auf Ihre Authenticator-App haben. Jeder Code funktioniert nur einmal.",
+        "done": "Fertig",
+        "download": "Herunterladen",
+        "fileHeader": "MediKeep-Backup-Codes. Jeder Code funktioniert nur einmal.",
+        "listLabel": "Backup-Codes",
+        "onlyOnce": "Diese Codes werden nicht erneut angezeigt. Speichern Sie sie, bevor Sie dieses Fenster schließen.",
+        "print": "Drucken",
+        "title": "Ihre Backup-Codes"
+      },
+      "blocked": {
+        "disabled_by_operator": "Die Zwei-Faktor-Authentifizierung wurde auf diesem Server vom Administrator deaktiviert.",
+        "secret_key_not_configured": "Die Zwei-Faktor-Authentifizierung benötigt einen dauerhaften SECRET_KEY auf diesem Server. Bitten Sie Ihren Administrator, einen festzulegen.",
+        "sso_account": "Ihr Konto meldet sich über Ihren Identitätsanbieter an. Richten Sie die Zwei-Faktor-Authentifizierung dort ein.",
+        "sso_only_mode": "Dieser Server erlaubt die Anmeldung nur über Ihren Identitätsanbieter. Richten Sie die Zwei-Faktor-Authentifizierung dort ein.",
+        "unknown": "Die Zwei-Faktor-Authentifizierung kann für dieses Konto nicht aktiviert werden."
+      },
+      "cancel": "Abbrechen",
+      "codesRemaining_one": "{{count}} Backup-Code übrig.",
+      "codesRemaining_other": "{{count}} Backup-Codes übrig.",
+      "confirmIdentity": {
+        "codeHelp": "Ein 6-stelliger Code aus Ihrer Authenticator-App oder einer Ihrer Backup-Codes.",
+        "codeLabel": "Authentifizierungscode"
+      },
+      "description": "Bei jeder Anmeldung mit Passwort einen Code aus einer Authenticator-App abfragen.",
+      "disable": "Deaktivieren",
+      "disableModal": {
+        "description": "Für die Anmeldung wird dann nur noch Ihr Passwort benötigt. Alle anderen Sitzungen werden abgemeldet.",
+        "title": "Zwei-Faktor-Authentifizierung deaktivieren"
+      },
+      "enable": "Aktivieren",
+      "enabledDescription": "Die Anmeldung mit Passwort erfordert zusätzlich einen Code aus Ihrer Authenticator-App.",
+      "failed": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "loadFailed": "Der Status der Zwei-Faktor-Authentifizierung konnte nicht geladen werden.",
+      "lowCodes_one": "Nur noch {{count}} Backup-Code übrig. Erstellen Sie neue, damit Sie nicht ausgesperrt werden.",
+      "lowCodes_other": "Nur noch {{count}} Backup-Codes übrig. Erstellen Sie neue, damit Sie nicht ausgesperrt werden.",
+      "regenerate": "Neue Backup-Codes",
+      "regenerateModal": {
+        "description": "Ihre aktuellen Backup-Codes funktionieren dann nicht mehr und Sie erhalten neue.",
+        "title": "Neue Backup-Codes erstellen"
+      },
+      "retry": "Erneut versuchen",
+      "setup": {
+        "codeStep": "Geben Sie zum Abschluss den 6-stelligen Code ein, den die App anzeigt.",
+        "confirm": "Aktivieren",
+        "continue": "Weiter",
+        "manualKey": "Code lässt sich nicht scannen? Geben Sie stattdessen diesen Schlüssel in der App ein:",
+        "passwordStep": "Geben Sie zum Beginnen Ihr aktuelles Passwort ein.",
+        "qrLabel": "QR-Code für Ihre Authenticator-App",
+        "scanStep": "Scannen Sie diesen QR-Code mit einer Authenticator-App wie Google Authenticator, Microsoft Authenticator, Aegis oder 1Password.",
+        "title": "Zwei-Faktor-Authentifizierung einrichten"
+      },
+      "statusOff": "Aus",
+      "statusOn": "An",
+      "title": "Zwei-Faktor-Authentifizierung"
     }
   },
   "settings": {

@@ -266,7 +266,7 @@ class TestPasswordChange:
             },
         )
 
-        assert response.status_code == 401
+        assert response.status_code == 400
         db_session.refresh(user)
         assert user.session_version == 0
         assert _with_header(client, token).status_code == 200

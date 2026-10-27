@@ -379,6 +379,16 @@
       "templateSaveFailed": "Error al guardar la plantilla",
       "validationError": "Error de validación"
     },
+    "security": {
+      "backupCodesLow_one": "Le queda {{count}} código de respaldo. Genere otros nuevos en Configuración.",
+      "backupCodesLow_other": "Le quedan {{count}} códigos de respaldo. Genere otros nuevos en Configuración.",
+      "backupCodesRegenerated": "Nuevos códigos de respaldo generados. Los anteriores ya no funcionan.",
+      "otherSessionsFailed": "No se pudo cerrar la sesión en sus otros dispositivos. Inténtelo de nuevo.",
+      "otherSessionsSignedOut": "Se ha cerrado la sesión en sus otros dispositivos.",
+      "printBlocked": "Su navegador ha bloqueado la ventana de impresión. Permita las ventanas emergentes para este sitio o use Descargar.",
+      "twoFactorDisabled": "Autenticación en dos pasos desactivada.",
+      "twoFactorEnabled": "Autenticación en dos pasos activada. Se ha cerrado la sesión en sus otros dispositivos."
+    },
     "settings": {
       "cleanupComplete": "Limpieza completada: {{cleaned}} archivos limpiados, {{deleted}} archivos eliminados",
       "cleanupFailed": "Error al limpiar los archivos. Por favor, inténtelo de nuevo más tarde.",

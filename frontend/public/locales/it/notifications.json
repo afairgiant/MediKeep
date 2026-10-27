@@ -379,6 +379,16 @@
       "templateSaveFailed": "Impossibile salvare il modello",
       "validationError": "Errore di validazione"
     },
+    "security": {
+      "backupCodesLow_one": "Ti rimane {{count}} codice di backup. Generane di nuovi nelle Impostazioni.",
+      "backupCodesLow_other": "Ti rimangono {{count}} codici di backup. Generane di nuovi nelle Impostazioni.",
+      "backupCodesRegenerated": "Nuovi codici di backup generati. Quelli vecchi non funzionano più.",
+      "otherSessionsFailed": "Impossibile disconnettere gli altri dispositivi. Riprova.",
+      "otherSessionsSignedOut": "Gli altri dispositivi sono stati disconnessi.",
+      "printBlocked": "Il browser ha bloccato la finestra di stampa. Consenti i pop-up per questo sito oppure usa Scarica.",
+      "twoFactorDisabled": "Autenticazione a due fattori disattivata.",
+      "twoFactorEnabled": "Autenticazione a due fattori attivata. Gli altri dispositivi sono stati disconnessi."
+    },
     "settings": {
       "cleanupComplete": "Pulizia completata: {{cleaned}} file ripuliti, {{deleted}} file eliminati",
       "cleanupFailed": "Impossibile ripulire i file. Riprova più tardi.",

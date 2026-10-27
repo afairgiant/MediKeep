@@ -20,6 +20,8 @@ import BloodDonationIntervalsCard from '../components/settings/BloodDonationInte
 import HemoglobinUnitCard from '../components/settings/HemoglobinUnitCard';
 import NotificationSettings from '../components/settings/NotificationSettings';
 import ProfileSettings from '../components/settings/ProfileSettings';
+import TwoFactorSettings from '../components/settings/TwoFactorSettings';
+import OtherSessionsSetting from '../components/settings/OtherSessionsSetting';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
@@ -548,6 +550,9 @@ const Settings = () => {
                   </Button>
                 </div>
               </div>
+
+              <TwoFactorSettings />
+              <OtherSessionsSetting />
             </div>
           </Card>
 

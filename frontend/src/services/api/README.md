@@ -167,6 +167,19 @@ Non-admin wrapper around `/api/v1/medical-specialties/`. Backs the `SpecialtySel
 - `create({ name, description })` - POST a new specialty. Returns the new row on 201, or the existing row on 200 if a case-insensitive name match already exists. Rate-limited to 20/hour per user.
 - `migrateLegacyCustomSpecialties()` - One-shot localStorage → DB migrator. Reads any names left in `customMedicalSpecialties` from the pre-FK dropdown, POSTs each via `create()`, then clears the key and writes `customMedicalSpecialtiesMigratedAt` as a re-run guard. Called transparently by `SpecialtySelect` on first mount.
 
+## Security API Service (`securityApi.ts`)
+
+The signed-in user's two-factor and session settings, under `/api/v1/users/me/`. Each function throws the `apiService` error, whose `errorCode` selects copy through `authErrorText` in `utils/authErrorCopy.js`.
+
+- `getTwoFactorStatus(signal)` - GET `{totp_enabled, backup_codes_remaining, enrollment_allowed, blocked_reason}`. Wrapped by `hooks/useTwoFactorStatus.ts`.
+- `startTotpSetup(currentPassword)` - POST; returns `{secret, otpauth_uri}`. Nothing is turned on yet.
+- `confirmTotpSetup(code)` - POST; turns two-factor on, signs out other sessions and returns `{backup_codes}`, shown only once.
+- `disableTwoFactor(currentPassword, code)` - POST; `code` may be an authenticator or backup code. Signs out other sessions.
+- `regenerateBackupCodes(currentPassword, code)` - POST; returns a new `{backup_codes}` and invalidates the old ones.
+- `revokeOtherSessions()` - POST; signs out every other session, this one continues.
+
+The second sign-in step lives in `services/auth/simpleAuthService.js` instead: `login()` returns `{mfaRequired, mfaTicket, methods}` when a code is due, and `verifyTwoFactor(ticket, code, method)` finishes the sign-in. It makes a single request, to the URL that answered the password step, because a resent code is already used.
+
 ## Admin API Service (`adminApi.js`)
 
 Specialized service for administrative functions, extending the base API service:
@@ -323,7 +336,11 @@ For admin-specific functionality, extend the `AdminApiService` class in `adminAp
 The API services provide comprehensive error handling:
 
 - **401 Unauthorized**: Automatic token cleanup and user notification (see
-  *Background requests* below for the one case that does not eject the user)
+  *Background requests* below for the one case that does not eject the user).
+  The server keeps 401 for "no valid session"; a wrong current password or code
+  typed into a form while signed in is a 400 and never ejects
+- **Error codes**: errors from `apiService` carry `status` and `errorCode` (the
+  server's `error_code`, or null)
 - **422 Validation Errors**: Detailed field-level error parsing and user-friendly messages
 - **Network Errors**: Graceful handling with multiple URL fallbacks for Docker environments
 - **Token Expiration**: Automatic detection and cleanup of expired JWT tokens

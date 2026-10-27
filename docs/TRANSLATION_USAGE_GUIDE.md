@@ -153,6 +153,24 @@ function FileUploader() {
 }
 ```
 
+### 5. Auth and Account-Security Error Codes
+
+Auth failures carry an `error_code` from `app/core/http/auth_codes.py`. The client renders `auth:errors.<error_code>` and falls back to the server's message for a code it has no key for:
+
+```tsx
+import { authErrorCopy, authErrorText } from '../../utils/authErrorCopy';
+
+const { t: tAuth } = useTranslation('auth');
+
+// From a simpleAuthService result ({ error, errorCode })
+authErrorCopy(tAuth, result.errorCode, result.error);
+
+// From an error thrown by apiService, which carries errorCode
+authErrorText(tAuth, caughtError, t('security.twoFactor.failed'));
+```
+
+A new `AuthErrorCode` needs an `auth:errors` key in all 13 locales. Two-factor sign-in copy is under `auth:login.twoFactor.*`; the Settings copy is under `settings:security.twoFactor.*` and `settings:security.sessions.*`, and its toasts under `notifications:toasts.security.*`.
+
 ---
 
 ## Translation Key Structure

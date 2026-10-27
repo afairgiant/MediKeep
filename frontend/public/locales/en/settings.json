@@ -160,6 +160,73 @@
       },
       "newPassword": "New Password",
       "passwordHelp": "At least 6 characters, must include a letter and a number."
+    },
+    "sessions": {
+      "button": "Sign out other devices",
+      "confirmBody": "Every other browser and device signed in to your account will be signed out. You stay signed in here.",
+      "confirmTitle": "Sign out other devices?",
+      "description": "Sign out of MediKeep everywhere except this browser.",
+      "title": "Other devices"
+    },
+    "twoFactor": {
+      "backupCodes": {
+        "acknowledge": "I have saved these codes somewhere safe",
+        "copied": "Copied",
+        "copy": "Copy",
+        "description": "Use a backup code to sign in if you lose access to your authenticator app. Each code works once.",
+        "done": "Done",
+        "download": "Download",
+        "fileHeader": "MediKeep backup codes. Each code works once.",
+        "listLabel": "Backup codes",
+        "onlyOnce": "These codes will not be shown again. Save them before closing this window.",
+        "print": "Print",
+        "title": "Your backup codes"
+      },
+      "blocked": {
+        "disabled_by_operator": "Two-factor authentication is turned off on this server by the administrator.",
+        "secret_key_not_configured": "Two-factor authentication needs a permanent SECRET_KEY on this server. Ask your administrator to set one.",
+        "sso_account": "Your account signs in through your identity provider. Set up two-factor authentication there.",
+        "sso_only_mode": "This server only allows sign-in through your identity provider. Set up two-factor authentication there.",
+        "unknown": "Two-factor authentication cannot be turned on for this account."
+      },
+      "cancel": "Cancel",
+      "codesRemaining_one": "{{count}} backup code left.",
+      "codesRemaining_other": "{{count}} backup codes left.",
+      "confirmIdentity": {
+        "codeHelp": "A 6-digit code from your authenticator app, or one of your backup codes.",
+        "codeLabel": "Authentication code"
+      },
+      "description": "Ask for a code from an authenticator app each time you sign in with your password.",
+      "disable": "Turn off",
+      "disableModal": {
+        "description": "Signing in will only need your password. All your other sessions will be signed out.",
+        "title": "Turn off two-factor authentication"
+      },
+      "enable": "Turn on",
+      "enabledDescription": "Signing in with your password also needs a code from your authenticator app.",
+      "failed": "Something went wrong. Please try again.",
+      "loadFailed": "Could not load your two-factor status.",
+      "lowCodes_one": "Only {{count}} backup code left. Generate new ones so you do not get locked out.",
+      "lowCodes_other": "Only {{count}} backup codes left. Generate new ones so you do not get locked out.",
+      "regenerate": "New backup codes",
+      "regenerateModal": {
+        "description": "Your current backup codes will stop working and you will get a new set.",
+        "title": "Generate new backup codes"
+      },
+      "retry": "Retry",
+      "setup": {
+        "codeStep": "Enter the 6-digit code the app shows to finish.",
+        "confirm": "Turn on",
+        "continue": "Continue",
+        "manualKey": "Cannot scan the code? Enter this key in the app instead:",
+        "passwordStep": "Enter your current password to begin.",
+        "qrLabel": "QR code for your authenticator app",
+        "scanStep": "Scan this QR code with an authenticator app such as Google Authenticator, Microsoft Authenticator, Aegis or 1Password.",
+        "title": "Set up two-factor authentication"
+      },
+      "statusOff": "Off",
+      "statusOn": "On",
+      "title": "Two-factor authentication"
     }
   },
   "settings": {

@@ -215,7 +215,7 @@ def _reserve_settings_check(request: Request, user: User) -> None:
 
 def _reject_reauth(
     request: Request, user: User, what: str, *, message: str, error_code: str
-) -> UnauthorizedException:
+) -> BusinessLogicException:
     log_security_event(
         logger,
         "two_factor_reauth_failed",
@@ -224,7 +224,8 @@ def _reject_reauth(
         user_id=user.id,
         username=user.username,
     )
-    return UnauthorizedException(
+    # Not 401: the session is still valid, and clients end the session on a 401
+    return BusinessLogicException(
         message=message, request=request, error_code=error_code
     )
 
@@ -238,7 +239,9 @@ def _reauthenticate(
 ) -> None:
     """Check the password, and the code when given; failures count toward a limit."""
     _reserve_settings_check(request, user)
-    with settings_check_limiter.failure_slot(user.id, counted=(UnauthorizedException,)):
+    with settings_check_limiter.failure_slot(
+        user.id, counted=(BusinessLogicException,)
+    ):
         if not verify_password(password, str(user.password_hash)):
             raise _reject_reauth(
                 request,

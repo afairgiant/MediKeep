@@ -379,6 +379,16 @@
       "templateSaveFailed": "Vorlage konnte nicht gespeichert werden",
       "validationError": "Validierungsfehler"
     },
+    "security": {
+      "backupCodesLow_one": "Sie haben noch {{count}} Backup-Code. Erstellen Sie neue in den Einstellungen.",
+      "backupCodesLow_other": "Sie haben noch {{count}} Backup-Codes. Erstellen Sie neue in den Einstellungen.",
+      "backupCodesRegenerated": "Neue Backup-Codes erstellt. Die alten funktionieren nicht mehr.",
+      "otherSessionsFailed": "Ihre anderen Geräte konnten nicht abgemeldet werden. Bitte versuchen Sie es erneut.",
+      "otherSessionsSignedOut": "Ihre anderen Geräte wurden abgemeldet.",
+      "printBlocked": "Das Druckfenster wurde von Ihrem Browser blockiert. Erlauben Sie Pop-ups für diese Website oder verwenden Sie stattdessen Herunterladen.",
+      "twoFactorDisabled": "Zwei-Faktor-Authentifizierung deaktiviert.",
+      "twoFactorEnabled": "Zwei-Faktor-Authentifizierung aktiviert. Ihre anderen Geräte wurden abgemeldet."
+    },
     "settings": {
       "cleanupComplete": "Bereinigung abgeschlossen: {{cleaned}} Dateien bereinigt, {{deleted}} Dateien gelöscht",
       "cleanupFailed": "Dateibereinigung fehlgeschlagen. Bitte versuchen Sie es später erneut.",

@@ -265,7 +265,7 @@ username=johndoe&password=SecurePass123!
   session cookie, so the caller stays signed in
 - **Error Responses**:
   - `400`: Password validation failed (too weak, same as old)
-  - `401`: Current password incorrect
+  - `400` `current_password_incorrect` (was 401 before 2FA shipped; a 401 now always means no valid session)
 
 ### Two-Factor Sign-In
 
@@ -616,7 +616,7 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 
 - Returns `{"secret", "otpauth_uri"}` for the authenticator app. Nothing changes at
   sign-in until confirmed; calling it again replaces the pending secret
-- `401` `current_password_incorrect`; `403` `two_factor_enrollment_blocked`;
+- `400` `current_password_incorrect`; `403` `two_factor_enrollment_blocked`;
   `409` `two_factor_already_enabled`; `429` `two_factor_rate_limited`
 
 `POST /users/me/two-factor/totp/confirm` `{"code": "123456"}`
@@ -632,7 +632,7 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 - `code` is an authenticator code or a backup code. Deletes the secret and backup
   codes and ends every other session; the response sets a fresh cookie. Allowed while
   `TWO_FACTOR_ENABLED=false`
-- `401` `current_password_incorrect` or `mfa_code_invalid`;
+- `400` `current_password_incorrect` or `mfa_code_invalid`;
   `409` `two_factor_not_enabled`; `429`
 
 `POST /users/me/two-factor/backup-codes/regenerate` `{"current_password": "...", "code": "..."}`

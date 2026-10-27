@@ -69,6 +69,10 @@ defined in `app/core/http/auth_codes.py`.
 in `frontend/public/locales/*/auth.json`; renaming one silently falls the UI back to the
 server's English. Add rather than rename.
 
+**401 means no valid session.** The frontend sends the user to the login page on any
+401 from an authenticated endpoint, so a wrong password or code re-entered by a signed-in
+user is a 400. Only the sign-in endpoints (login, two-factor verify) refuse with 401.
+
 | Code | HTTP Status | Raised by |
 |------|-------------|-----------|
 | `invalid_credentials` | 401 | Wrong username or password; also a failed GitHub manual link |
@@ -79,7 +83,7 @@ server's English. Add rather than rename.
 | `sso_only_password_login_disabled` | 403 | `POST /auth/login` under `SSO_ONLY_MODE` |
 | `username_taken` | 409 | Registration conflict |
 | `email_taken` | 409 | Registration conflict |
-| `current_password_incorrect` | 401 | `POST /auth/change-password` |
+| `current_password_incorrect` | 400 | `POST /auth/change-password` and the two-factor settings endpoints |
 | `password_too_short` | 400 | `POST /auth/change-password` |
 | `password_complexity` | 400 | `POST /auth/change-password` |
 | `sso_not_enabled` | 400 | SSO called while `SSO_ENABLED=false` |
