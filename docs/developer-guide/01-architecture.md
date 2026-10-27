@@ -122,6 +122,11 @@ HTTP Request
   existing session. `get_current_user` also rejects deactivated accounts
 - Failed password checks are throttled per username from each IP and per IP
   (`app/services/login_throttle.py`)
+- Optional TOTP two-factor (`app/services/two_factor_service.py`): a correct password
+  for an enrolled user returns an opaque in-memory `mfa_ticket` instead of a session,
+  and `/auth/two-factor/verify` finishes through `complete_login`. SSO sign-ins skip it,
+  so `/auth/sso/resolve-github-link` refuses to link GitHub by password to an enrolled
+  account
 - Dependency injection for auth: `current_user: User = Depends(get_current_user)`
 - Patient ownership verified on every data access
 

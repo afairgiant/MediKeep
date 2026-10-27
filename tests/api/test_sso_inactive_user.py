@@ -1,6 +1,6 @@
 """A deactivated user signing in via SSO must be told so, not shown a 500.
 
-`_check_user_active` raises UnauthorizedException from inside each SSO endpoint's
+`require_active` raises UnauthorizedException from inside each SSO endpoint's
 try block, and the broad `except Exception` underneath converted it into
 `500 SSO authentication failed`. The account was refused - correctly - but the
 message said the identity provider had failed.
@@ -50,7 +50,7 @@ def sso_result(inactive_user):
 
 @pytest.fixture
 def callback_flow(sso_result):
-    """A /callback that reaches _check_user_active with a real inactive user."""
+    """A /callback that reaches require_active with a real inactive user."""
     with patch.object(sso_module.settings, "SSO_ENABLED", True):
         with patch.object(sso_module, "create_sso_provider") as factory:
             factory.return_value.get_auth_url.return_value = "https://idp/authorize"

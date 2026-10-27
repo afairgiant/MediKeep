@@ -15,6 +15,13 @@ logger = get_logger(__name__, "app")
 # The "typ" claim of a login session; any other typ must never authenticate a request
 ACCESS_TOKEN_TYPE = "access"
 
+_BCRYPT_MAX_BYTES = 72
+
+
+def _bcrypt_input(password: str) -> bytes:
+    # bcrypt 4 hashed only the first 72 bytes; bcrypt 5 raises past them instead
+    return password.encode("utf-8")[:_BCRYPT_MAX_BYTES]
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
@@ -28,7 +35,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         True if password matches, False otherwise
     """
     return bcrypt.checkpw(
-        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+        _bcrypt_input(plain_password), hashed_password.encode("utf-8")
     )
 
 
@@ -42,7 +49,7 @@ def get_password_hash(password: str) -> str:
     Returns:
         The hashed password
     """
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    return bcrypt.hashpw(_bcrypt_input(password), bcrypt.gensalt()).decode("utf-8")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

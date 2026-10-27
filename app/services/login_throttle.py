@@ -5,7 +5,7 @@ from app.core.http.auth_codes import AuthErrorCode
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_security_event
 from app.core.utils.client_ip import get_client_ip
-from app.core.utils.rate_limit import SlidingWindowRateLimiter
+from app.core.utils.rate_limit import SlidingWindowRateLimiter, reserve_all
 
 logger = get_logger(__name__, "security")
 
@@ -39,29 +39,25 @@ class LoginThrottle:
 
         Call before checking the password, so a throttled request learns nothing.
         """
-        reserved = []
-        for limiter, key in self._keys(username, request):
-            if limiter.is_allowed(key):
-                reserved.append((limiter, key))
-                continue
-
-            for granted, granted_key in reserved:
-                granted.release(granted_key)
-            rejection = limiter.too_many_requests(
-                key,
-                "Too many failed sign-in attempts.",
-                AuthErrorCode.LOGIN_RATE_LIMITED,
-            )
-            log_security_event(
-                logger,
-                "login_rate_limited",
-                request,
-                f"Too many failed sign-in attempts for username: {username}",
-                username=username,
-                endpoint=request.url.path,
-                retry_after_seconds=rejection.headers["Retry-After"],
-            )
-            raise rejection
+        full = reserve_all(self._keys(username, request))
+        if full is None:
+            return
+        limiter, key = full
+        rejection = limiter.too_many_requests(
+            key,
+            "Too many failed sign-in attempts.",
+            AuthErrorCode.LOGIN_RATE_LIMITED,
+        )
+        log_security_event(
+            logger,
+            "login_rate_limited",
+            request,
+            f"Too many failed sign-in attempts for username: {username}",
+            username=username,
+            endpoint=request.url.path,
+            retry_after_seconds=rejection.headers["Retry-After"],
+        )
+        raise rejection
 
     def release(self, request: Request, username: str) -> None:
         """Give back the slot reserve() took, once the password proved correct."""

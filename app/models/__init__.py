@@ -47,6 +47,10 @@ from .injuries import (
     Injury,
     InjuryType,
 )
+from .mfa import (
+    UserBackupCode,
+    UserTotp,
+)
 from .labs import (
     LabResult,
     LabResultFile,
@@ -98,6 +102,8 @@ __all__ = [
     "User",
     "UserPreferences",
     "UserTag",
+    "UserTotp",
+    "UserBackupCode",
     "SystemSetting",
     "Patient",
     "PatientPhoto",

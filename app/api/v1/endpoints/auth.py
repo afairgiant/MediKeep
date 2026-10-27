@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from typing import Union
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
@@ -30,8 +31,14 @@ from app.crud.user import user
 from app.events.security_events import PasswordChangedEvent
 from app.models.activity_log import ActionType, EntityType
 from app.models.models import User as DBUser
+from app.schemas.two_factor import MfaChallenge
 from app.schemas.user import Token, User, UserCreate, UserRegistration
-from app.services.auth_session import complete_login, reissue_session
+from app.services.auth_session import (
+    finish_password_login,
+    reissue_session,
+    require_active,
+    require_password_login_allowed,
+)
 from app.services.login_throttle import login_throttle
 
 router = APIRouter()
@@ -275,21 +282,7 @@ def register(
     return new_user
 
 
-def log_successful_login(user_id: int, username: str, request: Request):
-    """
-    Logs a successful login event.
-    """
-    log_endpoint_access(
-        logger,
-        request,
-        user_id,
-        "login_success",
-        message=f"Login successful for username: {username}",
-        username=username,
-    )
-
-
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Union[Token, MfaChallenge])
 def login(
     request: Request,
     db: Session = Depends(deps.get_db),
@@ -298,7 +291,9 @@ def login(
     """
     Login with username and password to get an access token.
 
-    Returns a JWT token that can be used for authenticated requests.
+    Returns a JWT token that can be used for authenticated requests, or, when the
+    user has two-factor authentication on, an mfa_ticket for /auth/two-factor/verify
+    and no session.
     """
     # Refused before any credential check, and before the login_attempt event: a
     # request that cannot succeed is not a login attempt, and running authenticate()
@@ -307,22 +302,7 @@ def login(
     #
     # This is the security boundary for SSO-only mode. Hiding the form (frontend) is
     # cosmetic - anyone can POST here directly.
-    if settings.SSO_ONLY_MODE:
-        log_security_event(
-            logger,
-            "password_login_blocked_sso_only",
-            request,
-            f"Password login blocked - SSO-only mode. Username: {form_data.username}",
-            username=form_data.username,
-        )
-        raise ForbiddenException(
-            message=(
-                "Password sign-in is disabled on this instance. Please sign in "
-                "with your identity provider."
-            ),
-            request=request,
-            error_code=AuthErrorCode.SSO_ONLY_PASSWORD_LOGIN_DISABLED,
-        )
+    require_password_login_allowed(request, form_data.username)
 
     login_throttle.reserve(request, form_data.username)
 
@@ -368,31 +348,8 @@ def login(
             error_code=AuthErrorCode.ACCOUNT_INCOMPLETE,
         )
 
-    # Check if user account is active
-    if not db_user.is_active:
-        log_security_event(
-            logger,
-            "login_rejected_inactive",
-            request,
-            f"Login rejected for inactive user: {form_data.username}",
-            username=form_data.username,
-        )
-        raise UnauthorizedException(
-            message="This account has been deactivated. Please contact an administrator.",
-            request=request,
-            error_code=AuthErrorCode.ACCOUNT_DEACTIVATED,
-        )
-
-    response = complete_login(
-        db,
-        db_user,
-        request,
-        method="password",
-        activity_description=f"User logged in: {db_user.username}",
-        log_event_name="token_created",
-    )
-    log_successful_login(db_user.id, form_data.username, request)
-    return response
+    require_active(request, db_user, "login_rejected_inactive")
+    return finish_password_login(db, db_user, request)
 
 
 @router.post("/logout")

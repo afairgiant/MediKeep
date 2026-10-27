@@ -92,6 +92,11 @@
   and `LOGIN_MAX_FAILED_ATTEMPTS_PER_IP` per IP within `LOGIN_FAILED_WINDOW_MINUTES`,
   default 10 / 30 per 15 minutes (`/auth/login`, `/auth/sso/resolve-github-link`).
   Only failures count. The 429 carries `error_code: login_rate_limited`
+- Two-factor sign-in step: 5 attempts per ticket, and per user across tickets 10
+  failed codes per 15 minutes and 30 per 24 hours (`/auth/two-factor/verify`,
+  `error_code: mfa_rate_limited`)
+- Two-factor settings: 10 failed password or code checks per user per 15 minutes
+  (`/users/me/two-factor/*`, `error_code: two_factor_rate_limited`)
 - Medical specialty creation: 20 requests/hour per **user** (`POST /medical-specialties/`)
 
 Every rate-limited endpoint returns `429` with `Retry-After`, `X-RateLimit-Limit`,
@@ -120,7 +125,8 @@ user's session version.
   admin password reset (an admin resetting their own keeps their session), and
   deactivating an account through `PUT /admin/models/user/{id}` or a bulk update.
   `session_version` is server-owned: a value sent to the admin model endpoints is
-  ignored
+  ignored. It is also raised by turning two-factor off (by the user or with
+  `reset_user_mfa.py`) and by `POST /users/me/sessions/revoke-others`
 
 ### Check Registration Status
 
@@ -208,6 +214,19 @@ username=johndoe&password=SecurePass123!
 }
 ```
 
+- **Two-factor response** (200), when the user has two-factor on and
+  `TWO_FACTOR_ENABLED` is not false. No token and no cookie; finish with
+  `POST /auth/two-factor/verify`:
+
+```json
+{
+  "mfa_required": true,
+  "mfa_ticket": "opaque-random-string",
+  "methods": ["totp", "backup_code"],
+  "expires_in": 300
+}
+```
+
 - **Note**: The response does NOT include a user object. Use `GET /users/me` to retrieve user details after login. The `session_timeout_minutes` reflects the user's session timeout preference (or system default if not set).
 - **Error Responses**:
   - `401`: Invalid credentials. Counts toward the failed-login limit
@@ -247,6 +266,46 @@ username=johndoe&password=SecurePass123!
 - **Error Responses**:
   - `400`: Password validation failed (too weak, same as old)
   - `401`: Current password incorrect
+
+### Two-Factor Sign-In
+
+`POST /auth/two-factor/verify`
+
+- **Purpose**: Finish a password sign-in that answered `mfa_required`
+- **Authentication**: No (the `mfa_ticket` from `/auth/login`)
+- **Request Body**:
+
+```json
+{
+  "mfa_ticket": "opaque-random-string",
+  "code": "123456",
+  "method": "totp"
+}
+```
+
+- `method` is `totp` (6-digit authenticator code; the previous and next 30-second
+  codes are also accepted) or `backup_code` (`XXXX-XXXX`; case, spaces and hyphens
+  are ignored)
+- **Success Response** (200): the same body and cookie as `/auth/login`. After a
+  backup code the body also has `backup_codes_remaining`
+- The ticket is not a session token: it is rejected everywhere else. It lasts 5
+  minutes, allows 5 attempts, and is gone after a successful sign-in or a restart
+- A user has one ticket at a time: signing in with the password again replaces the
+  earlier ticket
+- Anything that ends the user's sessions (password change, sign out other sessions,
+  two-factor turned off or reset) also ends the ticket
+- Each authenticator code works once; a second use is rejected like a wrong code
+- If the operator turned two-factor off (`TWO_FACTOR_ENABLED=false`) between the two
+  steps, the sign-in completes
+- **Error Responses**:
+  - `401` `mfa_ticket_invalid`: unknown, expired, used up, replaced, ended with the
+    user's sessions, or the user was deleted. Sign in with the password again
+  - `401` `mfa_code_invalid`: wrong or already used code
+  - `401` `mfa_secret_unavailable`: the stored secret cannot be decrypted (usually a
+    changed `SECRET_KEY`); the ticket stays valid for a backup code
+  - `401` `account_deactivated`
+  - `403` `sso_only_password_login_disabled`
+  - `429` `mfa_rate_limited`, with `Retry-After`; the ticket is not used up
 
 ---
 
@@ -434,6 +493,14 @@ Base path: `/api/v1/auth/sso`
 }
 ```
 
+- **Success Response** (200): links the GitHub account and signs in, as `/auth/sso/callback`
+- **Error Responses**:
+  - `400` `invalid_credentials`, `sso_github_token_invalid`, `sso_github_token_expired`
+  - `400` `sso_github_link_two_factor`: the account has two-factor turned on (even
+    while `TWO_FACTOR_ENABLED=false`). A linked GitHub account signs in without the
+    code, so a password alone cannot create one. Nothing is linked
+  - `429` `login_rate_limited`
+
 ### Test SSO Connection
 
 `POST /auth/sso/test-connection`
@@ -523,6 +590,62 @@ Base path: `/api/v1/users`
 - **Error Responses**:
   - `400`: Cannot delete last admin user
   - `404`: User not found
+
+### Two-Factor Settings
+
+All need a session. Codes, secrets and tickets are never logged. Every change is
+recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
+`backup_codes_regenerated`).
+
+`GET /users/me/two-factor`
+
+```json
+{
+  "totp_enabled": false,
+  "backup_codes_remaining": 0,
+  "enrollment_allowed": true,
+  "blocked_reason": null
+}
+```
+
+- `blocked_reason`: `disabled_by_operator` (`TWO_FACTOR_ENABLED=false`),
+  `sso_only_mode`, `sso_account` (no local password), or
+  `secret_key_not_configured` (the server generated its `SECRET_KEY`)
+
+`POST /users/me/two-factor/totp/setup` `{"current_password": "..."}`
+
+- Returns `{"secret", "otpauth_uri"}` for the authenticator app. Nothing changes at
+  sign-in until confirmed; calling it again replaces the pending secret
+- `401` `current_password_incorrect`; `403` `two_factor_enrollment_blocked`;
+  `409` `two_factor_already_enabled`; `429` `two_factor_rate_limited`
+
+`POST /users/me/two-factor/totp/confirm` `{"code": "123456"}`
+
+- Turns two-factor on and returns `{"backup_codes": [10 codes]}`, shown only this once.
+  The confirming code cannot be reused to sign in. Ends every other session; the
+  response sets a fresh cookie
+- `400` `mfa_code_invalid`; `403` `two_factor_enrollment_blocked`;
+  `409` `two_factor_already_enabled` or `two_factor_setup_not_started`; `429`
+
+`POST /users/me/two-factor/disable` `{"current_password": "...", "code": "..."}`
+
+- `code` is an authenticator code or a backup code. Deletes the secret and backup
+  codes and ends every other session; the response sets a fresh cookie. Allowed while
+  `TWO_FACTOR_ENABLED=false`
+- `401` `current_password_incorrect` or `mfa_code_invalid`;
+  `409` `two_factor_not_enabled`; `429`
+
+`POST /users/me/two-factor/backup-codes/regenerate` `{"current_password": "...", "code": "..."}`
+
+- Returns `{"backup_codes": [...]}`; the old codes stop working. Errors as for disable
+
+### Sign Out Other Sessions
+
+`POST /users/me/sessions/revoke-others`
+
+- **Authentication**: Yes
+- Ends every other session of the caller; the response sets a fresh cookie so this
+  one continues. Recorded as `sessions_revoked`
 
 ### Get User Preferences
 

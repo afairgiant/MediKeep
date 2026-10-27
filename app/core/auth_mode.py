@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.models.mfa import UserTotp
 from app.models.user import User
 
 logger = get_logger(__name__, "app")
@@ -32,6 +33,46 @@ NO_LOCAL_PASSWORD_MESSAGE = (
     "access to the host and app/scripts/create_emergency_admin.py. To restore the "
     "documented recovery path, give one administrator a local password."
 )
+
+TWO_FACTOR_OFF_EVENT = "two_factor_disabled_with_enrolled_users"
+TWO_FACTOR_OFF_MESSAGE = (
+    "TWO_FACTOR_ENABLED is false, so users who turned on two-factor authentication "
+    "sign in with their password alone. Unset it once the reason for turning it off "
+    "is resolved."
+)
+
+EPHEMERAL_KEY_EVENT = "two_factor_secret_key_ephemeral"
+EPHEMERAL_KEY_MESSAGE = (
+    "SECRET_KEY is not configured, and some users have two-factor authentication "
+    "on. Their authenticator codes cannot be checked until the SECRET_KEY they "
+    "enrolled under is restored; until then they must sign in with a backup code, or "
+    "an administrator can reset their two-factor with app/scripts/reset_user_mfa.py."
+)
+
+
+def _has_two_factor_users(db: Session) -> bool:
+    return (
+        db.query(UserTotp.id).filter(UserTotp.enabled_at.isnot(None)).first()
+        is not None
+    )
+
+
+def two_factor_off_warning(db: Optional[Session]) -> Optional[Warning]:
+    """Return the kill-switch (event, message) pair while enrolled users exist."""
+    if db is None or settings.TWO_FACTOR_ENABLED or not _has_two_factor_users(db):
+        return None
+    return (TWO_FACTOR_OFF_EVENT, TWO_FACTOR_OFF_MESSAGE)
+
+
+def ephemeral_key_warning(db: Optional[Session]) -> Optional[Warning]:
+    """Return the generated-SECRET_KEY (event, message) pair while enrolled users exist."""
+    if (
+        db is None
+        or not settings.SECRET_KEY_IS_EPHEMERAL
+        or not _has_two_factor_users(db)
+    ):
+        return None
+    return (EPHEMERAL_KEY_EVENT, EPHEMERAL_KEY_MESSAGE)
 
 
 def sealed_instance_warning(
@@ -80,6 +121,8 @@ def warnings(db: Optional[Session] = None) -> list[Warning]:
     checks: tuple[Callable[[Optional[Session]], Optional[Warning]], ...] = (
         _check_sealed_instance,
         no_local_password_warning,
+        two_factor_off_warning,
+        ephemeral_key_warning,
     )
 
     found = []

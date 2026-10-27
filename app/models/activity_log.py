@@ -206,6 +206,11 @@ class ActionType:
     # Authentication events
     LOGIN = "login"
     LOGOUT = "logout"
+    TWO_FACTOR_ENABLED = "two_factor_enabled"
+    TWO_FACTOR_DISABLED = "two_factor_disabled"
+    TWO_FACTOR_RESET = "two_factor_reset"
+    BACKUP_CODES_REGENERATED = "backup_codes_regenerated"
+    SESSIONS_REVOKED = "sessions_revoked"
 
     # Status changes
     ACTIVATED = "activated"
@@ -230,6 +235,11 @@ class ActionType:
             cls.DOWNLOADED,
             cls.LOGIN,
             cls.LOGOUT,
+            cls.TWO_FACTOR_ENABLED,
+            cls.TWO_FACTOR_DISABLED,
+            cls.TWO_FACTOR_RESET,
+            cls.BACKUP_CODES_REGENERATED,
+            cls.SESSIONS_REVOKED,
             cls.ACTIVATED,
             cls.DEACTIVATED,
             cls.COMPLETED,

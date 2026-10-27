@@ -26,6 +26,19 @@ class AuthErrorCode:
     PASSWORD_TOO_SHORT = "password_too_short"
     PASSWORD_COMPLEXITY = "password_complexity"
 
+    # Two-factor sign-in step
+    MFA_TICKET_INVALID = "mfa_ticket_invalid"
+    MFA_CODE_INVALID = "mfa_code_invalid"
+    MFA_SECRET_UNAVAILABLE = "mfa_secret_unavailable"
+    MFA_RATE_LIMITED = "mfa_rate_limited"
+
+    # Two-factor settings
+    TWO_FACTOR_ENROLLMENT_BLOCKED = "two_factor_enrollment_blocked"
+    TWO_FACTOR_ALREADY_ENABLED = "two_factor_already_enabled"
+    TWO_FACTOR_NOT_ENABLED = "two_factor_not_enabled"
+    TWO_FACTOR_SETUP_NOT_STARTED = "two_factor_setup_not_started"
+    TWO_FACTOR_RATE_LIMITED = "two_factor_rate_limited"
+
     # SSO-only mode
     SSO_ONLY_PASSWORD_LOGIN_DISABLED = "sso_only_password_login_disabled"
 
@@ -57,6 +70,7 @@ class AuthErrorCode:
     SSO_GITHUB_TOKEN_INVALID = "sso_github_token_invalid"
     SSO_GITHUB_TOKEN_EXPIRED = "sso_github_token_expired"
     SSO_GITHUB_LINK_FAILED = "sso_github_link_failed"
+    SSO_GITHUB_LINK_TWO_FACTOR = "sso_github_link_two_factor"
 
 
 class AuthMessageCode:

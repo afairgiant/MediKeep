@@ -68,8 +68,10 @@ _KNOWN_INSECURE_SECRETS = [
 ]
 
 
-def _get_secret_key() -> str:
+def _get_secret_key() -> tuple[str, bool]:
     """Get SECRET_KEY, generating a random one if not configured.
+
+    Returns (key, whether it was generated for this process).
 
     Called once at module import time. If the configured key is missing,
     empty, or matches a known insecure default, a random key is generated
@@ -86,11 +88,11 @@ def _get_secret_key() -> str:
             "Set a stable SECRET_KEY in your environment so JWT tokens "
             "and encrypted data/configs remain valid across restarts."
         )
-        return secrets.token_urlsafe(64)
-    return key
+        return secrets.token_urlsafe(64), True
+    return key, False
 
 
-_resolved_secret_key = _get_secret_key()
+_resolved_secret_key, _secret_key_is_ephemeral = _get_secret_key()
 
 
 def _derive_salt(purpose: str) -> str:
@@ -278,6 +280,8 @@ class Settings:  # App Info
     # Security Configuration
     ALGORITHM: str = "HS256"
     SECRET_KEY: str = _resolved_secret_key
+    # True when SECRET_KEY was generated for this process and changes on restart
+    SECRET_KEY_IS_EPHEMERAL: bool = _secret_key_is_ephemeral
 
     # CORS Configuration
     CORS_ALLOWED_ORIGINS: list = [
@@ -430,6 +434,10 @@ class Settings:  # App Info
     SSO_ONLY_MODE: bool = _strict_bool("SSO_ONLY_MODE")
     SSO_AUTO_REDIRECT: bool = _strict_bool("SSO_AUTO_REDIRECT")
 
+    # Operator kill switch: false lets enrolled users sign in with a password alone
+    TWO_FACTOR_ENABLED: bool = _strict_bool("TWO_FACTOR_ENABLED", default=True)
+    TOTP_ISSUER: str = os.getenv("TOTP_ISSUER", "MediKeep").strip() or "MediKeep"
+
     # Snapshot of what the two calls above could not parse. An attribute rather
     # than a module global so it is patchable like every other setting, and read
     # after them so the class body has finished populating it.
@@ -493,6 +501,8 @@ class Settings:  # App Info
         os.getenv("PAPRA_MAX_UPLOAD_SIZE", str(100 * 1024 * 1024))
     )  # 100MB
     PAPRA_SALT: str = _derive_salt("papra")
+
+    MFA_SALT: str = _derive_salt("mfa")
 
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

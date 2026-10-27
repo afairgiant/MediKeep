@@ -400,7 +400,7 @@ DB_PASSWORD=secure-password-here
 
 | Variable                      | Type    | Default                   | Required | Description                                |
 | ----------------------------- | ------- | ------------------------- | -------- | ------------------------------------------ |
-| `SECRET_KEY`                  | string  | *(auto-generated)*        | Recommended | JWT signing key (min 32 chars). Auto-generates ephemeral key if not set; JWTs and encrypted configs won't survive restarts without it. |
+| `SECRET_KEY`                  | string  | *(auto-generated)*        | Recommended | JWT signing key (min 32 chars). Auto-generates ephemeral key if not set; JWTs and encrypted configs won't survive restarts without it, and two-factor cannot be turned on. See [Two-Factor Authentication](#two-factor-authentication) |
 | `ALGORITHM`                   | string  | `HS256`                   | No       | JWT algorithm (hardcoded)                  |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | integer | `480`                     | No       | JWT token expiration (8 hours)             |
 | `ADMIN_DEFAULT_PASSWORD`      | string  | `admin123`                | No       | Default admin password for fresh installs  |
@@ -522,6 +522,47 @@ A negative limit, or a window under one minute, stops the container at startup.
 The per-IP limit is higher because behind Docker's userland proxy, or a reverse proxy
 that is not trusted (see [Trusted Proxy Configuration](#trusted-proxy-configuration)),
 every client can appear to come from the same address.
+
+### Two-Factor Authentication
+
+Users can turn on authenticator-app codes (TOTP) for their own account in Settings.
+Nobody is enrolled by default, and SSO sign-ins never ask for a code, since the
+identity provider is responsible for its own multi-factor checks.
+
+| Variable             | Type    | Default    | Description |
+| -------------------- | ------- | ---------- | ----------- |
+| `TWO_FACTOR_ENABLED` | boolean | `true`     | Emergency switch. `false` lets users who turned on two-factor sign in with their password alone, and stops anyone turning it on. Accepts true/false, 1/0, yes/no, on/off; any other value stops the container at startup |
+| `TOTP_ISSUER`        | string  | `MediKeep` | Name shown next to the account in authenticator apps; useful when you run more than one instance |
+| `MFA_SALT`           | string  | *(derived from `SECRET_KEY`)* | Salt for encrypting authenticator secrets. Leave unset unless you have a reason to pin it |
+
+These are not in the example compose files. Add them to the app service's
+`environment:` when you need them.
+
+**Keep `SECRET_KEY` stable.** Authenticator secrets are encrypted with a key derived
+from `SECRET_KEY`. If it changes, or is restored onto a host with a different one,
+those secrets can no longer be read. Users then sign in with one of their backup
+codes, which are hashed rather than encrypted and keep working. While `SECRET_KEY` is
+unset, and the server generates a new one at each start, nobody can turn two-factor on.
+
+**Recovering an account:**
+
+1. The user signs in with a backup code, then turns two-factor off and on again in
+   Settings to get a new authenticator and new codes
+2. If they have no backup codes left, reset their two-factor from the host:
+
+   ```bash
+   docker exec -it medikeep-app python app/scripts/reset_user_mfa.py --username alice
+   ```
+
+   This deletes their authenticator secret and backup codes and signs out all their
+   sessions. Their password is unchanged.
+3. If several users are locked out at once, for example after a lost `SECRET_KEY`,
+   set `TWO_FACTOR_ENABLED=false` and restart. Everyone signs in with a password while
+   you sort it out. Startup logs a warning for as long as it is off and users are
+   enrolled
+
+The second sign-in step is held in memory for 5 minutes. A restart in between just
+means signing in with the password again.
 
 ### SSO Configuration
 
@@ -835,6 +876,7 @@ MediKeep supports the Docker `_FILE` convention used by the official PostgreSQL 
 | `SSO_CLIENT_ID_FILE` | `SSO_CLIENT_ID` |
 | `SSO_CLIENT_SECRET_FILE` | `SSO_CLIENT_SECRET` |
 | `PAPERLESS_SALT_FILE` | `PAPERLESS_SALT` |
+| `MFA_SALT_FILE` | `MFA_SALT` |
 | `NOTIFICATION_ENCRYPTION_SALT_FILE` | `NOTIFICATION_ENCRYPTION_SALT` |
 
 #### Example: Docker Compose with File-Based Secrets

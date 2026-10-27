@@ -243,6 +243,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         # Incremented in SQL so two concurrent bumps cannot collapse into one
         user_obj.session_version = User.session_version + 1
 
+    def commit_ending_sessions(self, db: Session, user_obj: User) -> None:
+        """End the user's sessions and commit them with any other pending changes."""
+        self.end_sessions(user_obj)
+        db.commit()
+        # end_sessions leaves a SQL expression on the attribute until it is reloaded
+        db.refresh(user_obj)
+
     def update(
         self,
         db: Session,

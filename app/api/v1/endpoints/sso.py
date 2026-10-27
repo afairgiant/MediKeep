@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.deps import UnauthorizedException
 from app.core.http.auth_codes import AuthErrorCode
 from app.auth.sso.exceptions import *
 from app.core.config import settings
@@ -19,7 +18,7 @@ from app.core.utils.client_ip import get_client_ip
 from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.core.utils.return_url import is_safe_return_url
 from app.models.models import User
-from app.services.auth_session import complete_login
+from app.services.auth_session import complete_login, require_active
 from app.services.login_throttle import login_throttle
 from app.services.sso_service import SSOService
 
@@ -59,22 +58,6 @@ class GitHubLinkRequest(BaseModel):
     temp_token: str
     username: str
     password: str
-
-
-def _check_user_active(sso_user, event_name: str, req: Request) -> None:
-    """Raise UnauthorizedException if the user account is inactive."""
-    if not sso_user.is_active:
-        log_security_event(
-            logger,
-            event_name,
-            req,
-            f"SSO login rejected for inactive user: {sso_user.username}",
-            username=sso_user.username,
-        )
-        raise UnauthorizedException(
-            message="This account has been deactivated. Please contact an administrator.",
-            request=req,
-        )
 
 
 def _complete_sso_login(
@@ -250,7 +233,7 @@ async def sso_callback(
             # Return GitHub manual linking data for frontend to handle
             return result
 
-        _check_user_active(result["user"], "sso_login_rejected_inactive", req)
+        require_active(req, result["user"], "sso_login_rejected_inactive")
 
         return _complete_sso_login(
             result,
@@ -292,7 +275,7 @@ async def sso_callback(
         )
     except (MedicalRecordsAPIException, HTTPException):
         # A typed response is a deliberate answer, not a failure. Without this the
-        # broad handler below swallows it: _check_user_active raises
+        # broad handler below swallows it: require_active raises
         # UnauthorizedException from inside this try, so a deactivated user was
         # told "SSO authentication failed" with a 500 instead of being told their
         # account is deactivated. HTTPException is included so that any guard added
@@ -317,7 +300,7 @@ async def resolve_account_conflict(
             request.temp_token, request.action, request.preference, db
         )
 
-        _check_user_active(result["user"], "sso_conflict_login_rejected_inactive", req)
+        require_active(req, result["user"], "sso_conflict_login_rejected_inactive")
 
         return _complete_sso_login(
             result,
@@ -380,7 +363,7 @@ async def resolve_github_manual_link(
             raise
         login_throttle.release(req, request.username)
 
-        _check_user_active(result["user"], "github_link_login_rejected_inactive", req)
+        require_active(req, result["user"], "github_link_login_rejected_inactive")
 
         return _complete_sso_login(
             result,

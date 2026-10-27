@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -10,13 +11,14 @@ from app.core.logging.helpers import log_endpoint_error, log_security_event
 from app.core.utils.client_ip import get_client_ip
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences
-from app.models.activity_log import EntityType
+from app.models.activity_log import ActionType, EntityType
 from app.models.models import User as UserModel
 from app.schemas.user import User, UserSelfUpdate
 from app.schemas.user_preferences import (
     UserPreferencesResponse,
     UserPreferencesUpdate,
 )
+from app.services.auth_session import end_other_sessions, record_account_change
 from app.services.user_deletion_service import UserDeletionService
 
 router = APIRouter()
@@ -49,6 +51,26 @@ def update_current_user(
         request=request,
     )
     return updated_user
+
+
+@router.post("/me/sessions/revoke-others")
+def revoke_other_sessions(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: UserModel = Depends(deps.get_current_user),
+):
+    """Sign out every other session of the caller; this one continues."""
+    response = JSONResponse(content={"message": "Other sessions signed out"})
+    end_other_sessions(db, current_user, request, response)
+    record_account_change(
+        db,
+        request,
+        current_user,
+        action=ActionType.SESSIONS_REVOKED,
+        event="sessions_revoked",
+        message="Other sessions signed out",
+    )
+    return response
 
 
 @router.delete("/me")

@@ -13,7 +13,8 @@ import math
 import threading
 import time
 from collections import deque
-from collections.abc import Hashable
+from collections.abc import Hashable, Iterator, Sequence
+from contextlib import ExitStack, contextmanager
 from typing import Deque, Dict, Optional
 
 from fastapi import HTTPException
@@ -123,6 +124,23 @@ class SlidingWindowRateLimiter:
                 if not window:
                     del self._requests[key]
 
+    @contextmanager
+    def failure_slot(
+        self, key: Hashable, counted: tuple[type[BaseException], ...]
+    ) -> Iterator[None]:
+        """Keep a slot already taken with is_allowed() only if the block raises counted.
+
+        Any other outcome, success or an unexpected error, gives the slot back.
+        """
+        try:
+            yield
+        except counted:
+            raise
+        except BaseException:
+            self.release(key)
+            raise
+        self.release(key)
+
     def get_remaining_requests(self, key: Hashable) -> int:
         """Requests still available to this key in the current window."""
         with self._lock:
@@ -196,3 +214,33 @@ class SlidingWindowRateLimiter:
         with self._lock:
             self._requests.clear()
             self._last_sweep = 0.0
+
+
+LimitedKey = tuple[SlidingWindowRateLimiter, Hashable]
+
+
+def reserve_all(limits: Sequence[LimitedKey]) -> Optional[LimitedKey]:
+    """Take a slot under every limit, or under none.
+
+    Returns None when all were taken, else the first full (limiter, key) after
+    giving back the slots already taken.
+    """
+    taken = []
+    for limiter, key in limits:
+        if not limiter.is_allowed(key):
+            for granted, granted_key in taken:
+                granted.release(granted_key)
+            return limiter, key
+        taken.append((limiter, key))
+    return None
+
+
+@contextmanager
+def failure_slots(
+    limits: Sequence[LimitedKey], counted: tuple[type[BaseException], ...]
+) -> Iterator[None]:
+    """failure_slot for every slot reserve_all() took."""
+    with ExitStack() as stack:
+        for limiter, key in limits:
+            stack.enter_context(limiter.failure_slot(key, counted))
+        yield

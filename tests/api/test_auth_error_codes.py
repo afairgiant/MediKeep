@@ -21,6 +21,9 @@ REGISTER_URL = "/api/v1/auth/register"
 REGISTRATION_STATUS_URL = "/api/v1/auth/registration-status"
 CHANGE_PASSWORD_URL = "/api/v1/auth/change-password"
 
+# Past bcrypt's 72-byte input limit in under 72 characters
+PASSWORD_PAST_BCRYPT_LIMIT = "pass1" + "é" * 40
+
 
 @pytest.fixture
 def sso_only():
@@ -45,6 +48,18 @@ class TestLoginCodes:
         response = client.post(
             LOGIN_URL,
             data={"username": user_data["username"], "password": "wrong-password"},
+        )
+
+        assert response.status_code == 401
+        assert response.json()["error_code"] == AuthErrorCode.INVALID_CREDENTIALS
+
+    def test_password_past_bcrypt_limit_is_bad_credentials_not_an_error(
+        self, client: TestClient, db_session
+    ):
+        user_data = create_random_user(db_session)
+
+        response = client.post(
+            LOGIN_URL, data={"username": user_data["username"], "password": "x" * 73}
         )
 
         assert response.status_code == 401
@@ -91,6 +106,21 @@ class TestLoginCodes:
 
 
 class TestRegistrationCodes:
+    def test_password_past_bcrypt_limit_registers_and_signs_in(
+        self, client: TestClient, db_session
+    ):
+        payload = registration_payload("longpassuser")
+        payload["password"] = PASSWORD_PAST_BCRYPT_LIMIT
+
+        registered = client.post(REGISTER_URL, json=payload)
+        login = client.post(
+            LOGIN_URL,
+            data={"username": "longpassuser", "password": PASSWORD_PAST_BCRYPT_LIMIT},
+        )
+
+        assert registered.status_code == 200
+        assert login.status_code == 200
+
     def test_duplicate_username_is_coded(self, client: TestClient, db_session):
         user_data = create_random_user(db_session)
         payload = registration_payload()
@@ -171,3 +201,37 @@ class TestChangePasswordCodes:
 
         assert response.status_code == 401
         assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
+
+    def test_current_password_past_bcrypt_limit_is_incorrect_not_an_error(
+        self, client: TestClient, authenticated_headers
+    ):
+        response = client.post(
+            CHANGE_PASSWORD_URL,
+            json={"currentPassword": "x" * 73, "newPassword": "newpass123"},
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 401
+        assert response.json()["error_code"] == AuthErrorCode.CURRENT_PASSWORD_INCORRECT
+
+    def test_new_password_past_bcrypt_limit_is_set_and_signs_in(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        changed = client.post(
+            CHANGE_PASSWORD_URL,
+            json={
+                "currentPassword": user_with_patient["password"],
+                "newPassword": PASSWORD_PAST_BCRYPT_LIMIT,
+            },
+            headers=authenticated_headers,
+        )
+        login = client.post(
+            LOGIN_URL,
+            data={
+                "username": user_with_patient["user"].username,
+                "password": PASSWORD_PAST_BCRYPT_LIMIT,
+            },
+        )
+
+        assert changed.status_code == 200
+        assert login.status_code == 200
