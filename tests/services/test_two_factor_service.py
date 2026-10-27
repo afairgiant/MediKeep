@@ -70,6 +70,7 @@ class TestReplay:
         with pytest.raises(tfs.CodeRejected) as rejected:
             tfs.verify_totp(db_session, user, code, now=NOW)
         assert rejected.value.replayed
+        assert rejected.value.method == tfs.METHOD_TOTP
 
     def test_earlier_step_after_a_later_one_is_a_replay(
         self, db_session, user, enrolled
@@ -165,8 +166,10 @@ class TestBackupCodes:
         _, codes = enrolled
         assert tfs.verify_backup_code(db_session, user, codes[3]) == 9
 
-        with pytest.raises(tfs.CodeRejected):
+        with pytest.raises(tfs.CodeRejected) as rejected:
             tfs.verify_backup_code(db_session, user, codes[3])
+        assert rejected.value.replayed
+        assert rejected.value.method == tfs.METHOD_BACKUP_CODE
 
     @pytest.mark.parametrize(
         "transform",
@@ -186,15 +189,17 @@ class TestBackupCodes:
 
     @pytest.mark.parametrize("bad", ["", "ABCD-EFGH", "ABC", "ABCD-EFGH-IJKL"])
     def test_wrong_codes_are_rejected(self, db_session, user, enrolled, bad):
-        with pytest.raises(tfs.CodeRejected):
+        with pytest.raises(tfs.CodeRejected) as rejected:
             tfs.verify_backup_code(db_session, user, bad)
+        assert not rejected.value.replayed
 
     def test_regenerate_invalidates_old_codes(self, db_session, user, enrolled):
         _, old = enrolled
         new = tfs.regenerate_backup_codes(db_session, user)
 
-        with pytest.raises(tfs.CodeRejected):
+        with pytest.raises(tfs.CodeRejected) as rejected:
             tfs.verify_backup_code(db_session, user, old[0])
+        assert not rejected.value.replayed
         assert tfs.verify_backup_code(db_session, user, new[0]) == 9
 
 

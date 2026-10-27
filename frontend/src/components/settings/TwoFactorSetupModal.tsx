@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   Button,
   Code,
   CopyButton,
@@ -18,7 +17,8 @@ import {
   startTotpSetup,
   type TotpSetup,
 } from '../../services/api/securityApi';
-import { authErrorText } from '../../utils/authErrorCopy';
+import AuthErrorAlert from '../auth/AuthErrorAlert';
+import { authErrorText, lastAttemptWarning } from '../../utils/authErrorCopy';
 import { TOTP_LENGTH } from '../../constants/twoFactor';
 
 interface TwoFactorSetupModalProps {
@@ -43,12 +43,14 @@ const TwoFactorSetupModal = ({
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState<string | null>(null);
 
   const reset = () => {
     setPassword('');
     setSetup(null);
     setCode('');
     setError('');
+    setWarning(null);
   };
 
   const close = () => {
@@ -61,6 +63,7 @@ const TwoFactorSetupModal = ({
     if (submitting) return;
     setSubmitting(true);
     setError('');
+    setWarning(null);
     try {
       await action();
     } catch (e) {
@@ -73,6 +76,7 @@ const TwoFactorSetupModal = ({
         setSetup(null);
       }
       setError(authErrorText(tAuth, e, t('security.twoFactor.failed')));
+      setWarning(lastAttemptWarning(tAuth, (e as { data?: unknown })?.data));
     } finally {
       setSubmitting(false);
     }
@@ -108,11 +112,7 @@ const TwoFactorSetupModal = ({
       size="md"
     >
       <Stack gap="md">
-        {error && (
-          <Alert color="red" role="alert">
-            {error}
-          </Alert>
-        )}
+        {error && <AuthErrorAlert message={error} warning={warning} />}
 
         {!setup ? (
           <form onSubmit={begin}>

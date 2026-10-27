@@ -69,12 +69,13 @@ class APIException(Exception):
         self.http_status_code = http_status_code
         self.status = status
         self.headers: dict[str, str] = {}
+        self.data: Any = None
         super().__init__(self.message)
 
     def to_response_model(self, data=None):
         """Convert exception to a ResponseModel for JSON serialization."""
         return ResponseModel(
-            data=data,
+            data=data if data is not None else self.data,
             status=self.status,
             message=self.message,
             error_code=self.error_code,
@@ -95,10 +96,12 @@ class MedicalRecordsAPIException(APIException):
         request: Optional[Request] = None,
         context: Optional[dict[str, Any]] = None,
         headers: Optional[dict[str, str]] = None,
+        data: Any = None,
     ):
         super().__init__(error_code, http_status_code, status, message, description)
         if headers:
             self.headers = headers
+        self.data = data
         self._log_exception(request, context)
 
     def _log_exception(

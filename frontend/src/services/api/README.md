@@ -339,8 +339,9 @@ The API services provide comprehensive error handling:
   *Background requests* below for the one case that does not eject the user).
   The server keeps 401 for "no valid session"; a wrong current password or code
   typed into a form while signed in is a 400 and never ejects
-- **Error codes**: errors from `apiService` carry `status` and `errorCode` (the
-  server's `error_code`, or null)
+- **Error codes**: errors from `apiService` carry `status`, `errorCode` (the
+  server's `error_code`, or null) and `data` (the error body's `data`, or null; a
+  refused password or code puts the tries left there)
 - **422 Validation Errors**: Detailed field-level error parsing and user-friendly messages
 - **Network Errors**: Graceful handling with multiple URL fallbacks for Docker environments
 - **Token Expiration**: Automatic detection and cleanup of expired JWT tokens

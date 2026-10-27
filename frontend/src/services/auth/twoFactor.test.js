@@ -92,11 +92,13 @@ describe('verifyTwoFactor', () => {
     expect(result.backupCodesRemaining).toBe(2);
   });
 
-  test('a refusal carries the server code', async () => {
+  test('a refusal carries the server code and the tries left', async () => {
+    const data = { attempts_remaining: 1, after_last: 'sign_in_again' };
     fetch.mockResolvedValue(
       errorResponse(401, {
         message: 'That code is not valid.',
         error_code: 'mfa_code_invalid',
+        data,
       })
     );
 
@@ -106,6 +108,7 @@ describe('verifyTwoFactor', () => {
       success: false,
       error: 'That code is not valid.',
       errorCode: 'mfa_code_invalid',
+      data,
     });
   });
 

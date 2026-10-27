@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   Button,
   Group,
   PasswordInput,
@@ -10,7 +9,8 @@ import {
   TextInput,
 } from '@mantine/core';
 import { ResponsiveModal } from '../adapters/ResponsiveModal';
-import { authErrorText } from '../../utils/authErrorCopy';
+import AuthErrorAlert from '../auth/AuthErrorAlert';
+import { authErrorText, lastAttemptWarning } from '../../utils/authErrorCopy';
 
 interface ConfirmIdentityModalProps {
   opened: boolean;
@@ -39,12 +39,14 @@ const ConfirmIdentityModal = ({
   const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState<string | null>(null);
 
   const close = () => {
     if (submitting) return;
     setPassword('');
     setCode('');
     setError('');
+    setWarning(null);
     onClose();
   };
 
@@ -53,6 +55,7 @@ const ConfirmIdentityModal = ({
     if (!password || !code.trim() || submitting) return;
     setSubmitting(true);
     setError('');
+    setWarning(null);
     try {
       await onSubmit(password, code.trim());
       setPassword('');
@@ -60,6 +63,7 @@ const ConfirmIdentityModal = ({
     } catch (err) {
       setCode('');
       setError(authErrorText(tAuth, err, t('security.twoFactor.failed')));
+      setWarning(lastAttemptWarning(tAuth, (err as { data?: unknown })?.data));
     } finally {
       setSubmitting(false);
     }
@@ -70,11 +74,7 @@ const ConfirmIdentityModal = ({
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           <Text size="sm">{description}</Text>
-          {error && (
-            <Alert color="red" role="alert">
-              {error}
-            </Alert>
-          )}
+          {error && <AuthErrorAlert message={error} warning={warning} />}
           <PasswordInput
             label={t('security.password.currentPassword')}
             value={password}

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   Anchor,
   Button,
   Group,
@@ -10,7 +9,8 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { authErrorCopy } from '../../utils/authErrorCopy';
+import { authErrorCopy, lastAttemptWarning } from '../../utils/authErrorCopy';
+import AuthErrorAlert from './AuthErrorAlert';
 import { TOTP_LENGTH } from '../../constants/twoFactor';
 import type {
   TwoFactorLoginResult,
@@ -44,6 +44,7 @@ const TwoFactorChallenge = ({
   const [error, setError] = useState<{
     message: string;
     code: string | null;
+    warning: string | null;
   } | null>(null);
 
   const canSwitch = methods.includes('totp') && methods.includes('backup_code');
@@ -79,6 +80,7 @@ const TwoFactorChallenge = ({
         message:
           (result.errorCode && result.error) || t('login.twoFactor.failed'),
         code: result.errorCode || null,
+        warning: lastAttemptWarning(t, result.data),
       });
     } finally {
       setSubmitting(false);
@@ -105,9 +107,11 @@ const TwoFactorChallenge = ({
         </div>
 
         {error && (
-          <Alert color="red" role="alert" data-testid="two-factor-error">
-            {authErrorCopy(t, error.code, error.message)}
-          </Alert>
+          <AuthErrorAlert
+            message={authErrorCopy(t, error.code, error.message)}
+            warning={error.warning}
+            testId="two-factor-error"
+          />
         )}
 
         {method === 'totp' ? (

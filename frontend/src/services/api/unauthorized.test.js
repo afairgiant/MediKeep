@@ -269,6 +269,7 @@ describe('apiService refusal of what the user typed', () => {
         jsonResponse(400, '/api/v1/auth/change-password', {
           message: 'Current password is incorrect',
           error_code: errorCode,
+          data: { attempts_remaining: 1, after_last: 'wait' },
         })
       );
 
@@ -278,6 +279,7 @@ describe('apiService refusal of what the user typed', () => {
 
       expect(error.status).toBe(400);
       expect(error.errorCode).toBe(errorCode);
+      expect(error.data).toEqual({ attempts_remaining: 1, after_last: 'wait' });
       expect(assign).not.toHaveBeenCalled();
     }
   );

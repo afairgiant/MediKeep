@@ -167,6 +167,9 @@ authErrorCopy(tAuth, result.errorCode, result.error);
 
 // From an error thrown by apiService, which carries errorCode
 authErrorText(tAuth, caughtError, t('security.twoFactor.failed'));
+
+// A refusal that leaves one try: auth:lastAttempt.wait or .signInAgain, else null
+lastAttemptWarning(tAuth, result.data /* or caughtError.data */);
 ```
 
 A new `AuthErrorCode` needs an `auth:errors` key in all 13 locales. Two-factor sign-in copy is under `auth:login.twoFactor.*`; the Settings copy is under `settings:security.twoFactor.*` and `settings:security.sessions.*`, and its toasts under `notifications:toasts.security.*`.

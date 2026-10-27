@@ -372,6 +372,8 @@ Turning it on signs you out on every other device. You stay signed in where you 
 
 After your password, enter the current code from the app. If you do not have your phone, choose **Use a backup code** and enter one of your saved codes. Each backup code works once. When you have two or fewer left, MediKeep reminds you to make new ones.
 
+Each code from the app also works only once. If MediKeep says a code was already used, wait for the app to show a new one (up to 30 seconds) and enter that. After several wrong codes you have to wait before trying again; MediKeep tells you when you have one try left.
+
 **New backup codes**
 
 Click **New backup codes** and confirm with your password and a code. Your old backup codes stop working.

@@ -86,6 +86,9 @@ user is a 400. Only the sign-in endpoints (login, two-factor verify) refuse with
 | `current_password_incorrect` | 400 | `POST /auth/change-password` and the two-factor settings endpoints |
 | `password_too_short` | 400 | `POST /auth/change-password` |
 | `password_complexity` | 400 | `POST /auth/change-password` |
+| `mfa_code_invalid` | 401 / 400 | Wrong two-factor code at sign-in (401) or in Settings (400) |
+| `mfa_code_reused` | 401 / 400 | Authenticator code already used; wait for the next one |
+| `mfa_backup_code_reused` | 401 / 400 | Backup code already used |
 | `sso_not_enabled` | 400 | SSO called while `SSO_ENABLED=false` |
 | `sso_configuration_error` | 400 | Provider config invalid |
 | `sso_initiate_failed` | 400 / 500 | Could not build the authorization URL |

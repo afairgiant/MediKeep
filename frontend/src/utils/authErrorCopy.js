@@ -25,3 +25,21 @@ export function authErrorText(t, error, fallback) {
     /** @type {{ errorCode?: string, message?: string }} */ (error || {});
   return authErrorCopy(t, errorCode, message || fallback);
 }
+
+/**
+ * The warning for a refusal that leaves one try, else null.
+ *
+ * @param {(...args: any[]) => string} t - from useTranslation('auth')
+ * @param {unknown} data - the refusal's `data`: `attempts_remaining` and `after_last`
+ * @returns {string|null}
+ */
+export function lastAttemptWarning(t, data) {
+  const { attempts_remaining: left, after_last: afterLast } =
+    /** @type {{ attempts_remaining?: number, after_last?: string }} */ (
+      data || {}
+    );
+  if (left !== 1) return null;
+  return afterLast === 'sign_in_again'
+    ? t('lastAttempt.signInAgain')
+    : t('lastAttempt.wait');
+}

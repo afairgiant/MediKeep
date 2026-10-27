@@ -52,7 +52,35 @@ auth_router = APIRouter()
 # Mounted at /users/me: the signed-in user's own two-factor settings
 account_router = APIRouter()
 
-_CODE_REJECTED_MESSAGE = "That code is incorrect or has already been used."
+_CODE_REJECTED_MESSAGE = "That code is incorrect."
+_CODE_REUSED = {
+    two_factor_service.METHOD_TOTP: (
+        "That code was already used. Wait for your authenticator app to show a new one.",
+        AuthErrorCode.MFA_CODE_REUSED,
+    ),
+    two_factor_service.METHOD_BACKUP_CODE: (
+        "That backup code was already used. Use a different one.",
+        AuthErrorCode.MFA_BACKUP_CODE_REUSED,
+    ),
+}
+
+
+def _code_refusal(rejected: CodeRejected) -> tuple[str, str]:
+    """(message, error_code) for a rejected code, telling a reused one from a wrong one."""
+    if rejected.replayed and rejected.method in _CODE_REUSED:
+        return _CODE_REUSED[rejected.method]
+    return _CODE_REJECTED_MESSAGE, AuthErrorCode.MFA_CODE_INVALID
+
+
+def _attempts_left(limits: list[LimitedKey], ticket_left: Optional[int] = None) -> dict:
+    """A refusal's data: tries left, and whether the last one ends in a wait or a new sign-in.
+
+    Call after the failed attempt's slot is taken, so it is already counted.
+    """
+    until_lock = min(limiter.get_remaining_requests(key) for limiter, key in limits)
+    if ticket_left is not None and ticket_left < until_lock:
+        return {"attempts_remaining": ticket_left, "after_last": "sign_in_again"}
+    return {"attempts_remaining": until_lock, "after_last": "wait"}
 
 
 def _ticket_invalid(request: Request) -> UnauthorizedException:
@@ -172,10 +200,12 @@ def verify_second_factor(
             username=db_user.username,
             method=body.method,
         )
+        message, error_code = _code_refusal(rejected)
         raise UnauthorizedException(
-            message=_CODE_REJECTED_MESSAGE,
+            message=message,
             request=request,
-            error_code=AuthErrorCode.MFA_CODE_INVALID,
+            error_code=error_code,
+            data=_attempts_left(limits, two_factor_service.ticket_attempts_left(entry)),
         ) from rejected
 
     log_security_event(
@@ -226,7 +256,10 @@ def _reject_reauth(
     )
     # Not 401: the session is still valid, and clients end the session on a 401
     return BusinessLogicException(
-        message=message, request=request, error_code=error_code
+        message=message,
+        request=request,
+        error_code=error_code,
+        data=_attempts_left([(settings_check_limiter, user.id)]),
     )
 
 
@@ -255,12 +288,9 @@ def _reauthenticate(
         try:
             two_factor_service.verify_any_code(db, user, code)
         except CodeRejected as e:
+            message, error_code = _code_refusal(e)
             raise _reject_reauth(
-                request,
-                user,
-                "code",
-                message=_CODE_REJECTED_MESSAGE,
-                error_code=AuthErrorCode.MFA_CODE_INVALID,
+                request, user, "code", message=message, error_code=error_code
             ) from e
 
 
@@ -356,6 +386,7 @@ def confirm_totp_setup(
             message="That code is incorrect. Check the time on your device and try again.",
             request=request,
             error_code=AuthErrorCode.MFA_CODE_INVALID,
+            data=_attempts_left([(settings_check_limiter, current_user.id)]),
         ) from e
 
     response = JSONResponse(

@@ -29,8 +29,15 @@ export interface TwoFactorChallengeResult {
   methods: TwoFactorMethod[];
 }
 
+/** Sent with a refused code or password: tries left, and what the last one ends in. */
+export interface AttemptsLeft {
+  attempts_remaining: number;
+  after_last: 'wait' | 'sign_in_again';
+}
+
 export interface TwoFactorLoginResult extends LoginResult {
   errorCode?: string | null;
+  data?: AttemptsLeft | null;
   backupCodesRemaining?: number | null;
 }
 

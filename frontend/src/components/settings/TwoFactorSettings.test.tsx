@@ -56,8 +56,12 @@ const OFF = {
 const ON = { ...OFF, totp_enabled: true, backup_codes_remaining: 8 };
 const CODES = ['AAAA-BBBB', 'CCCC-DDDD'];
 
-const refusal = (message: string, errorCode: string) =>
-  Object.assign(new Error(message), { status: 400, errorCode });
+const refusal = (message: string, errorCode: string, attemptsRemaining = 5) =>
+  Object.assign(new Error(message), {
+    status: 400,
+    errorCode,
+    data: { attempts_remaining: attemptsRemaining, after_last: 'wait' },
+  });
 
 const dialog = (name: string) => screen.getByRole('dialog', { name });
 
@@ -225,6 +229,19 @@ describe('TwoFactorSettings setup', () => {
     );
     expect(screen.queryByTestId('totp-secret')).not.toBeInTheDocument();
   });
+
+  test('warns when one try is left', async () => {
+    vi.mocked(startTotpSetup).mockRejectedValue(
+      refusal('Current password is incorrect', 'current_password_incorrect', 1)
+    );
+    const setup = await openSetup();
+
+    await submitPassword(setup, 'nope');
+
+    expect(
+      await within(setup).findByTestId('last-attempt-warning')
+    ).toHaveTextContent('lastAttempt.wait');
+  });
 });
 
 describe('TwoFactorSettings changes that need the password and a code', () => {
@@ -305,6 +322,25 @@ describe('TwoFactorSettings changes that need the password and a code', () => {
     expect(await within(modal).findByRole('alert')).toHaveTextContent(
       'That code is not valid.'
     );
+    expect(
+      within(modal).queryByTestId('last-attempt-warning')
+    ).not.toBeInTheDocument();
+  });
+
+  test('warns when one try is left before a wait', async () => {
+    vi.mocked(disableTwoFactor).mockRejectedValue(
+      refusal('That code is not valid.', 'mfa_code_invalid', 1)
+    );
+    const modal = await open(
+      'security.twoFactor.disable',
+      'security.twoFactor.disableModal.title'
+    );
+
+    await confirmIn(modal, 'security.twoFactor.disable');
+
+    expect(
+      await within(modal).findByTestId('last-attempt-warning')
+    ).toHaveTextContent('lastAttempt.wait');
   });
 
   test('new backup codes are shown once', async () => {

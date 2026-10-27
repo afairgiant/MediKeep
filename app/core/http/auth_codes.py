@@ -29,6 +29,8 @@ class AuthErrorCode:
     # Two-factor sign-in step
     MFA_TICKET_INVALID = "mfa_ticket_invalid"
     MFA_CODE_INVALID = "mfa_code_invalid"
+    MFA_CODE_REUSED = "mfa_code_reused"
+    MFA_BACKUP_CODE_REUSED = "mfa_backup_code_reused"
     MFA_SECRET_UNAVAILABLE = "mfa_secret_unavailable"
     MFA_RATE_LIMITED = "mfa_rate_limited"
 

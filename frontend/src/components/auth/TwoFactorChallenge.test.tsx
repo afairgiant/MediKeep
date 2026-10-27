@@ -80,6 +80,47 @@ describe('TwoFactorChallenge', () => {
     expect(await screen.findByTestId('two-factor-error')).toBeInTheDocument();
     expect(pinInputs()[0]).toHaveValue('');
     expect(onExpired).not.toHaveBeenCalled();
+    expect(
+      screen.queryByTestId('last-attempt-warning')
+    ).not.toBeInTheDocument();
+  });
+
+  test.each([
+    ['sign_in_again', 'lastAttempt.signInAgain'],
+    ['wait', 'lastAttempt.wait'],
+  ])('warns when one try is left before %s', async (afterLast, warning) => {
+    onVerify.mockResolvedValue({
+      success: false,
+      error: 'That code is incorrect.',
+      errorCode: 'mfa_code_invalid',
+      data: { attempts_remaining: 1, after_last: afterLast },
+    });
+    renderChallenge();
+
+    await userEvent.type(pinInputs()[0], '000000');
+
+    expect(await screen.findByTestId('last-attempt-warning')).toHaveTextContent(
+      warning
+    );
+  });
+
+  test('a reused code gets its own message', async () => {
+    onVerify.mockResolvedValue({
+      success: false,
+      error: 'That code was already used.',
+      errorCode: 'mfa_code_reused',
+      data: { attempts_remaining: 3, after_last: 'sign_in_again' },
+    });
+    renderChallenge();
+
+    await userEvent.type(pinInputs()[0], '123456');
+
+    expect(await screen.findByTestId('two-factor-error')).toHaveTextContent(
+      'That code was already used.'
+    );
+    expect(
+      screen.queryByTestId('last-attempt-warning')
+    ).not.toBeInTheDocument();
   });
 
   test('an expired ticket sends the user back to the password', async () => {

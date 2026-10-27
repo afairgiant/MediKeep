@@ -12,6 +12,7 @@ const authFailure = (errorData, fallback) => ({
   success: false,
   error: errorData.message || fallback,
   errorCode: errorData.error_code || null,
+  data: errorData.data ?? null,
 });
 
 class SimpleAuthService {
