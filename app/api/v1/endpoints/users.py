@@ -6,11 +6,13 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_delete, log_update
+from app.core.events import publish_from_thread
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_error, log_security_event
 from app.core.utils.client_ip import get_client_ip
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences
+from app.events.security_events import SessionsRevokedEvent
 from app.models.activity_log import ActionType, EntityType
 from app.models.models import User as UserModel
 from app.schemas.user import User, UserSelfUpdate
@@ -70,6 +72,7 @@ def revoke_other_sessions(
         event="sessions_revoked",
         message="Other sessions signed out",
     )
+    publish_from_thread(SessionsRevokedEvent(user_id=current_user.id))
     return response
 
 

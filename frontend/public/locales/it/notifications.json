@@ -185,6 +185,10 @@
   "description": "Configura come ricevere le notifiche per eventi importanti",
   "error": "Impossibile caricare le impostazioni delle notifiche",
   "events": {
+    "backup_code_used": {
+      "description": "Quando un codice di backup viene usato per accedere al tuo account",
+      "name": "Codice di backup usato"
+    },
     "backup_completed": {
       "description": "Quando un backup viene completato con successo",
       "name": "Backup completato"
@@ -229,6 +233,10 @@
       "description": "Quando la tua password viene modificata",
       "name": "Password modificata"
     },
+    "sessions_revoked": {
+      "description": "Quando gli altri tuoi dispositivi vengono disconnessi",
+      "name": "Altri dispositivi disconnessi"
+    },
     "share_revoked": {
       "description": "Quando l'accesso alle cartelle condivise viene revocato",
       "name": "Condivisione revocata"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Notifica di test manuale",
       "name": "Notifica di test"
+    },
+    "two_factor_disabled": {
+      "description": "Quando la verifica in due passaggi viene disattivata per il tuo account",
+      "name": "Verifica in due passaggi disattivata"
+    },
+    "two_factor_failures": {
+      "description": "Quando la tua password viene usata ma troppi codici di verifica sono errati",
+      "name": "Codici errati ripetuti"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "Ti rimane {{count}} codice di backup. Generane di nuovi nelle Impostazioni.",
       "backupCodesLow_other": "Ti rimangono {{count}} codici di backup. Generane di nuovi nelle Impostazioni.",
       "backupCodesRegenerated": "Nuovi codici di backup generati. Quelli vecchi non funzionano più.",
+      "lockoutCleared": "{{username}} può riprovare ad accedere.",
+      "lockoutClearFailed": "Impossibile rimuovere il blocco di accesso. Riprova.",
       "otherSessionsFailed": "Impossibile disconnettere gli altri dispositivi. Riprova.",
       "otherSessionsSignedOut": "Gli altri dispositivi sono stati disconnessi.",
       "printBlocked": "Il browser ha bloccato la finestra di stampa. Consenti i pop-up per questo sito oppure usa Scarica.",
       "twoFactorDisabled": "Autenticazione a due fattori disattivata.",
-      "twoFactorEnabled": "Autenticazione a due fattori attivata. Gli altri dispositivi sono stati disconnessi."
+      "twoFactorEnabled": "Autenticazione a due fattori attivata. Gli altri dispositivi sono stati disconnessi.",
+      "twoFactorResetByAdmin": "Verifica in due passaggi disattivata per {{username}}.",
+      "twoFactorResetFailed": "Impossibile reimpostare la verifica in due passaggi. Riprova."
     },
     "settings": {
       "cleanupComplete": "Pulizia completata: {{cleaned}} file ripuliti, {{deleted}} file eliminati",

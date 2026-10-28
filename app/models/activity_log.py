@@ -55,6 +55,13 @@ class ActivityLog(Base):
     user = orm_relationship("User", foreign_keys=[user_id])
     patient = orm_relationship("Patient", foreign_keys=[patient_id])
 
+    @property
+    def failure_reason(self) -> Optional[str]:
+        """The LoginFailureReason of a login_failed entry, else None."""
+        if self.action != ActionType.LOGIN_FAILED:
+            return None
+        return (self.event_metadata or {}).get("reason")
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert activity log to dictionary for API responses"""
         return {
@@ -205,12 +212,14 @@ class ActionType:
 
     # Authentication events
     LOGIN = "login"
+    LOGIN_FAILED = "login_failed"
     LOGOUT = "logout"
     TWO_FACTOR_ENABLED = "two_factor_enabled"
     TWO_FACTOR_DISABLED = "two_factor_disabled"
     TWO_FACTOR_RESET = "two_factor_reset"
     BACKUP_CODES_REGENERATED = "backup_codes_regenerated"
     SESSIONS_REVOKED = "sessions_revoked"
+    SIGN_IN_LOCKOUT_CLEARED = "sign_in_lockout_cleared"
 
     # Status changes
     ACTIVATED = "activated"
@@ -234,12 +243,14 @@ class ActionType:
             cls.UPLOADED,
             cls.DOWNLOADED,
             cls.LOGIN,
+            cls.LOGIN_FAILED,
             cls.LOGOUT,
             cls.TWO_FACTOR_ENABLED,
             cls.TWO_FACTOR_DISABLED,
             cls.TWO_FACTOR_RESET,
             cls.BACKUP_CODES_REGENERATED,
             cls.SESSIONS_REVOKED,
+            cls.SIGN_IN_LOCKOUT_CLEARED,
             cls.ACTIVATED,
             cls.DEACTIVATED,
             cls.COMPLETED,
@@ -248,6 +259,17 @@ class ActionType:
             cls.MAINTENANCE_STARTED,
             cls.MAINTENANCE_COMPLETED,
         ]
+
+
+class LoginFailureReason:
+    """Why a sign-in was refused, stored as the reason of a login_failed entry."""
+
+    WRONG_PASSWORD = "wrong_password"
+    UNKNOWN_USER = "unknown_user"
+    DEACTIVATED = "deactivated"
+    WRONG_CODE = "wrong_code"
+    CODE_REUSED = "code_reused"
+    LOCKED = "locked"
 
 
 class ActivityCategory:

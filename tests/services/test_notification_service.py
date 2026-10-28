@@ -79,6 +79,38 @@ class TestNotificationTemplates:
         assert "2026-01-27 10:30:00" in message
         assert "successfully changed" in message
 
+    def test_two_factor_disabled_by_the_user(self):
+        title, message = get_template(
+            "two_factor_disabled", {"occurred_at": "2026-10-27T10:30:00+00:00"}
+        )
+
+        assert title == "Two-Factor Authentication Turned Off"
+        assert "If this was not you" in message
+        assert "2026-10-27 10:30:00 UTC" in message
+
+    def test_two_factor_disabled_by_an_admin(self):
+        _, message = get_template("two_factor_disabled", {"by_admin": True})
+
+        assert "An administrator" in message
+        assert "If this was not you" not in message
+
+    def test_backup_code_used_template(self):
+        title, message = get_template("backup_code_used", {"codes_remaining": 3})
+
+        assert title == "Backup Code Used"
+        assert "Backup codes left: 3" in message
+
+    def test_sessions_revoked_template(self):
+        title, _ = get_template("sessions_revoked", {})
+
+        assert title == "Other Devices Signed Out"
+
+    def test_two_factor_failures_template(self):
+        title, message = get_template("two_factor_failures", {})
+
+        assert title == "Repeated Incorrect Two-Factor Codes"
+        assert "change your password now" in message
+
     def test_unknown_event_fallback(self):
         """Test that unknown events get a fallback template."""
         title, message = get_template("unknown_event", {})

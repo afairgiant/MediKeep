@@ -185,6 +185,10 @@
   "description": "Konfigurera hur du tar emot aviseringar för viktiga händelser",
   "error": "Kunde inte ladda aviseringsinställningar",
   "events": {
+    "backup_code_used": {
+      "description": "När en reservkod används för att logga in på ditt konto",
+      "name": "Reservkod använd"
+    },
     "backup_completed": {
       "description": "När en säkerhetskopiering slutförs utan fel",
       "name": "Säkerhetskopiering slutförd"
@@ -229,6 +233,10 @@
       "description": "När ditt lösenord ändras",
       "name": "Lösenord ändrat"
     },
+    "sessions_revoked": {
+      "description": "När dina andra enheter loggas ut",
+      "name": "Andra enheter utloggade"
+    },
     "share_revoked": {
       "description": "När åtkomst till delade journaler återkallas",
       "name": "Delning återkallad"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Manuell testavisering",
       "name": "Testavisering"
+    },
+    "two_factor_disabled": {
+      "description": "När tvåstegsverifiering stängs av för ditt konto",
+      "name": "Tvåstegsverifiering avstängd"
+    },
+    "two_factor_failures": {
+      "description": "När ditt lösenord används men för många tvåstegskoder är fel",
+      "name": "Upprepade felaktiga koder"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "Du har {{count}} reservkod kvar. Skapa nya under Inställningar.",
       "backupCodesLow_other": "Du har {{count}} reservkoder kvar. Skapa nya under Inställningar.",
       "backupCodesRegenerated": "Nya reservkoder har skapats. De gamla fungerar inte längre.",
+      "lockoutCleared": "{{username}} kan försöka logga in igen.",
+      "lockoutClearFailed": "Det gick inte att häva inloggningsspärren. Försök igen.",
       "otherSessionsFailed": "Det gick inte att logga ut dina andra enheter. Försök igen.",
       "otherSessionsSignedOut": "Dina andra enheter har loggats ut.",
       "printBlocked": "Utskriftsfönstret blockerades av webbläsaren. Tillåt popup-fönster för den här webbplatsen eller använd Ladda ner i stället.",
       "twoFactorDisabled": "Tvåfaktorsautentisering avstängd.",
-      "twoFactorEnabled": "Tvåfaktorsautentisering aktiverad. Dina andra enheter har loggats ut."
+      "twoFactorEnabled": "Tvåfaktorsautentisering aktiverad. Dina andra enheter har loggats ut.",
+      "twoFactorResetByAdmin": "Tvåstegsverifiering avstängd för {{username}}.",
+      "twoFactorResetFailed": "Det gick inte att återställa tvåstegsverifiering. Försök igen."
     },
     "settings": {
       "cleanupComplete": "Rensning slutförd: {{cleaned}} filer rensade, {{deleted}} filer borttagna",

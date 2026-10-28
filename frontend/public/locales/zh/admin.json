@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "操作",
+    "actions": {
+      "activated": "已激活",
+      "backup_codes_regenerated": "已重新生成备用码",
+      "backup_created": "已创建备份",
+      "cancelled": "已取消",
+      "completed": "已完成",
+      "created": "已创建",
+      "deactivated": "已停用",
+      "deleted": "已删除",
+      "downloaded": "已下载",
+      "login": "登录",
+      "login_failed": "登录失败",
+      "logout": "退出登录",
+      "maintenance_completed": "维护已完成",
+      "maintenance_started": "维护已开始",
+      "sessions_revoked": "其他设备已退出",
+      "sign_in_lockout_cleared": "已解除登录锁定",
+      "two_factor_disabled": "已关闭两步验证",
+      "two_factor_enabled": "已开启两步验证",
+      "two_factor_reset": "已重置两步验证",
+      "updated": "已更新",
+      "uploaded": "已上传",
+      "viewed": "已查看"
+    },
     "dateRange": "日期范围",
     "entityTypeFilter": "实体类型",
     "errorLoading": "加载审计日志时出错",
+    "failureReasons": {
+      "code_reused": "验证码已使用",
+      "deactivated": "账户已停用",
+      "locked": "失败次数过多，已锁定",
+      "unknown_user": "用户名不存在",
+      "wrong_code": "验证码错误",
+      "wrong_password": "密码错误"
+    },
     "filterByAction": "按操作筛选",
     "filterByDateRange": "按日期范围筛选",
     "filterByEntityType": "按实体类型筛选",
@@ -60,6 +92,7 @@
       "recordId": "记录ID",
       "timestamp": "时间戳"
     },
+    "unknownUser": "未知用户",
     "viewRecord": "查看{{type}}记录",
     "viewRecordAriaLabel": "查看{{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "更改角色",
     "clear": "清除",
+    "clearLockout": "解除登录锁定",
     "deactivate": "停用",
     "deleteModal": {
       "cannotDeleteLastAdmin": "无法删除最后一个管理员。",
@@ -738,6 +772,12 @@
       "title": "重置{{username}}的密码",
       "userInfo": "用户：{{username}}（ID：{{userId}}）"
     },
+    "resetTwoFactor": "重置两步验证",
+    "resetTwoFactorModal": {
+      "body": "要为 {{username}} 关闭两步验证吗？其身份验证器和备用码将失效，并会在所有设备上退出登录。",
+      "hint": "密码不会更改。该用户可以用密码登录，并在设置中重新开启两步验证。",
+      "title": "重置两步验证"
+    },
     "roleFilter": {
       "all": "所有角色"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "验证",
-      "lastLogin": "最后登录"
+      "lastLogin": "最后登录",
+      "twoFactor": "两步验证"
     },
     "toggleActiveModal": {
       "activateConfirm": "激活\"{{username}}\"？他们将能够重新登录。",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "您无法停用自己的账户。",
       "deactivateConfirm": "停用\"{{username}}\"？他们将无法登录，直到重新激活。",
       "deactivateTitle": "停用用户"
+    },
+    "twoFactor": {
+      "codesLeft": "剩余备用码：{{count}}",
+      "locked": "已锁定",
+      "off": "关闭",
+      "on": "开启"
     },
     "userCount": "{{count}}个用户",
     "userCount_one": "{{count}}个用户",

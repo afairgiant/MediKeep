@@ -75,6 +75,8 @@ class ActivityLogEntry(BaseModel):
     description: str
     timestamp: Optional[str] = None
     ip_address: Optional[str] = None
+    # Set on login_failed entries only
+    failure_reason: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -142,15 +144,21 @@ def _build_activity_query(
     return query
 
 
+def _display_username(log: ActivityLog) -> str:
+    if log.user:
+        return log.user.username
+    # A failed sign-in with no user means the username typed did not exist
+    return "Unknown user" if log.action == ActionType.LOGIN_FAILED else "System"
+
+
 def _log_to_entry(log: ActivityLog) -> ActivityLogEntry:
     """Convert an ActivityLog model instance to an API response entry."""
     entity_type = log.entity_type or ""
-    username = log.user.username if log.user else None
 
     return ActivityLogEntry(
         id=log.id,
         user_id=log.user_id,
-        username=username or "System",
+        username=_display_username(log),
         action=log.action,
         entity_type=entity_type,
         entity_type_display=ENTITY_TYPE_DISPLAY.get(
@@ -161,6 +169,7 @@ def _log_to_entry(log: ActivityLog) -> ActivityLogEntry:
         description=log.description,
         timestamp=log.timestamp.isoformat() if log.timestamp else None,
         ip_address=log.ip_address,
+        failure_reason=log.failure_reason,
     )
 
 
@@ -268,11 +277,10 @@ def export_activity_log(
             output.truncate(0)
 
             for log in logs:
-                username = log.user.username if log.user else "System"
                 writer.writerow(
                     [
                         log.timestamp.isoformat() if log.timestamp else "",
-                        username,
+                        _display_username(log),
                         log.action,
                         ENTITY_TYPE_DISPLAY.get(
                             log.entity_type or "",

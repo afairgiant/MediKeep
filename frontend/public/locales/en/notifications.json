@@ -185,6 +185,10 @@
   "description": "Configure how you receive notifications for important events",
   "error": "Failed to load notification settings",
   "events": {
+    "backup_code_used": {
+      "description": "When a backup code is used to sign in to your account",
+      "name": "Backup Code Used"
+    },
     "backup_completed": {
       "description": "When a backup completes successfully",
       "name": "Backup Completed"
@@ -229,6 +233,10 @@
       "description": "When your password is changed",
       "name": "Password Changed"
     },
+    "sessions_revoked": {
+      "description": "When your other devices are signed out",
+      "name": "Other Devices Signed Out"
+    },
     "share_revoked": {
       "description": "When access to shared records is revoked",
       "name": "Share Revoked"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Manual test notification",
       "name": "Test Notification"
+    },
+    "two_factor_disabled": {
+      "description": "When two-factor authentication is turned off for your account",
+      "name": "Two-Factor Turned Off"
+    },
+    "two_factor_failures": {
+      "description": "When your password is used but too many two-factor codes are wrong",
+      "name": "Repeated Incorrect Codes"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "You have {{count}} backup code left. Generate new ones in Settings.",
       "backupCodesLow_other": "You have {{count}} backup codes left. Generate new ones in Settings.",
       "backupCodesRegenerated": "New backup codes generated. The old ones no longer work.",
+      "lockoutCleared": "{{username}} can try signing in again.",
+      "lockoutClearFailed": "Could not clear the sign-in lockout. Please try again.",
       "otherSessionsFailed": "Could not sign out your other devices. Please try again.",
       "otherSessionsSignedOut": "Your other devices have been signed out.",
       "printBlocked": "The print window was blocked by your browser. Allow pop-ups for this site, or use Download instead.",
       "twoFactorDisabled": "Two-factor authentication turned off.",
-      "twoFactorEnabled": "Two-factor authentication turned on. Your other devices have been signed out."
+      "twoFactorEnabled": "Two-factor authentication turned on. Your other devices have been signed out.",
+      "twoFactorResetByAdmin": "Two-factor authentication turned off for {{username}}.",
+      "twoFactorResetFailed": "Could not reset two-factor authentication. Please try again."
     },
     "settings": {
       "cleanupComplete": "Cleanup completed: {{cleaned}} files cleaned, {{deleted}} files deleted",

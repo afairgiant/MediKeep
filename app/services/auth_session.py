@@ -20,10 +20,11 @@ from app.core.utils.cookie_auth import set_auth_cookie
 from app.core.utils.security import ACCESS_TOKEN_TYPE, create_access_token
 from app.crud.user import user as user_crud
 from app.crud.user_preferences import user_preferences
-from app.models.activity_log import ActionType, EntityType
+from app.models.activity_log import ActionType, EntityType, LoginFailureReason
 from app.models.base import get_utc_now
 from app.models.models import User
 from app.services import two_factor_service
+from app.services.login_throttle import login_throttle
 from app.services.patient_management import PatientManagementService
 
 logger = get_logger(__name__, "app")
@@ -78,7 +79,9 @@ def require_password_login_allowed(request: Request, username: str) -> None:
     )
 
 
-def require_active(request: Request, user: User, event: str) -> None:
+def require_active(
+    db: Session, request: Request, user: User, event: str, *, method: str
+) -> None:
     """Raise 401 account_deactivated, logging event, when the account is inactive."""
     if user.is_active:
         return
@@ -90,10 +93,75 @@ def require_active(request: Request, user: User, event: str) -> None:
         user_id=user.id,
         username=user.username,
     )
+    record_login_failure(
+        db, request, reason=LoginFailureReason.DEACTIVATED, method=method, user=user
+    )
     raise UnauthorizedException(
         message="This account has been deactivated. Please contact an administrator.",
         request=request,
         error_code=AuthErrorCode.ACCOUNT_DEACTIVATED,
+    )
+
+
+_FAILURE_WORDS = {
+    LoginFailureReason.WRONG_PASSWORD: "wrong password",
+    LoginFailureReason.UNKNOWN_USER: "unknown username",
+    LoginFailureReason.DEACTIVATED: "account deactivated",
+    LoginFailureReason.WRONG_CODE: "wrong code",
+    LoginFailureReason.CODE_REUSED: "code already used",
+    LoginFailureReason.LOCKED: "too many failures, sign-in locked",
+}
+
+
+def record_login_failure(
+    db: Session,
+    request: Request,
+    *,
+    reason: str,
+    method: str,
+    user: Optional[User] = None,
+    locked: bool = False,
+) -> None:
+    """Write a login_failed activity entry, and a second one when locked is true.
+
+    user is None for an unknown username; what was typed is never stored. Call only
+    for attempts that got past a rate limit, so the entries stay bounded.
+    """
+    # Read before the first write commits and expires user
+    user_id = user.id if user else None
+    subject = user.username if user else "unknown username"
+    reasons = (reason, LoginFailureReason.LOCKED) if locked else (reason,)
+    for entry_reason in reasons:
+        safe_log_activity(
+            db=db,
+            action=ActionType.LOGIN_FAILED,
+            entity_type=EntityType.USER,
+            entity_obj=user,
+            user_id=user_id,
+            description=f"Failed sign-in ({_FAILURE_WORDS[entry_reason]}): {subject}",
+            metadata={"reason": entry_reason, "method": method},
+            request=request,
+        )
+
+
+def record_password_failure(
+    db: Session, request: Request, username: str, *, method: str
+) -> None:
+    """Record a refused password, and the lockout when this failure started one.
+
+    Call after the failure's throttle slot is kept.
+    """
+    known = user_crud.get_by_username(db, username=username)
+    reason = (
+        LoginFailureReason.WRONG_PASSWORD if known else LoginFailureReason.UNKNOWN_USER
+    )
+    record_login_failure(
+        db,
+        request,
+        reason=reason,
+        method=method,
+        user=known,
+        locked=login_throttle.is_locked(request, username),
     )
 
 
@@ -105,15 +173,22 @@ def record_account_change(
     action: str,
     event: str,
     message: str,
+    actor: Optional[User] = None,
+    metadata: Optional[dict[str, Any]] = None,
 ) -> None:
-    """Write the activity entry and the security log entry for a change to user."""
+    """Write the activity entry and the security log entry for a change to user.
+
+    actor is who made the change when it was not the user, such as an administrator.
+    """
+    actor_id = actor.id if actor else user.id
     safe_log_activity(
         db=db,
         action=action,
         entity_type=EntityType.USER,
         entity_obj=user,
-        user_id=user.id,
+        user_id=actor_id,
         description=f"{message}: {user.username}",
+        metadata=metadata,
         request=request,
     )
     log_security_event(
@@ -121,8 +196,9 @@ def record_account_change(
         event,
         request,
         f"{message}: {user.username}",
-        user_id=user.id,
+        user_id=actor_id,
         username=user.username,
+        **({"target_user_id": user.id} if actor else {}),
     )
 
 

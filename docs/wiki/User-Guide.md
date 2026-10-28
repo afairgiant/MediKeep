@@ -344,6 +344,10 @@ MediKeep can send you notifications for important events through multiple channe
    - **Invitation received / accepted** - Patient sharing activity
    - **Share revoked** - When access to shared records is removed
    - **Password changed** - Security alerts
+   - **Two-factor turned off** - When two-factor is turned off for your account, by you or an administrator
+   - **Backup code used** - When a backup code is used to sign in to your account
+   - **Other devices signed out** - When your other devices are signed out
+   - **Repeated incorrect codes** - When someone enters your correct password but too many wrong two-factor codes. If that was not you, change your password
 
 ### Notification History
 

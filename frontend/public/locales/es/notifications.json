@@ -185,6 +185,10 @@
   "description": "Configure cómo recibir notificaciones de eventos importantes",
   "error": "Error al cargar la configuración de notificaciones",
   "events": {
+    "backup_code_used": {
+      "description": "Cuando se usa un código de respaldo para iniciar sesión en su cuenta",
+      "name": "Código de respaldo usado"
+    },
     "backup_completed": {
       "description": "Cuando una copia de seguridad se completa con éxito",
       "name": "Copia de seguridad completada"
@@ -229,6 +233,10 @@
       "description": "Cuando se cambia su contraseña",
       "name": "Contraseña cambiada"
     },
+    "sessions_revoked": {
+      "description": "Cuando se cierra la sesión en sus otros dispositivos",
+      "name": "Otros dispositivos desconectados"
+    },
     "share_revoked": {
       "description": "Cuando se revoca el acceso a registros compartidos",
       "name": "Acceso compartido revocado"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Notificación de prueba manual",
       "name": "Notificación de prueba"
+    },
+    "two_factor_disabled": {
+      "description": "Cuando se desactiva la verificación en dos pasos de su cuenta",
+      "name": "Verificación en dos pasos desactivada"
+    },
+    "two_factor_failures": {
+      "description": "Cuando se usa su contraseña pero demasiados códigos de verificación son incorrectos",
+      "name": "Códigos incorrectos repetidos"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "Le queda {{count}} código de respaldo. Genere otros nuevos en Configuración.",
       "backupCodesLow_other": "Le quedan {{count}} códigos de respaldo. Genere otros nuevos en Configuración.",
       "backupCodesRegenerated": "Nuevos códigos de respaldo generados. Los anteriores ya no funcionan.",
+      "lockoutCleared": "{{username}} puede volver a intentar iniciar sesión.",
+      "lockoutClearFailed": "No se pudo eliminar el bloqueo de inicio de sesión. Inténtelo de nuevo.",
       "otherSessionsFailed": "No se pudo cerrar la sesión en sus otros dispositivos. Inténtelo de nuevo.",
       "otherSessionsSignedOut": "Se ha cerrado la sesión en sus otros dispositivos.",
       "printBlocked": "Su navegador ha bloqueado la ventana de impresión. Permita las ventanas emergentes para este sitio o use Descargar.",
       "twoFactorDisabled": "Autenticación en dos pasos desactivada.",
-      "twoFactorEnabled": "Autenticación en dos pasos activada. Se ha cerrado la sesión en sus otros dispositivos."
+      "twoFactorEnabled": "Autenticación en dos pasos activada. Se ha cerrado la sesión en sus otros dispositivos.",
+      "twoFactorResetByAdmin": "Verificación en dos pasos desactivada para {{username}}.",
+      "twoFactorResetFailed": "No se pudo restablecer la verificación en dos pasos. Inténtelo de nuevo."
     },
     "settings": {
       "cleanupComplete": "Limpieza completada: {{cleaned}} archivos limpiados, {{deleted}} archivos eliminados",

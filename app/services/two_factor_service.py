@@ -83,6 +83,18 @@ mfa_verify_limiter = SlidingWindowRateLimiter(max_requests=10, window_seconds=90
 mfa_daily_limiter = SlidingWindowRateLimiter(max_requests=30, window_seconds=86400)
 # Failed password or code checks on the two-factor settings endpoints, per user
 settings_check_limiter = SlidingWindowRateLimiter(max_requests=10, window_seconds=900)
+_SIGN_IN_LIMITERS = (mfa_verify_limiter, mfa_daily_limiter)
+
+
+def locked_user_ids() -> set[int]:
+    """Users whose next sign-in code would be refused."""
+    return {key for limiter in _SIGN_IN_LIMITERS for key in limiter.full_keys()}
+
+
+def clear_user_limits(user_id: int) -> None:
+    """Forget the user's failed sign-in code and settings checks."""
+    for limiter in (*_SIGN_IN_LIMITERS, settings_check_limiter):
+        limiter.clear_keys(lambda key: key == user_id)
 
 
 def reset_state() -> None:

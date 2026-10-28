@@ -74,6 +74,10 @@ class EventType(str, Enum):
 
     # Security events
     PASSWORD_CHANGED = "password_changed"
+    TWO_FACTOR_DISABLED = "two_factor_disabled"
+    BACKUP_CODE_USED = "backup_code_used"
+    SESSIONS_REVOKED = "sessions_revoked"
+    TWO_FACTOR_FAILURES = "two_factor_failures"
 
     # Medical events
     MEDICATION_REMINDER_DUE = "medication_reminder_due"

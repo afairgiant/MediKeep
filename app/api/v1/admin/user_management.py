@@ -1,8 +1,8 @@
 """
 Admin User Management endpoints.
 
-Provides admin-only endpoints for creating users with optional patient linking
-and searching patients across the system.
+Provides admin-only endpoints for creating users with optional patient linking,
+searching patients across the system, and recovering users' sign-in.
 """
 
 from datetime import date
@@ -18,6 +18,8 @@ from app.api.deps import (
     get_current_admin_user,
 )
 from app.core.database.database import get_db
+from app.core.events import publish_from_thread
+from app.core.http.auth_codes import AuthErrorCode
 from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
@@ -26,6 +28,7 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.crud.user import user as user_crud
+from app.events.security_events import TwoFactorDisabledEvent
 from app.models.activity_log import ActionType, ActivityLog, EntityType
 from app.models.models import Patient, User
 from app.schemas.admin import (
@@ -34,6 +37,9 @@ from app.schemas.admin import (
     AdminUserCreateRequest,
 )
 from app.schemas.user import UserCreate
+from app.services import two_factor_service
+from app.services.account_recovery import clear_sign_in_lockouts, security_summary
+from app.services.auth_session import record_account_change
 from app.services.patient_management import PatientManagementService
 
 router = APIRouter()
@@ -310,6 +316,81 @@ def create_user_with_optional_link(
         }
 
 
+def _get_user_or_404(request: Request, db: Session, user_id: int) -> User:
+    target = user_crud.get(db, id=user_id)
+    if target is None:
+        raise NotFoundException(message="User not found", request=request)
+    return target
+
+
+@router.get("/security-summary")
+def get_security_summary(
+    request: Request,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+):
+    """Two-factor state and sign-in lockout keyed by user id; users with neither are omitted."""
+    log_endpoint_access(logger, request, admin_user.id, "admin_security_summary_viewed")
+    return {"status": "success", "data": security_summary(db)}
+
+
+@router.delete("/users/{user_id}/two-factor", status_code=204)
+def reset_user_two_factor(
+    request: Request,
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+):
+    """Turn off the user's two-factor and sign out all their sessions.
+
+    Their password is unchanged. 409 two_factor_not_enabled when it is off.
+    """
+    target = _get_user_or_404(request, db, user_id)
+    if not two_factor_service.is_totp_enabled(db, target):
+        raise ConflictException(
+            message="Two-factor authentication is not turned on for this user.",
+            request=request,
+            error_code=AuthErrorCode.TWO_FACTOR_NOT_ENABLED,
+        )
+
+    two_factor_service.remove_all(db, target)
+    record_account_change(
+        db,
+        request,
+        target,
+        action=ActionType.TWO_FACTOR_RESET,
+        event="mfa_reset_by_admin",
+        message="Two-factor authentication reset by an administrator",
+        actor=admin_user,
+        metadata={"source": "admin"},
+    )
+    publish_from_thread(TwoFactorDisabledEvent(user_id=target.id, by_admin=True))
+
+
+@router.delete("/users/{user_id}/sign-in-lockout", status_code=204)
+def clear_user_sign_in_lockout(
+    request: Request,
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+):
+    """Let the user try signing in again now instead of waiting out a lockout.
+
+    Clears this server process only.
+    """
+    target = _get_user_or_404(request, db, user_id)
+    clear_sign_in_lockouts(target)
+    record_account_change(
+        db,
+        request,
+        target,
+        action=ActionType.SIGN_IN_LOCKOUT_CLEARED,
+        event="sign_in_lockout_cleared_by_admin",
+        message="Sign-in lockout cleared by an administrator",
+        actor=admin_user,
+    )
+
+
 @router.get("/users/{user_id}/login-history")
 def get_user_login_history(
     request: Request,
@@ -319,18 +400,16 @@ def get_user_login_history(
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_current_admin_user),
 ):
-    """Get login history for a specific user from the activity log."""
+    """A user's sign-ins and failed sign-ins from the activity log, newest first."""
     log_endpoint_access(logger, request, admin_user.id, "user_login_history_viewed")
 
-    target_user = db.query(User).filter(User.id == user_id).first()
-    if not target_user:
-        raise NotFoundException(message="User not found", request=request)
+    _get_user_or_404(request, db, user_id)
 
     query = (
         db.query(ActivityLog)
         .filter(
             ActivityLog.user_id == user_id,
-            ActivityLog.action == ActionType.LOGIN,
+            ActivityLog.action.in_((ActionType.LOGIN, ActionType.LOGIN_FAILED)),
         )
         .order_by(ActivityLog.timestamp.desc())
     )
@@ -344,6 +423,8 @@ def get_user_login_history(
             "items": [
                 {
                     "id": item.id,
+                    "action": item.action,
+                    "failure_reason": item.failure_reason,
                     "timestamp": item.timestamp.isoformat() if item.timestamp else None,
                     "ip_address": item.ip_address,
                     "user_agent": item.user_agent,

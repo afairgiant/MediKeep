@@ -336,3 +336,47 @@ describe('AuditLog', () => {
     });
   });
 });
+
+describe('AuditLog failed sign-ins', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetActivityLogFilters.mockResolvedValue(mockFilters);
+    mockGetActivityLog.mockResolvedValue({
+      ...mockData,
+      items: [
+        {
+          id: 3,
+          user_id: null,
+          username: 'Unknown user',
+          action: 'login_failed',
+          entity_type: 'user',
+          entity_type_display: 'User',
+          entity_id: null,
+          description: 'Failed sign-in (unknown username): unknown username',
+          timestamp: '2024-01-15T11:00:00',
+          ip_address: '127.0.0.1',
+          failure_reason: 'unknown_user',
+        },
+      ],
+      total: 1,
+    });
+  });
+
+  it('shows a failed sign-in label with the reason', async () => {
+    renderAuditLog();
+
+    expect(
+      await screen.findByText('auditLog.actions.login_failed')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('failed-sign-in-reason')).toHaveTextContent(
+      'unknown_user'
+    );
+  });
+
+  it('names an unknown username as an unknown user, not System', async () => {
+    renderAuditLog();
+
+    expect(await screen.findByText('auditLog.unknownUser')).toBeInTheDocument();
+    expect(screen.queryByText('System')).not.toBeInTheDocument();
+  });
+});

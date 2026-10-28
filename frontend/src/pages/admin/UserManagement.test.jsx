@@ -54,6 +54,9 @@ const mockDeleteUser = vi.fn();
 const mockGetUserLoginHistory = vi.fn();
 const mockGetDashboardStats = vi.fn();
 const mockUpdateModelRecord = vi.fn();
+const mockGetSecuritySummary = vi.fn();
+const mockResetUserTwoFactor = vi.fn();
+const mockClearSignInLockout = vi.fn();
 
 vi.mock('../../services/api/adminApi', () => ({
   adminApiService: {
@@ -65,6 +68,9 @@ vi.mock('../../services/api/adminApi', () => ({
     getUserLoginHistory: (...args) => mockGetUserLoginHistory(...args),
     getDashboardStats: (...args) => mockGetDashboardStats(...args),
     updateModelRecord: (...args) => mockUpdateModelRecord(...args),
+    getSecuritySummary: (...args) => mockGetSecuritySummary(...args),
+    resetUserTwoFactor: (...args) => mockResetUserTwoFactor(...args),
+    clearSignInLockout: (...args) => mockClearSignInLockout(...args),
   },
   default: {
     getUsers: (...args) => mockGetUsers(...args),
@@ -149,6 +155,9 @@ describe('UserManagement', () => {
     mockToggleUserActive.mockResolvedValue({ status: 'success' });
     mockDeleteUser.mockResolvedValue({ status: 'success' });
     mockUpdateModelRecord.mockResolvedValue({ status: 'success' });
+    mockGetSecuritySummary.mockResolvedValue({ status: 'success', data: {} });
+    mockResetUserTwoFactor.mockResolvedValue(null);
+    mockClearSignInLockout.mockResolvedValue(null);
     mockGetUserLoginHistory.mockResolvedValue({
       data: {
         items: [
@@ -405,5 +414,132 @@ describe('UserManagement', () => {
         'true'
       );
     });
+  });
+});
+
+describe('UserManagement sign-in security', () => {
+  const enrolledAndLocked = {
+    status: 'success',
+    data: {
+      2: {
+        totp_enabled: true,
+        backup_codes_remaining: 7,
+        sign_in_locked: true,
+      },
+    },
+  };
+
+  const openMenuFor = async index => {
+    await screen.findByText('john_doe');
+    fireEvent.click(screen.getAllByLabelText(/Actions for/)[index]);
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetUsers.mockResolvedValue(mockUsers);
+    mockGetDashboardStats.mockResolvedValue(mockStats);
+    mockGetSecuritySummary.mockResolvedValue(enrolledAndLocked);
+    mockResetUserTwoFactor.mockResolvedValue(null);
+    mockClearSignInLockout.mockResolvedValue(null);
+  });
+
+  it('shows two-factor and lockout state per user', async () => {
+    renderUserManagement();
+
+    expect(await screen.findByText('users.twoFactor.on')).toBeInTheDocument();
+    expect(screen.getByText('users.twoFactor.locked')).toBeInTheDocument();
+    expect(screen.getAllByText('users.twoFactor.off')).toHaveLength(2);
+  });
+
+  it('offers recovery actions only to users who need them', async () => {
+    renderUserManagement();
+    await screen.findByText('users.twoFactor.on');
+
+    await openMenuFor(0);
+
+    await screen.findByText('Change Role');
+    expect(screen.queryByText('users.resetTwoFactor')).not.toBeInTheDocument();
+    expect(screen.queryByText('users.clearLockout')).not.toBeInTheDocument();
+  });
+
+  it('clears a lockout and refreshes the state', async () => {
+    renderUserManagement();
+    await screen.findByText('users.twoFactor.on');
+    await openMenuFor(1);
+
+    fireEvent.click(await screen.findByText('users.clearLockout'));
+
+    await waitFor(() => expect(mockClearSignInLockout).toHaveBeenCalledWith(2));
+    await waitFor(() =>
+      expect(mockGetSecuritySummary).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it('resets two-factor after confirmation', async () => {
+    renderUserManagement();
+    await screen.findByText('users.twoFactor.on');
+    await openMenuFor(1);
+
+    fireEvent.click(await screen.findByText('users.resetTwoFactor'));
+    expect(
+      await screen.findByText('users.resetTwoFactorModal.body')
+    ).toBeInTheDocument();
+    expect(mockResetUserTwoFactor).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'users.resetTwoFactor' })
+    );
+
+    await waitFor(() => expect(mockResetUserTwoFactor).toHaveBeenCalledWith(2));
+    await waitFor(() =>
+      expect(mockGetSecuritySummary).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it('keeps the reset dialog open when the reset fails', async () => {
+    mockResetUserTwoFactor.mockRejectedValue(new Error('boom'));
+    renderUserManagement();
+    await screen.findByText('users.twoFactor.on');
+    await openMenuFor(1);
+    fireEvent.click(await screen.findByText('users.resetTwoFactor'));
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'users.resetTwoFactor' })
+    );
+
+    await waitFor(() => expect(mockResetUserTwoFactor).toHaveBeenCalled());
+    expect(
+      screen.getByText('users.resetTwoFactorModal.body')
+    ).toBeInTheDocument();
+    expect(mockGetSecuritySummary).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks failed sign-ins in the login history', async () => {
+    mockGetUserLoginHistory.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 9,
+            action: 'login_failed',
+            failure_reason: 'wrong_code',
+            method: 'totp',
+            timestamp: '2026-02-26T10:00:00',
+            ip_address: '127.0.0.1',
+            description: 'Failed sign-in (wrong code): john_doe',
+          },
+        ],
+      },
+    });
+    renderUserManagement();
+    await openMenuFor(1);
+
+    fireEvent.click(await screen.findByText('Login History'));
+
+    expect(
+      await screen.findByText('auditLog.actions.login_failed')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('failed-sign-in-reason')).toHaveTextContent(
+      'wrong_code'
+    );
   });
 });

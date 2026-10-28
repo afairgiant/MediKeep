@@ -35,6 +35,7 @@ from app.schemas.two_factor import MfaChallenge
 from app.schemas.user import Token, User, UserCreate, UserRegistration
 from app.services.auth_session import (
     finish_password_login,
+    record_password_failure,
     reissue_session,
     require_active,
     require_password_login_allowed,
@@ -332,6 +333,7 @@ def login(
             f"Failed login attempt for username: {form_data.username}",
             username=form_data.username,
         )
+        record_password_failure(db, request, form_data.username, method="password")
 
         raise UnauthorizedException(
             message="Incorrect username or password",
@@ -348,7 +350,7 @@ def login(
             error_code=AuthErrorCode.ACCOUNT_INCOMPLETE,
         )
 
-    require_active(request, db_user, "login_rejected_inactive")
+    require_active(db, request, db_user, "login_rejected_inactive", method="password")
     return finish_password_login(db, db_user, request)
 
 

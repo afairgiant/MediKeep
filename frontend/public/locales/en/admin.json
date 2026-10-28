@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Action",
+    "actions": {
+      "activated": "Activated",
+      "backup_codes_regenerated": "Backup codes regenerated",
+      "backup_created": "Backup created",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "created": "Created",
+      "deactivated": "Deactivated",
+      "deleted": "Deleted",
+      "downloaded": "Downloaded",
+      "login": "Signed in",
+      "login_failed": "Failed sign-in",
+      "logout": "Signed out",
+      "maintenance_completed": "Maintenance completed",
+      "maintenance_started": "Maintenance started",
+      "sessions_revoked": "Other devices signed out",
+      "sign_in_lockout_cleared": "Sign-in lockout cleared",
+      "two_factor_disabled": "Two-factor turned off",
+      "two_factor_enabled": "Two-factor turned on",
+      "two_factor_reset": "Two-factor reset",
+      "updated": "Updated",
+      "uploaded": "Uploaded",
+      "viewed": "Viewed"
+    },
     "dateRange": "Date range",
     "entityTypeFilter": "Entity Type",
     "errorLoading": "Error loading audit log",
+    "failureReasons": {
+      "code_reused": "Code already used",
+      "deactivated": "Account deactivated",
+      "locked": "Too many failures, locked",
+      "unknown_user": "Unknown username",
+      "wrong_code": "Wrong code",
+      "wrong_password": "Wrong password"
+    },
     "filterByAction": "Filter by action",
     "filterByDateRange": "Filter by date range",
     "filterByEntityType": "Filter by entity type",
@@ -60,6 +92,7 @@
       "recordId": "Record ID",
       "timestamp": "Timestamp"
     },
+    "unknownUser": "Unknown user",
     "viewRecord": "View {{type}} record",
     "viewRecordAriaLabel": "View {{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Change Role",
     "clear": "Clear",
+    "clearLockout": "Clear sign-in lockout",
     "deactivate": "Deactivate",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Cannot delete the last administrator.",
@@ -738,6 +772,12 @@
       "title": "Reset Password for {{username}}",
       "userInfo": "User: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Reset two-factor",
+    "resetTwoFactorModal": {
+      "body": "Turn off two-factor authentication for {{username}}? Their authenticator and backup codes stop working, and they are signed out everywhere.",
+      "hint": "Their password does not change. They can sign in with it and turn two-factor on again in Settings.",
+      "title": "Reset Two-Factor Authentication"
+    },
     "roleFilter": {
       "all": "All Roles"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Auth",
-      "lastLogin": "Last Login"
+      "lastLogin": "Last Login",
+      "twoFactor": "Two-Factor"
     },
     "toggleActiveModal": {
       "activateConfirm": "Activate \"{{username}}\"? They will be able to log in again.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "You cannot deactivate your own account.",
       "deactivateConfirm": "Deactivate \"{{username}}\"? They will not be able to log in until reactivated.",
       "deactivateTitle": "Deactivate User"
+    },
+    "twoFactor": {
+      "codesLeft": "Backup codes left: {{count}}",
+      "locked": "Locked out",
+      "off": "Off",
+      "on": "On"
     },
     "userCount": "{{count}} users",
     "userCount_one": "{{count}} user",

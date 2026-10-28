@@ -415,3 +415,31 @@ class TestFailureSlots:
                 raise KeyError()
 
         assert all(l.get_remaining_requests(k) == 3 for l, k in limits)
+
+
+class TestFullAndClearKeys:
+    def test_full_keys_lists_only_keys_at_the_limit(self):
+        limiter = SlidingWindowRateLimiter(2, 60)
+        limiter.is_allowed("full")
+        limiter.is_allowed("full")
+        limiter.is_allowed("partial")
+
+        assert limiter.full_keys() == ["full"]
+
+    def test_full_keys_ignores_expired_requests(self):
+        limiter = SlidingWindowRateLimiter(1, 60)
+        with patch("app.core.utils.rate_limit.time.time", return_value=1000.0):
+            limiter.is_allowed("k")
+
+        with patch("app.core.utils.rate_limit.time.time", return_value=1061.0):
+            assert limiter.full_keys() == []
+
+    def test_clear_keys_forgets_only_matching_keys(self):
+        limiter = SlidingWindowRateLimiter(1, 60)
+        for key in (("alice", "1.1.1.1"), ("alice", "2.2.2.2"), ("bob", "1.1.1.1")):
+            limiter.is_allowed(key)
+
+        cleared = limiter.clear_keys(lambda key: key[0] == "alice")
+
+        assert cleared == 2
+        assert limiter.full_keys() == [("bob", "1.1.1.1")]

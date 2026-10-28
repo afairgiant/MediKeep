@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Acción",
+    "actions": {
+      "activated": "Activado",
+      "backup_codes_regenerated": "Códigos de respaldo regenerados",
+      "backup_created": "Copia de seguridad creada",
+      "cancelled": "Cancelado",
+      "completed": "Completado",
+      "created": "Creado",
+      "deactivated": "Desactivado",
+      "deleted": "Eliminado",
+      "downloaded": "Descargado",
+      "login": "Inicio de sesión",
+      "login_failed": "Inicio de sesión fallido",
+      "logout": "Cierre de sesión",
+      "maintenance_completed": "Mantenimiento completado",
+      "maintenance_started": "Mantenimiento iniciado",
+      "sessions_revoked": "Otros dispositivos desconectados",
+      "sign_in_lockout_cleared": "Bloqueo de inicio de sesión eliminado",
+      "two_factor_disabled": "Verificación en dos pasos desactivada",
+      "two_factor_enabled": "Verificación en dos pasos activada",
+      "two_factor_reset": "Verificación en dos pasos restablecida",
+      "updated": "Actualizado",
+      "uploaded": "Subido",
+      "viewed": "Visto"
+    },
     "dateRange": "Rango de fechas",
     "entityTypeFilter": "Tipo de entidad",
     "errorLoading": "Error al cargar el registro de auditoría",
+    "failureReasons": {
+      "code_reused": "Código ya usado",
+      "deactivated": "Cuenta desactivada",
+      "locked": "Demasiados fallos, bloqueado",
+      "unknown_user": "Nombre de usuario desconocido",
+      "wrong_code": "Código incorrecto",
+      "wrong_password": "Contraseña incorrecta"
+    },
     "filterByAction": "Filtrar por acción",
     "filterByDateRange": "Filtrar por rango de fechas",
     "filterByEntityType": "Filtrar por tipo de entidad",
@@ -60,6 +92,7 @@
       "recordId": "ID del registro",
       "timestamp": "Fecha y hora"
     },
+    "unknownUser": "Usuario desconocido",
     "viewRecord": "Ver registro de {{type}}",
     "viewRecordAriaLabel": "Ver {{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Cambiar rol",
     "clear": "Limpiar",
+    "clearLockout": "Eliminar bloqueo de inicio de sesión",
     "deactivate": "Desactivar",
     "deleteModal": {
       "cannotDeleteLastAdmin": "No se puede eliminar al último administrador.",
@@ -738,6 +772,12 @@
       "title": "Restablecer contraseña para {{username}}",
       "userInfo": "Usuario: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Restablecer verificación en dos pasos",
+    "resetTwoFactorModal": {
+      "body": "¿Desactivar la verificación en dos pasos de {{username}}? Su aplicación de autenticación y sus códigos de respaldo dejarán de funcionar, y se cerrarán todas sus sesiones.",
+      "hint": "Su contraseña no cambia. Puede iniciar sesión con ella y volver a activar la verificación en dos pasos en Configuración.",
+      "title": "Restablecer la verificación en dos pasos"
+    },
     "roleFilter": {
       "all": "Todos los roles"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Autenticación",
-      "lastLogin": "Último inicio de sesión"
+      "lastLogin": "Último inicio de sesión",
+      "twoFactor": "Dos pasos"
     },
     "toggleActiveModal": {
       "activateConfirm": "¿Activar \"{{username}}\"? Podrá iniciar sesión nuevamente.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "No puede desactivar su propia cuenta.",
       "deactivateConfirm": "¿Desactivar \"{{username}}\"? No podrá iniciar sesión hasta que sea reactivado.",
       "deactivateTitle": "Desactivar usuario"
+    },
+    "twoFactor": {
+      "codesLeft": "Códigos de respaldo restantes: {{count}}",
+      "locked": "Bloqueado",
+      "off": "Desactivada",
+      "on": "Activada"
     },
     "userCount": "{{count}} usuarios",
     "userCount_one": "{{count}} usuario",

@@ -18,7 +18,11 @@ from app.core.utils.client_ip import get_client_ip
 from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.core.utils.return_url import is_safe_return_url
 from app.models.models import User
-from app.services.auth_session import complete_login, require_active
+from app.services.auth_session import (
+    complete_login,
+    record_password_failure,
+    require_active,
+)
 from app.services.login_throttle import login_throttle
 from app.services.sso_service import SSOService
 
@@ -233,7 +237,9 @@ async def sso_callback(
             # Return GitHub manual linking data for frontend to handle
             return result
 
-        require_active(req, result["user"], "sso_login_rejected_inactive")
+        require_active(
+            db, req, result["user"], "sso_login_rejected_inactive", method="sso"
+        )
 
         return _complete_sso_login(
             result,
@@ -300,7 +306,13 @@ async def resolve_account_conflict(
             request.temp_token, request.action, request.preference, db
         )
 
-        require_active(req, result["user"], "sso_conflict_login_rejected_inactive")
+        require_active(
+            db,
+            req,
+            result["user"],
+            "sso_conflict_login_rejected_inactive",
+            method="sso",
+        )
 
         return _complete_sso_login(
             result,
@@ -360,10 +372,14 @@ async def resolve_github_manual_link(
             # Only a wrong password keeps its slot in the failed-login count
             if getattr(e, "error_code", None) != AuthErrorCode.INVALID_CREDENTIALS:
                 login_throttle.release(req, request.username)
+            else:
+                record_password_failure(db, req, request.username, method="sso")
             raise
         login_throttle.release(req, request.username)
 
-        require_active(req, result["user"], "github_link_login_rejected_inactive")
+        require_active(
+            db, req, result["user"], "github_link_login_rejected_inactive", method="sso"
+        )
 
         return _complete_sso_login(
             result,

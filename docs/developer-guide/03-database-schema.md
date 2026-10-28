@@ -1742,9 +1742,12 @@ JUNCTION TABLES (Many-to-Many)
 **Action Types**:
 - created, updated, deleted, viewed
 - uploaded, downloaded
-- login, logout
+- login, login_failed, logout
 - two_factor_enabled, two_factor_disabled, two_factor_reset, backup_codes_regenerated,
-  sessions_revoked
+  sessions_revoked, sign_in_lockout_cleared
+
+A `login_failed` row keeps `{"reason", "method"}` in `event_metadata`; for an unknown
+username `user_id` is null and the typed name is not stored.
 - activated, deactivated, completed, cancelled
 - backup_created, maintenance_started, maintenance_completed
 

@@ -97,6 +97,8 @@
   `error_code: mfa_rate_limited`)
 - Two-factor settings: 10 failed password or code checks per user per 15 minutes
   (`/users/me/two-factor/*`, `error_code: two_factor_rate_limited`)
+- An admin can clear a user's failed password and code counts with
+  `DELETE /admin/user-management/users/{id}/sign-in-lockout` (section 15.9)
 - Medical specialty creation: 20 requests/hour per **user** (`POST /medical-specialties/`)
 
 Every rate-limited endpoint returns `429` with `Retry-After`, `X-RateLimit-Limit`,
@@ -125,8 +127,9 @@ user's session version.
   admin password reset (an admin resetting their own keeps their session), and
   deactivating an account through `PUT /admin/models/user/{id}` or a bulk update.
   `session_version` is server-owned: a value sent to the admin model endpoints is
-  ignored. It is also raised by turning two-factor off (by the user or with
-  `reset_user_mfa.py`) and by `POST /users/me/sessions/revoke-others`
+  ignored. It is also raised by turning two-factor off (by the user, by an admin with
+  `DELETE /admin/user-management/users/{id}/two-factor`, or with `reset_user_mfa.py`)
+  and by `POST /users/me/sessions/revoke-others`
 
 ### Check Registration Status
 
@@ -656,7 +659,8 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 
 - **Authentication**: Yes
 - Ends every other session of the caller; the response sets a fresh cookie so this
-  one continues. Recorded as `sessions_revoked`
+  one continues. Recorded as `sessions_revoked`, and sends the `sessions_revoked`
+  notification
 
 ### Get User Preferences
 
@@ -6585,6 +6589,73 @@ Current codes:
 | `sso_only_no_registration_route` | Registration was turned off while `SSO_ONLY_MODE` is on, leaving no self-service route into the instance |
 
 The auto-backup schedule keeps its own endpoints: `GET`/`POST /admin/backups/settings/schedule`.
+
+### 15.9 User Sign-In Security
+
+Base path: `/api/v1/admin/user-management`. Admin only; a non-admin gets `403`.
+
+`GET /security-summary`
+
+- Two-factor state and sign-in lockout per user id. Users with two-factor off and no
+  lockout are left out:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "7": {"totp_enabled": true, "backup_codes_remaining": 8, "sign_in_locked": false}
+  }
+}
+```
+
+- `sign_in_locked` is true while the user's password checks (from any address) or
+  second-factor checks have no tries left. Lockouts are kept per server process
+
+`DELETE /users/{user_id}/two-factor`
+
+- Turns off the user's two-factor (authenticator and backup codes) and ends all their
+  sessions. Their password is unchanged. `204`
+- Recorded as `two_factor_reset` with the admin as the actor, and sends the user the
+  `two_factor_disabled` notification
+- `404` unknown user; `409` `two_factor_not_enabled`
+
+`DELETE /users/{user_id}/sign-in-lockout`
+
+- Forgets the user's failed password checks from every address, and their failed
+  two-factor checks, so they can try again now. `204`, also when nothing was locked
+- Clears this server process only. A lock on the address itself
+  (`LOGIN_MAX_FAILED_ATTEMPTS_PER_IP`) is not cleared
+- Recorded as `sign_in_lockout_cleared` with the admin as the actor; `404` unknown user
+
+`GET /users/{user_id}/login-history?page=1&per_page=20`
+
+- Sign-ins and failed sign-ins, newest first. Each item: `id`, `action` (`login` or
+  `login_failed`), `failure_reason` (null for `login`), `timestamp`,
+  `ip_address`, `user_agent`, `description`
+
+### 15.10 Activity Log
+
+Base path: `/api/v1/admin/activity-log`. Each entry carries `failure_reason`, set on
+`login_failed` entries only.
+
+**Failed sign-ins** are recorded as `login_failed` with `event_metadata`
+`{"reason": ..., "method": ...}`:
+
+| `reason` | When |
+|---|---|
+| `wrong_password` | The password was wrong for an existing username |
+| `unknown_user` | No account has that username. `user_id` is null and the typed username is not stored |
+| `deactivated` | The credentials were right but the account is deactivated |
+| `wrong_code` | A wrong authenticator or backup code |
+| `code_reused` | An authenticator or backup code that was already used |
+| `locked` | Written after the failure that used the last try; refusals while locked write nothing |
+
+`method` is `password`, `totp`, `backup_code` or `sso` (a deactivated SSO account, or
+a wrong password while linking GitHub). Only attempts that count toward a limit are
+recorded, so the entries stay bounded. Refusals that check no credential (password
+sign-in under `SSO_ONLY_MODE`, a failed SSO handshake with no account) go to the
+security log only. In the list and CSV export, a `login_failed` entry with no user
+shows as `Unknown user` instead of `System`.
 
 ---
 

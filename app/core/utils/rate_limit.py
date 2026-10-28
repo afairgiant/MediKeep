@@ -13,7 +13,7 @@ import math
 import threading
 import time
 from collections import deque
-from collections.abc import Hashable, Iterator, Sequence
+from collections.abc import Callable, Hashable, Iterator, Sequence
 from contextlib import ExitStack, contextmanager
 from typing import Deque, Dict, Optional
 
@@ -208,6 +208,25 @@ class SlidingWindowRateLimiter:
             headers={**headers, "X-Error-Code": error_code},
         )
 
+    def full_keys(self) -> list[Hashable]:
+        """Keys with no requests left in the current window."""
+        with self._lock:
+            now = time.time()
+            return [
+                key
+                for key in list(self._requests)
+                if (window := self._prune(key, now))
+                and len(window) >= self.max_requests
+            ]
+
+    def clear_keys(self, match: Callable[[Hashable], bool]) -> int:
+        """Forget every key for which match is true; returns how many were cleared."""
+        with self._lock:
+            matched = [key for key in self._requests if match(key)]
+            for key in matched:
+                del self._requests[key]
+            return len(matched)
+
     def reset(self) -> None:
         """Discard all recorded requests. For tests - module-scope limiter state
         otherwise leaks between them."""
@@ -233,6 +252,11 @@ def reserve_all(limits: Sequence[LimitedKey]) -> Optional[LimitedKey]:
             return limiter, key
         taken.append((limiter, key))
     return None
+
+
+def any_exhausted(limits: Sequence[LimitedKey]) -> bool:
+    """Whether the next reserve_all() on limits would be refused."""
+    return any(limiter.get_remaining_requests(key) == 0 for limiter, key in limits)
 
 
 @contextmanager

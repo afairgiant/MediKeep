@@ -20,3 +20,27 @@ class PasswordChangedEvent(DomainEvent):
     """
 
     change_time: str = ""
+
+
+@dataclass(frozen=True)
+class TwoFactorDisabledEvent(DomainEvent):
+    """Two-factor authentication was turned off for user_id, by them or by an administrator."""
+
+    by_admin: bool = False
+
+
+@dataclass(frozen=True)
+class BackupCodeUsedEvent(DomainEvent):
+    """A backup code was used to sign in as user_id."""
+
+    codes_remaining: int = 0
+
+
+@dataclass(frozen=True)
+class SessionsRevokedEvent(DomainEvent):
+    """Every other session of user_id was signed out."""
+
+
+@dataclass(frozen=True)
+class TwoFactorFailuresEvent(DomainEvent):
+    """Enough wrong codes followed a correct password that the second step locked."""

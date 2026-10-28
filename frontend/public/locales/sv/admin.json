@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Åtgärd",
+    "actions": {
+      "activated": "Aktiverad",
+      "backup_codes_regenerated": "Reservkoder skapade på nytt",
+      "backup_created": "Säkerhetskopia skapad",
+      "cancelled": "Avbruten",
+      "completed": "Slutförd",
+      "created": "Skapad",
+      "deactivated": "Inaktiverad",
+      "deleted": "Borttagen",
+      "downloaded": "Nedladdad",
+      "login": "Inloggad",
+      "login_failed": "Misslyckad inloggning",
+      "logout": "Utloggad",
+      "maintenance_completed": "Underhåll slutfört",
+      "maintenance_started": "Underhåll startat",
+      "sessions_revoked": "Andra enheter utloggade",
+      "sign_in_lockout_cleared": "Inloggningsspärr hävd",
+      "two_factor_disabled": "Tvåstegsverifiering av",
+      "two_factor_enabled": "Tvåstegsverifiering på",
+      "two_factor_reset": "Tvåstegsverifiering återställd",
+      "updated": "Uppdaterad",
+      "uploaded": "Uppladdad",
+      "viewed": "Visad"
+    },
     "dateRange": "Datumintervall",
     "entityTypeFilter": "Enhetstyp",
     "errorLoading": "Fel vid laddning av granskningslogg",
+    "failureReasons": {
+      "code_reused": "Koden redan använd",
+      "deactivated": "Kontot inaktiverat",
+      "locked": "För många misslyckanden, spärrad",
+      "unknown_user": "Okänt användarnamn",
+      "wrong_code": "Fel kod",
+      "wrong_password": "Fel lösenord"
+    },
     "filterByAction": "Filtrera efter åtgärd",
     "filterByDateRange": "Filtrera efter datumintervall",
     "filterByEntityType": "Filtrera efter enhetstyp",
@@ -60,6 +92,7 @@
       "recordId": "Post-ID",
       "timestamp": "Tidsstämpel"
     },
+    "unknownUser": "Okänd användare",
     "viewRecord": "Visa {{type}}-post",
     "viewRecordAriaLabel": "Visa {{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Ändra roll",
     "clear": "Rensa",
+    "clearLockout": "Häv inloggningsspärr",
     "deactivate": "Inaktivera",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Kan inte radera den sista administratören.",
@@ -738,6 +772,12 @@
       "title": "Återställ lösenord för {{username}}",
       "userInfo": "Användare: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Återställ tvåstegsverifiering",
+    "resetTwoFactorModal": {
+      "body": "Stänga av tvåstegsverifiering för {{username}}? Autentiseringsappen och reservkoderna slutar fungera, och användaren loggas ut överallt.",
+      "hint": "Lösenordet ändras inte. Användaren kan logga in med det och slå på tvåstegsverifiering igen i Inställningar.",
+      "title": "Återställ tvåstegsverifiering"
+    },
     "roleFilter": {
       "all": "Alla roller"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Autentisering",
-      "lastLogin": "Senaste inloggning"
+      "lastLogin": "Senaste inloggning",
+      "twoFactor": "Tvåsteg"
     },
     "toggleActiveModal": {
       "activateConfirm": "Aktivera \"{{username}}\"? De kommer att kunna logga in igen.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "Du kan inte inaktivera ditt eget konto.",
       "deactivateConfirm": "Inaktivera \"{{username}}\"? De kommer inte att kunna logga in förrän kontot återaktiveras.",
       "deactivateTitle": "Inaktivera användare"
+    },
+    "twoFactor": {
+      "codesLeft": "Reservkoder kvar: {{count}}",
+      "locked": "Spärrad",
+      "off": "Av",
+      "on": "På"
     },
     "userCount": "{{count}} användare",
     "userCount_one": "{{count}} användare",

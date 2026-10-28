@@ -11,13 +11,24 @@ from app.api.deps import (
     ForbiddenException,
     UnauthorizedException,
 )
+from app.core.events import publish_from_thread
 from app.core.http.auth_codes import AuthErrorCode
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_security_event
-from app.core.utils.rate_limit import LimitedKey, failure_slots, reserve_all
+from app.core.utils.rate_limit import (
+    LimitedKey,
+    any_exhausted,
+    failure_slots,
+    reserve_all,
+)
 from app.core.utils.security import verify_password
 from app.crud.user import user as user_crud
-from app.models.activity_log import ActionType
+from app.events.security_events import (
+    BackupCodeUsedEvent,
+    TwoFactorDisabledEvent,
+    TwoFactorFailuresEvent,
+)
+from app.models.activity_log import ActionType, LoginFailureReason
 from app.models.models import User
 from app.schemas.two_factor import (
     BackupCodesResponse,
@@ -33,6 +44,7 @@ from app.services.auth_session import (
     complete_login,
     finish_password_login,
     record_account_change,
+    record_login_failure,
     reissue_session,
     require_active,
     require_password_login_allowed,
@@ -81,6 +93,29 @@ def _attempts_left(limits: list[LimitedKey], ticket_left: Optional[int] = None) 
     if ticket_left is not None and ticket_left < until_lock:
         return {"attempts_remaining": ticket_left, "after_last": "sign_in_again"}
     return {"attempts_remaining": until_lock, "after_last": "wait"}
+
+
+def _record_code_failure(
+    db: Session,
+    request: Request,
+    user: User,
+    rejected: CodeRejected,
+    method: str,
+    limits: list[LimitedKey],
+) -> None:
+    """Audit a refused sign-in code; when it used the last try, also the lockout and an alert."""
+    reason = (
+        LoginFailureReason.CODE_REUSED
+        if rejected.replayed
+        else LoginFailureReason.WRONG_CODE
+    )
+    user_id = user.id
+    locked = any_exhausted(limits)
+    record_login_failure(
+        db, request, reason=reason, method=method, user=user, locked=locked
+    )
+    if locked:
+        publish_from_thread(TwoFactorFailuresEvent(user_id=user_id))
 
 
 def _ticket_invalid(request: Request) -> UnauthorizedException:
@@ -140,7 +175,7 @@ def verify_second_factor(
     if db_user is None:
         raise _ticket_invalid(request)
     require_password_login_allowed(request, db_user.username)
-    require_active(request, db_user, "login_rejected_inactive")
+    require_active(db, request, db_user, "login_rejected_inactive", method=body.method)
     if entry.value.session_version != db_user.session_version:
         raise _ticket_invalid(request)
 
@@ -200,6 +235,7 @@ def verify_second_factor(
             username=db_user.username,
             method=body.method,
         )
+        _record_code_failure(db, request, db_user, rejected, body.method, limits)
         message, error_code = _code_refusal(rejected)
         raise UnauthorizedException(
             message=message,
@@ -218,6 +254,10 @@ def verify_second_factor(
         method=body.method,
         backup_codes_remaining=remaining,
     )
+    if remaining is not None:
+        publish_from_thread(
+            BackupCodeUsedEvent(user_id=db_user.id, codes_remaining=remaining)
+        )
 
     return complete_login(
         db,
@@ -426,6 +466,7 @@ def disable_two_factor(
         event="totp_disabled",
         message="Two-factor authentication turned off",
     )
+    publish_from_thread(TwoFactorDisabledEvent(user_id=current_user.id))
     return response
 
 

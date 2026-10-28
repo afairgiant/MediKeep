@@ -8,6 +8,7 @@ Tests cover:
 - Template generation
 """
 
+import anyio
 import pytest
 from datetime import datetime
 
@@ -16,6 +17,7 @@ from app.core.events import (
     get_event_bus,
     EventRegistry,
     get_event_registry,
+    publish_from_thread,
     setup_event_system,
 )
 from app.events.backup_events import BackupCompletedEvent, BackupFailedEvent
@@ -24,7 +26,7 @@ from app.events.collaboration_events import (
     InvitationAcceptedEvent,
     ShareRevokedEvent,
 )
-from app.events.security_events import PasswordChangedEvent
+from app.events.security_events import PasswordChangedEvent, SessionsRevokedEvent
 
 
 class TestDomainEvent:
@@ -258,6 +260,10 @@ class TestSetupEventSystem:
             "invitation_accepted",
             "share_revoked",
             "password_changed",
+            "two_factor_disabled",
+            "backup_code_used",
+            "sessions_revoked",
+            "two_factor_failures",
         ]
 
         for event_type in expected_events:
@@ -321,3 +327,29 @@ class TestIntegration:
         assert "Backup Completed" in titles[0]
         assert "Password Changed" in titles[1]
         assert "Invitation" in titles[2]
+
+
+class TestPublishFromThread:
+    def test_outside_a_worker_thread_logs_and_does_not_raise(self):
+        publish_from_thread(SessionsRevokedEvent(user_id=1))
+
+    def test_from_a_worker_thread_reaches_the_handlers(self):
+        bus = get_event_bus()
+        received = []
+
+        async def handler(event):
+            received.append(event)
+
+        bus.subscribe("sessions_revoked", handler)
+        event = SessionsRevokedEvent(user_id=1)
+        try:
+
+            async def main():
+                await anyio.to_thread.run_sync(publish_from_thread, event)
+                await anyio.sleep(0.01)
+
+            anyio.run(main)
+        finally:
+            bus._handlers["sessions_revoked"].remove(handler)
+
+        assert received == [event]

@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Действие",
+    "actions": {
+      "activated": "Активировано",
+      "backup_codes_regenerated": "Резервные коды созданы заново",
+      "backup_created": "Резервная копия создана",
+      "cancelled": "Отменено",
+      "completed": "Завершено",
+      "created": "Создано",
+      "deactivated": "Деактивировано",
+      "deleted": "Удалено",
+      "downloaded": "Скачано",
+      "login": "Вход",
+      "login_failed": "Неудачный вход",
+      "logout": "Выход",
+      "maintenance_completed": "Обслуживание завершено",
+      "maintenance_started": "Обслуживание начато",
+      "sessions_revoked": "Другие устройства отключены",
+      "sign_in_lockout_cleared": "Блокировка входа снята",
+      "two_factor_disabled": "Двухфакторная защита отключена",
+      "two_factor_enabled": "Двухфакторная защита включена",
+      "two_factor_reset": "Двухфакторная защита сброшена",
+      "updated": "Обновлено",
+      "uploaded": "Загружено",
+      "viewed": "Просмотрено"
+    },
     "dateRange": "Диапазон дат",
     "entityTypeFilter": "Тип сущности",
     "errorLoading": "Ошибка загрузки журнала аудита",
+    "failureReasons": {
+      "code_reused": "Код уже использован",
+      "deactivated": "Учётная запись деактивирована",
+      "locked": "Слишком много ошибок, заблокировано",
+      "unknown_user": "Неизвестное имя пользователя",
+      "wrong_code": "Неверный код",
+      "wrong_password": "Неверный пароль"
+    },
     "filterByAction": "Фильтр по действию",
     "filterByDateRange": "Фильтр по диапазону дат",
     "filterByEntityType": "Фильтр по типу сущности",
@@ -60,6 +92,7 @@
       "recordId": "ID записи",
       "timestamp": "Время"
     },
+    "unknownUser": "Неизвестный пользователь",
     "viewRecord": "Просмотр записи {{type}}",
     "viewRecordAriaLabel": "Просмотр {{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Изменить роль",
     "clear": "Очистить",
+    "clearLockout": "Снять блокировку входа",
     "deactivate": "Деактивировать",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Невозможно удалить последнего администратора.",
@@ -738,6 +772,12 @@
       "title": "Сброс пароля для {{username}}",
       "userInfo": "Пользователь: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Сбросить двухфакторную защиту",
+    "resetTwoFactorModal": {
+      "body": "Отключить двухфакторную аутентификацию для {{username}}? Приложение-аутентификатор и резервные коды перестанут работать, а все сеансы будут завершены.",
+      "hint": "Пароль не меняется. С ним можно войти и снова включить двухфакторную защиту в настройках.",
+      "title": "Сброс двухфакторной аутентификации"
+    },
     "roleFilter": {
       "all": "Все роли"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Аутентификация",
-      "lastLogin": "Последний вход"
+      "lastLogin": "Последний вход",
+      "twoFactor": "Двухфакторная"
     },
     "toggleActiveModal": {
       "activateConfirm": "Активировать «{{username}}»? Пользователь сможет снова войти в систему.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "Вы не можете деактивировать собственную учётную запись.",
       "deactivateConfirm": "Деактивировать «{{username}}»? Пользователь не сможет входить в систему до повторной активации.",
       "deactivateTitle": "Деактивировать пользователя"
+    },
+    "twoFactor": {
+      "codesLeft": "Осталось резервных кодов: {{count}}",
+      "locked": "Заблокирован",
+      "off": "Выкл.",
+      "on": "Вкл."
     },
     "userCount": "{{count}} пользователей",
     "userCount_one": "{{count}} пользователь",

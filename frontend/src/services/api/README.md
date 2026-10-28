@@ -212,8 +212,15 @@ Specialized service for administrative functions, extending the base API service
 ### System Administration
 
 - `getDetailedStats()` - Get comprehensive system statistics
-- `getActivityLog(params)` - Get activity logs with filtering
+- `getActivityLog(params)` - Get activity logs with filtering; `login_failed` entries carry `failure_reason`
 - `testAdminAccess()` - Verify admin privileges
+
+### User Sign-In Security
+
+- `getSecuritySummary()` - Two-factor state and sign-in lockout keyed by user id; users with neither are absent
+- `resetUserTwoFactor(userId)` - Turn off a user's two-factor and end their sessions (204)
+- `clearSignInLockout(userId)` - Let a locked-out user try signing in again now (204)
+- `getUserLoginHistory(userId, page, perPage)` - Sign-ins and failed sign-ins, newest first
 
 ### Settings
 
