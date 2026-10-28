@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Działanie",
+    "actions": {
+      "activated": "Aktywowano",
+      "backup_codes_regenerated": "Kody zapasowe wygenerowane ponownie",
+      "backup_created": "Utworzono kopię zapasową",
+      "cancelled": "Anulowano",
+      "completed": "Ukończono",
+      "created": "Utworzono",
+      "deactivated": "Dezaktywowano",
+      "deleted": "Usunięto",
+      "downloaded": "Pobrano",
+      "login": "Zalogowano",
+      "login_failed": "Nieudane logowanie",
+      "logout": "Wylogowano",
+      "maintenance_completed": "Zakończono konserwację",
+      "maintenance_started": "Rozpoczęto konserwację",
+      "sessions_revoked": "Inne urządzenia wylogowane",
+      "sign_in_lockout_cleared": "Blokada logowania zdjęta",
+      "two_factor_disabled": "Weryfikacja dwuetapowa wyłączona",
+      "two_factor_enabled": "Weryfikacja dwuetapowa włączona",
+      "two_factor_reset": "Weryfikacja dwuetapowa zresetowana",
+      "updated": "Zaktualizowano",
+      "uploaded": "Przesłano",
+      "viewed": "Wyświetlono"
+    },
     "dateRange": "Zakres dat",
     "entityTypeFilter": "Typ encji",
     "errorLoading": "Błąd podczas ładowania dziennika audytu",
+    "failureReasons": {
+      "code_reused": "Kod już użyty",
+      "deactivated": "Konto dezaktywowane",
+      "locked": "Zbyt wiele błędów, zablokowano",
+      "unknown_user": "Nieznana nazwa użytkownika",
+      "wrong_code": "Błędny kod",
+      "wrong_password": "Błędne hasło"
+    },
     "filterByAction": "Filtruj według działania",
     "filterByDateRange": "Filtruj według zakresu dat",
     "filterByEntityType": "Filtruj według typu encji",
@@ -60,6 +92,7 @@
       "recordId": "ID rekordu",
       "timestamp": "Znacznik czasowy"
     },
+    "unknownUser": "Nieznany użytkownik",
     "viewRecord": "Wyświetl rekord {{type}}",
     "viewRecordAriaLabel": "Wyświetl {{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Zmień rolę",
     "clear": "Wyczyść",
+    "clearLockout": "Zdejmij blokadę logowania",
     "deactivate": "Dezaktywuj",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Nie można usunąć ostatniego administratora.",
@@ -738,6 +772,12 @@
       "title": "Zresetuj hasło dla {{username}}",
       "userInfo": "Użytkownik: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Zresetuj weryfikację dwuetapową",
+    "resetTwoFactorModal": {
+      "body": "Wyłączyć weryfikację dwuetapową dla {{username}}? Aplikacja uwierzytelniająca i kody zapasowe przestaną działać, a wszystkie sesje zostaną wylogowane.",
+      "hint": "Hasło się nie zmienia. Można się nim zalogować i ponownie włączyć weryfikację dwuetapową w Ustawieniach.",
+      "title": "Resetowanie weryfikacji dwuetapowej"
+    },
     "roleFilter": {
       "all": "Wszystkie role"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Uwierzytelnianie",
-      "lastLogin": "Ostatnie logowanie"
+      "lastLogin": "Ostatnie logowanie",
+      "twoFactor": "Dwuetapowa"
     },
     "toggleActiveModal": {
       "activateConfirm": "Aktywować \"{{username}}\"? Będą mogli logować się ponownie.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "Nie możesz dezaktywować własnego konta.",
       "deactivateConfirm": "Dezaktywować \"{{username}}\"? Nie będą mogli logować się do czasu ponownej aktywacji.",
       "deactivateTitle": "Dezaktywuj użytkownika"
+    },
+    "twoFactor": {
+      "codesLeft": "Pozostałe kody zapasowe: {{count}}",
+      "locked": "Zablokowany",
+      "off": "Wył.",
+      "on": "Wł."
     },
     "userCount": "{{count}} użytkowników",
     "userCount_one": "{{count}} użytkownik",

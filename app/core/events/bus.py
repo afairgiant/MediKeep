@@ -7,7 +7,9 @@ in parallel with error isolation.
 """
 
 import asyncio
-from typing import Awaitable, Callable, Dict, List
+from typing import Awaitable, Callable, Dict, List, Set
+
+import anyio.from_thread
 
 from app.core.events.base import DomainEvent
 from app.core.logging.config import get_logger
@@ -140,6 +142,33 @@ class EventBus:
 
 # Global event bus singleton
 _event_bus: EventBus = EventBus()
+# Holds fire-and-forget publishes until they finish, so they are not garbage collected
+_background_publishes: Set["asyncio.Task[None]"] = set()
+
+
+def _spawn_publish(event: DomainEvent) -> None:
+    task = asyncio.get_running_loop().create_task(_event_bus.publish(event))
+    _background_publishes.add(task)
+    task.add_done_callback(_background_publishes.discard)
+
+
+def publish_from_thread(event: DomainEvent) -> None:
+    """Publish from a sync endpoint without waiting for the handlers; never raises.
+
+    Must run in a worker thread of the app's event loop, as sync endpoints do.
+    """
+    try:
+        anyio.from_thread.run_sync(_spawn_publish, event)
+    except RuntimeError as e:
+        logger.warning(
+            f"Event not published: {event.event_type()}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "event_publish_skipped",
+                "event_type": event.event_type(),
+                LogFields.ERROR: str(e),
+            },
+        )
 
 
 def get_event_bus() -> EventBus:

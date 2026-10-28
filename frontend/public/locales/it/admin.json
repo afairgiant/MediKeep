@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Azione",
+    "actions": {
+      "activated": "Attivato",
+      "backup_codes_regenerated": "Codici di backup rigenerati",
+      "backup_created": "Backup creato",
+      "cancelled": "Annullato",
+      "completed": "Completato",
+      "created": "Creato",
+      "deactivated": "Disattivato",
+      "deleted": "Eliminato",
+      "downloaded": "Scaricato",
+      "login": "Accesso",
+      "login_failed": "Accesso non riuscito",
+      "logout": "Disconnessione",
+      "maintenance_completed": "Manutenzione completata",
+      "maintenance_started": "Manutenzione avviata",
+      "sessions_revoked": "Altri dispositivi disconnessi",
+      "sign_in_lockout_cleared": "Blocco di accesso rimosso",
+      "two_factor_disabled": "Verifica in due passaggi disattivata",
+      "two_factor_enabled": "Verifica in due passaggi attivata",
+      "two_factor_reset": "Verifica in due passaggi reimpostata",
+      "updated": "Aggiornato",
+      "uploaded": "Caricato",
+      "viewed": "Visualizzato"
+    },
     "dateRange": "Intervallo di date",
     "entityTypeFilter": "Tipo di entità",
     "errorLoading": "Errore durante il caricamento del registro attività",
+    "failureReasons": {
+      "code_reused": "Codice già usato",
+      "deactivated": "Account disattivato",
+      "locked": "Troppi errori, bloccato",
+      "unknown_user": "Nome utente sconosciuto",
+      "wrong_code": "Codice errato",
+      "wrong_password": "Password errata"
+    },
     "filterByAction": "Filtra per azione",
     "filterByDateRange": "Filtra per intervallo di date",
     "filterByEntityType": "Filtra per tipo di entità",
@@ -60,6 +92,7 @@
       "recordId": "ID record",
       "timestamp": "Data e ora"
     },
+    "unknownUser": "Utente sconosciuto",
     "viewRecord": "Visualizza record {{type}}",
     "viewRecordAriaLabel": "Visualizza {{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Modifica ruolo",
     "clear": "Cancella",
+    "clearLockout": "Rimuovi blocco di accesso",
     "deactivate": "Disattiva",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Impossibile eliminare l'ultimo amministratore.",
@@ -738,6 +772,12 @@
       "title": "Reimposta password per {{username}}",
       "userInfo": "Utente: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Reimposta verifica in due passaggi",
+    "resetTwoFactorModal": {
+      "body": "Disattivare la verifica in due passaggi per {{username}}? L'app di autenticazione e i codici di backup smetteranno di funzionare e verrà disconnesso ovunque.",
+      "hint": "La password non cambia. Potrà accedere con essa e riattivare la verifica in due passaggi nelle Impostazioni.",
+      "title": "Reimposta la verifica in due passaggi"
+    },
     "roleFilter": {
       "all": "Tutti i ruoli"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Autenticazione",
-      "lastLogin": "Ultimo accesso"
+      "lastLogin": "Ultimo accesso",
+      "twoFactor": "Due passaggi"
     },
     "toggleActiveModal": {
       "activateConfirm": "Attivare \"{{username}}\"? Potrà accedere nuovamente.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "Non puoi disattivare il tuo account.",
       "deactivateConfirm": "Disattivare \"{{username}}\"? Non potrà accedere fino alla riattivazione.",
       "deactivateTitle": "Disattiva utente"
+    },
+    "twoFactor": {
+      "codesLeft": "Codici di backup rimasti: {{count}}",
+      "locked": "Bloccato",
+      "off": "Disattiva",
+      "on": "Attiva"
     },
     "userCount": "{{count}} utenti",
     "userCount_one": "{{count}} utente",

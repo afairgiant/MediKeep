@@ -214,7 +214,8 @@ consent to change a user's role.
 `reset_user_mfa.py` is the recovery tool for a user (admin or not) who has
 two-factor authentication on and can no longer pass it: a lost phone and no
 backup codes left, or authenticator secrets made unreadable by a changed
-`SECRET_KEY`.
+`SECRET_KEY`. While an admin can still sign in, **Reset two-factor** in Admin >
+User Management does the same from the browser; this script is for when none can.
 
 ```bash
 docker exec -it medikeep-app python app/scripts/reset_user_mfa.py --username alice

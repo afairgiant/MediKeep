@@ -180,6 +180,67 @@ def password_changed_template(data: Dict) -> Tuple[str, str]:
     )
 
 
+def _event_time(data: Dict) -> str:
+    occurred_at = data.get("occurred_at")
+    try:
+        return datetime.fromisoformat(occurred_at).strftime("%Y-%m-%d %H:%M:%S UTC")
+    except (TypeError, ValueError):
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+_NOT_YOU = "If this was not you, change your password and contact your administrator."
+
+
+def two_factor_disabled_template(data: Dict) -> Tuple[str, str]:
+    """Two-factor turned off; data may carry by_admin and occurred_at."""
+    if data.get("by_admin"):
+        body = (
+            "An administrator turned off two-factor authentication for your "
+            "MediKeep account and signed out all your sessions. You can turn it "
+            "on again in Settings > Security."
+        )
+    else:
+        body = (
+            "Two-factor authentication was turned off for your MediKeep account. "
+            + _NOT_YOU
+        )
+    return (
+        "Two-Factor Authentication Turned Off",
+        f"{body}\n\nTime: {_event_time(data)}",
+    )
+
+
+def backup_code_used_template(data: Dict) -> Tuple[str, str]:
+    """A backup code signed in; data carries codes_remaining and occurred_at."""
+    remaining = data.get("codes_remaining", 0)
+    return (
+        "Backup Code Used",
+        "A backup code was used to sign in to your MediKeep account. "
+        f"Backup codes left: {remaining}. {_NOT_YOU}\n\n"
+        f"Time: {_event_time(data)}",
+    )
+
+
+def sessions_revoked_template(data: Dict) -> Tuple[str, str]:
+    """Other sessions signed out; data carries occurred_at."""
+    return (
+        "Other Devices Signed Out",
+        "Every other device signed in to your MediKeep account was signed out. "
+        f"{_NOT_YOU}\n\nTime: {_event_time(data)}",
+    )
+
+
+def two_factor_failures_template(data: Dict) -> Tuple[str, str]:
+    """Second step locked after wrong codes; data carries occurred_at."""
+    return (
+        "Repeated Incorrect Two-Factor Codes",
+        "Someone entered your correct MediKeep password, then too many incorrect "
+        "two-factor codes, so sign-in is paused for a while. If this was not you, "
+        "change your password now.\n\n"
+        f"Time: {_event_time(data)}",
+    )
+
+
 # Template registry for easy lookup
 NOTIFICATION_TEMPLATES = {
     "backup_completed": backup_completed_template,
@@ -188,6 +249,10 @@ NOTIFICATION_TEMPLATES = {
     "invitation_accepted": invitation_accepted_template,
     "share_revoked": share_revoked_template,
     "password_changed": password_changed_template,
+    "two_factor_disabled": two_factor_disabled_template,
+    "backup_code_used": backup_code_used_template,
+    "sessions_revoked": sessions_revoked_template,
+    "two_factor_failures": two_factor_failures_template,
     "medication_reminder_due": medication_reminder_due_template,
 }
 

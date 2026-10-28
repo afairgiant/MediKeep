@@ -348,6 +348,18 @@ class AdminApiService extends BaseApiService {
     });
   }
 
+  async getSecuritySummary() {
+    return this.get('/user-management/security-summary');
+  }
+
+  async resetUserTwoFactor(userId) {
+    return this.delete(`/user-management/users/${userId}/two-factor`);
+  }
+
+  async clearSignInLockout(userId) {
+    return this.delete(`/user-management/users/${userId}/sign-in-lockout`);
+  }
+
   async toggleUserActive(userId, isActive) {
     return this.put(`/models/user/${userId}`, { is_active: isActive });
   }

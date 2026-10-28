@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Action",
+    "actions": {
+      "activated": "Activé",
+      "backup_codes_regenerated": "Codes de secours régénérés",
+      "backup_created": "Sauvegarde créée",
+      "cancelled": "Annulé",
+      "completed": "Terminé",
+      "created": "Créé",
+      "deactivated": "Désactivé",
+      "deleted": "Supprimé",
+      "downloaded": "Téléchargé",
+      "login": "Connexion",
+      "login_failed": "Échec de connexion",
+      "logout": "Déconnexion",
+      "maintenance_completed": "Maintenance terminée",
+      "maintenance_started": "Maintenance démarrée",
+      "sessions_revoked": "Autres appareils déconnectés",
+      "sign_in_lockout_cleared": "Blocage de connexion levé",
+      "two_factor_disabled": "Double authentification désactivée",
+      "two_factor_enabled": "Double authentification activée",
+      "two_factor_reset": "Double authentification réinitialisée",
+      "updated": "Modifié",
+      "uploaded": "Téléversé",
+      "viewed": "Consulté"
+    },
     "dateRange": "Plage temporelle",
     "entityTypeFilter": "Type d'entité",
     "errorLoading": "Erreur lors du chargement du journal d'audit",
+    "failureReasons": {
+      "code_reused": "Code déjà utilisé",
+      "deactivated": "Compte désactivé",
+      "locked": "Trop d'échecs, bloqué",
+      "unknown_user": "Nom d'utilisateur inconnu",
+      "wrong_code": "Code incorrect",
+      "wrong_password": "Mot de passe incorrect"
+    },
     "filterByAction": "Filtrer par action",
     "filterByDateRange": "Filtrer par plage temporelle",
     "filterByEntityType": "Filtrer par type d'entité",
@@ -60,6 +92,7 @@
       "recordId": "ID de l'entrée",
       "timestamp": "Horodatage"
     },
+    "unknownUser": "Utilisateur inconnu",
     "viewRecord": "Afficher les entrées de type : {{type}}",
     "viewRecordAriaLabel": "Afficher le n°{{id}} de type : {{type}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Changer le rôle",
     "clear": "Effacer",
+    "clearLockout": "Lever le blocage de connexion",
     "deactivate": "Désactiver",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Impossible de supprimer le dernier administrateur.",
@@ -738,6 +772,12 @@
       "title": "Réinitialiser le mot de passe pour {{username}}",
       "userInfo": "Utilisateur : {{username}} (ID : {{userId}})"
     },
+    "resetTwoFactor": "Réinitialiser la double authentification",
+    "resetTwoFactorModal": {
+      "body": "Désactiver la double authentification pour {{username}} ? Son application d'authentification et ses codes de secours ne fonctionneront plus, et l'utilisateur sera déconnecté partout.",
+      "hint": "Son mot de passe ne change pas. L'utilisateur peut se connecter avec et réactiver la double authentification dans les Paramètres.",
+      "title": "Réinitialiser la double authentification"
+    },
     "roleFilter": {
       "all": "Tous les rôles"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Authentification",
-      "lastLogin": "Dernière connexion"
+      "lastLogin": "Dernière connexion",
+      "twoFactor": "Double authentification"
     },
     "toggleActiveModal": {
       "activateConfirm": "Activer \"{{username}}\" ? Cet utilisateur pourra à nouveau se connecter.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "Vous ne pouvez pas désactiver votre propre compte.",
       "deactivateConfirm": "Désactiver \"{{username}}\" ? Cet utilisateur ne pourra plus se connecter jusqu'à ce qu'il soit réactivé.",
       "deactivateTitle": "Désactiver l'utilisateur"
+    },
+    "twoFactor": {
+      "codesLeft": "Codes de secours restants : {{count}}",
+      "locked": "Bloqué",
+      "off": "Désactivée",
+      "on": "Activée"
     },
     "userCount": "{{count}} utilisateurs",
     "userCount_one": "{{count}} utilisateur",

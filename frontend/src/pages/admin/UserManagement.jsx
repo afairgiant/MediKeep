@@ -41,13 +41,18 @@ import {
   IconBrandGoogle,
   IconLink,
   IconPlus,
+  IconShieldOff,
+  IconLockOpen,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import FailedSignInLabel from '../../components/admin/FailedSignInLabel';
+import ResetTwoFactorModal from '../../components/admin/ResetTwoFactorModal';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useAuth } from '../../contexts/AuthContext';
 import logger from '../../services/logger';
 import { timezoneService } from '../../services/timezoneService';
+import { notifyError, notifySuccess } from '../../utils/notifyTranslated';
 
 const ROLE_COLORS = {
   admin: 'red',
@@ -133,6 +138,10 @@ const UserManagement = () => {
     deleteModalOpened,
     { open: openDeleteModal, close: closeDeleteModal },
   ] = useDisclosure(false);
+  const [
+    resetTwoFactorOpened,
+    { open: openResetTwoFactor, close: closeResetTwoFactor },
+  ] = useDisclosure(false);
 
   // Modal data state
   const [selectedUser, setSelectedUser] = useState(null);
@@ -144,6 +153,8 @@ const UserManagement = () => {
   const [loginHistory, setLoginHistory] = useState([]);
   const [loginHistoryLoading, setLoginHistoryLoading] = useState(false);
   const [adminCount, setAdminCount] = useState(null);
+  // Keyed by user id; users with neither two-factor nor a lockout are absent
+  const [security, setSecurity] = useState({});
 
   // Fetch users
   const fetchUsers = useCallback(async () => {
@@ -197,6 +208,22 @@ const UserManagement = () => {
   useEffect(() => {
     fetchAdminCount();
   }, [fetchAdminCount]);
+
+  const fetchSecurity = useCallback(async () => {
+    try {
+      const response = await adminApiService.getSecuritySummary();
+      setSecurity(response?.data || {});
+    } catch (error) {
+      logger.error('user_security_summary_fetch_error', {
+        component: 'UserManagement',
+        error: error.message,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSecurity();
+  }, [fetchSecurity]);
 
   // Client-side filtering
   const filteredUsers = users.filter(u => {
@@ -258,6 +285,27 @@ const UserManagement = () => {
       });
     } finally {
       setLoginHistoryLoading(false);
+    }
+  };
+
+  const handleOpenResetTwoFactor = user => {
+    setSelectedUser(user);
+    openResetTwoFactor();
+  };
+
+  const handleClearLockout = async user => {
+    try {
+      await adminApiService.clearSignInLockout(user.id);
+      notifySuccess('notifications:toasts.security.lockoutCleared', {
+        interpolation: { username: user.username },
+      });
+      fetchSecurity();
+    } catch (error) {
+      logger.error('user_lockout_clear_error', {
+        component: 'UserManagement',
+        error: error.message,
+      });
+      notifyError('notifications:toasts.security.lockoutClearFailed');
     }
   };
 
@@ -591,6 +639,7 @@ const UserManagement = () => {
                     <Table.Th>{t('shared:labels.role', 'Role')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.auth', 'Auth')}</Table.Th>
                     <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.twoFactor')}</Table.Th>
                     <Table.Th>
                       {t('users.tableHeaders.lastLogin', 'Last Login')}
                     </Table.Th>
@@ -648,6 +697,31 @@ const UserManagement = () => {
                             ? t('shared:labels.inactive', 'Inactive')
                             : t('shared:labels.active', 'Active')}
                         </Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <Group gap={4} wrap="nowrap">
+                          {security[u.id]?.totp_enabled ? (
+                            <Badge
+                              color="green"
+                              variant="light"
+                              size="sm"
+                              title={t('users.twoFactor.codesLeft', {
+                                count: security[u.id].backup_codes_remaining,
+                              })}
+                            >
+                              {t('users.twoFactor.on')}
+                            </Badge>
+                          ) : (
+                            <Text size="sm" c="dimmed">
+                              {t('users.twoFactor.off')}
+                            </Text>
+                          )}
+                          {security[u.id]?.sign_in_locked && (
+                            <Badge color="red" variant="light" size="sm">
+                              {t('users.twoFactor.locked')}
+                            </Badge>
+                          )}
+                        </Group>
                       </Table.Td>
                       <Table.Td>
                         <Text size="sm" c="dimmed">
@@ -710,6 +784,23 @@ const UserManagement = () => {
                             >
                               {t('users.loginHistory', 'Login History')}
                             </Menu.Item>
+                            {security[u.id]?.sign_in_locked && (
+                              <Menu.Item
+                                leftSection={<IconLockOpen size={14} />}
+                                onClick={() => handleClearLockout(u)}
+                              >
+                                {t('users.clearLockout')}
+                              </Menu.Item>
+                            )}
+                            {security[u.id]?.totp_enabled && (
+                              <Menu.Item
+                                color="orange"
+                                leftSection={<IconShieldOff size={14} />}
+                                onClick={() => handleOpenResetTwoFactor(u)}
+                              >
+                                {t('users.resetTwoFactor')}
+                              </Menu.Item>
+                            )}
                             <Menu.Divider />
                             <Menu.Item
                               color="red"
@@ -983,7 +1074,13 @@ const UserManagement = () => {
                             t('users.loginHistoryModal.notAvailable', 'N/A')}
                         </Code>
                       </Table.Td>
-                      <Table.Td>{entry.description || '-'}</Table.Td>
+                      <Table.Td>
+                        {entry.action === 'login_failed' ? (
+                          <FailedSignInLabel reason={entry.failure_reason} />
+                        ) : (
+                          entry.description || '-'
+                        )}
+                      </Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
@@ -992,6 +1089,13 @@ const UserManagement = () => {
           </Stack>
         )}
       </Modal>
+
+      <ResetTwoFactorModal
+        user={selectedUser}
+        opened={resetTwoFactorOpened}
+        onClose={closeResetTwoFactor}
+        onReset={fetchSecurity}
+      />
 
       {/* Delete User Modal */}
       <Modal

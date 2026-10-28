@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Actie",
+    "actions": {
+      "activated": "Geactiveerd",
+      "backup_codes_regenerated": "Back-upcodes opnieuw gemaakt",
+      "backup_created": "Back-up gemaakt",
+      "cancelled": "Geannuleerd",
+      "completed": "Voltooid",
+      "created": "Aangemaakt",
+      "deactivated": "Gedeactiveerd",
+      "deleted": "Verwijderd",
+      "downloaded": "Gedownload",
+      "login": "Aangemeld",
+      "login_failed": "Mislukte aanmelding",
+      "logout": "Afgemeld",
+      "maintenance_completed": "Onderhoud voltooid",
+      "maintenance_started": "Onderhoud gestart",
+      "sessions_revoked": "Andere apparaten afgemeld",
+      "sign_in_lockout_cleared": "Aanmeldblokkade opgeheven",
+      "two_factor_disabled": "Tweestapsverificatie uit",
+      "two_factor_enabled": "Tweestapsverificatie aan",
+      "two_factor_reset": "Tweestapsverificatie hersteld",
+      "updated": "Bijgewerkt",
+      "uploaded": "Geüpload",
+      "viewed": "Bekeken"
+    },
     "dateRange": "Datumbereik",
     "entityTypeFilter": "Entiteitstype",
     "errorLoading": "Fout bij laden auditlogboek",
+    "failureReasons": {
+      "code_reused": "Code al gebruikt",
+      "deactivated": "Account gedeactiveerd",
+      "locked": "Te veel mislukte pogingen, geblokkeerd",
+      "unknown_user": "Onbekende gebruikersnaam",
+      "wrong_code": "Verkeerde code",
+      "wrong_password": "Verkeerd wachtwoord"
+    },
     "filterByAction": "Filteren op actie",
     "filterByDateRange": "Filteren op datumbereik",
     "filterByEntityType": "Filteren op entiteitstype",
@@ -60,6 +92,7 @@
       "recordId": "Dossier-ID",
       "timestamp": "Tijdstempel"
     },
+    "unknownUser": "Onbekende gebruiker",
     "viewRecord": "{{type}} dossier bekijken",
     "viewRecordAriaLabel": "{{type}} #{{id}} bekijken"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Rol wijzigen",
     "clear": "Wissen",
+    "clearLockout": "Aanmeldblokkade opheffen",
     "deactivate": "Deactiveren",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Kan de laatste beheerder niet verwijderen.",
@@ -738,6 +772,12 @@
       "title": "Wachtwoord herstellen voor {{username}}",
       "userInfo": "Gebruiker: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Tweestapsverificatie herstellen",
+    "resetTwoFactorModal": {
+      "body": "Tweestapsverificatie uitzetten voor {{username}}? De authenticator-app en back-upcodes werken dan niet meer, en de gebruiker wordt overal afgemeld.",
+      "hint": "Het wachtwoord verandert niet. De gebruiker kan zich ermee aanmelden en tweestapsverificatie opnieuw aanzetten in Instellingen.",
+      "title": "Tweestapsverificatie herstellen"
+    },
     "roleFilter": {
       "all": "Alle rollen"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Authenticatie",
-      "lastLogin": "Laatste inlog"
+      "lastLogin": "Laatste inlog",
+      "twoFactor": "Tweestaps"
     },
     "toggleActiveModal": {
       "activateConfirm": "\"{{username}}\" activeren? Deze gebruiker kan dan weer inloggen.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "U kunt uw eigen account niet deactiveren.",
       "deactivateConfirm": "\"{{username}}\" deactiveren? Deze gebruiker kan niet meer inloggen totdat het account opnieuw wordt geactiveerd.",
       "deactivateTitle": "Gebruiker deactiveren"
+    },
+    "twoFactor": {
+      "codesLeft": "Resterende back-upcodes: {{count}}",
+      "locked": "Geblokkeerd",
+      "off": "Uit",
+      "on": "Aan"
     },
     "userCount": "{{count}} gebruikers",
     "userCount_one": "{{count}} gebruiker",

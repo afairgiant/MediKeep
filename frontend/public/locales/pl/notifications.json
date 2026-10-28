@@ -185,6 +185,10 @@
   "description": "Skonfiguruj sposób otrzymywania powiadomień o ważnych zdarzeniach",
   "error": "Nie udało się załadować ustawień powiadomień",
   "events": {
+    "backup_code_used": {
+      "description": "Gdy kod zapasowy zostanie użyty do zalogowania na Twoje konto",
+      "name": "Użyto kodu zapasowego"
+    },
     "backup_completed": {
       "description": "Gdy kopia zapasowa zakończy się pomyślnie",
       "name": "Kopia zapasowa ukończona"
@@ -229,6 +233,10 @@
       "description": "Gdy Twoje hasło zostanie zmienione",
       "name": "Hasło zmienione"
     },
+    "sessions_revoked": {
+      "description": "Gdy Twoje inne urządzenia zostaną wylogowane",
+      "name": "Inne urządzenia wylogowane"
+    },
     "share_revoked": {
       "description": "Gdy dostęp do udostępnionych rekordów zostanie odwołany",
       "name": "Dostęp do udostępniania odwołany"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Ręczne powiadomienie testowe",
       "name": "Powiadomienie testowe"
+    },
+    "two_factor_disabled": {
+      "description": "Gdy weryfikacja dwuetapowa zostanie wyłączona dla Twojego konta",
+      "name": "Weryfikacja dwuetapowa wyłączona"
+    },
+    "two_factor_failures": {
+      "description": "Gdy użyto Twojego hasła, ale zbyt wiele kodów weryfikacji dwuetapowej było błędnych",
+      "name": "Powtarzające się błędne kody"
     }
   },
   "history": {
@@ -385,11 +401,15 @@
       "backupCodesLow_one": "Pozostał Ci {{count}} kod zapasowy. Wygeneruj nowe w Ustawieniach.",
       "backupCodesLow_other": "Pozostało Ci {{count}} kodów zapasowych. Wygeneruj nowe w Ustawieniach.",
       "backupCodesRegenerated": "Wygenerowano nowe kody zapasowe. Stare już nie działają.",
+      "lockoutCleared": "{{username}} może ponownie spróbować się zalogować.",
+      "lockoutClearFailed": "Nie udało się zdjąć blokady logowania. Spróbuj ponownie.",
       "otherSessionsFailed": "Nie udało się wylogować innych urządzeń. Spróbuj ponownie.",
       "otherSessionsSignedOut": "Inne urządzenia zostały wylogowane.",
       "printBlocked": "Przeglądarka zablokowała okno drukowania. Zezwól na wyskakujące okna dla tej witryny lub użyj opcji Pobierz.",
       "twoFactorDisabled": "Uwierzytelnianie dwuskładnikowe wyłączone.",
-      "twoFactorEnabled": "Uwierzytelnianie dwuskładnikowe włączone. Inne urządzenia zostały wylogowane."
+      "twoFactorEnabled": "Uwierzytelnianie dwuskładnikowe włączone. Inne urządzenia zostały wylogowane.",
+      "twoFactorResetByAdmin": "Weryfikacja dwuetapowa wyłączona dla {{username}}.",
+      "twoFactorResetFailed": "Nie udało się zresetować weryfikacji dwuetapowej. Spróbuj ponownie."
     },
     "settings": {
       "cleanupComplete": "Czyszczenie ukończone: wyczyszczono {{cleaned}} plików, usunięto {{deleted}} plików",

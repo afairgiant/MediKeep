@@ -185,6 +185,10 @@
   "description": "Konfigurieren Sie, wie Sie Benachrichtigungen für wichtige Ereignisse erhalten",
   "error": "Benachrichtigungseinstellungen konnten nicht geladen werden",
   "events": {
+    "backup_code_used": {
+      "description": "Wenn ein Backup-Code zur Anmeldung bei Ihrem Konto verwendet wird",
+      "name": "Backup-Code verwendet"
+    },
     "backup_completed": {
       "description": "Wenn eine Sicherung erfolgreich abgeschlossen wurde",
       "name": "Sicherung abgeschlossen"
@@ -229,6 +233,10 @@
       "description": "Wenn Ihr Passwort geändert wurde",
       "name": "Passwort geändert"
     },
+    "sessions_revoked": {
+      "description": "Wenn Ihre anderen Geräte abgemeldet werden",
+      "name": "Andere Geräte abgemeldet"
+    },
     "share_revoked": {
       "description": "Wenn der Zugriff auf freigegebene Datensätze widerrufen wurde",
       "name": "Freigabe widerrufen"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Manuelle Testbenachrichtigung",
       "name": "Testbenachrichtigung"
+    },
+    "two_factor_disabled": {
+      "description": "Wenn die Zwei-Faktor-Authentifizierung für Ihr Konto deaktiviert wird",
+      "name": "Zwei-Faktor deaktiviert"
+    },
+    "two_factor_failures": {
+      "description": "Wenn Ihr Passwort verwendet wird, aber zu viele Zwei-Faktor-Codes falsch sind",
+      "name": "Wiederholt falsche Codes"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "Sie haben noch {{count}} Backup-Code. Erstellen Sie neue in den Einstellungen.",
       "backupCodesLow_other": "Sie haben noch {{count}} Backup-Codes. Erstellen Sie neue in den Einstellungen.",
       "backupCodesRegenerated": "Neue Backup-Codes erstellt. Die alten funktionieren nicht mehr.",
+      "lockoutCleared": "{{username}} kann sich erneut anmelden.",
+      "lockoutClearFailed": "Die Anmeldesperre konnte nicht aufgehoben werden. Bitte erneut versuchen.",
       "otherSessionsFailed": "Ihre anderen Geräte konnten nicht abgemeldet werden. Bitte versuchen Sie es erneut.",
       "otherSessionsSignedOut": "Ihre anderen Geräte wurden abgemeldet.",
       "printBlocked": "Das Druckfenster wurde von Ihrem Browser blockiert. Erlauben Sie Pop-ups für diese Website oder verwenden Sie stattdessen Herunterladen.",
       "twoFactorDisabled": "Zwei-Faktor-Authentifizierung deaktiviert.",
-      "twoFactorEnabled": "Zwei-Faktor-Authentifizierung aktiviert. Ihre anderen Geräte wurden abgemeldet."
+      "twoFactorEnabled": "Zwei-Faktor-Authentifizierung aktiviert. Ihre anderen Geräte wurden abgemeldet.",
+      "twoFactorResetByAdmin": "Zwei-Faktor-Authentifizierung für {{username}} deaktiviert.",
+      "twoFactorResetFailed": "Zwei-Faktor-Authentifizierung konnte nicht zurückgesetzt werden. Bitte erneut versuchen."
     },
     "settings": {
       "cleanupComplete": "Bereinigung abgeschlossen: {{cleaned}} Dateien bereinigt, {{deleted}} Dateien gelöscht",

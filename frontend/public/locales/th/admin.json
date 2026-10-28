@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "การกระทำ",
+    "actions": {
+      "activated": "เปิดใช้งานแล้ว",
+      "backup_codes_regenerated": "สร้างรหัสสำรองใหม่",
+      "backup_created": "สร้างข้อมูลสำรองแล้ว",
+      "cancelled": "ยกเลิกแล้ว",
+      "completed": "เสร็จสิ้น",
+      "created": "สร้างแล้ว",
+      "deactivated": "ปิดใช้งานแล้ว",
+      "deleted": "ลบแล้ว",
+      "downloaded": "ดาวน์โหลดแล้ว",
+      "login": "เข้าสู่ระบบ",
+      "login_failed": "เข้าสู่ระบบไม่สำเร็จ",
+      "logout": "ออกจากระบบ",
+      "maintenance_completed": "การบำรุงรักษาเสร็จสิ้น",
+      "maintenance_started": "เริ่มการบำรุงรักษา",
+      "sessions_revoked": "ออกจากระบบอุปกรณ์อื่นแล้ว",
+      "sign_in_lockout_cleared": "ยกเลิกการล็อกการเข้าสู่ระบบแล้ว",
+      "two_factor_disabled": "ปิดการยืนยันสองขั้นตอน",
+      "two_factor_enabled": "เปิดการยืนยันสองขั้นตอน",
+      "two_factor_reset": "รีเซ็ตการยืนยันสองขั้นตอน",
+      "updated": "อัปเดตแล้ว",
+      "uploaded": "อัปโหลดแล้ว",
+      "viewed": "ดูแล้ว"
+    },
     "dateRange": "ช่วงวันที่",
     "entityTypeFilter": "ประเภทเอนทิตี",
     "errorLoading": "เกิดข้อผิดพลาดในการโหลดบันทึกการตรวจสอบ",
+    "failureReasons": {
+      "code_reused": "รหัสถูกใช้ไปแล้ว",
+      "deactivated": "บัญชีถูกปิดใช้งาน",
+      "locked": "ล้มเหลวหลายครั้งเกินไป ถูกล็อก",
+      "unknown_user": "ไม่พบชื่อผู้ใช้",
+      "wrong_code": "รหัสไม่ถูกต้อง",
+      "wrong_password": "รหัสผ่านไม่ถูกต้อง"
+    },
     "filterByAction": "กรองตามการกระทำ",
     "filterByDateRange": "กรองตามช่วงวันที่",
     "filterByEntityType": "กรองตามประเภทเอนทิตี",
@@ -60,6 +92,7 @@
       "recordId": "ID เวชระเบียน",
       "timestamp": "เวลาประทับ"
     },
+    "unknownUser": "ผู้ใช้ที่ไม่รู้จัก",
     "viewRecord": "ดูเวชระเบียน {{type}}",
     "viewRecordAriaLabel": "ดู {{type}} #{{id}}"
   },
@@ -677,6 +710,7 @@
     },
     "changeRole": "เปลี่ยนบทบาท",
     "clear": "ล้าง",
+    "clearLockout": "ยกเลิกการล็อกการเข้าสู่ระบบ",
     "deactivate": "ปิดใช้งาน",
     "deleteModal": {
       "cannotDeleteLastAdmin": "ไม่สามารถลบผู้ดูแลระบบคนสุดท้ายได้",
@@ -715,6 +749,12 @@
       "title": "รีเซ็ตรหัสผ่านสำหรับ {{username}}",
       "userInfo": "ผู้ใช้: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "รีเซ็ตการยืนยันสองขั้นตอน",
+    "resetTwoFactorModal": {
+      "body": "ปิดการยืนยันสองขั้นตอนของ {{username}} หรือไม่ แอปยืนยันตัวตนและรหัสสำรองจะใช้ไม่ได้ และจะออกจากระบบในทุกอุปกรณ์",
+      "hint": "รหัสผ่านไม่เปลี่ยน ผู้ใช้สามารถเข้าสู่ระบบด้วยรหัสผ่านและเปิดการยืนยันสองขั้นตอนอีกครั้งได้ในการตั้งค่า",
+      "title": "รีเซ็ตการยืนยันตัวตนแบบสองขั้นตอน"
+    },
     "roleFilter": {
       "all": "บทบาททั้งหมด"
     },
@@ -731,7 +771,8 @@
     },
     "tableHeaders": {
       "auth": "การตรวจสอบ",
-      "lastLogin": "เข้าสู่ระบบล่าสุด"
+      "lastLogin": "เข้าสู่ระบบล่าสุด",
+      "twoFactor": "สองขั้นตอน"
     },
     "toggleActiveModal": {
       "activateConfirm": "เปิดใช้งาน \"{{username}}\"? จะสามารถเข้าสู่ระบบได้อีกครั้ง",
@@ -740,6 +781,12 @@
       "cannotDeactivateSelf": "คุณไม่สามารถปิดใช้งานบัญชีตัวเองได้",
       "deactivateConfirm": "ปิดใช้งาน \"{{username}}\"? จะไม่สามารถเข้าสู่ระบบได้จนกว่าจะเปิดใช้งานใหม่",
       "deactivateTitle": "ปิดใช้งานผู้ใช้"
+    },
+    "twoFactor": {
+      "codesLeft": "รหัสสำรองที่เหลือ: {{count}}",
+      "locked": "ถูกล็อก",
+      "off": "ปิด",
+      "on": "เปิด"
     },
     "userCount": "{{count}} ผู้ใช้",
     "userCount_one": "{{count}} ผู้ใช้",

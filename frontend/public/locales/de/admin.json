@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Aktion",
+    "actions": {
+      "activated": "Aktiviert",
+      "backup_codes_regenerated": "Backup-Codes neu erstellt",
+      "backup_created": "Sicherung erstellt",
+      "cancelled": "Abgebrochen",
+      "completed": "Abgeschlossen",
+      "created": "Erstellt",
+      "deactivated": "Deaktiviert",
+      "deleted": "Gelöscht",
+      "downloaded": "Heruntergeladen",
+      "login": "Angemeldet",
+      "login_failed": "Fehlgeschlagene Anmeldung",
+      "logout": "Abgemeldet",
+      "maintenance_completed": "Wartung abgeschlossen",
+      "maintenance_started": "Wartung gestartet",
+      "sessions_revoked": "Andere Geräte abgemeldet",
+      "sign_in_lockout_cleared": "Anmeldesperre aufgehoben",
+      "two_factor_disabled": "Zwei-Faktor deaktiviert",
+      "two_factor_enabled": "Zwei-Faktor aktiviert",
+      "two_factor_reset": "Zwei-Faktor zurückgesetzt",
+      "updated": "Aktualisiert",
+      "uploaded": "Hochgeladen",
+      "viewed": "Angesehen"
+    },
     "dateRange": "Datumsbereich",
     "entityTypeFilter": "Entitätstyp",
     "errorLoading": "Fehler beim Laden des Prüfprotokolls",
+    "failureReasons": {
+      "code_reused": "Code bereits verwendet",
+      "deactivated": "Konto deaktiviert",
+      "locked": "Zu viele Fehlversuche, gesperrt",
+      "unknown_user": "Unbekannter Benutzername",
+      "wrong_code": "Falscher Code",
+      "wrong_password": "Falsches Passwort"
+    },
     "filterByAction": "Nach Aktion filtern",
     "filterByDateRange": "Nach Datumsbereich filtern",
     "filterByEntityType": "Nach Entitätstyp filtern",
@@ -60,6 +92,7 @@
       "recordId": "Datensatz-ID",
       "timestamp": "Zeitstempel"
     },
+    "unknownUser": "Unbekannter Benutzer",
     "viewRecord": "{{type}}-Datensatz anzeigen",
     "viewRecordAriaLabel": "{{type}} #{{id}} anzeigen"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Rolle ändern",
     "clear": "Löschen",
+    "clearLockout": "Anmeldesperre aufheben",
     "deactivate": "Deaktivieren",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Der letzte Administrator kann nicht gelöscht werden.",
@@ -738,6 +772,12 @@
       "title": "Passwort zurücksetzen für {{username}}",
       "userInfo": "Benutzer: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Zwei-Faktor zurücksetzen",
+    "resetTwoFactorModal": {
+      "body": "Zwei-Faktor-Authentifizierung für {{username}} deaktivieren? Authenticator und Backup-Codes funktionieren dann nicht mehr, und alle Sitzungen werden abgemeldet.",
+      "hint": "Das Passwort bleibt unverändert. Die Anmeldung damit ist möglich, und Zwei-Faktor kann in den Einstellungen wieder aktiviert werden.",
+      "title": "Zwei-Faktor-Authentifizierung zurücksetzen"
+    },
     "roleFilter": {
       "all": "Alle Rollen"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Authentifizierung",
-      "lastLogin": "Letzte Anmeldung"
+      "lastLogin": "Letzte Anmeldung",
+      "twoFactor": "Zwei-Faktor"
     },
     "toggleActiveModal": {
       "activateConfirm": "\"{{username}}\" aktivieren? Der Benutzer kann sich wieder anmelden.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "Sie können Ihr eigenes Konto nicht deaktivieren.",
       "deactivateConfirm": "\"{{username}}\" deaktivieren? Der Benutzer kann sich nicht anmelden, bis er wieder aktiviert wird.",
       "deactivateTitle": "Benutzer deaktivieren"
+    },
+    "twoFactor": {
+      "codesLeft": "Verbleibende Backup-Codes: {{count}}",
+      "locked": "Gesperrt",
+      "off": "Aus",
+      "on": "Ein"
     },
     "userCount": "{{count}} Benutzer",
     "userCount_one": "{{count}} Benutzer",

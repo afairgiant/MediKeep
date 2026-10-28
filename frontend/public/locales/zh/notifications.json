@@ -185,6 +185,10 @@
   "description": "配置如何接收重要事件的通知",
   "error": "加载通知设置失败",
   "events": {
+    "backup_code_used": {
+      "description": "当有人使用备用码登录您的账户时",
+      "name": "已使用备用码"
+    },
     "backup_completed": {
       "description": "备份成功完成时",
       "name": "备份完成"
@@ -229,6 +233,10 @@
       "description": "密码更改时",
       "name": "密码已更改"
     },
+    "sessions_revoked": {
+      "description": "当您的其他设备退出登录时",
+      "name": "其他设备已退出"
+    },
     "share_revoked": {
       "description": "共享记录的访问权限被撤销时",
       "name": "共享已撤销"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "手动测试通知",
       "name": "测试通知"
+    },
+    "two_factor_disabled": {
+      "description": "当您的账户关闭两步验证时",
+      "name": "两步验证已关闭"
+    },
+    "two_factor_failures": {
+      "description": "当您的密码正确但两步验证码错误次数过多时",
+      "name": "多次输入错误验证码"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "您只剩 {{count}} 个备用码。请在设置中生成新的备用码。",
       "backupCodesLow_other": "您只剩 {{count}} 个备用码。请在设置中生成新的备用码。",
       "backupCodesRegenerated": "已生成新的备用码，旧备用码已失效。",
+      "lockoutCleared": "{{username}} 现在可以重新尝试登录。",
+      "lockoutClearFailed": "无法解除登录锁定，请重试。",
       "otherSessionsFailed": "无法退出其他设备，请重试。",
       "otherSessionsSignedOut": "您的其他设备已退出登录。",
       "printBlocked": "浏览器阻止了打印窗口。请允许此网站的弹出窗口，或改用下载。",
       "twoFactorDisabled": "双重身份验证已关闭。",
-      "twoFactorEnabled": "双重身份验证已开启。您的其他设备已退出登录。"
+      "twoFactorEnabled": "双重身份验证已开启。您的其他设备已退出登录。",
+      "twoFactorResetByAdmin": "已为 {{username}} 关闭两步验证。",
+      "twoFactorResetFailed": "无法重置两步验证，请重试。"
     },
     "settings": {
       "cleanupComplete": "清理完成：{{cleaned}}个文件已清理，{{deleted}}个文件已删除",

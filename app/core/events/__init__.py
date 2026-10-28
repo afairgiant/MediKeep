@@ -7,16 +7,20 @@ metadata and notification templates.
 """
 
 from app.core.events.base import DomainEvent
-from app.core.events.bus import EventBus, get_event_bus
+from app.core.events.bus import EventBus, get_event_bus, publish_from_thread
 from app.core.events.registry import EventMetadata, EventRegistry, get_event_registry
 from app.services.notification_templates import (
+    backup_code_used_template,
     backup_completed_template,
     backup_failed_template,
     invitation_accepted_template,
     invitation_received_template,
     medication_reminder_due_template,
     password_changed_template,
+    sessions_revoked_template,
     share_revoked_template,
+    two_factor_disabled_template,
+    two_factor_failures_template,
 )
 
 
@@ -24,8 +28,8 @@ def register_all_events() -> None:
     """
     Register all notification event types with the event registry.
 
-    This function registers all 7 notification triggers with their metadata
-    and template functions. Should be called once during application startup.
+    This function registers every notification trigger with its metadata
+    and template function. Should be called once during application startup.
     """
     registry = get_event_registry()
 
@@ -86,6 +90,42 @@ def register_all_events() -> None:
         is_implemented=True,
     )
 
+    registry.register(
+        event_type="two_factor_disabled",
+        label="Two-Factor Turned Off",
+        description="When two-factor authentication is turned off for your account",
+        category="security",
+        template_fn=two_factor_disabled_template,
+        is_implemented=True,
+    )
+
+    registry.register(
+        event_type="backup_code_used",
+        label="Backup Code Used",
+        description="When a backup code is used to sign in to your account",
+        category="security",
+        template_fn=backup_code_used_template,
+        is_implemented=True,
+    )
+
+    registry.register(
+        event_type="sessions_revoked",
+        label="Other Devices Signed Out",
+        description="When your other devices are signed out",
+        category="security",
+        template_fn=sessions_revoked_template,
+        is_implemented=True,
+    )
+
+    registry.register(
+        event_type="two_factor_failures",
+        label="Repeated Incorrect Two-Factor Codes",
+        description="When your password is used but too many two-factor codes are wrong",
+        category="security",
+        template_fn=two_factor_failures_template,
+        is_implemented=True,
+    )
+
     # Medical events
     registry.register(
         event_type="medication_reminder_due",
@@ -120,6 +160,7 @@ __all__ = [
     "DomainEvent",
     "EventBus",
     "get_event_bus",
+    "publish_from_thread",
     "EventRegistry",
     "EventMetadata",
     "get_event_registry",

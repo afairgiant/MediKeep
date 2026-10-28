@@ -39,9 +39,41 @@
   },
   "auditLog": {
     "actionFilter": "Ação",
+    "actions": {
+      "activated": "Ativado",
+      "backup_codes_regenerated": "Códigos de recuperação regenerados",
+      "backup_created": "Cópia de segurança criada",
+      "cancelled": "Cancelado",
+      "completed": "Concluído",
+      "created": "Criado",
+      "deactivated": "Desativado",
+      "deleted": "Eliminado",
+      "downloaded": "Transferido",
+      "login": "Início de sessão",
+      "login_failed": "Início de sessão falhado",
+      "logout": "Fim de sessão",
+      "maintenance_completed": "Manutenção concluída",
+      "maintenance_started": "Manutenção iniciada",
+      "sessions_revoked": "Outros dispositivos desligados",
+      "sign_in_lockout_cleared": "Bloqueio de início de sessão removido",
+      "two_factor_disabled": "Autenticação de dois fatores desativada",
+      "two_factor_enabled": "Autenticação de dois fatores ativada",
+      "two_factor_reset": "Autenticação de dois fatores reposta",
+      "updated": "Atualizado",
+      "uploaded": "Carregado",
+      "viewed": "Visualizado"
+    },
     "dateRange": "Período",
     "entityTypeFilter": "Tipo de Entidade",
     "errorLoading": "Erro ao carregar log de auditoria",
+    "failureReasons": {
+      "code_reused": "Código já utilizado",
+      "deactivated": "Conta desativada",
+      "locked": "Demasiadas falhas, bloqueado",
+      "unknown_user": "Nome de utilizador desconhecido",
+      "wrong_code": "Código errado",
+      "wrong_password": "Palavra-passe errada"
+    },
     "filterByAction": "Filtrar por ação",
     "filterByDateRange": "Filtrar por período",
     "filterByEntityType": "Filtrar por tipo de entidade",
@@ -60,6 +92,7 @@
       "recordId": "ID do Registro",
       "timestamp": "Data/Hora"
     },
+    "unknownUser": "Utilizador desconhecido",
     "viewRecord": "Visualizar registro de {{type}}",
     "viewRecordAriaLabel": "Visualizar {{type}} #{{id}}"
   },
@@ -700,6 +733,7 @@
     },
     "changeRole": "Alterar Função",
     "clear": "Limpar",
+    "clearLockout": "Remover bloqueio de início de sessão",
     "deactivate": "Desativar",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Não é possível excluir o último administrador.",
@@ -738,6 +772,12 @@
       "title": "Redefinir Senha para {{username}}",
       "userInfo": "Usuário: {{username}} (ID: {{userId}})"
     },
+    "resetTwoFactor": "Repor dois fatores",
+    "resetTwoFactorModal": {
+      "body": "Desativar a autenticação de dois fatores de {{username}}? A aplicação de autenticação e os códigos de recuperação deixam de funcionar, e todas as sessões são terminadas.",
+      "hint": "A palavra-passe não muda. Pode iniciar sessão com ela e ativar novamente os dois fatores nas Definições.",
+      "title": "Repor a autenticação de dois fatores"
+    },
     "roleFilter": {
       "all": "Todas as Funções"
     },
@@ -754,7 +794,8 @@
     },
     "tableHeaders": {
       "auth": "Autenticação",
-      "lastLogin": "Último Login"
+      "lastLogin": "Último Login",
+      "twoFactor": "Dois fatores"
     },
     "toggleActiveModal": {
       "activateConfirm": "Ativar \"{{username}}\"? Ele poderá fazer login novamente.",
@@ -763,6 +804,12 @@
       "cannotDeactivateSelf": "Você não pode desativar sua própria conta.",
       "deactivateConfirm": "Desativar \"{{username}}\"? Ele não poderá fazer login até ser reativado.",
       "deactivateTitle": "Desativar Usuário"
+    },
+    "twoFactor": {
+      "codesLeft": "Códigos de recuperação restantes: {{count}}",
+      "locked": "Bloqueado",
+      "off": "Desativada",
+      "on": "Ativa"
     },
     "userCount": "{{count}} usuários",
     "userCount_one": "{{count}} usuário",

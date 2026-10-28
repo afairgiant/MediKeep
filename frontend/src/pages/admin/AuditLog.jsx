@@ -33,6 +33,7 @@ import {
   IconExternalLink,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import FailedSignInLabel from '../../components/admin/FailedSignInLabel';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { downloadBlob } from '../../utils/downloadUtils';
@@ -49,6 +50,12 @@ const ACTION_COLORS = {
   downloaded: 'cyan',
   login: 'teal',
   logout: 'orange',
+  two_factor_enabled: 'green',
+  two_factor_disabled: 'orange',
+  two_factor_reset: 'orange',
+  backup_codes_regenerated: 'blue',
+  sessions_revoked: 'orange',
+  sign_in_lockout_cleared: 'blue',
   activated: 'green',
   deactivated: 'red',
   completed: 'green',
@@ -232,7 +239,13 @@ const AuditLog = () => {
     dateRange[0] ||
     dateRange[1];
 
-  const actionOptions = filters?.actions || [];
+  const actionLabel = (action, fallback = action) =>
+    t(`auditLog.actions.${action}`, { defaultValue: fallback });
+  const actionOptions =
+    filters?.actions?.map(a => ({
+      value: a.value,
+      label: actionLabel(a.value, a.label),
+    })) || [];
   const entityTypeOptions = filters?.entity_types || [];
   const userOptions =
     filters?.users?.map(u => ({
@@ -470,17 +483,26 @@ const AuditLog = () => {
                           </Table.Td>
                           <Table.Td>
                             <Text size="sm">
-                              {entry.username || t('auditLog.system', 'System')}
+                              {entry.action === 'login_failed' && !entry.user_id
+                                ? t('auditLog.unknownUser')
+                                : entry.username ||
+                                  t('auditLog.system', 'System')}
                             </Text>
                           </Table.Td>
                           <Table.Td>
-                            <Badge
-                              variant="light"
-                              color={ACTION_COLORS[entry.action] || 'gray'}
-                              size="sm"
-                            >
-                              {entry.action}
-                            </Badge>
+                            {entry.action === 'login_failed' ? (
+                              <FailedSignInLabel
+                                reason={entry.failure_reason}
+                              />
+                            ) : (
+                              <Badge
+                                variant="light"
+                                color={ACTION_COLORS[entry.action] || 'gray'}
+                                size="sm"
+                              >
+                                {actionLabel(entry.action)}
+                              </Badge>
+                            )}
                           </Table.Td>
                           <Table.Td>
                             <Text size="sm">{entry.entity_type_display}</Text>

@@ -113,6 +113,11 @@ async def schedule_appointment(user_id: int, patient_name: str, time: str):
     await get_event_bus().publish(event)
 ```
 
+From a plain `def` endpoint, which FastAPI runs in a worker thread, call
+`publish_from_thread(event)` from `app.core.events` instead. It hands the event to the
+app's event loop and returns without waiting for the handlers, so a slow notification
+channel does not slow the response.
+
 ---
 
 ## Architecture
@@ -184,6 +189,10 @@ title, message = registry.get_template("event_type", data)
 | `invitation_accepted` | collaboration | Someone accepted your invitation |
 | `share_revoked` | collaboration | Access to shared records revoked |
 | `password_changed` | security | Password was changed |
+| `two_factor_disabled` | security | Two-factor was turned off, by the user or by an admin (`by_admin`) |
+| `backup_code_used` | security | A backup code was used to sign in (`codes_remaining`) |
+| `sessions_revoked` | security | The user signed out their other devices |
+| `two_factor_failures` | security | The correct password was followed by enough wrong codes to lock the code step |
 | `medication_reminder_due` | medical | A scheduled medication reminder time has arrived (fired by the per-minute `MedicationReminderSchedulerService`; idempotent via `NotificationHistory` dedup) |
 
 ---

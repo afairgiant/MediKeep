@@ -185,6 +185,10 @@
   "description": "Configure como você recebe notificações para eventos importantes",
   "error": "Falha ao carregar configurações de notificação",
   "events": {
+    "backup_code_used": {
+      "description": "Quando um código de recuperação é utilizado para iniciar sessão na sua conta",
+      "name": "Código de recuperação utilizado"
+    },
     "backup_completed": {
       "description": "Quando um backup é concluído com sucesso",
       "name": "Backup Concluído"
@@ -229,6 +233,10 @@
       "description": "Quando sua senha é alterada",
       "name": "Senha Alterada"
     },
+    "sessions_revoked": {
+      "description": "Quando os seus outros dispositivos são desligados",
+      "name": "Outros dispositivos desligados"
+    },
     "share_revoked": {
       "description": "Quando o acesso a registros compartilhados é revogado",
       "name": "Compartilhamento Revogado"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Notificação de teste manual",
       "name": "Notificação de Teste"
+    },
+    "two_factor_disabled": {
+      "description": "Quando a autenticação de dois fatores é desativada na sua conta",
+      "name": "Dois fatores desativado"
+    },
+    "two_factor_failures": {
+      "description": "Quando a sua palavra-passe é utilizada mas demasiados códigos de dois fatores estão errados",
+      "name": "Códigos errados repetidos"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "Resta-lhe {{count}} código de backup. Gere novos nas Definições.",
       "backupCodesLow_other": "Restam-lhe {{count}} códigos de backup. Gere novos nas Definições.",
       "backupCodesRegenerated": "Novos códigos de backup gerados. Os antigos já não funcionam.",
+      "lockoutCleared": "{{username}} pode tentar iniciar sessão novamente.",
+      "lockoutClearFailed": "Não foi possível remover o bloqueio de início de sessão. Tente novamente.",
       "otherSessionsFailed": "Não foi possível terminar a sessão nos outros dispositivos. Tente novamente.",
       "otherSessionsSignedOut": "A sessão foi terminada nos seus outros dispositivos.",
       "printBlocked": "O navegador bloqueou a janela de impressão. Permita janelas pop-up para este site ou use Transferir.",
       "twoFactorDisabled": "Autenticação de dois fatores desativada.",
-      "twoFactorEnabled": "Autenticação de dois fatores ativada. A sessão foi terminada nos seus outros dispositivos."
+      "twoFactorEnabled": "Autenticação de dois fatores ativada. A sessão foi terminada nos seus outros dispositivos.",
+      "twoFactorResetByAdmin": "Autenticação de dois fatores desativada para {{username}}.",
+      "twoFactorResetFailed": "Não foi possível repor a autenticação de dois fatores. Tente novamente."
     },
     "settings": {
       "cleanupComplete": "Limpeza concluída: {{cleaned}} arquivos limpos, {{deleted}} arquivos excluídos",

@@ -185,6 +185,10 @@
   "description": "Configureer hoe u meldingen ontvangt voor belangrijke gebeurtenissen",
   "error": "Meldingsinstellingen laden mislukt",
   "events": {
+    "backup_code_used": {
+      "description": "Wanneer een back-upcode wordt gebruikt om je aan te melden",
+      "name": "Back-upcode gebruikt"
+    },
     "backup_completed": {
       "description": "Wanneer een back-up succesvol is voltooid",
       "name": "Back-up voltooid"
@@ -229,6 +233,10 @@
       "description": "Wanneer uw wachtwoord is gewijzigd",
       "name": "Wachtwoord gewijzigd"
     },
+    "sessions_revoked": {
+      "description": "Wanneer je andere apparaten worden afgemeld",
+      "name": "Andere apparaten afgemeld"
+    },
     "share_revoked": {
       "description": "Wanneer toegang tot gedeelde dossiers is ingetrokken",
       "name": "Deling ingetrokken"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Handmatige testmelding",
       "name": "Testmelding"
+    },
+    "two_factor_disabled": {
+      "description": "Wanneer tweestapsverificatie voor je account wordt uitgezet",
+      "name": "Tweestapsverificatie uitgezet"
+    },
+    "two_factor_failures": {
+      "description": "Wanneer je wachtwoord wordt gebruikt maar te veel tweestapscodes verkeerd zijn",
+      "name": "Herhaaldelijk verkeerde codes"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "Je hebt nog {{count}} back-upcode. Maak nieuwe aan in Instellingen.",
       "backupCodesLow_other": "Je hebt nog {{count}} back-upcodes. Maak nieuwe aan in Instellingen.",
       "backupCodesRegenerated": "Nieuwe back-upcodes gemaakt. De oude werken niet meer.",
+      "lockoutCleared": "{{username}} kan opnieuw proberen zich aan te melden.",
+      "lockoutClearFailed": "De aanmeldblokkade kon niet worden opgeheven. Probeer het opnieuw.",
       "otherSessionsFailed": "Je andere apparaten konden niet worden afgemeld. Probeer het opnieuw.",
       "otherSessionsSignedOut": "Je andere apparaten zijn afgemeld.",
       "printBlocked": "Het afdrukvenster is door je browser geblokkeerd. Sta pop-ups toe voor deze site of gebruik Downloaden.",
       "twoFactorDisabled": "Tweestapsverificatie uitgezet.",
-      "twoFactorEnabled": "Tweestapsverificatie aangezet. Je andere apparaten zijn afgemeld."
+      "twoFactorEnabled": "Tweestapsverificatie aangezet. Je andere apparaten zijn afgemeld.",
+      "twoFactorResetByAdmin": "Tweestapsverificatie uitgezet voor {{username}}.",
+      "twoFactorResetFailed": "Tweestapsverificatie kon niet worden hersteld. Probeer het opnieuw."
     },
     "settings": {
       "cleanupComplete": "Opschoning voltooid: {{cleaned}} bestanden opgeschoond, {{deleted}} bestanden verwijderd",

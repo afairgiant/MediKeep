@@ -5,9 +5,17 @@ from app.core.http.auth_codes import AuthErrorCode
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_security_event
 from app.core.utils.client_ip import get_client_ip
-from app.core.utils.rate_limit import SlidingWindowRateLimiter, reserve_all
+from app.core.utils.rate_limit import (
+    SlidingWindowRateLimiter,
+    any_exhausted,
+    reserve_all,
+)
 
 logger = get_logger(__name__, "security")
+
+
+def _normalize(username: str) -> str:
+    return username.strip().lower()
 
 
 class LoginThrottle:
@@ -29,7 +37,7 @@ class LoginThrottle:
         client_ip = get_client_ip(request)
         pairs = (
             # Keyed with the IP so one source cannot lock an account out for everyone
-            (self.by_username, (username.strip().lower(), client_ip)),
+            (self.by_username, (_normalize(username), client_ip)),
             (self.by_ip, client_ip),
         )
         return [(limiter, key) for limiter, key in pairs if limiter.max_requests > 0]
@@ -63,6 +71,19 @@ class LoginThrottle:
         """Give back the slot reserve() took, once the password proved correct."""
         for limiter, key in self._keys(username, request):
             limiter.release(key)
+
+    def is_locked(self, request: Request, username: str) -> bool:
+        """Whether the next attempt for this username from this client would be refused."""
+        return any_exhausted(self._keys(username, request))
+
+    def locked_usernames(self) -> set[str]:
+        """Lowercased usernames locked out from at least one address."""
+        return {username for username, _ip in self.by_username.full_keys()}
+
+    def clear_username(self, username: str) -> None:
+        """Forget the failures recorded for username from every address."""
+        target = _normalize(username)
+        self.by_username.clear_keys(lambda key: key[0] == target)
 
     def reset(self) -> None:
         """Discard all recorded failures. For tests."""

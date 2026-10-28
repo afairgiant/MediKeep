@@ -185,6 +185,10 @@
   "description": "Configurez comment vous recevez des notifications pour les événements importants",
   "error": "Echec du chargement des paramètres de notification",
   "events": {
+    "backup_code_used": {
+      "description": "Quand un code de secours est utilisé pour vous connecter",
+      "name": "Code de secours utilisé"
+    },
     "backup_completed": {
       "description": "Quand une sauvegarde se termine avec succès",
       "name": "Succès de sauvegarde"
@@ -229,6 +233,10 @@
       "description": "Quand votre mot de passe est modifié",
       "name": "Mot de passe modifié"
     },
+    "sessions_revoked": {
+      "description": "Quand vos autres appareils sont déconnectés",
+      "name": "Autres appareils déconnectés"
+    },
     "share_revoked": {
       "description": "Quand l'accès à un dossier partagé est révoqué",
       "name": "Partage révoqué"
@@ -236,6 +244,14 @@
     "test_notification": {
       "description": "Notification de test manuelle",
       "name": "Notification de test"
+    },
+    "two_factor_disabled": {
+      "description": "Quand la double authentification est désactivée pour votre compte",
+      "name": "Double authentification désactivée"
+    },
+    "two_factor_failures": {
+      "description": "Quand votre mot de passe est utilisé mais que trop de codes de double authentification sont incorrects",
+      "name": "Codes incorrects répétés"
     }
   },
   "history": {
@@ -383,11 +399,15 @@
       "backupCodesLow_one": "Il vous reste {{count}} code de secours. Générez-en de nouveaux dans les Paramètres.",
       "backupCodesLow_other": "Il vous reste {{count}} codes de secours. Générez-en de nouveaux dans les Paramètres.",
       "backupCodesRegenerated": "Nouveaux codes de secours générés. Les anciens ne fonctionnent plus.",
+      "lockoutCleared": "{{username}} peut de nouveau essayer de se connecter.",
+      "lockoutClearFailed": "Impossible de lever le blocage de connexion. Veuillez réessayer.",
       "otherSessionsFailed": "Impossible de déconnecter vos autres appareils. Veuillez réessayer.",
       "otherSessionsSignedOut": "Vos autres appareils ont été déconnectés.",
       "printBlocked": "La fenêtre d'impression a été bloquée par votre navigateur. Autorisez les fenêtres pop-up pour ce site ou utilisez plutôt Télécharger.",
       "twoFactorDisabled": "Authentification à deux facteurs désactivée.",
-      "twoFactorEnabled": "Authentification à deux facteurs activée. Vos autres appareils ont été déconnectés."
+      "twoFactorEnabled": "Authentification à deux facteurs activée. Vos autres appareils ont été déconnectés.",
+      "twoFactorResetByAdmin": "Double authentification désactivée pour {{username}}.",
+      "twoFactorResetFailed": "Impossible de réinitialiser la double authentification. Veuillez réessayer."
     },
     "settings": {
       "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
