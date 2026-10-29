@@ -11,9 +11,9 @@ import os
 import subprocess
 import tempfile
 import zipfile
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -27,6 +27,29 @@ from app.models.models import BackupRecord
 from app.services.file_management_service import file_management_service
 
 logger = get_logger(__name__, "app")
+
+
+def retention_cutoff(retention_days: int) -> datetime:
+    """Naive UTC cutoff, comparable with BackupRecord.created_at (stored as naive UTC)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
+        days=retention_days
+    )
+
+
+def partition_for_retention(
+    backups: List[BackupRecord], min_count: int, cutoff_date: datetime
+) -> Tuple[List[BackupRecord], List[BackupRecord]]:
+    """Split newest-first backups into (protected, deletable).
+
+    Only successful backups count toward min_count. A failed record is never
+    protected and is deletable once older than cutoff_date, like any other.
+    """
+    protected = [b for b in backups if b.status != "failed"][:min_count]
+    protected_ids = {id(b) for b in protected}
+    deletable = [
+        b for b in backups if id(b) not in protected_ids and b.created_at < cutoff_date
+    ]
+    return protected, deletable
 
 
 class BackupService:
@@ -496,8 +519,6 @@ class BackupService:
             Dictionary containing cleanup results
         """
         try:
-            from datetime import timedelta
-
             # Get all backups ordered by creation date (newest first)
             all_backups = (
                 self.db.query(BackupRecord)
@@ -507,18 +528,11 @@ class BackupService:
 
             min_count = settings.BACKUP_MIN_COUNT
             retention_days = settings.BACKUP_RETENTION_DAYS
-            cutoff_date = datetime.now() - timedelta(days=retention_days)
+            cutoff_date = retention_cutoff(retention_days)
 
-            # Step 1: Protect the N most recent backups (regardless of age)
-            protected_backups = all_backups[:min_count]
-
-            # Step 2: Apply time-based retention to remaining backups
-            eligible_for_deletion = all_backups[min_count:]
-            old_backups = [
-                backup
-                for backup in eligible_for_deletion
-                if backup.created_at < cutoff_date
-            ]
+            protected_backups, old_backups = partition_for_retention(
+                all_backups, min_count, cutoff_date
+            )
 
             logger.info(
                 f"Retention policy: keeping {min_count} most recent backups, "
@@ -575,8 +589,8 @@ class BackupService:
                                     try:
                                         # Check if file is old enough to be considered orphaned
                                         file_mtime = datetime.fromtimestamp(
-                                            file_path.stat().st_mtime
-                                        )
+                                            file_path.stat().st_mtime, timezone.utc
+                                        ).replace(tzinfo=None)
                                         if file_mtime < cutoff_date:
                                             file_path.unlink()
                                             orphaned_deleted += 1
@@ -627,8 +641,6 @@ class BackupService:
             Dictionary containing retention statistics
         """
         try:
-            from datetime import timedelta
-
             # Get all backups ordered by creation date (newest first)
             all_backups = (
                 self.db.query(BackupRecord)
@@ -638,30 +650,17 @@ class BackupService:
 
             min_count = settings.BACKUP_MIN_COUNT
             retention_days = settings.BACKUP_RETENTION_DAYS
-            cutoff_date = datetime.now() - timedelta(days=retention_days)
+            cutoff_date = retention_cutoff(retention_days)
 
-            # Step 1: Identify protected backups (N most recent)
-            protected_backups = all_backups[:min_count]
-
-            # Step 2: Identify backups eligible for deletion
-            eligible_for_deletion = all_backups[min_count:]
-            backups_to_delete = [
-                backup
-                for backup in eligible_for_deletion
-                if backup.created_at < cutoff_date
-            ]
-
-            # Step 3: Calculate protected by time (within retention period but not in min count)
-            protected_by_time = [
-                backup
-                for backup in eligible_for_deletion
-                if backup.created_at >= cutoff_date
-            ]
-
+            protected_backups, backups_to_delete = partition_for_retention(
+                all_backups, min_count, cutoff_date
+            )
             return {
                 "total_backups": len(all_backups),
                 "protected_by_count": len(protected_backups),
-                "protected_by_time": len(protected_by_time),
+                "protected_by_time": len(all_backups)
+                - len(protected_backups)
+                - len(backups_to_delete),
                 "eligible_for_deletion": len(backups_to_delete),
                 "settings": {
                     "backup_min_count": min_count,

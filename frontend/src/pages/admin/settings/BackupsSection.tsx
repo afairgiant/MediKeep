@@ -6,6 +6,7 @@ import { IconAlertCircle, IconCheck, IconClock } from '@tabler/icons-react';
 import NumberSettingRow from './NumberSettingRow';
 import SettingRow from './SettingRow';
 import SettingsGroup from './SettingsGroup';
+import SwitchSettingRow from './SwitchSettingRow';
 import type { SectionProps } from './useAdminSettings';
 import type { SchedulePreset } from './types';
 import { isTimedPreset, useScheduleLabels } from './useScheduleLabels';
@@ -134,6 +135,18 @@ const BackupsSection = ({ state }: SectionProps) => {
       <SettingsGroup
         title={t('settings.groups.backupCleanup', 'Backup clean-up')}
       >
+        <SwitchSettingRow
+          state={state}
+          settingKey="backup_auto_cleanup_enabled"
+          label={t(
+            'settings.backups.autoCleanup',
+            'Delete old backups automatically'
+          )}
+          description={t(
+            'settings.backups.autoCleanupDesc',
+            'After each scheduled backup, delete backups older than the limit below, including ones made by hand.'
+          )}
+        />
         <NumberSettingRow
           state={state}
           settingKey="backup_retention_days"
@@ -153,7 +166,7 @@ const BackupsSection = ({ state }: SectionProps) => {
           label={t('settings.backups.minCount', 'Always keep at least')}
           description={t(
             'settings.backups.minCountDesc',
-            'The most recent backups are kept regardless of age.'
+            "The most recent successful backups are kept regardless of age. Failed attempts don't count."
           )}
           unit={backupsUnit}
         />

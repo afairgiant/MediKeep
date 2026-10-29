@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Elimina automaticamente i backup vecchi",
+      "autoCleanupDesc": "Dopo ogni backup pianificato, elimina i backup più vecchi del limite qui sotto, compresi quelli creati manualmente.",
       "maxCount": "Massimo previsto",
       "maxCountDesc": "Solo a titolo indicativo. I backup oltre questo numero non vengono eliminati né bloccati.",
       "minCount": "Conserva sempre almeno",
-      "minCountDesc": "I backup più recenti vengono conservati indipendentemente dalla loro età.",
+      "minCountDesc": "I backup riusciti più recenti vengono conservati indipendentemente dalla loro età. I tentativi non riusciti non contano.",
       "operationsLink": "Crea, scarica e ripristina i backup nella pagina Gestione backup",
       "retentionDays": "Elimina i backup più vecchi di",
       "retentionDaysDesc": "La pulizia non scende mai sotto il numero minimo.",

@@ -6570,8 +6570,12 @@ value until an admin saves one; a saved value then wins on every restart.
 - `source` is `saved` (a row exists), `env` (the variable is set) or `default` (built-in value).
 - `fallback` is the value used if the saved row is removed; `fallback_source` says where it comes from.
 - Keys: `allow_user_registration`, `trash_retention_days`, `backup_retention_days`,
-  `backup_min_count`, `backup_max_count`, `release_check_enabled`, `whats_new_popup_enabled`,
-  `activity_log_retention_days`, `notification_history_retention_days`.
+  `backup_min_count`, `backup_max_count`, `backup_auto_cleanup_enabled`,
+  `release_check_enabled`, `whats_new_popup_enabled`, `activity_log_retention_days`,
+  `notification_history_retention_days`.
+- `backup_auto_cleanup_enabled` (default `false`): when on, each successful scheduled backup is
+  followed by the same retention clean-up as `POST /admin/backups/cleanup`. A clean-up failure is
+  logged and does not mark the backup as failed.
 - When `zero_means_forever` is `true`, `0` is also accepted and means rows are kept forever;
   any other value must be between `min` and `max`.
 - `deployment` is a fixed allowlist (`SSO_ONLY_MODE`, `SSO_AUTO_REDIRECT`,

@@ -29,6 +29,7 @@ KEY_BACKUP_RETENTION_DAYS = "backup_retention_days"
 KEY_TRASH_RETENTION_DAYS = "trash_retention_days"
 KEY_BACKUP_MIN_COUNT = "backup_min_count"
 KEY_BACKUP_MAX_COUNT = "backup_max_count"
+KEY_BACKUP_AUTO_CLEANUP_ENABLED = "backup_auto_cleanup_enabled"
 KEY_RELEASE_CHECK_ENABLED = "release_check_enabled"
 KEY_WHATS_NEW_POPUP_ENABLED = "whats_new_popup_enabled"
 KEY_ACTIVITY_LOG_RETENTION_DAYS = "activity_log_retention_days"
@@ -121,6 +122,7 @@ PERSISTED_SETTINGS: dict[str, PersistedSetting] = {
         _int_setting(KEY_TRASH_RETENTION_DAYS, "TRASH_RETENTION_DAYS", 365),
         _int_setting(KEY_BACKUP_MIN_COUNT, "BACKUP_MIN_COUNT", 100),
         _int_setting(KEY_BACKUP_MAX_COUNT, "BACKUP_MAX_COUNT", 500),
+        _bool_setting(KEY_BACKUP_AUTO_CLEANUP_ENABLED, "BACKUP_AUTO_CLEANUP_ENABLED"),
         _bool_setting(KEY_RELEASE_CHECK_ENABLED, "RELEASE_CHECK_ENABLED"),
         _bool_setting(KEY_WHATS_NEW_POPUP_ENABLED, "WHATS_NEW_POPUP_ENABLED"),
         _int_setting(

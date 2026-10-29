@@ -670,5 +670,5 @@ async def update_auto_backup_schedule(
         )
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to update schedule: {str(e)}",
+            detail="Failed to update schedule",
         )

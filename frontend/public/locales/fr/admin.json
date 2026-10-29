@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Supprimer automatiquement les anciennes sauvegardes",
+      "autoCleanupDesc": "Après chaque sauvegarde planifiée, supprime les sauvegardes plus anciennes que la limite ci-dessous, y compris celles créées manuellement.",
       "maxCount": "Maximum prévu",
       "maxCountDesc": "À titre indicatif uniquement. Les sauvegardes au-delà de ce nombre ne sont ni supprimées ni bloquées.",
       "minCount": "Toujours conserver au moins",
-      "minCountDesc": "Les sauvegardes les plus récentes sont conservées quel que soit leur âge.",
+      "minCountDesc": "Les sauvegardes réussies les plus récentes sont conservées quel que soit leur âge. Les tentatives échouées ne comptent pas.",
       "operationsLink": "Créer, télécharger et restaurer des sauvegardes sur la page Gestion des sauvegardes",
       "retentionDays": "Supprimer les sauvegardes de plus de",
       "retentionDaysDesc": "Le nettoyage ne descend jamais sous le nombre minimum.",

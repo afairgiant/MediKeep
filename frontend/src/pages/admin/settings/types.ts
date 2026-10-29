@@ -8,6 +8,7 @@ export type NumberSettingKey =
 
 export type BoolSettingKey =
   | 'allow_user_registration'
+  | 'backup_auto_cleanup_enabled'
   | 'release_check_enabled'
   | 'whats_new_popup_enabled';
 

@@ -201,3 +201,20 @@ class TestUpdateScheduleEndpoint:
             json={"preset": "daily", "time_of_day": "25:00"},
         )
         assert response.status_code == 422
+
+    def test_unexpected_error_hides_internal_detail(self, admin_client):
+        """A 500 must not echo the exception text back to the client."""
+        mock_service = MagicMock()
+        mock_service.update_schedule.side_effect = RuntimeError(
+            "connection to server at 10.0.0.5 failed"
+        )
+
+        with patch.object(
+            BackupSchedulerService,
+            "get_instance",
+            return_value=mock_service,
+        ):
+            response = admin_client.post(SCHEDULE_URL, json={"preset": "daily"})
+
+        assert response.status_code == 500
+        assert "10.0.0.5" not in response.text
