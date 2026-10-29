@@ -25,6 +25,14 @@ export interface BackupCodes {
   backup_codes: string[];
 }
 
+export interface TrustedDevice {
+  id: number;
+  user_agent: string | null;
+  created_at: string;
+  last_used_at: string | null;
+  expires_at: string;
+}
+
 const BASE = '/users/me';
 
 export const getTwoFactorStatus = (
@@ -64,3 +72,17 @@ export const regenerateBackupCodes = (
 /** Signs out every other session; this one continues. */
 export const revokeOtherSessions = (): Promise<unknown> =>
   apiService.post(`${BASE}/sessions/revoke-others`, {});
+
+/** Browsers that currently skip the code step, most recently used first. */
+export const getTrustedDevices = (
+  signal?: AbortSignal
+): Promise<TrustedDevice[]> =>
+  apiService.get(`${BASE}/two-factor/trusted-devices`, { signal });
+
+/** That browser's next sign-in asks for a code again. */
+export const forgetTrustedDevice = (id: number): Promise<unknown> =>
+  apiService.delete(`${BASE}/two-factor/trusted-devices/${id}`);
+
+/** Every browser's next sign-in asks for a code again. */
+export const forgetAllTrustedDevices = (): Promise<unknown> =>
+  apiService.delete(`${BASE}/two-factor/trusted-devices`);

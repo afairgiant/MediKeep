@@ -23,7 +23,7 @@ from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActionType, EntityType, LoginFailureReason
 from app.models.base import get_utc_now
 from app.models.models import User
-from app.services import two_factor_service
+from app.services import trusted_device_service, two_factor_service
 from app.services.login_throttle import login_throttle
 from app.services.patient_management import PatientManagementService
 
@@ -339,25 +339,41 @@ def complete_login(
 def finish_password_login(db: Session, user: User, request: Request) -> JSONResponse:
     """Complete a verified password sign-in, or start the second step when one is due.
 
-    The caller must already have verified the password and is_active.
+    A remembered device skips the second step. The caller must already have
+    verified the password and is_active.
     """
+    trusted = False
     if two_factor_service.is_required_at_login(db, user):
+        trusted = trusted_device_service.is_trusted(db, user, request)
+        if not trusted:
+            log_security_event(
+                logger,
+                "login_password_verified_mfa_required",
+                request,
+                f"Password verified, second factor required for: {user.username}",
+                user_id=user.id,
+                username=user.username,
+            )
+            return JSONResponse(content=two_factor_service.issue_challenge(user))
         log_security_event(
             logger,
-            "login_password_verified_mfa_required",
+            "mfa_skipped_trusted_device",
             request,
-            f"Password verified, second factor required for: {user.username}",
+            f"Second factor skipped on a remembered device for: {user.username}",
             user_id=user.id,
             username=user.username,
         )
-        return JSONResponse(content=two_factor_service.issue_challenge(user))
 
     response = complete_login(
         db,
         user,
         request,
-        method="password",
-        activity_description=f"User logged in: {user.username}",
+        method="trusted_device" if trusted else "password",
+        activity_description=(
+            f"User logged in on a remembered device: {user.username}"
+            if trusted
+            else f"User logged in: {user.username}"
+        ),
         log_event_name="token_created",
     )
     log_endpoint_access(

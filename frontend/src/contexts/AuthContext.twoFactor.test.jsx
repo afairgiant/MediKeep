@@ -115,7 +115,8 @@ describe('AuthContext two-factor sign-in', () => {
     expect(authService.verifyTwoFactor).toHaveBeenCalledWith(
       'ticket-1',
       '123456',
-      'totp'
+      'totp',
+      false
     );
     expect(lastResult).toMatchObject({
       success: true,

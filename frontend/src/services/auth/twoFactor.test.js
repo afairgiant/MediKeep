@@ -43,6 +43,7 @@ describe('login with two-factor on', () => {
         mfa_ticket: 'ticket-1',
         methods: ['totp', 'backup_code'],
         expires_in: 300,
+        remember_device_days: 30,
       })
     );
 
@@ -53,6 +54,7 @@ describe('login with two-factor on', () => {
       mfaRequired: true,
       mfaTicket: 'ticket-1',
       methods: ['totp', 'backup_code'],
+      rememberDeviceDays: 30,
     });
   });
 
@@ -86,10 +88,20 @@ describe('verifyTwoFactor', () => {
       mfa_ticket: 'ticket-1',
       code: 'ABCD-EFGH',
       method: 'backup_code',
+      remember_device: false,
     });
     expect(result.success).toBe(true);
     expect(result.user.username).toBe('jo');
     expect(result.backupCodesRemaining).toBe(2);
+  });
+
+  test('asks the server to remember this browser', async () => {
+    fetch.mockResolvedValue(okJson(LOGIN_BODY));
+
+    await authService.verifyTwoFactor('ticket-1', '123456', 'totp', true);
+
+    const [, init] = fetch.mock.calls[0];
+    expect(JSON.parse(init.body).remember_device).toBe(true);
   });
 
   test('a refusal carries the server code and the tries left', async () => {

@@ -176,9 +176,12 @@ The signed-in user's two-factor and session settings, under `/api/v1/users/me/`.
 - `confirmTotpSetup(code)` - POST; turns two-factor on, signs out other sessions and returns `{backup_codes}`, shown only once.
 - `disableTwoFactor(currentPassword, code)` - POST; `code` may be an authenticator or backup code. Signs out other sessions.
 - `regenerateBackupCodes(currentPassword, code)` - POST; returns a new `{backup_codes}` and invalidates the old ones.
-- `revokeOtherSessions()` - POST; signs out every other session, this one continues.
+- `revokeOtherSessions()` - POST; signs out every other session, this one continues. Remembered browsers ask for a code again.
+- `getTrustedDevices(signal)` - GET the browsers that skip the code step: `[{id, user_agent, created_at, last_used_at, expires_at}]`. `utils/describeUserAgent.ts` turns `user_agent` into browser and system names.
+- `forgetTrustedDevice(id)` - DELETE; that browser asks for a code at its next sign-in.
+- `forgetAllTrustedDevices()` - DELETE; every browser asks for a code at its next sign-in.
 
-The second sign-in step lives in `services/auth/simpleAuthService.js` instead: `login()` returns `{mfaRequired, mfaTicket, methods}` when a code is due, and `verifyTwoFactor(ticket, code, method)` finishes the sign-in. It makes a single request, to the URL that answered the password step, because a resent code is already used.
+The second sign-in step lives in `services/auth/simpleAuthService.js` instead: `login()` returns `{mfaRequired, mfaTicket, methods, rememberDeviceDays}` when a code is due, and `verifyTwoFactor(ticket, code, method, rememberDevice)` finishes the sign-in, asking the server to remember the browser when `rememberDevice` is true. It makes a single request, to the URL that answered the password step, because a resent code is already used.
 
 ## Admin API Service (`adminApi.js`)
 

@@ -316,8 +316,13 @@ const Login = () => {
     }
   };
 
-  const handleVerify = async (code, method) => {
-    const result = await completeTwoFactorLogin(challenge.ticket, code, method);
+  const handleVerify = async (code, method, rememberDevice) => {
+    const result = await completeTwoFactorLogin(
+      challenge.ticket,
+      code,
+      method,
+      rememberDevice
+    );
     if (result.success) {
       const remaining = result.backupCodesRemaining;
       if (remaining != null && remaining <= LOW_BACKUP_CODES) {
@@ -340,7 +345,11 @@ const Login = () => {
       const result = await login(formData);
       if (result.success && result.mfaRequired) {
         setFormData(prev => ({ ...prev, password: '' }));
-        setChallenge({ ticket: result.mfaTicket, methods: result.methods });
+        setChallenge({
+          ticket: result.mfaTicket,
+          methods: result.methods,
+          rememberDeviceDays: result.rememberDeviceDays,
+        });
       } else if (result.success) {
         await finishSignIn(result);
       } else {
@@ -436,6 +445,7 @@ const Login = () => {
         {challenge && (
           <TwoFactorChallenge
             methods={challenge.methods}
+            rememberDeviceDays={challenge.rememberDeviceDays}
             onVerify={handleVerify}
             onExpired={() => {
               setChallenge(null);

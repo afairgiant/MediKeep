@@ -27,6 +27,8 @@ export interface TwoFactorChallengeResult {
   mfaRequired: true;
   mfaTicket: string;
   methods: TwoFactorMethod[];
+  /** 0 when the server does not offer to remember this browser. */
+  rememberDeviceDays: number;
 }
 
 /** Sent with a refused code or password: tries left, and what the last one ends in. */
@@ -60,7 +62,8 @@ export interface AuthContextType {
   completeTwoFactorLogin: (
     mfaTicket: string,
     code: string,
-    method: TwoFactorMethod
+    method: TwoFactorMethod,
+    rememberDevice?: boolean
   ) => Promise<TwoFactorLoginResult>;
   logout: () => Promise<void>;
   updateActivity: () => void;

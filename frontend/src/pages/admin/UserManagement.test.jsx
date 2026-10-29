@@ -542,4 +542,37 @@ describe('UserManagement sign-in security', () => {
       'wrong_code'
     );
   });
+
+  it('names the device each sign-in came from, keeping the raw user agent on hover', async () => {
+    const firefox =
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0';
+    mockGetUserLoginHistory.mockResolvedValue({
+      data: {
+        items: [
+          {
+            id: 1,
+            timestamp: '2026-02-26T10:00:00',
+            ip_address: '127.0.0.1',
+            user_agent: firefox,
+            description: 'User logged in: john_doe',
+          },
+          {
+            id: 2,
+            timestamp: '2026-02-25T10:00:00',
+            ip_address: '127.0.0.1',
+            user_agent: null,
+            description: 'User logged in: john_doe',
+          },
+        ],
+      },
+    });
+    renderUserManagement();
+    await openMenuFor(1);
+
+    fireEvent.click(await screen.findByText('Login History'));
+
+    expect(await screen.findByText('Device')).toBeInTheDocument();
+    expect(screen.getByText('device.name')).toHaveAttribute('title', firefox);
+    expect(screen.queryByText('device.unknown')).not.toBeInTheDocument();
+  });
 });

@@ -88,6 +88,7 @@
     "system": "Systeem",
     "tableHeaders": {
       "action": "Actie",
+      "device": "Apparaat",
       "entityType": "Entiteitstype",
       "recordId": "Dossier-ID",
       "timestamp": "Tijdstempel"
@@ -747,6 +748,7 @@
     "loginHistory": "Inloggeschiedenis",
     "loginHistoryModal": {
       "dateTime": "Datum & tijd",
+      "device": "Apparaat",
       "ipAddress": "IP-adres",
       "noHistory": "Geen inloggeschiedenis gevonden",
       "notAvailable": "N.v.t.",

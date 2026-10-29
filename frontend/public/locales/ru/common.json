@@ -100,6 +100,10 @@
       "icd10": "МКБ-10"
     }
   },
+  "device": {
+    "name": "{{browser}} на {{os}}",
+    "unknown": "Неизвестный браузер"
+  },
   "emergencyContacts": {
     "actions": {
       "addNew": "Добавить экстренный контакт"

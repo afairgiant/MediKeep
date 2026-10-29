@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Cerrar sesión en otros dispositivos",
-      "confirmBody": "Se cerrará la sesión en todos los demás navegadores y dispositivos conectados a su cuenta. Usted seguirá conectado aquí.",
+      "confirmBody": "Se cerrará la sesión en todos los demás navegadores y dispositivos conectados a su cuenta, y los navegadores recordados volverán a pedir un código. Usted seguirá conectado aquí.",
       "confirmTitle": "¿Cerrar sesión en otros dispositivos?",
       "description": "Cerrar sesión en MediKeep en todas partes excepto en este navegador.",
       "title": "Otros dispositivos"
+    },
+    "trustedDevices": {
+      "added": "Recordado el {{date}}",
+      "count_one": "{{count}} navegador inicia sesión sin código.",
+      "count_other": "{{count}} navegadores inician sesión sin código.",
+      "expires": "Recordado hasta el {{date}}",
+      "forget": "Olvidar",
+      "forgetAll": "Olvidar todos",
+      "forgetLabel": "Olvidar {{name}}",
+      "intro": "Estos navegadores pueden iniciar sesión solo con su contraseña hasta la fecha indicada. Si olvida uno, pedirá un código en su próximo inicio de sesión. Cambiar la contraseña o cerrar la sesión en otros dispositivos los olvida todos.",
+      "lastUsed": "Último uso: {{date}}",
+      "loadFailed": "No se pudieron cargar sus dispositivos recordados.",
+      "manage": "Gestionar",
+      "none": "Ningún navegador omite el paso del código.",
+      "title": "Dispositivos recordados"
     },
     "twoFactor": {
       "backupCodes": {

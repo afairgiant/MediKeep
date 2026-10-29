@@ -88,6 +88,7 @@
     "system": "ระบบ",
     "tableHeaders": {
       "action": "การกระทำ",
+      "device": "อุปกรณ์",
       "entityType": "ประเภทเอนทิตี",
       "recordId": "ID เวชระเบียน",
       "timestamp": "เวลาประทับ"
@@ -724,6 +725,7 @@
     "loginHistory": "ประวัติการเข้าสู่ระบบ",
     "loginHistoryModal": {
       "dateTime": "วันที่และเวลา",
+      "device": "อุปกรณ์",
       "ipAddress": "ที่อยู่ IP",
       "noHistory": "ไม่พบประวัติการเข้าสู่ระบบ",
       "notAvailable": "ไม่มี",

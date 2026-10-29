@@ -96,6 +96,10 @@
       "icd10": "ICD-10"
     }
   },
+  "device": {
+    "name": "{{browser}} บน {{os}}",
+    "unknown": "เบราว์เซอร์ที่ไม่รู้จัก"
+  },
   "emergencyContacts": {
     "actions": {
       "addNew": "เพิ่มผู้ติดต่อฉุกเฉิน"

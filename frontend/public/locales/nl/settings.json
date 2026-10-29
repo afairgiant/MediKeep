@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Andere apparaten afmelden",
-      "confirmBody": "Alle andere browsers en apparaten die bij je account zijn aangemeld, worden afgemeld. Hier blijf je aangemeld.",
+      "confirmBody": "Alle andere browsers en apparaten die bij je account zijn aangemeld, worden afgemeld, en onthouden browsers vragen opnieuw om een code. Hier blijf je aangemeld.",
       "confirmTitle": "Andere apparaten afmelden?",
       "description": "Overal afmelden bij MediKeep behalve in deze browser.",
       "title": "Andere apparaten"
+    },
+    "trustedDevices": {
+      "added": "Onthouden op {{date}}",
+      "count_one": "{{count}} browser meldt zich aan zonder code.",
+      "count_other": "{{count}} browsers melden zich aan zonder code.",
+      "expires": "Onthouden tot {{date}}",
+      "forget": "Vergeten",
+      "forgetAll": "Alles vergeten",
+      "forgetLabel": "{{name}} vergeten",
+      "intro": "Deze browsers kunnen tot de getoonde datum met alleen je wachtwoord aanmelden. Vergeet je er een, dan vraagt die bij de volgende aanmelding om een code. Je wachtwoord wijzigen of andere apparaten afmelden vergeet ze allemaal.",
+      "lastUsed": "Laatst gebruikt op {{date}}",
+      "loadFailed": "Je onthouden apparaten konden niet worden geladen.",
+      "manage": "Beheren",
+      "none": "Geen enkele browser slaat de codestap over.",
+      "title": "Onthouden apparaten"
     },
     "twoFactor": {
       "backupCodes": {

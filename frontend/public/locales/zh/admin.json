@@ -88,6 +88,7 @@
     "system": "系统",
     "tableHeaders": {
       "action": "操作",
+      "device": "设备",
       "entityType": "实体类型",
       "recordId": "记录ID",
       "timestamp": "时间戳"
@@ -747,6 +748,7 @@
     "loginHistory": "登录历史",
     "loginHistoryModal": {
       "dateTime": "日期时间",
+      "device": "设备",
       "ipAddress": "IP地址",
       "noHistory": "未找到登录历史",
       "notAvailable": "不可用",

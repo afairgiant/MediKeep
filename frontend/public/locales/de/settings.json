@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Andere Geräte abmelden",
-      "confirmBody": "Alle anderen Browser und Geräte, die bei Ihrem Konto angemeldet sind, werden abgemeldet. Hier bleiben Sie angemeldet.",
+      "confirmBody": "Alle anderen Browser und Geräte, die bei Ihrem Konto angemeldet sind, werden abgemeldet, und gemerkte Browser fragen wieder nach einem Code. Hier bleiben Sie angemeldet.",
       "confirmTitle": "Andere Geräte abmelden?",
       "description": "Überall außer in diesem Browser von MediKeep abmelden.",
       "title": "Andere Geräte"
+    },
+    "trustedDevices": {
+      "added": "Gemerkt am {{date}}",
+      "count_one": "{{count}} Browser meldet sich ohne Code an.",
+      "count_other": "{{count}} Browser melden sich ohne Code an.",
+      "expires": "Gemerkt bis {{date}}",
+      "forget": "Vergessen",
+      "forgetAll": "Alle vergessen",
+      "forgetLabel": "{{name}} vergessen",
+      "intro": "Diese Browser können sich bis zum angezeigten Datum nur mit Ihrem Passwort anmelden. Wenn Sie einen vergessen, fragt er bei der nächsten Anmeldung nach einem Code. Eine Passwortänderung oder das Abmelden anderer Geräte vergisst alle.",
+      "lastUsed": "Zuletzt verwendet am {{date}}",
+      "loadFailed": "Ihre gemerkten Geräte konnten nicht geladen werden.",
+      "manage": "Verwalten",
+      "none": "Kein Browser überspringt den Code-Schritt.",
+      "title": "Gemerkte Geräte"
     },
     "twoFactor": {
       "backupCodes": {

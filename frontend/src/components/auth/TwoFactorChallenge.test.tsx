@@ -9,11 +9,13 @@ const onExpired = vi.fn();
 const onCancel = vi.fn();
 
 const renderChallenge = (
-  methods: ('totp' | 'backup_code')[] = ['totp', 'backup_code']
+  methods: ('totp' | 'backup_code')[] = ['totp', 'backup_code'],
+  rememberDeviceDays?: number
 ) =>
   render(
     <TwoFactorChallenge
       methods={methods}
+      rememberDeviceDays={rememberDeviceDays}
       onVerify={onVerify}
       onExpired={onExpired}
       onCancel={onCancel}
@@ -28,6 +30,37 @@ beforeEach(() => {
 });
 
 describe('TwoFactorChallenge', () => {
+  test('offers to remember the browser only when the server allows it', () => {
+    renderChallenge(['totp'], 0);
+
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
+
+  test('sends the remember choice with the code', async () => {
+    renderChallenge(['totp'], 30);
+
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'login.twoFactor.rememberDevice' })
+    );
+    await userEvent.type(pinInputs()[0], '123456');
+
+    await waitFor(() =>
+      expect(onVerify).toHaveBeenCalledWith('123456', 'totp', true)
+    );
+  });
+
+  test('puts the remember choice before the code, which submits on its last digit', () => {
+    renderChallenge(['totp'], 30);
+
+    const checkbox = screen.getByRole('checkbox', {
+      name: 'login.twoFactor.rememberDevice',
+    });
+    expect(
+      checkbox.compareDocumentPosition(pinInputs()[0]) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   test('asks for an authenticator code first and submits once six digits are in', async () => {
     renderChallenge();
 
@@ -35,7 +68,7 @@ describe('TwoFactorChallenge', () => {
     await userEvent.type(pinInputs()[0], '123456');
 
     await waitFor(() =>
-      expect(onVerify).toHaveBeenCalledWith('123456', 'totp')
+      expect(onVerify).toHaveBeenCalledWith('123456', 'totp', false)
     );
     expect(onVerify).toHaveBeenCalledTimes(1);
   });
@@ -64,7 +97,7 @@ describe('TwoFactorChallenge', () => {
       screen.getByRole('button', { name: 'login.twoFactor.verify' })
     );
 
-    expect(onVerify).toHaveBeenCalledWith('abcd-efgh', 'backup_code');
+    expect(onVerify).toHaveBeenCalledWith('abcd-efgh', 'backup_code', false);
   });
 
   test('a rejected code shows the error and clears the input', async () => {

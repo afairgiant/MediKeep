@@ -100,6 +100,10 @@
       "icd10": "CID-10"
     }
   },
+  "device": {
+    "name": "{{browser}} em {{os}}",
+    "unknown": "Navegador desconhecido"
+  },
   "emergencyContacts": {
     "actions": {
       "addNew": "Adicionar Contato de Emergência"

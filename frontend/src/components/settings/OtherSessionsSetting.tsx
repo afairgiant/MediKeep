@@ -7,8 +7,12 @@ import { revokeOtherSessions } from '../../services/api/securityApi';
 import { notifyError, notifySuccess } from '../../utils/notifyTranslated';
 import logger from '../../services/logger';
 
+interface OtherSessionsSettingProps {
+  onSignedOut?: () => void;
+}
+
 /** The "sign out other devices" row of the Settings Security card. */
-const OtherSessionsSetting = () => {
+const OtherSessionsSetting = ({ onSignedOut }: OtherSessionsSettingProps) => {
   const { t } = useTranslation('settings');
   const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -18,6 +22,7 @@ const OtherSessionsSetting = () => {
     try {
       await revokeOtherSessions();
       setConfirming(false);
+      onSignedOut?.();
       notifySuccess('notifications:toasts.security.otherSessionsSignedOut');
     } catch (e) {
       logger.error('revoke_other_sessions_failed', {

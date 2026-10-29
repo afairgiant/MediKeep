@@ -54,3 +54,28 @@ class UserBackupCode(Base):
     )
 
     __table_args__ = (Index("idx_user_backup_codes_user_id", "user_id"),)
+
+
+class TrustedDevice(Base):
+    """A browser that may skip the second sign-in step until expires_at."""
+
+    __tablename__ = "trusted_devices"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    # SHA-256 of the cookie value; the value itself is never stored
+    token_hash = Column(String(64), nullable=False, unique=True)
+    user_agent = Column(String(255), nullable=True)
+    # Ending the user's sessions also ends trust in every device remembered before
+    session_version = Column(Integer, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    last_used_at = Column(DateTime, nullable=True)
+
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    __table_args__ = (Index("idx_trusted_devices_user_id", "user_id"),)

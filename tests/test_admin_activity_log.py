@@ -58,6 +58,7 @@ def sample_activities(db_session: Session, test_admin_user):
         description="User logged in",
         timestamp=now - timedelta(days=2),
         ip_address="10.0.0.1",
+        user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0",
     )
     db_session.add(login_activity)
     activities.append(login_activity)
@@ -156,6 +157,14 @@ class TestGetActivityLog:
         assert "entity_type_display" in item
         assert "description" in item
         assert "timestamp" in item
+        assert "ip_address" in item
+        assert "user_agent" in item
+
+    def test_items_carry_the_user_agent(self, admin_client, sample_activities):
+        response = admin_client.get("/api/v1/admin/activity-log?action=login")
+
+        (item,) = response.json()["items"]
+        assert "Firefox/131.0" in item["user_agent"]
 
     def test_empty_results(self, admin_client):
         response = admin_client.get("/api/v1/admin/activity-log")
@@ -188,6 +197,7 @@ class TestExportActivityLog:
             "Entity ID",
             "Description",
             "IP Address",
+            "User Agent",
         ]
 
     def test_csv_has_data_rows(self, admin_client, sample_activities):
@@ -205,6 +215,32 @@ class TestExportActivityLog:
         rows = list(reader)
         # Header + 1 filtered row
         assert len(rows) == 2
+
+    def test_csv_has_the_user_agent(self, admin_client, sample_activities):
+        response = admin_client.get("/api/v1/admin/activity-log/export?action=login")
+        rows = list(csv.reader(io.StringIO(response.text)))
+
+        assert "Firefox/131.0" in rows[1][-1]
+
+    def test_csv_cells_cannot_run_as_formulas(
+        self, admin_client, db_session, test_admin_user
+    ):
+        formula = '=HYPERLINK("http://example.com","x")'
+        db_session.add(
+            ActivityLog(
+                user_id=test_admin_user.id,
+                action=ActionType.LOGIN,
+                entity_type=EntityType.USER,
+                description=formula,
+                user_agent=formula,
+            )
+        )
+        db_session.commit()
+
+        response = admin_client.get("/api/v1/admin/activity-log/export")
+        rows = list(csv.reader(io.StringIO(response.text)))
+
+        assert rows[1][5] == rows[1][-1] == f"'{formula}"
 
 
 class TestGetActivityLogFilters:

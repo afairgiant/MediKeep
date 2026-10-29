@@ -259,14 +259,20 @@ class SimpleAuthService {
    * @param {string} mfaTicket - from the login result
    * @param {string} code - authenticator or backup code as typed
    * @param {'totp'|'backup_code'} method
+   * @param {boolean} [rememberDevice] - skip this step on this browser next time
    */
-  async verifyTwoFactor(mfaTicket, code, method) {
+  async verifyTwoFactor(mfaTicket, code, method, rememberDevice = false) {
     try {
       // One attempt: a resent code is already used and would read as a wrong code
       const response = await this.makeRequest('/auth/two-factor/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mfa_ticket: mfaTicket, code, method }),
+        body: JSON.stringify({
+          mfa_ticket: mfaTicket,
+          code,
+          method,
+          remember_device: rememberDevice,
+        }),
         singleAttempt: true,
       });
 
@@ -347,6 +353,7 @@ class SimpleAuthService {
           mfaRequired: true,
           mfaTicket: data.mfa_ticket,
           methods: data.methods || [],
+          rememberDeviceDays: data.remember_device_days || 0,
         };
       }
 

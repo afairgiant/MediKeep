@@ -389,8 +389,18 @@ export function AuthProvider({ children }) {
   };
 
   // Refusals are returned, not stored, so the password form's error stays clear
-  const completeTwoFactorLogin = async (mfaTicket, code, method) => {
-    const result = await authService.verifyTwoFactor(mfaTicket, code, method);
+  const completeTwoFactorLogin = async (
+    mfaTicket,
+    code,
+    method,
+    rememberDevice = false
+  ) => {
+    const result = await authService.verifyTwoFactor(
+      mfaTicket,
+      code,
+      method,
+      rememberDevice
+    );
     if (!result.success) {
       return result;
     }

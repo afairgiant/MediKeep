@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Logga ut andra enheter",
-      "confirmBody": "Alla andra webbläsare och enheter som är inloggade på ditt konto loggas ut. Här förblir du inloggad.",
+      "confirmBody": "Alla andra webbläsare och enheter som är inloggade på ditt konto loggas ut, och ihågkomna webbläsare ber om en kod igen. Här förblir du inloggad.",
       "confirmTitle": "Logga ut andra enheter?",
       "description": "Logga ut från MediKeep överallt utom i den här webbläsaren.",
       "title": "Andra enheter"
+    },
+    "trustedDevices": {
+      "added": "Ihågkommen {{date}}",
+      "count_one": "{{count}} webbläsare loggar in utan kod.",
+      "count_other": "{{count}} webbläsare loggar in utan kod.",
+      "expires": "Ihågkommen till {{date}}",
+      "forget": "Glöm",
+      "forgetAll": "Glöm alla",
+      "forgetLabel": "Glöm {{name}}",
+      "intro": "Dessa webbläsare kan logga in med bara ditt lösenord fram till det angivna datumet. Glömmer du en ber den om en kod vid nästa inloggning. Att byta lösenord eller logga ut andra enheter glömmer alla.",
+      "lastUsed": "Senast använd {{date}}",
+      "loadFailed": "Det gick inte att läsa in dina ihågkomna enheter.",
+      "manage": "Hantera",
+      "none": "Ingen webbläsare hoppar över kodsteget.",
+      "title": "Ihågkomna enheter"
     },
     "twoFactor": {
       "backupCodes": {

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
@@ -14,12 +15,15 @@ class MfaChallenge(BaseModel):
     mfa_ticket: str
     methods: List[str]
     expires_in: int
+    # 0 when this server does not offer to remember the device
+    remember_device_days: int = 0
 
 
 class TwoFactorVerifyRequest(BaseModel):
     mfa_ticket: str = Field(..., min_length=1, max_length=128)
     code: str = _CODE
     method: Literal["totp", "backup_code"]
+    remember_device: bool = False
 
 
 class TwoFactorStatus(BaseModel):
@@ -51,3 +55,13 @@ class PasswordAndCodeRequest(BaseModel):
 
     current_password: str = _PASSWORD
     code: str = _CODE
+
+
+class TrustedDeviceOut(BaseModel):
+    id: int
+    user_agent: Optional[str] = None
+    created_at: datetime
+    last_used_at: Optional[datetime] = None
+    expires_at: datetime
+
+    model_config = {"from_attributes": True}

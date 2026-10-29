@@ -100,6 +100,10 @@
       "icd10": "CIM-10"
     }
   },
+  "device": {
+    "name": "{{browser}} sur {{os}}",
+    "unknown": "Navigateur inconnu"
+  },
   "emergencyContacts": {
     "actions": {
       "addNew": "Ajouter un contact d'urgence"

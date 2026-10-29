@@ -144,6 +144,8 @@ const Settings = () => {
   } = useUserPreferences();
   const [activeTab, setActiveTab] = useState('general');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  // Raised when other sessions are signed out, which also ends every remembered device
+  const [sessionsRevision, setSessionsRevision] = useState(0);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
     useState(false);
   const [versionInfo, setVersionInfo] = useState(null);
@@ -551,8 +553,10 @@ const Settings = () => {
                 </div>
               </div>
 
-              <TwoFactorSettings />
-              <OtherSessionsSetting />
+              <TwoFactorSettings sessionsRevision={sessionsRevision} />
+              <OtherSessionsSetting
+                onSignedOut={() => setSessionsRevision(n => n + 1)}
+              />
             </div>
           </Card>
 

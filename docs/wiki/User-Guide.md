@@ -378,6 +378,12 @@ After your password, enter the current code from the app. If you do not have you
 
 Each code from the app also works only once. If MediKeep says a code was already used, wait for the app to show a new one (up to 30 seconds) and enter that. After several wrong codes you have to wait before trying again; MediKeep tells you when you have one try left.
 
+**Remembering a browser**
+
+Tick **Don't ask again on this browser**, shown above the code boxes, before you type the code (the code signs you in as soon as the last digit is in), and that browser signs in with your password alone for the next 30 days (your administrator may set a different number, or turn the option off). Only do this on your own computer or phone: anyone using that browser would need just your password.
+
+Settings lists your remembered browsers under **Remembered devices**. Click **Manage** to forget one or all of them; they ask for a code at their next sign-in. Changing your password, signing out other devices or turning two-factor off also forgets them all.
+
 **New backup codes**
 
 Click **New backup codes** and confirm with your password and a code. Your old backup codes stop working.
@@ -392,7 +398,7 @@ If you sign in with Google, GitHub or another identity provider, set up two-fact
 
 ### Signing Out Other Devices
 
-Click **Sign out other devices** to sign out of MediKeep in every other browser and on every other device, for example after using a shared computer. You stay signed in where you clicked it.
+Click **Sign out other devices** to sign out of MediKeep in every other browser and on every other device, for example after using a shared computer. You stay signed in where you clicked it. Browsers you told not to ask for a two-factor code, including this one, ask for it again.
 
 ## Generating Reports
 

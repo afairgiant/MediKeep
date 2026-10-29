@@ -88,6 +88,7 @@
     "system": "Sistema",
     "tableHeaders": {
       "action": "Ação",
+      "device": "Dispositivo",
       "entityType": "Tipo de Entidade",
       "recordId": "ID do Registro",
       "timestamp": "Data/Hora"
@@ -747,6 +748,7 @@
     "loginHistory": "Histórico de Login",
     "loginHistoryModal": {
       "dateTime": "Data e Hora",
+      "device": "Dispositivo",
       "ipAddress": "Endereço IP",
       "noHistory": "Nenhum histórico de login encontrado",
       "notAvailable": "N/D",
