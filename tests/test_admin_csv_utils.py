@@ -8,7 +8,8 @@ from app.api.v1.admin.csv_utils import neutralize_formula, stream_csv
 
 
 @pytest.mark.parametrize(
-    "value", ["=1+1", "+cmd", "-2+3+cmd|' /C calc'!A0", "@SUM(A1)", "\tx", "\rx"]
+    "value",
+    ["=1+1", "+cmd", "-2+3+cmd|' /C calc'!A0", "@SUM(A1)", "\tx", "\rx", "\n=cmd"],
 )
 def test_formula_starts_are_quoted(value):
     assert neutralize_formula(value) == f"'{value}"

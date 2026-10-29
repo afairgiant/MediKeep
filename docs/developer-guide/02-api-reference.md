@@ -6675,7 +6675,7 @@ Base path: `/api/v1/admin/activity-log`. Each entry carries `ip_address`, `user_
 (as the client sent it, null when none was recorded) and `failure_reason`, set on
 `login_failed` entries only. The CSV export (`GET /export`) ends with `IP Address` and
 `User Agent` columns. In this and every other admin CSV export, a text cell starting
-with `=`, `+`, `-`, `@`, tab or carriage return (other than a plain number) is
+with `=`, `+`, `-`, `@`, tab, carriage return or line feed (other than a plain number) is
 prefixed with `'` so spreadsheet apps do not run it as a formula.
 
 **Failed sign-ins** are recorded as `login_failed` with `event_metadata`

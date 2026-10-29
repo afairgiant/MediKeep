@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 from fastapi.responses import StreamingResponse
 
-_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r", "\n")
 
 
 def _is_number(value: str) -> bool:
