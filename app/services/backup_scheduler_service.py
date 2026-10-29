@@ -47,6 +47,10 @@ LAST_RUN_KEYS = ("last_run_at", "last_run_status", "last_run_error")
 TIME_FORMAT_RE = HHMM_24H_RE
 
 
+class ScheduleValidationError(ValueError):
+    """A schedule update was rejected; the message is safe to show the admin."""
+
+
 def _parse_past_time(value: Optional[str]) -> Optional[datetime]:
     """Stored timestamp; None when missing, malformed, naive or in the future."""
     if not value:
@@ -149,18 +153,24 @@ class BackupSchedulerService:
         time_of_day: Optional[str] = None,
         day_of_week: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Validate, persist, and apply a new schedule."""
+        """Validate, persist, and apply a new schedule.
+
+        Raises:
+            ScheduleValidationError: the input is invalid.
+        """
         if preset not in VALID_PRESETS:
-            raise ValueError(
+            raise ScheduleValidationError(
                 f"Invalid preset: {preset}. "
                 f"Must be one of: {', '.join(sorted(VALID_PRESETS))}"
             )
 
         if time_of_day is not None and not TIME_FORMAT_RE.match(time_of_day):
-            raise ValueError("time_of_day must be in HH:MM format (24-hour)")
+            raise ScheduleValidationError(
+                "time_of_day must be in HH:MM format (24-hour)"
+            )
 
         if day_of_week is not None and day_of_week not in VALID_DAYS_OF_WEEK:
-            raise ValueError(
+            raise ScheduleValidationError(
                 f"Invalid day_of_week: {day_of_week}. "
                 f"Must be one of: {', '.join(sorted(VALID_DAYS_OF_WEEK))}"
             )

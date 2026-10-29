@@ -79,6 +79,7 @@ def log_endpoint_error(
     *,
     user_id: Optional[int] = None,
     patient_id: Optional[int] = None,
+    exc_info: bool = False,
     **kwargs,
 ) -> None:
     """
@@ -93,6 +94,7 @@ def log_endpoint_error(
         error: The exception that was raised
         user_id: Optional user ID if known
         patient_id: Optional patient ID if relevant
+        exc_info: Also log the traceback; call from inside the except block
         **kwargs: Additional fields to log
 
     Example:
@@ -125,7 +127,7 @@ def log_endpoint_error(
     # Add any additional fields
     extra.update(kwargs)
 
-    logger.error(message, extra=extra)
+    logger.error(message, extra=extra, exc_info=exc_info)
 
 
 def log_security_event(

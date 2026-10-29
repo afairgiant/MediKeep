@@ -28,6 +28,9 @@ from app.services.file_management_service import file_management_service
 
 logger = get_logger(__name__, "app")
 
+# Statuses of a backup that can be restored; verification failures are excluded.
+USABLE_BACKUP_STATUSES = frozenset({"created", "verified", "uploaded"})
+
 
 def retention_cutoff(retention_days: int) -> datetime:
     """Naive UTC cutoff, comparable with BackupRecord.created_at (stored as naive UTC)."""
@@ -41,10 +44,11 @@ def partition_for_retention(
 ) -> Tuple[List[BackupRecord], List[BackupRecord]]:
     """Split newest-first backups into (protected, deletable).
 
-    Only successful backups count toward min_count. A failed record is never
-    protected and is deletable once older than cutoff_date, like any other.
+    Only backups with a status in USABLE_BACKUP_STATUSES count toward min_count.
+    Any other record (failed, missing, corrupted...) is never protected and is
+    deletable once older than cutoff_date, like any other.
     """
-    protected = [b for b in backups if b.status != "failed"][:min_count]
+    protected = [b for b in backups if b.status in USABLE_BACKUP_STATUSES][:min_count]
     protected_ids = {id(b) for b in protected}
     deletable = [
         b for b in backups if id(b) not in protected_ids and b.created_at < cutoff_date

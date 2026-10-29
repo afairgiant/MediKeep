@@ -1,5 +1,6 @@
 """Tests for auto-backup schedule API endpoints."""
 
+import json
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -7,6 +8,7 @@ import pytest
 from app.services.backup_scheduler_service import (
     DEFAULT_CONFIG,
     BackupSchedulerService,
+    ScheduleValidationError,
 )
 
 
@@ -218,3 +220,34 @@ class TestUpdateScheduleEndpoint:
 
         assert response.status_code == 500
         assert "10.0.0.5" not in response.text
+
+    def _post_with_error(self, admin_client, error):
+        mock_service = MagicMock()
+        mock_service.update_schedule.side_effect = error
+        with patch.object(
+            BackupSchedulerService, "get_instance", return_value=mock_service
+        ):
+            return admin_client.post(SCHEDULE_URL, json={"preset": "daily"})
+
+    def test_validation_error_returns_400_with_message(self, admin_client):
+        response = self._post_with_error(
+            admin_client, ScheduleValidationError("Invalid preset: hourly")
+        )
+
+        assert response.status_code == 400
+        assert "Invalid preset: hourly" in response.text
+
+    def test_corrupt_stored_schedule_is_a_500_not_a_400(self, admin_client):
+        """A JSONDecodeError is a ValueError, but it is a server fault, not bad input."""
+        error = json.JSONDecodeError("Expecting value", "{not json", 1)
+
+        response = self._post_with_error(admin_client, error)
+
+        assert response.status_code == 500
+        assert "Expecting value" not in response.text
+
+    def test_unexpected_error_logs_traceback(self, admin_client):
+        with patch("app.api.v1.admin.backup.log_endpoint_error") as mock_log:
+            self._post_with_error(admin_client, RuntimeError("boom"))
+
+        assert mock_log.call_args.kwargs["exc_info"] is True

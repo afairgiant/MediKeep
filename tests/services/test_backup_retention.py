@@ -3,6 +3,8 @@
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
+import pytest
+
 from app.services.backup_service import partition_for_retention, retention_cutoff
 
 NOW = datetime(2026, 10, 29, 12, 0)
@@ -39,6 +41,27 @@ class TestPartitionForRetention:
 
         assert protected == good
         assert deletable == failed
+
+    @pytest.mark.parametrize(
+        "status", ["missing", "corrupted", "size_mismatch", "checksum_failed"]
+    )
+    def test_verification_failures_do_not_count_toward_minimum(self, status):
+        broken = _backup(8, status=status)
+        good = _backup(9)
+
+        protected, deletable = partition_for_retention([broken, good], 1, CUTOFF)
+
+        assert protected == [good]
+        assert deletable == [broken]
+
+    @pytest.mark.parametrize("status", ["created", "verified", "uploaded"])
+    def test_usable_statuses_count_toward_minimum(self, status):
+        backup = _backup(10, status=status)
+
+        protected, deletable = partition_for_retention([backup], 1, CUTOFF)
+
+        assert protected == [backup]
+        assert deletable == []
 
     def test_recent_failed_backup_is_kept_until_cutoff(self):
         recent_failed = _backup(1, status="failed")

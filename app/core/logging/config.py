@@ -228,6 +228,9 @@ class MedicalRecordsJSONFormatter(logging.Formatter):
             if value is not None:
                 log_record[field] = str(value)
 
+        if record.exc_info:
+            log_record[LogFields.TRACEBACK] = self.formatException(record.exc_info)
+
         # Add source location for debug logs
         if record.levelno <= logging.DEBUG:
             log_record[LogFields.FILE] = record.filename
