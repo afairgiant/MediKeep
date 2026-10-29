@@ -432,16 +432,18 @@ class BackupService:
 
             # Update status based on verification result
             new_status = None
-            if not verified:
-                if not size_matches and not checksum_matches:
-                    new_status = "corrupted"
-                elif not size_matches:
-                    new_status = "size_mismatch"
-                elif not checksum_matches:
-                    new_status = "checksum_failed"
-                else:
-                    new_status = "failed"
+            if verified:
+                # Clears an earlier failed check; an upload keeps its label, already usable.
+                if backup_record.status not in ("verified", "uploaded"):
+                    new_status = "verified"
+            elif not size_matches and not checksum_matches:
+                new_status = "corrupted"
+            elif not size_matches:
+                new_status = "size_mismatch"
+            else:
+                new_status = "checksum_failed"
 
+            if new_status:
                 setattr(backup_record, "status", new_status)
                 self.db.commit()
 
