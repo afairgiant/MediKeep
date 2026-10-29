@@ -11,14 +11,22 @@ import { notifySuccess } from '../../utils/notifyTranslated';
 import { LOW_BACKUP_CODES } from '../../constants/twoFactor';
 import BackupCodesModal from './BackupCodesModal';
 import ConfirmIdentityModal from './ConfirmIdentityModal';
+import TrustedDevicesSetting from './TrustedDevicesSetting';
 
 // Keeps the QR code library out of the main bundle until someone enrolls
 const TwoFactorSetupModal = lazy(() => import('./TwoFactorSetupModal'));
 
 type OpenModal = 'setup' | 'disable' | 'regenerate' | null;
 
+interface TwoFactorSettingsProps {
+  /** Changes whenever other sessions are signed out. */
+  sessionsRevision?: number;
+}
+
 /** The two-factor row of the Settings Security card. */
-const TwoFactorSettings = () => {
+const TwoFactorSettings = ({
+  sessionsRevision = 0,
+}: TwoFactorSettingsProps) => {
   const { t } = useTranslation('settings');
   const { status, loading, error, reload } = useTwoFactorStatus();
   const [openModal, setOpenModal] = useState<OpenModal>(null);
@@ -136,6 +144,9 @@ const TwoFactorSettings = () => {
           )}
         </div>
       </div>
+      {status?.totp_enabled && (
+        <TrustedDevicesSetting sessionsRevision={sessionsRevision} />
+      )}
 
       {openModal === 'setup' && (
         <Suspense fallback={null}>

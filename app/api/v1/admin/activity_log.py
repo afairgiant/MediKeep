@@ -5,17 +5,15 @@ Provides endpoints for viewing, searching, filtering, and exporting
 the system activity log for compliance and auditing purposes.
 """
 
-import csv
-import io
 from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
+from app.api.v1.admin.csv_utils import stream_csv
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.models.activity_log import ActionType, ActivityLog, EntityType
@@ -75,6 +73,7 @@ class ActivityLogEntry(BaseModel):
     description: str
     timestamp: Optional[str] = None
     ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
     # Set on login_failed entries only
     failure_reason: Optional[str] = None
 
@@ -169,6 +168,7 @@ def _log_to_entry(log: ActivityLog) -> ActivityLogEntry:
         description=log.description,
         timestamp=log.timestamp.isoformat() if log.timestamp else None,
         ip_address=log.ip_address,
+        user_agent=log.user_agent,
         failure_reason=log.failure_reason,
     )
 
@@ -257,27 +257,20 @@ def export_activity_log(
 
         logs = query.order_by(ActivityLog.timestamp.desc()).all()
 
-        def iter_csv():
-            output = io.StringIO()
-            writer = csv.writer(output)
-
-            writer.writerow(
-                [
-                    "Timestamp",
-                    "User",
-                    "Action",
-                    "Entity Type",
-                    "Entity ID",
-                    "Description",
-                    "IP Address",
-                ]
-            )
-            yield output.getvalue()
-            output.seek(0)
-            output.truncate(0)
-
-            for log in logs:
-                writer.writerow(
+        headers = [
+            "Timestamp",
+            "User",
+            "Action",
+            "Entity Type",
+            "Entity ID",
+            "Description",
+            "IP Address",
+            "User Agent",
+        ]
+        rows = [
+            dict(
+                zip(
+                    headers,
                     [
                         log.timestamp.isoformat() if log.timestamp else "",
                         _display_username(log),
@@ -289,19 +282,13 @@ def export_activity_log(
                         log.entity_id or "",
                         log.description,
                         log.ip_address or "",
-                    ]
+                        log.user_agent or "",
+                    ],
                 )
-                yield output.getvalue()
-                output.seek(0)
-                output.truncate(0)
-
-        return StreamingResponse(
-            iter_csv(),
-            media_type="text/csv",
-            headers={
-                "Content-Disposition": "attachment; filename=audit_log_export.csv"
-            },
-        )
+            )
+            for log in logs
+        ]
+        return stream_csv(headers, rows, "audit_log_export.csv")
 
     except Exception as e:
         log_endpoint_error(logger, request, "Error exporting activity log", e)

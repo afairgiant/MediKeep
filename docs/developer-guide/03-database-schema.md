@@ -313,6 +313,32 @@ JUNCTION TABLES (Many-to-Many)
 - Hashed with bcrypt rather than encrypted, so they keep working after `SECRET_KEY` changes
 - Marked used with a conditional UPDATE, so a code cannot be used twice
 
+### trusted_devices
+**Purpose**: Browsers that may skip the second sign-in step for a while ("remember this device")
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique ID |
+| user_id | Integer | FK(users.id) ON DELETE CASCADE, NOT NULL | Owner |
+| token_hash | String(64) | NOT NULL, UNIQUE | SHA-256 of the `medapp_trusted_device_<user id>` cookie value; the value itself is never stored |
+| user_agent | String(255) | NULL | Browser's user agent when it was remembered, for the Settings list |
+| session_version | Integer | NOT NULL | The user's `session_version` when remembered |
+| expires_at | DateTime | NOT NULL | End of the `TWO_FACTOR_REMEMBER_DAYS` window |
+| last_used_at | DateTime | NULL | Last sign-in that skipped the code |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Indexes**:
+- `idx_trusted_devices_user_id` on user_id
+
+**Business Rules**:
+- Trusted only while session_version matches the user's, so anything that ends the
+  user's sessions also ends trust in every device
+- Also untrusted once older than `TWO_FACTOR_REMEMBER_DAYS`, so shortening the setting
+  applies to devices remembered before
+- Expired and outdated rows of a user are deleted when that user remembers a device or
+  lists them; turning two-factor off deletes all of them
+
 ### activity_log
 **Purpose**: Audit trail for user and system activities (referenced in code, table definition in separate migration)
 

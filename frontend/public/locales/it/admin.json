@@ -88,6 +88,7 @@
     "system": "Sistema",
     "tableHeaders": {
       "action": "Azione",
+      "device": "Dispositivo",
       "entityType": "Tipo di entità",
       "recordId": "ID record",
       "timestamp": "Data e ora"
@@ -747,6 +748,7 @@
     "loginHistory": "Cronologia accessi",
     "loginHistoryModal": {
       "dateTime": "Data e ora",
+      "device": "Dispositivo",
       "ipAddress": "Indirizzo IP",
       "noHistory": "Nessuna cronologia accessi trovata",
       "notAvailable": "N/D",

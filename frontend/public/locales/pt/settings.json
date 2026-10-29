@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Terminar sessão noutros dispositivos",
-      "confirmBody": "A sessão será terminada em todos os outros navegadores e dispositivos ligados à sua conta. Aqui continuará com sessão iniciada.",
+      "confirmBody": "A sessão será terminada em todos os outros navegadores e dispositivos ligados à sua conta, e os navegadores memorizados voltarão a pedir um código. Aqui continuará com sessão iniciada.",
       "confirmTitle": "Terminar sessão noutros dispositivos?",
       "description": "Terminar sessão no MediKeep em todo o lado exceto neste navegador.",
       "title": "Outros dispositivos"
+    },
+    "trustedDevices": {
+      "added": "Memorizado em {{date}}",
+      "count_one": "{{count}} navegador inicia sessão sem código.",
+      "count_other": "{{count}} navegadores iniciam sessão sem código.",
+      "expires": "Memorizado até {{date}}",
+      "forget": "Esquecer",
+      "forgetAll": "Esquecer todos",
+      "forgetLabel": "Esquecer {{name}}",
+      "intro": "Estes navegadores podem iniciar sessão apenas com a sua palavra-passe até à data indicada. Se esquecer um, pedirá um código no próximo início de sessão. Alterar a palavra-passe ou terminar a sessão nos outros dispositivos esquece-os todos.",
+      "lastUsed": "Última utilização: {{date}}",
+      "loadFailed": "Não foi possível carregar os seus dispositivos memorizados.",
+      "manage": "Gerir",
+      "none": "Nenhum navegador ignora o passo do código.",
+      "title": "Dispositivos memorizados"
     },
     "twoFactor": {
       "backupCodes": {

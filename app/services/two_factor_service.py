@@ -20,6 +20,7 @@ from app.models.base import get_utc_now
 from app.models.mfa import UserBackupCode, UserTotp
 from app.models.models import User
 from app.schemas.two_factor import MfaChallenge
+from app.services import trusted_device_service
 from app.services.credential_encryption import (
     SecurityError,
     mfa_credential_encryption,
@@ -272,7 +273,9 @@ def regenerate_backup_codes(db: Session, user: User) -> List[str]:
 
 
 def remove_all(db: Session, user: User) -> bool:
-    """Delete the user's TOTP secret and backup codes; returns whether TOTP was on.
+    """Delete the user's TOTP secret, backup codes and remembered devices.
+
+    Returns whether TOTP was on.
 
     Ends every session of the user in the same commit.
     """
@@ -283,6 +286,7 @@ def remove_all(db: Session, user: User) -> bool:
     db.query(UserTotp).filter(UserTotp.user_id == user.id).delete(
         synchronize_session=False
     )
+    trusted_device_service.forget_all(db, user)
     user_crud.commit_ending_sessions(db, user)
     return was_enabled
 
@@ -302,6 +306,7 @@ def issue_challenge(user: User) -> dict:
         mfa_ticket=mfa_tickets.put(ticket, owner=user.id),
         methods=list(METHODS),
         expires_in=MFA_TICKET_TTL_SECONDS,
+        remember_device_days=settings.TWO_FACTOR_REMEMBER_DAYS,
     ).model_dump()
 
 

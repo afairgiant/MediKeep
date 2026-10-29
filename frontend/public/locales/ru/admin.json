@@ -88,6 +88,7 @@
     "system": "Система",
     "tableHeaders": {
       "action": "Действие",
+      "device": "Устройство",
       "entityType": "Тип сущности",
       "recordId": "ID записи",
       "timestamp": "Время"
@@ -747,6 +748,7 @@
     "loginHistory": "История входов",
     "loginHistoryModal": {
       "dateTime": "Дата и время",
+      "device": "Устройство",
       "ipAddress": "IP-адрес",
       "noHistory": "История входов не найдена",
       "notAvailable": "Н/Д",

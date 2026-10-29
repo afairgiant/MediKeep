@@ -88,6 +88,7 @@
     "system": "System",
     "tableHeaders": {
       "action": "Aktion",
+      "device": "Gerät",
       "entityType": "Entitätstyp",
       "recordId": "Datensatz-ID",
       "timestamp": "Zeitstempel"
@@ -747,6 +748,7 @@
     "loginHistory": "Anmeldeverlauf",
     "loginHistoryModal": {
       "dateTime": "Datum & Uhrzeit",
+      "device": "Gerät",
       "ipAddress": "IP-Adresse",
       "noHistory": "Kein Anmeldeverlauf gefunden",
       "notAvailable": "N/V",

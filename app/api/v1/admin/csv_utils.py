@@ -2,9 +2,33 @@
 
 import csv
 import io
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi.responses import StreamingResponse
+
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _is_number(value: str) -> bool:
+    try:
+        float(value)
+    except ValueError:
+        return False
+    return True
+
+
+def neutralize_formula(value: Any) -> Any:
+    """Return value, with a leading ' on text a spreadsheet app would run as a formula.
+
+    Values that are not strings, and strings that are plain numbers, are unchanged.
+    """
+    if (
+        isinstance(value, str)
+        and value.startswith(_FORMULA_PREFIXES)
+        and not _is_number(value)
+    ):
+        return f"'{value}"
+    return value
 
 
 def stream_csv(
@@ -15,6 +39,7 @@ def stream_csv(
     Args:
         headers: Column header labels for the first row.
         rows: List of dicts keyed by header label. Missing keys default to "".
+            Each cell goes through neutralize_formula.
         filename: Value for the Content-Disposition attachment filename.
     """
 
@@ -26,7 +51,7 @@ def stream_csv(
         buf.seek(0)
         buf.truncate(0)
         for row in rows:
-            writer.writerow([row.get(h, "") for h in headers])
+            writer.writerow([neutralize_formula(row.get(h, "")) for h in headers])
             yield buf.getvalue()
             buf.seek(0)
             buf.truncate(0)

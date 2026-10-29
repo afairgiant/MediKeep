@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Sign out other devices",
-      "confirmBody": "Every other browser and device signed in to your account will be signed out. You stay signed in here.",
+      "confirmBody": "Every other browser and device signed in to your account will be signed out, and remembered browsers will ask for a code again. You stay signed in here.",
       "confirmTitle": "Sign out other devices?",
       "description": "Sign out of MediKeep everywhere except this browser.",
       "title": "Other devices"
+    },
+    "trustedDevices": {
+      "added": "Remembered {{date}}",
+      "count_one": "{{count}} browser signs in without a code.",
+      "count_other": "{{count}} browsers sign in without a code.",
+      "expires": "Remembered until {{date}}",
+      "forget": "Forget",
+      "forgetAll": "Forget all",
+      "forgetLabel": "Forget {{name}}",
+      "intro": "These browsers can sign in with your password alone until the date shown. Forget one and it asks for a code at its next sign-in. Changing your password or signing out other devices forgets them all.",
+      "lastUsed": "Last used {{date}}",
+      "loadFailed": "Could not load your remembered devices.",
+      "manage": "Manage",
+      "none": "No browser skips the code step.",
+      "title": "Remembered devices"
     },
     "twoFactor": {
       "backupCodes": {

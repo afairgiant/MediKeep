@@ -172,7 +172,7 @@ authErrorText(tAuth, caughtError, t('security.twoFactor.failed'));
 lastAttemptWarning(tAuth, result.data /* or caughtError.data */);
 ```
 
-A new `AuthErrorCode` needs an `auth:errors` key in all 13 locales. Two-factor sign-in copy is under `auth:login.twoFactor.*`; the Settings copy is under `settings:security.twoFactor.*` and `settings:security.sessions.*`, and its toasts under `notifications:toasts.security.*`.
+A new `AuthErrorCode` needs an `auth:errors` key in all 13 locales. Two-factor sign-in copy is under `auth:login.twoFactor.*`; the Settings copy is under `settings:security.twoFactor.*`, `settings:security.trustedDevices.*` and `settings:security.sessions.*`, and its toasts under `notifications:toasts.security.*`. Browser names built from a user agent ("Firefox on Windows") use `common:device.*` through the `useDeviceName` hook.
 
 The admin side lives in the `admin` namespace: audit-log action names under `auditLog.actions.<action>` (one per `ActionType`), failed sign-in reasons under `auditLog.failureReasons.<reason>`, and the User Management two-factor column, menu items and reset dialog under `users.twoFactor.*`, `users.resetTwoFactor`, `users.clearLockout` and `users.resetTwoFactorModal.*`. A new `ActionType` or `LoginFailureReason` needs its key in all 13 locales; the components fall back to the raw value. Security notification events need `notifications:events.<event_type>.name` and `.description`.
 

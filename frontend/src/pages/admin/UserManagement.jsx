@@ -45,6 +45,7 @@ import {
   IconLockOpen,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import DeviceLabel from '../../components/admin/DeviceLabel';
 import FailedSignInLabel from '../../components/admin/FailedSignInLabel';
 import ResetTwoFactorModal from '../../components/admin/ResetTwoFactorModal';
 import { adminApiService } from '../../services/api/adminApi';
@@ -1059,6 +1060,9 @@ const UserManagement = () => {
                     <Table.Th>
                       {t('users.loginHistoryModal.ipAddress', 'IP Address')}
                     </Table.Th>
+                    <Table.Th>
+                      {t('users.loginHistoryModal.device', 'Device')}
+                    </Table.Th>
                     <Table.Th>{t('shared:tabs.details', 'Details')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -1073,6 +1077,9 @@ const UserManagement = () => {
                           {entry.ip_address ||
                             t('users.loginHistoryModal.notAvailable', 'N/A')}
                         </Code>
+                      </Table.Td>
+                      <Table.Td>
+                        <DeviceLabel userAgent={entry.user_agent} />
                       </Table.Td>
                       <Table.Td>
                         {entry.action === 'login_failed' ? (

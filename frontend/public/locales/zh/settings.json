@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "退出其他设备",
-      "confirmBody": "所有其他已登录您账户的浏览器和设备都将退出登录。您在此处仍保持登录。",
+      "confirmBody": "所有其他已登录您账户的浏览器和设备都将退出登录，已记住的浏览器将再次要求输入验证码。您在此处仍保持登录。",
       "confirmTitle": "退出其他设备？",
       "description": "在除此浏览器以外的所有地方退出 MediKeep。",
       "title": "其他设备"
+    },
+    "trustedDevices": {
+      "added": "记住于 {{date}}",
+      "count_one": "{{count}} 个浏览器无需验证码即可登录。",
+      "count_other": "{{count}} 个浏览器无需验证码即可登录。",
+      "expires": "记住至 {{date}}",
+      "forget": "忘记",
+      "forgetAll": "全部忘记",
+      "forgetLabel": "忘记 {{name}}",
+      "intro": "在显示的日期之前，这些浏览器仅凭密码即可登录。忘记某个浏览器后，它在下次登录时会要求输入验证码。更改密码或退出其他设备会忘记所有浏览器。",
+      "lastUsed": "上次使用：{{date}}",
+      "loadFailed": "无法加载已记住的设备。",
+      "manage": "管理",
+      "none": "没有浏览器跳过验证码步骤。",
+      "title": "已记住的设备"
     },
     "twoFactor": {
       "backupCodes": {

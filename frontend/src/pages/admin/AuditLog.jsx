@@ -33,6 +33,7 @@ import {
   IconExternalLink,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import DeviceLabel from '../../components/admin/DeviceLabel';
 import FailedSignInLabel from '../../components/admin/FailedSignInLabel';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -449,6 +450,9 @@ const AuditLog = () => {
                       {t('shared:labels.description', 'Description')}
                     </Table.Th>
                     <Table.Th>
+                      {t('auditLog.tableHeaders.device', 'Device')}
+                    </Table.Th>
+                    <Table.Th>
                       {t('auditLog.tableHeaders.recordId', 'Record ID')}
                     </Table.Th>
                   </Table.Tr>
@@ -520,6 +524,9 @@ const AuditLog = () => {
                             </Tooltip>
                           </Table.Td>
                           <Table.Td>
+                            <DeviceLabel userAgent={entry.user_agent} />
+                          </Table.Td>
+                          <Table.Td>
                             {link ? (
                               <Tooltip
                                 label={t(
@@ -559,7 +566,7 @@ const AuditLog = () => {
                     })
                   ) : (
                     <Table.Tr>
-                      <Table.Td colSpan={6}>
+                      <Table.Td colSpan={7}>
                         <Center py="xl">
                           <Stack align="center">
                             <ThemeIcon size="xl" variant="light" color="gray">

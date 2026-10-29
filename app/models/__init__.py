@@ -48,6 +48,7 @@ from .injuries import (
     InjuryType,
 )
 from .mfa import (
+    TrustedDevice,
     UserBackupCode,
     UserTotp,
 )
@@ -104,6 +105,7 @@ __all__ = [
     "UserTag",
     "UserTotp",
     "UserBackupCode",
+    "TrustedDevice",
     "SystemSetting",
     "Patient",
     "PatientPhoto",

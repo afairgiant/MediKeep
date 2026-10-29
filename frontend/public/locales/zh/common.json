@@ -100,6 +100,10 @@
       "icd10": "ICD-10"
     }
   },
+  "device": {
+    "name": "{{os}} 上的 {{browser}}",
+    "unknown": "未知浏览器"
+  },
   "emergencyContacts": {
     "actions": {
       "addNew": "添加紧急联系人"

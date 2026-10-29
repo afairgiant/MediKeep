@@ -88,6 +88,7 @@
     "system": "Système",
     "tableHeaders": {
       "action": "Action",
+      "device": "Appareil",
       "entityType": "Type d'entité",
       "recordId": "ID de l'entrée",
       "timestamp": "Horodatage"
@@ -747,6 +748,7 @@
     "loginHistory": "Historique de connexion",
     "loginHistoryModal": {
       "dateTime": "Date & Heure",
+      "device": "Appareil",
       "ipAddress": "Adresse IP",
       "noHistory": "Aucun historique de connexion trouvé",
       "notAvailable": "N/A",

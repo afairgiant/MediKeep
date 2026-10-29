@@ -532,6 +532,7 @@ identity provider is responsible for its own multi-factor checks.
 | Variable             | Type    | Default    | Description |
 | -------------------- | ------- | ---------- | ----------- |
 | `TWO_FACTOR_ENABLED` | boolean | `true`     | Emergency switch. `false` lets users who turned on two-factor sign in with their password alone, and stops anyone turning it on. Accepts true/false, 1/0, yes/no, on/off; any other value stops the container at startup |
+| `TWO_FACTOR_REMEMBER_DAYS` | integer | `30` | How long "Don't ask again on this browser" lasts after a code is entered. `0` removes the option and stops honouring browsers remembered before. 0 to 365; anything else stops the container at startup |
 | `TOTP_ISSUER`        | string  | `MediKeep` | Name shown next to the account in authenticator apps; useful when you run more than one instance |
 | `MFA_SALT`           | string  | *(derived from `SECRET_KEY`)* | Salt for encrypting authenticator secrets. Leave unset unless you have a reason to pin it |
 

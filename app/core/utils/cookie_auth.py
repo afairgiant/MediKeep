@@ -10,6 +10,20 @@ from fastapi.responses import Response
 from app.core.config import settings
 
 
+def set_cookie(response: Response, key: str, value: str, max_age_seconds: int) -> None:
+    """Set an HttpOnly cookie with the session cookie's path, domain and flags."""
+    response.set_cookie(
+        key=key,
+        value=value,
+        httponly=settings.AUTH_COOKIE_HTTPONLY,
+        secure=settings.AUTH_COOKIE_SECURE,
+        samesite=settings.AUTH_COOKIE_SAMESITE,
+        path=settings.AUTH_COOKIE_PATH,
+        domain=settings.AUTH_COOKIE_DOMAIN,
+        max_age=max_age_seconds,
+    )
+
+
 def set_auth_cookie(
     response: Response, token: str, max_age_minutes: int | None = None
 ) -> None:
@@ -23,16 +37,7 @@ def set_auth_cookie(
         if max_age_minutes is None
         else max_age_minutes
     )
-    response.set_cookie(
-        key=settings.AUTH_COOKIE_NAME,
-        value=token,
-        httponly=settings.AUTH_COOKIE_HTTPONLY,
-        secure=settings.AUTH_COOKIE_SECURE,
-        samesite=settings.AUTH_COOKIE_SAMESITE,
-        path=settings.AUTH_COOKIE_PATH,
-        domain=settings.AUTH_COOKIE_DOMAIN,
-        max_age=minutes * 60,
-    )
+    set_cookie(response, settings.AUTH_COOKIE_NAME, token, minutes * 60)
 
 
 def clear_auth_cookie(response: Response) -> None:

@@ -88,6 +88,7 @@
     "system": "System",
     "tableHeaders": {
       "action": "Åtgärd",
+      "device": "Enhet",
       "entityType": "Enhetstyp",
       "recordId": "Post-ID",
       "timestamp": "Tidsstämpel"
@@ -747,6 +748,7 @@
     "loginHistory": "Inloggningshistorik",
     "loginHistoryModal": {
       "dateTime": "Datum och tid",
+      "device": "Enhet",
       "ipAddress": "IP-adress",
       "noHistory": "Ingen inloggningshistorik hittades",
       "notAvailable": "Ej tillgänglig",

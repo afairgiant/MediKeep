@@ -226,10 +226,16 @@ username=johndoe&password=SecurePass123!
   "mfa_required": true,
   "mfa_ticket": "opaque-random-string",
   "methods": ["totp", "backup_code"],
-  "expires_in": 300
+  "expires_in": 300,
+  "remember_device_days": 30
 }
 ```
 
+- `remember_device_days` is `TWO_FACTOR_REMEMBER_DAYS`; 0 means the server does not
+  offer to remember the browser
+- A browser remembered for this user (see `remember_device` below) skips this step and
+  gets the token straight away. The `login` activity entry then has method
+  `trusted_device`, and the security log records `mfa_skipped_trusted_device`
 - **Note**: The response does NOT include a user object. Use `GET /users/me` to retrieve user details after login. The `session_timeout_minutes` reflects the user's session timeout preference (or system default if not set).
 - **Error Responses**:
   - `401`: Invalid credentials. Counts toward the failed-login limit
@@ -282,10 +288,19 @@ username=johndoe&password=SecurePass123!
 {
   "mfa_ticket": "opaque-random-string",
   "code": "123456",
-  "method": "totp"
+  "method": "totp",
+  "remember_device": false
 }
 ```
 
+- `remember_device` (optional, default false): after the code is accepted, also set
+  the `medapp_trusted_device_<user id>` cookie (HttpOnly, same path and domain as the
+  session cookie, lasting `TWO_FACTOR_REMEMBER_DAYS`) so this browser's next password
+  sign-ins skip the code. Each user has their own cookie, so people sharing a browser
+  do not replace each other's.
+  Ignored when `TWO_FACTOR_REMEMBER_DAYS=0`. A failure to remember never fails the
+  sign-in. The cookie is not a session: it is only read by `/auth/login`, and only
+  for the user it was issued to
 - `method` is `totp` (6-digit authenticator code; the previous and next 30-second
   codes are also accepted) or `backup_code` (`XXXX-XXXX`; case, spaces and hyphens
   are ignored)
@@ -653,6 +668,27 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 
 - Returns `{"backup_codes": [...]}`; the old codes stop working. Errors as for disable
 
+`GET /users/me/two-factor/trusted-devices`
+
+- Browsers that currently skip the code step, most recently used first:
+  `[{"id", "user_agent", "created_at", "last_used_at", "expires_at"}]`. `expires_at`
+  is when trust actually ends: the stored expiry or `created_at` plus the current
+  `TWO_FACTOR_REMEMBER_DAYS`, whichever is earlier
+- A device stops being trusted when it expires, when `TWO_FACTOR_REMEMBER_DAYS` is
+  shortened below its age or set to 0, and whenever the user's `session_version` is
+  raised (password change, sign out other sessions, two-factor turned off or reset,
+  deactivation). Turning two-factor off also deletes them
+
+`DELETE /users/me/two-factor/trusted-devices/{id}`
+
+- `204`; that browser asks for a code at its next sign-in. `404` when the device is
+  not the caller's. Recorded as `trusted_device_removed` in the security log
+
+`DELETE /users/me/two-factor/trusted-devices`
+
+- `204`; every browser asks for a code at its next sign-in. Recorded as
+  `trusted_devices_cleared` in the security log
+
 ### Sign Out Other Sessions
 
 `POST /users/me/sessions/revoke-others`
@@ -660,7 +696,7 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 - **Authentication**: Yes
 - Ends every other session of the caller; the response sets a fresh cookie so this
   one continues. Recorded as `sessions_revoked`, and sends the `sessions_revoked`
-  notification
+  notification. Remembered browsers, this one included, ask for a code again
 
 ### Get User Preferences
 
@@ -6635,8 +6671,12 @@ Base path: `/api/v1/admin/user-management`. Admin only; a non-admin gets `403`.
 
 ### 15.10 Activity Log
 
-Base path: `/api/v1/admin/activity-log`. Each entry carries `failure_reason`, set on
-`login_failed` entries only.
+Base path: `/api/v1/admin/activity-log`. Each entry carries `ip_address`, `user_agent`
+(as the client sent it, null when none was recorded) and `failure_reason`, set on
+`login_failed` entries only. The CSV export (`GET /export`) ends with `IP Address` and
+`User Agent` columns. In this and every other admin CSV export, a text cell starting
+with `=`, `+`, `-`, `@`, tab or carriage return (other than a plain number) is
+prefixed with `'` so spreadsheet apps do not run it as a formula.
 
 **Failed sign-ins** are recorded as `login_failed` with `event_metadata`
 `{"reason": ..., "method": ...}`:

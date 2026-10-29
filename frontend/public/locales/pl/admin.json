@@ -88,6 +88,7 @@
     "system": "System",
     "tableHeaders": {
       "action": "Działanie",
+      "device": "Urządzenie",
       "entityType": "Typ encji",
       "recordId": "ID rekordu",
       "timestamp": "Znacznik czasowy"
@@ -747,6 +748,7 @@
     "loginHistory": "Historia logowań",
     "loginHistoryModal": {
       "dateTime": "Data i godzina",
+      "device": "Urządzenie",
       "ipAddress": "Adres IP",
       "noHistory": "Nie znaleziono historii logowań",
       "notAvailable": "N/D",

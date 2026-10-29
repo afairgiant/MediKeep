@@ -109,6 +109,8 @@ def _derive_salt(purpose: str) -> str:
     return salt_from_env
 
 
+MAX_TWO_FACTOR_REMEMBER_DAYS = 365
+
 # Raw values of auth flags that _strict_bool() could not parse, keyed by variable
 # name. Populated at class definition time and reported by
 # validate_auth_mode_config() at startup - never raised from here, because a
@@ -437,6 +439,9 @@ class Settings:  # App Info
     # Operator kill switch: false lets enrolled users sign in with a password alone
     TWO_FACTOR_ENABLED: bool = _strict_bool("TWO_FACTOR_ENABLED", default=True)
     TOTP_ISSUER: str = os.getenv("TOTP_ISSUER", "MediKeep").strip() or "MediKeep"
+    # How long a browser may skip the second sign-in step; 0 turns the option off
+    TWO_FACTOR_REMEMBER_DAYS: int = int(os.getenv("TWO_FACTOR_REMEMBER_DAYS", "30"))
+    TRUSTED_DEVICE_COOKIE_NAME: str = "medapp_trusted_device"
 
     # Snapshot of what the two calls above could not parse. An attribute rather
     # than a module global so it is patchable like every other setting, and read
@@ -700,6 +705,7 @@ class Settings:  # App Info
         # fail the boot rather than the first login attempt.
         self.validate_sso_config()
         self.validate_login_throttle_config()
+        self.validate_two_factor_config()
 
     def validate_login_throttle_config(self) -> None:
         """Raise ValueError for a sign-in throttle setting that is out of range."""
@@ -714,6 +720,15 @@ class Settings:  # App Info
             raise ValueError(
                 "LOGIN_FAILED_WINDOW_MINUTES must be at least 1, "
                 f"got {self.LOGIN_FAILED_WINDOW_MINUTES}."
+            )
+
+    def validate_two_factor_config(self) -> None:
+        """Raise ValueError for a two-factor setting that is out of range."""
+        if not 0 <= self.TWO_FACTOR_REMEMBER_DAYS <= MAX_TWO_FACTOR_REMEMBER_DAYS:
+            raise ValueError(
+                f"TWO_FACTOR_REMEMBER_DAYS must be between 0 and "
+                f"{MAX_TWO_FACTOR_REMEMBER_DAYS} (0 turns the option off), "
+                f"got {self.TWO_FACTOR_REMEMBER_DAYS}."
             )
 
     def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:

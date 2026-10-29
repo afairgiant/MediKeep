@@ -82,6 +82,9 @@ const mockFilters = {
   users: [{ value: 1, label: 'admin' }],
 };
 
+const FIREFOX =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0';
+
 const mockData = {
   items: [
     {
@@ -95,6 +98,7 @@ const mockData = {
       description: 'Created patient record for John Doe',
       timestamp: '2024-01-15T10:30:00',
       ip_address: '127.0.0.1',
+      user_agent: FIREFOX,
     },
     {
       id: 2,
@@ -107,6 +111,7 @@ const mockData = {
       description: 'Deleted medication record',
       timestamp: '2024-01-15T09:00:00',
       ip_address: '127.0.0.1',
+      user_agent: FIREFOX,
     },
   ],
   total: 2,
@@ -334,6 +339,36 @@ describe('AuditLog', () => {
         expect.objectContaining({ page: 2 })
       );
     });
+  });
+});
+
+describe('AuditLog device column', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetActivityLogFilters.mockResolvedValue(mockFilters);
+  });
+
+  it('names the device, keeping the raw user agent on hover', async () => {
+    mockGetActivityLog.mockResolvedValue(mockData);
+    renderAuditLog();
+
+    expect(await screen.findByText('Device')).toBeInTheDocument();
+    for (const cell of await screen.findAllByText('device.name')) {
+      expect(cell).toHaveAttribute('title', FIREFOX);
+    }
+  });
+
+  it('shows a dash when no user agent was recorded', async () => {
+    mockGetActivityLog.mockResolvedValue({
+      ...mockData,
+      items: [{ ...mockData.items[0], user_agent: null }],
+      total: 1,
+    });
+    renderAuditLog();
+
+    await screen.findByText('Created patient record for John Doe');
+    expect(screen.queryByText('device.name')).not.toBeInTheDocument();
+    expect(screen.getByText('-')).toBeInTheDocument();
   });
 });
 

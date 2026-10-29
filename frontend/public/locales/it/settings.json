@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Disconnetti gli altri dispositivi",
-      "confirmBody": "Tutti gli altri browser e dispositivi connessi al tuo account verranno disconnessi. Qui rimarrai connesso.",
+      "confirmBody": "Tutti gli altri browser e dispositivi connessi al tuo account verranno disconnessi, e i browser memorizzati chiederanno di nuovo un codice. Qui rimarrai connesso.",
       "confirmTitle": "Disconnettere gli altri dispositivi?",
       "description": "Esci da MediKeep ovunque tranne che in questo browser.",
       "title": "Altri dispositivi"
+    },
+    "trustedDevices": {
+      "added": "Memorizzato il {{date}}",
+      "count_one": "{{count}} browser accede senza codice.",
+      "count_other": "{{count}} browser accedono senza codice.",
+      "expires": "Memorizzato fino al {{date}}",
+      "forget": "Dimentica",
+      "forgetAll": "Dimentica tutti",
+      "forgetLabel": "Dimentica {{name}}",
+      "intro": "Questi browser possono accedere solo con la tua password fino alla data indicata. Se ne dimentichi uno, chiederà un codice al prossimo accesso. Cambiare la password o disconnettere gli altri dispositivi li dimentica tutti.",
+      "lastUsed": "Ultimo utilizzo: {{date}}",
+      "loadFailed": "Impossibile caricare i dispositivi memorizzati.",
+      "manage": "Gestisci",
+      "none": "Nessun browser salta il passaggio del codice.",
+      "title": "Dispositivi memorizzati"
     },
     "twoFactor": {
       "backupCodes": {

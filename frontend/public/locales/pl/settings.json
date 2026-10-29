@@ -163,10 +163,27 @@
     },
     "sessions": {
       "button": "Wyloguj inne urządzenia",
-      "confirmBody": "Wszystkie inne przeglądarki i urządzenia zalogowane na Twoje konto zostaną wylogowane. Tutaj pozostaniesz zalogowany.",
+      "confirmBody": "Wszystkie inne przeglądarki i urządzenia zalogowane na Twoje konto zostaną wylogowane, a zapamiętane przeglądarki ponownie poproszą o kod. Tutaj pozostaniesz zalogowany.",
       "confirmTitle": "Wylogować inne urządzenia?",
       "description": "Wyloguj się z MediKeep wszędzie poza tą przeglądarką.",
       "title": "Inne urządzenia"
+    },
+    "trustedDevices": {
+      "added": "Zapamiętano {{date}}",
+      "count_few": "{{count}} przeglądarki logują się bez kodu.",
+      "count_many": "{{count}} przeglądarek loguje się bez kodu.",
+      "count_one": "{{count}} przeglądarka loguje się bez kodu.",
+      "count_other": "{{count}} przeglądarki logują się bez kodu.",
+      "expires": "Zapamiętane do {{date}}",
+      "forget": "Zapomnij",
+      "forgetAll": "Zapomnij wszystkie",
+      "forgetLabel": "Zapomnij {{name}}",
+      "intro": "Te przeglądarki mogą logować się samym hasłem do wskazanej daty. Jeśli zapomnisz którąś, przy następnym logowaniu poprosi o kod. Zmiana hasła lub wylogowanie innych urządzeń zapomina je wszystkie.",
+      "lastUsed": "Ostatnio użyto {{date}}",
+      "loadFailed": "Nie udało się wczytać zapamiętanych urządzeń.",
+      "manage": "Zarządzaj",
+      "none": "Żadna przeglądarka nie pomija kroku z kodem.",
+      "title": "Zapamiętane urządzenia"
     },
     "twoFactor": {
       "backupCodes": {

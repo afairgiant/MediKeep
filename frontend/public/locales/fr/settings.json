@@ -163,10 +163,25 @@
     },
     "sessions": {
       "button": "Déconnecter les autres appareils",
-      "confirmBody": "Tous les autres navigateurs et appareils connectés à votre compte seront déconnectés. Vous restez connecté ici.",
+      "confirmBody": "Tous les autres navigateurs et appareils connectés à votre compte seront déconnectés, et les navigateurs mémorisés demanderont de nouveau un code. Vous restez connecté ici.",
       "confirmTitle": "Déconnecter les autres appareils ?",
       "description": "Se déconnecter de MediKeep partout sauf dans ce navigateur.",
       "title": "Autres appareils"
+    },
+    "trustedDevices": {
+      "added": "Mémorisé le {{date}}",
+      "count_one": "{{count}} navigateur se connecte sans code.",
+      "count_other": "{{count}} navigateurs se connectent sans code.",
+      "expires": "Mémorisé jusqu'au {{date}}",
+      "forget": "Oublier",
+      "forgetAll": "Tout oublier",
+      "forgetLabel": "Oublier {{name}}",
+      "intro": "Ces navigateurs peuvent se connecter avec votre seul mot de passe jusqu'à la date indiquée. Si vous en oubliez un, il demandera un code à sa prochaine connexion. Changer votre mot de passe ou déconnecter les autres appareils les oublie tous.",
+      "lastUsed": "Dernière utilisation : {{date}}",
+      "loadFailed": "Impossible de charger vos appareils mémorisés.",
+      "manage": "Gérer",
+      "none": "Aucun navigateur ne saute l'étape du code.",
+      "title": "Appareils mémorisés"
     },
     "twoFactor": {
       "backupCodes": {

@@ -94,7 +94,8 @@ describe('Login with two-factor', () => {
     expect(completeTwoFactorLogin).toHaveBeenCalledWith(
       'ticket-1',
       '123456',
-      'totp'
+      'totp',
+      false
     );
     expect(notifyWarning).not.toHaveBeenCalled();
   });
@@ -151,6 +152,33 @@ describe('Login with two-factor', () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText('shared:labels.password')).toHaveValue('');
     expect(screen.getByLabelText('shared:labels.username')).toHaveValue('jo');
+  });
+
+  test('remembering the browser is passed on with the code', async () => {
+    login.mockResolvedValue({ ...CHALLENGE, rememberDeviceDays: 30 });
+    completeTwoFactorLogin.mockResolvedValue({
+      success: true,
+      mustChangePassword: false,
+      backupCodesRemaining: null,
+    });
+    renderLogin();
+    await signInWithPassword();
+
+    await userEvent.click(
+      await screen.findByRole('checkbox', {
+        name: 'login.twoFactor.rememberDevice',
+      })
+    );
+    await typeCode('123456');
+
+    await waitFor(() =>
+      expect(completeTwoFactorLogin).toHaveBeenCalledWith(
+        'ticket-1',
+        '123456',
+        'totp',
+        true
+      )
+    );
   });
 
   test('back returns to the password form without an error', async () => {

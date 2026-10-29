@@ -28,6 +28,9 @@ vi.mock('../../services/api/securityApi', () => ({
   disableTwoFactor: vi.fn(),
   regenerateBackupCodes: vi.fn(),
   revokeOtherSessions: vi.fn(),
+  getTrustedDevices: vi.fn(() => Promise.resolve([])),
+  forgetTrustedDevice: vi.fn(),
+  forgetAllTrustedDevices: vi.fn(),
 }));
 
 vi.mock('../../utils/notifyTranslated', () => ({
@@ -71,6 +74,24 @@ beforeEach(() => {
 });
 
 describe('TwoFactorSettings status', () => {
+  test('lists remembered devices only while two-factor is on', async () => {
+    vi.mocked(getTwoFactorStatus).mockResolvedValue(ON);
+    render(<TwoFactorSettings />);
+
+    expect(
+      await screen.findByText('security.trustedDevices.title')
+    ).toBeInTheDocument();
+  });
+
+  test('has no remembered devices row while two-factor is off', async () => {
+    render(<TwoFactorSettings />);
+
+    await screen.findByRole('button', { name: 'security.twoFactor.enable' });
+    expect(
+      screen.queryByText('security.trustedDevices.title')
+    ).not.toBeInTheDocument();
+  });
+
   test('offers to turn two-factor on when it is off', async () => {
     render(<TwoFactorSettings />);
 
@@ -372,7 +393,8 @@ describe('OtherSessionsSetting', () => {
 
   test('signs out other devices after confirming', async () => {
     vi.mocked(revokeOtherSessions).mockResolvedValue({});
-    render(<OtherSessionsSetting />);
+    const onSignedOut = vi.fn();
+    render(<OtherSessionsSetting onSignedOut={onSignedOut} />);
 
     await confirmSignOut();
 
@@ -382,11 +404,13 @@ describe('OtherSessionsSetting', () => {
       )
     );
     expect(revokeOtherSessions).toHaveBeenCalledTimes(1);
+    expect(onSignedOut).toHaveBeenCalledTimes(1);
   });
 
   test('a failure is reported', async () => {
     vi.mocked(revokeOtherSessions).mockRejectedValue(new Error('down'));
-    render(<OtherSessionsSetting />);
+    const onSignedOut = vi.fn();
+    render(<OtherSessionsSetting onSignedOut={onSignedOut} />);
 
     await confirmSignOut();
 
@@ -395,5 +419,6 @@ describe('OtherSessionsSetting', () => {
         'notifications:toasts.security.otherSessionsFailed'
       )
     );
+    expect(onSignedOut).not.toHaveBeenCalled();
   });
 });

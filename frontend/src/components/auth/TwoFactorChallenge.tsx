@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Anchor,
   Button,
+  Checkbox,
   Group,
   PinInput,
   Stack,
@@ -19,9 +20,12 @@ import type {
 
 interface TwoFactorChallengeProps {
   methods: TwoFactorMethod[];
+  /** 0 hides the option to remember this browser. */
+  rememberDeviceDays?: number;
   onVerify: (
     code: string,
-    method: TwoFactorMethod
+    method: TwoFactorMethod,
+    rememberDevice: boolean
   ) => Promise<TwoFactorLoginResult>;
   /** The ticket is gone; the user must enter their password again. */
   onExpired: () => void;
@@ -31,6 +35,7 @@ interface TwoFactorChallengeProps {
 /** Second step of a password sign-in: an authenticator code or a backup code. */
 const TwoFactorChallenge = ({
   methods,
+  rememberDeviceDays = 0,
   onVerify,
   onExpired,
   onCancel,
@@ -40,6 +45,7 @@ const TwoFactorChallenge = ({
     methods.includes('totp') ? 'totp' : 'backup_code'
   );
   const [code, setCode] = useState('');
+  const [rememberDevice, setRememberDevice] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<{
     message: string;
@@ -64,7 +70,7 @@ const TwoFactorChallenge = ({
     setSubmitting(true);
     setError(null);
     try {
-      const result = await onVerify(value, method);
+      const result = await onVerify(value, method, rememberDevice);
       if (result.success) return;
       if (result.errorCode === 'mfa_ticket_invalid') {
         onExpired();
@@ -111,6 +117,19 @@ const TwoFactorChallenge = ({
             message={authErrorCopy(t, error.code, error.message)}
             warning={error.warning}
             testId="two-factor-error"
+          />
+        )}
+
+        {/* Above the code, which submits itself on the last digit */}
+        {rememberDeviceDays > 0 && (
+          <Checkbox
+            label={t('login.twoFactor.rememberDevice', {
+              count: rememberDeviceDays,
+            })}
+            description={t('login.twoFactor.rememberDeviceHint')}
+            checked={rememberDevice}
+            onChange={e => setRememberDevice(e.currentTarget.checked)}
+            disabled={submitting}
           />
         )}
 

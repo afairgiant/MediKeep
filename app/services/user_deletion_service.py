@@ -16,6 +16,7 @@ from app.models.models import (
     Invitation,
     Patient,
     PatientShare,
+    TrustedDevice,
     User,
     UserBackupCode,
     UserPreferences,
@@ -88,6 +89,11 @@ class UserDeletionService:
         deletion_stats["deleted_records"]["backup_codes"] = (
             db.query(UserBackupCode)
             .filter(UserBackupCode.user_id == user_id)
+            .delete(synchronize_session=False)
+        )
+        deletion_stats["deleted_records"]["trusted_devices"] = (
+            db.query(TrustedDevice)
+            .filter(TrustedDevice.user_id == user_id)
             .delete(synchronize_session=False)
         )
         deletion_stats["deleted_records"]["totp"] = (

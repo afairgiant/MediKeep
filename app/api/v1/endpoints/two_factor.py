@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -9,8 +9,10 @@ from app.api.deps import (
     BusinessLogicException,
     ConflictException,
     ForbiddenException,
+    NotFoundException,
     UnauthorizedException,
 )
+from app.core.config import settings
 from app.core.events import publish_from_thread
 from app.core.http.auth_codes import AuthErrorCode
 from app.core.logging.config import get_logger
@@ -36,10 +38,11 @@ from app.schemas.two_factor import (
     TotpConfirmRequest,
     TotpSetupRequest,
     TotpSetupResponse,
+    TrustedDeviceOut,
     TwoFactorStatus,
     TwoFactorVerifyRequest,
 )
-from app.services import two_factor_service
+from app.services import trusted_device_service, two_factor_service
 from app.services.auth_session import (
     complete_login,
     finish_password_login,
@@ -259,7 +262,7 @@ def verify_second_factor(
             BackupCodeUsedEvent(user_id=db_user.id, codes_remaining=remaining)
         )
 
-    return complete_login(
+    response = complete_login(
         db,
         db_user,
         request,
@@ -270,6 +273,9 @@ def verify_second_factor(
             {"backup_codes_remaining": remaining} if remaining is not None else None
         ),
     )
+    if body.remember_device and settings.TWO_FACTOR_REMEMBER_DAYS:
+        trusted_device_service.remember(db, db_user, request, response)
+    return response
 
 
 def _reserve_settings_check(request: Request, user: User) -> None:
@@ -493,3 +499,58 @@ def regenerate_backup_codes(
         message="Backup codes regenerated",
     )
     return BackupCodesResponse(backup_codes=codes)
+
+
+@account_router.get(
+    "/two-factor/trusted-devices", response_model=List[TrustedDeviceOut]
+)
+def list_trusted_devices(
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Browsers that currently skip the second sign-in step, most recently used first."""
+    return [
+        TrustedDeviceOut.model_validate(device).model_copy(
+            update={"expires_at": trusted_device_service.expires_at(device)}
+        )
+        for device in trusted_device_service.list_devices(db, current_user)
+    ]
+
+
+@account_router.delete("/two-factor/trusted-devices/{device_id}", status_code=204)
+def forget_trusted_device(
+    device_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Ask for a code again on that browser's next sign-in. 404 if it is not yours."""
+    if not trusted_device_service.forget(db, current_user, device_id):
+        raise NotFoundException(message="Device not found", request=request)
+    log_security_event(
+        logger,
+        "trusted_device_removed",
+        request,
+        f"Remembered device removed for: {current_user.username}",
+        user_id=current_user.id,
+        username=current_user.username,
+    )
+
+
+@account_router.delete("/two-factor/trusted-devices", status_code=204)
+def forget_all_trusted_devices(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Ask for a code again on every browser's next sign-in."""
+    trusted_device_service.forget_all(db, current_user)
+    db.commit()
+    log_security_event(
+        logger,
+        "trusted_devices_cleared",
+        request,
+        f"All remembered devices removed for: {current_user.username}",
+        user_id=current_user.id,
+        username=current_user.username,
+    )
