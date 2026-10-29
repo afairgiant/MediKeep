@@ -147,7 +147,7 @@ MediKeep includes a built-in backup system for database protection.
 - **General** - **Check for updates** shows signed-in users when a newer MediKeep version is out, in the page footer and next to the version number in their settings. **Show release notes after an upgrade** opens the notes for the new version once for each user, the first time they sign in after an upgrade
 - **Users and sign-in** - whether people can create their own accounts from the login page, and the single sign-on status with a **Test SSO Connection** button
 - **Data and storage** - how long deleted files stay in the trash, and how long activity history and notification history are kept. Both history settings default to **Keep forever**; when set, a daily job deletes older entries, and older activity also disappears from the Audit Log and Recent Activity
-- **Backups** - the automatic backup schedule, how old a backup can get before clean-up removes it, and the minimum number to always keep
+- **Backups** - the automatic backup schedule (every few hours, daily, on chosen days of the week, or monthly), how old a backup can get before clean-up removes it, and the minimum number to always keep. Below the schedule, a preview shows the next three runs, the time zone they run in and, once a backup exists, roughly how many scheduled backups clean-up keeps and how much space they take. The estimate leaves out manual backups; because they also count toward the minimum, clean-up may keep fewer scheduled ones than shown
 - **Set by deployment** - values that can only be changed in `docker-compose.yml` or `.env`, shown read-only
 
 Changes are held until you click **Save changes** in the bar at the bottom of the page. **Discard** puts everything back.

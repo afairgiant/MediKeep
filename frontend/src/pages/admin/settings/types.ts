@@ -56,23 +56,40 @@ export interface AdminSettingsUpdateResponse {
 
 export type SchedulePreset =
   | 'disabled'
-  | 'every_6_hours'
-  | 'every_12_hours'
+  | 'interval'
   | 'daily'
-  | 'weekly';
+  | 'weekly'
+  | 'monthly';
 
+export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+
+// Number fields hold '' while the input is empty.
 export interface ScheduleDraft {
   preset: SchedulePreset;
   time_of_day: string;
-  day_of_week: string | null;
+  interval_hours: number | '';
+  days_of_week: DayOfWeek[];
+  day_of_month: number | '';
 }
 
 export interface ScheduleConfig extends ScheduleDraft {
+  interval_hours: number;
+  day_of_month: number;
   enabled: boolean;
   last_run_at: string | null;
   last_run_status: string | null;
   last_run_error: string | null;
   next_run_at: string | null;
+  upcoming_runs: string[];
+  timezone: string;
+}
+
+export interface SchedulePreview {
+  upcoming_runs: string[];
+  timezone: string;
+  latest_backup_size_bytes: number | null;
+  retained_count: number | null;
+  estimated_bytes: number | null;
 }
 
 export interface SsoConfig {
@@ -84,3 +101,7 @@ export interface SsoConfig {
 }
 
 export type FieldError = { code: 'range' } | { code: 'minAboveMax' };
+
+export type ScheduleError =
+  | { code: 'range'; min: number; max: number }
+  | { code: 'noDays' };

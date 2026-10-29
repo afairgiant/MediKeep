@@ -11,13 +11,19 @@ import type {
   FieldError,
   ScheduleConfig,
   ScheduleDraft,
+  ScheduleError,
+  SchedulePreset,
   SettingKey,
   SettingsMap,
   SettingValue,
   SettingWarning,
   SsoConfig,
 } from './types';
-import { isTimedPreset } from './useScheduleLabels';
+import {
+  DAY_OF_MONTH_RANGE,
+  INTERVAL_HOURS_RANGE,
+  usesTimeOfDay,
+} from './useScheduleLabels';
 
 // 'schedule' means settings were saved first; 'scheduleOnly' means nothing else was sent.
 export type SaveError = {
@@ -42,17 +48,60 @@ const toDraft = (settings: SettingsMap): DraftMap =>
 const toScheduleDraft = (schedule: ScheduleConfig): ScheduleDraft => ({
   preset: schedule.preset,
   time_of_day: schedule.time_of_day,
-  day_of_week: schedule.day_of_week,
+  interval_hours: schedule.interval_hours,
+  days_of_week: schedule.days_of_week,
+  day_of_month: schedule.day_of_month,
 });
 
+const PRESET_FIELD: Partial<
+  Record<SchedulePreset, 'interval_hours' | 'days_of_week' | 'day_of_month'>
+> = {
+  interval: 'interval_hours',
+  weekly: 'days_of_week',
+  monthly: 'day_of_month',
+};
+
+const FIELD_RANGE = {
+  interval_hours: INTERVAL_HOURS_RANGE,
+  day_of_month: DAY_OF_MONTH_RANGE,
+};
+
+/** Only the fields the draft's preset uses count as changes. */
 export const isScheduleChanged = (
   saved: ScheduleDraft,
   draft: ScheduleDraft
 ): boolean => {
   if (saved.preset !== draft.preset) return true;
-  if (isTimedPreset(draft.preset) && saved.time_of_day !== draft.time_of_day)
+  if (usesTimeOfDay(draft.preset) && saved.time_of_day !== draft.time_of_day)
     return true;
-  return draft.preset === 'weekly' && saved.day_of_week !== draft.day_of_week;
+  const field = PRESET_FIELD[draft.preset];
+  return !!field && String(saved[field]) !== String(draft[field]);
+};
+
+export const getScheduleError = (
+  draft: ScheduleDraft
+): ScheduleError | null => {
+  const field = PRESET_FIELD[draft.preset];
+  if (!field) return null;
+  if (field === 'days_of_week')
+    return draft.days_of_week.length === 0 ? { code: 'noDays' } : null;
+  const value = draft[field];
+  const range = FIELD_RANGE[field];
+  return typeof value !== 'number' || value < range.min || value > range.max
+    ? { code: 'range', ...range }
+    : null;
+};
+
+/** The schedule request body: the preset, its time and the one field it uses. */
+export const toSchedulePayload = (
+  draft: ScheduleDraft
+): Partial<ScheduleDraft> => {
+  const field = PRESET_FIELD[draft.preset];
+  return {
+    preset: draft.preset,
+    time_of_day: draft.time_of_day,
+    ...(field && { [field]: draft[field] }),
+  };
 };
 
 const validate = (
@@ -167,6 +216,12 @@ export const useAdminSettings = () => {
     [settings, draft]
   );
 
+  const scheduleError = useMemo(
+    () => (scheduleDraft ? getScheduleError(scheduleDraft) : null),
+    [scheduleDraft]
+  );
+  const canSave = Object.keys(errors).length === 0 && !scheduleError;
+
   const setValue = useCallback((key: SettingKey, value: SettingValue | '') => {
     setDraft(prev => (prev ? { ...prev, [key]: value } : prev));
     setResets(prev => {
@@ -201,7 +256,7 @@ export const useAdminSettings = () => {
 
   /** Saves settings first, then the schedule; resolves true when both succeeded. */
   const save = useCallback(async (): Promise<boolean> => {
-    if (!draft || Object.keys(errors).length > 0) return false;
+    if (!draft || !canSave) return false;
     setSaving(true);
     setSaveError(null);
     try {
@@ -229,20 +284,15 @@ export const useAdminSettings = () => {
         }
       }
       if (scheduleDirty && scheduleDraft && schedule) {
-        const payload: Partial<ScheduleDraft> = {
-          preset: scheduleDraft.preset,
-          time_of_day: scheduleDraft.time_of_day,
-        };
-        if (scheduleDraft.preset === 'weekly') {
-          payload.day_of_week = scheduleDraft.day_of_week;
-        }
         try {
+          const payload = toSchedulePayload(scheduleDraft);
           const response = (await adminApiService.updateAutoBackupSchedule(
             payload
           )) as { schedule?: Partial<ScheduleConfig> };
           applySchedule({
             ...schedule,
-            ...scheduleDraft,
+            // canSave guarantees the preset's own field holds a number.
+            ...(payload as Partial<ScheduleConfig>),
             ...response.schedule,
           });
         } catch (error) {
@@ -263,7 +313,7 @@ export const useAdminSettings = () => {
     }
   }, [
     draft,
-    errors,
+    canSave,
     dirtyKeys,
     resets,
     scheduleDirty,
@@ -293,6 +343,8 @@ export const useAdminSettings = () => {
     dirtyKeys,
     scheduleDirty,
     errors,
+    scheduleError,
+    canSave,
     unsavedCount: dirtyKeys.length + (scheduleDirty ? 1 : 0),
     load,
     setValue,

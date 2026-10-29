@@ -5,29 +5,33 @@ Provides admin-only endpoints for backup and restore operations.
 Phase 1 implementation: Basic manual backup functionality.
 """
 
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, StrictInt, model_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.api.v1.admin.csv_utils import stream_csv
+from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
 )
-from app.models.models import User
-from app.services.backup_scheduler_service import (
-    TIME_FORMAT_RE,
-    VALID_DAYS_OF_WEEK,
-    VALID_PRESETS,
-    ScheduleValidationError,
+from app.core.persisted_settings import (
+    KEY_BACKUP_MIN_COUNT,
+    KEY_BACKUP_RETENTION_DAYS,
+    PERSISTED_SETTINGS,
 )
+from app.models.models import User
+from app.services.backup_scheduler_service import clean_schedule
 from app.services.backup_service import BackupService
+
+_RETENTION_DAYS = PERSISTED_SETTINGS[KEY_BACKUP_RETENTION_DAYS]
+_MIN_COUNT = PERSISTED_SETTINGS[KEY_BACKUP_MIN_COUNT]
 
 logger = get_logger(__name__, "app")
 
@@ -51,43 +55,61 @@ class BackupResponse(BaseModel):
 class AutoBackupScheduleResponse(BaseModel):
     preset: str
     time_of_day: str
-    day_of_week: Optional[str] = None
+    interval_hours: int
+    days_of_week: List[str]
+    day_of_month: int
     enabled: bool
     last_run_at: Optional[str] = None
     last_run_status: Optional[str] = None
     last_run_error: Optional[str] = None
     next_run_at: Optional[str] = None
+    upcoming_runs: List[str] = []
+    timezone: str
 
 
 class AutoBackupScheduleUpdate(BaseModel):
     preset: str
     time_of_day: Optional[str] = None
-    day_of_week: Optional[str] = None
+    # Strict so a JSON true or 5.0 is rejected rather than read as a number.
+    interval_hours: Optional[StrictInt] = None
+    days_of_week: Optional[List[str]] = None
+    day_of_month: Optional[StrictInt] = None
+    _cleaned: dict = PrivateAttr(default_factory=dict)
 
-    @field_validator("preset")
-    @classmethod
-    def validate_preset(cls, v):
-        if v not in VALID_PRESETS:
-            raise ValueError(f"Must be one of: {', '.join(sorted(VALID_PRESETS))}")
-        return v
+    @model_validator(mode="after")
+    def validate_for_preset(self):
+        # ScheduleValidationError is a ValueError, so it becomes a 422.
+        self._cleaned = clean_schedule(
+            self.preset,
+            self.time_of_day,
+            self.interval_hours,
+            self.days_of_week,
+            self.day_of_month,
+        )
+        return self
 
-    @field_validator("time_of_day")
-    @classmethod
-    def validate_time_of_day(cls, v):
-        if v is None:
-            return v
-        if not TIME_FORMAT_RE.match(v):
-            raise ValueError("Must be in HH:MM format (24-hour)")
-        return v
+    def cleaned(self) -> dict:
+        """The validated fields for this preset, as clean_schedule() returns them."""
+        return self._cleaned
 
-    @field_validator("day_of_week")
-    @classmethod
-    def validate_day_of_week(cls, v):
-        if v is None:
-            return v
-        if v not in VALID_DAYS_OF_WEEK:
-            raise ValueError(f"Must be one of: {', '.join(sorted(VALID_DAYS_OF_WEEK))}")
-        return v
+
+class AutoBackupSchedulePreviewRequest(AutoBackupScheduleUpdate):
+    """A draft schedule plus draft retention settings; omitted settings use the saved ones."""
+
+    backup_retention_days: Optional[int] = Field(
+        None, ge=_RETENTION_DAYS.min_value, le=_RETENTION_DAYS.max_value
+    )
+    backup_min_count: Optional[int] = Field(
+        None, ge=_MIN_COUNT.min_value, le=_MIN_COUNT.max_value
+    )
+
+
+class AutoBackupSchedulePreviewResponse(BaseModel):
+    upcoming_runs: List[str]
+    timezone: str
+    latest_backup_size_bytes: Optional[int] = None
+    retained_count: Optional[int] = None
+    estimated_bytes: Optional[int] = None
 
 
 @router.post("/create-database", response_model=BackupResponse)
@@ -627,6 +649,44 @@ async def get_auto_backup_schedule(
     return AutoBackupScheduleResponse(**config)
 
 
+@router.post(
+    "/settings/schedule/preview", response_model=AutoBackupSchedulePreviewResponse
+)
+def preview_auto_backup_schedule(
+    preview_request: AutoBackupSchedulePreviewRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+) -> AutoBackupSchedulePreviewResponse:
+    """Upcoming runs and disk estimate for a draft schedule; saves nothing."""
+    from app.services.backup_scheduler_service import BackupSchedulerService
+
+    retention_days = preview_request.backup_retention_days
+    min_count = preview_request.backup_min_count
+    try:
+        preview = BackupSchedulerService.get_instance().preview_schedule(
+            preview_request.cleaned(),
+            retention_days=(
+                settings.BACKUP_RETENTION_DAYS
+                if retention_days is None
+                else retention_days
+            ),
+            min_count=settings.BACKUP_MIN_COUNT if min_count is None else min_count,
+            latest_backup_size=BackupService(db).latest_full_backup_size(),
+        )
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to preview auto-backup schedule",
+            e,
+            user_id=current_user.id,
+            exc_info=True,
+        )
+        raise HTTPException(status_code=500, detail="Failed to preview schedule")
+    return AutoBackupSchedulePreviewResponse(**preview)
+
+
 @router.post("/settings/schedule")
 async def update_auto_backup_schedule(
     schedule_update: AutoBackupScheduleUpdate,
@@ -638,11 +698,7 @@ async def update_auto_backup_schedule(
 
     try:
         scheduler_service = BackupSchedulerService.get_instance()
-        config = scheduler_service.update_schedule(
-            preset=schedule_update.preset,
-            time_of_day=schedule_update.time_of_day,
-            day_of_week=schedule_update.day_of_week,
-        )
+        config = scheduler_service.update_schedule(**schedule_update.cleaned())
 
         log_security_event(
             logger,
@@ -659,8 +715,6 @@ async def update_auto_backup_schedule(
             "schedule": config,
         }
 
-    except ScheduleValidationError as e:
-        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         log_endpoint_error(
             logger,

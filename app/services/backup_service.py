@@ -693,6 +693,19 @@ class BackupService:
             logger.error(f"Failed to get retention stats: {str(e)}")
             raise Exception(f"Failed to get retention stats: {str(e)}")
 
+    def latest_full_backup_size(self) -> Optional[int]:
+        """Bytes of the newest usable full backup, the kind a schedule makes; None if none."""
+        record = (
+            self.db.query(BackupRecord)
+            .filter(
+                BackupRecord.backup_type == "full",
+                BackupRecord.status.in_(USABLE_BACKUP_STATUSES),
+            )
+            .order_by(BackupRecord.created_at.desc())
+            .first()
+        )
+        return record.size_bytes if record else None
+
     async def cleanup_orphaned_files(self) -> Dict[str, Any]:
         """
         Clean up orphaned backup files (files that exist but aren't tracked in database).

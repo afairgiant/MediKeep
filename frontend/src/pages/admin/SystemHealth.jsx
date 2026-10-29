@@ -35,6 +35,7 @@ import DirectoryCard from '../../components/admin/DirectoryCard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useScheduleLabels } from './settings/useScheduleLabels';
 import './SystemHealth.css';
 
 const SSO_PROVIDER_LABELS = {
@@ -51,6 +52,7 @@ const USAGE_STATUS = {
 const SystemHealth = () => {
   const { t } = useTranslation(['admin', 'shared']);
   const { formatDate, formatDateTime } = useDateFormat();
+  const { describeSchedule } = useScheduleLabels();
   const [lastRefresh, setLastRefresh] = useState(null);
 
   // System Health Data with auto-refresh
@@ -62,7 +64,8 @@ const SystemHealth = () => {
   } = useAdminData({
     entityName: 'System Health',
     apiMethodsConfig: {
-      load: (signal, options) => adminApiService.getSystemHealth(signal, options),
+      load: (signal, options) =>
+        adminApiService.getSystemHealth(signal, options),
     },
     autoRefresh: true,
     refreshInterval: 30000,
@@ -77,7 +80,8 @@ const SystemHealth = () => {
   } = useAdminData({
     entityName: 'System Metrics',
     apiMethodsConfig: {
-      load: (signal, options) => adminApiService.getSystemMetrics(signal, options),
+      load: (signal, options) =>
+        adminApiService.getSystemMetrics(signal, options),
     },
     autoRefresh: true,
     refreshInterval: 30000,
@@ -314,22 +318,7 @@ const SystemHealth = () => {
                   />
                   <Text size="xs" c="green">
                     {t('health.scheduled', 'Scheduled: {{schedule}}', {
-                      schedule:
-                        scheduleSettings.preset === 'every_6_hours'
-                          ? t(
-                              'health.schedulePresets.every_6_hours',
-                              'Every 6 hours'
-                            )
-                          : scheduleSettings.preset === 'every_12_hours'
-                            ? t(
-                                'health.schedulePresets.every_12_hours',
-                                'Every 12 hours'
-                              )
-                            : scheduleSettings.preset === 'daily'
-                              ? t('health.schedulePresets.daily', 'Daily')
-                              : scheduleSettings.preset === 'weekly'
-                                ? t('shared:labels.weekly', 'Weekly')
-                                : scheduleSettings.preset,
+                      schedule: describeSchedule(scheduleSettings),
                     })}
                   </Text>
                 </Group>

@@ -462,7 +462,8 @@ MAX_FILE_SIZE=15728640  # 15MB
 | `BACKUP_AUTO_CLEANUP_ENABLED` | boolean | `false`     | **Delete old backups automatically**: after each scheduled backup, apply the retention settings above to all backups, including manual ones. Off by default so upgrading never deletes backups. Can be changed in **Admin > Settings > Backups** |
 
 Scheduled backups run in the time zone set by `TZ`, or the host's time zone when `TZ` is
-unset. Interval schedules (every 6 or 12 hours) count from when the last backup started,
+unset. The schedule is set in **Admin > Settings > Backups**: every N hours (1-168), daily,
+weekly on one or more days, or monthly on a day from 1 to 28. Interval schedules count from when the last backup started,
 or from when the schedule was saved if that is later, so a restart does not postpone the
 next one. If a scheduled backup was missed while the app was down, one backup runs about
 5 minutes after startup, unless the regular run comes sooner. Saving a schedule never

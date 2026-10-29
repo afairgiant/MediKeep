@@ -9,7 +9,7 @@ import { useBackupNotifications } from '../../hooks/useBackupNotifications';
 import { adminApiService } from '../../services/api/adminApi';
 import { downloadBlob, exportTimestamp } from '../../utils/downloadUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { isTimedPreset, useScheduleLabels } from './settings/useScheduleLabels';
+import { useScheduleLabels } from './settings/useScheduleLabels';
 import {
   Card,
   Table,
@@ -1455,11 +1455,7 @@ const RestorePreviewAffectedData = ({
 // Automatic backup summary; the schedule itself is edited on the settings page.
 const ScheduleSummary = ({ schedule }) => {
   const { t } = useTranslation(['admin', 'shared']);
-  const { presetData, dayData, nextRunText, lastRunText } = useScheduleLabels();
-
-  const presetLabel =
-    presetData.find(p => p.value === schedule.preset)?.label ?? schedule.preset;
-  const dayLabel = dayData.find(d => d.value === schedule.day_of_week)?.label;
+  const { describeSchedule, nextRunText, lastRunText } = useScheduleLabels();
   const nextRun = nextRunText(schedule);
   const lastRun = lastRunText(schedule);
 
@@ -1486,13 +1482,7 @@ const ScheduleSummary = ({ schedule }) => {
             </Group>
             {schedule.enabled && (
               <Text size="sm" c="dimmed">
-                {[
-                  presetLabel,
-                  schedule.preset === 'weekly' ? dayLabel : null,
-                  isTimedPreset(schedule.preset) ? schedule.time_of_day : null,
-                ]
-                  .filter(Boolean)
-                  .join(' \u00b7 ')}
+                {describeSchedule(schedule)}
               </Text>
             )}
             {nextRun && (

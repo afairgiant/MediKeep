@@ -163,7 +163,7 @@ const AdminSettingsPage = () => {
                 <UnsavedChangesBar
                   count={state.unsavedCount}
                   saving={state.saving}
-                  canSave={Object.keys(state.errors).length === 0}
+                  canSave={state.canSave}
                   onSave={handleSave}
                   onDiscard={state.discard}
                 />

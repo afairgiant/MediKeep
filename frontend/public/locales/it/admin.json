@@ -172,29 +172,42 @@
     "schedule": {
       "changeInSettings": "Modifica pianificazione e conservazione",
       "completedSuccessfully": "Completato con successo",
-      "dayOfWeek": "Giorno della settimana",
-      "dayOfWeekDesc": "In quale giorno deve essere eseguito il backup settimanale?",
-      "days": {
-        "fri": "Venerdì",
-        "mon": "Lunedì",
-        "sat": "Sabato",
-        "sun": "Domenica",
-        "thu": "Giovedì",
-        "tue": "Martedì",
-        "wed": "Mercoledì"
-      },
+      "dayOfMonth": "Giorno del mese",
+      "dayOfMonthDesc": "Fino al 28, così il backup viene eseguito ogni mese.",
+      "daysOfWeek": "Giorni della settimana",
+      "daysOfWeekDesc": "In quali giorni deve essere eseguito il backup?",
       "failed": "Fallito: {{error}}",
       "frequency": "Frequenza backup",
       "frequencyDesc": "Pianifica backup completi automatici (database + file)",
+      "intervalHours": "Esegui ogni",
+      "intervalHoursDesc": "Ore tra un backup e l'altro, fino a una settimana.",
       "lastBackup": "Ultimo backup:",
       "nextScheduledRun": "Prossima esecuzione pianificata",
+      "noDays": "Scegli almeno un giorno.",
       "presets": {
         "daily": "Giornaliero",
-        "every12Hours": "Ogni 12 ore",
-        "every6Hours": "Ogni 6 ore"
+        "interval": "Ogni N ore",
+        "monthly": "Mensile"
+      },
+      "preview": {
+        "cleanupOff": "La pulizia automatica è disattivata, quindi si accumulano finché non pulisci manualmente.",
+        "estimate_one": "La pulizia conserva circa {{count}} backup pianificato, circa {{size}}.",
+        "estimate_other": "La pulizia conserva circa {{count}} backup pianificati, circa {{size}}.",
+        "failed": "Impossibile caricare l'anteprima.",
+        "loading": "Aggiornamento anteprima",
+        "nextRuns": "Prossime esecuzioni: {{runs}}"
+      },
+      "summary": {
+        "daily": "Ogni giorno alle {{time}}",
+        "hourly": "Ogni ora",
+        "interval_one": "Ogni {{count}} ore",
+        "interval_other": "Ogni {{count}} ore",
+        "monthly": "Ogni mese il giorno {{day}} alle {{time}}",
+        "weekly": "{{days}} alle {{time}}"
       },
       "timeOfDay": "Ora del giorno",
       "timeOfDayDesc": "Quando deve essere eseguito il backup? (formato 24 ore)",
+      "timeZone": "Fuso orario: {{zone}}",
       "title": "Pianificazione backup automatico",
       "unknownError": "Errore sconosciuto"
     },
@@ -405,11 +418,6 @@
       "title": "Prestazioni dell'applicazione"
     },
     "scheduled": "Pianificato: {{schedule}}",
-    "schedulePresets": {
-      "daily": "Giornaliero",
-      "every_12_hours": "Ogni 12 ore",
-      "every_6_hours": "Ogni 6 ore"
-    },
     "services": {
       "adminInterface": "Interfaccia di amministrazione",
       "apiStatus": "Stato API",
@@ -612,7 +620,8 @@
     "title": "Impostazioni",
     "units": {
       "backups": "backup",
-      "days": "giorni"
+      "days": "giorni",
+      "hours": "ore"
     },
     "updates": {
       "releaseCheck": "Controlla aggiornamenti",

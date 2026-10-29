@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
+from itertools import islice
 from unittest.mock import ANY, AsyncMock, MagicMock, patch
 from zoneinfo import ZoneInfo
 
@@ -18,22 +19,25 @@ from app.services.backup_scheduler_service import (
     CATCH_UP_JOB_ID,
     DEFAULT_CONFIG,
     JOB_ID,
-    SETTING_KEY,
-    VALID_DAYS_OF_WEEK,
-    VALID_PRESETS,
     BackupSchedulerService,
+    ScheduleValidationError,
+    _config_from_stored,
+    _fire_times,
+    clean_schedule,
 )
 
 # Slack for the time that passes between building a trigger and asserting on it.
 CLOCK_TOLERANCE = timedelta(seconds=5)
 
 
-def _enabled_config(preset="every_6_hours", last_run_at=None):
+def _enabled_config(preset="interval", last_run_at=None, **fields):
     return {
         **DEFAULT_CONFIG,
+        "interval_hours": 6,
         "preset": preset,
         "enabled": True,
         "last_run_at": last_run_at,
+        **fields,
     }
 
 
@@ -109,16 +113,17 @@ class TestUpdateSchedule:
         service._scheduler.shutdown(wait=False)
 
     @pytest.mark.asyncio
-    async def test_update_to_every_6_hours(self, db_session):
+    async def test_update_to_interval(self, db_session):
         """Setting interval preset creates interval trigger."""
         service = BackupSchedulerService.get_instance()
         service._scheduler.start()
 
         with patch.object(service, "_load_config", return_value=dict(DEFAULT_CONFIG)):
             with patch.object(service, "_save_config"):
-                config = service.update_schedule(preset="every_6_hours")
+                config = service.update_schedule(preset="interval", interval_hours=3)
 
-        assert config["preset"] == "every_6_hours"
+        assert config["preset"] == "interval"
+        assert config["interval_hours"] == 3
         assert config["enabled"] is True
 
         job = service._scheduler.get_job(JOB_ID)
@@ -166,21 +171,23 @@ class TestUpdateSchedule:
             service.update_schedule(preset="daily", time_of_day="abc")
 
     @pytest.mark.asyncio
-    async def test_update_to_weekly_with_custom_day(self, db_session):
-        """Setting weekly preset with a custom day_of_week persists and creates a job."""
+    async def test_update_to_weekly_with_several_days(self, db_session):
+        """Days are stored Monday first without duplicates."""
         service = BackupSchedulerService.get_instance()
         service._scheduler.start()
 
         with patch.object(service, "_load_config", return_value=dict(DEFAULT_CONFIG)):
             with patch.object(service, "_save_config") as mock_save:
                 config = service.update_schedule(
-                    preset="weekly", time_of_day="05:00", day_of_week="wed"
+                    preset="weekly",
+                    time_of_day="05:00",
+                    days_of_week=["fri", "mon", "wed", "mon"],
                 )
 
         assert config["preset"] == "weekly"
         assert config["enabled"] is True
         assert config["time_of_day"] == "05:00"
-        assert config["day_of_week"] == "wed"
+        assert config["days_of_week"] == ["mon", "wed", "fri"]
         mock_save.assert_called_once()
 
         job = service._scheduler.get_job(JOB_ID)
@@ -192,7 +199,32 @@ class TestUpdateSchedule:
         """Invalid day_of_week raises ValueError."""
         service = BackupSchedulerService.get_instance()
         with pytest.raises(ValueError, match="Invalid day_of_week"):
-            service.update_schedule(preset="weekly", day_of_week="monday")
+            service.update_schedule(preset="weekly", days_of_week=["monday"])
+
+    def test_switching_preset_keeps_other_presets_fields(self):
+        """Switching weekly to daily and back must not lose the chosen days."""
+        service = BackupSchedulerService.get_instance()
+        stored = _enabled_config("weekly", days_of_week=["tue", "thu"])
+
+        with patch.object(service, "_load_config", return_value=stored):
+            with patch.object(service, "_save_config") as mock_save:
+                service.update_schedule(preset="daily")
+
+        assert mock_save.call_args.args[0]["days_of_week"] == ["tue", "thu"]
+
+    @pytest.mark.asyncio
+    async def test_response_includes_run_times_and_timezone(self, db_session):
+        service = BackupSchedulerService.get_instance()
+        service._scheduler.start()
+
+        with patch.object(service, "_load_config", return_value=dict(DEFAULT_CONFIG)):
+            with patch.object(service, "_save_config"):
+                config = service.update_schedule(preset="daily")
+
+        assert len(config["upcoming_runs"]) == 3
+        assert config["next_run_at"] == config["upcoming_runs"][0]
+        assert config["timezone"] == str(service._timezone)
+        service._scheduler.shutdown(wait=False)
 
 
 class TestTimezone:
@@ -223,7 +255,7 @@ class TestTimezone:
 
         assert service._scheduler.timezone == AsyncIOScheduler().timezone
 
-    @pytest.mark.parametrize("preset", ["daily", "weekly", "every_6_hours"])
+    @pytest.mark.parametrize("preset", ["interval", "daily", "weekly", "monthly"])
     def test_triggers_use_scheduler_timezone(self, preset):
         service = BackupSchedulerService.get_instance()
         trigger = service._build_trigger({**DEFAULT_CONFIG, "preset": preset})
@@ -263,7 +295,7 @@ class TestIntervalAnchoring:
         """Rebuilding the trigger later lands on the same run time."""
         service = BackupSchedulerService.get_instance()
         last_run = (datetime.now(timezone.utc) - timedelta(hours=11)).isoformat()
-        config = _enabled_config(preset="every_12_hours", last_run_at=last_run)
+        config = _enabled_config(last_run_at=last_run, interval_hours=12)
 
         first = _first_fire(service._build_trigger(config))
         after_restart = _first_fire(service._build_trigger(config))
@@ -349,6 +381,13 @@ class TestCatchUp:
         assert service._scheduler.get_job(CATCH_UP_JOB_ID) is not None
 
     @pytest.mark.asyncio
+    async def test_missed_monthly_run_catches_up(self, db_session):
+        service = BackupSchedulerService.get_instance()
+        await _start_with(service, _enabled_config("monthly", _ago(days=40)))
+
+        assert service._scheduler.get_job(CATCH_UP_JOB_ID) is not None
+
+    @pytest.mark.asyncio
     async def test_missed_weekly_run_catches_up(self, db_session):
         service = BackupSchedulerService.get_instance()
         await _start_with(service, _enabled_config("weekly", _ago(days=8)))
@@ -391,7 +430,7 @@ class TestCatchUp:
 
         with patch.object(service, "_load_config", return_value=stored):
             with patch.object(service, "_save_config"):
-                service.update_schedule(preset="every_6_hours")
+                service.update_schedule(preset="interval", interval_hours=6)
 
         assert service._scheduler.get_job(CATCH_UP_JOB_ID) is None
         next_run = service._scheduler.get_job(JOB_ID).next_run_time
@@ -466,7 +505,10 @@ class TestCatchUp:
         await _start_with(service, _enabled_config("daily", _ago(days=2)))
 
         catch_up = service._scheduler.get_job(CATCH_UP_JOB_ID).next_run_time
-        assert service._get_next_run_time() == catch_up.isoformat()
+        with patch.object(service, "_load_config", return_value=_enabled_config()):
+            schedule = service.get_schedule()
+        assert schedule["next_run_at"] == catch_up.isoformat()
+        assert schedule["upcoming_runs"][0] == catch_up.isoformat()
 
 
 class TestScheduleSave:
@@ -511,6 +553,210 @@ class TestScheduleSave:
         written = json.loads(mock_crud.set_setting.call_args.args[2])
         assert {k: written[k] for k in newer} == newer
         assert written["preset"] == "daily"
+
+
+class TestCleanSchedule:
+    """Per-preset validation shared by the service and the API."""
+
+    @pytest.mark.parametrize("hours", [0, 169, None])
+    def test_interval_hours_out_of_range(self, hours):
+        with pytest.raises(ScheduleValidationError, match="interval_hours"):
+            clean_schedule("interval", interval_hours=hours)
+
+    @pytest.mark.parametrize("hours", [1, 168])
+    def test_interval_hours_bounds_accepted(self, hours):
+        assert (
+            clean_schedule("interval", interval_hours=hours)["interval_hours"] == hours
+        )
+
+    @pytest.mark.parametrize("days", [None, []])
+    def test_weekly_needs_a_day(self, days):
+        with pytest.raises(ScheduleValidationError, match="at least one day"):
+            clean_schedule("weekly", days_of_week=days)
+
+    @pytest.mark.parametrize("day", [0, 29, 31, None])
+    def test_day_of_month_out_of_range(self, day):
+        with pytest.raises(ScheduleValidationError, match="day_of_month"):
+            clean_schedule("monthly", day_of_month=day)
+
+    def test_drops_fields_the_preset_does_not_use(self):
+        cleaned = clean_schedule(
+            "daily", "04:00", interval_hours=3, days_of_week=["mon"], day_of_month=5
+        )
+        assert cleaned == {"preset": "daily", "time_of_day": "04:00"}
+
+    @pytest.mark.parametrize("preset", ["every_6_hours", "every_12_hours"])
+    def test_old_preset_names_are_rejected(self, preset):
+        with pytest.raises(ScheduleValidationError, match="Invalid preset"):
+            clean_schedule(preset)
+
+
+class TestLegacyConfig:
+    """Schedules saved before custom schedules keep working without a re-save."""
+
+    @pytest.mark.parametrize(
+        "preset,hours", [("every_6_hours", 6), ("every_12_hours", 12)]
+    )
+    def test_fixed_intervals_become_interval(self, preset, hours):
+        config = _config_from_stored(json.dumps({"preset": preset, "enabled": True}))
+        assert (config["preset"], config["interval_hours"]) == ("interval", hours)
+
+    def test_single_day_becomes_a_list(self):
+        config = _config_from_stored(
+            json.dumps({"preset": "weekly", "day_of_week": "wed"})
+        )
+        assert config["days_of_week"] == ["wed"]
+        assert "day_of_week" not in config
+
+    def test_new_config_is_left_alone(self):
+        stored = {"preset": "weekly", "days_of_week": ["mon", "fri"]}
+        assert _config_from_stored(json.dumps(stored))["days_of_week"] == [
+            "mon",
+            "fri",
+        ]
+
+    def test_defaults_are_not_shared_between_loads(self):
+        _config_from_stored(None)["days_of_week"].append("mon")
+        assert _config_from_stored(None)["days_of_week"] == ["sun"]
+
+    def test_last_run_save_drops_old_keys(self):
+        """The first backup after an upgrade writes the new shape."""
+        service = BackupSchedulerService.get_instance()
+        mock_crud = MagicMock()
+        mock_crud.get_setting.return_value = json.dumps(
+            {"preset": "every_6_hours", "day_of_week": "sun", "enabled": True}
+        )
+
+        with patch("app.crud.system_setting.system_setting", mock_crud):
+            service._update_last_run(
+                MagicMock(), datetime.now(timezone.utc), "success", None
+            )
+
+        written = json.loads(mock_crud.set_setting.call_args.args[2])
+        assert written["preset"] == "interval"
+        assert written["interval_hours"] == 6
+        assert "day_of_week" not in written
+
+
+def _fires(trigger, start, count):
+    """count fire times of trigger from start."""
+    return list(
+        islice(_fire_times(trigger, trigger.get_next_fire_time(None, start)), count)
+    )
+
+
+class TestTriggers:
+    """Run times each preset produces."""
+
+    def test_weekly_runs_on_each_chosen_day(self):
+        service = BackupSchedulerService.get_instance()
+        trigger = service._build_trigger(
+            _enabled_config("weekly", days_of_week=["mon", "wed", "fri"])
+        )
+
+        fires = _fires(trigger, datetime.now(service._timezone), 6)
+
+        assert {f.strftime("%a") for f in fires} == {"Mon", "Wed", "Fri"}
+        assert all((f.hour, f.minute) == (2, 0) for f in fires)
+
+    def test_monthly_day_28_runs_every_month(self):
+        """February has a 28th, so no month is skipped."""
+        service = BackupSchedulerService.get_instance()
+        trigger = service._build_trigger(_enabled_config("monthly", day_of_month=28))
+        start = datetime(2027, 1, 1, tzinfo=service._timezone)
+
+        fires = _fires(trigger, start, 12)
+
+        assert [f.month for f in fires] == list(range(1, 13))
+        assert all(f.day == 28 for f in fires)
+
+    def test_daily_keeps_wall_clock_time_across_dst(self):
+        service = BackupSchedulerService()
+        service._timezone = ZoneInfo("America/New_York")
+        trigger = service._build_trigger(_enabled_config("daily", time_of_day="03:00"))
+        start = datetime(2026, 10, 30, tzinfo=service._timezone)
+
+        fires = _fires(trigger, start, 4)
+
+        assert all((f.hour, f.minute) == (3, 0) for f in fires)
+        assert fires[1].utcoffset() != fires[2].utcoffset()
+
+
+class TestPreview:
+    """Run times and disk estimate for a draft schedule."""
+
+    def _preview(self, cleaned, retention_days=7, min_count=2, size=None):
+        service = BackupSchedulerService.get_instance()
+        with patch.object(service, "_load_config", return_value=dict(DEFAULT_CONFIG)):
+            return service.preview_schedule(cleaned, retention_days, min_count, size)
+
+    def test_lists_next_three_runs_and_timezone(self):
+        preview = self._preview(clean_schedule("daily", "02:00"))
+
+        runs = [datetime.fromisoformat(r) for r in preview["upcoming_runs"]]
+        assert len(runs) == 3
+        assert runs == sorted(runs)
+        assert preview["timezone"] == str(
+            BackupSchedulerService.get_instance()._timezone
+        )
+
+    def test_interval_counts_from_now_like_a_save(self):
+        expected = datetime.now(timezone.utc) + timedelta(hours=4)
+
+        preview = self._preview(clean_schedule("interval", interval_hours=4))
+
+        first = datetime.fromisoformat(preview["upcoming_runs"][0])
+        assert abs(first - expected) < CLOCK_TOLERANCE
+
+    def test_counts_runs_in_retention_window(self):
+        preview = self._preview(
+            clean_schedule("interval", interval_hours=7), retention_days=30, size=10
+        )
+
+        assert preview["retained_count"] == 30 * 24 // 7
+        assert preview["estimated_bytes"] == 30 * 24 // 7 * 10
+
+    def test_never_below_min_count(self):
+        preview = self._preview(
+            clean_schedule("monthly", day_of_month=1),
+            retention_days=7,
+            min_count=5,
+            size=100,
+        )
+
+        assert preview["retained_count"] == 5
+        assert preview["estimated_bytes"] == 500
+
+    def test_no_estimate_without_a_backup(self):
+        preview = self._preview(clean_schedule("daily"))
+
+        assert preview["retained_count"] is not None
+        assert preview["latest_backup_size_bytes"] is None
+        assert preview["estimated_bytes"] is None
+
+    def test_disabled_has_no_runs(self):
+        preview = self._preview(clean_schedule("disabled"), size=100)
+
+        assert preview["upcoming_runs"] == []
+        assert preview["retained_count"] is None
+
+    def test_saves_nothing(self):
+        service = BackupSchedulerService.get_instance()
+        with patch.object(service, "_save_config") as mock_save:
+            self._preview(clean_schedule("daily"))
+
+        mock_save.assert_not_called()
+        assert service._scheduler.get_job(JOB_ID) is None
+
+    @pytest.mark.asyncio
+    async def test_includes_a_pending_catch_up(self, db_session):
+        service = BackupSchedulerService.get_instance()
+        await _start_with(service, _enabled_config(last_run_at=_ago(hours=30)))
+        catch_up = service._scheduler.get_job(CATCH_UP_JOB_ID).next_run_time
+
+        preview = self._preview(clean_schedule("weekly", days_of_week=["sun"]))
+
+        assert preview["upcoming_runs"][0] == catch_up.isoformat()
 
 
 class TestRunBackup:
