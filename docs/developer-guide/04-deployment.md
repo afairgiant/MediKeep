@@ -453,12 +453,20 @@ MAX_FILE_SIZE=15728640  # 15MB
 
 ### Backup Configuration
 
-| Variable                | Type    | Default     | Description                    |
-| ----------------------- | ------- | ----------- | ------------------------------ |
-| `BACKUP_DIR`            | path    | `./backups` | Backup directory path          |
-| `BACKUP_RETENTION_DAYS` | integer | `7`         | Days to keep backups           |
-| `BACKUP_MIN_COUNT`      | integer | `5`         | Minimum backups to always keep |
-| `BACKUP_MAX_COUNT`      | integer | `50`        | Warning threshold for backups  |
+| Variable                      | Type    | Default     | Description                    |
+| ----------------------------- | ------- | ----------- | ------------------------------ |
+| `BACKUP_DIR`                  | path    | `./backups` | Backup directory path          |
+| `BACKUP_RETENTION_DAYS`       | integer | `7`         | Days to keep backups           |
+| `BACKUP_MIN_COUNT`            | integer | `5`         | Minimum successful backups to always keep; failed attempts don't count |
+| `BACKUP_MAX_COUNT`            | integer | `50`        | Warning threshold for backups  |
+| `BACKUP_AUTO_CLEANUP_ENABLED` | boolean | `false`     | **Delete old backups automatically**: after each scheduled backup, apply the retention settings above to all backups, including manual ones. Off by default so upgrading never deletes backups. Can be changed in **Admin > Settings > Backups** |
+
+Scheduled backups run in the time zone set by `TZ`, or the host's time zone when `TZ` is
+unset. Interval schedules (every 6 or 12 hours) count from when the last backup started,
+or from when the schedule was saved if that is later, so a restart does not postpone the
+next one. If a scheduled backup was missed while the app was down, one backup runs about
+5 minutes after startup, unless the regular run comes sooner. Saving a schedule never
+starts a backup straight away. Backup ages for retention are measured in UTC.
 
 **Example:**
 

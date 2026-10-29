@@ -34,7 +34,12 @@ export const SECTIONS: SectionDef[] = [
   },
   {
     id: 'backups',
-    keys: ['backup_retention_days', 'backup_min_count', 'backup_max_count'],
+    keys: [
+      'backup_auto_cleanup_enabled',
+      'backup_retention_days',
+      'backup_min_count',
+      'backup_max_count',
+    ],
     includesSchedule: true,
     Component: BackupsSection,
   },

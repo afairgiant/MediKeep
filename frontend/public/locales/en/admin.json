@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Delete old backups automatically",
+      "autoCleanupDesc": "After each scheduled backup, delete backups older than the limit below, including ones made by hand.",
       "maxCount": "Expected maximum",
       "maxCountDesc": "For reference only. Backups above this number are not deleted or blocked.",
       "minCount": "Always keep at least",
-      "minCountDesc": "The most recent backups are kept regardless of age.",
+      "minCountDesc": "The most recent successful backups are kept regardless of age. Failed attempts don't count.",
       "operationsLink": "Create, download and restore backups on the Backup Management page",
       "retentionDays": "Delete backups older than",
       "retentionDaysDesc": "Clean-up never goes below the minimum count.",

@@ -206,6 +206,7 @@ class LogFields:
     RECORD_ID = "record_id"
     STATUS = "status"
     ERROR = "error"
+    TRACEBACK = "traceback"
     DATA = "data"
     FIELD = "field"
     VALUE = "value"

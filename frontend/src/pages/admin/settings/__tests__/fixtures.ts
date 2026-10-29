@@ -45,6 +45,11 @@ export const makeSettings = (
     max: 500,
     ...overrides.backup_max_count,
   }),
+  backup_auto_cleanup_enabled: boolState({
+    value: false,
+    fallback: false,
+    ...overrides.backup_auto_cleanup_enabled,
+  }),
   release_check_enabled: boolState(overrides.release_check_enabled),
   whats_new_popup_enabled: boolState(overrides.whats_new_popup_enabled),
   activity_log_retention_days: state({

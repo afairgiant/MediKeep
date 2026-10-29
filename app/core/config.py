@@ -330,6 +330,10 @@ class Settings:  # App Info
     BACKUP_MAX_COUNT: int = int(
         os.getenv("BACKUP_MAX_COUNT", "50")
     )  # Warning threshold for too many backups
+    # Admin-overridable at runtime; off so upgrades never start deleting backups
+    BACKUP_AUTO_CLEANUP_ENABLED: bool = (
+        os.getenv("BACKUP_AUTO_CLEANUP_ENABLED", "False").lower() == "true"
+    )
 
     # Trash directory settings
     _windows_uploads = _get_windows_path_helper("uploads")

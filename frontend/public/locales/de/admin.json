@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Alte Sicherungen automatisch löschen",
+      "autoCleanupDesc": "Löscht nach jeder geplanten Sicherung Sicherungen, die älter als das unten stehende Limit sind, auch manuell erstellte.",
       "maxCount": "Erwartetes Maximum",
       "maxCountDesc": "Nur zur Information. Sicherungen über dieser Anzahl werden weder gelöscht noch blockiert.",
       "minCount": "Mindestens behalten",
-      "minCountDesc": "Die neuesten Sicherungen werden unabhängig vom Alter behalten.",
+      "minCountDesc": "Die neuesten erfolgreichen Sicherungen werden unabhängig vom Alter behalten. Fehlgeschlagene Versuche zählen nicht.",
       "operationsLink": "Sicherungen auf der Seite Sicherungsverwaltung erstellen, herunterladen und wiederherstellen",
       "retentionDays": "Sicherungen löschen, die älter sind als",
       "retentionDaysDesc": "Die Bereinigung unterschreitet nie die Mindestanzahl.",

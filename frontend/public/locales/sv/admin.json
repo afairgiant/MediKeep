@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Ta bort gamla säkerhetskopior automatiskt",
+      "autoCleanupDesc": "Efter varje schemalagd säkerhetskopiering tas säkerhetskopior som är äldre än gränsen nedan bort, även de som skapats manuellt.",
       "maxCount": "Förväntat maximum",
       "maxCountDesc": "Endast som referens. Säkerhetskopior över detta antal tas inte bort och blockeras inte.",
       "minCount": "Behåll alltid minst",
-      "minCountDesc": "De senaste säkerhetskopiorna behålls oavsett ålder.",
+      "minCountDesc": "De senaste lyckade säkerhetskopiorna behålls oavsett ålder. Misslyckade försök räknas inte.",
       "operationsLink": "Skapa, ladda ned och återställ säkerhetskopior på sidan Hantering av säkerhetskopior",
       "retentionDays": "Ta bort säkerhetskopior äldre än",
       "retentionDaysDesc": "Rensningen går aldrig under minsta antal.",

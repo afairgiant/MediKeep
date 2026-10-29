@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Automatycznie usuwaj stare kopie zapasowe",
+      "autoCleanupDesc": "Po każdej zaplanowanej kopii zapasowej usuwa kopie starsze niż poniższy limit, w tym utworzone ręcznie.",
       "maxCount": "Oczekiwane maksimum",
       "maxCountDesc": "Tylko informacyjnie. Kopie powyżej tej liczby nie są usuwane ani blokowane.",
       "minCount": "Zawsze zachowuj co najmniej",
-      "minCountDesc": "Najnowsze kopie zapasowe są zachowywane niezależnie od wieku.",
+      "minCountDesc": "Najnowsze udane kopie zapasowe są zachowywane niezależnie od wieku. Nieudane próby się nie liczą.",
       "operationsLink": "Twórz, pobieraj i przywracaj kopie zapasowe na stronie Zarządzanie kopiami zapasowymi",
       "retentionDays": "Usuwaj kopie zapasowe starsze niż",
       "retentionDaysDesc": "Czyszczenie nigdy nie schodzi poniżej minimalnej liczby.",

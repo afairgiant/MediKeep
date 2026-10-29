@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "自动删除旧备份",
+      "autoCleanupDesc": "每次计划备份完成后，删除早于下方期限的备份，包括手动创建的备份。",
       "maxCount": "预期最大数量",
       "maxCountDesc": "仅供参考。超过此数量的备份不会被删除或阻止。",
       "minCount": "至少始终保留",
-      "minCountDesc": "无论时间多久，都会保留最新的备份。",
+      "minCountDesc": "无论时间多久，都会保留最新的成功备份。失败的备份不计入其中。",
       "operationsLink": "在备份管理页面创建、下载和恢复备份",
       "retentionDays": "删除早于以下时间的备份",
       "retentionDaysDesc": "清理时保留的备份数量不会低于最小数量。",

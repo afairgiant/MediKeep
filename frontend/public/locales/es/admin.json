@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Eliminar copias de seguridad antiguas automáticamente",
+      "autoCleanupDesc": "Después de cada copia de seguridad programada, elimina las copias más antiguas que el límite indicado abajo, incluidas las creadas manualmente.",
       "maxCount": "Máximo previsto",
       "maxCountDesc": "Solo como referencia. Las copias por encima de este número no se eliminan ni se bloquean.",
       "minCount": "Conservar siempre al menos",
-      "minCountDesc": "Las copias más recientes se conservan sin importar su antigüedad.",
+      "minCountDesc": "Las copias correctas más recientes se conservan sin importar su antigüedad. Los intentos fallidos no cuentan.",
       "operationsLink": "Cree, descargue y restaure copias de seguridad en la página Gestión de copias de seguridad",
       "retentionDays": "Eliminar copias de seguridad con más de",
       "retentionDaysDesc": "La limpieza nunca baja del número mínimo.",

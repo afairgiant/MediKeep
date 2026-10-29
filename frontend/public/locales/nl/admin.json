@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Oude back-ups automatisch verwijderen",
+      "autoCleanupDesc": "Verwijdert na elke geplande back-up back-ups die ouder zijn dan de limiet hieronder, ook handmatig gemaakte.",
       "maxCount": "Verwacht maximum",
       "maxCountDesc": "Alleen ter informatie. Back-ups boven dit aantal worden niet verwijderd of geblokkeerd.",
       "minCount": "Altijd minstens bewaren",
-      "minCountDesc": "De meest recente back-ups worden bewaard, ongeacht hun leeftijd.",
+      "minCountDesc": "De meest recente geslaagde back-ups worden bewaard, ongeacht hun leeftijd. Mislukte pogingen tellen niet mee.",
       "operationsLink": "Back-ups maken, downloaden en herstellen op de pagina Back-upbeheer",
       "retentionDays": "Back-ups verwijderen die ouder zijn dan",
       "retentionDaysDesc": "Het opschonen gaat nooit onder het minimumaantal.",

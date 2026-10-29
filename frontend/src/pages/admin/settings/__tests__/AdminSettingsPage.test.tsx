@@ -310,6 +310,30 @@ describe('backups section', () => {
     expect(screen.getByRole('button', { name: /Save changes/ })).toBeDisabled();
   });
 
+  test('automatic clean-up starts off and saves when turned on', async () => {
+    const user = userEvent.setup();
+    api.updateAdminSettings.mockResolvedValue({
+      settings: makeSettings({
+        backup_auto_cleanup_enabled: { value: true, source: 'saved' },
+      }),
+      updated: ['backup_auto_cleanup_enabled'],
+      warnings: [],
+    });
+    renderPage('/admin/settings/backups');
+
+    const toggle = await screen.findByRole('switch', {
+      name: 'Delete old backups automatically',
+    });
+    expect(toggle).not.toBeChecked();
+
+    await user.click(toggle);
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
+
+    expect(api.updateAdminSettings).toHaveBeenCalledWith({
+      backup_auto_cleanup_enabled: true,
+    });
+  });
+
   test('links to the backup page for backup operations', async () => {
     renderPage('/admin/settings/backups');
 

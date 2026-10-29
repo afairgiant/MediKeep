@@ -25,6 +25,7 @@ from app.services.backup_scheduler_service import (
     TIME_FORMAT_RE,
     VALID_DAYS_OF_WEEK,
     VALID_PRESETS,
+    ScheduleValidationError,
 )
 from app.services.backup_service import BackupService
 
@@ -658,7 +659,7 @@ async def update_auto_backup_schedule(
             "schedule": config,
         }
 
-    except ValueError as e:
+    except ScheduleValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         log_endpoint_error(
@@ -667,8 +668,9 @@ async def update_auto_backup_schedule(
             "Failed to update auto-backup schedule",
             e,
             user_id=current_user.id,
+            exc_info=True,
         )
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to update schedule: {str(e)}",
+            detail="Failed to update schedule",
         )

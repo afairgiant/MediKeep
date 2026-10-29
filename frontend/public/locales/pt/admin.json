@@ -533,10 +533,12 @@
   },
   "settings": {
     "backups": {
+      "autoCleanup": "Excluir backups antigos automaticamente",
+      "autoCleanupDesc": "Após cada backup agendado, exclui os backups mais antigos que o limite abaixo, incluindo os criados manualmente.",
       "maxCount": "Máximo esperado",
       "maxCountDesc": "Apenas para referência. Cópias acima deste número não são excluídas nem bloqueadas.",
       "minCount": "Manter sempre pelo menos",
-      "minCountDesc": "As cópias mais recentes são mantidas independentemente da idade.",
+      "minCountDesc": "As cópias bem-sucedidas mais recentes são mantidas independentemente da idade. Tentativas falhadas não contam.",
       "operationsLink": "Crie, baixe e restaure cópias de segurança na página Gerenciamento de backups",
       "retentionDays": "Excluir cópias de segurança com mais de",
       "retentionDaysDesc": "A limpeza nunca fica abaixo da quantidade mínima.",
