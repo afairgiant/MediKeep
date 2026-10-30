@@ -172,29 +172,42 @@
     "schedule": {
       "changeInSettings": "Modifier la planification et la conservation",
       "completedSuccessfully": "Complété avec succès",
-      "dayOfWeek": "Jour de la semaine",
-      "dayOfWeekDesc": "Quel jour doit avoir lieu la sauvegarde hebdomadaire ?",
-      "days": {
-        "fri": "Vendredi",
-        "mon": "Lundi",
-        "sat": "Samedi",
-        "sun": "Dimanche",
-        "thu": "Jeudi",
-        "tue": "Mardi",
-        "wed": "Mercredi"
-      },
+      "dayOfMonth": "Jour du mois",
+      "dayOfMonthDesc": "Jusqu'au 28, pour que la sauvegarde ait lieu chaque mois.",
+      "daysOfWeek": "Jours de la semaine",
+      "daysOfWeekDesc": "Quels jours la sauvegarde doit-elle s'exécuter ?",
       "failed": "Echec : {{error}}",
       "frequency": "Fréquence des sauvegardes",
       "frequencyDesc": "Programmer des sauvegardes complètes automatiques (base de données + fichiers)",
+      "intervalHours": "Exécuter toutes les",
+      "intervalHoursDesc": "Heures entre deux sauvegardes, jusqu'à une semaine.",
       "lastBackup": "Dernière sauvegarde :",
       "nextScheduledRun": "Prochaine sauvegarde prévue",
+      "noDays": "Choisissez au moins un jour.",
       "presets": {
         "daily": "Quotidien",
-        "every12Hours": "Toutes les 12 heures",
-        "every6Hours": "Toutes les 6 heures"
+        "interval": "Toutes les N heures",
+        "monthly": "Mensuel"
+      },
+      "preview": {
+        "cleanupOff": "Le nettoyage automatique est désactivé : elles s'accumulent jusqu'à un nettoyage manuel.",
+        "estimate_one": "Le nettoyage conserve environ {{count}} sauvegarde planifiée, soit environ {{size}}.",
+        "estimate_other": "Le nettoyage conserve environ {{count}} sauvegardes planifiées, soit environ {{size}}.",
+        "failed": "Impossible de charger l'aperçu.",
+        "loading": "Mise à jour de l'aperçu",
+        "nextRuns": "Prochaines exécutions : {{runs}}"
+      },
+      "summary": {
+        "daily": "Tous les jours à {{time}}",
+        "hourly": "Toutes les heures",
+        "interval_one": "Toutes les {{count}} heures",
+        "interval_other": "Toutes les {{count}} heures",
+        "monthly": "Tous les mois le {{day}} à {{time}}",
+        "weekly": "{{days}} à {{time}}"
       },
       "timeOfDay": "Moment de la journée",
       "timeOfDayDesc": "Quand doit avoir lieu la sauvegarde ? (format 24h)",
+      "timeZone": "Fuseau horaire : {{zone}}",
       "title": "Programmation des sauvegardes automatiques",
       "unknownError": "Erreur inconnue"
     },
@@ -405,11 +418,6 @@
       "title": "Performance de l'application"
     },
     "scheduled": "Prévu : {{schedule}}",
-    "schedulePresets": {
-      "daily": "Quotidien",
-      "every_12_hours": "Toutes les 12 heures",
-      "every_6_hours": "Toutes les 6 heures"
-    },
     "services": {
       "adminInterface": "Interface administrateur",
       "apiStatus": "Statut de l'API",
@@ -612,7 +620,8 @@
     "title": "Paramètres",
     "units": {
       "backups": "sauvegardes",
-      "days": "jours"
+      "days": "jours",
+      "hours": "heures"
     },
     "updates": {
       "releaseCheck": "Rechercher les mises à jour",

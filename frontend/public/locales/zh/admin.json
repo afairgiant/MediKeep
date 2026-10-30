@@ -172,29 +172,42 @@
     "schedule": {
       "changeInSettings": "更改计划和保留设置",
       "completedSuccessfully": "成功完成",
-      "dayOfWeek": "星期",
-      "dayOfWeekDesc": "每周备份应在哪一天运行？",
-      "days": {
-        "fri": "星期五",
-        "mon": "星期一",
-        "sat": "星期六",
-        "sun": "星期日",
-        "thu": "星期四",
-        "tue": "星期二",
-        "wed": "星期三"
-      },
+      "dayOfMonth": "每月日期",
+      "dayOfMonthDesc": "最多到 28 日，这样每个月都会备份。",
+      "daysOfWeek": "星期",
+      "daysOfWeekDesc": "备份应在哪几天运行？",
       "failed": "失败：{{error}}",
       "frequency": "备份频率",
       "frequencyDesc": "计划自动完整备份（数据库+文件）",
+      "intervalHours": "运行间隔",
+      "intervalHoursDesc": "两次备份之间的小时数，最长一周。",
       "lastBackup": "上次备份：",
       "nextScheduledRun": "下次计划运行",
+      "noDays": "请至少选择一天。",
       "presets": {
         "daily": "每日",
-        "every12Hours": "每12小时",
-        "every6Hours": "每6小时"
+        "interval": "每 N 小时",
+        "monthly": "每月"
+      },
+      "preview": {
+        "cleanupOff": "自动清理已关闭，备份会一直累积，直到您手动清理。",
+        "estimate_one": "清理后约保留 {{count}} 个计划备份，约 {{size}}。",
+        "estimate_other": "清理后约保留 {{count}} 个计划备份，约 {{size}}。",
+        "failed": "无法加载预览。",
+        "loading": "正在更新预览",
+        "nextRuns": "接下来的运行时间：{{runs}}"
+      },
+      "summary": {
+        "daily": "每天 {{time}}",
+        "hourly": "每小时",
+        "interval_one": "每 {{count}} 小时",
+        "interval_other": "每 {{count}} 小时",
+        "monthly": "每月 {{day}} 日 {{time}}",
+        "weekly": "{{days}} {{time}}"
       },
       "timeOfDay": "时间",
       "timeOfDayDesc": "备份应在何时运行？（24小时格式）",
+      "timeZone": "时区：{{zone}}",
       "title": "自动备份计划",
       "unknownError": "未知错误"
     },
@@ -405,11 +418,6 @@
       "title": "应用程序性能"
     },
     "scheduled": "计划：{{schedule}}",
-    "schedulePresets": {
-      "daily": "每日",
-      "every_12_hours": "每12小时",
-      "every_6_hours": "每6小时"
-    },
     "services": {
       "adminInterface": "管理界面",
       "apiStatus": "API状态",
@@ -612,7 +620,8 @@
     "title": "设置",
     "units": {
       "backups": "个",
-      "days": "天"
+      "days": "天",
+      "hours": "小时"
     },
     "updates": {
       "releaseCheck": "检查更新",

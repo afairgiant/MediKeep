@@ -229,7 +229,8 @@ Specialized service for administrative functions, extending the base API service
 
 - `getAdminSettings()` - Get every admin-editable setting with its value source, plus read-only deployment values
 - `updateAdminSettings(changes)` - PATCH changed settings only; a `null` value resets that setting to its env or built-in value
-- `getAutoBackupSchedule()` / `updateAutoBackupSchedule(scheduleData)` - Read or change the automatic backup schedule
+- `getAutoBackupSchedule()` / `updateAutoBackupSchedule(scheduleData)` - Read or change the automatic backup schedule (`preset` plus the field it uses: `interval_hours`, `days_of_week` or `day_of_month`)
+- `previewAutoBackupSchedule(previewData)` - Next runs, time zone and disk estimate for a draft schedule and draft retention settings; saves nothing
 
 ## Usage
 

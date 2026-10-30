@@ -1,6 +1,7 @@
 import type {
   AdminSettingsResponse,
   ScheduleConfig,
+  SchedulePreview,
   SettingState,
   SettingsMap,
 } from '../types';
@@ -86,11 +87,30 @@ export const makeSchedule = (
 ): ScheduleConfig => ({
   preset: 'daily',
   time_of_day: '02:00',
-  day_of_week: 'sun',
+  interval_hours: 12,
+  days_of_week: ['sun'],
+  day_of_month: 1,
   enabled: true,
   last_run_at: null,
   last_run_status: null,
   last_run_error: null,
   next_run_at: null,
+  upcoming_runs: [],
+  timezone: 'America/New_York',
+  ...overrides,
+});
+
+export const makePreview = (
+  overrides: Partial<SchedulePreview> = {}
+): SchedulePreview => ({
+  upcoming_runs: [
+    '2026-11-02T02:00:00-05:00',
+    '2026-11-03T02:00:00-05:00',
+    '2026-11-04T02:00:00-05:00',
+  ],
+  timezone: 'America/New_York',
+  latest_backup_size_bytes: 1024 * 1024,
+  retained_count: 7,
+  estimated_bytes: 7 * 1024 * 1024,
   ...overrides,
 });

@@ -282,6 +282,8 @@ describe('File Utilities', () => {
     test('handles large file sizes', () => {
       expect(formatFileSize(2.5 * 1024 * 1024)).toBe('2.5 MB');
       expect(formatFileSize(5.25 * 1024 * 1024 * 1024)).toBe('5.25 GB');
+      expect(formatFileSize(1.5 * 1024 ** 4)).toBe('1.5 TB');
+      expect(formatFileSize(2048 * 1024 ** 4)).toBe('2048 TB');
     });
   });
 

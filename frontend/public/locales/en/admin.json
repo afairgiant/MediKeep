@@ -172,29 +172,42 @@
     "schedule": {
       "changeInSettings": "Change schedule and retention",
       "completedSuccessfully": "Completed successfully",
-      "dayOfWeek": "Day of Week",
-      "dayOfWeekDesc": "Which day should the weekly backup run?",
-      "days": {
-        "fri": "Friday",
-        "mon": "Monday",
-        "sat": "Saturday",
-        "sun": "Sunday",
-        "thu": "Thursday",
-        "tue": "Tuesday",
-        "wed": "Wednesday"
-      },
+      "dayOfMonth": "Day of Month",
+      "dayOfMonthDesc": "Up to the 28th, so the backup runs every month.",
+      "daysOfWeek": "Days of Week",
+      "daysOfWeekDesc": "Which days should the backup run?",
       "failed": "Failed: {{error}}",
       "frequency": "Backup Frequency",
       "frequencyDesc": "Schedule automatic full backups (database + files)",
+      "intervalHours": "Run every",
+      "intervalHoursDesc": "Hours between backups, up to one week.",
       "lastBackup": "Last backup:",
       "nextScheduledRun": "Next Scheduled Run",
+      "noDays": "Pick at least one day.",
       "presets": {
         "daily": "Daily",
-        "every12Hours": "Every 12 hours",
-        "every6Hours": "Every 6 hours"
+        "interval": "Every N hours",
+        "monthly": "Monthly"
+      },
+      "preview": {
+        "cleanupOff": "Automatic clean-up is off, so until you clean up by hand they add up.",
+        "estimate_one": "Clean-up keeps about {{count}} scheduled backup, roughly {{size}}.",
+        "estimate_other": "Clean-up keeps about {{count}} scheduled backups, roughly {{size}}.",
+        "failed": "The preview could not be loaded.",
+        "loading": "Updating preview",
+        "nextRuns": "Next runs: {{runs}}"
+      },
+      "summary": {
+        "daily": "Daily at {{time}}",
+        "hourly": "Every hour",
+        "interval_one": "Every {{count}} hour",
+        "interval_other": "Every {{count}} hours",
+        "monthly": "Monthly on day {{day}} at {{time}}",
+        "weekly": "{{days}} at {{time}}"
       },
       "timeOfDay": "Time of Day",
       "timeOfDayDesc": "When should the backup run? (24-hour format)",
+      "timeZone": "Time zone: {{zone}}",
       "title": "Auto-Backup Schedule",
       "unknownError": "Unknown error"
     },
@@ -405,11 +418,6 @@
       "title": "Application Performance"
     },
     "scheduled": "Scheduled: {{schedule}}",
-    "schedulePresets": {
-      "daily": "Daily",
-      "every_12_hours": "Every 12 hours",
-      "every_6_hours": "Every 6 hours"
-    },
     "services": {
       "adminInterface": "Admin Interface",
       "apiStatus": "API Status",
@@ -612,7 +620,8 @@
     "title": "Settings",
     "units": {
       "backups": "backups",
-      "days": "days"
+      "days": "days",
+      "hours": "hours"
     },
     "updates": {
       "releaseCheck": "Check for updates",

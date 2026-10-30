@@ -172,29 +172,42 @@
     "schedule": {
       "changeInSettings": "Cambiar programación y retención",
       "completedSuccessfully": "Completada con éxito",
-      "dayOfWeek": "Día de la semana",
-      "dayOfWeekDesc": "¿Qué día debe ejecutarse la copia de seguridad semanal?",
-      "days": {
-        "fri": "Viernes",
-        "mon": "Lunes",
-        "sat": "Sábado",
-        "sun": "Domingo",
-        "thu": "Jueves",
-        "tue": "Martes",
-        "wed": "Miércoles"
-      },
+      "dayOfMonth": "Día del mes",
+      "dayOfMonthDesc": "Hasta el 28, para que la copia se haga todos los meses.",
+      "daysOfWeek": "Días de la semana",
+      "daysOfWeekDesc": "¿Qué días debe ejecutarse la copia de seguridad?",
       "failed": "Error: {{error}}",
       "frequency": "Frecuencia de copia de seguridad",
       "frequencyDesc": "Programar copias de seguridad completas automáticas (base de datos + archivos)",
+      "intervalHours": "Ejecutar cada",
+      "intervalHoursDesc": "Horas entre copias de seguridad, hasta una semana.",
       "lastBackup": "Última copia de seguridad:",
       "nextScheduledRun": "Próxima ejecución programada",
+      "noDays": "Elija al menos un día.",
       "presets": {
         "daily": "Diaria",
-        "every12Hours": "Cada 12 horas",
-        "every6Hours": "Cada 6 horas"
+        "interval": "Cada N horas",
+        "monthly": "Mensual"
+      },
+      "preview": {
+        "cleanupOff": "La limpieza automática está desactivada, así que se acumulan hasta que limpie a mano.",
+        "estimate_one": "La limpieza conserva unas {{count}} copia programada, aproximadamente {{size}}.",
+        "estimate_other": "La limpieza conserva unas {{count}} copias programadas, aproximadamente {{size}}.",
+        "failed": "No se pudo cargar la vista previa.",
+        "loading": "Actualizando vista previa",
+        "nextRuns": "Próximas ejecuciones: {{runs}}"
+      },
+      "summary": {
+        "daily": "Todos los días a las {{time}}",
+        "hourly": "Cada hora",
+        "interval_one": "Cada {{count}} horas",
+        "interval_other": "Cada {{count}} horas",
+        "monthly": "Mensual el día {{day}} a las {{time}}",
+        "weekly": "{{days}} a las {{time}}"
       },
       "timeOfDay": "Hora del día",
       "timeOfDayDesc": "¿A qué hora debe ejecutarse la copia de seguridad? (formato 24 horas)",
+      "timeZone": "Zona horaria: {{zone}}",
       "title": "Programación de copias de seguridad automáticas",
       "unknownError": "Error desconocido"
     },
@@ -405,11 +418,6 @@
       "title": "Rendimiento de la aplicación"
     },
     "scheduled": "Programada: {{schedule}}",
-    "schedulePresets": {
-      "daily": "Diaria",
-      "every_12_hours": "Cada 12 horas",
-      "every_6_hours": "Cada 6 horas"
-    },
     "services": {
       "adminInterface": "Interfaz de administración",
       "apiStatus": "Estado de la API",
@@ -612,7 +620,8 @@
     "title": "Configuración",
     "units": {
       "backups": "copias",
-      "days": "días"
+      "days": "días",
+      "hours": "horas"
     },
     "updates": {
       "releaseCheck": "Buscar actualizaciones",

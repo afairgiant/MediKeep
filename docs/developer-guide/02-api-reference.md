@@ -6245,6 +6245,85 @@ Retention values and user registration are read and changed through [15.8 Admin 
 - **Purpose**: Get backup retention statistics
 - **Success Response** (200): Statistics and cleanup preview
 
+#### Get Auto-Backup Schedule
+
+`GET /admin/backups/settings/schedule`
+
+- **Purpose**: The automatic full backup schedule, its next runs and the time zone they run in
+- **Success Response** (200):
+
+```json
+{
+  "preset": "weekly",
+  "time_of_day": "02:00",
+  "interval_hours": 12,
+  "days_of_week": ["mon", "wed", "fri"],
+  "day_of_month": 1,
+  "enabled": true,
+  "last_run_at": "2026-10-28T06:00:00+00:00",
+  "last_run_status": "success",
+  "last_run_error": null,
+  "next_run_at": "2026-10-30T02:00:00-04:00",
+  "upcoming_runs": [
+    "2026-10-30T02:00:00-04:00",
+    "2026-11-02T02:00:00-05:00",
+    "2026-11-04T02:00:00-05:00"
+  ],
+  "timezone": "America/New_York"
+}
+```
+
+- `preset` is `disabled`, `interval`, `daily`, `weekly` or `monthly`. Every field is always
+  present; only the ones the preset uses apply. `upcoming_runs` includes a pending catch-up run.
+- Schedules saved before custom presets (`every_6_hours`, `every_12_hours`, a single
+  `day_of_week`) are returned in this shape and rewritten in it on the next save or backup.
+
+#### Update Auto-Backup Schedule
+
+`POST /admin/backups/settings/schedule`
+
+- **Request Body**: `preset`, an optional `time_of_day` (`HH:MM`, 24-hour; used by `daily`,
+  `weekly` and `monthly`), and the field the preset needs:
+
+| Preset | Required field |
+|---|---|
+| `interval` | `interval_hours`, 1-168 |
+| `weekly` | `days_of_week`, one or more of `mon`...`sun`; stored Monday first without duplicates |
+| `monthly` | `day_of_month`, 1-28 |
+
+- Fields other presets use are ignored and keep their saved values. The old preset names are
+  rejected.
+- **Success Response** (200): `{"message": "...", "schedule": {...}}` with the schedule in the GET shape
+- **Errors**: 422 for invalid input; 500 with a fixed message (details are logged)
+
+#### Preview Auto-Backup Schedule
+
+`POST /admin/backups/settings/schedule/preview`
+
+- **Purpose**: Run times and disk estimate for a draft schedule; saves nothing
+- **Request Body**: the update body, plus optional draft `backup_retention_days` and
+  `backup_min_count` (same limits as [15.8 Admin Settings](#158-admin-settings)); omitted
+  values use the saved settings
+- **Success Response** (200):
+
+```json
+{
+  "upcoming_runs": ["2026-10-30T02:00:00-04:00", "..."],
+  "timezone": "America/New_York",
+  "latest_backup_size_bytes": 52428800,
+  "retained_count": 13,
+  "estimated_bytes": 681574400
+}
+```
+
+- `retained_count` is how many scheduled backups clean-up would keep: the runs inside the
+  retention window, never fewer than `backup_min_count`. It ignores other backups, but clean-up
+  counts manual, database-only and files-only backups toward `backup_min_count` too, so with
+  those around it keeps fewer scheduled ones and the estimate runs high.
+- `latest_backup_size_bytes` is the newest restorable full backup; it and `estimated_bytes`
+  are `null` until one exists. For `disabled`, `upcoming_runs` is empty and the counts are `null`.
+- **Errors**: 422 for invalid input; 500 with a fixed message
+
 ### 15.4 Restore Operations
 
 Base path: `/api/v1/admin/restore`
@@ -6628,7 +6707,7 @@ Current codes:
 |---|---|
 | `sso_only_no_registration_route` | Registration was turned off while `SSO_ONLY_MODE` is on, leaving no self-service route into the instance |
 
-The auto-backup schedule keeps its own endpoints: `GET`/`POST /admin/backups/settings/schedule`.
+The auto-backup schedule keeps its own endpoints; see [15.3 Backup Operations](#153-backup-operations).
 
 ### 15.9 User Sign-In Security
 

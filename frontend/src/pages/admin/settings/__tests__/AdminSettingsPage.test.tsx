@@ -1,10 +1,15 @@
 import type { ReactNode } from 'react';
 import { vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { adminApiService } from '../../../../services/api/adminApi';
 import { authService } from '../../../../services/auth/simpleAuthService';
-import { makeResponse, makeSchedule, makeSettings } from './fixtures';
+import {
+  makePreview,
+  makeResponse,
+  makeSchedule,
+  makeSettings,
+} from './fixtures';
 import { renderPage } from './renderPage';
 
 vi.mock('../../../../components/admin/AdminLayout', () => ({
@@ -26,6 +31,9 @@ beforeEach(() => {
   );
   vi.spyOn(adminApiService, 'updateAdminSettings');
   vi.spyOn(adminApiService, 'updateAutoBackupSchedule');
+  vi.spyOn(adminApiService, 'previewAutoBackupSchedule').mockResolvedValue(
+    makePreview()
+  );
   vi.spyOn(authService, 'getSSOConfig').mockResolvedValue({ enabled: false });
 });
 
@@ -174,7 +182,7 @@ describe('save bar', () => {
       await screen.findByRole('textbox', { name: 'Backup Frequency' })
     );
     await user.click(
-      await screen.findByRole('option', { name: 'Every 6 hours', hidden: true })
+      await screen.findByRole('option', { name: 'Every N hours', hidden: true })
     );
     await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
@@ -194,7 +202,7 @@ describe('save bar', () => {
       await screen.findByRole('textbox', { name: 'Backup Frequency' })
     );
     await user.click(
-      await screen.findByRole('option', { name: 'Every 6 hours', hidden: true })
+      await screen.findByRole('option', { name: 'Every N hours', hidden: true })
     );
     await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
@@ -277,23 +285,150 @@ describe('load states', () => {
 });
 
 describe('backups section', () => {
-  test('shows time for daily and adds the day for weekly', async () => {
+  const choosePreset = async (
+    user: ReturnType<typeof userEvent.setup>,
+    name: string
+  ) => {
+    await user.click(
+      await screen.findByRole('textbox', { name: 'Backup Frequency' })
+    );
+    await user.click(await screen.findByRole('option', { name, hidden: true }));
+  };
+
+  test.each([
+    ['Every N hours', ['Run every'], ['Time of Day', 'Day of Month']],
+    ['Daily', ['Time of Day'], ['Run every', 'Day of Month']],
+    ['Monthly', ['Day of Month', 'Time of Day'], ['Run every']],
+  ])('%s shows only its own fields', async (preset, shown, hidden) => {
     const user = userEvent.setup();
     renderPage('/admin/settings/backups');
 
-    expect(await screen.findByLabelText('Time of Day')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('textbox', { name: 'Day of Week' })
-    ).not.toBeInTheDocument();
+    await choosePreset(user, preset);
 
-    await user.click(screen.getByRole('textbox', { name: 'Backup Frequency' }));
-    await user.click(
-      await screen.findByRole('option', { name: 'Weekly', hidden: true })
+    shown.forEach(label =>
+      expect(screen.getByLabelText(label)).toBeInTheDocument()
     );
+    hidden.forEach(label =>
+      expect(screen.queryByLabelText(label)).not.toBeInTheDocument()
+    );
+    expect(
+      screen.queryByRole('group', { name: 'Days of Week' })
+    ).not.toBeInTheDocument();
+  });
+
+  test('weekly picks several days and needs at least one', async () => {
+    const user = userEvent.setup();
+    renderPage('/admin/settings/backups');
+
+    await choosePreset(user, 'Weekly');
+    const days = screen.getByRole('group', { name: 'Days of Week' });
+    expect(screen.getByLabelText('Time of Day')).toBeInTheDocument();
+
+    await user.click(within(days).getByRole('checkbox', { name: 'Wed' }));
+    expect(within(days).getByRole('checkbox', { name: 'Wed' })).toBeChecked();
+
+    await user.click(within(days).getByRole('checkbox', { name: 'Wed' }));
+    await user.click(within(days).getByRole('checkbox', { name: 'Sun' }));
+    expect(screen.getByText('Pick at least one day.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save changes/ })).toBeDisabled();
+  });
+
+  test('an interval outside 1 to 168 hours is refused', async () => {
+    const user = userEvent.setup();
+    renderPage('/admin/settings/backups');
+
+    await choosePreset(user, 'Every N hours');
+    const hours = screen.getByLabelText('Run every');
+    await user.clear(hours);
+    await user.type(hours, '200');
 
     expect(
-      screen.getByRole('textbox', { name: 'Day of Week' })
+      screen.getByText('Enter a whole number from 1 to 168.')
     ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save changes/ })).toBeDisabled();
+  });
+
+  test('previews the draft schedule with run times and disk estimate', async () => {
+    renderPage('/admin/settings/backups');
+
+    const preview = await screen.findByTestId('schedule-preview');
+    expect(within(preview).getByText('Daily at 02:00')).toBeInTheDocument();
+    expect(await within(preview).findByText(/^Next runs:/)).toBeInTheDocument();
+    expect(
+      within(preview).getByText(
+        /Clean-up keeps about 7 scheduled backups, roughly 7 MB\./
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Time zone: America\/New_York/)
+    ).toBeInTheDocument();
+    expect(api.previewAutoBackupSchedule).toHaveBeenLastCalledWith({
+      preset: 'daily',
+      time_of_day: '02:00',
+      backup_retention_days: 7,
+      backup_min_count: 5,
+    });
+  });
+
+  test('the preview follows draft edits, including retention', async () => {
+    const user = userEvent.setup();
+    renderPage('/admin/settings/backups');
+    await screen.findByTestId('schedule-preview');
+
+    await choosePreset(user, 'Monthly');
+    const retention = screen.getByLabelText('Delete backups older than');
+    await user.clear(retention);
+    await user.type(retention, '30');
+
+    await waitFor(() =>
+      expect(api.previewAutoBackupSchedule).toHaveBeenLastCalledWith({
+        preset: 'monthly',
+        time_of_day: '02:00',
+        day_of_month: 1,
+        backup_retention_days: 30,
+        backup_min_count: 5,
+      })
+    );
+  });
+
+  test('says old backups add up while automatic clean-up is off', async () => {
+    renderPage('/admin/settings/backups');
+
+    expect(
+      await screen.findByText(/Automatic clean-up is off/)
+    ).toBeInTheDocument();
+  });
+
+  test('hides the estimate until a backup exists', async () => {
+    api.previewAutoBackupSchedule.mockResolvedValue(
+      makePreview({ latest_backup_size_bytes: null, estimated_bytes: null })
+    );
+    renderPage('/admin/settings/backups');
+
+    expect(await screen.findByText(/^Next runs:/)).toBeInTheDocument();
+    expect(screen.queryByText(/Clean-up keeps about/)).not.toBeInTheDocument();
+  });
+
+  test('says when the preview fails', async () => {
+    api.previewAutoBackupSchedule.mockRejectedValue(
+      new Error('Request failed')
+    );
+    renderPage('/admin/settings/backups');
+
+    expect(
+      await screen.findByText('The preview could not be loaded.')
+    ).toBeInTheDocument();
+  });
+
+  test('a disabled schedule asks for no preview', async () => {
+    api.getAutoBackupSchedule.mockResolvedValue(
+      makeSchedule({ preset: 'disabled', enabled: false })
+    );
+    renderPage('/admin/settings/backups');
+
+    await screen.findByRole('textbox', { name: 'Backup Frequency' });
+    expect(screen.queryByTestId('schedule-preview')).not.toBeInTheDocument();
+    expect(api.previewAutoBackupSchedule).not.toHaveBeenCalled();
   });
 
   test('a minimum above the maximum is refused', async () => {

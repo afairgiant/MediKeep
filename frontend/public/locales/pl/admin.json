@@ -172,29 +172,46 @@
     "schedule": {
       "changeInSettings": "Zmień harmonogram i przechowywanie",
       "completedSuccessfully": "Zakończono pomyślnie",
-      "dayOfWeek": "Dzień tygodnia",
-      "dayOfWeekDesc": "W który dzień powinna się wykonać cotygodniowa kopia zapasowa?",
-      "days": {
-        "fri": "Piątek",
-        "mon": "Poniedziałek",
-        "sat": "Sobota",
-        "sun": "Niedziela",
-        "thu": "Czwartek",
-        "tue": "Wtorek",
-        "wed": "Środa"
-      },
+      "dayOfMonth": "Dzień miesiąca",
+      "dayOfMonthDesc": "Do 28., aby kopia była wykonywana co miesiąc.",
+      "daysOfWeek": "Dni tygodnia",
+      "daysOfWeekDesc": "W które dni ma być wykonywana kopia zapasowa?",
       "failed": "Nie powiodło się: {{error}}",
       "frequency": "Częstotliwość kopii zapasowych",
       "frequencyDesc": "Zaplanuj automatyczne pełne kopie zapasowe (baza danych + pliki)",
+      "intervalHours": "Uruchamiaj co",
+      "intervalHoursDesc": "Godziny między kopiami zapasowymi, maksymalnie tydzień.",
       "lastBackup": "Ostatnia kopia zapasowa:",
       "nextScheduledRun": "Następne zaplanowane uruchomienie",
+      "noDays": "Wybierz co najmniej jeden dzień.",
       "presets": {
         "daily": "Codziennie",
-        "every12Hours": "Co 12 godzin",
-        "every6Hours": "Co 6 godzin"
+        "interval": "Co N godzin",
+        "monthly": "Co miesiąc"
+      },
+      "preview": {
+        "cleanupOff": "Automatyczne czyszczenie jest wyłączone, więc kopie się gromadzą, dopóki nie wyczyścisz ich ręcznie.",
+        "estimate_few": "Czyszczenie zachowuje około {{count}} zaplanowanych kopii, około {{size}}.",
+        "estimate_many": "Czyszczenie zachowuje około {{count}} zaplanowanych kopii, około {{size}}.",
+        "estimate_one": "Czyszczenie zachowuje około {{count}} zaplanowanej kopii, około {{size}}.",
+        "estimate_other": "Czyszczenie zachowuje około {{count}} zaplanowanej kopii, około {{size}}.",
+        "failed": "Nie udało się wczytać podglądu.",
+        "loading": "Aktualizowanie podglądu",
+        "nextRuns": "Następne uruchomienia: {{runs}}"
+      },
+      "summary": {
+        "daily": "Codziennie o {{time}}",
+        "hourly": "Co godzinę",
+        "interval_few": "Co {{count}} godziny",
+        "interval_many": "Co {{count}} godzin",
+        "interval_one": "Co {{count}} godzinę",
+        "interval_other": "Co {{count}} godziny",
+        "monthly": "Co miesiąc, dnia {{day}}, o {{time}}",
+        "weekly": "{{days}} o {{time}}"
       },
       "timeOfDay": "Godzina dnia",
       "timeOfDayDesc": "Kiedy powinna działać kopia zapasowa? (format 24-godzinny)",
+      "timeZone": "Strefa czasowa: {{zone}}",
       "title": "Harmonogram automatycznych kopii zapasowych",
       "unknownError": "Nieznany błąd"
     },
@@ -405,11 +422,6 @@
       "title": "Wydajność aplikacji"
     },
     "scheduled": "Zaplanowane: {{schedule}}",
-    "schedulePresets": {
-      "daily": "Codziennie",
-      "every_12_hours": "Co 12 godzin",
-      "every_6_hours": "Co 6 godzin"
-    },
     "services": {
       "adminInterface": "Interfejs administracyjny",
       "apiStatus": "Status API",
@@ -612,7 +624,8 @@
     "title": "Ustawienia",
     "units": {
       "backups": "kopii",
-      "days": "dni"
+      "days": "dni",
+      "hours": "godz."
     },
     "updates": {
       "releaseCheck": "Sprawdzaj aktualizacje",

@@ -190,29 +190,91 @@ test('a failed schedule-only save does not claim other changes were saved', asyn
   expect(result.current.saveError?.scope).toBe('scheduleOnly');
 });
 
-test('the schedule payload carries the day only for weekly', async () => {
-  api.updateAutoBackupSchedule.mockResolvedValue({ schedule: {} });
-  const { result } = await loaded();
+test.each([
+  [{ preset: 'interval' as const, interval_hours: 3 }, { interval_hours: 3 }],
+  [
+    {
+      preset: 'weekly' as const,
+      days_of_week: ['mon' as const, 'fri' as const],
+    },
+    { days_of_week: ['mon', 'fri'] },
+  ],
+  [{ preset: 'monthly' as const, day_of_month: 15 }, { day_of_month: 15 }],
+  [{ preset: 'disabled' as const }, {}],
+])(
+  'the schedule payload carries only the field the preset uses (%o)',
+  async (patch, expected) => {
+    api.updateAutoBackupSchedule.mockResolvedValue({ schedule: {} });
+    const { result } = await loaded();
 
-  act(() => result.current.updateSchedule({ preset: 'every_6_hours' }));
-  await act(async () => {
-    await result.current.save();
-  });
+    act(() => result.current.updateSchedule(patch));
+    await act(async () => {
+      await result.current.save();
+    });
 
-  expect(api.updateAutoBackupSchedule).toHaveBeenCalledWith({
-    preset: 'every_6_hours',
-    time_of_day: '02:00',
-  });
-});
+    expect(api.updateAutoBackupSchedule).toHaveBeenCalledWith({
+      preset: patch.preset,
+      time_of_day: '02:00',
+      ...expected,
+    });
+  }
+);
 
 test('time changes do not count for presets that ignore the time', async () => {
   api.getAutoBackupSchedule.mockResolvedValue(
-    makeSchedule({ preset: 'every_6_hours' })
+    makeSchedule({ preset: 'interval' })
   );
   const { result } = await loaded();
 
   act(() => result.current.updateSchedule({ time_of_day: '05:00' }));
 
+  expect(result.current.scheduleDirty).toBe(false);
+});
+
+test('fields another preset uses do not count as changes', async () => {
+  const { result } = await loaded();
+
+  act(() =>
+    result.current.updateSchedule({ interval_hours: 4, day_of_month: 9 })
+  );
+
+  expect(result.current.scheduleDirty).toBe(false);
+});
+
+test.each([
+  [{ preset: 'interval' as const, interval_hours: 0 }, 'range'],
+  [{ preset: 'interval' as const, interval_hours: '' as const }, 'range'],
+  [{ preset: 'interval' as const, interval_hours: 169 }, 'range'],
+  [{ preset: 'weekly' as const, days_of_week: [] }, 'noDays'],
+  [{ preset: 'monthly' as const, day_of_month: 29 }, 'range'],
+])('an invalid schedule draft blocks saving (%o)', async (patch, code) => {
+  const { result } = await loaded();
+
+  act(() => result.current.updateSchedule(patch));
+  expect(result.current.scheduleError?.code).toBe(code);
+  expect(result.current.canSave).toBe(false);
+
+  let ok = true;
+  await act(async () => {
+    ok = await result.current.save();
+  });
+  expect(ok).toBe(false);
+  expect(api.updateAutoBackupSchedule).not.toHaveBeenCalled();
+});
+
+test('an empty field of another preset does not block saving', async () => {
+  api.updateAutoBackupSchedule.mockResolvedValue({ schedule: {} });
+  const { result } = await loaded();
+
+  act(() => result.current.updateSchedule({ preset: 'interval' }));
+  act(() => result.current.updateSchedule({ interval_hours: '' }));
+  act(() => result.current.updateSchedule({ preset: 'weekly' }));
+
+  expect(result.current.scheduleError).toBeNull();
+  await act(async () => {
+    await result.current.save();
+  });
+  expect(result.current.schedule?.interval_hours).toBe(12);
   expect(result.current.scheduleDirty).toBe(false);
 });
 
