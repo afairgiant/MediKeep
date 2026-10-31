@@ -85,7 +85,8 @@
 - Authentication endpoints: 10 requests/minute
 - File upload endpoints: 50 requests/hour
 - Search endpoints: 30 requests/minute
-- System monitoring endpoints: 60 requests/minute per IP (`/system/log-level`, `/system/log-rotation-config`)
+- System monitoring endpoints: 60 requests/minute per IP (`/system/log-level`)
+- Frontend log endpoints: 600 requests/minute per IP (`/frontend-logs/log`, `/frontend-logs/error`)
 - SSO sign-in: `SSO_RATE_LIMIT_ATTEMPTS` per `SSO_RATE_LIMIT_WINDOW_MINUTES` per IP,
   default 10 per 10 minutes (`/auth/sso/initiate`)
 - Failed password checks: `LOGIN_MAX_FAILED_ATTEMPTS` per username from each IP
@@ -5445,17 +5446,7 @@ Base path for the endpoints below: `/api/v1/system`
   "available_levels": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
   "default_level": "INFO",
   "categories": ["app", "security"],
-  "file_mapping": {
-    "app": "logs/app.log - Patient access, API calls, frontend errors, performance events",
-    "security": "logs/security.log - Authentication failures, security threats, suspicious activity"
-  },
-  "configuration": {
-    "log_level_numeric": 20,
-    "simplified_structure": true,
-    "file_count": 2,
-    "max_file_size_mb": 50,
-    "backup_count": 10
-  },
+  "log_level_numeric": 20,
   "timestamp": "2025-10-19T12:00:00Z",
   "rate_limit_info": {
     "requests_remaining": 59,
@@ -5484,8 +5475,7 @@ Base path for the endpoints below: `/api/v1/system`
 
 `GET /system/log-rotation-config`
 
-- **Authentication**: No
-- **Rate Limit**: 60 requests/minute per IP
+- **Authentication**: Yes (Admin only)
 - **Purpose**: Get current log rotation configuration and status
 - **Success Response** (200):
 
@@ -5620,7 +5610,9 @@ Base path: `/api/v1/frontend-logs`
 `POST /frontend-logs/log`
 
 - **Purpose**: Log frontend events and errors from the React frontend
-- **Authentication**: Optional (user_id can be provided in request)
+- **Authentication**: No. A `user_id` in the body is unverified and is not written to the log as the user
+- **Rate Limit**: 600 requests/minute per IP, shared with `/frontend-logs/error`
+- **Size limits**: `message` is truncated in the log line
 - **Request Body**:
 
 ```json
@@ -5643,7 +5635,7 @@ Base path: `/api/v1/frontend-logs`
 }
 ```
 
-- **Log levels**: `error`, `warn`, `info`, `debug`
+- **Log levels**: `debug`, `info`, `warn`/`warning`, `error`, `critical` (case-insensitive)
 - **Categories**: `error`, `user_action`, `performance`, `security`
 - **Success Response** (200):
 
@@ -5659,7 +5651,7 @@ Base path: `/api/v1/frontend-logs`
 `POST /frontend-logs/error`
 
 - **Purpose**: Log frontend errors with detailed context (for React error boundaries)
-- **Authentication**: Optional
+- **Authentication**: No. Same `user_id`, rate limit and size rules as `/frontend-logs/log`
 - **Request Body**:
 
 ```json
@@ -5862,25 +5854,6 @@ Base path: `/api/v1/admin`
     "authorization_status": "operational",
     "session_status": "operational"
   }
-}
-```
-
-#### Quick Health Check
-
-`GET /admin/dashboard/health-check`
-
-- **Purpose**: Quick health check for monitoring services
-- **Authentication**: No
-- **Success Response** (200):
-
-```json
-{
-  "status": "healthy",
-  "timestamp": "2025-10-04T10:30:00Z",
-  "service": "medical_records_api",
-  "version": "2.0",
-  "uptime": "432000s",
-  "startup_time": "2025-09-29T07:30:00Z"
 }
 ```
 

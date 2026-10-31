@@ -36,6 +36,7 @@ from app.crud.patient import patient as patient_crud
 from app.schemas.user import UserCreate
 from app.schemas.patient import PatientCreate
 from app.core.utils.security import create_access_token
+from app.api.v1.endpoints import frontend_logs
 from app.services import two_factor_service
 from app.services.login_throttle import login_throttle
 from tests.utils.user import create_random_user, create_user_authentication_headers
@@ -577,6 +578,7 @@ def cleanup_after_test():
     # Failed logins from the shared test client IP would otherwise add up across tests
     login_throttle.reset()
     two_factor_service.reset_state()
+    frontend_logs._anonymous_limiter.reset()
 
 
 @pytest.fixture

@@ -534,16 +534,6 @@ def set_application_startup_time(startup_time: Optional[datetime] = None) -> Non
     _APPLICATION_START_TIME = startup_time or get_utc_now()
 
 
-def get_application_startup_time() -> Optional[datetime]:
-    """
-    Get the actual application startup time.
-
-    Returns:
-        The datetime when the application started, or None if not set yet.
-    """
-    return _APPLICATION_START_TIME
-
-
 def get_application_uptime_seconds() -> Optional[int]:
     """
     Get the application uptime in seconds.

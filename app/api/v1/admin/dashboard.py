@@ -18,8 +18,6 @@ from app.api import deps
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_error
 from app.core.utils.datetime_utils import (
-    get_application_startup_time,
-    get_application_uptime_seconds,
     get_application_uptime_string,
 )
 from app.models.activity_log import ActivityLog, get_utc_now
@@ -656,23 +654,6 @@ def get_system_metrics(
         )
 
 
-@router.get("/health-check")
-def quick_health_check():
-    """Quick health check endpoint for monitoring services"""
-    startup_time = get_application_startup_time()
-    uptime_seconds = get_application_uptime_seconds()
-    uptime_info = f"{uptime_seconds}s" if uptime_seconds is not None else "operational"
-
-    return {
-        "status": "healthy",
-        "timestamp": get_utc_now().isoformat(),
-        "service": "medical_records_api",
-        "version": "2.0",
-        "uptime": uptime_info,
-        "startup_time": startup_time.isoformat() if startup_time else None,
-    }
-
-
 @router.get("/test-access")
 async def test_admin_access(
     current_user: User = Depends(deps.get_current_admin_user),
@@ -980,9 +961,3 @@ def get_analytics_data(
             },
             "error": str(e),
         }
-
-
-@router.get("/stats-test")
-def get_dashboard_stats_test():
-    """Simple test endpoint to debug routing issues"""
-    return {"message": "Test endpoint working", "status": "ok"}

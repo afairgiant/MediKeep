@@ -9,8 +9,9 @@ import os
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
+from app.api import deps
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.constants import (
@@ -25,6 +26,7 @@ from app.core.logging.constants import (
 from app.core.logging.helpers import log_security_event
 from app.core.utils.client_ip import get_client_ip
 from app.core.utils.rate_limit import SlidingWindowRateLimiter
+from app.models.models import User
 from app.services.release_notes_service import (
     get_release_notes_service,
     newer_release_tag,
@@ -48,7 +50,7 @@ rate_limiter = SlidingWindowRateLimiter(max_requests=60, window_seconds=60)
 @router.get("/log-level")
 def get_log_level(request: Request) -> Dict[str, Any]:
     """
-    Get current logging configuration for frontend integration.
+    Get current logging configuration for frontend integration. No authentication.
 
     Returns current LOG_LEVEL and available configuration options.
     Rate limited to 60 requests per minute per IP address.
@@ -59,7 +61,7 @@ def get_log_level(request: Request) -> Dict[str, Any]:
         - available_levels: List of valid log levels
         - default_level: Default level when not specified
         - categories: Available log categories
-        - file_mapping: Description of log files
+        - log_level_numeric: Numeric value of current_level
         - timestamp: Current timestamp
         - rate_limit_info: Rate limiting information
     """
@@ -130,17 +132,7 @@ def get_log_level(request: Request) -> Dict[str, Any]:
             "available_levels": VALID_LOG_LEVELS,
             "default_level": DEFAULT_LOG_LEVEL,
             "categories": CATEGORIES,
-            "file_mapping": {
-                "app": "logs/app.log - Patient access, API calls, frontend errors, performance events",
-                "security": "logs/security.log - Authentication failures, security threats, suspicious activity",
-            },
-            "configuration": {
-                "log_level_numeric": get_log_level_numeric(current_level),
-                "simplified_structure": True,
-                "file_count": len(CATEGORIES),
-                "max_file_size_mb": 50,
-                "backup_count": 10,
-            },
+            "log_level_numeric": get_log_level_numeric(current_level),
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "rate_limit_info": {
                 "requests_remaining": remaining_requests,
@@ -240,9 +232,12 @@ def system_health() -> Dict[str, Any]:
 
 
 @router.get("/log-rotation-config")
-def get_log_rotation_config(request: Request) -> Dict[str, Any]:
+def get_log_rotation_config(
+    request: Request,
+    current_user: User = Depends(deps.get_current_admin_user),
+) -> Dict[str, Any]:
     """
-    Get current log rotation configuration (admin endpoint).
+    Get current log rotation configuration. Admin only.
 
     Returns detailed information about log rotation settings including:
     - Active rotation method (logrotate vs Python)
@@ -250,33 +245,12 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
     - Log directory and file information
     - Feature availability by method
 
-    Rate limited to 60 requests per minute per IP address.
-
     Returns:
         Dict containing log rotation configuration details
     """
     client_ip = get_client_ip(request)
 
     try:
-        # Apply rate limiting
-        if not rate_limiter.is_allowed(client_ip):
-            log_security_event(
-                security_logger,
-                "rate_limit_exceeded",
-                request,
-                f"Rate limit exceeded for log rotation config endpoint from {client_ip}",
-                endpoint="/api/v1/system/log-rotation-config",
-            )
-
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=(
-                    "Rate limit exceeded. Maximum "
-                    f"{rate_limiter.max_requests} requests per minute."
-                ),
-                headers=rate_limiter.rate_limit_headers(client_ip),
-            )
-
         # Log access
         app_logger.info(
             f"Log rotation config endpoint accessed from {client_ip}",
