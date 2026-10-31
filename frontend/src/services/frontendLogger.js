@@ -130,7 +130,6 @@ class FrontendLogger {
 
         this.logDebug('Log level fetched from backend', {
           level: this.currentLogLevel,
-          configuration: config.configuration,
         });
       } else {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);

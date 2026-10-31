@@ -36,3 +36,14 @@ class TestTraceback:
         output = json.loads(MedicalRecordsJSONFormatter().format(_record()))
 
         assert LogFields.TRACEBACK not in output
+
+
+class TestClientUserId:
+    def test_written_separately_from_the_trusted_user_id(self):
+        record = _record()
+        record.client_user_id = 42
+
+        output = json.loads(MedicalRecordsJSONFormatter().format(record))
+
+        assert output["client_user_id"] == "42"
+        assert LogFields.USER_ID not in output

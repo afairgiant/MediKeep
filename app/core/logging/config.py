@@ -222,6 +222,7 @@ class MedicalRecordsJSONFormatter(logging.Formatter):
             LogFields.PATIENT_ID,
             LogFields.IP,
             LogFields.DURATION,
+            "client_user_id",  # unverified id from the frontend log endpoints
         ]
         for field in extra_fields:
             value = getattr(record, field, None)

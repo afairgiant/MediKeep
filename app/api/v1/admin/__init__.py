@@ -5,7 +5,9 @@ This module provides Django Admin-like functionality for the Medical Records sys
 allowing administrators to manage all models through a unified interface.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from app.api.deps import get_current_admin_user
 
 from app.api.v1.admin import (
     activity_log,
@@ -20,7 +22,8 @@ from app.api.v1.admin import (
     user_management,
 )
 
-router = APIRouter()
+# Router-wide so a route that forgets its own admin dependency is still protected
+router = APIRouter(dependencies=[Depends(get_current_admin_user)])
 
 # Include admin sub-routers
 router.include_router(dashboard.router, prefix="/dashboard", tags=["admin-dashboard"])

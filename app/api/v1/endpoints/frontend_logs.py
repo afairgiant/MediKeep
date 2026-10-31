@@ -10,17 +10,32 @@ from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
+from app.core.logging.constants import LogFields, sanitize_log_input
 from app.core.utils.client_ip import get_client_ip
+from app.core.utils.rate_limit import SlidingWindowRateLimiter
 
 router = APIRouter()
 
 # Initialize logger
 frontend_logger = get_logger("frontend", "app")
+
+# Shared by /log and /error, which accept requests from signed-out pages
+_anonymous_limiter = SlidingWindowRateLimiter(max_requests=600, window_seconds=60)
+
+MAX_MESSAGE_LENGTH = 2000
+
+# Client level, lower-cased -> (label, logger method); the frontend sends both cases
+_LEVELS = {
+    "debug": ("Debug", "debug"),
+    "info": ("Info", "info"),
+    "warn": ("Warning", "warning"),
+    "warning": ("Warning", "warning"),
+    "error": ("Error", "error"),
+    "critical": ("Critical", "critical"),
+}
 
 
 class FrontendLogRequest(BaseModel):
@@ -66,22 +81,30 @@ class UserActionRequest(BaseModel):
     url: str
 
 
+def _enforce_anonymous_limit(request: Request) -> str:
+    """Return the client IP, raising 429 once it exceeds the shared limit."""
+    client_ip = get_client_ip(request)
+    if not _anonymous_limiter.is_allowed(client_ip):
+        raise _anonymous_limiter.too_many_requests(
+            client_ip, "Too many log entries.", "frontend_log_rate_limited"
+        )
+    return client_ip
+
+
 @router.post("/log")
 def log_frontend_event(
     *,
     request: Request,
     log_data: FrontendLogRequest,
-    db: Session = Depends(deps.get_db),
+    user_ip: str = Depends(_enforce_anonymous_limit),
 ) -> Dict[str, str]:
     """
     Log frontend events and errors.
 
-    Accepts log entries from the React frontend and processes them
-    through the appropriate logging channels.
+    No authentication: the client's user_id is unverified and never logged as the
+    user. Rate limited per IP.
     """
-    user_ip = get_client_ip(request)
-
-    # Prepare log data with additional context
+    # Client fields stay in their own keys so they cannot overwrite server-set log fields
     log_context = {
         LogFields.CATEGORY: "frontend",
         "frontend_category": log_data.category,
@@ -92,62 +115,17 @@ def log_frontend_event(
         "url": log_data.url,
         "component": log_data.component,
         "action": log_data.action,
-        LogFields.USER_ID: log_data.user_id,
+        "client_user_id": log_data.user_id,
         "session_id": log_data.session_id,
+        "details": log_data.details,
+        "stack_trace": log_data.stack_trace,
     }
-
-    # Add details if provided, but filter out conflicting fields
-    if log_data.details:
-        # Filter out fields that conflict with Python's logging system
-        reserved_fields = {
-            "message",
-            "level",
-            "category",
-            "timestamp",
-            "name",
-            "msg",
-            "args",
-            "pathname",
-            "filename",
-            "module",
-            "lineno",
-            "funcName",
-            "created",
-            "msecs",
-            "relativeCreated",
-            "thread",
-            "threadName",
-            "processName",
-            "process",
-            "exc_info",
-            "exc_text",
-            "stack_info",
-        }
-        filtered_details = {
-            k: v for k, v in log_data.details.items() if k not in reserved_fields
-        }
-        log_context.update(filtered_details)
-
-    # Add stack trace for errors
-    if log_data.stack_trace:
-        log_context["stack_trace"] = (
-            log_data.stack_trace
-        )  # Log based on level and category
-    if log_data.level.lower() == "error":
-        frontend_logger.error(f"Frontend Error: {log_data.message}", extra=log_context)
-
-    elif log_data.level.lower() == "warn":
-        frontend_logger.warning(
-            f"Frontend Warning: {log_data.message}", extra=log_context
-        )
-
-    elif log_data.level.lower() == "debug":
-        frontend_logger.debug(f"Frontend Debug: {log_data.message}", extra=log_context)
-
-    else:  # info and any other level
-        frontend_logger.info(
-            f"Frontend {log_data.level.title()}: {log_data.message}", extra=log_context
-        )
+    label, method = _LEVELS.get(
+        log_data.level.lower(), (sanitize_log_input(log_data.level.title(), 20), "info")
+    )
+    log = getattr(frontend_logger, method)
+    message = sanitize_log_input(log_data.message, MAX_MESSAGE_LENGTH)
+    log(f"Frontend {label}: {message}", extra=log_context)
 
     return {"status": "logged", "timestamp": datetime.utcnow().isoformat()}
 
@@ -157,15 +135,13 @@ def log_frontend_error(
     *,
     request: Request,
     error_data: FrontendErrorRequest,
-    db: Session = Depends(deps.get_db),
+    user_ip: str = Depends(_enforce_anonymous_limit),
 ) -> Dict[str, str]:
     """
     Log frontend errors with detailed context.
 
-    Specifically designed for React error boundaries and unhandled errors.
+    Same trust rules and rate limit as /log.
     """
-    user_ip = get_client_ip(request)
-
     error_context = {
         LogFields.CATEGORY: "frontend",
         "frontend_category": "error",
@@ -177,22 +153,18 @@ def log_frontend_error(
         "frontend_timestamp": error_data.timestamp,
         "user_agent": error_data.user_agent
         or request.headers.get("user-agent", "unknown"),
-        LogFields.USER_ID: error_data.user_id,
+        "client_user_id": error_data.user_id,
+        "stack_trace": error_data.stack_trace,
+        "component_props": error_data.props,
+        "browser_info": error_data.browser_info,
     }
 
-    # Add stack trace if available
-    if error_data.stack_trace:
-        error_context["stack_trace"] = error_data.stack_trace
-
-    # Add component props if available
-    if error_data.props:
-        error_context["component_props"] = error_data.props
-
-    # Add browser info if available
-    if error_data.browser_info:
-        error_context["browser_info"] = error_data.browser_info  # Log the error
+    message = sanitize_log_input(error_data.error_message, MAX_MESSAGE_LENGTH)
+    component = sanitize_log_input(
+        error_data.component_name or "Unknown Component", 200
+    )
     frontend_logger.error(
-        f"Frontend Error: {error_data.error_message} in {error_data.component_name or 'Unknown Component'}",
+        f"Frontend Error: {message} in {component}",
         extra=error_context,
     )
 
