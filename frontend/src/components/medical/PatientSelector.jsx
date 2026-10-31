@@ -761,146 +761,248 @@ const PatientSelector = ({
     );
   }
 
+  const modals = (
+    <>
+      {/* Create Patient Modal */}
+      <Modal
+        opened={createModalOpened}
+        onClose={closeCreateModal}
+        title={t('patientSelector.modals.createTitle', 'Create New Patient')}
+        size="lg"
+        padding="lg"
+      >
+        <PatientForm
+          onSuccess={async newPatient => {
+            // Invalidate patient list cache to force fresh data
+            await invalidatePatientList();
+            setActivePatient(newPatient);
+            if (onPatientChange) {
+              onPatientChange(newPatient);
+            }
+            closeCreateModal();
+            notifySuccess('notifications:toasts.patient.nowViewing', {
+              interpolation: {
+                name: `${newPatient.first_name} ${newPatient.last_name}`,
+              },
+            });
+          }}
+          onCancel={closeCreateModal}
+          isModal={true}
+        />
+      </Modal>
+
+      {/* Edit Patient Modal */}
+      <Modal
+        opened={editModalOpened}
+        onClose={() => {
+          closeEditModal();
+          setEditingPatient(null);
+        }}
+        title={t('patientSelector.modals.editTitle', 'Edit Patient')}
+        size="lg"
+        padding="lg"
+      >
+        <PatientForm
+          patient={editingPatient}
+          onSuccess={async updatedPatient => {
+            // Invalidate patient list cache to force fresh data
+            await invalidatePatientList();
+            if (activePatient?.id === updatedPatient.id) {
+              setActivePatient(updatedPatient);
+              if (onPatientChange) {
+                onPatientChange(updatedPatient);
+              }
+            }
+            closeEditModal();
+            setEditingPatient(null);
+            notifySuccess('notifications:toasts.patient.updatedSuccess', {
+              interpolation: {
+                name: `${updatedPatient.first_name} ${updatedPatient.last_name}`,
+              },
+            });
+          }}
+          onCancel={() => {
+            closeEditModal();
+            setEditingPatient(null);
+          }}
+          isModal={true}
+        />
+      </Modal>
+
+      {/* Patient Sharing Modal */}
+      <PatientSharingModal
+        opened={sharingModalOpened}
+        onClose={() => {
+          closeSharingModal();
+          setSharingPatient(null);
+        }}
+        patient={sharingPatient}
+        onSuccess={async () => {
+          // Invalidate patient list cache in case sharing affects patient list
+          await invalidatePatientList();
+          closeSharingModal();
+          setSharingPatient(null);
+        }}
+      />
+    </>
+  );
+
   // Minimized view - single line with patient name and expand button
   if (isMinimized && activePatient) {
     const activePatientPhoto = getPatientPhoto(activePatient);
     return (
-      <Group
-        gap="sm"
-        p="xs"
-        styles={() => ({
-          root: {
-            borderRadius: 8,
-            backgroundColor: 'var(--mantine-color-default)',
-            border: '1px solid var(--mantine-color-default-border)',
-          },
-        })}
-      >
-        <PatientAvatar
-          photoUrl={activePatientPhoto}
-          patient={activePatient}
-          size="sm"
-          color="blue"
-          radius="xl"
-        />
-        <div style={{ flex: 1 }}>
-          <Text fw={500} size="sm">
-            {formatPatientName(activePatient)}
-            {activePatient.relationship_to_self && (
-              <Text span ml="xs" style={{ color: getRelationshipTextColor() }}>
-                ({formatRelationshipLabel(activePatient.relationship_to_self)})
-              </Text>
-            )}
-          </Text>
-        </div>
-        {getPatientBadge(activePatient)}
-
-        {/* Loading indicator */}
-        {(combinedLoading || externalLoading) && <Loader size="xs" />}
-
-        {/* Expand button */}
-        <Tooltip
-          label={t(
-            'patientSelector.tooltips.expand',
-            'Expand patient selector'
-          )}
+      <>
+        <Group
+          gap="sm"
+          p="xs"
+          styles={() => ({
+            root: {
+              borderRadius: 8,
+              backgroundColor: 'var(--mantine-color-default)',
+              border: '1px solid var(--mantine-color-default-border)',
+            },
+          })}
         >
-          <ActionIcon
-            variant="subtle"
-            color={getIconColor('blue')}
+          <PatientAvatar
+            photoUrl={activePatientPhoto}
+            patient={activePatient}
             size="sm"
-            onClick={() => setIsMinimized(false)}
-            disabled={combinedLoading || externalLoading}
-            style={colorScheme === 'light' ? { color: '#000000' } : undefined}
-          >
-            <IconChevronDown size="0.8rem" />
-          </ActionIcon>
-        </Tooltip>
-
-        {/* Quick patient switch menu */}
-        <Menu shadow="md" width={300} position="bottom-start">
-          <Menu.Target>
-            <Tooltip
-              label={t(
-                'patientSelector.tooltips.switchPatient',
-                'Switch patient'
-              )}
-            >
-              <ActionIcon
-                variant="subtle"
-                color={getIconColor('gray')}
-                size="sm"
-                disabled={combinedLoading || externalLoading}
-                style={
-                  colorScheme === 'light' ? { color: '#000000' } : undefined
-                }
-              >
-                <IconUsers size="0.8rem" />
-              </ActionIcon>
-            </Tooltip>
-          </Menu.Target>
-
-          <Menu.Dropdown>
-            <Menu.Label>
-              {t('patientSelector.labels.switchTo', 'Switch to Patient')}
-            </Menu.Label>
-            {patients.map(patient => {
-              const patientPhoto = getPatientPhoto(patient);
-              return (
-                <Menu.Item
-                  key={patient.id}
-                  leftSection={
-                    <PatientAvatar
-                      photoUrl={patientPhoto}
-                      patient={patient}
-                      size="xs"
-                      color="blue"
-                      radius="xl"
-                    />
-                  }
-                  rightSection={getPatientBadge(patient)}
-                  onClick={() => switchPatient(patient.id)}
-                  disabled={patient.id === activePatient?.id}
+            color="blue"
+            radius="xl"
+          />
+          <div style={{ flex: 1 }}>
+            <Text fw={500} size="sm">
+              {formatPatientName(activePatient)}
+              {activePatient.relationship_to_self && (
+                <Text
+                  span
+                  ml="xs"
+                  style={{ color: getRelationshipTextColor() }}
                 >
-                  <div>
-                    <Text
-                      size="sm"
-                      fw={patient.id === activePatient?.id ? 600 : 500}
-                    >
-                      {formatPatientName(patient)}
-                      {patient.relationship_to_self && (
-                        <Text
-                          span
-                          ml="xs"
-                          fw={400}
-                          style={{ color: getRelationshipTextColor() }}
-                        >
-                          (
-                          {formatRelationshipLabel(
-                            patient.relationship_to_self
-                          )}
-                          )
-                        </Text>
-                      )}
-                    </Text>
-                    <Text size="xs" c="dimmed">
-                      {formatBirthDate(patient.birth_date)}
-                    </Text>
-                  </div>
-                </Menu.Item>
-              );
-            })}
+                  ({formatRelationshipLabel(activePatient.relationship_to_self)}
+                  )
+                </Text>
+              )}
+            </Text>
+          </div>
+          {getPatientBadge(activePatient)}
 
-            <Menu.Divider />
-            <Menu.Item
-              leftSection={<IconPlus size="0.8rem" />}
-              onClick={openCreateModal}
+          {/* Loading indicator */}
+          {(combinedLoading || externalLoading) && <Loader size="xs" />}
+
+          {/* Expand button */}
+          <Tooltip
+            label={t(
+              'patientSelector.tooltips.expand',
+              'Expand patient selector'
+            )}
+          >
+            <ActionIcon
+              variant="subtle"
+              color={getIconColor('blue')}
+              size="sm"
+              aria-label={t(
+                'patientSelector.tooltips.expand',
+                'Expand patient selector'
+              )}
+              onClick={() => setIsMinimized(false)}
+              disabled={combinedLoading || externalLoading}
+              style={colorScheme === 'light' ? { color: '#000000' } : undefined}
             >
-              {t('patientSelector.buttons.addNew', 'Add New Patient')}
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      </Group>
+              <IconChevronDown size="0.8rem" />
+            </ActionIcon>
+          </Tooltip>
+
+          {/* Quick patient switch menu */}
+          <Menu shadow="md" width={300} position="bottom-start">
+            <Menu.Target>
+              <Tooltip
+                label={t(
+                  'patientSelector.tooltips.switchPatient',
+                  'Switch patient'
+                )}
+              >
+                <ActionIcon
+                  variant="subtle"
+                  color={getIconColor('gray')}
+                  size="sm"
+                  aria-label={t(
+                    'patientSelector.tooltips.switchPatient',
+                    'Switch patient'
+                  )}
+                  disabled={combinedLoading || externalLoading}
+                  style={
+                    colorScheme === 'light' ? { color: '#000000' } : undefined
+                  }
+                >
+                  <IconUsers size="0.8rem" />
+                </ActionIcon>
+              </Tooltip>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Label>
+                {t('patientSelector.labels.switchTo', 'Switch to Patient')}
+              </Menu.Label>
+              {patients.map(patient => {
+                const patientPhoto = getPatientPhoto(patient);
+                return (
+                  <Menu.Item
+                    key={patient.id}
+                    leftSection={
+                      <PatientAvatar
+                        photoUrl={patientPhoto}
+                        patient={patient}
+                        size="xs"
+                        color="blue"
+                        radius="xl"
+                      />
+                    }
+                    rightSection={getPatientBadge(patient)}
+                    onClick={() => switchPatient(patient.id)}
+                    disabled={patient.id === activePatient?.id}
+                  >
+                    <div>
+                      <Text
+                        size="sm"
+                        fw={patient.id === activePatient?.id ? 600 : 500}
+                      >
+                        {formatPatientName(patient)}
+                        {patient.relationship_to_self && (
+                          <Text
+                            span
+                            ml="xs"
+                            fw={400}
+                            style={{ color: getRelationshipTextColor() }}
+                          >
+                            (
+                            {formatRelationshipLabel(
+                              patient.relationship_to_self
+                            )}
+                            )
+                          </Text>
+                        )}
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        {formatBirthDate(patient.birth_date)}
+                      </Text>
+                    </div>
+                  </Menu.Item>
+                );
+              })}
+
+              <Menu.Divider />
+              <Menu.Item
+                leftSection={<IconPlus size="0.8rem" />}
+                onClick={openCreateModal}
+              >
+                {t('patientSelector.buttons.addNew', 'Add New Patient')}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Group>
+        {modals}
+      </>
     );
   }
 
@@ -1216,87 +1318,7 @@ const PatientSelector = ({
         )}
       </Stack>
 
-      {/* Create Patient Modal */}
-      <Modal
-        opened={createModalOpened}
-        onClose={closeCreateModal}
-        title={t('patientSelector.modals.createTitle', 'Create New Patient')}
-        size="lg"
-        padding="lg"
-      >
-        <PatientForm
-          onSuccess={async newPatient => {
-            // Invalidate patient list cache to force fresh data
-            await invalidatePatientList();
-            setActivePatient(newPatient);
-            if (onPatientChange) {
-              onPatientChange(newPatient);
-            }
-            closeCreateModal();
-            notifySuccess('notifications:toasts.patient.nowViewing', {
-              interpolation: {
-                name: `${newPatient.first_name} ${newPatient.last_name}`,
-              },
-            });
-          }}
-          onCancel={closeCreateModal}
-          isModal={true}
-        />
-      </Modal>
-
-      {/* Edit Patient Modal */}
-      <Modal
-        opened={editModalOpened}
-        onClose={() => {
-          closeEditModal();
-          setEditingPatient(null);
-        }}
-        title={t('patientSelector.modals.editTitle', 'Edit Patient')}
-        size="lg"
-        padding="lg"
-      >
-        <PatientForm
-          patient={editingPatient}
-          onSuccess={async updatedPatient => {
-            // Invalidate patient list cache to force fresh data
-            await invalidatePatientList();
-            if (activePatient?.id === updatedPatient.id) {
-              setActivePatient(updatedPatient);
-              if (onPatientChange) {
-                onPatientChange(updatedPatient);
-              }
-            }
-            closeEditModal();
-            setEditingPatient(null);
-            notifySuccess('notifications:toasts.patient.updatedSuccess', {
-              interpolation: {
-                name: `${updatedPatient.first_name} ${updatedPatient.last_name}`,
-              },
-            });
-          }}
-          onCancel={() => {
-            closeEditModal();
-            setEditingPatient(null);
-          }}
-          isModal={true}
-        />
-      </Modal>
-
-      {/* Patient Sharing Modal */}
-      <PatientSharingModal
-        opened={sharingModalOpened}
-        onClose={() => {
-          closeSharingModal();
-          setSharingPatient(null);
-        }}
-        patient={sharingPatient}
-        onSuccess={async () => {
-          // Invalidate patient list cache in case sharing affects patient list
-          await invalidatePatientList();
-          closeSharingModal();
-          setSharingPatient(null);
-        }}
-      />
+      {modals}
     </Paper>
   );
 };
