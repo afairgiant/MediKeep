@@ -5,7 +5,7 @@ Patient Management Service - Enhanced patient CRUD operations with V1 ownership
 from datetime import date, datetime
 from typing import List, Optional
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger, log_security_event
@@ -449,6 +449,25 @@ class PatientManagementService:
             self.db.commit()
             return None
 
+    def resolve_active_patient(self, user: User, *options) -> Optional[Patient]:
+        """The active patient if the user can still view it, else None.
+
+        A stale active_patient_id is left in place, so every call refuses until the
+        user selects another patient. With none set, an owned patient is selected
+        as in ensure_active_patient. options are applied to the patient query.
+        """
+        if not user.active_patient_id:
+            return self.ensure_active_patient(user)
+        patient = (
+            self.db.query(Patient)
+            .options(*options)
+            .filter(Patient.id == user.active_patient_id)
+            .first()
+        )
+        if patient and self.access_service.can_access_patient(user, patient, "view"):
+            return patient
+        return None
+
     def ensure_active_patient(self, user: User) -> Optional[Patient]:
         """
         Ensure the user has an active patient set. If not, auto-resolve by
@@ -688,3 +707,25 @@ class PatientManagementService:
             "active_patient_id": active_patient_id,
             "sharing_stats": self.access_service.get_user_patient_count(user),
         }
+
+
+def get_active_patient_for_user(
+    db: Session, user_id: int, *options
+) -> Optional[Patient]:
+    """resolve_active_patient for a user id; None if the user is missing or selection fails."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+    try:
+        return PatientManagementService(db).resolve_active_patient(user, *options)
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.warning(
+            "Failed to auto-resolve active patient",
+            extra={
+                LogFields.EVENT: "active_patient_resolve_failed",
+                LogFields.USER_ID: user_id,
+                LogFields.ERROR: str(e),
+            },
+        )
+        return None

@@ -209,6 +209,7 @@ class PatientSharingService:
             return False
 
         share.is_active = False
+        self._clear_active_patient(shared_with_user_id, patient_id)
 
         # NEW: Update invitation status if it exists
         if share.invitation_id:
@@ -389,6 +390,12 @@ class PatientSharingService:
 
         return {"shared_by_me": shared_by_me, "shared_with_me": shared_with_me}
 
+    def _clear_active_patient(self, user_id: int, patient_id: int) -> None:
+        """Unset the user's active patient if it is this one. Caller commits."""
+        self.db.query(User).filter(
+            User.id == user_id, User.active_patient_id == patient_id
+        ).update({User.active_patient_id: None})
+
     def cleanup_expired_shares(self) -> int:
         """
         Clean up expired patient shares
@@ -410,6 +417,7 @@ class PatientSharingService:
         count = 0
         for share in expired_shares:
             share.is_active = False
+            self._clear_active_patient(share.shared_with_user_id, share.patient_id)
             count += 1
 
         self.db.commit()
@@ -474,6 +482,7 @@ class PatientSharingService:
 
         # Deactivate the share
         share.is_active = False
+        self._clear_active_patient(user.id, patient_id)
         self.db.commit()
 
         logger.info(
