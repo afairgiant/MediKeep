@@ -19,7 +19,6 @@ from app.core.logging.helpers import (
     log_security_event,
     log_validation_error,
 )
-from app.models.models import User
 from app.schemas.custom_reports import (
     CustomReportRequest,
     DataSummaryResponse,
@@ -33,6 +32,7 @@ from app.schemas.custom_reports import (
 )
 from app.schemas.trend_charts import TrendChartSelection, encode_lab_chart_key
 from app.services.custom_report_service import CustomReportService
+from app.services.patient_management import get_active_patient_for_user
 from app.services.trend_data_fetcher import TrendDataFetcher
 
 logger = get_logger(__name__, "app")
@@ -41,11 +41,9 @@ router = APIRouter()
 
 
 def _get_active_patient_id(db: Session, user_id: int) -> Optional[int]:
-    """Look up the active patient ID for a user. Returns None if not set."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user or not user.active_patient_id:
-        return None
-    return user.active_patient_id
+    """The user's active patient ID if they can still view it, else None."""
+    patient = get_active_patient_for_user(db, user_id)
+    return patient.id if patient else None
 
 
 @router.get("/data-summary", response_model=DataSummaryResponse)

@@ -840,13 +840,10 @@ def cleanup_expired_shares(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user: User = Depends(deps.get_current_admin_user),
 ) -> Any:
     """
-    Clean up expired patient shares.
-
-    This is a maintenance endpoint that deactivates expired shares.
-    Only available to admin users in production.
+    Deactivate every expired patient share, across all users. Admin only.
     """
     try:
         service = PatientSharingService(db)

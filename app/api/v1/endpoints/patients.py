@@ -34,6 +34,7 @@ from app.models.models import User
 from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
 from app.schemas.patient_photo import PatientPhotoResponse
+from app.services.patient_access import PatientAccessService
 from app.services.patient_photo_service import patient_photo_service
 
 router = APIRouter()
@@ -560,8 +561,6 @@ async def get_my_dashboard_stats(
         # Get the target patient ID
         if patient_id:
             # Phase 1: Use provided patient_id with access control
-            from app.services.patient_access import PatientAccessService
-
             access_service = PatientAccessService(db)
 
             # Get the patient record
@@ -666,7 +665,6 @@ def get_user_recent_activity(
         if patient_id:
             # Validate patient access using patient_access service
             from app.crud.user import user as user_crud
-            from app.services.patient_access import PatientAccessService
 
             # Get user and patient objects
             user_obj = user_crud.get(db, id=current_user_id)
@@ -855,20 +853,17 @@ async def upload_patient_photo(
         file_name=file.filename,
     )
 
-    # Verify patient ownership
     patient_obj = patient.get(db, id=patient_id)
     if not patient_obj:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    if patient_obj.owner_user_id != current_user.id:
-        # Check if user has access via sharing
-        from app.crud.patient_share import patient_share as share_crud
-
-        if not share_crud.user_has_access(db, patient_id, current_user.id):
-            raise HTTPException(
-                status_code=403,
-                detail="You don't have permission to update this patient's photo",
-            )
+    if not PatientAccessService(db).can_access_patient(
+        current_user, patient_obj, "edit"
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to update this patient's photo",
+        )
 
     try:
         # Upload and process the photo

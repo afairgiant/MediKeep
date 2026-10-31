@@ -4813,14 +4813,13 @@ Base path: `/api/v1/patient-sharing`
 
 `POST /patient-sharing/cleanup-expired`
 
-- **Purpose**: Remove expired sharing invitations (admin/scheduled task)
-- **Authentication**: Yes
+- **Purpose**: Deactivate every expired patient share, across all users
+- **Authentication**: Yes (Admin only)
 - **Success Response** (200):
 
 ```json
 {
-  "expired_shares_removed": 5,
-  "cleanup_date": "2025-10-04T10:30:00Z"
+  "message": "Cleaned up 5 expired shares"
 }
 ```
 

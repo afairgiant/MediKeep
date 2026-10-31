@@ -14,6 +14,7 @@ from sqlalchemy import DateTime
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.models.models import (
     Allergy,
@@ -37,7 +38,6 @@ from app.models.models import (
     ReportTemplate,
     Symptom,
     Treatment,
-    User,
     Vitals,
 )
 from app.models.procedures import MedicalEquipment
@@ -57,6 +57,7 @@ from app.schemas.trend_charts import TrendChartSelection
 from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.export_service import ExportService, UnitConverter
+from app.services.patient_management import get_active_patient_for_user
 from app.services.report_translations import get_translator
 from app.utils.notes_markdown import MARKDOWN_FIELDS_BY_SECTION, notes_to_plain_text
 
@@ -129,97 +130,16 @@ class CustomReportService:
             language, (user_prefs and user_prefs.date_format) or "mdy"
         )
 
-        # Get the active patient for the user first
-        user = self.db.query(User).filter(User.id == user_id).first()
-        if not user:
-            logger.warning(f"User {user_id} not found")
-            return DataSummaryResponse(categories={}, total_records=0)
-
-        # Get the active patient ID
-        if not user.active_patient_id:
-            # Check if user has a self-record that can be set as active
-            self_record = (
-                self.db.query(Patient)
-                .filter(
-                    Patient.owner_user_id == user_id, Patient.is_self_record.is_(True)
-                )
-                .first()
+        patient = get_active_patient_for_user(self.db, user_id)
+        if not patient:
+            logger.warning(
+                "No active patient available",
+                extra={
+                    LogFields.EVENT: "custom_report_no_active_patient",
+                    LogFields.USER_ID: user_id,
+                },
             )
-
-            if self_record:
-                try:
-                    user.active_patient_id = self_record.id
-                    self.db.commit()
-                    self.db.refresh(user)
-
-                    logger.info(
-                        "Auto-setting self-record as active patient",
-                        extra={
-                            "user_id": user_id,
-                            "patient_id": self_record.id,
-                            "context": "custom_report_access",
-                        },
-                    )
-                except Exception as e:
-                    self.db.rollback()
-                    logger.error(
-                        "Failed to set self-record as active patient",
-                        extra={
-                            "user_id": user_id,
-                            "patient_id": self_record.id,
-                            "context": "custom_report_access",
-                            "error": str(e),
-                        },
-                    )
-                    logger.warning(f"No active patient for user {user_id}")
-                    return DataSummaryResponse(categories={}, total_records=0)
-            else:
-                # Check if user has any owned patients at all
-                any_patient = (
-                    self.db.query(Patient)
-                    .filter(Patient.owner_user_id == user_id)
-                    .first()
-                )
-
-                if any_patient:
-                    try:
-                        user.active_patient_id = any_patient.id
-                        self.db.commit()
-                        self.db.refresh(user)
-
-                        logger.info(
-                            "Auto-setting first available patient as active",
-                            extra={
-                                "user_id": user_id,
-                                "patient_id": any_patient.id,
-                                "context": "custom_report_access",
-                            },
-                        )
-                    except Exception as e:
-                        self.db.rollback()
-                        logger.error(
-                            "Failed to set first available patient as active",
-                            extra={
-                                "user_id": user_id,
-                                "patient_id": any_patient.id,
-                                "context": "custom_report_access",
-                                "error": str(e),
-                            },
-                        )
-                        logger.warning(
-                            "No patients available for user",
-                            extra={
-                                "user_id": user_id,
-                                "context": "custom_report_access",
-                            },
-                        )
-                        return DataSummaryResponse(categories={}, total_records=0)
-                else:
-                    logger.warning(
-                        "No patients available for user",
-                        extra={"user_id": user_id, "context": "custom_report_access"},
-                    )
-                    return DataSummaryResponse(categories={}, total_records=0)
+            return DataSummaryResponse(categories={}, total_records=0)
 
         # Include patient ID in cache key so different patients have different caches
         filter_key = (
@@ -227,9 +147,7 @@ class CustomReportService:
             date_range.end_date if date_range else None,
             tuple(sorted(t.lower() for t in tags or [])),
         )
-        cache_key = (
-            f"summary_{user_id}_{user.active_patient_id}_{language}_{filter_key}"
-        )
+        cache_key = f"summary_{user_id}_{patient.id}_{language}_{filter_key}"
         now = time.time()
 
         # Check cache
@@ -238,25 +156,13 @@ class CustomReportService:
             and now - self._summary_cache[cache_key]["timestamp"] < self._cache_timeout
         ):
             logger.debug(
-                f"Returning cached summary for user {user_id}, patient {user.active_patient_id}"
+                f"Returning cached summary for user {user_id}, patient {patient.id}"
             )
             return self._summary_cache[cache_key]["data"]
 
         logger.debug(
-            f"Generating new data summary for user {user_id}, active patient {user.active_patient_id}"
+            f"Generating new data summary for user {user_id}, active patient {patient.id}"
         )
-
-        # Get the patient
-        patient = (
-            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
-        )
-        if not patient:
-            logger.warning(
-                f"Active patient {user.active_patient_id} not found for user {user_id}"
-            )
-            return DataSummaryResponse(categories={}, total_records=0)
-
-        logger.debug(f"Found active patient {patient.id} for user {user_id}")
 
         categories = {}
         total_records = 0
@@ -828,19 +734,9 @@ class CustomReportService:
         self, user_id: int, selected_records: List[SelectiveRecordRequest]
     ):
         """Ensure user can only access their own records"""
-        # Get the active patient for the user
-        user = self.db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise PermissionError("User not found")
-
-        if not user.active_patient_id:
-            raise PermissionError("No active patient selected")
-
-        patient = (
-            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
-        )
+        patient = get_active_patient_for_user(self.db, user_id)
         if not patient:
-            raise PermissionError("Active patient record not found")
+            raise PermissionError("No active patient available")
 
         for record_group in selected_records:
             if record_group.category not in self.CATEGORY_MODELS:
@@ -1118,13 +1014,8 @@ class CustomReportService:
         return chart_results
 
     def _get_active_patient(self, user_id: int) -> Patient:
-        """The user's active patient, or CustomReportError when there is none"""
-        user = self.db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise CustomReportError("User not found")
-        patient = (
-            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
-        )
+        """The user's active patient, or CustomReportError when there is none they can view"""
+        patient = get_active_patient_for_user(self.db, user_id)
         if not patient:
             raise CustomReportError("No active patient found")
         return patient

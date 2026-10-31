@@ -177,6 +177,7 @@ class TestNoMatchingRecords:
         svc._log_report_generation_failed = AsyncMock()
         svc.validate_record_ownership = AsyncMock()
         svc._get_selected_records = AsyncMock(return_value=[])
+        svc._get_active_patient = MagicMock(return_value=SimpleNamespace(id=1))
         request = CustomReportRequest(
             selected_records=[{"category": "medications", "record_ids": [1]}],
             date_range={"start_date": "2024-01-01"},
