@@ -5610,7 +5610,7 @@ Base path: `/api/v1/frontend-logs`
 `POST /frontend-logs/log`
 
 - **Purpose**: Log frontend events and errors from the React frontend
-- **Authentication**: No. A `user_id` in the body is unverified and is not written to the log as the user
+- **Authentication**: No. A `user_id` in the body is unverified: it is logged as `client_user_id`, never as the user
 - **Rate Limit**: 600 requests/minute per IP, shared with `/frontend-logs/error`
 - **Size limits**: `message` is truncated in the log line
 - **Request Body**:
