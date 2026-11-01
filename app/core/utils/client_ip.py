@@ -5,7 +5,7 @@ security log records another cannot be reasoned about after the fact.
 """
 
 import ipaddress
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from fastapi import Request
 
@@ -85,3 +85,14 @@ def get_client_ip(request: Request) -> str:
             return sanitize_log_input(forwarded, max_length=_MAX_IP_LENGTH)
 
     return sanitize_log_input(peer, max_length=_MAX_IP_LENGTH)
+
+
+def request_audit_fields(
+    request: Optional[Request],
+) -> Tuple[Optional[str], Optional[str]]:
+    """(ip_address, user_agent) for an activity-log entry; both None without a request."""
+    if request is None:
+        return None, None
+    ip_address = get_client_ip(request) if request.client else None
+    raw_agent = request.headers.get("user-agent")
+    return ip_address, sanitize_log_input(raw_agent) if raw_agent else None

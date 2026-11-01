@@ -31,7 +31,7 @@ def normalize_and_validate_tag(tag: str) -> str:
     # check is an upper bound only, and "." is itself allowed punctuation -
     # which would let e.g. "   " create a blank tag, or a blank/punctuation
     # `new_tag` on the rename/replace endpoints blank a tag across every
-    # record it appears on via the raw-SQL path in tag_service. Require at
+    # record it appears on. Require at
     # least one alphanumeric character survives normalization.
     if not any(c.isalnum() for c in normalized):
         raise ValueError("Tag must contain at least one letter or number")

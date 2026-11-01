@@ -5,7 +5,10 @@ Provides helper functions that work with both PostgreSQL and SQLite,
 abstracting away database-specific operations.
 """
 
+from typing import Any, Dict, List
+
 from sqlalchemy import JSON, and_, case, cast, func, literal, true
+from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
 
@@ -85,3 +88,20 @@ def json_array_elements(db: Session, column: ColumnElement):
         else_=cast(literal("[]"), JSON),
     )
     return func.json_array_elements_text(array_only).table_valued("value")
+
+
+def insert_ignoring_conflicts(
+    db: Session, model, rows: List[Dict[str, Any]], index_elements: List[str]
+) -> int:
+    """Insert rows, skipping any that would violate the unique key on `index_elements`.
+
+    Returns how many rows were inserted. Safe against concurrent writers.
+    """
+    if not rows:
+        return 0
+    insert = (
+        postgresql.insert if get_database_type(db) == "postgresql" else sqlite.insert
+    )
+    return db.execute(
+        insert(model).values(rows).on_conflict_do_nothing(index_elements=index_elements)
+    ).rowcount

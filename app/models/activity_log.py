@@ -157,6 +157,7 @@ class EntityType:
     INJURY_TYPE = "injury_type"
     MEDICAL_EQUIPMENT = "medical_equipment"
     BLOOD_DONATION = "blood_donation"
+    TAG = "tag"
 
     # System entities
     SYSTEM = "system"
@@ -192,6 +193,7 @@ class EntityType:
             cls.INJURY,
             cls.INJURY_TYPE,
             cls.BLOOD_DONATION,
+            cls.TAG,
             cls.SYSTEM,
             cls.BACKUP,
         ]

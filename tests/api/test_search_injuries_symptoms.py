@@ -14,7 +14,7 @@ from app.api.v1.endpoints import tags as tags_endpoint
 from app.crud.patient import patient as patient_crud
 from app.models.models import Injury, MedicalEquipment, Symptom
 from app.schemas.patient import PatientCreate
-from app.services.tag_service import tag_service
+from app.services.tag_service import ENTITY_MODELS
 from tests.utils.user import create_random_user, create_user_token_headers
 
 
@@ -476,20 +476,18 @@ class TestInjurySymptomIsolation:
 
 
 class TestTagSearchRegistration:
-    """Tag search is raw SQL over ENTITY_TABLES; an unregistered type returns nothing."""
+    """Tag search covers only ENTITY_MODELS; an unregistered type returns nothing."""
 
     @pytest.mark.parametrize(
-        "entity_type,table",
+        "entity_type,model",
         [
-            ("injury", "injuries"),
-            ("symptom", "symptoms"),
-            ("medical_equipment", "medical_equipment"),
+            ("injury", Injury),
+            ("symptom", Symptom),
+            ("medical_equipment", MedicalEquipment),
         ],
     )
-    def test_entity_registered_with_real_table(self, entity_type, table):
-        assert tag_service.ENTITY_TABLES[entity_type] == table
-        assert tag_service._validate_entity_type(entity_type) == table
-        assert table in Injury.metadata.tables
+    def test_entity_registered_with_its_model(self, entity_type, model):
+        assert ENTITY_MODELS[entity_type] is model
 
     @pytest.mark.parametrize(
         "endpoint",

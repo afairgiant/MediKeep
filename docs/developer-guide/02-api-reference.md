@@ -5068,6 +5068,8 @@ Base path: `/api/v1/tags`
 
 **Scoping**: Each user has their own tag registry (`user_tags`, unique per user and tag name). The read endpoints (`/popular`, `/autocomplete`, `/suggestions`) return only the calling user's tags, and usage counts include only records of patients that user owns. Two users can have the same tag name without seeing each other's tags.
 
+**Bulk changes** (`/rename`, `/delete`, `/replace`): change only records of patients the caller owns, never a patient shared with them. Each runs in one transaction: on any error nothing is saved and the endpoint returns 500. A changed record keeps its `updated_at`. Each writes one activity entry (entity type `tag`) per patient whose records changed, naming the tags and the number of records; these appear in the patient's recent activity and in the admin audit log.
+
 #### Get Popular Tags
 
 `GET /tags/popular`
@@ -5075,7 +5077,7 @@ Base path: `/api/v1/tags`
 - **Purpose**: Get the calling user's tags, ordered by usage across their owned patients
 - **Authentication**: Yes
 - **Query Parameters**:
-  - `entity_types` (array, default: all types): Entity types to count usage in (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy, injury, symptom, medical_equipment)
+  - `entity_types` (array, default: all types): Entity types to count usage in (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy, injury, symptom, medical_equipment, blood_donation)
   - `limit` (integer, default: 20, max: 50): Maximum number of tags
 - **Success Response** (200): Each tag name appears at most once.
 
@@ -5102,13 +5104,14 @@ Base path: `/api/v1/tags`
 
 `GET /tags/search`
 
-- **Purpose**: Search across entity types by tags
+- **Purpose**: Search the active (or specified) patient's records by exact tag, newest first
 - **Authentication**: Yes
 - **Query Parameters**:
   - `tags` (array, required): Tags to search for
   - `entity_types` (array, default: all types): Entity types to search (same values as `/tags/popular`)
   - `limit_per_entity` (integer, default: 10, max: 20): Max results per entity type
-- **Success Response** (200):
+  - `match_mode` (string, default: `any`): `any` matches records with at least one tag, `all` records with every tag
+- **Success Response** (200): Every column of each matching record. An unknown entity type returns an empty list.
 
 ```json
 {
@@ -5126,7 +5129,7 @@ Base path: `/api/v1/tags`
 
 `GET /tags/autocomplete`
 
-- **Purpose**: Get the calling user's tags that start with the typed prefix (case-insensitive)
+- **Purpose**: Get the calling user's tags that start with the typed prefix (case-insensitive; `%` and `_` match literally)
 - **Authentication**: Yes
 - **Query Parameters**:
   - `q` (string, required, min: 1, max: 50): Query string
@@ -5156,7 +5159,7 @@ Base path: `/api/v1/tags`
 
 `PUT /tags/rename`
 
-- **Purpose**: Rename a tag across all entities
+- **Purpose**: Rename a tag on the caller's records (see **Bulk changes** above). A record that already has `new_tag` keeps one copy. If the caller already has `new_tag` in their registry, `old_tag` is merged into it
 - **Authentication**: Yes
 - **Query Parameters**:
   - `old_tag` (string, required): Current tag name to rename
@@ -5174,7 +5177,7 @@ Base path: `/api/v1/tags`
 
 `DELETE /tags/delete`
 
-- **Purpose**: Delete a tag from all entities
+- **Purpose**: Remove a tag from the caller's records and registry (see **Bulk changes** above). A record left with no tags has `tags: []`
 - **Authentication**: Yes
 - **Query Parameters**:
   - `tag` (string, required): Tag name to delete
@@ -5191,7 +5194,7 @@ Base path: `/api/v1/tags`
 
 `PUT /tags/replace`
 
-- **Purpose**: Replace one tag with another across all entities
+- **Purpose**: Replace one tag with another on the caller's records (see **Bulk changes** above). Each changed record's tags end up sorted with no duplicates. `old_tag` leaves the registry and `new_tag` joins it
 - **Authentication**: Yes
 - **Query Parameters**:
   - `old_tag` (string, required): Tag to replace

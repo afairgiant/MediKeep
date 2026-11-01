@@ -136,7 +136,7 @@ async def search_by_tags_across_entities(
         request,
         current_user.id,
         "tags_search_performed",
-        tags=tags,
+        tag_count=len(tags),
         entity_types=entity_types,
         limit_per_entity=limit_per_entity,
         match_mode=match_mode,
@@ -168,7 +168,7 @@ async def autocomplete_tags(
         request,
         current_user.id,
         "tag_autocomplete_requested",
-        query=q,
+        query_length=len(q),
         limit=limit,
     )
 
@@ -227,22 +227,20 @@ async def rename_tag(
         raise HTTPException(status_code=400, detail=str(e))
 
     log_data_access(
-        logger,
-        request,
-        current_user.id,
-        "update",
-        "Tag",
-        old_tag=old_tag,
-        new_tag=new_tag,
+        logger, request, current_user.id, "update", "Tag", operation_type="rename"
     )
 
     result = tag_service.rename_tag_across_entities(
-        db, old_tag=old_tag, new_tag=new_tag, user_id=current_user.id
+        db,
+        old_tag=old_tag,
+        new_tag=new_tag,
+        user_id=current_user.id,
+        request=request,
     )
 
     return {
         "message": f"Successfully renamed '{old_tag}' to '{new_tag}'",
-        "records_updated": result,
+        "records_updated": result.records_updated,
         "new_tag": new_tag,
     }
 
@@ -256,13 +254,16 @@ async def delete_tag(
 ):
     """Delete a tag from all entities owned by the current user"""
 
-    log_data_access(logger, request, current_user.id, "delete", "Tag", tag=tag)
+    log_data_access(logger, request, current_user.id, "delete", "Tag")
 
     result = tag_service.delete_tag_across_entities(
-        db, tag=tag, user_id=current_user.id
+        db, tag=tag, user_id=current_user.id, request=request
     )
 
-    return {"message": f"Successfully deleted tag '{tag}'", "records_updated": result}
+    return {
+        "message": f"Successfully deleted tag '{tag}'",
+        "records_updated": result.records_updated,
+    }
 
 
 @router.put("/replace", response_model=Dict[str, Any])
@@ -282,23 +283,20 @@ async def replace_tag(
         raise HTTPException(status_code=400, detail=str(e))
 
     log_data_access(
-        logger,
-        request,
-        current_user.id,
-        "update",
-        "Tag",
-        old_tag=old_tag,
-        new_tag=new_tag,
-        operation_type="replace",
+        logger, request, current_user.id, "update", "Tag", operation_type="replace"
     )
 
     result = tag_service.replace_tag_across_entities(
-        db, old_tag=old_tag, new_tag=new_tag, user_id=current_user.id
+        db,
+        old_tag=old_tag,
+        new_tag=new_tag,
+        user_id=current_user.id,
+        request=request,
     )
 
     return {
         "message": f"Successfully replaced '{old_tag}' with '{new_tag}'",
-        "records_updated": result,
+        "records_updated": result.records_updated,
         "new_tag": new_tag,
     }
 
@@ -312,9 +310,9 @@ async def create_tag(
 ):
     """Create a new tag in the user tags registry"""
 
-    log_data_access(logger, req, current_user.id, "create", "Tag", tag=request.tag)
+    log_data_access(logger, req, current_user.id, "create", "Tag")
 
-    result = tag_service.create_tag(db, tag=request.tag, user_id=current_user.id)
+    tag_service.create_tag(db, tag=request.tag, user_id=current_user.id)
 
     return {"message": f"Successfully created tag '{request.tag}'", "tag": request.tag}
 
