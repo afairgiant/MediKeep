@@ -1,25 +1,28 @@
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from sqlalchemy import text
+from sqlalchemy import column, func, select, table, text
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import Select
 
 from app.core.database.database import get_db
 from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "sequence_monitor")
 
-# Names here come from the pg catalog or the CLI; quote every one put into SQL.
+# Names here come from the pg catalog or the CLI. Reads use Core table() so the
+# compiler quotes them; this is for the setval argument and ALTER SEQUENCE.
 # The named paramstyle stops `%` being doubled here, since text() doubles it again.
 quote_identifier = postgresql.dialect(paramstyle="named").identifier_preparer.quote
 
 
-def quote_qualified(name: str) -> str:
-    """Quote a possibly schema-qualified name part by part (`schema.seq`)."""
-    return ".".join(quote_identifier(part) for part in name.split("."))
+def split_qualified(name: str, default_schema: str) -> tuple[str, str]:
+    """(schema, name) from `schema.name`, or `default_schema` when unqualified."""
+    schema, _, relname = name.rpartition(".")
+    return schema or default_schema, relname
 
 
 @dataclass
@@ -153,16 +156,26 @@ class SequenceQueryBuilder:
         """
 
     @staticmethod
-    def get_sequence_current_value(sequence_name: str) -> str:
+    def get_sequence_current_value(sequence_name: str, schema: str) -> Select:
         """Query to get current sequence value"""
-        return f"SELECT last_value, is_called FROM {quote_identifier(sequence_name)}"  # nosec B608
+        sequence = table(
+            sequence_name, column("last_value"), column("is_called"), schema=schema
+        )
+        return select(sequence.c.last_value, sequence.c.is_called)
 
     @staticmethod
-    def get_table_max_value(table_name: str, column_name: str) -> str:
+    def get_table_max_value(table_name: str, column_name: str, schema: str) -> Select:
         """Query to get maximum value in table column"""
-        return (
-            f"SELECT COALESCE(MAX({quote_identifier(column_name)}), 0) as max_value "  # nosec B608
-            f"FROM {quote_identifier(table_name)}"
+        target = table(table_name, column(column_name), schema=schema)
+        return select(
+            func.coalesce(func.max(target.c[column_name]), 0).label("max_value")
+        )
+
+    @staticmethod
+    def get_row_count(table_name: str, schema: str) -> Select:
+        """Query to count the rows in a table"""
+        return select(func.count().label("row_count")).select_from(
+            table(table_name, schema=schema)
         )
 
 
@@ -272,19 +285,22 @@ class SequenceMonitor:
             f"{quote_identifier(sequence_name)}"
         )
 
-    def _execute_query(self, query: str, params: Optional[Dict] = None) -> Any:
+    def _execute_query(
+        self, query: Union[str, Select], params: Optional[Dict] = None
+    ) -> Any:
         """
         Execute a SQL query with consistent error handling
 
         Args:
-            query: SQL query string
+            query: SQL query string, or a Core statement
             params: Query parameters
 
         Returns:
             Query result
         """
         db = self.get_database_session()
-        return db.execute(text(query), params or {})
+        statement = text(query) if isinstance(query, str) else query
+        return db.execute(statement, params or {})
 
     def _get_sequence_current_state(self, sequence_name: str) -> Dict[str, Any]:
         """
@@ -297,7 +313,9 @@ class SequenceMonitor:
             Dictionary with current state or default values
         """
         try:
-            query = self.query_builder.get_sequence_current_value(sequence_name)
+            query = self.query_builder.get_sequence_current_value(
+                sequence_name, self.config.DEFAULT_SCHEMA
+            )
             result = self._execute_query(query).fetchone()
 
             if result:
@@ -361,12 +379,16 @@ class SequenceMonitor:
         )
 
         # Get maximum value in table
-        max_query = self.query_builder.get_table_max_value(table_name, column_name)
+        max_query = self.query_builder.get_table_max_value(
+            table_name, column_name, self.config.DEFAULT_SCHEMA
+        )
         max_result = self._execute_query(max_query).fetchone()
         max_table_value = max_result.max_value if max_result else 0
 
         # Get row count for context
-        count_query = f"SELECT COUNT(*) as row_count FROM {quote_identifier(table_name)}"  # nosec B608
+        count_query = self.query_builder.get_row_count(
+            table_name, self.config.DEFAULT_SCHEMA
+        )
         count_result = self._execute_query(count_query).fetchone()
         row_count = count_result.row_count if count_result else 0
 
@@ -420,7 +442,9 @@ class SequenceMonitor:
             return False
 
         # Get maximum value in table
-        max_query = self.query_builder.get_table_max_value(table_name, column_name)
+        max_query = self.query_builder.get_table_max_value(
+            table_name, column_name, self.config.DEFAULT_SCHEMA
+        )
         max_result = self._execute_query(max_query).fetchone()
         max_value = max_result.max_value if max_result else 0
 
@@ -534,8 +558,9 @@ class SequenceMonitor:
             )
             return False
 
-        # Use ALTER SEQUENCE to change max value
-        alter_query = f"ALTER SEQUENCE {quote_identifier(sequence_name)} MAXVALUE {int(new_max_value)}"
+        # DDL has no Core form; escape colons so text() does not read them as binds
+        target = self._qualified_sequence(sequence_name).replace(":", "\\:")
+        alter_query = f"ALTER SEQUENCE {target} MAXVALUE {int(new_max_value)}"
         self._execute_query(alter_query)
         db.commit()
 
@@ -815,11 +840,17 @@ class SequenceMonitor:
                     ),
                 }
             # Fallback to simpler query if pg_sequences view fails
-            simple_query = text(
-                "SELECT last_value, is_called, log_cnt "
-                f"FROM {quote_qualified(sequence_name)}"  # nosec B608
+            schema, relname = split_qualified(sequence_name, self.config.DEFAULT_SCHEMA)
+            sequence = table(
+                relname,
+                column("last_value"),
+                column("is_called"),
+                column("log_cnt"),
+                schema=schema,
             )
-            simple_result = db.execute(simple_query).fetchone()
+            simple_result = db.execute(
+                select(sequence.c.last_value, sequence.c.is_called, sequence.c.log_cnt)
+            ).fetchone()
 
             if simple_result:
                 return {
@@ -893,8 +924,8 @@ class SequenceMonitor:
             for row in result:
                 # Get current sequence values individually for each sequence
                 try:
-                    seq_query = text(
-                        f"SELECT last_value, is_called FROM {quote_identifier(row.sequencename)}"  # nosec B608
+                    seq_query = self.query_builder.get_sequence_current_value(
+                        row.sequencename, row.schemaname
                     )
                     seq_result = db.execute(seq_query).fetchone()
 

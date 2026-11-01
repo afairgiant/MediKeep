@@ -1,14 +1,17 @@
-"""Identifiers interpolated into sequence monitor SQL are quoted."""
+"""Sequence monitor SQL: identifiers quoted once, schema-qualified, never parsed as binds."""
 
-from sqlalchemy import text
 from sqlalchemy.dialects import postgresql
 
 from app.scripts.sequence_monitor import (
     SequenceMonitor,
     SequenceQueryBuilder,
     quote_identifier,
-    quote_qualified,
+    split_qualified,
 )
+
+
+def _sql(statement) -> str:
+    return str(statement.compile(dialect=postgresql.dialect()))
 
 
 def test_plain_name_is_left_as_is():
@@ -20,25 +23,29 @@ def test_name_needing_quotes_is_quoted_and_escaped():
     assert quote_identifier('x"; DROP TABLE users; --') == '"x""; DROP TABLE users; --"'
 
 
-def test_query_builder_quotes_every_identifier():
-    assert SequenceQueryBuilder.get_sequence_current_value("Seq") == (
-        'SELECT last_value, is_called FROM "Seq"'
+def test_reads_are_schema_qualified_and_quoted():
+    assert _sql(SequenceQueryBuilder.get_sequence_current_value("Seq", "public")) == (
+        'SELECT public."Seq".last_value, public."Seq".is_called \nFROM public."Seq"'
     )
-    assert SequenceQueryBuilder.get_table_max_value("Table", "Id") == (
-        'SELECT COALESCE(MAX("Id"), 0) as max_value FROM "Table"'
+    max_sql = _sql(SequenceQueryBuilder.get_table_max_value("Table", "Id", "public"))
+    assert 'max(public."Table"."Id")' in max_sql
+    assert max_sql.endswith('FROM public."Table"')
+    assert _sql(SequenceQueryBuilder.get_row_count("Table", "public")).endswith(
+        'FROM public."Table"'
     )
 
 
-def test_schema_qualified_name_is_quoted_part_by_part():
-    assert quote_qualified("public.users_id_seq") == "public.users_id_seq"
-    assert quote_qualified("public.Users_id_seq") == 'public."Users_id_seq"'
+def test_percent_and_colon_in_names_survive_compilation():
+    statement = SequenceQueryBuilder.get_sequence_current_value("a%:b", "public")
 
-
-def test_percent_in_name_is_escaped_once_by_text():
-    statement = text(SequenceQueryBuilder.get_sequence_current_value("a%b"))
-
-    assert str(statement.compile(dialect=postgresql.dialect())).endswith('"a%%b"')
+    assert 'public."a%%:b"' in _sql(statement)
+    assert statement.compile(dialect=postgresql.dialect()).params == {}
 
 
 def test_setval_target_is_schema_qualified_and_quoted():
     assert SequenceMonitor()._qualified_sequence("Mixed_seq") == 'public."Mixed_seq"'
+
+
+def test_split_qualified_falls_back_to_the_default_schema():
+    assert split_qualified("users_id_seq", "public") == ("public", "users_id_seq")
+    assert split_qualified("audit.Users_id_seq", "public") == ("audit", "Users_id_seq")
