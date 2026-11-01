@@ -96,16 +96,37 @@ class Practitioner(Base):
     # Table Relationships
     practice_rel = orm_relationship("Practice", back_populates="practitioners")
     specialty_rel = orm_relationship("MedicalSpecialty", back_populates="practitioners")
-    patients = orm_relationship("Patient", back_populates="practitioner")
-    medications = orm_relationship("Medication", back_populates="practitioner")
-    encounters = orm_relationship("Encounter", back_populates="practitioner")
-    lab_results = orm_relationship("LabResult", back_populates="practitioner")
-    immunizations = orm_relationship("Immunization", back_populates="practitioner")
-    procedures = orm_relationship("Procedure", back_populates="practitioner")
-    treatments = orm_relationship("Treatment", back_populates="practitioner")
-    conditions = orm_relationship("Condition", back_populates="practitioner")
-    vitals = orm_relationship("Vitals", back_populates="practitioner")
-    injuries = orm_relationship("Injury", back_populates="practitioner")
+    # Leave links for the database to refuse, so a delete cannot silently clear them
+    patients = orm_relationship(
+        "Patient", back_populates="practitioner", passive_deletes="all"
+    )
+    medications = orm_relationship(
+        "Medication", back_populates="practitioner", passive_deletes="all"
+    )
+    encounters = orm_relationship(
+        "Encounter", back_populates="practitioner", passive_deletes="all"
+    )
+    lab_results = orm_relationship(
+        "LabResult", back_populates="practitioner", passive_deletes="all"
+    )
+    immunizations = orm_relationship(
+        "Immunization", back_populates="practitioner", passive_deletes="all"
+    )
+    procedures = orm_relationship(
+        "Procedure", back_populates="practitioner", passive_deletes="all"
+    )
+    treatments = orm_relationship(
+        "Treatment", back_populates="practitioner", passive_deletes="all"
+    )
+    conditions = orm_relationship(
+        "Condition", back_populates="practitioner", passive_deletes="all"
+    )
+    vitals = orm_relationship(
+        "Vitals", back_populates="practitioner", passive_deletes="all"
+    )
+    injuries = orm_relationship(
+        "Injury", back_populates="practitioner", passive_deletes="all"
+    )
     medical_equipment = orm_relationship(
         "MedicalEquipment", back_populates="practitioner"
     )

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.utils.datetime_utils import get_utc_now
 from app.api.v1.endpoints.paperless import _update_entity_file_from_task_result
+from app.crud.practitioner import practitioner as practitioner_crud
 from app.main import app
 from app.models.models import (
     EntityFile,
@@ -270,6 +271,36 @@ class TestPractitionerDeleteWhileInUse:
 
         assert response.status_code == 409
         assert db_session.get(Practitioner, practitioner.id) is not None
+
+    def test_link_added_after_the_check_is_kept(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        practitioner,
+        owner,
+        monkeypatch,
+    ):
+        medication = Medication(
+            patient_id=owner[1].id,
+            medication_name="Med",
+            status="active",
+            practitioner_id=practitioner.id,
+        )
+        db_session.add(medication)
+        db_session.commit()
+        monkeypatch.setattr(
+            practitioner_crud, "is_referenced", lambda *args, **kwargs: False
+        )
+
+        response = authenticated_client.delete(
+            f"/api/v1/practitioners/{practitioner.id}"
+        )
+
+        assert response.status_code == 409
+        db_session.expire_all()
+        assert db_session.get(Medication, medication.id).practitioner_id == (
+            practitioner.id
+        )
 
     def test_unlinked_practitioner_is_deleted(
         self, authenticated_client: TestClient, practitioner
