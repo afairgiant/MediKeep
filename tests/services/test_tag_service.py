@@ -546,6 +546,33 @@ class TestBulkTagChanges:
             db_session, query="", user_id=test_user.id
         ) == ["cold"]
 
+    def test_rename_of_an_unregistered_tag_registers_the_new_name(
+        self, db_session: Session, test_user, owned
+    ):
+        change = tag_service.rename_tag_across_entities(
+            db_session, old_tag="a", new_tag="b", user_id=test_user.id
+        )
+
+        assert change.records_updated == 1
+        assert change.registry_action == "added"
+        assert change.tag_id is not None
+        assert tag_service.autocomplete_tags(
+            db_session, query="", user_id=test_user.id
+        ) == ["b", "flu"]
+
+    def test_rename_of_an_unregistered_tag_into_a_registered_one(
+        self, db_session: Session, test_user, owned
+    ):
+        flu = tag_service.get_popular_tags_across_entities(
+            db_session, user_id=test_user.id
+        )[0]
+
+        change = tag_service.rename_tag_across_entities(
+            db_session, old_tag="a", new_tag="flu", user_id=test_user.id
+        )
+
+        assert (change.registry_action, change.tag_id) == ("existing", flu["id"])
+
     def test_register_skips_tags_already_there(
         self, db_session: Session, test_user, owned
     ):

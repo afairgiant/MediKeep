@@ -443,6 +443,14 @@ class TagService:
             elif old_row:
                 old_row.tag = new_tag
                 change.tag_id, change.registry_action = old_row.id, "renamed"
+            elif change.records:
+                if existing is None:
+                    self._register(db, user_id, [new_tag])
+                    existing = self._registry_row(db, user_id, new_tag)
+                    change.registry_action = "added"
+                else:
+                    change.registry_action = "existing"
+                change.tag_id = existing.id
 
         return self._bulk_change(
             db,
