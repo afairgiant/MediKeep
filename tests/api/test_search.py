@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
+from app.models.models import Medication
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
 
@@ -677,3 +678,74 @@ class TestSearchAPI:
         data = response.json()
         treatments = data["results"].get("treatments", {"count": 0})
         assert treatments["count"] >= 1
+
+
+class TestSearchTermIsLiteral:
+    """Wildcard and quote characters in the search term match themselves."""
+
+    @pytest.fixture
+    def add_medication(self, db_session: Session, user_with_patient):
+        def add(medication_name: str, tags=None, **fields) -> None:
+            db_session.add(
+                Medication(
+                    patient_id=user_with_patient["patient"].id,
+                    medication_name=medication_name,
+                    status="active",
+                    tags=tags,
+                    **fields,
+                )
+            )
+            db_session.commit()
+
+        return add
+
+    def _medication_names(self, client: TestClient, headers, term: str) -> set[str]:
+        response = client.get(
+            "/api/v1/search/",
+            params={"q": term, "types": "medications"},
+            headers=headers,
+        )
+        assert response.status_code == 200
+        items = response.json()["results"]["medications"]["items"]
+        return {item["medication_name"] for item in items}
+
+    def test_partial_tag_text_matches(
+        self, client: TestClient, authenticated_headers, add_medication
+    ):
+        add_medication("Alpha", ["flu-2026"])
+
+        assert self._medication_names(client, authenticated_headers, "flu-20") == {
+            "Alpha"
+        }
+
+    @pytest.mark.parametrize("term", ["%", "_"])
+    @pytest.mark.parametrize("field", ["medication_name", "dosage", "indication"])
+    def test_wildcard_matches_only_itself(
+        self, client: TestClient, authenticated_headers, add_medication, term, field
+    ):
+        values = {"medication_name": "Alpha", field: f"50{term}off"}
+        add_medication(**values)
+        add_medication("Beta", dosage="10 mg", indication="pain")
+
+        assert self._medication_names(client, authenticated_headers, term) == {
+            values["medication_name"]
+        }
+
+    def test_quote_matches_itself(
+        self, client: TestClient, authenticated_headers, add_medication
+    ):
+        add_medication("O'Brien mix")
+        add_medication("Obrien mix")
+
+        assert self._medication_names(client, authenticated_headers, "o'brien") == {
+            "O'Brien mix"
+        }
+
+    def test_tags_that_are_not_a_list_never_match(
+        self, client: TestClient, authenticated_headers, add_medication
+    ):
+        add_medication("Alpha", ["flu"])
+        add_medication("Beta", "flu")
+        add_medication("Gamma", None)
+
+        assert self._medication_names(client, authenticated_headers, "flu") == {"Alpha"}

@@ -3,6 +3,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional
 
 from sqlalchemy import text
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -10,6 +11,14 @@ from app.core.database.database import get_db
 from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "sequence_monitor")
+
+# Names here come from the pg catalog or the CLI; quote every one put into SQL
+quote_identifier = postgresql.dialect().identifier_preparer.quote
+
+
+def quote_qualified(name: str) -> str:
+    """Quote a possibly schema-qualified name part by part (`schema.seq`)."""
+    return ".".join(quote_identifier(part) for part in name.split("."))
 
 
 @dataclass
@@ -145,12 +154,15 @@ class SequenceQueryBuilder:
     @staticmethod
     def get_sequence_current_value(sequence_name: str) -> str:
         """Query to get current sequence value"""
-        return f"SELECT last_value, is_called FROM {sequence_name}"
+        return f"SELECT last_value, is_called FROM {quote_identifier(sequence_name)}"  # nosec B608
 
     @staticmethod
     def get_table_max_value(table_name: str, column_name: str) -> str:
         """Query to get maximum value in table column"""
-        return f"SELECT COALESCE(MAX({column_name}), 0) as max_value FROM {table_name}"
+        return (
+            f"SELECT COALESCE(MAX({quote_identifier(column_name)}), 0) as max_value "  # nosec B608
+            f"FROM {quote_identifier(table_name)}"
+        )
 
 
 class SequenceValidator:
@@ -346,7 +358,7 @@ class SequenceMonitor:
         max_table_value = max_result.max_value if max_result else 0
 
         # Get row count for context
-        count_query = f"SELECT COUNT(*) as row_count FROM {table_name}"
+        count_query = f"SELECT COUNT(*) as row_count FROM {quote_identifier(table_name)}"  # nosec B608
         count_result = self._execute_query(count_query).fetchone()
         row_count = count_result.row_count if count_result else 0
 
@@ -509,7 +521,7 @@ class SequenceMonitor:
             return False
 
         # Use ALTER SEQUENCE to change max value
-        alter_query = f"ALTER SEQUENCE {sequence_name} MAXVALUE {new_max_value}"
+        alter_query = f"ALTER SEQUENCE {quote_identifier(sequence_name)} MAXVALUE {int(new_max_value)}"
         self._execute_query(alter_query)
         db.commit()
 
@@ -790,13 +802,8 @@ class SequenceMonitor:
                 }
             # Fallback to simpler query if pg_sequences view fails
             simple_query = text(
-                f"""
-                    SELECT 
-                        last_value, 
-                        is_called,
-                        log_cnt
-                    FROM {sequence_name}
-                """
+                "SELECT last_value, is_called, log_cnt "
+                f"FROM {quote_qualified(sequence_name)}"  # nosec B608
             )
             simple_result = db.execute(simple_query).fetchone()
 
@@ -873,7 +880,7 @@ class SequenceMonitor:
                 # Get current sequence values individually for each sequence
                 try:
                     seq_query = text(
-                        f"SELECT last_value, is_called FROM {row.sequencename}"
+                        f"SELECT last_value, is_called FROM {quote_identifier(row.sequencename)}"  # nosec B608
                     )
                     seq_result = db.execute(seq_query).fetchone()
 

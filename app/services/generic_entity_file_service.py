@@ -389,10 +389,9 @@ class GenericEntityFileService:
         )
 
         if is_linked:
-            # Log message, not SQL query
-            logger.info(  # nosec B608
+            logger.info(
                 f"Document {document_id} is a linked document. "
-                f"Unlinking from MediKeep only, will NOT delete from {backend_name}."
+                f"Unlinking from MediKeep only; it stays in {backend_name}."
             )
             return True
 
@@ -1356,7 +1355,7 @@ class GenericEntityFileService:
 
         if not user_prefs or not user_prefs.paperless_enabled:
             logger.warning(
-                f"Cannot delete from paperless: user preferences not found or disabled for user {current_user_id}"
+                f"Paperless deletion skipped: user preferences not found or disabled for user {current_user_id}"
             )
             return False
 

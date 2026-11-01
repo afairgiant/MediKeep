@@ -5023,7 +5023,7 @@ Base path: `/api/v1/search`
 
 - **Purpose**: Search the active (or specified) patient's records in one request. Results are grouped by record type.
 - **Query Parameters**:
-  - `q` (string, optional): Search text. Omit it to list records.
+  - `q` (string, optional): Search text, matched case-insensitively anywhere in the record's text fields and tags; `%` and `_` match literally. Omit it to list records.
   - `types` (array, optional): Record types to search; repeat the parameter for several. Default: all of `medications`, `conditions`, `lab_results`, `procedures`, `immunizations`, `treatments`, `encounters`, `allergies`, `injuries`, `symptoms`, `medical_equipment`, `vitals`
   - `patient_id` (integer, optional): Patient to search (must be accessible to the caller)
   - `sort` (string, default: `relevance`): `relevance`, `date_desc`, `date_asc`, `title`
