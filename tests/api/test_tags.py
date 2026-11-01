@@ -5,9 +5,9 @@ Regression coverage for a bypass reported after the #1040 fix landed: a user
 was able to create a tag with the value ``< &8 HTML > <p>`` even though
 entity tags (via TaggedEntityMixin / TaggedEntityUpdateMixin) were already
 allowlisted. The tag-registry endpoints - create/rename/replace - write tag
-values directly (rename/replace via raw SQL straight into every taggable
-entity's ``tags`` column) and had no validation of their own, so they were a
-separate bypass of the same allowlist. This file covers that these three
+values directly (rename/replace into every taggable entity's ``tags`` column)
+and had no validation of their own, so they were a separate bypass of the same
+allowlist. This file covers that these three
 endpoints now reject the same payloads TaggedEntityMixin does, and that the
 rename/replace bypass in particular can no longer poison an existing
 record's tags.
@@ -102,10 +102,8 @@ class TestTagRenameEndpointRejectsInjection:
         )
         assert response.status_code == 400
 
-        # The bypass this test guards against: rename/replace write straight
-        # into every entity's tags column via raw SQL, so if validation were
-        # skipped the payload would show up here even though nothing else
-        # about the allergy record was touched.
+        # Rename writes straight into every entity's tags column, so a skipped
+        # validation would show the payload here
         check = client.get(
             f"/api/v1/allergies/{allergy['id']}", headers=authenticated_headers
         )
@@ -114,12 +112,7 @@ class TestTagRenameEndpointRejectsInjection:
     def test_rename_accepts_normal_tag(
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
-        # rename_tag_across_entities writes via Postgres-only JSON functions
-        # (json_agg / json_array_elements_text), which the SQLite test DB
-        # doesn't support - so this only asserts the request clears
-        # validation, not that the underlying rename SQL runs. That part is
-        # pre-existing and untouched by this fix.
-        _create_allergy_with_tag(
+        allergy = _create_allergy_with_tag(
             client,
             authenticated_headers,
             user_with_patient["patient"].id,
@@ -132,9 +125,13 @@ class TestTagRenameEndpointRejectsInjection:
             headers=authenticated_headers,
         )
         assert response.status_code == 200, response.text
-        # The frontend uses this to show what was actually stored in its
-        # success toast, rather than the raw un-normalized input.
+        # The frontend shows the stored value, not the raw input, in its toast
         assert response.json()["new_tag"] == "type-2-diabetes"
+        assert response.json()["records_updated"] == 1
+        check = client.get(
+            f"/api/v1/allergies/{allergy['id']}", headers=authenticated_headers
+        )
+        assert check.json()["tags"] == ["type-2-diabetes"]
 
     @pytest.mark.parametrize("payload", BLANK_OR_PUNCTUATION_ONLY_TAGS)
     def test_rename_rejects_blank_and_punctuation_only_new_tag(
@@ -154,8 +151,7 @@ class TestTagRenameEndpointRejectsInjection:
         )
         assert response.status_code == 400, response.text
 
-        # Guards the actual impact: a blank/punctuation-only new_tag must not
-        # blank the tag across the record via the raw-SQL rename path.
+        # A blank or punctuation-only new_tag must not blank the record's tag
         check = client.get(
             f"/api/v1/allergies/{allergy['id']}", headers=authenticated_headers
         )
@@ -188,10 +184,7 @@ class TestTagReplaceEndpointRejectsInjection:
     def test_replace_accepts_normal_tag_and_returns_normalized_new_tag(
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
-        # replace_tag_across_entities writes via Postgres-only JSON functions,
-        # same limitation noted on the rename test above - this only asserts
-        # the request clears validation and the response is well-formed.
-        _create_allergy_with_tag(
+        allergy = _create_allergy_with_tag(
             client,
             authenticated_headers,
             user_with_patient["patient"].id,
@@ -205,6 +198,10 @@ class TestTagReplaceEndpointRejectsInjection:
         )
         assert response.status_code == 200, response.text
         assert response.json()["new_tag"] == "type-2-diabetes"
+        check = client.get(
+            f"/api/v1/allergies/{allergy['id']}", headers=authenticated_headers
+        )
+        assert check.json()["tags"] == ["type-2-diabetes"]
 
     @pytest.mark.parametrize("payload", BLANK_OR_PUNCTUATION_ONLY_TAGS)
     def test_replace_rejects_blank_and_punctuation_only_new_tag(
@@ -267,3 +264,28 @@ class TestTagReadEndpointsScopedToCaller:
         assert response.status_code == 200, response.text
         call = getattr(service, service_method).call_args
         assert call.kwargs["user_id"] == user_with_patient["user"].id
+
+
+class TestBulkTagChangeActivity:
+    def test_rename_shows_in_the_patients_activity(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        patient_id = user_with_patient["patient"].id
+        _create_allergy_with_tag(client, authenticated_headers, patient_id, "diabetes")
+
+        client.put(
+            "/api/v1/tags/rename",
+            params={"old_tag": "diabetes", "new_tag": "type-2"},
+            headers=authenticated_headers,
+        )
+        response = client.get(
+            "/api/v1/patients/recent-activity/",
+            params={"patient_id": patient_id},
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200, response.text
+        descriptions = [a["description"] for a in response.json()]
+        assert "Updated Tag: 'diabetes' renamed to 'type-2' on 1 record(s)" in (
+            descriptions
+        )

@@ -1,773 +1,620 @@
-from typing import Any, Dict, List, Optional
+"""Tag registry (`user_tags`) and tag operations across a user's tagged records."""
 
-from sqlalchemy import text
+import time
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+
+from fastapi import Request
+from sqlalchemy import (
+    and_,
+    bindparam,
+    exists,
+    func,
+    literal,
+    or_,
+    select,
+    true,
+    union_all,
+    update,
+)
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.core.database.utils import insert_ignoring_conflicts, json_array_elements
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields, sanitize_log_input
+from app.core.utils.client_ip import request_audit_fields
+from app.crud.activity_log import activity_log
+from app.models.activity_log import ActionType, EntityType
+from app.models.models import (
+    Allergy,
+    BloodDonation,
+    Condition,
+    Encounter,
+    Immunization,
+    Injury,
+    LabResult,
+    MedicalEquipment,
+    Medication,
+    Patient,
+    Procedure,
+    Symptom,
+    Treatment,
+    UserTag,
+)
 
 logger = get_logger(__name__, "app")
 
+ENTITY_MODELS: Dict[str, Any] = {
+    "lab_result": LabResult,
+    "medication": Medication,
+    "condition": Condition,
+    "procedure": Procedure,
+    "immunization": Immunization,
+    "treatment": Treatment,
+    "encounter": Encounter,
+    "allergy": Allergy,
+    "injury": Injury,
+    "symptom": Symptom,
+    "medical_equipment": MedicalEquipment,
+    "blood_donation": BloodDonation,
+}
+
+
+def renamed_tags(tags: List[str], old_tag: str, new_tag: str) -> List[str]:
+    """`old_tag` becomes `new_tag` in place; a second copy of `new_tag` is dropped."""
+    result: List[str] = []
+    for tag in tags:
+        tag = new_tag if tag == old_tag else tag
+        if tag == new_tag and new_tag in result:
+            continue
+        result.append(tag)
+    return result
+
+
+def tags_without(tags: List[str], removed: str) -> List[str]:
+    return [tag for tag in tags if tag != removed]
+
+
+def replaced_tags(tags: List[str], old_tag: str, new_tag: str) -> List[str]:
+    """`old_tag` becomes `new_tag`, then duplicates are dropped and the list is sorted."""
+    return sorted({new_tag if tag == old_tag else tag for tag in tags})
+
+
+@dataclass
+class TagChange:
+    """What a rename, delete or replace changed."""
+
+    # patient id -> entity type -> records changed
+    records: Dict[int, Dict[str, int]] = field(default_factory=dict)
+    tag_id: Optional[int] = None
+    registry_action: str = "none"
+
+    @property
+    def records_updated(self) -> int:
+        return sum(sum(by_type.values()) for by_type in self.records.values())
+
+    @property
+    def records_by_entity(self) -> Dict[str, int]:
+        totals: Dict[str, int] = {}
+        for by_type in self.records.values():
+            for entity_type, count in by_type.items():
+                totals[entity_type] = totals.get(entity_type, 0) + count
+        return totals
+
 
 class TagService:
-    """Universal tag management across all entities
+    """Tags are per user: the registry and every bulk change cover the user's own patients only."""
 
-    This service requires PostgreSQL and uses PostgreSQL-specific functions:
-    - json_array_elements_text() for expanding JSON arrays
-    - json_agg() for JSON aggregation
-    - array_agg() for array aggregation
-    - ILIKE for case-insensitive matching
-    - ON CONFLICT for upsert operations
+    @staticmethod
+    def _owned_patient_ids(user_id: int):
+        return select(Patient.id).where(Patient.user_id == user_id)
 
-    Tag matching uses json_array_elements_text() with WHERE clauses
-    instead of the @> containment operator for JSON (vs JSONB) compatibility.
-    """
+    @staticmethod
+    def _has_tag(db: Session, tags_column, tag: str):
+        elements = json_array_elements(db, tags_column)
+        return exists().where(elements.c.value == tag)
 
-    ENTITY_TABLES = {
-        "lab_result": "lab_results",
-        "medication": "medications",
-        "condition": "conditions",
-        "procedure": "procedures",
-        "immunization": "immunizations",
-        "treatment": "treatments",
-        "encounter": "encounters",
-        "allergy": "allergies",
-        "injury": "injuries",
-        "symptom": "symptoms",
-        "medical_equipment": "medical_equipment",
-        "blood_donation": "blood_donations",
-    }
+    def _models(self, entity_types: Optional[List[str]]):
+        for entity_type in entity_types or ENTITY_MODELS:
+            model = ENTITY_MODELS.get(entity_type)
+            if model is None:
+                logger.warning(
+                    "Unknown entity type in tag query",
+                    extra={"entity_type": sanitize_log_input(entity_type)},
+                )
+                continue
+            yield entity_type, model
 
-    def _validate_entity_type(self, entity_type: str) -> str:
-        """Validate and return table name for entity type to prevent SQL injection"""
-        if entity_type not in self.ENTITY_TABLES:
-            raise ValueError(f"Invalid entity type: {entity_type}")
-        return self.ENTITY_TABLES[entity_type]
+    def _tag_usage(
+        self, db: Session, models: Iterable[Tuple[str, Any]], user_id: int
+    ) -> list:
+        """(tag, entity_type, record count) rows across the user's patients, in one query."""
+        owned = self._owned_patient_ids(user_id)
+        parts = []
+        for entity_type, model in models:
+            elements = json_array_elements(db, model.tags)
+            tag = elements.c.value
+            parts.append(
+                select(tag, literal(entity_type), func.count())
+                .select_from(model)
+                .join(elements, true())
+                .where(model.patient_id.in_(owned))
+                .group_by(tag)
+            )
+        return db.execute(union_all(*parts)).all() if parts else []
 
-    def _validate_table_name(self, table_name: str) -> str:
-        """Validate table name against allowed tables to prevent SQL injection"""
-        allowed_tables = set(self.ENTITY_TABLES.values())
-        if table_name not in allowed_tables:
-            raise ValueError(f"Invalid table name: {table_name}")
-        return table_name
-
-    def _user_patient_filter(self) -> str:
-        """Return a SQL subquery fragment that restricts to a user's patients."""
-        return "patient_id IN (SELECT id FROM patients WHERE user_id = :user_id)"
+    @staticmethod
+    def _register(db: Session, user_id: int, tags: List[str]) -> int:
+        """Add tags to the user's registry, skipping any already there; returns how many were added."""
+        return insert_ignoring_conflicts(
+            db,
+            UserTag,
+            [{"user_id": user_id, "tag": tag} for tag in tags],
+            ["user_id", "tag"],
+        )
 
     def get_popular_tags_across_entities(
         self,
         db: Session,
         *,
-        entity_types: List[str] = None,
+        entity_types: Optional[List[str]] = None,
         limit: int = 20,
         user_id: int,
     ) -> List[Dict[str, Any]]:
-        """Get one user's tags with usage counts from that user's owned patients."""
+        """The user's registered tags, most used first; usage counts only their own patients.
 
-        if not entity_types:
-            entity_types = [
-                "lab_result",
-                "medication",
-                "condition",
-                "procedure",
-                "immunization",
-                "treatment",
-                "encounter",
-                "allergy",
-                "injury",
-                "symptom",
-                "medical_equipment",
-                "blood_donation",
-            ]
-
-        # Build subquery for usage counts across all entity types
-        usage_subqueries = []
-        query_params: Dict[str, Any] = {}
-
-        for entity_type in entity_types:
-            try:
-                # Validate entity type and get safe table name
-                table_name = self._validate_entity_type(entity_type)
-
-                # Validate the table name is in our allowed list
-                self._validate_table_name(table_name)
-
-                # Since we've validated the table name against our whitelist, it's safe to use
-                # We use parameterized queries for the entity_type value
-                param_key = f"entity_type_{len(usage_subqueries)}"
-                query_params[param_key] = entity_type
-
-                usage_subqueries.append(
-                    f"""
-                    SELECT tag, COUNT(*) as usage_count, :{param_key} as entity_type
-                    FROM "{table_name}", json_array_elements_text(tags) as tag
-                    WHERE tags IS NOT NULL AND {self._user_patient_filter()}
-                    GROUP BY tag
-                """
-                )
-            except ValueError as e:
-                logger.warning(
-                    "Invalid entity type in tag search",
-                    extra={"entity_type": entity_type, "error": str(e)},
-                )
-                continue
-
-        if not usage_subqueries:
-            # If no entity tables, just return user tags with 0 usage
-            query = """
-                SELECT id, tag, color, 0 as usage_count, ARRAY[]::text[] as entity_types
-                FROM user_tags
-                WHERE user_id = :user_id
-                ORDER BY tag ASC
-                LIMIT :limit
-            """
-        else:
-            # Get all user tags and their usage counts
-            query = f"""
-                WITH usage_stats AS (
-                    {' UNION ALL '.join(usage_subqueries)}
-                )
-                SELECT
-                    ut.id,
-                    ut.tag,
-                    ut.color,
-                    COALESCE(SUM(us.usage_count), 0) as total_usage,
-                    CASE
-                        WHEN COUNT(us.entity_type) > 0
-                        THEN array_agg(DISTINCT us.entity_type)
-                        ELSE ARRAY[]::text[]
-                    END as entity_types
-                FROM user_tags ut
-                LEFT JOIN usage_stats us ON ut.tag = us.tag
-                WHERE ut.user_id = :user_id
-                GROUP BY ut.id, ut.tag, ut.color
-                ORDER BY total_usage DESC, ut.tag ASC
-                LIMIT :limit
-            """
-
+        Returns an empty list if the database read fails.
+        """
+        usage: Dict[str, int] = {}
+        types_by_tag: Dict[str, set] = {}
         try:
-            final_params: Dict[str, Any] = {
-                "limit": limit,
-                "user_id": user_id,
-                **query_params,
-            }
-            result = db.execute(text(query), final_params).fetchall()
-
-            logger.info(
-                "Retrieved user tags with usage counts",
-                extra={"tag_count": len(result), "limit": limit},
+            models = list(self._models(entity_types))
+            for tag, entity_type, count in self._tag_usage(db, models, user_id):
+                usage[tag] = usage.get(tag, 0) + count
+                types_by_tag.setdefault(tag, set()).add(entity_type)
+            registry = db.scalars(
+                select(UserTag).where(UserTag.user_id == user_id)
+            ).all()
+        except SQLAlchemyError as e:
+            logger.error(
+                "Failed to retrieve user tags",
+                extra={LogFields.USER_ID: user_id, LogFields.ERROR: type(e).__name__},
             )
-
-            return [
-                {
-                    "id": row[0],
-                    "tag": row[1],
-                    "color": row[2],
-                    "usage_count": row[3],
-                    "entity_types": row[4],
-                }
-                for row in result
-            ]
-        except Exception as e:
-            logger.error("Failed to retrieve user tags", extra={"error": str(e)})
-            # Fallback to empty list if user_tags table doesn't exist yet
             return []
+
+        rows = [
+            {
+                "id": user_tag.id,
+                "tag": user_tag.tag,
+                "color": user_tag.color,
+                "usage_count": usage.get(user_tag.tag, 0),
+                "entity_types": sorted(types_by_tag.get(user_tag.tag, ())),
+            }
+            for user_tag in registry
+        ]
+        rows.sort(key=lambda row: (-row["usage_count"], row["tag"]))
+        return rows[:limit]
 
     def search_across_entities_by_tags(
         self,
         db: Session,
         *,
         tags: List[str],
-        entity_types: List[str] = None,
+        patient_id: int,
+        entity_types: Optional[List[str]] = None,
         limit_per_entity: int = 10,
         match_mode: str = "any",
-        patient_id: Optional[int] = None,
-    ) -> Dict[str, List[Any]]:
-        """Search for records across entity types by tags.
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """One patient's records carrying any (or, with match_mode "all", every) tag.
 
-        Uses json_array_elements_text() with EXISTS for JSON column compatibility
-        (the @> containment operator only works on JSONB, not JSON).
-
-        match_mode: "any" returns records matching ANY tag (OR),
-                    "all" returns records matching ALL tags (AND).
-
-        When patient_id is provided, results are scoped to that patient.
+        Rows are full column dicts, newest first. An unknown or failing entity type
+        gives an empty list.
         """
+        valid_tags = [tag for tag in tags if isinstance(tag, str) and len(tag) <= 100]
+        combine = and_ if match_mode == "all" else or_
 
-        if match_mode not in ("any", "all"):
-            match_mode = "any"
-
-        if not entity_types:
-            entity_types = [
-                "lab_result",
-                "medication",
-                "condition",
-                "procedure",
-                "immunization",
-                "treatment",
-                "encounter",
-                "allergy",
-                "injury",
-                "symptom",
-                "medical_equipment",
-                "blood_donation",
-            ]
-
-        results = {}
-
-        for entity_type in entity_types:
-            try:
-                # Validate entity type and get safe table name
-                table_name = self._validate_entity_type(entity_type)
-                self._validate_table_name(table_name)
-
-                # Build tag filter conditions using parameterized queries
-                tag_conditions = []
-                query_params: Dict[str, Any] = {"limit": limit_per_entity}
-
-                for i, tag in enumerate(tags):
-                    # Validate tag input to prevent injection
-                    if not isinstance(tag, str) or len(tag) > 100:
-                        logger.warning(
-                            "Invalid tag in search",
-                            extra={"tag": tag, "entity_type": entity_type},
-                        )
-                        continue
-
-                    param_key = f"tag_{i}"
-                    query_params[param_key] = tag
-                    tag_conditions.append(
-                        f"EXISTS (SELECT 1 FROM json_array_elements_text(tags) AS t WHERE t = :{param_key})"
-                    )
-
-                if tag_conditions:
-                    joiner = " AND " if match_mode == "all" else " OR "
-
-                    # Scope to patient when provided
-                    patient_filter = ""
-                    if patient_id is not None:
-                        patient_filter = "AND patient_id = :patient_id"
-                        query_params["patient_id"] = patient_id
-
-                    query = f"""
-                        SELECT * FROM "{table_name}"
-                        WHERE tags IS NOT NULL AND ({joiner.join(tag_conditions)})
-                        {patient_filter}
-                        ORDER BY created_at DESC
-                        LIMIT :limit
-                    """
-
-                    rows = db.execute(text(query), query_params).fetchall()
-
-                    results[entity_type] = [dict(row._mapping) for row in rows]
-
-                    logger.debug(
-                        "Retrieved records by tags",
-                        extra={
-                            "entity_type": entity_type,
-                            "tags": tags,
-                            "result_count": len(results[entity_type]),
-                        },
-                    )
-                else:
-                    results[entity_type] = []
-
-            except ValueError as e:
-                logger.error(
-                    "Invalid entity type in tag search",
-                    extra={"entity_type": entity_type, "error": str(e)},
+        results: Dict[str, List[Dict[str, Any]]] = {
+            entity_type: [] for entity_type in entity_types or ENTITY_MODELS
+        }
+        for entity_type, model in self._models(entity_types) if valid_tags else ():
+            table = model.__table__
+            statement = (
+                select(table)
+                .where(
+                    table.c.patient_id == patient_id,
+                    combine(*(self._has_tag(db, table.c.tags, t) for t in valid_tags)),
                 )
-                results[entity_type] = []
-            except Exception as e:
+                .order_by(table.c.created_at.desc())
+                .limit(limit_per_entity)
+            )
+            try:
+                # A failed query must not abort the transaction for the remaining types
+                with db.begin_nested():
+                    results[entity_type] = [
+                        dict(row._mapping) for row in db.execute(statement)
+                    ]
+            except SQLAlchemyError as e:
                 logger.error(
                     "Failed to search entity by tags",
-                    extra={"entity_type": entity_type, "tags": tags, "error": str(e)},
+                    extra={
+                        "entity_type": entity_type,
+                        LogFields.ERROR: type(e).__name__,
+                    },
                 )
-                results[entity_type] = []
 
         logger.info(
             "Completed cross-entity tag search",
             extra={
-                "tags": tags,
-                "entity_types": entity_types,
+                LogFields.EVENT: "tags_search_completed",
+                LogFields.PATIENT_ID: patient_id,
+                "tag_count": len(valid_tags),
                 "match_mode": match_mode,
-                "total_results": sum(len(r) for r in results.values()),
+                "result_count": sum(len(rows) for rows in results.values()),
             },
         )
-
         return results
 
     def autocomplete_tags(
         self, db: Session, *, query: str, user_id: int, limit: int = 10
     ) -> List[str]:
-        """Get tag names from one user's tags that start with the given prefix."""
-
+        """The user's tags starting with `query`, case-insensitive; `%` and `_` are literal."""
         try:
-
-            query_sql = """
-                SELECT tag
-                FROM user_tags
-                WHERE user_id = :user_id AND tag ILIKE :query || '%'
-                ORDER BY tag
-                LIMIT :limit
-            """
-
-            result = db.execute(
-                text(query_sql),
-                {"query": query.lower(), "user_id": user_id, "limit": limit},
-            ).fetchall()
-
-            tags = [row[0] for row in result]
-
-            logger.debug(
-                "Generated tag autocomplete suggestions from user tags",
-                extra={"query": query, "suggestion_count": len(tags)},
+            return list(
+                db.scalars(
+                    select(UserTag.tag)
+                    .where(
+                        UserTag.user_id == user_id,
+                        UserTag.tag.istartswith(query, autoescape=True),
+                    )
+                    .order_by(UserTag.tag)
+                    .limit(limit)
+                )
             )
-
-            return tags
-
-        except Exception as e:
+        except SQLAlchemyError as e:
             logger.error(
                 "Failed to generate tag autocomplete",
-                extra={"query": query, "error": str(e)},
+                extra={LogFields.USER_ID: user_id, LogFields.ERROR: type(e).__name__},
             )
             return []
 
-    def rename_tag_across_entities(
-        self, db: Session, *, old_tag: str, new_tag: str, user_id: int
-    ) -> int:
-        """Rename a tag across all entity types, scoped to a user's patients."""
-
-        total_updated = 0
-
-        for table_name in self.ENTITY_TABLES.values():
-            try:
-                # Validate table name for security
-                self._validate_table_name(table_name)
-
-                query = f"""
-                    UPDATE "{table_name}"
-                    SET tags = (
-                        SELECT json_agg(
-                            CASE
-                                WHEN tag_element = :old_tag THEN :new_tag
-                                ELSE tag_element
-                            END
-                        )
-                        FROM json_array_elements_text(tags) AS tag_element
-                    )
-                    WHERE EXISTS (
-                        SELECT 1 FROM json_array_elements_text(tags) AS tag_element
-                        WHERE tag_element = :old_tag
-                    )
-                    AND {self._user_patient_filter()}
-                """
-
-                result = db.execute(
-                    text(query),
-                    {"old_tag": old_tag, "new_tag": new_tag, "user_id": user_id},
+    def _change_records(
+        self,
+        db: Session,
+        *,
+        tag: str,
+        user_id: int,
+        new_tags: Callable[[List[str]], List[str]],
+    ) -> TagChange:
+        """Rewrite the tags of the user's records carrying `tag`; leaves updated_at unchanged."""
+        change = TagChange()
+        owned = self._owned_patient_ids(user_id)
+        for entity_type, model in ENTITY_MODELS.items():
+            table = model.__table__
+            # Row locks stop a concurrent edit of the same record from being overwritten
+            records = db.execute(
+                select(table.c.id, table.c.patient_id, table.c.tags)
+                .where(
+                    table.c.patient_id.in_(owned), self._has_tag(db, table.c.tags, tag)
                 )
+                .with_for_update()
+            ).all()
+            if not records:
+                continue
+            db.execute(
+                update(table)
+                .where(table.c.id == bindparam("record_id"))
+                .values(
+                    tags=bindparam("new_tags", type_=table.c.tags.type),
+                    updated_at=table.c.updated_at,
+                ),
+                [
+                    {"record_id": record.id, "new_tags": new_tags(list(record.tags))}
+                    for record in records
+                ],
+            )
+            for record in records:
+                by_type = change.records.setdefault(record.patient_id, {})
+                by_type[entity_type] = by_type.get(entity_type, 0) + 1
+        return change
 
-                updated_count = result.rowcount
-                total_updated += updated_count
+    @staticmethod
+    def _registry_row(db: Session, user_id: int, tag: str) -> Optional[UserTag]:
+        return db.scalar(
+            select(UserTag).where(UserTag.user_id == user_id, UserTag.tag == tag)
+        )
 
-                logger.debug(
-                    f"Updated {updated_count} records in {table_name}",
-                    extra={
-                        "table": table_name,
-                        "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "updated_count": updated_count,
-                    },
-                )
-
-            except Exception as e:
-                logger.error(
-                    f"Failed to rename tag in {table_name}",
-                    extra={
-                        "table": table_name,
-                        "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "error": str(e),
-                    },
-                )
-
-        # Update user_tags registry: rename old_tag to new_tag
-        # If new_tag already exists in user_tags for this user, delete old_tag instead
-        # to avoid unique constraint violation
-        try:
-            check_new_tag_query = """
-                SELECT COUNT(*) FROM user_tags
-                WHERE user_id = :user_id AND tag = :new_tag
-            """
-            new_tag_exists = (
-                db.execute(
-                    text(check_new_tag_query), {"user_id": user_id, "new_tag": new_tag}
-                ).fetchone()[0]
-                > 0
+    def _record_activity(
+        self,
+        db: Session,
+        *,
+        change: TagChange,
+        action: str,
+        operation: str,
+        # The activity feed shows only the text after the first colon
+        describe: Callable[[int], str],
+        user_id: int,
+        request: Optional[Request],
+    ) -> None:
+        ip_address, user_agent = request_audit_fields(request)
+        for patient_id, by_type in change.records.items():
+            activity_log.log_activity(
+                db,
+                action=action,
+                entity_type=EntityType.TAG,
+                description=sanitize_log_input(describe(sum(by_type.values()))),
+                user_id=user_id,
+                patient_id=patient_id,
+                entity_id=change.tag_id,
+                metadata={
+                    "operation": operation,
+                    "records_changed": by_type,
+                    "registry_action": change.registry_action,
+                },
+                ip_address=ip_address,
+                user_agent=user_agent,
+                commit=False,
             )
 
-            if new_tag_exists:
-                # New tag already exists, just delete the old one
-                delete_old_query = """
-                    DELETE FROM user_tags
-                    WHERE user_id = :user_id AND tag = :old_tag
-                """
-                db.execute(
-                    text(delete_old_query), {"user_id": user_id, "old_tag": old_tag}
-                )
-                logger.debug(
-                    "Deleted old tag from user_tags (new tag already exists)",
-                    extra={"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
-                )
-            else:
-                # Rename old tag to new tag
-                rename_query = """
-                    UPDATE user_tags
-                    SET tag = :new_tag
-                    WHERE user_id = :user_id AND tag = :old_tag
-                """
-                db.execute(
-                    text(rename_query),
-                    {"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
-                )
-                logger.debug(
-                    "Renamed tag in user_tags",
-                    extra={"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
-                )
+    def _bulk_change(
+        self,
+        db: Session,
+        *,
+        operation: str,
+        action: str,
+        tag: str,
+        new_tags: Callable[[List[str]], List[str]],
+        update_registry: Callable[[TagChange], None],
+        describe: Callable[[int], str],
+        user_id: int,
+        request: Optional[Request],
+    ) -> TagChange:
+        """Rewrite `tag` on the user's records, update the registry and log activity.
+
+        One transaction: on any error everything is rolled back and the error re-raised.
+        """
+        started = time.monotonic()
+        try:
+            change = self._change_records(
+                db, tag=tag, user_id=user_id, new_tags=new_tags
+            )
+            update_registry(change)
+            self._record_activity(
+                db,
+                change=change,
+                action=action,
+                operation=operation,
+                describe=describe,
+                user_id=user_id,
+                request=request,
+            )
+            db.commit()
         except Exception as e:
+            db.rollback()
             logger.error(
-                "Failed to update user_tags during tag rename",
+                f"Tag {operation} failed",
                 extra={
-                    "user_id": user_id,
-                    "old_tag": old_tag,
-                    "new_tag": new_tag,
-                    "error": str(e),
+                    LogFields.EVENT: f"tag_{operation}_failed",
+                    LogFields.USER_ID: user_id,
+                    LogFields.ERROR: type(e).__name__,
                 },
             )
-
-        db.commit()
-
+            raise
         logger.info(
-            "Completed tag rename across entities",
+            f"Tag {operation} completed",
             extra={
-                "old_tag": old_tag,
-                "new_tag": new_tag,
-                "total_updated": total_updated,
+                LogFields.EVENT: f"tag_{operation}d",
+                LogFields.USER_ID: user_id,
+                LogFields.DURATION: round((time.monotonic() - started) * 1000),
+                "tag_id": change.tag_id,
+                "records_changed": change.records_by_entity,
+                "registry_action": change.registry_action,
             },
         )
+        return change
 
-        return total_updated
+    def rename_tag_across_entities(
+        self,
+        db: Session,
+        *,
+        old_tag: str,
+        new_tag: str,
+        user_id: int,
+        request: Optional[Request] = None,
+    ) -> TagChange:
+        """Rename a tag on the user's own patients' records and in their registry.
 
-    def delete_tag_across_entities(self, db: Session, *, tag: str, user_id: int) -> int:
-        """Delete a tag from all entity types, scoped to a user's patients."""
+        All or nothing: on any error nothing is saved and the error is re-raised.
+        Writes one activity entry per patient whose records changed. Renaming a tag
+        to itself changes nothing.
+        """
+        if old_tag == new_tag:
+            return TagChange()
 
-        total_updated = 0
-
-        for table_name in self.ENTITY_TABLES.values():
-            try:
-                # Validate table name for security
-                self._validate_table_name(table_name)
-
-                query = f"""
-                    UPDATE "{table_name}"
-                    SET tags = (
-                        SELECT json_agg(tag_element)
-                        FROM json_array_elements_text(tags) AS tag_element
-                        WHERE tag_element != :tag
-                    )
-                    WHERE EXISTS (
-                        SELECT 1 FROM json_array_elements_text(tags) AS tag_element
-                        WHERE tag_element = :tag
-                    )
-                    AND {self._user_patient_filter()}
-                """
-
-                result = db.execute(text(query), {"tag": tag, "user_id": user_id})
-
-                updated_count = result.rowcount
-                total_updated += updated_count
-
-                logger.debug(
-                    f"Removed tag from {updated_count} records in {table_name}",
-                    extra={
-                        "table": table_name,
-                        "tag": tag,
-                        "updated_count": updated_count,
-                    },
+        def update_registry(change: TagChange) -> None:
+            old_row = self._registry_row(db, user_id, old_tag)
+            existing = self._registry_row(db, user_id, new_tag)
+            if old_row and existing:
+                db.delete(old_row)
+                change.tag_id, change.registry_action = (
+                    existing.id,
+                    "merged_into_existing",
                 )
+            elif old_row:
+                old_row.tag = new_tag
+                change.tag_id, change.registry_action = old_row.id, "renamed"
+            elif change.records:
+                if existing is None:
+                    self._register(db, user_id, [new_tag])
+                    existing = self._registry_row(db, user_id, new_tag)
+                    change.registry_action = "added"
+                else:
+                    change.registry_action = "existing"
+                change.tag_id = existing.id
 
-            except Exception as e:
-                logger.error(
-                    f"Failed to delete tag from {table_name}",
-                    extra={"table": table_name, "tag": tag, "error": str(e)},
-                )
-
-        # Remove the tag from user_tags registry
-        try:
-            delete_user_tag_query = """
-                DELETE FROM user_tags
-                WHERE user_id = :user_id AND tag = :tag
-            """
-            db.execute(text(delete_user_tag_query), {"user_id": user_id, "tag": tag})
-            logger.debug(
-                "Deleted tag from user_tags", extra={"user_id": user_id, "tag": tag}
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to delete tag from user_tags",
-                extra={"user_id": user_id, "tag": tag, "error": str(e)},
-            )
-
-        db.commit()
-
-        logger.info(
-            "Completed tag deletion across entities",
-            extra={"tag": tag, "total_updated": total_updated},
+        return self._bulk_change(
+            db,
+            operation="rename",
+            action=ActionType.UPDATED,
+            tag=old_tag,
+            new_tags=lambda tags: renamed_tags(tags, old_tag, new_tag),
+            update_registry=update_registry,
+            describe=lambda n: f"Tag: '{old_tag}' renamed to '{new_tag}' on {n} record(s)",
+            user_id=user_id,
+            request=request,
         )
 
-        return total_updated
+    def delete_tag_across_entities(
+        self,
+        db: Session,
+        *,
+        tag: str,
+        user_id: int,
+        request: Optional[Request] = None,
+    ) -> TagChange:
+        """Remove a tag from the user's own patients' records and from their registry.
+
+        All or nothing, with one activity entry per patient whose records changed.
+        """
+
+        def update_registry(change: TagChange) -> None:
+            row = self._registry_row(db, user_id, tag)
+            if row:
+                change.tag_id, change.registry_action = row.id, "deleted"
+                db.delete(row)
+
+        return self._bulk_change(
+            db,
+            operation="delete",
+            action=ActionType.DELETED,
+            tag=tag,
+            new_tags=lambda tags: tags_without(tags, tag),
+            update_registry=update_registry,
+            describe=lambda n: f"Tag: '{tag}' removed from {n} record(s)",
+            user_id=user_id,
+            request=request,
+        )
 
     def replace_tag_across_entities(
-        self, db: Session, *, old_tag: str, new_tag: str, user_id: int
-    ) -> int:
-        """Replace one tag with another across all entity types, scoped to a user's patients."""
+        self,
+        db: Session,
+        *,
+        old_tag: str,
+        new_tag: str,
+        user_id: int,
+        request: Optional[Request] = None,
+    ) -> TagChange:
+        """Replace a tag on the user's own patients' records; each list ends up sorted and unique.
 
-        total_updated = 0
+        The old tag leaves the registry and the new one joins it. All or nothing, with
+        one activity entry per patient whose records changed. Replacing a tag with
+        itself changes nothing.
+        """
+        if old_tag == new_tag:
+            return TagChange()
 
-        for table_name in self.ENTITY_TABLES.values():
-            try:
-                # Validate table name for security
-                self._validate_table_name(table_name)
+        def update_registry(change: TagChange) -> None:
+            row = self._registry_row(db, user_id, old_tag)
+            if row:
+                db.delete(row)
+                db.flush()
+            if row or change.records:
+                self._register(db, user_id, [new_tag])
+                change.tag_id = self._registry_row(db, user_id, new_tag).id
+                change.registry_action = "replaced" if row else "added"
 
-                query = f"""
-                    UPDATE "{table_name}"
-                    SET tags = (
-                        SELECT json_agg(DISTINCT tag_element ORDER BY tag_element)
-                        FROM (
-                            SELECT
-                                CASE
-                                    WHEN tag_element = :old_tag THEN :new_tag
-                                    ELSE tag_element
-                                END AS tag_element
-                            FROM json_array_elements_text(tags) AS tag_element
-                        ) AS updated_tags
-                    )
-                    WHERE EXISTS (
-                        SELECT 1 FROM json_array_elements_text(tags) AS tag_element
-                        WHERE tag_element = :old_tag
-                    )
-                    AND {self._user_patient_filter()}
-                """
-
-                result = db.execute(
-                    text(query),
-                    {"old_tag": old_tag, "new_tag": new_tag, "user_id": user_id},
-                )
-
-                updated_count = result.rowcount
-                total_updated += updated_count
-
-                logger.debug(
-                    f"Replaced tag in {updated_count} records in {table_name}",
-                    extra={
-                        "table": table_name,
-                        "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "updated_count": updated_count,
-                    },
-                )
-
-            except Exception as e:
-                logger.error(
-                    f"Failed to replace tag in {table_name}",
-                    extra={
-                        "table": table_name,
-                        "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "error": str(e),
-                    },
-                )
-
-        # Remove old tag from user_tags registry
-        # The new tag should already exist in user_tags (or will be created by sync)
-        try:
-            delete_old_tag_query = """
-                DELETE FROM user_tags
-                WHERE user_id = :user_id AND tag = :old_tag
-            """
-            db.execute(
-                text(delete_old_tag_query), {"user_id": user_id, "old_tag": old_tag}
-            )
-            logger.debug(
-                "Deleted old tag from user_tags after replacement",
-                extra={"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to delete old tag from user_tags during replacement",
-                extra={
-                    "user_id": user_id,
-                    "old_tag": old_tag,
-                    "new_tag": new_tag,
-                    "error": str(e),
-                },
-            )
-
-        db.commit()
-
-        logger.info(
-            "Completed tag replacement across entities",
-            extra={
-                "old_tag": old_tag,
-                "new_tag": new_tag,
-                "total_updated": total_updated,
-            },
+        return self._bulk_change(
+            db,
+            operation="replace",
+            action=ActionType.UPDATED,
+            tag=old_tag,
+            new_tags=lambda tags: replaced_tags(tags, old_tag, new_tag),
+            update_registry=update_registry,
+            describe=lambda n: f"Tag: '{old_tag}' replaced with '{new_tag}' on {n} record(s)",
+            user_id=user_id,
+            request=request,
         )
 
-        return total_updated
-
-    def create_tag(self, db: Session, *, tag: str, user_id: int) -> bool:
-        """Create a new tag in the tags registry table"""
-
+    def create_tag(self, db: Session, *, tag: str, user_id: int) -> None:
+        """Add a tag to the user's registry; a tag already there is left as is."""
         try:
-
-            # Check if tag already exists for this user
-            existing_query = """
-                SELECT COUNT(*) FROM user_tags
-                WHERE user_id = :user_id AND tag = :tag
-            """
-
-            result = db.execute(
-                text(existing_query), {"user_id": user_id, "tag": tag}
-            ).fetchone()
-
-            if result[0] > 0:
-                logger.info(
-                    "Tag already exists for user",
-                    extra={"tag": tag, "user_id": user_id},
-                )
-                return True
-
-            # Insert the new tag
-            insert_query = """
-                INSERT INTO user_tags (user_id, tag, created_at)
-                VALUES (:user_id, :tag, CURRENT_TIMESTAMP)
-            """
-
-            db.execute(text(insert_query), {"user_id": user_id, "tag": tag})
-
+            self._register(db, user_id, [tag])
             db.commit()
-
-            logger.info(
-                "Tag created successfully", extra={"tag": tag, "user_id": user_id}
-            )
-
-            return True
-
         except Exception as e:
+            db.rollback()
             logger.error(
                 "Failed to create tag",
-                extra={"tag": tag, "user_id": user_id, "error": str(e)},
+                extra={LogFields.USER_ID: user_id, LogFields.ERROR: type(e).__name__},
             )
-            db.rollback()
             raise
 
     def update_tag_color(
-        self, db: Session, *, tag_id: int, user_id: int, color: str | None
+        self, db: Session, *, tag_id: int, user_id: int, color: Optional[str]
     ) -> bool:
-        """Update the color of a user tag"""
-
+        """Set a registry tag's color; False when the user has no tag with that id."""
         try:
-            query = """
-                UPDATE user_tags
-                SET color = :color
-                WHERE id = :tag_id AND user_id = :user_id
-            """
-
             result = db.execute(
-                text(query), {"color": color, "tag_id": tag_id, "user_id": user_id}
+                update(UserTag)
+                .where(UserTag.id == tag_id, UserTag.user_id == user_id)
+                .values(color=color)
             )
-
             if result.rowcount == 0:
                 logger.warning(
                     "Tag not found for color update",
-                    extra={"tag_id": tag_id, "user_id": user_id},
+                    extra={"tag_id": tag_id, LogFields.USER_ID: user_id},
                 )
                 return False
-
             db.commit()
-
             logger.info(
                 "Tag color updated",
-                extra={"tag_id": tag_id, "user_id": user_id, "color": color},
+                extra={
+                    LogFields.EVENT: "tag_color_updated",
+                    "tag_id": tag_id,
+                    LogFields.USER_ID: user_id,
+                },
             )
-
             return True
-
         except Exception as e:
+            db.rollback()
             logger.error(
                 "Failed to update tag color",
-                extra={"tag_id": tag_id, "user_id": user_id, "error": str(e)},
+                extra={
+                    "tag_id": tag_id,
+                    LogFields.USER_ID: user_id,
+                    LogFields.ERROR: type(e).__name__,
+                },
             )
-            db.rollback()
             raise
 
     def sync_tags_from_records(self, db: Session, *, user_id: int) -> int:
-        """Sync all tags from medical records into the user_tags table"""
+        """Register every tag found on the user's own patients' records; returns how many were added.
 
+        Returns 0 instead of raising if the database fails.
+        """
         try:
-
-            # Get all unique tags used in this user's medical records
-            union_queries = []
-            for table_name in self.ENTITY_TABLES.values():
-                # Validate table name for security
-                self._validate_table_name(table_name)
-
-                union_queries.append(
-                    f"""
-                    SELECT DISTINCT tag
-                    FROM "{table_name}" r
-                    JOIN patients p ON r.patient_id = p.id
-                    JOIN users u ON p.user_id = u.id,
-                    json_array_elements_text(r.tags) as tag
-                    WHERE r.tags IS NOT NULL AND u.id = :user_id
-                """
-                )
-
-            if not union_queries:
-                return 0
-
-            # Insert all found tags into user_tags (ignore duplicates)
-            sync_query = f"""
-                INSERT INTO user_tags (user_id, tag, created_at)
-                SELECT DISTINCT :user_id, tag, CURRENT_TIMESTAMP
-                FROM (
-                    {' UNION '.join(union_queries)}
-                ) all_user_tags
-                ON CONFLICT (user_id, tag) DO NOTHING
-            """
-
-            result = db.execute(text(sync_query), {"user_id": user_id})
-            synced_count = result.rowcount
-
+            found = {
+                tag for tag, _, _ in self._tag_usage(db, ENTITY_MODELS.items(), user_id)
+            }
+            added = self._register(db, user_id, sorted(found))
             db.commit()
-
-            logger.info(
-                "Synced tags from medical records",
-                extra={"user_id": user_id, "synced_count": synced_count},
-            )
-
-            return synced_count
-
-        except Exception as e:
+        except SQLAlchemyError as e:
+            db.rollback()
             logger.error(
                 "Failed to sync tags from medical records",
-                extra={"user_id": user_id, "error": str(e)},
+                extra={LogFields.USER_ID: user_id, LogFields.ERROR: type(e).__name__},
             )
-            db.rollback()
             return 0
 
+        logger.info(
+            "Synced tags from medical records",
+            extra={
+                LogFields.EVENT: "tags_synced",
+                LogFields.USER_ID: user_id,
+                "tags_found": len(found),
+                "tags_added": added,
+            },
+        )
+        return added
 
-# Create singleton instance
+
 tag_service = TagService()

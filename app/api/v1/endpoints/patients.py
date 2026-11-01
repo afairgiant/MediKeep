@@ -706,6 +706,7 @@ def get_user_recent_activity(
             "pharmacy",  # Pharmacies page
             "lab_result_file",  # Lab result file uploads
             "insurance",  # Insurance page
+            "tag",  # Bulk tag rename, delete and replace
         ]
 
         # Define universal entity types that should be shown regardless of patient

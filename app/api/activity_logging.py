@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import sanitize_log_input
-from app.core.utils.client_ip import get_client_ip
+from app.core.utils.client_ip import request_audit_fields
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, EntityType
 
@@ -248,13 +248,7 @@ def log_crud_activity(
         entity_id = getattr(entity_obj, "id", None)
         patient_id = getattr(entity_obj, "patient_id", None)
 
-        # Extract and sanitize request details if available
-        ip_address = None
-        user_agent = None
-        if request:
-            ip_address = get_client_ip(request) if request.client else None
-            raw_user_agent = request.headers.get("user-agent")
-            user_agent = sanitize_log_input(raw_user_agent) if raw_user_agent else None
+        ip_address, user_agent = request_audit_fields(request)
 
         # Sanitize metadata to prevent sensitive data exposure
         safe_metadata = None

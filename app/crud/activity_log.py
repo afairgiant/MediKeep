@@ -360,6 +360,7 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
         metadata: Optional[Dict[str, Any]] = None,
         ip_address: Optional[str] = None,
         user_agent: Optional[str] = None,
+        commit: bool = True,
     ) -> ActivityLog:
         """
         Log a new activity entry.
@@ -375,6 +376,7 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
             metadata: Optional additional metadata
             ip_address: Optional IP address
             user_agent: Optional user agent string
+            commit: False adds the entry to the caller's transaction (flushed, not committed)
 
         Returns:
             Created ActivityLog object
@@ -405,6 +407,9 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
 
         db_obj = self.model(**activity_data)
         db.add(db_obj)
+        if not commit:
+            db.flush()
+            return db_obj
         db.commit()
         db.refresh(db_obj)
         return db_obj
