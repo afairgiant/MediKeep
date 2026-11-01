@@ -2876,15 +2876,6 @@ Treatments support two modes:
 - **Purpose**: Get only active treatments for a specific patient
 - **Success Response** (200): Array of treatment objects
 
-#### Get Ongoing Treatments
-
-`GET /treatments/ongoing`
-
-- **Purpose**: Get treatments with status active or in_progress
-- **Query Parameters**:
-  - `patient_id` (integer, optional): Filter by patient ID (defaults to current user's patient)
-- **Success Response** (200): Array of treatment objects
-
 #### Treatment-Medication Relationships
 
 These endpoints manage the many-to-many relationship between treatments and medications. In **advanced mode**, each linked medication can have treatment-specific overrides for dosage, frequency, dates, prescriber, and pharmacy.
@@ -4171,6 +4162,8 @@ Base path: `/api/v1/practitioners`
 
 `DELETE /practitioners/{practitioner_id}`
 
+- **Error Responses**: 409 while any record (patient, medication, condition, visit, ...) still links to the practitioner. Links from insurance, medical equipment and treatment prescribers are cleared instead.
+
 #### Search Practitioners by Name
 
 `GET /practitioners/search/by-name`
@@ -4322,7 +4315,7 @@ Base path: `/api/v1/practices`
 `DELETE /practices/{practice_id}`
 
 - **Authentication**: Yes
-- **Notes**: Deleting a practice sets `practice_id` to NULL on all linked practitioners (ON DELETE SET NULL).
+- **Error Responses**: 409 while any practitioner belongs to the practice.
 
 ---
 
@@ -4872,8 +4865,8 @@ Base path: `/api/v1/invitations`
 
 `POST /invitations/cleanup`
 
-- **Purpose**: Remove expired invitations (admin/scheduled task)
-- **Authentication**: Yes
+- **Purpose**: Mark overdue pending invitations as expired, across all users
+- **Authentication**: Admin only
 - **Success Response** (200):
 
 ```json

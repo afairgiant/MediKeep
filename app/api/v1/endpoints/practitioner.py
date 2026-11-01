@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -143,7 +143,15 @@ def delete_practitioner(
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Delete a practitioner."""
+    """Delete a practitioner. Refused with 409 while any record still uses them."""
+    with handle_database_errors(request=request):
+        in_use = practitioner.is_referenced(db, practitioner_id)
+    if in_use:
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete a practitioner who is linked to records",
+        )
+
     return handle_delete_with_logging(
         db=db,
         crud_obj=practitioner,

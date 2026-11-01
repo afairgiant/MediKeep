@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_admin_user, get_current_user
 from app.core.database.database import get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
@@ -265,13 +265,9 @@ async def respond_to_invitation(
                             shares = (
                                 patient_service.accept_bulk_patient_share_invitation(
                                     user=current_user,
-                                    invitation=invitation,
+                                    invitation_id=invitation_id,
                                     response_note=response_data.response_note,
                                 )
-                            )
-                        except ValueError as e:
-                            raise HTTPException(
-                                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
                             )
                         except IntegrityError as e:
                             raise HTTPException(
@@ -330,6 +326,8 @@ async def respond_to_invitation(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"Unable to accept patient share: {error_msg}",
                     )
+                except HTTPException:
+                    raise
                 except Exception as e:
                     log_endpoint_error(
                         logger,
@@ -605,12 +603,11 @@ def revoke_invitation(
 @router.post("/cleanup")
 def cleanup_expired_invitations(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
-    """Cleanup expired invitations (admin/maintenance endpoint)"""
+    """Mark every overdue pending invitation as expired, across all users. Admin only."""
     try:
-        # Could be restricted to admin users only in the future
         service = InvitationService(db)
         expired_count = service.expire_old_invitations()
 

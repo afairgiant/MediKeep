@@ -296,32 +296,6 @@ def get_active_treatments(
         return treatments
 
 
-@router.get("/ongoing", response_model=List[TreatmentResponse])
-def get_ongoing_treatments(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    patient_id: Optional[int] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
-) -> Any:
-    """Get treatments that are currently ongoing."""
-    with handle_database_errors(request=request):
-        treatments = treatment.get_ongoing(db, patient_id=patient_id)
-
-        log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "Treatment",
-            patient_id=patient_id,
-            count=len(treatments),
-            status="ongoing",
-        )
-
-        return treatments
-
-
 @router.get(
     "/patients/{patient_id}/treatments/", response_model=List[TreatmentResponse]
 )

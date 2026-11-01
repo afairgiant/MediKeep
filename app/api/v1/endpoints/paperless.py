@@ -15,6 +15,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.api.v1.endpoints.entity_file import get_entity_by_type_and_id
 from app.core.database.database import get_db
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -27,7 +28,7 @@ from app.core.logging.helpers import (
 from app.core.utils.integration_http import UNSAFE_REDIRECT_MESSAGE
 from app.core.utils.stored_files import resolve_stored_file
 from app.crud.user_preferences import user_preferences
-from app.models.models import User
+from app.models.models import Patient, User
 from app.schemas.user_preferences import PaperlessConnectionData
 from app.services.credential_encryption import SecurityError, credential_encryption
 from app.services.paperless_service import (
@@ -38,6 +39,7 @@ from app.services.paperless_service import (
     create_paperless_service,
 )
 from app.services.paperless_task_status import extract_task, parse_task
+from app.services.patient_access import PatientAccessService
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -95,13 +97,16 @@ def _categorize_task_error(error_message: str, is_duplicate: bool) -> str:
 
 
 def _update_entity_file_from_task_result(
-    db: Session, task_uuid: str, task_result: dict
+    db: Session, user: User, task_uuid: str, task_result: dict
 ) -> None:
     """
     Update EntityFile record based on Paperless task completion result.
 
+    Leaves the record alone unless the user has edit access to its patient.
+
     Args:
         db: Database session
+        user: User polling the task
         task_uuid: Task UUID to find the EntityFile record
         task_result: Task result with status, result, error_type, etc.
     """
@@ -115,7 +120,9 @@ def _update_entity_file_from_task_result(
             .first()
         )
 
-        if not entity_file:
+        if not entity_file or not _can_edit_entity(
+            db, user, entity_file.entity_type, entity_file.entity_id
+        ):
             mock_req = MockRequest()
             logger.warning(
                 f"No EntityFile found for task UUID {task_uuid}",
@@ -1031,11 +1038,15 @@ async def cleanup_out_of_sync_files(
         )
 
         # Find and delete EntityFile records with missing or failed status
-        failed_missing_files = (
-            db.query(EntityFile)
+        failed_missing_files = [
+            file_record
+            for file_record in db.query(EntityFile)
             .filter(EntityFile.sync_status.in_(["failed", "missing"]))
             .all()
-        )
+            if _can_edit_entity(
+                db, current_user, file_record.entity_type, file_record.entity_id
+            )
+        ]
 
         logger.info(
             f"Found {len(failed_missing_files)} files with failed/missing status"
@@ -1189,6 +1200,7 @@ async def get_paperless_task_status(
                         if parsed.is_success:
                             _update_entity_file_from_task_result(
                                 db,
+                                current_user,
                                 task_uuid,
                                 {
                                     "status": "SUCCESS",
@@ -1221,6 +1233,7 @@ async def get_paperless_task_status(
 
                             _update_entity_file_from_task_result(
                                 db,
+                                current_user,
                                 task_uuid,
                                 {
                                     "status": "FAILURE",
@@ -1555,6 +1568,22 @@ class BackgroundTaskRequest(BaseModel):
     sync_status: str = Field(default="processing", description="Sync status to set")
 
 
+def _can_edit_entity(db: Session, user: User, entity_type: str, entity_id: int) -> bool:
+    """Whether the user has edit access to the patient that owns this entity.
+
+    False for an unsupported entity type.
+    """
+    try:
+        entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+    except HTTPException:
+        return False
+    patient_id = getattr(entity, "patient_id", None)
+    patient = db.get(Patient, patient_id) if patient_id is not None else None
+    return patient is not None and PatientAccessService(db).can_access_patient(
+        user, patient, "edit"
+    )
+
+
 @router.post("/entity-files/set-background-task")
 async def set_background_task(
     *,
@@ -1596,7 +1625,10 @@ async def set_background_task(
             .first()
         )
 
-        if not entity_file_record:
+        # Same 404 for no access, so another patient's file names are not revealed
+        if not entity_file_record or not _can_edit_entity(
+            db, current_user, request_data.entity_type, request_data.entity_id
+        ):
             logger.error(
                 f"Entity file not found for background task",
                 extra={
@@ -1714,7 +1746,10 @@ async def update_background_task(
             .first()
         )
 
-        if not entity_file_record:
+        # Same 404 for no access, so another patient's file names are not revealed
+        if not entity_file_record or not _can_edit_entity(
+            db, current_user, request_data.entity_type, request_data.entity_id
+        ):
             logger.error(
                 f"Entity file not found for background task update",
                 extra={

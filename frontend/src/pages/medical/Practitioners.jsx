@@ -180,7 +180,12 @@ const Practitioners = () => {
         setSuccessMessage('Practitioner deleted successfully');
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
-        setError('Failed to delete practitioner. Please try again.');
+        // 409 means still linked to records; retrying cannot help, so show why
+        setError(
+          err.status === 409
+            ? err.message
+            : 'Failed to delete practitioner. Please try again.'
+        );
         frontendLogger.logError('Failed to delete practitioner', {
           practitionerId,
           error: err.message,

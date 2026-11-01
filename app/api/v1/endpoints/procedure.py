@@ -221,34 +221,6 @@ def delete_procedure(
     )
 
 
-@router.get("/scheduled", response_model=List[ProcedureResponse])
-def get_scheduled_procedures(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    patient_id: Optional[int] = Query(None),
-    current_user_id: int = Depends(deps.get_current_user_id),
-) -> Any:
-    """
-    Get all scheduled procedures, optionally filtered by patient.
-    """
-    with handle_database_errors(request=request):
-        procedures = procedure.get_scheduled(db, patient_id=patient_id)
-
-        log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "Procedure",
-            patient_id=patient_id,
-            count=len(procedures),
-            status="scheduled",
-        )
-
-        return procedures
-
-
 @router.get("/patient/{patient_id}/recent", response_model=List[ProcedureResponse])
 def get_recent_procedures(
     *,
