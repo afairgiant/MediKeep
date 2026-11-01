@@ -2561,6 +2561,60 @@
       "is_common": false,
       "result_type": "quantitative",
       "display_order": 175
+    },
+    {
+      "test_name": "Hepatitis B Surface Antigen",
+      "abbreviation": "HBsAg",
+      "test_code": "5196-1",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": [
+        "HBsAg",
+        "HBs Antigen",
+        "HBs-Antigen",
+        "Hepatitis B Surface Ag",
+        "Hep B Surface Antigen"
+      ],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 176
+    },
+    {
+      "test_name": "Parietal Cell Antibody",
+      "abbreviation": "APCA",
+      "test_code": "56147-2",
+      "default_unit": "U/mL",
+      "category": "immunology",
+      "common_names": [
+        "Parietal Cell Ab",
+        "Parietal Cell Antibodies",
+        "Parietal Cell Antibody, ELISA",
+        "Parietal Cell Ab W/Refl Titer",
+        "Parietal Cell Antibody with Reflex to Titer",
+        "Parietal Cell Antibodies, IgG",
+        "Antiparietal Cell Antibody",
+        "Anti-Parietal Cell Antibody"
+      ],
+      "is_common": false,
+      "result_type": "quantitative",
+      "display_order": 177
+    },
+    {
+      "test_name": "Intrinsic Factor Antibody",
+      "abbreviation": "IFAB",
+      "test_code": "56539-0",
+      "default_unit": "U/mL",
+      "category": "immunology",
+      "common_names": [
+        "Intrinsic Factor Ab",
+        "Intrinsic Factor Antibodies",
+        "Intrinsic Factor Blocking Antibody",
+        "Intrinsic Factor Blocking Antibodies",
+        "Anti-Intrinsic Factor Antibody"
+      ],
+      "is_common": false,
+      "result_type": "quantitative",
+      "display_order": 178
     }
   ]
 }
