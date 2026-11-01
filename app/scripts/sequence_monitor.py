@@ -12,8 +12,9 @@ from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "sequence_monitor")
 
-# Names here come from the pg catalog or the CLI; quote every one put into SQL
-quote_identifier = postgresql.dialect().identifier_preparer.quote
+# Names here come from the pg catalog or the CLI; quote every one put into SQL.
+# The named paramstyle stops `%` being doubled here, since text() doubles it again.
+quote_identifier = postgresql.dialect(paramstyle="named").identifier_preparer.quote
 
 
 def quote_qualified(name: str) -> str:
@@ -264,6 +265,13 @@ class SequenceMonitor:
             self.db_session.close()
             self.db_session = None
 
+    def _qualified_sequence(self, sequence_name: str) -> str:
+        """`schema.sequence` quoted, for a regclass argument such as setval's."""
+        return (
+            f"{quote_identifier(self.config.DEFAULT_SCHEMA)}."
+            f"{quote_identifier(sequence_name)}"
+        )
+
     def _execute_query(self, query: str, params: Optional[Dict] = None) -> Any:
         """
         Execute a SQL query with consistent error handling
@@ -426,7 +434,10 @@ class SequenceMonitor:
         setval_query = "SELECT setval(:sequence_name, :new_value, true)"
         result = self._execute_query(
             setval_query,
-            {"sequence_name": sequence_name, "new_value": new_sequence_value},
+            {
+                "sequence_name": self._qualified_sequence(sequence_name),
+                "new_value": new_sequence_value,
+            },
         )
 
         # Verify the operation
@@ -474,7 +485,10 @@ class SequenceMonitor:
         reset_query = "SELECT setval(:sequence_name, :start_value, false)"
         self._execute_query(
             reset_query,
-            {"sequence_name": sequence_name, "start_value": seq_result.start_value},
+            {
+                "sequence_name": self._qualified_sequence(sequence_name),
+                "start_value": seq_result.start_value,
+            },
         )
 
         db.commit()
