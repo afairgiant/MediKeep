@@ -3,10 +3,11 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel
-from sqlalchemy import func, or_, text
+from sqlalchemy import exists, func, or_
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.core.database.utils import contains_ignore_case, json_array_elements
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_data_access, log_endpoint_access
 from app.models.models import (
@@ -38,24 +39,10 @@ SORT_ALIASES = {
 }
 
 
-def _tag_text_filter(db: Session, table_name: str, query_lower: str):
-    """Build an EXISTS filter for precise tag text matching.
-
-    Uses json_array_elements_text on PostgreSQL and json_each on SQLite.
-    Returns a SQLAlchemy text clause that checks if any element in the
-    JSON tags array contains the search term (case-insensitive LIKE).
-    Uses parameterized binding to prevent SQL injection.
-    """
-    dialect = db.get_bind().dialect.name
-    if dialect == "sqlite":
-        return text(
-            f'EXISTS (SELECT 1 FROM json_each("{table_name}"."tags") '
-            "WHERE lower(json_each.value) LIKE '%' || :_tag_q || '%')"
-        ).bindparams(_tag_q=query_lower)
-    return text(
-        f'EXISTS (SELECT 1 FROM json_array_elements_text("{table_name}"."tags") AS t '
-        "WHERE lower(t) LIKE '%' || :_tag_q || '%')"
-    ).bindparams(_tag_q=query_lower)
+def _tag_text_filter(db: Session, tags_column, query_lower: str):
+    """EXISTS clause: any element of the JSON tags array contains the term, case-insensitive."""
+    elements = json_array_elements(db, tags_column)
+    return exists().where(contains_ignore_case(elements.c.value, query_lower))
 
 
 def _apply_date_filter(query_obj, date_col, date_from, date_to):
@@ -310,10 +297,10 @@ def search_patient_records(
         if query_lower:
             medications_query = medications_query.filter(
                 or_(
-                    func.lower(Medication.medication_name).contains(query_lower),
-                    func.lower(Medication.dosage).contains(query_lower),
-                    func.lower(Medication.indication).contains(query_lower),
-                    _tag_text_filter(db, "medications", query_lower),
+                    contains_ignore_case(Medication.medication_name, query_lower),
+                    contains_ignore_case(Medication.dosage, query_lower),
+                    contains_ignore_case(Medication.indication, query_lower),
+                    _tag_text_filter(db, Medication.tags, query_lower),
                 )
             )
 
@@ -365,10 +352,10 @@ def search_patient_records(
         if query_lower:
             conditions_query = conditions_query.filter(
                 or_(
-                    func.lower(Condition.condition_name).contains(query_lower),
-                    func.lower(Condition.diagnosis).contains(query_lower),
-                    func.lower(Condition.notes).contains(query_lower),
-                    _tag_text_filter(db, "conditions", query_lower),
+                    contains_ignore_case(Condition.condition_name, query_lower),
+                    contains_ignore_case(Condition.diagnosis, query_lower),
+                    contains_ignore_case(Condition.notes, query_lower),
+                    _tag_text_filter(db, Condition.tags, query_lower),
                 )
             )
 
@@ -415,10 +402,10 @@ def search_patient_records(
         if query_lower:
             lab_results_query = lab_results_query.filter(
                 or_(
-                    func.lower(LabResult.test_name).contains(query_lower),
-                    func.lower(LabResult.labs_result).contains(query_lower),
-                    func.lower(LabResult.notes).contains(query_lower),
-                    _tag_text_filter(db, "lab_results", query_lower),
+                    contains_ignore_case(LabResult.test_name, query_lower),
+                    contains_ignore_case(LabResult.labs_result, query_lower),
+                    contains_ignore_case(LabResult.notes, query_lower),
+                    _tag_text_filter(db, LabResult.tags, query_lower),
                 )
             )
 
@@ -468,10 +455,10 @@ def search_patient_records(
         if query_lower:
             procedures_query = procedures_query.filter(
                 or_(
-                    func.lower(Procedure.procedure_name).contains(query_lower),
-                    func.lower(Procedure.description).contains(query_lower),
-                    func.lower(Procedure.notes).contains(query_lower),
-                    _tag_text_filter(db, "procedures", query_lower),
+                    contains_ignore_case(Procedure.procedure_name, query_lower),
+                    contains_ignore_case(Procedure.description, query_lower),
+                    contains_ignore_case(Procedure.notes, query_lower),
+                    _tag_text_filter(db, Procedure.tags, query_lower),
                 )
             )
 
@@ -513,9 +500,9 @@ def search_patient_records(
         if query_lower:
             immunizations_query = immunizations_query.filter(
                 or_(
-                    func.lower(Immunization.vaccine_name).contains(query_lower),
-                    func.lower(Immunization.notes).contains(query_lower),
-                    _tag_text_filter(db, "immunizations", query_lower),
+                    contains_ignore_case(Immunization.vaccine_name, query_lower),
+                    contains_ignore_case(Immunization.notes, query_lower),
+                    _tag_text_filter(db, Immunization.tags, query_lower),
                 )
             )
 
@@ -567,11 +554,11 @@ def search_patient_records(
         if query_lower:
             treatments_query = treatments_query.filter(
                 or_(
-                    func.lower(Treatment.treatment_name).contains(query_lower),
-                    func.lower(Treatment.treatment_type).contains(query_lower),
-                    func.lower(Treatment.description).contains(query_lower),
-                    func.lower(Treatment.notes).contains(query_lower),
-                    _tag_text_filter(db, "treatments", query_lower),
+                    contains_ignore_case(Treatment.treatment_name, query_lower),
+                    contains_ignore_case(Treatment.treatment_type, query_lower),
+                    contains_ignore_case(Treatment.description, query_lower),
+                    contains_ignore_case(Treatment.notes, query_lower),
+                    _tag_text_filter(db, Treatment.tags, query_lower),
                 )
             )
 
@@ -619,10 +606,10 @@ def search_patient_records(
         if query_lower:
             encounters_query = encounters_query.filter(
                 or_(
-                    func.lower(Encounter.visit_type).contains(query_lower),
-                    func.lower(Encounter.chief_complaint).contains(query_lower),
-                    func.lower(Encounter.notes).contains(query_lower),
-                    _tag_text_filter(db, "encounters", query_lower),
+                    contains_ignore_case(Encounter.visit_type, query_lower),
+                    contains_ignore_case(Encounter.chief_complaint, query_lower),
+                    contains_ignore_case(Encounter.notes, query_lower),
+                    _tag_text_filter(db, Encounter.tags, query_lower),
                 )
             )
 
@@ -664,10 +651,10 @@ def search_patient_records(
         if query_lower:
             allergies_query = allergies_query.filter(
                 or_(
-                    func.lower(Allergy.allergen).contains(query_lower),
-                    func.lower(Allergy.reaction).contains(query_lower),
-                    func.lower(Allergy.notes).contains(query_lower),
-                    _tag_text_filter(db, "allergies", query_lower),
+                    contains_ignore_case(Allergy.allergen, query_lower),
+                    contains_ignore_case(Allergy.reaction, query_lower),
+                    contains_ignore_case(Allergy.notes, query_lower),
+                    _tag_text_filter(db, Allergy.tags, query_lower),
                 )
             )
 
@@ -709,11 +696,11 @@ def search_patient_records(
         if query_lower:
             injuries_query = injuries_query.filter(
                 or_(
-                    func.lower(Injury.injury_name).contains(query_lower),
-                    func.lower(Injury.body_part).contains(query_lower),
-                    func.lower(Injury.mechanism).contains(query_lower),
-                    func.lower(Injury.notes).contains(query_lower),
-                    _tag_text_filter(db, "injuries", query_lower),
+                    contains_ignore_case(Injury.injury_name, query_lower),
+                    contains_ignore_case(Injury.body_part, query_lower),
+                    contains_ignore_case(Injury.mechanism, query_lower),
+                    contains_ignore_case(Injury.notes, query_lower),
+                    _tag_text_filter(db, Injury.tags, query_lower),
                 )
             )
 
@@ -762,9 +749,9 @@ def search_patient_records(
         if query_lower:
             symptoms_query = symptoms_query.filter(
                 or_(
-                    func.lower(Symptom.symptom_name).contains(query_lower),
-                    func.lower(Symptom.general_notes).contains(query_lower),
-                    _tag_text_filter(db, "symptoms", query_lower),
+                    contains_ignore_case(Symptom.symptom_name, query_lower),
+                    contains_ignore_case(Symptom.general_notes, query_lower),
+                    _tag_text_filter(db, Symptom.tags, query_lower),
                 )
             )
 
@@ -816,13 +803,13 @@ def search_patient_records(
         if query_lower:
             equipment_query = equipment_query.filter(
                 or_(
-                    func.lower(MedicalEquipment.equipment_name).contains(query_lower),
-                    func.lower(MedicalEquipment.equipment_type).contains(query_lower),
-                    func.lower(MedicalEquipment.manufacturer).contains(query_lower),
-                    func.lower(MedicalEquipment.model_number).contains(query_lower),
-                    func.lower(MedicalEquipment.supplier).contains(query_lower),
-                    func.lower(MedicalEquipment.notes).contains(query_lower),
-                    _tag_text_filter(db, "medical_equipment", query_lower),
+                    contains_ignore_case(MedicalEquipment.equipment_name, query_lower),
+                    contains_ignore_case(MedicalEquipment.equipment_type, query_lower),
+                    contains_ignore_case(MedicalEquipment.manufacturer, query_lower),
+                    contains_ignore_case(MedicalEquipment.model_number, query_lower),
+                    contains_ignore_case(MedicalEquipment.supplier, query_lower),
+                    contains_ignore_case(MedicalEquipment.notes, query_lower),
+                    _tag_text_filter(db, MedicalEquipment.tags, query_lower),
                 )
             )
 
@@ -873,7 +860,7 @@ def search_patient_records(
         vitals_query = db.query(Vitals).filter(Vitals.patient_id == target_patient_id)
         if query_lower:
             vitals_query = vitals_query.filter(
-                func.lower(Vitals.notes).contains(query_lower)
+                contains_ignore_case(Vitals.notes, query_lower)
             )
 
         vitals_query = _apply_date_filter(

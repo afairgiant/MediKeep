@@ -5,7 +5,7 @@ Provides helper functions that work with both PostgreSQL and SQLite,
 abstracting away database-specific operations.
 """
 
-from sqlalchemy import and_, func, true
+from sqlalchemy import JSON, and_, case, cast, func, literal, true
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
 
@@ -22,6 +22,11 @@ def get_database_type(db: Session) -> str:
     """
     dialect_name = db.bind.dialect.name
     return dialect_name
+
+
+def contains_ignore_case(column: ColumnElement, term: str) -> ColumnElement:
+    """Case-insensitive substring match; `%` and `_` in the term match literally."""
+    return func.lower(column).contains(term.lower(), autoescape=True)
 
 
 def create_text_search_condition(
@@ -55,10 +60,28 @@ def create_text_search_condition(
     # Create conditions for each word (case-insensitive with LIKE escaping)
     conditions = []
     for word in words:
-        conditions.append(func.lower(column).contains(word.lower(), autoescape=True))
+        conditions.append(contains_ignore_case(column, word))
 
     # All words must match (AND logic)
     if len(conditions) == 1:
         return conditions[0]
 
     return and_(*conditions)
+
+
+def json_array_elements(db: Session, column: ColumnElement):
+    """Table-valued expansion of a JSON array column; each element is in `.c.value`.
+
+    Null or non-array values expand to no rows. Reference it inside a query on the
+    column's table so it correlates per row.
+    """
+    # PostgreSQL raises on expanding JSON null or a scalar, so swap those for []
+    if get_database_type(db) == "sqlite":
+        # A CAST to JSON gets numeric affinity in SQLite and turns '[]' into 0
+        array_only = case((func.json_type(column) == "array", column), else_="[]")
+        return func.json_each(array_only).table_valued("value")
+    array_only = case(
+        (func.json_typeof(column) == "array", column),
+        else_=cast(literal("[]"), JSON),
+    )
+    return func.json_array_elements_text(array_only).table_valued("value")

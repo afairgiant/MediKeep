@@ -4,10 +4,11 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, asc, desc, text
+from sqlalchemy import and_, asc, desc, func, select, text
 from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.database.utils import get_database_type
 from app.core.logging.config import get_logger
 from app.core.logging.constants import (
     LogFields,
@@ -552,25 +553,33 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 f"Integrity error creating {self.model_name}: {error_msg}"
             )
 
-            # Try sequence fix for duplicate key errors
-            if "duplicate key" in error_msg.lower():
-                if self._fix_sequence(db):
+            message = error_msg.lower()
+            if "duplicate key" in message:
+                duplicate_orig = e.orig
+                # Only a clash on the id itself means the sequence fell behind
+                if "key (id)=" in message and self._fix_sequence(db):
                     self.logger.info(
                         f"Applied sequence fix for {self.model_name}, retrying creation"
                     )
                     db_obj = self.model(**obj_in_data)
                     db.add(db_obj)
-                    db.commit()
-                    db.refresh(db_obj)
-                    self.logger.info(
-                        f"Successfully created {self.model_name} record {db_obj.id} after sequence fix"
-                    )
-                    return db_obj
-                # If sequence fix didn't help, it's a real duplicate
+                    try:
+                        db.commit()
+                    except IntegrityError as retry_error:
+                        db.rollback()
+                        duplicate_orig = retry_error.orig
+                    else:
+                        db.refresh(db_obj)
+                        self.logger.info(
+                            f"Successfully created {self.model_name} record {db_obj.id} after sequence fix"
+                        )
+                        return db_obj
                 raise IntegrityError(
-                    f"Duplicate {self.model_name} record", orig=e.orig, params=None
+                    f"Duplicate {self.model_name} record",
+                    orig=duplicate_orig,
+                    params=None,
                 )
-            if "foreign key" in error_msg.lower():
+            if "foreign key" in message:
                 raise IntegrityError(
                     f"Invalid reference in {self.model_name}", orig=e.orig, params=None
                 )
@@ -587,39 +596,45 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             raise
 
     def _fix_sequence(self, db: Session) -> bool:
-        """Simplified sequence fix for PostgreSQL."""
+        """Move the id sequence past the highest id; True on success.
+
+        PostgreSQL only: always False on other databases.
+        """
+        if get_database_type(db) != "postgresql":
+            return False
+        table_name = self.model.__tablename__
+        log_context = {
+            LogFields.MODEL: self.model_name,
+            LogFields.OPERATION: "sequence_fix",
+            "table_name": table_name,
+        }
         try:
-            table_name = self.model.__tablename__
-
             self.logger.debug(
-                f"Attempting sequence fix for {self.model_name}",
-                extra={
-                    LogFields.MODEL: self.model_name,
-                    LogFields.OPERATION: "sequence_fix",
-                    "table_name": table_name,
-                },
+                f"Attempting sequence fix for {self.model_name}", extra=log_context
             )
 
-            # Get max ID and reset sequence
-            max_id = (
-                db.execute(
-                    text(f"SELECT COALESCE(MAX(id), 0) FROM {table_name}")
-                ).scalar()
-                or 0
+            max_id = db.scalar(select(func.coalesce(func.max(self.model.id), 0)))
+            # is_called false on an empty table, so the next id is 1 rather than 2
+            new_value = db.scalar(
+                text(
+                    "SELECT setval(pg_get_serial_sequence(:table, 'id'), "
+                    "GREATEST(:max_id, 1), :max_id > 0)"
+                ),
+                {"table": table_name, "max_id": max_id},
             )
-            sequence_name = f"{table_name}_id_seq"
-            db.execute(text(f"SELECT setval('{sequence_name}', {max_id + 1})"))
+            if new_value is None:
+                # setval(NULL, ...) is a silent no-op: the id column owns no sequence
+                db.rollback()
+                self.logger.warning(
+                    f"No sequence owned by {self.model_name}.id; nothing to fix",
+                    extra=log_context,
+                )
+                return False
             db.commit()
 
             self.logger.info(
                 f"Successfully fixed sequence for {self.model_name}",
-                extra={
-                    LogFields.MODEL: self.model_name,
-                    LogFields.OPERATION: "sequence_fix",
-                    "table_name": table_name,
-                    "max_id": max_id,
-                    "new_sequence_value": max_id + 1,
-                },
+                extra={**log_context, "max_id": max_id},
             )
 
             return True
