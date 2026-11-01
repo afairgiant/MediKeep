@@ -642,6 +642,39 @@ class PatientSharingService:
         )
         return invitation
 
+    def _get_pending_invitation(self, user: User, invitation_id: int) -> Invitation:
+        """The pending patient share invitation sent to this user.
+
+        Raises:
+            ValueError: If not found, not pending, not sent to the user, or expired
+                (an expired one is marked expired and committed).
+        """
+        invitation = (
+            self.db.query(Invitation)
+            .filter(
+                Invitation.id == invitation_id,
+                Invitation.sent_to_user_id == user.id,
+                Invitation.status == "pending",
+                Invitation.invitation_type == "patient_share",
+            )
+            .first()
+        )
+
+        if not invitation:
+            raise ValueError("Invitation not found or not pending")
+
+        if invitation.expires_at:
+            now = get_utc_now()
+            expires_at = invitation.expires_at
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if expires_at < now:
+                invitation.status = "expired"
+                self.db.commit()
+                raise ValueError("Invitation has expired")
+
+        return invitation
+
     def accept_patient_share_invitation(
         self, user: User, invitation_id: int, response_note: Optional[str] = None
     ) -> PatientShare:
@@ -668,31 +701,7 @@ class PatientSharingService:
             },
         )
 
-        # Get invitation
-        invitation = (
-            self.db.query(Invitation)
-            .filter(
-                Invitation.id == invitation_id,
-                Invitation.sent_to_user_id == user.id,
-                Invitation.status == "pending",
-                Invitation.invitation_type == "patient_share",
-            )
-            .first()
-        )
-
-        if not invitation:
-            raise ValueError("Invitation not found or not pending")
-
-        # Check expiration
-        if invitation.expires_at:
-            now = get_utc_now()
-            expires_at = invitation.expires_at
-            if expires_at.tzinfo is None:
-                expires_at = expires_at.replace(tzinfo=timezone.utc)
-            if expires_at < now:
-                invitation.status = "expired"
-                self.db.commit()
-                raise ValueError("Invitation has expired")
+        invitation = self._get_pending_invitation(user, invitation_id)
 
         # Extract context data
         context = invitation.context_data
@@ -802,30 +811,33 @@ class PatientSharingService:
             raise
 
     def accept_bulk_patient_share_invitation(
-        self, user: User, invitation: Invitation, response_note: Optional[str] = None
+        self, user: User, invitation_id: int, response_note: Optional[str] = None
     ) -> List[PatientShare]:
         """
         Accept bulk patient share invitation and create multiple PatientShares
 
         Args:
             user: User accepting the invitation
-            invitation: Bulk invitation object
+            invitation_id: ID of the bulk invitation to accept
             response_note: Optional response note
 
         Returns:
             List of created/existing PatientShare objects
 
         Raises:
-            ValueError: If invitation invalid or bulk data missing
+            ValueError: If the invitation is not a pending one sent to the user,
+                has expired, or is missing bulk data
         """
         logger.info(
             "Accepting bulk patient share invitation",
             extra={
                 "user_id": user.id,
-                "invitation_id": invitation.id,
+                "invitation_id": invitation_id,
                 "component": "patient_sharing",
             },
         )
+
+        invitation = self._get_pending_invitation(user, invitation_id)
 
         # Extract bulk invitation data
         patients_data = invitation.context_data.get("patients", [])

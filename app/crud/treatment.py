@@ -96,36 +96,6 @@ class CRUDTreatment(
             order_desc=True,
         )
 
-    def get_ongoing(
-        self, db: Session, *, patient_id: Optional[int] = None
-    ) -> List[Treatment]:
-        """
-        Get treatments that are currently ongoing (active and no end date or future end date).
-
-        Args:
-            db: SQLAlchemy database session
-            patient_id: Optional patient ID to filter by
-
-        Returns:
-            List of ongoing treatments
-        """
-        from datetime import date
-
-        from sqlalchemy import or_
-
-        query = (
-            db.query(self.model)
-            .filter(self.model.status == "active")
-            .filter(
-                or_(self.model.end_date.is_(None), self.model.end_date >= date.today())
-            )
-        )
-
-        if patient_id:
-            query = query.filter(self.model.patient_id == patient_id)
-
-        return query.order_by(self.model.start_date.desc()).all()
-
 
 # =============================================================================
 # Treatment-Medication Relationship CRUD

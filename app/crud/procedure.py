@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -16,30 +16,6 @@ class CRUDProcedure(
 
     Handles medical procedures, surgeries, and diagnostic procedures.
     """
-
-    def get_scheduled(
-        self, db: Session, *, patient_id: Optional[int] = None
-    ) -> List[Procedure]:
-        """
-        Get all scheduled procedures, optionally filtered by patient.
-
-        Args:
-            db: SQLAlchemy database session
-            patient_id: Optional patient ID to filter by
-
-        Returns:
-            List of scheduled procedures
-        """
-        filters: Dict[str, Any] = {"status": "scheduled"}
-        if patient_id:
-            filters["patient_id"] = patient_id
-
-        return self.query(
-            db=db,
-            filters=filters,
-            order_by="date",
-            order_desc=False,  # Ascending order for scheduled procedures
-        )
 
     def get_recent(
         self, db: Session, *, patient_id: int, days: int = 90

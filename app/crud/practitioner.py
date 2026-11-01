@@ -1,8 +1,10 @@
 from typing import List, Optional
 
+from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
+from app.models.base import Base
 from app.models.models import Practitioner as PractitionerModel
 from app.schemas.practitioner import PractitionerCreate, PractitionerUpdate
 
@@ -226,6 +228,21 @@ class CRUDPractitioner(
             .limit(limit)
             .all()
         )
+
+    def is_referenced(self, db: Session, practitioner_id: int) -> bool:
+        """Whether a record links to the practitioner by a key that blocks deletion.
+
+        Links declared ON DELETE SET NULL or CASCADE do not count.
+        """
+        practitioners = PractitionerModel.__table__
+        links = [
+            exists().where(fk.parent == practitioner_id)
+            for table in Base.metadata.tables.values()
+            for fk in table.foreign_keys
+            if fk.column.table is practitioners
+            and (fk.ondelete or "").upper() not in ("SET NULL", "CASCADE")
+        ]
+        return bool(links) and bool(db.scalar(select(or_(*links))))
 
 
 # Create the practitioner CRUD instance

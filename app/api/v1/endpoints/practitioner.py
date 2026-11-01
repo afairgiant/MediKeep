@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -20,6 +21,8 @@ from app.schemas.practitioner import (
 )
 
 router = APIRouter()
+
+IN_USE_DETAIL = "Cannot delete a practitioner who is linked to records"
 
 
 @router.post("/", response_model=Practitioner)
@@ -143,16 +146,25 @@ def delete_practitioner(
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Delete a practitioner."""
-    return handle_delete_with_logging(
-        db=db,
-        crud_obj=practitioner,
-        entity_id=practitioner_id,
-        entity_type=EntityType.PRACTITIONER,
-        user_id=current_user_id,
-        entity_name="Practitioner",
-        request=request,
-    )
+    """Delete a practitioner. Refused with 409 while any record still uses them."""
+    with handle_database_errors(request=request):
+        in_use = practitioner.is_referenced(db, practitioner_id)
+    if in_use:
+        raise HTTPException(status_code=409, detail=IN_USE_DETAIL)
+
+    try:
+        return handle_delete_with_logging(
+            db=db,
+            crud_obj=practitioner,
+            entity_id=practitioner_id,
+            entity_type=EntityType.PRACTITIONER,
+            user_id=current_user_id,
+            entity_name="Practitioner",
+            request=request,
+        )
+    except IntegrityError:
+        # A record was linked after the check; the database refused the delete
+        raise HTTPException(status_code=409, detail=IN_USE_DETAIL)
 
 
 @router.get("/search/by-name", response_model=List[Practitioner])
