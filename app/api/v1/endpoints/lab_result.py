@@ -37,7 +37,7 @@ from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
 )
-from app.core.utils.client_ip import get_client_ip
+from app.core.utils.client_ip import request_audit_fields
 from app.crud.condition import condition as condition_crud
 from app.crud.encounter import encounter as encounter_crud
 from app.crud.encounter import encounter_lab_result
@@ -1988,12 +1988,13 @@ async def parse_lab_pdf_with_ocr(
         )
 
         result = pdf_extraction_service.extract_text(
-            pdf_bytes=file_bytes, filename=file.filename
+            pdf_bytes=file_bytes, filename_hash=filename_hash
         )
 
         # 5. Log activity for audit trail
         from app.crud.activity_log import activity_log
 
+        ip_address, user_agent = request_audit_fields(request)
         activity_log.log_activity(
             db=db,
             action="pdf_ocr_extraction",
@@ -2010,8 +2011,8 @@ async def parse_lab_pdf_with_ocr(
                 "confidence": result["confidence"],
                 "success": result["error"] is None,
             },
-            ip_address=get_client_ip(request) if request.client else None,
-            user_agent=request.headers.get("user-agent"),
+            ip_address=ip_address,
+            user_agent=user_agent,
         )
 
         # 6. Return result for client-side parsing using standardized schema
@@ -2024,6 +2025,8 @@ async def parse_lab_pdf_with_ocr(
             lab_name=result.get("lab_name"),
             test_count=result.get("test_count"),
             test_date=result.get("test_date"),  # Include extracted test date
+            fallback_triggered=result.get("fallback_triggered", False),
+            native_test_count=result.get("native_test_count"),
         )
 
         return PDFExtractionResponse(

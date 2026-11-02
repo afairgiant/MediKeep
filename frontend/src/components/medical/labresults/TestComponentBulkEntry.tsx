@@ -1110,14 +1110,14 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       setExtractionError('');
       setIsProcessing(true);
       setProcessingProgress(0);
-      setProcessingMessage('Uploading PDF...');
+      setProcessingMessage(t('labresults:bulkEntry.uploadingPdf'));
 
       try {
         // Upload to OCR endpoint
         const formData = new FormData();
         formData.append('file', file);
 
-        setProcessingMessage('Extracting text from PDF...');
+        setProcessingMessage(t('labresults:bulkEntry.extractingText'));
         setProcessingProgress(30);
 
         const response = await apiService.post(
@@ -1128,8 +1128,13 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           }
         );
 
+        // Extraction failures come back as HTTP 200 with status "error"
+        if (response?.status === 'error') {
+          throw new Error('pdf_extraction_status_error');
+        }
+
         setProcessingProgress(80);
-        setProcessingMessage('Text extracted successfully!');
+        setProcessingMessage(t('labresults:bulkEntry.textExtracted'));
 
         // Store extracted text (apiService.post returns the response directly, not wrapped in .data)
         setExtractedText(response?.extracted_text || '');
@@ -1151,15 +1156,22 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
         }
 
         notifications.show({
-          title: 'PDF Processed',
-          message: `Extracted ${response.metadata.char_count} characters using ${response.metadata.method} method${response.metadata.test_date ? `. Test Date: ${response.metadata.test_date}` : ''}`,
+          title: t('labresults:bulkEntry.pdfProcessed'),
+          message: response.metadata.test_date
+            ? t('labresults:bulkEntry.charactersExtractedWithDate', {
+                chars: response.metadata.char_count,
+                date: response.metadata.test_date,
+              })
+            : t('labresults:bulkEntry.charactersExtracted', {
+                chars: response.metadata.char_count,
+              }),
           color: 'green',
         });
       } catch (error: any) {
-        setExtractionError(
+        const failureMessage =
           error.response?.data?.detail ||
-            'Failed to extract text from PDF. Please try manual entry.'
-        );
+          t('labresults:bulkEntry.extractionFailedMessage');
+        setExtractionError(failureMessage);
 
         logger.error('pdf_ocr_extraction_error', {
           component: 'TestComponentBulkEntry',
@@ -1167,15 +1179,15 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
         });
 
         notifications.show({
-          title: 'Extraction Failed',
-          message: error.response?.data?.detail || 'Failed to process PDF',
+          title: t('labresults:bulkEntry.extractionFailed'),
+          message: failureMessage,
           color: 'red',
         });
       } finally {
         setIsProcessing(false);
       }
     },
-    [labResultId]
+    [labResultId, t]
   );
 
   const handleParseExtractedText = useCallback(() => {

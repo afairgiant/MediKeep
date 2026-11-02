@@ -557,6 +557,9 @@ class Settings:  # App Info
         os.getenv("OCR_FALLBACK_MIN_TESTS", "5")
     )  # Minimum tests extracted to consider parsing successful
     OCR_FALLBACK_MAX_RETRIES: int = 1  # Prevent infinite loops (fixed at 1)
+    OCR_LANGUAGES: str = os.getenv(
+        "OCR_LANGUAGES", "eng"
+    )  # Tesseract codes joined with "+", e.g. "eng+deu+ell"
 
     # Notification Framework Configuration
     NOTIFICATIONS_ENABLED: bool = (
