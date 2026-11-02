@@ -6,7 +6,6 @@ Includes lab-specific parsing for structured extraction.
 
 import io
 import re
-from functools import cached_property
 from typing import Callable, Dict, Iterable, Optional
 
 import pdfplumber
@@ -39,6 +38,7 @@ DEFAULT_OCR_LANGUAGE = "eng"
 
 # Sent to the client; the exception detail stays in the server log
 EXTRACTION_FAILED_MESSAGE = "PDF text extraction failed"
+EXTRACTION_FAILED_CODE = "pdf_extraction_failed"
 
 # Common unit patterns for lab results
 UNIT_PATTERNS = (
@@ -136,6 +136,7 @@ class PDFTextExtractionService:
 
         # Check Tesseract availability on initialization (cached at class level)
         self.ocr_available = self._check_tesseract_availability()
+        self._ocr_lang: Optional[str] = None
 
     def _check_tesseract_availability(self) -> bool:
         """
@@ -197,9 +198,14 @@ class PDFTextExtractionService:
             PDFTextExtractionService._tesseract_available_cache = False
             return False
 
-    @cached_property
+    @property
     def ocr_lang(self) -> str:
-        """Tesseract `lang` argument from OCR_LANGUAGES, limited to installed packs."""
+        """Tesseract `lang` argument from OCR_LANGUAGES, limited to installed packs.
+
+        Cached once the installed packs are listed; a failed listing is retried next call.
+        """
+        if self._ocr_lang is not None:
+            return self._ocr_lang
         try:
             installed = pytesseract.get_languages(config="")
         except Exception as e:
@@ -224,6 +230,7 @@ class PDFTextExtractionService:
                     "ocr_languages": usable,
                 },
             )
+        self._ocr_lang = usable
         return usable
 
     def _extract_ocr_text_with_retry(
@@ -314,11 +321,12 @@ class PDFTextExtractionService:
 
         except Exception as e:
             logger.error(
-                f"OCR fallback failed with exception: {str(e)}",
+                "OCR fallback failed",
                 extra={
+                    LogFields.EVENT: "ocr_fallback_failed",
                     "component": "PDFTextExtractionService",
                     "filename_hash": filename_hash,
-                    "error": str(e),
+                    LogFields.ERROR: str(e),
                 },
             )
             return None
@@ -439,7 +447,7 @@ class PDFTextExtractionService:
                     "confidence": 0.0,
                     "page_count": native_result["page_count"],
                     "char_count": 0,
-                    "error": "Tesseract OCR is not installed. Cannot extract text from scanned PDFs. Please install Tesseract or provide a digital PDF.",
+                    "error": EXTRACTION_FAILED_MESSAGE,
                     "fallback_triggered": False,
                 }
 
@@ -455,6 +463,26 @@ class PDFTextExtractionService:
 
             # Clean OCR text as well
             cleaned_text = self._clean_extracted_text(ocr_result["text"])
+
+            if not cleaned_text:
+                logger.warning(
+                    "OCR extracted no text",
+                    extra={
+                        LogFields.EVENT: "pdf_ocr_no_text",
+                        "component": "PDFTextExtractionService",
+                        "filename_hash": filename_hash,
+                        "page_count": ocr_result["page_count"],
+                    },
+                )
+                return {
+                    "text": "",
+                    "method": "failed",
+                    "confidence": 0.0,
+                    "page_count": ocr_result["page_count"],
+                    "char_count": 0,
+                    "error": EXTRACTION_FAILED_MESSAGE,
+                    "fallback_triggered": False,
+                }
 
             return {
                 "text": cleaned_text,

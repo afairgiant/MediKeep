@@ -14,6 +14,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -1971,7 +1972,10 @@ async def parse_lab_pdf_with_ocr(
         # Hash filename to avoid logging PHI (filenames may contain patient names)
         import hashlib
 
-        from app.services.pdf_text_extraction_service import pdf_extraction_service
+        from app.services.pdf_text_extraction_service import (
+            EXTRACTION_FAILED_CODE,
+            pdf_extraction_service,
+        )
 
         filename_hash = hashlib.sha256(file.filename.encode()).hexdigest()[:16]
 
@@ -1987,8 +1991,11 @@ async def parse_lab_pdf_with_ocr(
             file_size=len(file_bytes),
         )
 
-        result = pdf_extraction_service.extract_text(
-            pdf_bytes=file_bytes, filename_hash=filename_hash
+        # OCR can take seconds per page; keep it off the event loop
+        result = await run_in_threadpool(
+            pdf_extraction_service.extract_text,
+            pdf_bytes=file_bytes,
+            filename_hash=filename_hash,
         )
 
         # 5. Log activity for audit trail
@@ -2015,23 +2022,18 @@ async def parse_lab_pdf_with_ocr(
             user_agent=user_agent,
         )
 
-        # 6. Return result for client-side parsing using standardized schema
-        metadata = PDFExtractionMetadata(
-            method=result["method"],
-            confidence=result["confidence"],
-            page_count=result["page_count"],
-            char_count=result["char_count"],
-            filename=file.filename,
-            lab_name=result.get("lab_name"),
-            test_count=result.get("test_count"),
-            test_date=result.get("test_date"),  # Include extracted test date
-            fallback_triggered=result.get("fallback_triggered", False),
-            native_test_count=result.get("native_test_count"),
-        )
+        if result["error"] is not None:
+            raise BusinessLogicException(
+                message=result["error"],
+                error_code=EXTRACTION_FAILED_CODE,
+                request=request,
+            )
 
+        # 6. Return result for client-side parsing using standardized schema
         return PDFExtractionResponse(
-            status="success" if result["error"] is None else "error",
+            status="success",
             extracted_text=result["text"],
-            metadata=metadata,
-            error=result["error"],
+            metadata=PDFExtractionMetadata.model_validate(
+                {**result, "filename": file.filename}
+            ),
         )

@@ -48,13 +48,13 @@ describe('TestComponentBulkEntry PDF upload', () => {
     mockPost.mockReset();
   });
 
-  test('shows the error state when extraction returns status "error"', async () => {
-    mockPost.mockResolvedValue({
-      status: 'error',
-      extracted_text: '',
-      metadata: { ...metadata, method: 'failed', char_count: 0 },
-      error: 'PDF text extraction failed',
-    });
+  test('shows the translated error state when extraction fails', async () => {
+    mockPost.mockRejectedValue(
+      Object.assign(new Error('PDF text extraction failed'), {
+        status: 400,
+        errorCode: 'pdf_extraction_failed',
+      })
+    );
 
     dropPdf();
 
@@ -89,5 +89,38 @@ describe('TestComponentBulkEntry PDF upload', () => {
     expect(
       screen.queryByText('labresults:bulkEntry.extractionFailedMessage')
     ).not.toBeInTheDocument();
+  });
+
+  test('shows the server reason for an upload validation error', async () => {
+    mockPost.mockRejectedValue(
+      Object.assign(new Error('Invalid PDF file format.'), {
+        status: 400,
+        errorCode: 'BUS-400',
+      })
+    );
+
+    dropPdf();
+
+    expect(
+      await screen.findByText('Invalid PDF file format.')
+    ).toBeInTheDocument();
+  });
+
+  test.each([
+    ['labcorp_parser', 'labresults:bulkEntry.fastExtraction'],
+    ['native', 'labresults:bulkEntry.fastExtraction'],
+    ['labcorp_parser_ocr', 'labresults:bulkEntry.ocrExtraction'],
+    ['ocr', 'labresults:bulkEntry.ocrExtraction'],
+  ])('labels method %s as %s', async (method, label) => {
+    mockPost.mockResolvedValue({
+      status: 'success',
+      extracted_text: 'WBC: 7.5',
+      metadata: { ...metadata, method },
+      error: null,
+    });
+
+    dropPdf();
+
+    expect(await screen.findByText(label)).toBeInTheDocument();
   });
 });

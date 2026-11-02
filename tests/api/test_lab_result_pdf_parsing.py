@@ -177,6 +177,36 @@ class TestLabResultPDFParsing:
         )
         assert entry.user_agent == "Agent 'quoted'"
 
+    def test_failed_extraction_returns_400_and_is_audited(
+        self,
+        client: TestClient,
+        db_session: Session,
+        lab_result_id,
+        authenticated_headers,
+    ):
+        """Test a failed extraction is an HTTP error, still logged as an attempt."""
+        failed = _make_extraction_result(
+            "", method="failed", confidence=0.0, error="PDF text extraction failed"
+        )
+
+        with patch(MOCK_EXTRACT_TEXT, return_value=failed):
+            response = client.post(
+                f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
+                files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
+                headers=authenticated_headers,
+            )
+
+        assert response.status_code == 400
+        assert "PDF text extraction failed" in response.text
+        assert "pdf_extraction_failed" in response.text
+        entry = (
+            db_session.query(ActivityLog)
+            .filter(ActivityLog.action == "pdf_ocr_extraction")
+            .order_by(ActivityLog.id.desc())
+            .first()
+        )
+        assert entry.event_metadata["success"] is False
+
     def test_pdf_upload_invalid_file_type(
         self, client: TestClient, lab_result_id, authenticated_headers
     ):

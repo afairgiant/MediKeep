@@ -46,11 +46,6 @@ class TestOcrLang:
             get_languages.return_value = ["eng", "deu", "ell", "osd"]
             assert service.ocr_lang == "eng+deu+ell"
 
-    def test_skips_missing_language(self, service):
-        service.settings.OCR_LANGUAGES = "eng+ell"
-        with patch(f"{SERVICE_MODULE}.pytesseract.get_languages", return_value=["eng"]):
-            assert service.ocr_lang == "eng"
-
     def test_defaults_when_languages_cannot_be_listed(self, service):
         service.settings.OCR_LANGUAGES = "eng+ell"
         with patch(
@@ -59,12 +54,28 @@ class TestOcrLang:
         ):
             assert service.ocr_lang == DEFAULT_OCR_LANGUAGE
 
+    def test_retries_after_listing_failure(self, service):
+        service.settings.OCR_LANGUAGES = "eng+ell"
+        with patch(
+            f"{SERVICE_MODULE}.pytesseract.get_languages",
+            side_effect=[RuntimeError("busy"), ["eng", "ell"], ["eng"]],
+        ) as get_languages:
+            assert service.ocr_lang == DEFAULT_OCR_LANGUAGE
+            assert service.ocr_lang == "eng+ell"
+            assert service.ocr_lang == "eng+ell"
+
+        assert get_languages.call_count == 2
+
     def test_ocr_passes_lang_to_tesseract(self, service):
         service.ocr_available = True
-        service.__dict__["ocr_lang"] = "eng+ell"
+        service.settings.OCR_LANGUAGES = "eng+ell"
         with patch(
+            f"{SERVICE_MODULE}.pytesseract.get_languages", return_value=["eng", "ell"]
+        ), patch(
             f"{SERVICE_MODULE}.convert_from_bytes", return_value=[MagicMock()]
-        ), patch.object(service, "_preprocess_image"), patch(
+        ), patch.object(
+            service, "_preprocess_image"
+        ), patch(
             f"{SERVICE_MODULE}.pytesseract.image_to_string", return_value="text"
         ) as image_to_string:
             service._extract_ocr_text(b"%PDF")
@@ -84,3 +95,31 @@ class TestExtractTextFailure:
         assert result["method"] == "failed"
         assert result["error"] == EXTRACTION_FAILED_MESSAGE
         assert "secret" not in result["error"]
+
+    def test_ocr_unavailable_returns_generic_error(self, service):
+        service.ocr_available = False
+        with patch.object(
+            service,
+            "_extract_native_text",
+            return_value={"text": "", "page_count": 1, "char_count": 0},
+        ):
+            result = service.extract_text(b"%PDF", "abc123")
+
+        assert result["method"] == "failed"
+        assert result["error"] == EXTRACTION_FAILED_MESSAGE
+
+    def test_ocr_with_no_text_is_a_failure(self, service):
+        service.ocr_available = True
+        with patch.object(
+            service,
+            "_extract_native_text",
+            return_value={"text": "", "page_count": 1, "char_count": 0},
+        ), patch.object(
+            service,
+            "_extract_ocr_text",
+            return_value={"text": "   \n", "page_count": 1, "char_count": 4},
+        ):
+            result = service.extract_text(b"%PDF", "abc123")
+
+        assert result["method"] == "failed"
+        assert result["error"] == EXTRACTION_FAILED_MESSAGE

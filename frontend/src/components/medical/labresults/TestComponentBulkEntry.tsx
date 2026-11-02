@@ -64,6 +64,13 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import SameAsOrderedLink from './SameAsOrderedLink';
 
+// Matches EXTRACTION_FAILED_CODE in app/services/pdf_text_extraction_service.py
+const PDF_EXTRACTION_FAILED_CODE = 'pdf_extraction_failed';
+
+// Lab parsers report "<lab>_parser" natively and "<lab>_parser_ocr" after OCR
+const isOcrMethod = (method: string) =>
+  method === 'ocr' || method.endsWith('_ocr');
+
 /**
  * Validates and normalizes a date value from DateInput.
  * Returns a valid Date object or null if the value is invalid/missing.
@@ -1128,11 +1135,6 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           }
         );
 
-        // Extraction failures come back as HTTP 200 with status "error"
-        if (response?.status === 'error') {
-          throw new Error('pdf_extraction_status_error');
-        }
-
         setProcessingProgress(80);
         setProcessingMessage(t('labresults:bulkEntry.textExtracted'));
 
@@ -1157,20 +1159,28 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
 
         notifications.show({
           title: t('labresults:bulkEntry.pdfProcessed'),
-          message: response.metadata.test_date
-            ? t('labresults:bulkEntry.charactersExtractedWithDate', {
-                chars: response.metadata.char_count,
-                date: response.metadata.test_date,
-              })
-            : t('labresults:bulkEntry.charactersExtracted', {
-                chars: response.metadata.char_count,
-              }),
+          message: t(
+            response.metadata.test_date
+              ? 'labresults:bulkEntry.extractedCharsWithDate'
+              : 'labresults:bulkEntry.extractedChars',
+            {
+              charCount: response.metadata.char_count,
+              pageCount: response.metadata.page_count,
+              count: response.metadata.page_count,
+              date: response.metadata.test_date,
+            }
+          ),
           color: 'green',
         });
       } catch (error: any) {
-        const failureMessage =
-          error.response?.data?.detail ||
-          t('labresults:bulkEntry.extractionFailedMessage');
+        // Upload validation 400s carry a specific reason; extraction failures do not
+        const isValidationError =
+          error.status === 400 &&
+          error.errorCode !== PDF_EXTRACTION_FAILED_CODE &&
+          !!error.message;
+        const failureMessage = isValidationError
+          ? error.message
+          : t('labresults:bulkEntry.extractionFailedMessage');
         setExtractionError(failureMessage);
 
         logger.error('pdf_ocr_extraction_error', {
@@ -1179,7 +1189,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
         });
 
         notifications.show({
-          title: t('labresults:bulkEntry.extractionFailed'),
+          title: t('labresults:bulkEntry.errorProcessingPdf'),
           message: failureMessage,
           color: 'red',
         });
@@ -1203,8 +1213,10 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     setParsedComponents(enriched);
 
     notifications.show({
-      title: 'PDF Parsed',
-      message: `Found ${enriched.length} test results`,
+      title: t('labresults:bulkEntry.pdfParsed'),
+      message: t('labresults:bulkEntry.foundTestResults', {
+        count: enriched.length,
+      }),
       color: 'green',
     });
 
@@ -1214,7 +1226,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       componentCount: enriched.length,
       failedLines: failedCount,
     });
-  }, [extractedText, parseText, enrichWithStandardizedTests]);
+  }, [extractedText, parseText, enrichWithStandardizedTests, t]);
 
   const validComponents = useMemo(() => {
     return parsedComponents.filter(
@@ -1420,7 +1432,7 @@ SARS-CoV-2: Not Detected`,
               <Alert color="blue" icon={<IconLoader size={16} />}>
                 <Stack gap="xs">
                   <Text size="sm" fw={500}>
-                    Processing PDF...
+                    {t('labresults:bulkEntry.processingPdf')}
                   </Text>
                   <Progress
                     value={processingProgress}
@@ -1456,14 +1468,14 @@ SARS-CoV-2: Not Detected`,
                         mt={4}
                         variant="light"
                         color={
-                          extractionMetadata.method === 'native'
-                            ? 'blue'
-                            : 'orange'
+                          isOcrMethod(extractionMetadata.method)
+                            ? 'orange'
+                            : 'blue'
                         }
                       >
-                        {extractionMetadata.method === 'native'
-                          ? 'Fast Extraction'
-                          : 'OCR Extraction'}
+                        {isOcrMethod(extractionMetadata.method)
+                          ? t('labresults:bulkEntry.ocrExtraction')
+                          : t('labresults:bulkEntry.fastExtraction')}
                       </Badge>
                     </div>
                     <Button
