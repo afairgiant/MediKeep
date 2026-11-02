@@ -17,8 +17,18 @@ MediKeep automatically detects and parses reports from:
 - **LabCorp** (Laboratory Corporation of America)
 - **Quest Diagnostics**
 - **Epic MyChart** patient-portal exports, including the two-column "Test Details" layout with visual gauge bars
+- **Synlab** (Germany) "Labor-Bericht" reports
 
 The system identifies the lab provider by scanning for signature indicators in the PDF (e.g., company name, website, copyright notices) and applies the appropriate parser. Epic MyChart exports are detected even when the performing lab (LabCorp, Quest, etc.) is named in the footer.
+
+### German Synlab reports
+
+Synlab reports are in German. MediKeep maps each result to its English standardized test name (for example *Leukozyten* becomes *White Blood Cell Count*), so results link to the same tests as US lab reports and appear in the same trend charts.
+
+- **Values stay in the units the lab reported.** Calcium in mmol/L, for example, is not converted to mg/dL. Unit spellings are normalized (e.g. *10^9/l* is shown as *K/uL*, the same quantity), and cell counts reported per microliter are scaled to K/uL.
+- **German decimal commas** (*2,11*) are read correctly.
+- **Flags:** *+* is imported as High and *-* as Low.
+- **Tiered targets** (for example LDL "optimal: < 100; fast optimal: 100 - 129") are kept as reference-range text.
 
 ### Result types
 
@@ -65,7 +75,7 @@ Review the extracted data, make any necessary corrections, and save the results 
 ## Tips for Best Results
 
 - **Use digital PDFs when possible.** PDFs generated directly by the lab (not scanned paper copies) produce the most accurate results.
-- **Standard lab report formats work best.** Reports from LabCorp, Quest Diagnostics, and Epic MyChart are specifically supported.
+- **Standard lab report formats work best.** Reports from LabCorp, Quest Diagnostics, Epic MyChart, and Synlab are specifically supported.
 - **Check for OCR artifacts.** If your PDF was created from a scanned image, some values may need manual correction. The system handles common OCR mistakes automatically (e.g., correcting misread characters in test names and units), but unusual formatting may require review.
 - **One report at a time.** Upload individual lab reports rather than combined multi-visit documents for the most accurate date assignment.
 
