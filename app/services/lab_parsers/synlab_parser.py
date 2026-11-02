@@ -284,7 +284,8 @@ class SynlabParser(BaseLabParser):
         # Page breaks can repeat the last row of a page verbatim. Skip exact
         # repeats of a source row only: different tests that map to the same
         # canonical name (e.g. CKD-EPI and MDRD eGFR) must both be kept.
-        seen_rows = set()
+        # Maps each source row to the index of its result (None if no result).
+        seen_rows: Dict[object, Optional[int]] = {}
 
         i = 0
         while i < len(lines):
@@ -303,7 +304,7 @@ class SynlabParser(BaseLabParser):
                         row_key = (line, lines[i - 1])
                         if row_key in seen_rows:
                             continue
-                        seen_rows.add(row_key)
+                        seen_rows[row_key] = None
                         fields = {**pending.groupdict(), **nxt.groupdict()}
                         result = self._build(fields, test_date)
                         if result:
@@ -312,20 +313,22 @@ class SynlabParser(BaseLabParser):
 
             if match.group("code").upper() in PANEL_CODES:
                 continue
-            if line in seen_rows:
-                continue
-            seen_rows.add(line)
             fields = match.groupdict()
-            # A labelled, tiered range continues on the following lines;
-            # collect the tiers into one reference-range text.
+            # A labelled, tiered range continues on the following lines.
+            # Collect the tiers before the duplicate check: when a page break
+            # splits a tiered row, the repeated row is followed by the tiers
+            # the first copy did not reach.
+            tiers: List[str] = []
             if fields.get("range") and ":" in fields["range"]:
-                tiers = [fields["range"]]
-                while i < len(lines) and self._is_tier_line(lines[i]):
-                    tiers.append(lines[i])
-                    i += 1
-                fields["tiers"] = "; ".join(" ".join(t.split()) for t in tiers)
+                tiers, i = self._collect_tiers(lines, i, fields["range"])
+            if line in seen_rows:
+                self._merge_tiers(results, seen_rows[line], tiers)
+                continue
+            if tiers:
+                fields["tiers"] = "; ".join(tiers)
 
             result = self._build(fields, test_date)
+            seen_rows[line] = len(results) if result else None
             if result:
                 results.append(result)
 
@@ -420,6 +423,33 @@ class SynlabParser(BaseLabParser):
             if pattern.search(desc):
                 return name
         return desc or code
+
+    def _collect_tiers(
+        self, lines: List[str], i: int, first: str
+    ) -> Tuple[List[str], int]:
+        """Return the tiers of a labelled range and the index after them."""
+        tiers = [" ".join(first.split())]
+        while i < len(lines) and self._is_tier_line(lines[i]):
+            tiers.append(" ".join(lines[i].split()))
+            i += 1
+        return tiers, i
+
+    @staticmethod
+    def _merge_tiers(
+        results: List[LabTestResult], index: Optional[int], tiers: List[str]
+    ) -> None:
+        """Add tiers from a repeated row to the earlier result of that row.
+
+        Only numeric results carry a reference range; qualitative and
+        ``<``/``>`` text results have none, so nothing is merged into them.
+        """
+        if index is None or not tiers:
+            return
+        result = results[index]
+        if result.value is None:
+            return
+        known = result.reference_range.split("; ") if result.reference_range else []
+        result.reference_range = "; ".join(known + [t for t in tiers if t not in known])
 
     @staticmethod
     def _is_tier_line(line: str) -> bool:

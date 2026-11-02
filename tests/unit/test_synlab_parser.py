@@ -14,27 +14,33 @@ from tests.fixtures.lab_text_samples import (
 
 @pytest.fixture
 def parser():
+    """Return a fresh Synlab parser."""
     return SynlabParser()
 
 
 def by_name(results):
+    """Index parsed results by canonical test name."""
     return {r.test_name: r for r in results}
 
 
 class TestSynlabDetection:
     def test_detects_synlab_report(self, parser):
+        """Detects synlab report."""
         assert parser.can_parse(SYNLAB_REPORT_TEXT) is True
         assert parser.can_parse(SYNLAB_REPORT_2023_TEXT) is True
 
     def test_rejects_other_labs(self, parser):
+        """Rejects other labs."""
         assert parser.can_parse(LABCORP_CLEAN_TEXT) is False
         assert parser.can_parse(QUEST_DIAGNOSTICS_SAMPLE) is False
         assert parser.can_parse(EMPTY_PDF_TEXT) is False
 
     def test_mentioning_synlab_alone_is_not_enough(self, parser):
+        """Mentioning synlab alone is not enough."""
         assert parser.can_parse("Befund von Synlab\nGlucose 95 mg/dl") is False
 
     def test_registry_routes_to_synlab(self):
+        """Registry routes to synlab."""
         results, lab_name = lab_parser_registry.parse(SYNLAB_REPORT_TEXT)
         assert lab_name == "Synlab"
         assert len(results) > 0
@@ -42,6 +48,7 @@ class TestSynlabDetection:
 
 class TestSynlabReport:
     def test_extracts_every_result_once(self, parser):
+        """Extracts every result once."""
         results = parser.parse(SYNLAB_REPORT_TEXT)
         names = [r.test_name for r in results]
         assert len(names) == 29
@@ -49,6 +56,7 @@ class TestSynlabReport:
         assert "Urea" in names
 
     def test_maps_codes_to_canonical_english_names(self, parser):
+        """Maps codes to canonical english names."""
         results = by_name(parser.parse(SYNLAB_REPORT_TEXT))
         for name in [
             "White Blood Cell Count",
@@ -66,6 +74,7 @@ class TestSynlabReport:
             assert name in results, name
 
     def test_value_unit_range_and_flag(self, parser):
+        """Value unit range and flag."""
         alt = by_name(parser.parse(SYNLAB_REPORT_TEXT))["Alanine Aminotransferase"]
         assert alt.value == 55.0
         assert alt.unit == "U/L"
@@ -73,12 +82,14 @@ class TestSynlabReport:
         assert alt.flag == "High"
 
     def test_description_with_digits_keeps_the_real_value(self, parser):
+        """Description with digits keeps the real value."""
         b12 = by_name(parser.parse(SYNLAB_REPORT_TEXT))["Vitamin B12"]
         assert b12.value == 412
         assert b12.unit == "pg/mL"
         assert b12.reference_range == "211-911"
 
     def test_units_are_normalized(self, parser):
+        """Units are normalized."""
         results = by_name(parser.parse(SYNLAB_REPORT_TEXT))
         assert results["White Blood Cell Count"].unit == "K/uL"
         assert results["White Blood Cell Count"].value == 6.4
@@ -88,32 +99,38 @@ class TestSynlabReport:
         assert results["Total Cholesterol/HDL Ratio"].unit == "ratio"
 
     def test_values_stay_in_reported_units(self, parser):
+        """Values stay in reported units."""
         calcium = by_name(parser.parse(SYNLAB_REPORT_TEXT))["Calcium"]
         assert calcium.value == 2.32
         assert calcium.unit == "mmol/L"
 
     def test_egfr_unit_left_for_library_default(self, parser):
+        """Egfr unit left for library default."""
         egfr = by_name(parser.parse(SYNLAB_REPORT_TEXT))["Estimated GFR"]
         assert egfr.value == 104
         assert egfr.unit == ""
         assert egfr.reference_range == ">60"
 
     def test_below_limit_result_is_text(self, parser):
+        """Below limit result is text."""
         crp = by_name(parser.parse(SYNLAB_REPORT_TEXT))["C-Reactive Protein"]
         assert crp.value is None
         assert crp.qualitative_value == "<0.15"
 
     def test_hint_blocks_and_panel_headers_are_skipped(self, parser):
+        """Hint blocks and panel headers are skipped."""
         names = [r.test_name for r in parser.parse(SYNLAB_REPORT_TEXT)]
         assert not any("Kleines Blutbild" in n or "Zielwert" in n for n in names)
 
     def test_report_date(self, parser):
+        """Report date."""
         results = parser.parse(SYNLAB_REPORT_TEXT)
         assert {r.test_date for r in results} == {"2025-03-15"}
 
 
 class TestSynlab2023Layout:
     def test_counts_per_microliter_scaled_to_k_per_ul(self, parser):
+        """Counts per microliter scaled to k per ul."""
         results = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))
         wbc = results["White Blood Cell Count"]
         assert wbc.value == 5.12
@@ -123,11 +140,13 @@ class TestSynlab2023Layout:
         assert results["Platelet Count"].unit == "K/uL"
 
     def test_minus_flag_means_low(self, parser):
+        """Minus flag means low."""
         glucose = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))["Glucose"]
         assert glucose.value == 66
         assert glucose.flag == "Low"
 
     def test_tiered_ranges_are_kept_as_text(self, parser):
+        """Tiered ranges are kept as text."""
         results = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))
         assert results["HDL Cholesterol"].reference_range == (
             "progn.günstig: > 60; Risiko erhöht: < 40"
@@ -139,27 +158,32 @@ class TestSynlab2023Layout:
         assert results["Sodium"].value == 141
 
     def test_decimal_comma(self, parser):
+        """Decimal comma."""
         egfr = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))["Estimated GFR"]
         assert egfr.value == 97.5
 
     def test_results_on_the_following_line(self, parser):
+        """Results on the following line."""
         results = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))
         assert results["C-Reactive Protein"].qualitative_value == "<0.3"
         assert results["Intrinsic Factor Antibody"].qualitative_value == "<1.5"
         assert results["Hepatitis B Surface Antigen"].qualitative_value == "Positive"
 
     def test_qualitative_on_same_line(self, parser):
+        """Qualitative on same line."""
         hcv = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))["Hepatitis C Antibody"]
         assert hcv.value is None
         assert hcv.qualitative_value == "Not Detected"
 
     def test_differential_percent_and_absolute(self, parser):
+        """Differential percent and absolute."""
         results = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))
         assert results["Neutrophils"].unit == "%"
         assert results["Neutrophils (Absolute)"].value == 2.98
         assert results["Neutrophils (Absolute)"].unit == "K/uL"
 
     def test_ratio_and_antibody(self, parser):
+        """Ratio and antibody."""
         results = by_name(parser.parse(SYNLAB_REPORT_2023_TEXT))
         assert results["LDL/HDL Ratio"].value == 1.9
         assert results["LDL/HDL Ratio"].reference_range == "<3"
@@ -187,11 +211,13 @@ LEUK Leukozyten inkl. Lymphozyten 6.10 10^9/l 3.90-10.2
 
 class TestSynlabEdgeCases:
     def test_capitalized_qualitative_words(self, parser):
+        """Capitalized qualitative words."""
         results = by_name(parser.parse(SYNLAB_EDGE_CASES_TEXT))
         assert results["Hepatitis C Antibody"].qualitative_value == "Negative"
         assert results["Hepatitis B Surface Antigen"].qualitative_value == "Positive"
 
     def test_different_tests_with_same_canonical_name_are_kept(self, parser):
+        """Different tests with same canonical name are kept."""
         egfr = [
             r.value
             for r in parser.parse(SYNLAB_EDGE_CASES_TEXT)
@@ -200,11 +226,42 @@ class TestSynlabEdgeCases:
         assert egfr == [88, 91]
 
     def test_band_cells_do_not_collapse_into_neutrophils(self, parser):
+        """Band cells do not collapse into neutrophils."""
         results = by_name(parser.parse(SYNLAB_EDGE_CASES_TEXT))
         assert results["Band form Neutrophils"].value == 4.0
         assert results["Neutrophils"].value == 55.0
 
     def test_known_code_wins_over_description(self, parser):
+        """Known code wins over description."""
         results = by_name(parser.parse(SYNLAB_EDGE_CASES_TEXT))
         assert results["White Blood Cell Count"].value == 6.1
         assert "Lymphocytes (Absolute)" not in results
+
+
+# Made-up LDL row whose tiered target is split by a page break: Synlab
+# repeats the row on the next page, followed by the remaining tiers.
+SYNLAB_SPLIT_TIERS_TEXT = """
+Labor-Bericht vom 03.03.2024 - Endbefund
+Synlab
+Test Beschreibung +/- Ergebnis Einheit Normalwert
+LDLD LDL-Chol. direkt 118 mg/dl optimal: < 100
+fast optimal: 100 - 129
+Seite 1
+Laborwerte von Dr. med. Erika Musterfrau
+LDLD LDL-Chol. direkt 118 mg/dl optimal: < 100
+grenzw. erhöht: 130 - 159
+NA Natrium 139 mmol/l 136 - 145
+"""
+
+
+class TestSynlabPageBreakTiers:
+    def test_tiers_after_a_repeated_row_are_merged(self, parser):
+        """Tiers after a repeated row are merged."""
+        results = parser.parse(SYNLAB_SPLIT_TIERS_TEXT)
+        ldl = [r for r in results if r.test_name == "LDL Cholesterol"]
+        assert len(ldl) == 1
+        assert ldl[0].value == 118
+        assert ldl[0].reference_range == (
+            "optimal: < 100; fast optimal: 100 - 129; grenzw. erhöht: 130 - 159"
+        )
+        assert by_name(results)["Sodium"].value == 139
