@@ -164,8 +164,12 @@ DESCRIPTION_TO_TEST: List[Tuple[re.Pattern, str]] = [
 ]
 
 # Differential counts come as a percentage or an absolute count with the
-# same German name; the unit decides which canonical test applies.
+# same German name; the unit decides which canonical test applies. Only used
+# for codes missing from CODE_TO_TEST. Band cells ("stabkernige") are listed
+# before the generic pattern so they don't collapse into Neutrophils;
+# segmented ("segmentkernige") neutrophils are the mature neutrophils.
 DIFFERENTIAL = [
+    (re.compile(r"stabkernig", re.I), "Band form Neutrophils"),
     (re.compile(r"neutrophile", re.I), "Neutrophils"),
     (re.compile(r"lymphozyten", re.I), "Lymphocytes"),
     (re.compile(r"monozyten", re.I), "Monocytes"),
@@ -184,7 +188,9 @@ QUALITATIVE = {
 }
 
 _NUM = r"\d+(?:[.,]\d+)?"
-_VALUE = rf"(?:[<>]\s?{_NUM}|{_NUM}|nicht nachweisbar|nachweisbar|negativ|positiv)"
+# Qualitative words match in any case ("Negativ"); the code group in the row
+# pattern stays uppercase-only so prose lines are not taken for results.
+_VALUE = rf"(?:[<>]\s?{_NUM}|{_NUM}|(?i:nicht nachweisbar|nachweisbar|negativ|positiv))"
 _RANGE = rf"(?:[<>]=?\s*{_NUM}|{_NUM}\s*[-–]\s*{_NUM})"
 # A unit never starts with a digit (except powers of ten such as "10^9/l")
 # and never contains a colon, which marks a labelled range.
@@ -266,9 +272,19 @@ class SynlabParser(BaseLabParser):
         )
 
     def parse(self, text: str) -> List[LabTestResult]:
+        """Parse every result row of a Synlab report.
+
+        Rows look like ``CODE description [+|-] value [unit] [range]``. A test
+        whose value sits on the following line is joined with that line, and
+        a labelled, tiered range is joined with its continuation lines.
+        """
         test_date = self.extract_date_from_text(text)
         lines = [line.strip() for line in text.split("\n")]
         results: List[LabTestResult] = []
+        # Page breaks can repeat the last row of a page verbatim. Skip exact
+        # repeats of a source row only: different tests that map to the same
+        # canonical name (e.g. CKD-EPI and MDRD eGFR) must both be kept.
+        seen_rows = set()
 
         i = 0
         while i < len(lines):
@@ -284,6 +300,10 @@ class SynlabParser(BaseLabParser):
                     nxt = _VALUE_ONLY_RE.match(lines[i]) if i < len(lines) else None
                     if nxt:
                         i += 1
+                        row_key = (line, lines[i - 1])
+                        if row_key in seen_rows:
+                            continue
+                        seen_rows.add(row_key)
                         fields = {**pending.groupdict(), **nxt.groupdict()}
                         result = self._build(fields, test_date)
                         if result:
@@ -292,6 +312,9 @@ class SynlabParser(BaseLabParser):
 
             if match.group("code").upper() in PANEL_CODES:
                 continue
+            if line in seen_rows:
+                continue
+            seen_rows.add(line)
             fields = match.groupdict()
             # A labelled, tiered range continues on the following lines;
             # collect the tiers into one reference-range text.
@@ -306,8 +329,6 @@ class SynlabParser(BaseLabParser):
             if result:
                 results.append(result)
 
-        # Page breaks can repeat the last row of a page.
-        results = self.deduplicate(results)
         logger.info(
             "Synlab parser finished",
             extra={"component": "SynlabParser", "test_count": len(results)},
@@ -325,6 +346,12 @@ class SynlabParser(BaseLabParser):
     # ------------------------------------------------------------------ helpers
 
     def _build(self, fields: Dict, test_date: Optional[str]) -> Optional[LabTestResult]:
+        """Turn the matched columns of one row into a LabTestResult.
+
+        Qualitative words become qualitative results, ``<``/``>`` values become
+        text results, and numbers keep their reported unit (spelling normalized,
+        counts per microliter scaled to K/uL).
+        """
         code = fields["code"].upper()
         desc = " ".join((fields.get("desc") or "").split())
         raw_value = fields["value"].strip()
@@ -383,11 +410,12 @@ class SynlabParser(BaseLabParser):
         )
 
     def _test_name(self, code: str, desc: str, unit: str) -> str:
+        """Canonical test name: Synlab code first, then the German description."""
+        if code in CODE_TO_TEST:
+            return CODE_TO_TEST[code]
         for pattern, name in DIFFERENTIAL:
             if pattern.search(desc):
                 return name if unit == "%" else f"{name} (Absolute)"
-        if code in CODE_TO_TEST:
-            return CODE_TO_TEST[code]
         for pattern, name in DESCRIPTION_TO_TEST:
             if pattern.search(desc):
                 return name
@@ -395,6 +423,7 @@ class SynlabParser(BaseLabParser):
 
     @staticmethod
     def _is_tier_line(line: str) -> bool:
+        """True for a continuation line of a tiered range ("fast optimal: 100 - 129")."""
         return (
             bool(line)
             and len(line) < 80
@@ -406,6 +435,7 @@ class SynlabParser(BaseLabParser):
 
     @staticmethod
     def _normalize_unit(unit: str) -> Tuple[str, float]:
+        """Map a Synlab unit to its Bulk Entry spelling and a value scale factor."""
         if not unit:
             return "", 1
         if unit == "G/l":  # Giga per liter (cell counts); "g/l" is grams
@@ -418,6 +448,7 @@ class SynlabParser(BaseLabParser):
         return unit, 1
 
     def _scale_range(self, rng: str, factor: float) -> str:
+        """Normalize a range ("3,90 - 10,2", "< 50") and scale it by ``factor``."""
         if not rng:
             return ""
         rng = rng.replace(",", ".").replace("–", "-")
@@ -431,4 +462,5 @@ class SynlabParser(BaseLabParser):
 
     @staticmethod
     def _fmt(number: float) -> str:
+        """Format a number without trailing zeros (4.6700 -> "4.67")."""
         return f"{number:.4f}".rstrip("0").rstrip(".")

@@ -165,3 +165,46 @@ class TestSynlab2023Layout:
         assert results["LDL/HDL Ratio"].reference_range == "<3"
         pca = results["Parietal Cell Antibody"]
         assert (pca.value, pca.unit, pca.reference_range) == (4.8, "U/mL", "<20")
+
+
+# Made-up rows for the review fixes: capitalized qualitative words, two eGFR
+# formulas, band vs segmented neutrophils, and a code whose description also
+# names a differential cell type.
+SYNLAB_EDGE_CASES_TEXT = """
+Labor-Bericht vom 02.02.2024 - Endbefund
+Synlab
+Test Beschreibung +/- Ergebnis Einheit Normalwert
+HEPC Anti-HCV Negativ
+HBS. HBs-Antigen
+Positiv
+CKDEPI eGFR nach CKD-EPI 88 ml/min/1,7 >60
+GFRKM GFR (MDRD-F.kurz,m) 91 ml/min/1.7 > 60
+STABN Stabkernige Neutrophile 4.0 % 0.0 - 5.0
+SEGN Segmentkernige Neutrophile 55.0 % 40.0 - 75.0
+LEUK Leukozyten inkl. Lymphozyten 6.10 10^9/l 3.90-10.2
+"""
+
+
+class TestSynlabEdgeCases:
+    def test_capitalized_qualitative_words(self, parser):
+        results = by_name(parser.parse(SYNLAB_EDGE_CASES_TEXT))
+        assert results["Hepatitis C Antibody"].qualitative_value == "Negative"
+        assert results["Hepatitis B Surface Antigen"].qualitative_value == "Positive"
+
+    def test_different_tests_with_same_canonical_name_are_kept(self, parser):
+        egfr = [
+            r.value
+            for r in parser.parse(SYNLAB_EDGE_CASES_TEXT)
+            if r.test_name == "Estimated GFR"
+        ]
+        assert egfr == [88, 91]
+
+    def test_band_cells_do_not_collapse_into_neutrophils(self, parser):
+        results = by_name(parser.parse(SYNLAB_EDGE_CASES_TEXT))
+        assert results["Band form Neutrophils"].value == 4.0
+        assert results["Neutrophils"].value == 55.0
+
+    def test_known_code_wins_over_description(self, parser):
+        results = by_name(parser.parse(SYNLAB_EDGE_CASES_TEXT))
+        assert results["White Blood Cell Count"].value == 6.1
+        assert "Lymphocytes (Absolute)" not in results
