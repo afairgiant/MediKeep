@@ -14,6 +14,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -37,7 +38,7 @@ from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
 )
-from app.core.utils.client_ip import get_client_ip
+from app.core.utils.client_ip import request_audit_fields
 from app.crud.condition import condition as condition_crud
 from app.crud.encounter import encounter as encounter_crud
 from app.crud.encounter import encounter_lab_result
@@ -1971,7 +1972,10 @@ async def parse_lab_pdf_with_ocr(
         # Hash filename to avoid logging PHI (filenames may contain patient names)
         import hashlib
 
-        from app.services.pdf_text_extraction_service import pdf_extraction_service
+        from app.services.pdf_text_extraction_service import (
+            EXTRACTION_FAILED_CODE,
+            pdf_extraction_service,
+        )
 
         filename_hash = hashlib.sha256(file.filename.encode()).hexdigest()[:16]
 
@@ -1987,13 +1991,17 @@ async def parse_lab_pdf_with_ocr(
             file_size=len(file_bytes),
         )
 
-        result = pdf_extraction_service.extract_text(
-            pdf_bytes=file_bytes, filename=file.filename
+        # OCR can take seconds per page; keep it off the event loop
+        result = await run_in_threadpool(
+            pdf_extraction_service.extract_text,
+            pdf_bytes=file_bytes,
+            filename_hash=filename_hash,
         )
 
         # 5. Log activity for audit trail
         from app.crud.activity_log import activity_log
 
+        ip_address, user_agent = request_audit_fields(request)
         activity_log.log_activity(
             db=db,
             action="pdf_ocr_extraction",
@@ -2010,25 +2018,22 @@ async def parse_lab_pdf_with_ocr(
                 "confidence": result["confidence"],
                 "success": result["error"] is None,
             },
-            ip_address=get_client_ip(request) if request.client else None,
-            user_agent=request.headers.get("user-agent"),
+            ip_address=ip_address,
+            user_agent=user_agent,
         )
+
+        if result["error"] is not None:
+            raise BusinessLogicException(
+                message=result["error"],
+                error_code=EXTRACTION_FAILED_CODE,
+                request=request,
+            )
 
         # 6. Return result for client-side parsing using standardized schema
-        metadata = PDFExtractionMetadata(
-            method=result["method"],
-            confidence=result["confidence"],
-            page_count=result["page_count"],
-            char_count=result["char_count"],
-            filename=file.filename,
-            lab_name=result.get("lab_name"),
-            test_count=result.get("test_count"),
-            test_date=result.get("test_date"),  # Include extracted test date
-        )
-
         return PDFExtractionResponse(
-            status="success" if result["error"] is None else "error",
+            status="success",
             extracted_text=result["text"],
-            metadata=metadata,
-            error=result["error"],
+            metadata=PDFExtractionMetadata.model_validate(
+                {**result, "filename": file.filename}
+            ),
         )

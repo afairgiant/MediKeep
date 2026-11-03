@@ -463,8 +463,10 @@ TESSERACT_PATH = '/usr/bin/tesseract'  # Linux
 
 # Text Extraction
 PDF_EXTRACTION_TIMEOUT = 30  # seconds
-OCR_LANGUAGE = 'eng'  # English
+OCR_LANGUAGES = os.getenv("OCR_LANGUAGES", "eng")  # e.g. "eng+deu+ell"
 ```
+
+`OCR_LANGUAGES` is set from the environment; see the Lab PDF OCR section of `docs/developer-guide/04-deployment.md`.
 
 ### Frontend Configuration
 

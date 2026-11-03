@@ -6,7 +6,7 @@ Includes lab-specific parsing for structured extraction.
 
 import io
 import re
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict, Iterable, Optional
 
 import pdfplumber
 import pytesseract
@@ -15,6 +15,7 @@ from PIL import Image
 
 from app.core.config import Settings
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.platform.external_binaries import (
     configure_environment_for_binaries,
     get_poppler_path,
@@ -33,6 +34,11 @@ MIN_DIGIT_RATIO = 0.01  # Minimum ratio of digits in text (lab results contain n
 # Tested with 15MB PDFs on 4-core containers
 OCR_DPI = 300  # High DPI for accuracy, tested with typical lab PDFs (2-10MB)
 OCR_THREAD_COUNT = 2  # Prevents thread exhaustion, optimized for 4-core containers
+DEFAULT_OCR_LANGUAGE = "eng"
+
+# Sent to the client; the exception detail stays in the server log
+EXTRACTION_FAILED_MESSAGE = "PDF text extraction failed"
+EXTRACTION_FAILED_CODE = "pdf_extraction_failed"
 
 # Common unit patterns for lab results
 UNIT_PATTERNS = (
@@ -101,6 +107,20 @@ COMPILED_NOISE_PATTERNS = [
 ]
 
 
+def resolve_ocr_languages(
+    configured: str, installed: Iterable[str]
+) -> tuple[str, list[str]]:
+    """Split a "+"-joined Tesseract language list into (usable, missing).
+
+    usable is the installed subset, "+"-joined; DEFAULT_OCR_LANGUAGE if none is.
+    """
+    installed = set(installed)
+    requested = [code.strip() for code in configured.split("+") if code.strip()]
+    usable = [code for code in requested if code in installed]
+    missing = [code for code in requested if code not in installed]
+    return "+".join(usable) or DEFAULT_OCR_LANGUAGE, missing
+
+
 class PDFTextExtractionService:
     """Service for extracting text from PDF files using hybrid approach."""
 
@@ -116,6 +136,7 @@ class PDFTextExtractionService:
 
         # Check Tesseract availability on initialization (cached at class level)
         self.ocr_available = self._check_tesseract_availability()
+        self._ocr_lang: Optional[str] = None
 
     def _check_tesseract_availability(self) -> bool:
         """
@@ -177,8 +198,43 @@ class PDFTextExtractionService:
             PDFTextExtractionService._tesseract_available_cache = False
             return False
 
+    @property
+    def ocr_lang(self) -> str:
+        """Tesseract `lang` argument from OCR_LANGUAGES, limited to installed packs.
+
+        Cached once the installed packs are listed; a failed listing is retried next call.
+        """
+        if self._ocr_lang is not None:
+            return self._ocr_lang
+        try:
+            installed = pytesseract.get_languages(config="")
+        except Exception as e:
+            logger.warning(
+                "Could not list Tesseract languages, using default",
+                extra={
+                    LogFields.EVENT: "ocr_languages_unavailable",
+                    "component": "PDFTextExtractionService",
+                    LogFields.ERROR: str(e),
+                },
+            )
+            return DEFAULT_OCR_LANGUAGE
+
+        usable, missing = resolve_ocr_languages(self.settings.OCR_LANGUAGES, installed)
+        if missing:
+            logger.warning(
+                "Configured OCR languages are not installed and will be skipped",
+                extra={
+                    LogFields.EVENT: "ocr_languages_missing",
+                    "component": "PDFTextExtractionService",
+                    "missing_languages": missing,
+                    "ocr_languages": usable,
+                },
+            )
+        self._ocr_lang = usable
+        return usable
+
     def _extract_ocr_text_with_retry(
-        self, pdf_bytes: bytes, filename: str, native_test_count: int
+        self, pdf_bytes: bytes, filename_hash: str, native_test_count: int
     ) -> Optional[Dict]:
         """
         Attempt OCR extraction and lab-specific parsing as a fallback.
@@ -188,7 +244,7 @@ class PDFTextExtractionService:
 
         Args:
             pdf_bytes: PDF file content as bytes
-            filename: Original filename for logging
+            filename_hash: Hashed filename for logs; never the raw name (may contain PHI)
             native_test_count: Number of tests extracted by native method
 
         Returns:
@@ -201,7 +257,7 @@ class PDFTextExtractionService:
                 f"(threshold: {self.settings.OCR_FALLBACK_MIN_TESTS}). Attempting OCR fallback...",
                 extra={
                     "component": "PDFTextExtractionService",
-                    "pdf_filename": filename,
+                    "filename_hash": filename_hash,
                     "native_test_count": native_test_count,
                     "fallback_threshold": self.settings.OCR_FALLBACK_MIN_TESTS,
                 },
@@ -215,7 +271,7 @@ class PDFTextExtractionService:
                     "OCR fallback failed: No text extracted",
                     extra={
                         "component": "PDFTextExtractionService",
-                        "pdf_filename": filename,
+                        "filename_hash": filename_hash,
                     },
                 )
                 return None
@@ -230,7 +286,7 @@ class PDFTextExtractionService:
                     "OCR fallback failed: Lab-specific parsing unsuccessful",
                     extra={
                         "component": "PDFTextExtractionService",
-                        "pdf_filename": filename,
+                        "filename_hash": filename_hash,
                     },
                 )
                 return None
@@ -244,7 +300,7 @@ class PDFTextExtractionService:
                     f"(vs {native_test_count} from native extraction)",
                     extra={
                         "component": "PDFTextExtractionService",
-                        "pdf_filename": filename,
+                        "filename_hash": filename_hash,
                         "native_count": native_test_count,
                         "ocr_count": ocr_test_count,
                         "improvement": ocr_test_count - native_test_count,
@@ -256,7 +312,7 @@ class PDFTextExtractionService:
                 f"(vs {native_test_count} from native)",
                 extra={
                     "component": "PDFTextExtractionService",
-                    "pdf_filename": filename,
+                    "filename_hash": filename_hash,
                     "native_count": native_test_count,
                     "ocr_count": ocr_test_count,
                 },
@@ -265,22 +321,23 @@ class PDFTextExtractionService:
 
         except Exception as e:
             logger.error(
-                f"OCR fallback failed with exception: {str(e)}",
+                "OCR fallback failed",
                 extra={
+                    LogFields.EVENT: "ocr_fallback_failed",
                     "component": "PDFTextExtractionService",
-                    "pdf_filename": filename,
-                    "error": str(e),
+                    "filename_hash": filename_hash,
+                    LogFields.ERROR: str(e),
                 },
             )
             return None
 
-    def extract_text(self, pdf_bytes: bytes, filename: str = "document.pdf") -> Dict:
+    def extract_text(self, pdf_bytes: bytes, filename_hash: str) -> Dict:
         """
         Extract text from PDF using hybrid approach.
 
         Args:
             pdf_bytes: PDF file content as bytes
-            filename: Original filename for logging
+            filename_hash: Hashed filename for logs; never the raw name (may contain PHI)
 
         Returns:
             {
@@ -296,7 +353,7 @@ class PDFTextExtractionService:
             "Starting PDF text extraction",
             extra={
                 "component": "PDFTextExtractionService",
-                "pdf_filename": filename,
+                "filename_hash": filename_hash,
                 "size_bytes": len(pdf_bytes),
             },
         )
@@ -327,7 +384,7 @@ class PDFTextExtractionService:
 
                         # Attempt OCR fallback
                         ocr_fallback_result = self._extract_ocr_text_with_retry(
-                            pdf_bytes, filename, test_count
+                            pdf_bytes, filename_hash, test_count
                         )
 
                         if ocr_fallback_result:
@@ -341,7 +398,7 @@ class PDFTextExtractionService:
                             "OCR fallback did not improve results, returning native extraction",
                             extra={
                                 "component": "PDFTextExtractionService",
-                                "pdf_filename": filename,
+                                "filename_hash": filename_hash,
                                 "test_count": test_count,
                             },
                         )
@@ -357,7 +414,7 @@ class PDFTextExtractionService:
                     "Native extraction successful (generic cleaning)",
                     extra={
                         "component": "PDFTextExtractionService",
-                        "pdf_filename": filename,
+                        "filename_hash": filename_hash,
                         "char_count": native_result["char_count"],
                         "cleaned_char_count": len(cleaned_text),
                         "page_count": native_result["page_count"],
@@ -380,7 +437,7 @@ class PDFTextExtractionService:
                     "Native extraction insufficient and OCR is not available. Returning empty result.",
                     extra={
                         "component": "PDFTextExtractionService",
-                        "pdf_filename": filename,
+                        "filename_hash": filename_hash,
                         "native_char_count": native_result["char_count"],
                     },
                 )
@@ -390,7 +447,7 @@ class PDFTextExtractionService:
                     "confidence": 0.0,
                     "page_count": native_result["page_count"],
                     "char_count": 0,
-                    "error": "Tesseract OCR is not installed. Cannot extract text from scanned PDFs. Please install Tesseract or provide a digital PDF.",
+                    "error": EXTRACTION_FAILED_MESSAGE,
                     "fallback_triggered": False,
                 }
 
@@ -398,7 +455,7 @@ class PDFTextExtractionService:
                 "Native extraction insufficient, falling back to OCR",
                 extra={
                     "component": "PDFTextExtractionService",
-                    "pdf_filename": filename,
+                    "filename_hash": filename_hash,
                     "native_char_count": native_result["char_count"],
                 },
             )
@@ -406,6 +463,26 @@ class PDFTextExtractionService:
 
             # Clean OCR text as well
             cleaned_text = self._clean_extracted_text(ocr_result["text"])
+
+            if not cleaned_text:
+                logger.warning(
+                    "OCR extracted no text",
+                    extra={
+                        LogFields.EVENT: "pdf_ocr_no_text",
+                        "component": "PDFTextExtractionService",
+                        "filename_hash": filename_hash,
+                        "page_count": ocr_result["page_count"],
+                    },
+                )
+                return {
+                    "text": "",
+                    "method": "failed",
+                    "confidence": 0.0,
+                    "page_count": ocr_result["page_count"],
+                    "char_count": 0,
+                    "error": EXTRACTION_FAILED_MESSAGE,
+                    "fallback_triggered": False,
+                }
 
             return {
                 "text": cleaned_text,
@@ -419,11 +496,12 @@ class PDFTextExtractionService:
 
         except Exception as e:
             logger.error(
-                f"PDF extraction failed: {str(e)}",
+                "PDF text extraction failed",
                 extra={
+                    LogFields.EVENT: "pdf_text_extraction_failed",
                     "component": "PDFTextExtractionService",
-                    "pdf_filename": filename,
-                    "error": str(e),
+                    "filename_hash": filename_hash,
+                    LogFields.ERROR: str(e),
                 },
                 exc_info=True,
             )
@@ -433,7 +511,7 @@ class PDFTextExtractionService:
                 "confidence": 0.0,
                 "page_count": 0,
                 "char_count": 0,
-                "error": str(e),
+                "error": EXTRACTION_FAILED_MESSAGE,
                 "fallback_triggered": False,
             }
 
@@ -524,7 +602,9 @@ class PDFTextExtractionService:
 
             # Run OCR
             page_text = pytesseract.image_to_string(
-                processed_image, config="--psm 6"  # Assume uniform block of text
+                processed_image,
+                lang=self.ocr_lang,
+                config="--psm 6",  # Assume uniform block of text
             )
 
             text_parts.append(page_text)

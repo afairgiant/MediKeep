@@ -2495,19 +2495,24 @@ Note: this reuses the same `treatment_lab_results` junction table as the existin
   "status": "success",
   "extracted_text": "Extracted text content...",
   "metadata": {
-    "method": "hybrid",
-    "confidence": 0.95,
-    "page_count": 3,
+    "method": "labcorp_parser",
+    "confidence": 0.98,
+    "page_count": 1,
     "char_count": 5000,
     "filename": "lab_report.pdf",
     "lab_name": "LabCorp",
     "test_count": 15,
-    "test_date": "2025-10-01"
+    "test_date": "2025-10-01",
+    "fallback_triggered": false,
+    "native_test_count": null
   },
   "error": null
 }
 ```
 
+- **`method`**: `native`, `ocr`, `failed`, or `<lab>_parser` / `<lab>_parser_ocr` when a lab-specific parser matched
+- **`fallback_triggered`**: `true` when the OCR fallback replaced a native parse; `native_test_count` is then the native parse's test count
+- **Error Response** (400): upload validation failures (not a PDF, too large, invalid PDF header) carry a specific message. When no text could be extracted (unreadable PDF, OCR found nothing, or OCR unavailable) the response has `error_code` `pdf_extraction_failed` and a generic message; details are logged server-side only. The attempt is still recorded in the activity log
 - **Note**: Returns raw text for client-side parsing. Does NOT save to database.
 
 ### Lab Test Components

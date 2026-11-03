@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from unittest.mock import patch, MagicMock
 
 from app.crud.patient import patient as patient_crud
+from app.models.activity_log import ActivityLog
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
 from tests.fixtures.pdf_fixtures import create_minimal_pdf
@@ -111,6 +112,100 @@ class TestLabResultPDFParsing:
             assert data["status"] == "success"
             assert "WBC: 7.5" in data["extracted_text"]
             assert data["metadata"]["method"] == "native"
+
+    def test_pdf_upload_passes_hashed_filename_to_service(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
+        """The service logs whatever name it gets, so it must only see the hash."""
+        filename = "Jane Doe bloodwork.pdf"
+
+        with patch(MOCK_EXTRACT_TEXT) as mock_extract:
+            mock_extract.return_value = _make_extraction_result("WBC: 7.5")
+
+            client.post(
+                f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
+                files={"file": (filename, self.create_pdf_file(), "application/pdf")},
+                headers=authenticated_headers,
+            )
+
+        filename_hash = mock_extract.call_args.kwargs["filename_hash"]
+        assert filename_hash != filename
+        assert "Jane" not in filename_hash
+        assert "filename" not in mock_extract.call_args.kwargs
+
+    def test_pdf_upload_returns_fallback_metadata(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
+        """Test OCR fallback fields from the service reach the response."""
+        result = _make_extraction_result("WBC: 7.5", method="labcorp_parser_ocr")
+        result.update(fallback_triggered=True, native_test_count=2)
+
+        with patch(MOCK_EXTRACT_TEXT, return_value=result):
+            response = client.post(
+                f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
+                files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
+                headers=authenticated_headers,
+            )
+
+        metadata = response.json()["metadata"]
+        assert metadata["fallback_triggered"] is True
+        assert metadata["native_test_count"] == 2
+
+    def test_pdf_upload_sanitizes_activity_log_user_agent(
+        self,
+        client: TestClient,
+        db_session: Session,
+        lab_result_id,
+        authenticated_headers,
+    ):
+        """Test the stored user-agent goes through the log sanitizer."""
+        headers = {**authenticated_headers, "User-Agent": 'Agent "quoted"'}
+
+        with patch(MOCK_EXTRACT_TEXT) as mock_extract:
+            mock_extract.return_value = _make_extraction_result("WBC: 7.5")
+            client.post(
+                f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
+                files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
+                headers=headers,
+            )
+
+        entry = (
+            db_session.query(ActivityLog)
+            .filter(ActivityLog.action == "pdf_ocr_extraction")
+            .order_by(ActivityLog.id.desc())
+            .first()
+        )
+        assert entry.user_agent == "Agent 'quoted'"
+
+    def test_failed_extraction_returns_400_and_is_audited(
+        self,
+        client: TestClient,
+        db_session: Session,
+        lab_result_id,
+        authenticated_headers,
+    ):
+        """Test a failed extraction is an HTTP error, still logged as an attempt."""
+        failed = _make_extraction_result(
+            "", method="failed", confidence=0.0, error="PDF text extraction failed"
+        )
+
+        with patch(MOCK_EXTRACT_TEXT, return_value=failed):
+            response = client.post(
+                f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
+                files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
+                headers=authenticated_headers,
+            )
+
+        assert response.status_code == 400
+        assert "PDF text extraction failed" in response.text
+        assert "pdf_extraction_failed" in response.text
+        entry = (
+            db_session.query(ActivityLog)
+            .filter(ActivityLog.action == "pdf_ocr_extraction")
+            .order_by(ActivityLog.id.desc())
+            .first()
+        )
+        assert entry.event_metadata["success"] is False
 
     def test_pdf_upload_invalid_file_type(
         self, client: TestClient, lab_result_id, authenticated_headers

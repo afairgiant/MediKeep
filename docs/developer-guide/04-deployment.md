@@ -852,6 +852,22 @@ SEQUENCE_CHECK_ON_STARTUP=true
 SEQUENCE_AUTO_FIX=true
 ```
 
+### Lab PDF OCR
+
+| Variable                 | Type    | Default | Description                                                                 |
+| ------------------------ | ------- | ------- | --------------------------------------------------------------------------- |
+| `OCR_LANGUAGES`          | string  | `eng`   | Tesseract languages for scanned PDFs, joined with `+`                       |
+| `OCR_FALLBACK_ENABLED`   | boolean | `true`  | Retry with OCR when a lab parser finds too few tests in a digital PDF       |
+| `OCR_FALLBACK_MIN_TESTS` | integer | `5`     | Test count below which the OCR fallback runs                                |
+
+The Docker image includes English (`eng`), German (`deu`) and Greek (`ell`). Keep `eng` in the list, since lab reports in any language use Latin-script abbreviations and units. Each extra language slows OCR down; digital PDFs that parse without OCR are unaffected. Languages that are not installed are skipped with a warning in the log.
+
+**Example:**
+
+```env
+OCR_LANGUAGES=eng+deu+ell
+```
+
 ### Docker-Specific Variables
 
 | Variable | Type    | Default            | Description                                 |
