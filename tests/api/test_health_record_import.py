@@ -66,7 +66,7 @@ class ConditionStubMapper(BaseResourceMapper):
     MODEL = Condition
 
     def map(self, resource, bundle):
-        status = resource["clinicalStatus"]["coding"][0]["code"]
+        status = resource["clinicalStatus"].get("coding")[0]["code"]
         diagnosis = resource["code"]["text"]
         onset = resource.get("onsetDateTime", "")[:10] or None
         return MappedRecord(
@@ -872,6 +872,27 @@ class TestExecute:
             "Skipped Condition/cond-1: could not be mapped"
         ]
         assert "clinicalStatus" not in response.text
+
+    def test_mapper_attribute_error_is_skipped(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+    ):
+        """Test that a field of the wrong shape skips the resource instead of failing."""
+        patient_id = user_with_patient["patient"].id
+        bundle = json.loads(FIXTURE.read_text())
+        bundle["entry"][1]["resource"]["clinicalStatus"] = "active"
+        data = json.dumps(bundle).encode()
+
+        response = client.post(
+            _preview_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["counts"]["condition"]["new"] == 1
+        assert "Skipped Condition/cond-1: could not be mapped" in body["warnings"]
 
     def test_hash_match_from_another_source_keeps_its_source_id(
         self,

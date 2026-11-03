@@ -5372,7 +5372,7 @@ by registering importers and mappers.
   "warnings": []
 }
 ```
-- **Notes**: `changed` counts rows that exist but differ, either because the file changed or because the row was edited in MediKeep; `edited` is the part of `changed` that execute skips by default. A resource repeated within one file counts as `duplicate` after its first copy. `warnings` includes a line when the file's patient name or birth date differs from the selected patient, and one line per entry that was skipped (counted under `unsupported.invalid` when its `resourceType` is missing); warnings never carry parser or mapper error text.
+- **Notes**: `changed` counts rows that exist but differ, either because the file changed or because the row was edited in MediKeep; `edited` is the part of `changed` that execute skips by default. A resource repeated within one file counts as `duplicate` after its first copy. Resource types without a mapper are counted under `unsupported` and produce no warning. `warnings` includes a line when the file's patient name or birth date differs from the selected patient, and one line per entry that was skipped: an entry whose `resourceType` is missing or not a string (also counted under `unsupported.invalid`) or a resource its mapper could not read; warnings never carry parser or mapper error text.
 - **Errors**: `422` for a missing, oversized or wrong-extension file; `400` for a file the importer cannot parse
 
 #### Execute Import

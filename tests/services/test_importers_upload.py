@@ -122,6 +122,12 @@ class TestContentHash:
         assert content_hash(["2019-03-02"]) != content_hash(["2019-03-03"])
         assert content_hash(["I10"]) == content_hash(["i10"])
 
+    def test_extreme_numbers_hash_as_text(self):
+        """Test that values past the decimal context fall back to text instead of raising."""
+        for value in ("1e1000000", "-1E999999", float("inf"), float("nan")):
+            assert content_hash([value]) == content_hash([str(value).lower()])
+        assert content_hash(["1e1000000"]) != content_hash(["1e1000001"])
+
 
 class TestFhirBundleImporter:
     """Test the FHIR bundle importer."""

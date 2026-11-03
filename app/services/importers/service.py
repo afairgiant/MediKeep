@@ -175,7 +175,7 @@ class HealthRecordImportService:
             label = f"{resource_type}/{resource.get('id', '?')}"
             try:
                 mapped = mapper.map(resource, bundle)
-            except (KeyError, IndexError, ValueError, TypeError) as exc:
+            except (AttributeError, KeyError, IndexError, ValueError, TypeError) as exc:
                 # The detail stays in the server log; the client gets a fixed line
                 logger.warning(
                     "Health record import could not map a resource",

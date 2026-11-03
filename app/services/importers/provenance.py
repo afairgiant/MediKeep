@@ -2,7 +2,7 @@
 
 import hashlib
 from datetime import date, datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from typing import Iterable, List, Optional
 
 from sqlalchemy.orm import Session
@@ -20,14 +20,15 @@ def _normalize(part: object) -> str:
     if isinstance(part, (int, float, Decimal)) or _looks_numeric(text):
         try:
             number = Decimal(text)
-        except InvalidOperation:
-            return text.lower()
-        if number.is_finite():
-            # 120, 120.0 and 120.00 are the same value
-            number = number.normalize()
-            if number == 0:
-                number = Decimal(0)
-            return format(number, "f")
+            if number.is_finite():
+                # 120, 120.0 and 120.00 are the same value
+                number = number.normalize()
+                if number == 0:
+                    number = Decimal(0)
+                return format(number, "f")
+        except ArithmeticError:
+            # Exponents past the decimal context (1e1000000) hash as text
+            pass
     return text.lower()
 
 
