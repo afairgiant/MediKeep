@@ -1746,6 +1746,33 @@ JUNCTION TABLES (Many-to-Many)
 - Performance metrics for monitoring
 - user_id SET NULL if user deleted (preserve audit)
 
+### import_provenance
+**Purpose**: Where each imported record came from, so re-imports can tell duplicates from local edits
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique provenance ID |
+| patient_id | Integer | FK(patients.id) CASCADE, NOT NULL | Patient the record belongs to |
+| record_type | String | NOT NULL | Record table key (condition, allergy, ...) |
+| record_id | Integer | NOT NULL | ID in that record type's table |
+| source | String | NOT NULL | Importer source (fhir, ccda) |
+| external_id | String | | Resource id in the source file |
+| content_hash | String(64) | NOT NULL | sha256 of the fields the import wrote |
+| import_batch_id | String(32) | NOT NULL | One id per execute call |
+| imported_at | DateTime | NOT NULL | When the row was imported |
+
+**Indexes**:
+- `uq_import_provenance_record` unique on (record_type, record_id)
+- `idx_import_provenance_patient_external` on (patient_id, source, external_id)
+- `idx_import_provenance_patient_hash` on (patient_id, record_type, content_hash)
+- `idx_import_provenance_batch` on import_batch_id
+
+**Business Rules**:
+- A record is matched on (source, external_id) first, then on content_hash, since source ids change between exports
+- A row whose current content hash differs from content_hash was edited in MediKeep and is skipped on re-import by default
+- There is no FK on record_id because it spans several tables; a provenance row whose record the user deleted is replaced on the next import that recreates that record
+- Vitals keep their own `import_source` column from the CSV import
+
 ## Admin Tables
 
 ### activity_logs

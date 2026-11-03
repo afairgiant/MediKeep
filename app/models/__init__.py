@@ -43,6 +43,7 @@ from .files import (
     BackupRecord,
     EntityFile,
 )
+from .import_provenance import ImportProvenance
 from .injuries import (
     Injury,
     InjuryType,
@@ -141,6 +142,7 @@ __all__ = [
     "FamilyHistoryShare",
     "EntityFile",
     "BackupRecord",
+    "ImportProvenance",
     "ReportTemplate",
     "ReportGenerationAudit",
     "NotificationChannel",

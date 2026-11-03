@@ -158,6 +158,7 @@ class EntityType:
     MEDICAL_EQUIPMENT = "medical_equipment"
     BLOOD_DONATION = "blood_donation"
     TAG = "tag"
+    HEALTH_RECORD_IMPORT = "health_record_import"
 
     # System entities
     SYSTEM = "system"
@@ -194,6 +195,7 @@ class EntityType:
             cls.INJURY_TYPE,
             cls.BLOOD_DONATION,
             cls.TAG,
+            cls.HEALTH_RECORD_IMPORT,
             cls.SYSTEM,
             cls.BACKUP,
         ]
@@ -211,6 +213,7 @@ class ActionType:
     # File operations
     UPLOADED = "uploaded"
     DOWNLOADED = "downloaded"
+    IMPORTED = "imported"
 
     # Authentication events
     LOGIN = "login"
@@ -244,6 +247,7 @@ class ActionType:
             cls.VIEWED,
             cls.UPLOADED,
             cls.DOWNLOADED,
+            cls.IMPORTED,
             cls.LOGIN,
             cls.LOGIN_FAILED,
             cls.LOGOUT,
