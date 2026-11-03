@@ -7,6 +7,7 @@ import io
 import json
 import zipfile
 from datetime import date, datetime
+from decimal import Decimal
 
 import pytest
 
@@ -108,6 +109,19 @@ class TestContentHash:
         assert base != content_hash(["b", "a"])
         assert base != content_hash(["a", "c"])
 
+    def test_numbers_hash_by_value(self):
+        """Test that the same number hashes the same whatever its type or spelling."""
+        for same in (
+            [120, 120.0, Decimal("120.00"), "120", "120.0", "1.2e2"],
+            [0, -0.0, Decimal("-0"), "0.000"],
+            [7.5, "7.50", Decimal("7.5")],
+        ):
+            hashes = {content_hash([value]) for value in same}
+            assert len(hashes) == 1, same
+        assert content_hash([120]) != content_hash([121])
+        assert content_hash(["2019-03-02"]) != content_hash(["2019-03-03"])
+        assert content_hash(["I10"]) == content_hash(["i10"])
+
 
 class TestFhirBundleImporter:
     """Test the FHIR bundle importer."""
@@ -128,9 +142,9 @@ class TestFhirBundleImporter:
             importer.to_bundle(data, "patient.json")
 
     def test_rejects_invalid_json_and_non_object(self):
-        """Test that malformed JSON and a JSON array are rejected."""
+        """Test that malformed JSON is rejected without echoing the parser error."""
         importer = FhirBundleImporter()
-        with pytest.raises(ImportFormatError, match="Invalid JSON"):
+        with pytest.raises(ImportFormatError, match="^File is not valid JSON$"):
             importer.to_bundle(b"{", "x.json")
         with pytest.raises(ImportFormatError, match="not an object"):
             importer.to_bundle(b"[]", "x.json")
@@ -142,6 +156,18 @@ class TestFhirBundleImporter:
         assert not importer.validate_format(data, "deep.json")
         with pytest.raises(ImportFormatError, match="nested too deeply"):
             importer.to_bundle(data, "deep.json")
+
+    def test_detection_sniffs_the_head_without_parsing(self):
+        """Test that validate_format reads the first bytes only and tolerates spacing."""
+        importer = FhirBundleImporter()
+        assert importer.validate_format(
+            b'{ "resourceType" :\n "Bundle", "entry": [', "a.json"
+        )
+        # Not JSON at all, but the header is there and parsing is to_bundle's job
+        assert importer.validate_format(b'{"resourceType": "Bundle" garbage', "a.json")
+        late = b'{"id": "' + b"x" * 5000 + b'", "resourceType": "Bundle"}'
+        assert not importer.validate_format(late, "a.json")
+        assert not importer.validate_format(b'{"resourceType": "Patient"}', "a.json")
 
     def test_rejects_entries_that_are_not_objects(self):
         """Test that a non-object entry or resource names its index in the error."""

@@ -33,12 +33,12 @@ class ImportProvenance(Base):
         UniqueConstraint(
             "record_type", "record_id", name="uq_import_provenance_record"
         ),
-        Index(
-            "idx_import_provenance_patient_external",
+        UniqueConstraint(
             "patient_id",
             "record_type",
             "source",
             "external_id",
+            name="uq_import_provenance_external",
         ),
         Index(
             "idx_import_provenance_patient_hash",

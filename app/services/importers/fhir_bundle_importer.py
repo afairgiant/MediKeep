@@ -1,8 +1,16 @@
 """FHIR R4 Bundle importer: a JSON file that is already in the internal format."""
 
 import json
+import re
+
+from app.core.logging.config import get_logger
 
 from .base_importer import BaseHealthRecordImporter, ImportFormatError
+
+logger = get_logger(__name__, "app")
+
+SNIFF_BYTES = 4096
+_BUNDLE_HEADER = re.compile(rb'"resourceType"\s*:\s*"Bundle"')
 
 
 class FhirBundleImporter(BaseHealthRecordImporter):
@@ -14,13 +22,10 @@ class FhirBundleImporter(BaseHealthRecordImporter):
     SOURCE = "fhir"
 
     def validate_format(self, data: bytes, filename: str) -> bool:
-        """Accept .json files whose top-level resourceType is Bundle."""
+        """Accept .json files whose first bytes declare a Bundle; parsing waits for to_bundle."""
         if not filename.lower().endswith(".json"):
             return False
-        try:
-            return self._load(data).get("resourceType") == "Bundle"
-        except (ImportFormatError, RecursionError):
-            return False
+        return _BUNDLE_HEADER.search(data[:SNIFF_BYTES]) is not None
 
     def to_bundle(self, data: bytes, filename: str) -> dict:
         """Parse the JSON and check that it is a Bundle with an entry list."""
@@ -46,7 +51,8 @@ class FhirBundleImporter(BaseHealthRecordImporter):
         try:
             parsed = json.loads(data.decode("utf-8-sig"))
         except (UnicodeDecodeError, ValueError) as exc:
-            raise ImportFormatError(f"Invalid JSON: {exc}") from exc
+            logger.warning("Health record import upload is not valid JSON: %s", exc)
+            raise ImportFormatError("File is not valid JSON") from exc
         except RecursionError as exc:
             raise ImportFormatError("JSON is nested too deeply") from exc
         if not isinstance(parsed, dict):

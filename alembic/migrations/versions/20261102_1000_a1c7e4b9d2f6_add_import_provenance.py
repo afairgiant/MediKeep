@@ -37,11 +37,13 @@ def upgrade() -> None:
         sa.UniqueConstraint(
             "record_type", "record_id", name="uq_import_provenance_record"
         ),
-    )
-    op.create_index(
-        "idx_import_provenance_patient_external",
-        "import_provenance",
-        ["patient_id", "record_type", "source", "external_id"],
+        sa.UniqueConstraint(
+            "patient_id",
+            "record_type",
+            "source",
+            "external_id",
+            name="uq_import_provenance_external",
+        ),
     )
     op.create_index(
         "idx_import_provenance_patient_hash",
@@ -56,7 +58,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_index("idx_import_provenance_batch", table_name="import_provenance")
     op.drop_index("idx_import_provenance_patient_hash", table_name="import_provenance")
-    op.drop_index(
-        "idx_import_provenance_patient_external", table_name="import_provenance"
-    )
     op.drop_table("import_provenance")

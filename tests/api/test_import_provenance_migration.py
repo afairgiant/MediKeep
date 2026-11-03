@@ -24,21 +24,9 @@ def test_upgrade_creates_table_and_downgrade_removes_it():
 
     assert "import_provenance" in _tables(engine)
     assert _indexes(engine) == {
-        "idx_import_provenance_patient_external",
         "idx_import_provenance_patient_hash",
         "idx_import_provenance_batch",
     }
-    external = next(
-        i
-        for i in sa.inspect(engine).get_indexes("import_provenance")
-        if i["name"] == "idx_import_provenance_patient_external"
-    )
-    assert external["column_names"] == [
-        "patient_id",
-        "record_type",
-        "source",
-        "external_id",
-    ]
     columns = {c["name"] for c in sa.inspect(engine).get_columns("import_provenance")}
     assert columns == {
         "id",
@@ -54,7 +42,10 @@ def test_upgrade_creates_table_and_downgrade_removes_it():
 
     inspector = sa.inspect(engine)
     uniques = inspector.get_unique_constraints("import_provenance")
-    assert [u["column_names"] for u in uniques] == [["record_type", "record_id"]]
+    assert sorted(u["column_names"] for u in uniques) == [
+        ["patient_id", "record_type", "source", "external_id"],
+        ["record_type", "record_id"],
+    ]
     foreign_keys = inspector.get_foreign_keys("import_provenance")
     assert [(f["constrained_columns"], f["referred_table"]) for f in foreign_keys] == [
         (["patient_id"], "patients")

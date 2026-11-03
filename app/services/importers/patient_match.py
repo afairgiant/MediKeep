@@ -31,6 +31,11 @@ def _first_patient(bundle: dict) -> Optional[dict]:
     return None
 
 
+def _text(value) -> Optional[str]:
+    """The value when it is a non-empty string, else None."""
+    return value if isinstance(value, str) and value.strip() else None
+
+
 def _name_parts(resource: dict):
     """(given tokens, family, full display) from the first usable HumanName."""
     names = resource.get("name")
@@ -38,17 +43,20 @@ def _name_parts(resource: dict):
         if not isinstance(name, dict):
             continue
         given_raw = name.get("given")
-        given = [g for g in given_raw if g] if isinstance(given_raw, list) else []
-        family = name.get("family") or ""
+        given = (
+            [g for g in given_raw if _text(g)] if isinstance(given_raw, list) else []
+        )
+        family = _text(name.get("family")) or ""
         if given or family:
-            text = name.get("text") or " ".join([*given, family]).strip()
+            text = _text(name.get("text")) or " ".join([*given, family]).strip()
             return given, family, text
     return [], "", None
 
 
-def _parse_date(value: Optional[str]) -> Optional[date]:
-    """Date from the first ten characters of a FHIR date, or None."""
-    if not value:
+def _parse_date(value) -> Optional[date]:
+    """Date from the first ten characters of a FHIR date string, or None."""
+    value = _text(value)
+    if value is None:
         return None
     try:
         return date.fromisoformat(value[:10])
@@ -71,7 +79,7 @@ def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
     match = PatientMatch(
         full_name=text,
         birth_date=_parse_date(resource.get("birthDate")),
-        gender=resource.get("gender"),
+        gender=_text(resource.get("gender")),
     )
 
     # Middle names are common in exports and absent in MediKeep, so compare

@@ -1763,7 +1763,7 @@ JUNCTION TABLES (Many-to-Many)
 
 **Indexes**:
 - `uq_import_provenance_record` unique on (record_type, record_id)
-- `idx_import_provenance_patient_external` on (patient_id, source, external_id)
+- `uq_import_provenance_external` unique on (patient_id, record_type, source, external_id); NULL external ids may repeat
 - `idx_import_provenance_patient_hash` on (patient_id, record_type, content_hash)
 - `idx_import_provenance_batch` on import_batch_id
 

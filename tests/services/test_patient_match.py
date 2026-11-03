@@ -72,3 +72,15 @@ class TestComparePatient:
             assert match.found
             assert match.full_name in (None, "Testperson")
             assert all("birth" not in w for w in match.warnings)
+
+    def test_fields_in_wrong_type_are_ignored(self):
+        """Test that non-string demographics are treated as absent, without a crash."""
+        bundle = _bundle(["Jane"], "Sampleton", birth=123, gender={})
+        bundle["entry"][0]["resource"]["name"] = [
+            {"given": [7, "Jane"], "family": ["x"], "text": 5}
+        ]
+        match = compare_patient(bundle, _patient())
+        assert match.full_name == "Jane"
+        assert match.birth_date is None
+        assert match.gender is None
+        assert match.warnings == []

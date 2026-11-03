@@ -10,6 +10,8 @@ from typing import Optional
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
@@ -22,6 +24,7 @@ from app.services.importers.mappers import (
     MappedRecord,
     resource_mapper_registry,
 )
+from app.services.importers.service import HealthRecordImportService
 from tests.utils.user import create_random_user, create_user_token_headers
 
 FIXTURE = (
@@ -135,6 +138,37 @@ def _provenance(db: Session, patient_id: int):
         .filter(ImportProvenance.patient_id == patient_id)
         .all()
     )
+
+
+def _count_selects(session: Session, call):
+    """Run call() and return how many SELECT statements it issued."""
+    statements = []
+
+    def record(conn, cursor, statement, parameters, context, executemany):
+        if statement.lstrip().upper().startswith("SELECT"):
+            statements.append(statement)
+
+    engine = session.get_bind()
+    event.listen(engine, "before_cursor_execute", record)
+    try:
+        call()
+    finally:
+        event.remove(engine, "before_cursor_execute", record)
+    return len(statements)
+
+
+def _bundle_with_conditions(count: int) -> bytes:
+    """The fixture's first condition repeated count times with distinct ids and text."""
+    bundle = json.loads(FIXTURE.read_text())
+    template = bundle["entry"][1]
+    entries = [bundle["entry"][0]]
+    for i in range(count):
+        entry = json.loads(json.dumps(template))
+        entry["resource"]["id"] = f"cond-{i}"
+        entry["resource"]["code"]["text"] = f"Condition {i}"
+        entries.append(entry)
+    bundle["entry"] = entries
+    return json.dumps(bundle).encode()
 
 
 def _import_logs(db: Session, patient_id: int):
@@ -756,3 +790,226 @@ class TestExecute:
             client.post(_execute_url(patient_id), files=_upload(), headers=headers)
         ).status_code == 200
         assert len(_import_logs(db_session, patient_id)) == 1
+
+    def test_malformed_patient_fields_do_not_crash(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+    ):
+        """Test that non-string Patient fields give no summary and still import with a log entry."""
+        patient_id = user_with_patient["patient"].id
+        bundle = json.loads(FIXTURE.read_text())
+        bundle["entry"][0]["resource"].update(
+            {"name": [{"given": [1], "family": ["x"]}], "birthDate": 123, "gender": {}}
+        )
+        data = json.dumps(bundle).encode()
+
+        preview = client.post(
+            _preview_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert preview.status_code == 200, preview.text
+        assert preview.json()["patient"] is None
+        assert preview.json()["warnings"] == []
+
+        response = client.post(
+            _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["counts"]["condition"]["created"] == 2
+        assert len(_conditions(db_session, patient_id)) == 2
+        assert len(_import_logs(db_session, patient_id)) == 1
+
+    def test_invalid_resource_type_is_skipped_with_warning(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+    ):
+        """Test that a resource without a string resourceType is skipped, not fatal."""
+        patient_id = user_with_patient["patient"].id
+        bundle = json.loads(FIXTURE.read_text())
+        bundle["entry"].append({"resource": {"resourceType": 7}})
+        bundle["entry"].append({"resource": {"id": "no-type"}})
+        data = json.dumps(bundle).encode()
+
+        response = client.post(
+            _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["counts"]["condition"]["created"] == 2
+        assert body["unsupported"]["invalid"] == 2
+        assert [w for w in body["warnings"] if w.startswith("Skipped")] == [
+            "Skipped entry 5: resourceType missing or not a string",
+            "Skipped entry 6: resourceType missing or not a string",
+        ]
+
+    def test_mapper_error_is_reported_without_detail(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+    ):
+        """Test that a resource the mapper cannot handle gives a fixed warning line."""
+        patient_id = user_with_patient["patient"].id
+        bundle = json.loads(FIXTURE.read_text())
+        del bundle["entry"][1]["resource"]["clinicalStatus"]
+        data = json.dumps(bundle).encode()
+
+        response = client.post(
+            _preview_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["counts"]["condition"]["new"] == 1
+        assert [w for w in body["warnings"] if w.startswith("Skipped")] == [
+            "Skipped Condition/cond-1: could not be mapped"
+        ]
+        assert "clinicalStatus" not in response.text
+
+    def test_hash_match_from_another_source_keeps_its_source_id(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+    ):
+        """Test that a row imported from one source is not relabelled by another source."""
+        patient = user_with_patient["patient"]
+        bundle = json.loads(FIXTURE.read_text())
+        HealthRecordImportService(db_session).execute(
+            bundle, patient, "ccda", "ccda", user_id=user_with_patient["user"].id
+        )
+        for entry in bundle["entry"]:
+            if entry["resource"]["resourceType"] == "Condition":
+                entry["resource"]["id"] = "fhir-" + entry["resource"]["id"]
+
+        response = client.post(
+            _execute_url(patient.id),
+            files=_upload(json.dumps(bundle).encode()),
+            headers=authenticated_headers,
+        )
+        assert response.json()["counts"]["condition"]["skipped_duplicate"] == 2
+        db_session.expire_all()
+        provenance = _provenance(db_session, patient.id)
+        assert {(p.source, p.external_id) for p in provenance} == {
+            ("ccda", "cond-1"),
+            ("ccda", "cond-2"),
+        }
+        assert len(_conditions(db_session, patient.id)) == 2
+
+    def test_provenance_row_is_claimed_once_per_import(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+    ):
+        """Test that only the first of two resources matching one row may update it."""
+        patient_id = user_with_patient["patient"].id
+        client.post(
+            _execute_url(patient_id), files=_upload(), headers=authenticated_headers
+        )
+        bundle = json.loads(FIXTURE.read_text())
+        by_id = bundle["entry"][1]
+        by_hash = json.loads(json.dumps(by_id))
+        by_id["resource"]["code"]["text"] = "Hypertension, essential"
+        by_hash["resource"]["id"] = "late-copy"
+        bundle["entry"] = [bundle["entry"][0], by_id, by_hash]
+        data = json.dumps(bundle).encode()
+
+        preview = client.post(
+            _preview_url(patient_id), files=_upload(data), headers=authenticated_headers
+        ).json()
+        assert preview["counts"]["condition"] == {
+            "new": 0,
+            "duplicate": 1,
+            "changed": 1,
+            "edited": 0,
+        }
+        response = client.post(
+            _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.json()["counts"]["condition"] == {
+            "created": 0,
+            "updated": 1,
+            "skipped_duplicate": 1,
+            "skipped_edited": 0,
+        }
+        db_session.expire_all()
+        updated = next(
+            p for p in _provenance(db_session, patient_id) if p.external_id == "cond-1"
+        )
+        assert db_session.get(Condition, updated.record_id).diagnosis == (
+            "Hypertension, essential"
+        )
+        assert len(_conditions(db_session, patient_id)) == 2
+
+    def test_external_id_is_unique_per_patient_type_and_source(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that two provenance rows with the same source id are refused."""
+        patient_id = user_with_patient["patient"].id
+
+        def row(record_id, external_id):
+            return ImportProvenance(
+                patient_id=patient_id,
+                record_type="condition",
+                record_id=record_id,
+                source="fhir",
+                external_id=external_id,
+                content_hash="x" * 64,
+                import_batch_id="b" * 32,
+            )
+
+        db_session.add_all([row(1, None), row(2, None), row(3, "dup")])
+        db_session.flush()
+        db_session.add(row(4, "dup"))
+        with pytest.raises(IntegrityError):
+            db_session.flush()
+        db_session.rollback()
+
+
+class TestQueries:
+    """Test that classification does not query per resource."""
+
+    def test_preview_query_count_does_not_grow_with_resources(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+    ):
+        """Test that a preview of 2 and of 20 conditions issues the same SELECTs, before and after import."""
+        patient_id = user_with_patient["patient"].id
+        small, large = _bundle_with_conditions(2), _bundle_with_conditions(20)
+
+        def preview(data):
+            response = client.post(
+                _preview_url(patient_id),
+                files=_upload(data),
+                headers=authenticated_headers,
+            )
+            assert response.status_code == 200, response.text
+
+        assert _count_selects(db_session, lambda: preview(small)) == _count_selects(
+            db_session, lambda: preview(large)
+        )
+
+        client.post(
+            _execute_url(patient_id),
+            files=_upload(large),
+            headers=authenticated_headers,
+        )
+        assert _count_selects(db_session, lambda: preview(small)) == _count_selects(
+            db_session, lambda: preview(large)
+        )

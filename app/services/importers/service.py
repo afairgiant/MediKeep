@@ -14,6 +14,7 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.utils.client_ip import get_client_ip
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, EntityType
@@ -49,6 +50,7 @@ class _PlannedRow:
     existing: Optional[ImportProvenance] = None
     locally_edited: bool = False
     stale: Optional[ImportProvenance] = None  # Provenance whose record is gone
+    record: Any = None  # The existing row, fetched once with the plan
 
 
 @dataclass
@@ -61,6 +63,10 @@ class _Plan:
     warnings: List[str] = field(default_factory=list)
     seen_hashes: Set[Tuple[str, str]] = field(default_factory=set)
     seen_ids: Set[Tuple[str, str]] = field(default_factory=set)
+    claimed: Set[int] = field(default_factory=set)  # Provenance ids already matched
+    by_key: Dict[Tuple[str, str, str], ImportProvenance] = field(default_factory=dict)
+    by_hash: Dict[Tuple[str, str], ImportProvenance] = field(default_factory=dict)
+    records: Dict[Tuple[str, int], Any] = field(default_factory=dict)
 
 
 class HealthRecordImportService:
@@ -119,7 +125,8 @@ class HealthRecordImportService:
         sections: Optional[Set[str]] = None,
         skip_edited: bool = True,
     ) -> HealthRecordImportResponse:
-        """Write the planned rows and one provenance row each, in one transaction."""
+        """Write the planned rows, their provenance and the log entry in one transaction."""
+        match = compare_patient(bundle, patient)
         plan = self._build_plan(bundle, patient, source)
         batch_id = uuid.uuid4().hex
         counts: Dict[str, SectionResultCount] = {}
@@ -131,8 +138,6 @@ class HealthRecordImportService:
             section = counts.setdefault(record_type, SectionResultCount())
             self._apply(row, section, patient, source, batch_id, skip_edited)
 
-        self.db.commit()
-        match = compare_patient(bundle, patient)
         response = HealthRecordImportResponse(
             source=source,
             format_key=format_key,
@@ -142,38 +147,96 @@ class HealthRecordImportService:
             warnings=[*match.warnings, *plan.warnings],
         )
         self._log_activity(response, patient, user_id, request)
+        self.db.commit()
         return response
 
     def _build_plan(self, bundle: dict, patient: Patient, source: str) -> _Plan:
         """Map each resource and classify it against existing provenance."""
         plan = _Plan()
-        for entry in bundle.get("entry", []):
+        mapped_items: List[Tuple[MappedRecord, Any]] = []
+        for index, entry in enumerate(bundle.get("entry", [])):
             resource = entry.get("resource") or {}
             resource_type = resource.get("resourceType")
-            if not resource_type or resource_type == "Patient":
+            if resource_type == "Patient":
                 continue
             plan.total_resources += 1
+            if not isinstance(resource_type, str) or not resource_type:
+                plan.unsupported["invalid"] = plan.unsupported.get("invalid", 0) + 1
+                plan.warnings.append(
+                    f"Skipped entry {index}: resourceType missing or not a string"
+                )
+                continue
             mapper = resource_mapper_registry.get_mapper(resource_type)
             if mapper is None:
                 plan.unsupported[resource_type] = (
                     plan.unsupported.get(resource_type, 0) + 1
                 )
                 continue
+            label = f"{resource_type}/{resource.get('id', '?')}"
             try:
                 mapped = mapper.map(resource, bundle)
             except (KeyError, IndexError, ValueError, TypeError) as exc:
-                plan.warnings.append(
-                    f"Skipped {resource_type}/{resource.get('id', '?')}: {exc}"
+                # The detail stays in the server log; the client gets a fixed line
+                logger.warning(
+                    "Health record import could not map a resource",
+                    extra={LogFields.PATIENT_ID: patient.id, LogFields.ERROR: str(exc)},
                 )
+                plan.warnings.append(f"Skipped {label}: could not be mapped")
                 continue
             if mapped is None:
                 continue
-            plan.rows.append(self._classify(plan, mapped, patient, source, mapper))
+            mapped_items.append((mapped, mapper))
+
+        self._load_existing(plan, patient, mapped_items, source)
+        for mapped, mapper in mapped_items:
+            plan.rows.append(self._classify(plan, mapped, source, mapper))
         return plan
 
-    def _classify(
-        self, plan: _Plan, mapped: MappedRecord, patient: Patient, source: str, mapper
-    ):
+    def _load_existing(
+        self,
+        plan: _Plan,
+        patient: Patient,
+        mapped_items: List[Tuple[MappedRecord, Any]],
+        source: str,
+    ) -> None:
+        """Fetch the patient's provenance and the matched rows in a few queries."""
+        if not mapped_items:
+            return
+        record_types = {mapped.record_type for mapped, _ in mapped_items}
+        for existing in prov.list_for_patient(self.db, patient.id, record_types):
+            if existing.external_id:
+                key = (existing.record_type, existing.source, existing.external_id)
+                plan.by_key.setdefault(key, existing)
+            plan.by_hash.setdefault(
+                (existing.record_type, existing.content_hash), existing
+            )
+
+        # One query per record type for the rows the provenance points at
+        wanted: Dict[str, Set[int]] = {}
+        models = {}
+        for mapped, mapper in mapped_items:
+            existing = self._find_existing(plan, mapped, source)
+            if existing is not None:
+                wanted.setdefault(mapped.record_type, set()).add(existing.record_id)
+                models[mapped.record_type] = mapper.MODEL
+        for record_type, ids in wanted.items():
+            model = models[record_type]
+            for row in self.db.query(model).filter(model.id.in_(ids)).all():
+                plan.records[(record_type, row.id)] = row
+
+    @staticmethod
+    def _find_existing(
+        plan: _Plan, mapped: MappedRecord, source: str
+    ) -> Optional[ImportProvenance]:
+        """Provenance for a mapped record: by source id first, then by content."""
+        if mapped.external_id:
+            existing = plan.by_key.get((mapped.record_type, source, mapped.external_id))
+            if existing is not None:
+                return existing
+        incoming_hash = prov.content_hash(mapped.hash_parts)
+        return plan.by_hash.get((mapped.record_type, incoming_hash))
+
+    def _classify(self, plan: _Plan, mapped: MappedRecord, source: str, mapper):
         """Decide new, duplicate or changed for one mapped record."""
         incoming_hash = prov.content_hash(mapped.hash_parts)
 
@@ -188,15 +251,16 @@ class HealthRecordImportService:
         if mapped.external_id:
             plan.seen_ids.add(id_key)
 
-        existing = prov.find_by_external_id(
-            self.db, patient.id, mapped.record_type, source, mapped.external_id
-        ) or prov.find_by_content_hash(
-            self.db, patient.id, mapped.record_type, incoming_hash
-        )
+        existing = self._find_existing(plan, mapped, source)
         if existing is None:
             return _PlannedRow(mapped, mapper, incoming_hash, NEW)
+        # Two resources can match one provenance row (one by id, one by content);
+        # only the first may update it
+        if existing.id in plan.claimed:
+            return _PlannedRow(mapped, mapper, incoming_hash, DUPLICATE)
+        plan.claimed.add(existing.id)
 
-        row = self.db.get(mapper.MODEL, existing.record_id)
+        row = plan.records.get((mapped.record_type, existing.record_id))
         if row is None:
             # The record was deleted after import; execute replaces the provenance
             return _PlannedRow(mapped, mapper, incoming_hash, NEW, stale=existing)
@@ -205,9 +269,18 @@ class HealthRecordImportService:
         locally_edited = prov.is_locally_edited(existing, current_hash)
         if locally_edited or existing.content_hash != incoming_hash:
             return _PlannedRow(
-                mapped, mapper, incoming_hash, CHANGED, existing, locally_edited
+                mapped,
+                mapper,
+                incoming_hash,
+                CHANGED,
+                existing,
+                locally_edited,
+                None,
+                row,
             )
-        return _PlannedRow(mapped, mapper, incoming_hash, DUPLICATE, existing)
+        return _PlannedRow(
+            mapped, mapper, incoming_hash, DUPLICATE, existing, False, None, row
+        )
 
     def _apply(
         self,
@@ -220,12 +293,12 @@ class HealthRecordImportService:
     ) -> None:
         """Write or skip one planned row and count what happened."""
         if row.status == DUPLICATE:
-            self._refresh_external_id(row)
+            self._refresh_external_id(row, source)
             section.skipped_duplicate += 1
         elif row.status == CHANGED and row.locally_edited and skip_edited:
             section.skipped_edited += 1
         elif row.status == CHANGED:
-            self._update_row(row)
+            self._update_row(row, source)
             section.updated += 1
         else:
             self._create_row(row, patient, source, batch_id)
@@ -253,22 +326,23 @@ class HealthRecordImportService:
             )
         )
 
-    def _update_row(self, row: _PlannedRow) -> None:
+    def _update_row(self, row: _PlannedRow, source: str) -> None:
         """Copy the new values onto the existing row, keeping user-owned fields."""
-        db_obj = self.db.get(row.mapper.MODEL, row.existing.record_id)
+        db_obj = row.record
         for field_name, value in row.mapped.data.items():
             if field_name in row.mapper.preserve_on_update:
                 continue
             if hasattr(db_obj, field_name):
                 setattr(db_obj, field_name, value)
         row.existing.content_hash = row.content_hash
-        self._refresh_external_id(row)
+        self._refresh_external_id(row, source)
 
     @staticmethod
-    def _refresh_external_id(row: _PlannedRow) -> None:
+    def _refresh_external_id(row: _PlannedRow, source: str) -> None:
         """Store the source's current id when a hash match came with a new one."""
         if (
             row.existing is not None
+            and row.existing.source == source
             and row.mapped.external_id
             and row.existing.external_id != row.mapped.external_id
         ):
@@ -281,36 +355,29 @@ class HealthRecordImportService:
         user_id: int,
         request: Optional[Request],
     ) -> None:
-        """Write one activity-log entry with the per-type counts."""
+        """Add one activity-log entry to the open transaction."""
         created = sum(c.created for c in response.counts.values())
         updated = sum(c.updated for c in response.counts.values())
-        try:
-            activity_log.log_activity(
-                self.db,
-                action=ActionType.IMPORTED,
-                entity_type=EntityType.HEALTH_RECORD_IMPORT,
-                patient_id=patient.id,
-                user_id=user_id,
-                description=(
-                    f"Imported {created} records from {response.source} "
-                    f"({updated} updated, batch {response.import_batch_id[:8]})"
-                ),
-                metadata={
-                    "source": response.source,
-                    "format_key": response.format_key,
-                    "import_batch_id": response.import_batch_id,
-                    "counts": {k: v.model_dump() for k, v in response.counts.items()},
-                    "unsupported": response.unsupported,
-                },
-                ip_address=get_client_ip(request) if request is not None else None,
-                user_agent=(
-                    request.headers.get("user-agent") if request is not None else None
-                ),
-            )
-        except Exception as exc:
-            # The import is already committed; a failed log entry must not undo it
-            logger.warning(
-                "Activity logging failed for health record import",
-                extra={"patient_id": patient.id, "user_id": user_id, "error": str(exc)},
-            )
-            self.db.rollback()
+        activity_log.log_activity(
+            self.db,
+            action=ActionType.IMPORTED,
+            entity_type=EntityType.HEALTH_RECORD_IMPORT,
+            patient_id=patient.id,
+            user_id=user_id,
+            description=(
+                f"Imported {created} records from {response.source} "
+                f"({updated} updated, batch {response.import_batch_id[:8]})"
+            ),
+            metadata={
+                "source": response.source,
+                "format_key": response.format_key,
+                "import_batch_id": response.import_batch_id,
+                "counts": {k: v.model_dump() for k, v in response.counts.items()},
+                "unsupported": response.unsupported,
+            },
+            ip_address=get_client_ip(request) if request is not None else None,
+            user_agent=(
+                request.headers.get("user-agent") if request is not None else None
+            ),
+            commit=False,
+        )

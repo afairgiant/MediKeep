@@ -5372,7 +5372,7 @@ by registering importers and mappers.
   "warnings": []
 }
 ```
-- **Notes**: `changed` counts rows that exist but differ, either because the file changed or because the row was edited in MediKeep; `edited` is the part of `changed` that execute skips by default. A resource repeated within one file counts as `duplicate` after its first copy. `warnings` includes a line when the file's patient name or birth date differs from the selected patient.
+- **Notes**: `changed` counts rows that exist but differ, either because the file changed or because the row was edited in MediKeep; `edited` is the part of `changed` that execute skips by default. A resource repeated within one file counts as `duplicate` after its first copy. `warnings` includes a line when the file's patient name or birth date differs from the selected patient, and one line per entry that was skipped (counted under `unsupported.invalid` when its `resourceType` is missing); warnings never carry parser or mapper error text.
 - **Errors**: `422` for a missing, oversized or wrong-extension file; `400` for a file the importer cannot parse
 
 #### Execute Import
@@ -5393,7 +5393,7 @@ by registering importers and mappers.
   "warnings": []
 }
 ```
-- **Notes**: One activity log entry (`imported` / `health_record_import`) is written per call. Duplicates are matched on the source record id first, then on a content hash.
+- **Notes**: The records, their provenance rows and one activity log entry (`imported` / `health_record_import`) are committed together, so a failure writes nothing. Duplicates are matched on the source record id first, then on a content hash; a provenance row is only updated by a file from the same source. Two executes of the same file at once can collide on the unique key (patient, record type, source, external id); the second one gets `409`.
 
 ## 13. Integrations
 
