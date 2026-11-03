@@ -27,13 +27,22 @@ class FhirBundleImporter(BaseHealthRecordImporter):
         bundle = self._load(data)
         if bundle.get("resourceType") != "Bundle":
             raise ImportFormatError("File is not a FHIR Bundle")
-        if not isinstance(bundle.get("entry", []), list):
+        entries = bundle.get("entry", [])
+        if not isinstance(entries, list):
             raise ImportFormatError("Bundle entry is not a list")
-        bundle.setdefault("entry", [])
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                raise ImportFormatError(f"Bundle entry {index} is not an object")
+            if "resource" in entry and not isinstance(entry["resource"], dict):
+                raise ImportFormatError(
+                    f"Bundle entry {index} resource is not an object"
+                )
+        bundle["entry"] = entries
         return bundle
 
     @staticmethod
     def _load(data: bytes) -> dict:
+        """Decode and parse the upload, raising ImportFormatError on bad input."""
         try:
             parsed = json.loads(data.decode("utf-8-sig"))
         except (UnicodeDecodeError, ValueError) as exc:

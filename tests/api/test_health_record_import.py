@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
 from app.models.activity_log import ActivityLog
-from app.models.models import Condition, ImportProvenance, PatientShare
+from app.models.models import Allergy, Condition, ImportProvenance, PatientShare
 from app.schemas.patient import PatientCreate
 from app.services.importers import upload
 from app.services.importers.mappers import (
@@ -89,6 +89,40 @@ def condition_mapper():
     resource_mapper_registry.register(ConditionStubMapper())
     yield
     resource_mapper_registry.unregister("Condition")
+
+
+class AllergyStubMapper(BaseResourceMapper):
+    """Minimal AllergyIntolerance mapper for tests that need two record types."""
+
+    RESOURCE_TYPE = "AllergyIntolerance"
+    RECORD_TYPE = "allergy"
+    MODEL = Allergy
+
+    def map(self, resource, bundle):
+        allergen = resource["code"]["text"]
+        return MappedRecord(
+            record_type=self.RECORD_TYPE,
+            external_id=resource.get("id"),
+            data={
+                "allergen": allergen,
+                "reaction": "Not specified",
+                "severity": "none",
+                "status": "active",
+            },
+            hash_parts=(allergen,),
+            label=allergen,
+        )
+
+    def hash_parts_for_row(self, row):
+        return (row.allergen,)
+
+
+@pytest.fixture
+def allergy_mapper():
+    """Register the allergy stub mapper for one test."""
+    resource_mapper_registry.register(AllergyStubMapper())
+    yield
+    resource_mapper_registry.unregister("AllergyIntolerance")
 
 
 def _conditions(db: Session, patient_id: int):
@@ -283,6 +317,40 @@ class TestPreview:
             headers=authenticated_headers,
         )
         assert response.status_code == 400
+
+    def test_rejects_malformed_entry(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that an entry or resource that is not an object is a 400, not a crash."""
+        patient_id = user_with_patient["patient"].id
+        for entries, message in [
+            (["not an entry"], "entry 0 is not an object"),
+            ([{"resource": "Condition"}], "entry 0 resource is not an object"),
+        ]:
+            data = json.dumps({"resourceType": "Bundle", "entry": entries}).encode()
+            response = client.post(
+                _preview_url(patient_id),
+                data={"format_key": "fhir_bundle"},
+                files=_upload(data),
+                headers=authenticated_headers,
+            )
+            assert response.status_code == 400, response.text
+            assert message in response.text
+
+    def test_patient_name_in_wrong_shape_is_ignored(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that a Patient whose name is a string gives no summary name."""
+        patient_id = user_with_patient["patient"].id
+        bundle = json.loads(FIXTURE.read_text())
+        bundle["entry"][0]["resource"]["name"] = "Alex"
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(json.dumps(bundle).encode()),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["patient"]["full_name"] is None
 
     def test_unknown_format_key(
         self, client: TestClient, user_with_patient, authenticated_headers
@@ -582,6 +650,55 @@ class TestExecute:
             "new-cond-1",
             "new-cond-2",
         }
+
+    def test_same_external_id_across_record_types(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+        allergy_mapper,
+    ):
+        """Test that a Condition and an AllergyIntolerance sharing an id stay separate."""
+        patient_id = user_with_patient["patient"].id
+        bundle = json.loads(FIXTURE.read_text())
+        bundle["entry"][1]["resource"]["id"] = "shared-1"
+        allergy_entry = next(
+            e
+            for e in bundle["entry"]
+            if e["resource"]["resourceType"] == "AllergyIntolerance"
+        )
+        allergy_entry["resource"]["id"] = "shared-1"
+        allergy_entry["resource"]["code"] = {"text": "Peanut"}
+        data = json.dumps(bundle).encode()
+
+        response = client.post(
+            _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        counts = response.json()["counts"]
+        assert counts["condition"]["created"] == 2
+        assert counts["allergy"]["created"] == 1
+
+        shared = [
+            p
+            for p in _provenance(db_session, patient_id)
+            if p.external_id == "shared-1"
+        ]
+        assert {p.record_type for p in shared} == {"condition", "allergy"}
+        allergy = (
+            db_session.query(Allergy).filter(Allergy.patient_id == patient_id).one()
+        )
+        assert allergy.allergen == "Peanut"
+
+        response = client.post(
+            _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        counts = response.json()["counts"]
+        assert counts["condition"]["skipped_duplicate"] == 2
+        assert counts["allergy"]["skipped_duplicate"] == 1
+        assert len(_conditions(db_session, patient_id)) == 2
 
     def test_sections_filter(
         self,

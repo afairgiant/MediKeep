@@ -143,6 +143,18 @@ class TestFhirBundleImporter:
         with pytest.raises(ImportFormatError, match="nested too deeply"):
             importer.to_bundle(data, "deep.json")
 
+    def test_rejects_entries_that_are_not_objects(self):
+        """Test that a non-object entry or resource names its index in the error."""
+        importer = FhirBundleImporter()
+        data = json.dumps({"resourceType": "Bundle", "entry": [{}, 3]}).encode()
+        with pytest.raises(ImportFormatError, match="entry 1 is not an object"):
+            importer.to_bundle(data, "x.json")
+        data = json.dumps(
+            {"resourceType": "Bundle", "entry": [{"resource": []}]}
+        ).encode()
+        with pytest.raises(ImportFormatError, match="entry 0 resource"):
+            importer.to_bundle(data, "x.json")
+
     def test_rejects_entry_that_is_not_a_list(self):
         """Test that a Bundle whose entry is not a list is rejected."""
         data = json.dumps({"resourceType": "Bundle", "entry": {}}).encode()

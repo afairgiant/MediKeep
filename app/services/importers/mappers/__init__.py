@@ -14,6 +14,7 @@ class ResourceMapperRegistry:
     """Registry for FHIR resource mappers keyed by resourceType."""
 
     def __init__(self):
+        """Create the registry with the built-in mappers."""
         self._mappers: Dict[str, BaseResourceMapper] = {}
 
     def register(self, mapper: BaseResourceMapper):

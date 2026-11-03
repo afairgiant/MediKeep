@@ -18,10 +18,12 @@ class PatientMatch:
 
     @property
     def found(self) -> bool:
+        """True when the file carried any demographics at all."""
         return bool(self.full_name or self.birth_date or self.gender)
 
 
 def _first_patient(bundle: dict) -> Optional[dict]:
+    """The bundle's first Patient resource, if any."""
     for entry in bundle.get("entry", []):
         resource = entry.get("resource") or {}
         if resource.get("resourceType") == "Patient":
@@ -31,8 +33,12 @@ def _first_patient(bundle: dict) -> Optional[dict]:
 
 def _name_parts(resource: dict):
     """(given tokens, family, full display) from the first usable HumanName."""
-    for name in resource.get("name", []):
-        given = [g for g in name.get("given", []) if g]
+    names = resource.get("name")
+    for name in names if isinstance(names, list) else []:
+        if not isinstance(name, dict):
+            continue
+        given_raw = name.get("given")
+        given = [g for g in given_raw if g] if isinstance(given_raw, list) else []
         family = name.get("family") or ""
         if given or family:
             text = name.get("text") or " ".join([*given, family]).strip()
@@ -41,6 +47,7 @@ def _name_parts(resource: dict):
 
 
 def _parse_date(value: Optional[str]) -> Optional[date]:
+    """Date from the first ten characters of a FHIR date, or None."""
     if not value:
         return None
     try:
@@ -50,6 +57,7 @@ def _parse_date(value: Optional[str]) -> Optional[date]:
 
 
 def _norm(value: Optional[str]) -> str:
+    """Lower-case with collapsed whitespace, for comparisons."""
     return " ".join((value or "").split()).lower()
 
 

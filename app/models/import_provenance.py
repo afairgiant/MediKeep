@@ -36,6 +36,7 @@ class ImportProvenance(Base):
         Index(
             "idx_import_provenance_patient_external",
             "patient_id",
+            "record_type",
             "source",
             "external_id",
         ),

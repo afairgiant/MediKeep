@@ -62,3 +62,13 @@ class TestComparePatient:
         match = compare_patient({"entry": []}, _patient())
         assert not match.found
         assert match.warnings == []
+
+    def test_name_in_wrong_shape_is_skipped(self):
+        """Test that a string name, a non-object entry or a string given list is ignored."""
+        for name in ["Alex", ["Alex"], [{"given": "Alex", "family": "Testperson"}]]:
+            bundle = _bundle(["Jane"], "Sampleton")
+            bundle["entry"][0]["resource"]["name"] = name
+            match = compare_patient(bundle, _patient())
+            assert match.found
+            assert match.full_name in (None, "Testperson")
+            assert all("birth" not in w for w in match.warnings)

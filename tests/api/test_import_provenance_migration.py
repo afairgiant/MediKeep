@@ -28,6 +28,17 @@ def test_upgrade_creates_table_and_downgrade_removes_it():
         "idx_import_provenance_patient_hash",
         "idx_import_provenance_batch",
     }
+    external = next(
+        i
+        for i in sa.inspect(engine).get_indexes("import_provenance")
+        if i["name"] == "idx_import_provenance_patient_external"
+    )
+    assert external["column_names"] == [
+        "patient_id",
+        "record_type",
+        "source",
+        "external_id",
+    ]
     columns = {c["name"] for c in sa.inspect(engine).get_columns("import_provenance")}
     assert columns == {
         "id",

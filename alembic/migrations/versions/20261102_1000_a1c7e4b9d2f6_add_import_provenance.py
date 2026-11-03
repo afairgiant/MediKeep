@@ -41,7 +41,7 @@ def upgrade() -> None:
     op.create_index(
         "idx_import_provenance_patient_external",
         "import_provenance",
-        ["patient_id", "source", "external_id"],
+        ["patient_id", "record_type", "source", "external_id"],
     )
     op.create_index(
         "idx_import_provenance_patient_hash",

@@ -23,7 +23,11 @@ def content_hash(parts: Iterable[Optional[object]]) -> str:
 
 
 def find_by_external_id(
-    db: Session, patient_id: int, source: str, external_id: Optional[str]
+    db: Session,
+    patient_id: int,
+    record_type: str,
+    source: str,
+    external_id: Optional[str],
 ) -> Optional[ImportProvenance]:
     """Provenance row for a source record id, if that record was imported before."""
     if not external_id:
@@ -32,6 +36,7 @@ def find_by_external_id(
         db.query(ImportProvenance)
         .filter(
             ImportProvenance.patient_id == patient_id,
+            ImportProvenance.record_type == record_type,
             ImportProvenance.source == source,
             ImportProvenance.external_id == external_id,
         )
