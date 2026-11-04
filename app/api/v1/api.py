@@ -14,6 +14,7 @@ from app.api.v1.endpoints import (
     family_history_sharing,
     family_member,
     frontend_logs,
+    health_record_import,
     immunization,
     injury,
     injury_type,
@@ -166,6 +167,11 @@ api_router.include_router(
 
 # Export endpoints
 api_router.include_router(export.router, prefix="/export", tags=["export"])
+
+# Health record import endpoints
+api_router.include_router(
+    health_record_import.router, prefix="/health-records", tags=["health-records"]
+)
 
 # Custom reports endpoints
 api_router.include_router(

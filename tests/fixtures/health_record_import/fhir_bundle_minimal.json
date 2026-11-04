@@ -1,0 +1,72 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-1",
+        "name": [{"family": "Sampleton", "given": ["Jane", "Quinn"]}],
+        "gender": "female",
+        "birthDate": "1980-04-12"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-1",
+        "clinicalStatus": {
+          "coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active"}]
+        },
+        "code": {
+          "coding": [{"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10", "display": "Essential hypertension"}],
+          "text": "Essential hypertension"
+        },
+        "subject": {"reference": "Patient/pat-1"},
+        "onsetDateTime": "2019-03-02"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-2",
+        "clinicalStatus": {
+          "coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "resolved"}]
+        },
+        "code": {
+          "coding": [{"system": "http://snomed.info/sct", "code": "195967001", "display": "Asthma"}],
+          "text": "Asthma"
+        },
+        "subject": {"reference": "Patient/pat-1"},
+        "onsetDateTime": "1992-06-15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-1",
+        "clinicalStatus": {
+          "coding": [{"system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "code": "active"}]
+        },
+        "code": {
+          "coding": [{"system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "7980", "display": "Penicillin"}],
+          "text": "Penicillin"
+        },
+        "patient": {"reference": "Patient/pat-1"},
+        "reaction": [{"manifestation": [{"text": "Hives"}], "severity": "moderate"}]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-1",
+        "status": "final",
+        "category": [{"coding": [{"system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs"}]}],
+        "code": {"coding": [{"system": "http://loinc.org", "code": "8867-4", "display": "Heart rate"}]},
+        "subject": {"reference": "Patient/pat-1"},
+        "effectiveDateTime": "2026-01-15T09:30:00Z",
+        "valueQuantity": {"value": 72, "unit": "/min"}
+      }
+    }
+  ]
+}

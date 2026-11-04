@@ -5335,6 +5335,71 @@ Base path: `/api/v1/export`
 
 ---
 
+### 12.3 Health Record Import
+
+Base path: `/api/v1/health-records`
+
+Imports records exported from another system. Each upload is converted to a
+FHIR R4 Bundle by a format importer, then resource mappers write MediKeep rows
+and an `import_provenance` row per record. Formats and resource types are added
+by registering importers and mappers.
+
+#### Import Formats
+
+`GET /health-records/import/formats`
+
+- **Purpose**: List supported upload formats and the size limit
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "formats": [{"key": "fhir_bundle", "name": "FHIR R4 Bundle (JSON)", "extensions": ["json"]}],
+  "max_file_size_bytes": 52428800
+}
+```
+
+#### Preview Import
+
+`POST /health-records/patient/{patient_id}/import/preview`
+
+- **Purpose**: Report what an import would create, skip or change, without writing
+- **Authentication**: Yes (edit access to the patient)
+- **Request**: multipart form with `file` and optional `format_key` (auto-detected when omitted)
+- **Success Response** (200):
+```json
+{
+  "source": "fhir",
+  "format_key": "fhir_bundle",
+  "total_resources": 4,
+  "counts": {"condition": {"new": 2, "duplicate": 0, "changed": 0, "edited": 0}},
+  "unsupported": {"Observation": 1},
+  "patient": {"full_name": "Jane Sampleton", "birth_date": "1980-04-12", "gender": "female"},
+  "warnings": []
+}
+```
+- **Notes**: `changed` counts rows that exist but differ, either because the file changed or because the row was edited in MediKeep; `edited` is the part of `changed` that execute skips by default. A resource repeated within one file counts as `duplicate` after its first copy. Resource types without a mapper are counted under `unsupported` and produce no warning. `warnings` includes a line when the file's patient name or birth date differs from the selected patient, and one line per entry that was skipped: an entry whose `resourceType` is missing or not a string (also counted under `unsupported.invalid`) or a resource its mapper could not read; warnings never carry parser or mapper error text.
+- **Errors**: `422` for a missing, oversized or wrong-extension file; `400` for a file the importer cannot parse
+
+#### Execute Import
+
+`POST /health-records/patient/{patient_id}/import/execute`
+
+- **Purpose**: Write the records and one provenance row each
+- **Authentication**: Yes (edit access to the patient)
+- **Request**: multipart form with `file`, optional `format_key`, optional `sections` (comma-separated record types to write, default all) and `skip_edited` (default `true`: leave rows edited in MediKeep alone)
+- **Success Response** (200):
+```json
+{
+  "source": "fhir",
+  "format_key": "fhir_bundle",
+  "import_batch_id": "3f2a9c1e4b7d4f0e8a6c2b1d9e5f7a3c",
+  "counts": {"condition": {"created": 2, "updated": 0, "skipped_duplicate": 0, "skipped_edited": 0}},
+  "unsupported": {"Observation": 1},
+  "warnings": []
+}
+```
+- **Notes**: The records, their provenance rows and one activity log entry (`imported` / `health_record_import`) are committed together, so a failure writes nothing. Duplicates are matched on the source record id first, then on a content hash; a provenance row is only updated by a file from the same source. Two executes of the same file at once can collide on the unique key (patient, record type, source, external id); the second one gets `409`.
+
 ## 13. Integrations
 
 ### 13.1 Paperless-ngx
