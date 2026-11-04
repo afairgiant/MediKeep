@@ -369,3 +369,15 @@ class TestSynlabRowsAndTiers:
         )
         assert len(results) == 1
         assert results[0].reference_range == "normal: 3.9 - 10.2; hoch: > 10.2"
+
+    def test_number_at_the_end_of_a_name_is_not_the_value(self, parser):
+        """Synlab prints "Vitamin B 12", so 12 must not be read as the result."""
+        result = parser.parse("VITB12 Vitamin B 12\n412 pg/ml 211-911")
+        assert len(result) == 1
+        assert (result[0].value, result[0].unit) == (412, "pg/mL")
+
+    def test_row_ending_in_its_value_keeps_it(self, parser):
+        """A unit-less value stays when the next line is another test."""
+        results = parser.parse("XQ Quotient 12\nNA Natrium 141 mmol/l 136 - 145")
+        assert results[0].value == 12
+        assert results[1].value == 141

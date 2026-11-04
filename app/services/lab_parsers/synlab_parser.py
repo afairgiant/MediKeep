@@ -346,8 +346,9 @@ class SynlabParser(BaseLabParser):
         ``lines[i]`` is the line after ``line``. A row whose value is printed on
         that line uses both lines. The columns are None if this is not a result.
         """
+        next_line = lines[i] if i < len(lines) else ""
         match = _ROW_RE.match(line)
-        if match:
+        if match and not self._number_is_part_of_name(match, next_line):
             if match.group("code").upper() in PANEL_CODES:
                 return None, line, i
             return match.groupdict(), line, i
@@ -355,10 +356,10 @@ class SynlabParser(BaseLabParser):
         pending = self._match_row_without_value(line)
         if not pending or pending.group("code").upper() in PANEL_CODES:
             return None, line, i
-        nxt = _VALUE_ONLY_RE.match(lines[i]) if i < len(lines) else None
+        nxt = _VALUE_ONLY_RE.match(next_line)
         if not nxt:
             return None, line, i
-        return {**pending.groupdict(), **nxt.groupdict()}, (line, lines[i]), i + 1
+        return {**pending.groupdict(), **nxt.groupdict()}, (line, next_line), i + 1
 
     def _read_tiers(
         self, fields: Dict, lines: List[str], i: int
@@ -473,6 +474,20 @@ class SynlabParser(BaseLabParser):
             return
         known = result.reference_range.split("; ") if result.reference_range else []
         result.reference_range = "; ".join(known + [t for t in tiers if t not in known])
+
+    @staticmethod
+    def _number_is_part_of_name(row: re.Match, next_line: str) -> bool:
+        """True if a row's "value" is really the end of its name ("Vitamin B 12").
+
+        The row then has nothing after that number, and the next line holds the
+        real value with its unit.
+        """
+        if row.group("flag") or row.group("unit") or row.group("range"):
+            return False
+        if not re.fullmatch(_NUM, row.group("value")):
+            return False
+        nxt = _VALUE_ONLY_RE.match(next_line)
+        return nxt is not None and nxt.group("unit") is not None
 
     @staticmethod
     def _match_row_without_value(line: str) -> Optional[re.Match]:
