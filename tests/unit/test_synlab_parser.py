@@ -576,3 +576,137 @@ class TestSynlabFormattedText:
         assert "Estimated GFR: 104.0 mL/min/1.73m2 (>60)" in self.formatted_lines(
             SYNLAB_REPORT_TEXT
         )
+
+
+class TestSynlabMeasuredValueWins:
+    """A number or word from the range column must never replace the value."""
+
+    @pytest.mark.parametrize(
+        "line, value, unit, reference_range",
+        [
+            ("K Kalium 4.2 mmol/l 3.5 bis 5.1", 4.2, "mmol/L", "3.5 bis 5.1"),
+            ("K Kalium 4.2 mmol/l ≤ 5.1", 4.2, "mmol/L", "≤5.1"),
+            ("CK CK 120 U/l ≤190", 120, "U/L", "≤190"),
+            (
+                "TSH TSH 1.5 mU/l 0.27 - 4.2 (Erw.)",
+                1.5,
+                "mIU/L",
+                "0.27 - 4.2 (Erw.)",
+            ),
+            ("HEPC Anti-HCV 0.1 S/CO negativ", 0.1, "S/CO", "negativ"),
+        ],
+    )
+    def test_any_range_text(self, parser, line, value, unit, reference_range):
+        """Range text the patterns don't know stays in the range."""
+        result = parser.parse(line)[0]
+        assert (result.value, result.unit) == (value, unit)
+        assert result.reference_range == reference_range
+        assert result.flag == ""
+
+    def test_comparison_range_with_a_unit(self, parser):
+        """A range that repeats the unit doesn't replace the value."""
+        result = parser.parse("CRP C-reak.Protein 0.3 mg/dl < 0.5 mg/dl")[0]
+        assert (result.value, result.reference_range) == (0.3, "< 0.5 mg/dl")
+
+    def test_flagged_value_with_a_qualitative_range(self, parser):
+        """A reactive index keeps its flag instead of reading as Negative."""
+        result = parser.parse("HBS HBs-Antigen + 1.5 Index negativ")[0]
+        assert (result.value, result.flag) == (1.5, "High")
+        assert result.qualitative_value == ""
+        assert (result.unit, result.reference_range) == ("Index", "negativ")
+
+    def test_qualitative_range_without_a_unit(self, parser):
+        """The word isn't read as a unit."""
+        result = parser.parse("HBS HBs-Antigen 0.3 negativ")[0]
+        assert (result.value, result.unit) == (0.3, "")
+        assert result.reference_range == "negativ"
+
+    def test_free_range_is_scaled_with_the_value(self, parser):
+        """Range text uses the same scale as the value."""
+        result = parser.parse("LEU Leukozyten 5120 n/µl 3900 bis 10200")[0]
+        assert (result.value, result.reference_range) == (5.12, "3.9 bis 10.2")
+
+    @pytest.mark.parametrize(
+        "line, value",
+        [
+            ("VITB12 Vitamin B 12 412 pg/ml 211-911", 412),
+            ("CKDEPI eGFR 2021 Formel 88 ml/min/1,7 >60", 88),
+        ],
+    )
+    def test_numbers_in_a_name_are_still_not_values(self, parser, line, value):
+        """A number in the name isn't taken for the measured value."""
+        assert parser.parse(line)[0].value == value
+
+    def test_unitless_decimal_is_not_part_of_the_name(self, parser):
+        """Only a whole number can be the end of a name."""
+        result = parser.parse("LDLHDL LDL/HDL-Quotient 2.5\n5.0 mg/dl <7")
+        assert result[0].value == 2.5
+
+    def test_comparison_on_next_line_does_not_replace_the_value(self, parser):
+        """A target such as "< 3.5 Risiko" isn't the real value."""
+        result = parser.parse("LDLHDL LDL/HDL-Quotient 2\n< 3.5 Risiko")
+        assert result[0].value == 2
+
+    @pytest.mark.parametrize(
+        "unit, expected", [("10^3/µl", "K/uL"), ("10^6/µl", "M/uL")]
+    )
+    def test_other_powers_of_ten(self, parser, unit, expected):
+        """These spellings would reach Bulk Entry as the unit "10"."""
+        assert parser.parse(f"RET Retikulozyten 50 {unit} 25-100")[0].unit == expected
+
+
+class TestSynlabNamesWithKnownCodes:
+    @pytest.mark.parametrize(
+        "line, name",
+        [
+            ("LEU Leukozyten im Urin 12 /µl <25", "Leukozyten im Urin"),
+            ("ERY Erythrozyten im Urin 3 /µl <10", "Erythrozyten im Urin"),
+            ("KREA Kreatinin im Urin 120 mg/dl", "Kreatinin im Urin"),
+            ("KREA Kreatinin-Clearance 110 ml/min 80-140", "Kreatinin-Clearance"),
+            ("BIL Bilirubin indirekt 0.4 mg/dl <0.8", "Bilirubin indirekt"),
+            ("BIL Bilirubin direkt 0.2 mg/dl <0.3", "Direct Bilirubin"),
+        ],
+    )
+    def test_description_more_specific_than_code(self, parser, line, name):
+        """Reusing a blood test's code doesn't put these on its trend."""
+        assert parser.parse(line)[0].test_name == name
+
+    @pytest.mark.parametrize(
+        "line, name",
+        [
+            ("TSHR TSH-Rezeptor-AK 0.5 IU/l <1.75", "TSH-Rezeptor-AK"),
+            ("GLYK Glykohämoglobin 6.1 % 4-6", "Glykohämoglobin"),
+            ("VIT125 1,25-OH-Vitamin D 40 pg/ml 20-80", "1,25-OH-Vitamin D"),
+        ],
+    )
+    def test_related_analytes_keep_their_name(self, parser, line, name):
+        """A different analyte with a similar name stays off the trend."""
+        assert parser.parse(line)[0].test_name == name
+
+    def test_quotient_with_a_known_code_still_maps(self, parser):
+        """A known code still wins over a generic description."""
+        result = parser.parse("CHQ Quotient 3.9 kA <5")[0]
+        assert result.test_name == "Total Cholesterol/HDL Ratio"
+
+
+class TestSynlabHintBlockEnds:
+    @pytest.mark.parametrize(
+        "hint",
+        ["LDL Zielwert < 70 mg/dl", "CV Risiko Zielwert 116 mg/dl", "LDL < 70 mg/dl"],
+    )
+    def test_targets_that_look_like_results_stay_in_the_block(self, parser, hint):
+        """Target values with a unit are still hint text."""
+        assert parser.parse(f"Hinweise: Zielwerte\n{hint}") == []
+
+    @pytest.mark.parametrize(
+        "line, value",
+        [("HB Hämoglobin 14", 14), ("XQ Foo 12 mg/dl", 12), ("XQ Foo 12 5-20", 12)],
+    )
+    def test_plain_results_end_the_block(self, parser, line, value):
+        """A known code, unit or range is enough for a non-comparison value."""
+        assert parser.parse(f"Hinweise: Zielwerte\n{line}")[0].value == value
+
+    def test_comparison_result_with_unit_and_range_ends_the_block(self, parser):
+        """An unknown code keeps its result if the row has both."""
+        result = parser.parse("Hinweise: x\nXYZ Foo <0.2 mg/dl <0.5")[0]
+        assert result.qualitative_value == "<0.2"

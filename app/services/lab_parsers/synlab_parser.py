@@ -113,18 +113,25 @@ CODE_TO_TEST: Dict[str, str] = {
     "AKIN": "Intrinsic Factor Antibody",
 }
 
-# Ratios that do have a library test, checked before _OWN_TEST_RE.
-RATIO_TO_TEST: List[Tuple[re.Pattern, str]] = [
+# Descriptions more specific than the test code ("BIL Bilirubin direkt").
+SPECIFIC_TO_TEST: List[Tuple[re.Pattern, str]] = [
     (re.compile(r"LDL/HDL", re.IGNORECASE), "LDL/HDL Ratio"),
     (re.compile(r"chol\.?/HDL", re.IGNORECASE), "Total Cholesterol/HDL Ratio"),
+    (
+        re.compile(r"bilirubin.*\bdirekt|\bdirekt.*bilirubin", re.IGNORECASE),
+        "Direct Bilirubin",
+    ),
 ]
 
-# Tests that name an analyte but measure something else, such as
-# Kreatinin-Clearance, Albumin/Kreatinin-Quotient or Leukozyten im Urin. They
-# keep their own name rather than landing on the blood analyte's trend.
-_OWN_TEST_RE = re.compile(
-    r"clearance|quotient|urin\b|\bim harn\b|\bi\.\s?U\b|\bindirekt", re.IGNORECASE
+# Tests that name a blood analyte but measure something else. They keep their
+# own name rather than landing on that analyte's trend, even if Synlab reuses
+# the analyte's code ("LEU Leukozyten im Urin").
+_OTHER_SPECIMEN_RE = re.compile(
+    r"clearance|urin\b|\bim harn\b|\bi\.\s?U\b|\bindirekt", re.IGNORECASE
 )
+# The same for descriptions with an unknown code. A known code wins here, as the
+# description may only be a variant ("CHQ Quotient").
+_RELATED_TEST_RE = re.compile(r"quotient|rezeptor|glyko|\b1[,.]25\b", re.IGNORECASE)
 
 # German description -> canonical name, for codes not listed above.
 # Checked in order, so more specific patterns come first.
@@ -138,7 +145,6 @@ DESCRIPTION_TO_TEST: List[Tuple[re.Pattern, str]] = [
         (r"h[äa]matokrit", "Hematocrit"),
         (r"thrombozyten", "Platelet Count"),
         (r"alkalische phosphatase", "Alkaline Phosphatase"),
-        (r"bilirubin.*\bdirekt|\bdirekt.*bilirubin", "Direct Bilirubin"),
         (r"bilirubin", "Total Bilirubin"),
         (r"\bGOT\b|\bAST\b", "Aspartate Aminotransferase"),
         (r"\bGPT\b|\bALT\b", "Alanine Aminotransferase"),
@@ -222,6 +228,14 @@ _ROW_RE = re.compile(
     rf"(?:(?P<flag>\+\+?|--?)\s+)?"
     rf"(?P<value>{_VALUE})" + _TAIL,
 )
+# The same row with any text in the range column ("3.5 bis 5.1", "≤ 5.1"), for
+# when _ROW_RE only matches by taking a later number or word as the value.
+_ROW_ANY_RANGE_RE = re.compile(
+    rf"^(?P<code>[A-Z][A-Z0-9]{{0,7}})\.?\s+"
+    rf"(?P<desc>.*?)\s+"
+    rf"(?:(?P<flag>\+\+?|--?)\s+)?"
+    rf"(?P<value>{_VALUE})\s+(?P<unit>{_UNIT})\s+(?P<range>\S.*)$"
+)
 # A test whose value is printed on the following line ("HBS. HBs-Antigen").
 # The description may hold digits ("Vitamin B12") but no colon, which marks a
 # hint or a labelled range ("ESC 2019: LDL").
@@ -248,6 +262,10 @@ _UNITS: Dict[str, Tuple[str, float]] = {
     "/nl": ("K/uL", 1),
     "n/µl": ("K/uL", 0.001),
     "/µl": ("K/uL", 0.001),
+    "10^3/µl": ("K/uL", 1),
+    "10^3/ul": ("K/uL", 1),
+    "10^6/µl": ("M/uL", 1),
+    "10^6/ul": ("M/uL", 1),
     "10^12/l": ("M/uL", 1),
     "tera/l": ("M/uL", 1),
     "mio./µl": ("M/uL", 1),
@@ -278,6 +296,17 @@ _UNITS: Dict[str, Tuple[str, float]] = {
 
 # Units without a "/" that may stand before a labelled range, besides _UNITS.
 _BARE_UNITS = {"pg"}
+
+
+def _first_match(patterns: List[Tuple[re.Pattern, str]], text: str) -> Optional[str]:
+    """Return the name of the first pattern found in ``text``."""
+    return next((name for pattern, name in patterns if pattern.search(text)), None)
+
+
+def _looks_like_unit(word: str) -> bool:
+    """True for a word that is a unit rather than part of a label or a name."""
+    key = word.replace("μ", "µ").lower()
+    return any(c in key for c in "/%^") or key in _UNITS or key in _BARE_UNITS
 
 
 class SynlabParser(BaseLabParser):
@@ -368,6 +397,24 @@ class SynlabParser(BaseLabParser):
 
     # ------------------------------------------------------------------ helpers
 
+    @staticmethod
+    def _match_row(line: str) -> Optional[re.Match]:
+        """Match a result row, reading the first measurement as its value.
+
+        Without a range _ROW_RE knows, it can only match by moving the measured
+        value into the description, which then reports a number from the range
+        column as the result. Vitamin B 12 has a number in its name, so the
+        earlier match only counts if it really is a value with a unit.
+        """
+        row = _ROW_RE.match(line)
+        any_range = _ROW_ANY_RANGE_RE.match(line)
+        if not any_range or (row and len(row["desc"]) <= len(any_range["desc"])):
+            return row
+        hides_a_word = row and row["value"].lower() in QUALITATIVE
+        if hides_a_word or _looks_like_unit(any_range["unit"]):
+            return any_range
+        return row
+
     def _ends_hint_block(self, line: str, next_line: str) -> bool:
         """True if a line after a "Hinweise" line is a real row again.
 
@@ -376,7 +423,7 @@ class SynlabParser(BaseLabParser):
         """
         if _SKIP_RE.match(line):
             return True
-        row = _ROW_RE.match(line)
+        row = self._match_row(line)
         if row and not self._number_is_part_of_name(row, next_line):
             return self._row_is_a_result(row)
         pending = self._match_row_without_value(line)
@@ -392,14 +439,14 @@ class SynlabParser(BaseLabParser):
     @staticmethod
     def _row_is_a_result(row: re.Match) -> bool:
         """Tell a result row from a target value in hint text."""
-        code, value = row.group("code"), row.group("value")
+        code, value, desc = row.group("code"), row.group("value"), row.group("desc")
         if code in PANEL_CODES or value.lower() in QUALITATIVE:
             return True
-        if not row.group("unit") and not row.group("range"):
+        if ":" in desc or "ziel" in desc.lower() or not re.search(r"[^\W\d]", desc):
             return False
-        if code in CODE_TO_TEST:
-            return True
-        return ":" not in row.group("desc") and value[0] not in "<>"
+        if value[0] in "<>":
+            return bool(row.group("unit") and row.group("range"))
+        return bool(code in CODE_TO_TEST or row.group("unit") or row.group("range"))
 
     def _read_row(
         self, line: str, lines: List[str], i: int
@@ -410,7 +457,7 @@ class SynlabParser(BaseLabParser):
         that line uses both lines. The columns are None if this is not a result.
         """
         next_line = lines[i] if i < len(lines) else ""
-        match = _ROW_RE.match(line)
+        match = self._match_row(line)
         if match and not self._number_is_part_of_name(match, next_line):
             if match.group("code").upper() in PANEL_CODES:
                 return None, line, i
@@ -441,8 +488,8 @@ class SynlabParser(BaseLabParser):
         """Turn the matched columns of one row into a LabTestResult.
 
         Qualitative words become qualitative results, ``<``/``>`` values become
-        text results with their unit and range, and numbers keep their reported unit (spelling normalized,
-        counts per microliter scaled to K/uL).
+        text results with their unit and range, and numbers keep their reported
+        unit (spelling normalized, counts per microliter scaled to K/uL).
         """
         code = fields["code"].upper()
         desc = " ".join((fields.get("desc") or "").split())
@@ -500,20 +547,19 @@ class SynlabParser(BaseLabParser):
 
     def _test_name(self, code: str, desc: str, unit: str) -> str:
         """Canonical test name: Synlab code first, then the German description."""
+        specific = _first_match(SPECIFIC_TO_TEST, desc)
+        if specific:
+            return specific
+        if _OTHER_SPECIMEN_RE.search(desc):
+            return desc or code
         if code in CODE_TO_TEST:
             return CODE_TO_TEST[code]
-        for pattern, name in RATIO_TO_TEST:
-            if pattern.search(desc):
-                return name
-        if _OWN_TEST_RE.search(desc):
+        if _RELATED_TEST_RE.search(desc):
             return desc or code
-        for pattern, name in DIFFERENTIAL:
-            if pattern.search(desc):
-                return name if unit == "%" else f"{name} (Absolute)"
-        for pattern, name in DESCRIPTION_TO_TEST:
-            if pattern.search(desc):
-                return name
-        return desc or code
+        differential = _first_match(DIFFERENTIAL, desc)
+        if differential:
+            return differential if unit == "%" else f"{differential} (Absolute)"
+        return _first_match(DESCRIPTION_TO_TEST, desc) or desc or code
 
     def _collect_tiers(
         self, lines: List[str], i: int, first: str
@@ -546,15 +592,20 @@ class SynlabParser(BaseLabParser):
     def _number_is_part_of_name(row: re.Match, next_line: str) -> bool:
         """True if a row's "value" is really the end of its name ("Vitamin B 12").
 
-        The row then has nothing after that number, and the next line holds the
-        real value with its unit.
+        The row then has nothing after a whole number, and the next line holds
+        the real value with a unit.
         """
         if row.group("flag") or row.group("unit") or row.group("range"):
             return False
-        if not re.fullmatch(_NUM, row.group("value")):
+        if not row.group("value").isdigit():
             return False
         nxt = _VALUE_ONLY_RE.match(next_line)
-        return nxt is not None and nxt.group("unit") is not None
+        return bool(
+            nxt
+            and nxt.group("value")[0] not in "<>"
+            and nxt.group("unit")
+            and _looks_like_unit(nxt.group("unit"))
+        )
 
     @staticmethod
     def _match_row_without_value(line: str) -> Optional[re.Match]:
@@ -574,20 +625,20 @@ class SynlabParser(BaseLabParser):
         return (
             _TIER_RE.match(line) is not None
             and not _SKIP_RE.match(line)
-            and not _ROW_RE.match(line)
+            and not SynlabParser._match_row(line)
         )
 
     @staticmethod
     def _separate_label_from_unit(unit: str, range_text: str) -> Tuple[str, str]:
-        """Return the first word of a labelled range to the range, if it isn't a unit.
+        """Return a word to the range column if it was read as the unit.
 
         In "3.9 Risiko erhöht: > 5" there is no unit, but the pattern can't tell
         "Risiko erhöht:" from "mg/dl optimal:", so check what the word looks like.
+        The same goes for a qualitative range: "0.3 negativ".
         """
-        if not unit or ":" not in range_text:
-            return unit, range_text
-        key = unit.replace("μ", "µ").lower()
-        if any(c in key for c in "/%^") or key in _UNITS or key in _BARE_UNITS:
+        if unit.lower() in QUALITATIVE and not range_text:
+            return "", unit
+        if not unit or ":" not in range_text or _looks_like_unit(unit):
             return unit, range_text
         return "", f"{unit} {range_text}"
 
@@ -610,6 +661,8 @@ class SynlabParser(BaseLabParser):
         if not rng:
             return ""
         rng = rng.replace(",", ".").replace("–", "-")
+        if re.search(r"[^\W\d]", rng):  # Words: "3.5 bis 5.1", "0.27 - 4.2 (Erw.)"
+            return self._scale_tier(rng, factor)
         if factor == 1:
             return rng.replace(" ", "")
         m = re.match(r"^([<>]=?)\s*([\d.]+)$", rng)
@@ -617,7 +670,7 @@ class SynlabParser(BaseLabParser):
             return f"{m.group(1)}{self._fmt(float(m.group(2)) * factor)}"
         m = re.match(r"^(-?[\d.]+)\s*-\s*(-?[\d.]+)$", rng)
         if m is None:
-            return rng
+            return self._scale_tier(rng, factor)
         low, high = (float(x) * factor for x in m.groups())
         return f"{self._fmt(low)}-{self._fmt(high)}"
 
