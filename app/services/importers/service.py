@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from fastapi import Request
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
@@ -30,6 +31,8 @@ from app.schemas.health_record_import import (
 
 from . import provenance as prov
 from .mappers import MappedRecord, resource_mapper_registry
+from .mappers.base_mapper import MAPPING_ERRORS
+from .mappers._fhir import indexed
 from .patient_match import compare_patient
 
 logger = get_logger(__name__, "app")
@@ -37,6 +40,8 @@ logger = get_logger(__name__, "app")
 NEW = "new"
 DUPLICATE = "duplicate"
 CHANGED = "changed"
+
+MAX_WARNINGS = 50
 
 
 @dataclass
@@ -153,6 +158,12 @@ class HealthRecordImportService:
 
     def _build_plan(self, bundle: dict, patient: Patient, source: str) -> _Plan:
         """Map each resource and classify it against existing provenance."""
+        # The mappers share one index of the bundle, dropped when the plan is done
+        with indexed(bundle):
+            return self._plan_entries(bundle, patient, source)
+
+    def _plan_entries(self, bundle: dict, patient: Patient, source: str) -> _Plan:
+        """The plan body; run inside indexed(bundle)."""
         plan = _Plan()
         mapped_items: List[Tuple[MappedRecord, Any, str]] = []
         for index, entry in enumerate(bundle.get("entry", [])):
@@ -176,7 +187,7 @@ class HealthRecordImportService:
             label = f"{resource_type}/{resource.get('id', '?')}"
             try:
                 mapped = mapper.map(resource, bundle)
-            except (AttributeError, KeyError, IndexError, ValueError, TypeError) as exc:
+            except MAPPING_ERRORS as exc:
                 # Exception text can echo clinical values, so only its type is logged
                 logger.warning(
                     "Health record import could not map a resource",
@@ -191,6 +202,10 @@ class HealthRecordImportService:
                 continue
             if mapped is None:
                 continue
+            if not self._validate(mapped, mapper, patient):
+                plan.warnings.append(f"Skipped {label}: failed validation")
+                continue
+            plan.warnings.extend(f"{mapped.label}: {w}" for w in mapped.warnings)
             mapped_items.append((mapped, mapper, prov.content_hash(mapped.hash_parts)))
 
         self._load_existing(plan, patient, mapped_items, source)
@@ -198,7 +213,37 @@ class HealthRecordImportService:
             plan.rows.append(
                 self._classify(plan, mapped, source, mapper, incoming_hash)
             )
+        if len(plan.warnings) > MAX_WARNINGS:
+            hidden = len(plan.warnings) - MAX_WARNINGS
+            plan.warnings = plan.warnings[:MAX_WARNINGS]
+            plan.warnings.append(f"{hidden} more warnings not shown")
         return plan
+
+    def _validate(self, mapped: MappedRecord, mapper: Any, patient: Patient) -> bool:
+        """Run the mapped values through the record type's create schema."""
+        schema = getattr(mapper, "CREATE_SCHEMA", None)
+        if schema is None:
+            return True
+        try:
+            checked = schema.model_validate({**mapped.data, "patient_id": patient.id})
+        except ValidationError as exc:
+            # The error text echoes the rejected values, so only fields and types are logged
+            logger.warning(
+                "Health record import rejected a mapped resource",
+                extra={
+                    LogFields.EVENT: "health_import_resource_invalid",
+                    LogFields.PATIENT_ID: patient.id,
+                    LogFields.MODEL: mapped.record_type,
+                    LogFields.ERROR: ", ".join(
+                        f"{'.'.join(map(str, e['loc']))}:{e['type']}"
+                        for e in exc.errors()
+                    ),
+                },
+            )
+            return False
+        # Keep the schema's normalized values so the row matches what the API would write
+        mapped.data = {key: getattr(checked, key) for key in mapped.data}
+        return True
 
     def _load_existing(
         self,

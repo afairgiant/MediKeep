@@ -5400,6 +5400,24 @@ by registering importers and mappers.
 ```
 - **Notes**: The records, their provenance rows and one activity log entry (`imported` / `health_record_import`) are committed together, so a failure writes nothing. Duplicates are matched on the source record id first, then on a content hash; when one resource in the file matches a row by id and another by content, the id match wins regardless of order. A provenance row is only updated by a file from the same source. Two executes of the same file at once can collide on the unique key (patient, record type, source, external id); the second one gets `409`.
 
+#### Supported Resources
+
+| FHIR resource | Record type | Table |
+|---|---|---|
+| `Condition` | `condition` | `conditions` |
+| `AllergyIntolerance` | `allergy` | `allergies` |
+| `MedicationStatement`, `MedicationRequest` | `medication` | `medications` |
+
+Decisions where the source and the table do not line up:
+
+- Allergies without a reaction are stored with reaction `Not specified`, since the column is required. Severity comes from the first reaction, then from `criticality` (`high` is severe, `low` is mild), else `none`.
+- RxNorm codes are not stored; the medications table has no column for them. Statuses `cancelled` and `entered-in-error` are skipped, `not-taken` becomes `cancelled`, `intended` and `draft` become `active`.
+- Routes are mapped from SNOMED codes and common wordings onto the values `MedicationBase` accepts; a route with no match is left empty and kept in the notes as `Route: ...`, with a warning. A timing period under one day or hour is written as `N times per day`, rounded half up.
+- A `MedicationRequest` is skipped when the bundle also holds a `MedicationStatement` for the same drug (by RxNorm code, resolved through a referenced `Medication` when needed, else by name) with the same start date, or when either side has no start date, so one prescription does not become two rows.
+- Conditions with verification status `refuted` or `entered-in-error` are skipped; `provisional`, `differential` and `unconfirmed` stay active with a `Verification: ...` note. Status `remission` becomes `inactive`; an abatement date forces `resolved`. Values longer than a column allows are cut and reported in `warnings`.
+- Every mapped row is validated through the record type's create schema (`ConditionCreate`, `AllergyCreate`, `MedicationCreate`) before it is written; a row that fails is skipped with `Skipped <type>/<id>: failed validation`. Only the failing field names and error types are logged, never the values. Onset and end dates after today, which those schemas reject, are dropped by the mapper with a warning so the rest of the row still imports.
+- The content hash covers every column a re-import overwrites, so an edit to any of them marks the row as changed and, by default, leaves it alone. `notes`, `tags`, a condition's `condition_name` and a medication's `medication_type` are never overwritten: the source sets them only when the row is created.
+
 ## 13. Integrations
 
 ### 13.1 Paperless-ngx
