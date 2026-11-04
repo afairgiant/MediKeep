@@ -951,7 +951,11 @@ class TestExecute:
         }
         assert len(_conditions(db_session, patient.id)) == 2
 
-    @pytest.mark.parametrize("hash_match_first", [False, True])
+    @pytest.mark.parametrize(
+        "copy_first,copy_has_new_content",
+        [(False, False), (True, False), (True, True)],
+        ids=["id-match-first", "old-content-copy-first", "new-content-copy-first"],
+    )
     def test_provenance_row_is_claimed_once_per_import(
         self,
         client: TestClient,
@@ -959,7 +963,8 @@ class TestExecute:
         user_with_patient,
         authenticated_headers,
         condition_mapper,
-        hash_match_first,
+        copy_first,
+        copy_has_new_content,
     ):
         """Test that the resource matching a row by id updates it, whatever the file order."""
         patient_id = user_with_patient["patient"].id
@@ -970,8 +975,10 @@ class TestExecute:
         by_id = bundle["entry"][1]
         by_hash = json.loads(json.dumps(by_id))
         by_id["resource"]["code"]["text"] = "Hypertension, essential"
+        if copy_has_new_content:
+            by_hash["resource"]["code"]["text"] = "Hypertension, essential"
         by_hash["resource"]["id"] = "late-copy"
-        matches = [by_hash, by_id] if hash_match_first else [by_id, by_hash]
+        matches = [by_hash, by_id] if copy_first else [by_id, by_hash]
         bundle["entry"] = [bundle["entry"][0], *matches]
         data = json.dumps(bundle).encode()
 

@@ -64,6 +64,7 @@ class _Plan:
     seen_hashes: Set[Tuple[str, str]] = field(default_factory=set)
     seen_ids: Set[Tuple[str, str]] = field(default_factory=set)
     matched_by_id: Set[int] = field(default_factory=set)  # Provenance ids
+    id_matched_hashes: Set[Tuple[str, str]] = field(default_factory=set)
     by_key: Dict[Tuple[str, str, str], ImportProvenance] = field(default_factory=dict)
     by_hash: Dict[Tuple[str, str], ImportProvenance] = field(default_factory=dict)
     records: Dict[Tuple[str, int], Any] = field(default_factory=dict)
@@ -226,6 +227,7 @@ class HealthRecordImportService:
             if existing is not None:
                 if by_id:
                     plan.matched_by_id.add(existing.id)
+                    plan.id_matched_hashes.add((mapped.record_type, incoming_hash))
                 wanted.setdefault(mapped.record_type, set()).add(existing.record_id)
                 models[mapped.record_type] = mapper.MODEL
         for record_type, ids in wanted.items():
@@ -253,9 +255,13 @@ class HealthRecordImportService:
         incoming_hash: str,
     ):
         """Decide new, duplicate or changed for one mapped record."""
-        # A resource repeated within the upload is a duplicate of the first copy
         hash_key = (mapped.record_type, incoming_hash)
         id_key = (mapped.record_type, mapped.external_id or "")
+        existing, by_id = self._find_existing(plan, mapped, source, incoming_hash)
+        # A copy of a resource the file matches by id defers to it, even when it comes first
+        if not by_id and hash_key in plan.id_matched_hashes:
+            return _PlannedRow(mapped, mapper, incoming_hash, DUPLICATE)
+        # A resource repeated within the upload is a duplicate of the first copy
         if hash_key in plan.seen_hashes or (
             mapped.external_id and id_key in plan.seen_ids
         ):
@@ -264,7 +270,6 @@ class HealthRecordImportService:
         if mapped.external_id:
             plan.seen_ids.add(id_key)
 
-        existing, by_id = self._find_existing(plan, mapped, source, incoming_hash)
         if existing is None:
             return _PlannedRow(mapped, mapper, incoming_hash, NEW)
         # A row some resource in the file matches by id is that resource's, whatever the order
