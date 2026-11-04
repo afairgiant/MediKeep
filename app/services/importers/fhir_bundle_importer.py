@@ -4,6 +4,7 @@ import json
 import re
 
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 
 from .base_importer import BaseHealthRecordImporter, ImportFormatError
 
@@ -22,10 +23,16 @@ class FhirBundleImporter(BaseHealthRecordImporter):
     SOURCE = "fhir"
 
     def validate_format(self, data: bytes, filename: str) -> bool:
-        """Accept .json files whose first bytes declare a Bundle; parsing waits for to_bundle."""
+        """Accept .json files whose root is a Bundle, sniffing the first bytes before parsing."""
         if not filename.lower().endswith(".json"):
             return False
-        return _BUNDLE_HEADER.search(data[:SNIFF_BYTES]) is not None
+        if _BUNDLE_HEADER.search(data[:SNIFF_BYTES]):
+            return True
+        # Key order is not fixed: sorted-key writers put entry before resourceType
+        try:
+            return self._load(data).get("resourceType") == "Bundle"
+        except ImportFormatError:
+            return False
 
     def to_bundle(self, data: bytes, filename: str) -> dict:
         """Parse the JSON and check that it is a Bundle with an entry list."""
@@ -51,7 +58,13 @@ class FhirBundleImporter(BaseHealthRecordImporter):
         try:
             parsed = json.loads(data.decode("utf-8-sig"))
         except (UnicodeDecodeError, ValueError) as exc:
-            logger.warning("Health record import upload is not valid JSON: %s", exc)
+            logger.warning(
+                "Health record import upload is not valid JSON",
+                extra={
+                    LogFields.EVENT: "health_import_invalid_json",
+                    LogFields.ERROR: type(exc).__name__,
+                },
+            )
             raise ImportFormatError("File is not valid JSON") from exc
         except RecursionError as exc:
             raise ImportFormatError("JSON is nested too deeply") from exc

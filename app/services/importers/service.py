@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.utils.client_ip import get_client_ip
+from app.core.utils.client_ip import request_audit_fields
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, EntityType
 from app.models.import_provenance import ImportProvenance
@@ -63,7 +63,7 @@ class _Plan:
     warnings: List[str] = field(default_factory=list)
     seen_hashes: Set[Tuple[str, str]] = field(default_factory=set)
     seen_ids: Set[Tuple[str, str]] = field(default_factory=set)
-    claimed: Set[int] = field(default_factory=set)  # Provenance ids already matched
+    matched_by_id: Set[int] = field(default_factory=set)  # Provenance ids
     by_key: Dict[Tuple[str, str, str], ImportProvenance] = field(default_factory=dict)
     by_hash: Dict[Tuple[str, str], ImportProvenance] = field(default_factory=dict)
     records: Dict[Tuple[str, int], Any] = field(default_factory=dict)
@@ -153,7 +153,7 @@ class HealthRecordImportService:
     def _build_plan(self, bundle: dict, patient: Patient, source: str) -> _Plan:
         """Map each resource and classify it against existing provenance."""
         plan = _Plan()
-        mapped_items: List[Tuple[MappedRecord, Any]] = []
+        mapped_items: List[Tuple[MappedRecord, Any, str]] = []
         for index, entry in enumerate(bundle.get("entry", [])):
             resource = entry.get("resource") or {}
             resource_type = resource.get("resourceType")
@@ -176,33 +176,40 @@ class HealthRecordImportService:
             try:
                 mapped = mapper.map(resource, bundle)
             except (AttributeError, KeyError, IndexError, ValueError, TypeError) as exc:
-                # The detail stays in the server log; the client gets a fixed line
+                # Exception text can echo clinical values, so only its type is logged
                 logger.warning(
                     "Health record import could not map a resource",
-                    extra={LogFields.PATIENT_ID: patient.id, LogFields.ERROR: str(exc)},
+                    extra={
+                        LogFields.EVENT: "health_import_resource_unmapped",
+                        LogFields.PATIENT_ID: patient.id,
+                        LogFields.MODEL: resource_type,
+                        LogFields.ERROR: type(exc).__name__,
+                    },
                 )
                 plan.warnings.append(f"Skipped {label}: could not be mapped")
                 continue
             if mapped is None:
                 continue
-            mapped_items.append((mapped, mapper))
+            mapped_items.append((mapped, mapper, prov.content_hash(mapped.hash_parts)))
 
         self._load_existing(plan, patient, mapped_items, source)
-        for mapped, mapper in mapped_items:
-            plan.rows.append(self._classify(plan, mapped, source, mapper))
+        for mapped, mapper, incoming_hash in mapped_items:
+            plan.rows.append(
+                self._classify(plan, mapped, source, mapper, incoming_hash)
+            )
         return plan
 
     def _load_existing(
         self,
         plan: _Plan,
         patient: Patient,
-        mapped_items: List[Tuple[MappedRecord, Any]],
+        mapped_items: List[Tuple[MappedRecord, Any, str]],
         source: str,
     ) -> None:
         """Fetch the patient's provenance and the matched rows in a few queries."""
         if not mapped_items:
             return
-        record_types = {mapped.record_type for mapped, _ in mapped_items}
+        record_types = {mapped.record_type for mapped, _, _ in mapped_items}
         for existing in prov.list_for_patient(self.db, patient.id, record_types):
             if existing.external_id:
                 key = (existing.record_type, existing.source, existing.external_id)
@@ -214,9 +221,11 @@ class HealthRecordImportService:
         # One query per record type for the rows the provenance points at
         wanted: Dict[str, Set[int]] = {}
         models = {}
-        for mapped, mapper in mapped_items:
-            existing = self._find_existing(plan, mapped, source)
+        for mapped, mapper, incoming_hash in mapped_items:
+            existing, by_id = self._find_existing(plan, mapped, source, incoming_hash)
             if existing is not None:
+                if by_id:
+                    plan.matched_by_id.add(existing.id)
                 wanted.setdefault(mapped.record_type, set()).add(existing.record_id)
                 models[mapped.record_type] = mapper.MODEL
         for record_type, ids in wanted.items():
@@ -226,20 +235,24 @@ class HealthRecordImportService:
 
     @staticmethod
     def _find_existing(
-        plan: _Plan, mapped: MappedRecord, source: str
-    ) -> Optional[ImportProvenance]:
-        """Provenance for a mapped record: by source id first, then by content."""
+        plan: _Plan, mapped: MappedRecord, source: str, incoming_hash: str
+    ) -> Tuple[Optional[ImportProvenance], bool]:
+        """Provenance for a mapped record, and whether it matched on the source id."""
         if mapped.external_id:
             existing = plan.by_key.get((mapped.record_type, source, mapped.external_id))
             if existing is not None:
-                return existing
-        incoming_hash = prov.content_hash(mapped.hash_parts)
-        return plan.by_hash.get((mapped.record_type, incoming_hash))
+                return existing, True
+        return plan.by_hash.get((mapped.record_type, incoming_hash)), False
 
-    def _classify(self, plan: _Plan, mapped: MappedRecord, source: str, mapper):
+    def _classify(
+        self,
+        plan: _Plan,
+        mapped: MappedRecord,
+        source: str,
+        mapper,
+        incoming_hash: str,
+    ):
         """Decide new, duplicate or changed for one mapped record."""
-        incoming_hash = prov.content_hash(mapped.hash_parts)
-
         # A resource repeated within the upload is a duplicate of the first copy
         hash_key = (mapped.record_type, incoming_hash)
         id_key = (mapped.record_type, mapped.external_id or "")
@@ -251,14 +264,12 @@ class HealthRecordImportService:
         if mapped.external_id:
             plan.seen_ids.add(id_key)
 
-        existing = self._find_existing(plan, mapped, source)
+        existing, by_id = self._find_existing(plan, mapped, source, incoming_hash)
         if existing is None:
             return _PlannedRow(mapped, mapper, incoming_hash, NEW)
-        # Two resources can match one provenance row (one by id, one by content);
-        # only the first may update it
-        if existing.id in plan.claimed:
+        # A row some resource in the file matches by id is that resource's, whatever the order
+        if not by_id and existing.id in plan.matched_by_id:
             return _PlannedRow(mapped, mapper, incoming_hash, DUPLICATE)
-        plan.claimed.add(existing.id)
 
         row = plan.records.get((mapped.record_type, existing.record_id))
         if row is None:
@@ -358,6 +369,7 @@ class HealthRecordImportService:
         """Add one activity-log entry to the open transaction."""
         created = sum(c.created for c in response.counts.values())
         updated = sum(c.updated for c in response.counts.values())
+        ip_address, user_agent = request_audit_fields(request)
         activity_log.log_activity(
             self.db,
             action=ActionType.IMPORTED,
@@ -375,9 +387,7 @@ class HealthRecordImportService:
                 "counts": {k: v.model_dump() for k, v in response.counts.items()},
                 "unsupported": response.unsupported,
             },
-            ip_address=get_client_ip(request) if request is not None else None,
-            user_agent=(
-                request.headers.get("user-agent") if request is not None else None
-            ),
+            ip_address=ip_address,
+            user_agent=user_agent,
             commit=False,
         )

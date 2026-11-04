@@ -7,6 +7,7 @@ import json
 from datetime import date
 from pathlib import Path
 from typing import Optional
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,6 +15,7 @@ from sqlalchemy import event
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.logging.constants import LogFields
 from app.crud.patient import patient as patient_crud
 from app.models.activity_log import ActivityLog
 from app.models.models import Allergy, Condition, ImportProvenance, PatientShare
@@ -426,6 +428,23 @@ class TestExecute:
         assert len(logs) == 1
         assert logs[0].action == "imported"
         assert logs[0].event_metadata["import_batch_id"] == body["import_batch_id"]
+
+    def test_activity_log_sanitizes_user_agent(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the logged user agent goes through the log-input sanitizer."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(),
+            headers={**authenticated_headers, "User-Agent": 'evil"agent'},
+        )
+        assert response.status_code == 200, response.text
+        assert _import_logs(db_session, patient_id)[0].user_agent == "evil'agent"
 
     def test_creates_rows_and_provenance(
         self,
@@ -856,15 +875,21 @@ class TestExecute:
         authenticated_headers,
         condition_mapper,
     ):
-        """Test that a resource the mapper cannot handle gives a fixed warning line."""
+        """Test that a mapper failure gives a fixed warning line and logs only its type."""
         patient_id = user_with_patient["patient"].id
         bundle = json.loads(FIXTURE.read_text())
         del bundle["entry"][1]["resource"]["clinicalStatus"]
         data = json.dumps(bundle).encode()
 
-        response = client.post(
-            _preview_url(patient_id), files=_upload(data), headers=authenticated_headers
-        )
+        with patch("app.services.importers.service.logger") as logger:
+            response = client.post(
+                _preview_url(patient_id),
+                files=_upload(data),
+                headers=authenticated_headers,
+            )
+        extra = logger.warning.call_args.kwargs["extra"]
+        assert extra[LogFields.EVENT] == "health_import_resource_unmapped"
+        assert extra[LogFields.ERROR] == "KeyError"
         assert response.status_code == 200, response.text
         body = response.json()
         assert body["counts"]["condition"]["new"] == 1
@@ -926,6 +951,7 @@ class TestExecute:
         }
         assert len(_conditions(db_session, patient.id)) == 2
 
+    @pytest.mark.parametrize("hash_match_first", [False, True])
     def test_provenance_row_is_claimed_once_per_import(
         self,
         client: TestClient,
@@ -933,8 +959,9 @@ class TestExecute:
         user_with_patient,
         authenticated_headers,
         condition_mapper,
+        hash_match_first,
     ):
-        """Test that only the first of two resources matching one row may update it."""
+        """Test that the resource matching a row by id updates it, whatever the file order."""
         patient_id = user_with_patient["patient"].id
         client.post(
             _execute_url(patient_id), files=_upload(), headers=authenticated_headers
@@ -944,7 +971,8 @@ class TestExecute:
         by_hash = json.loads(json.dumps(by_id))
         by_id["resource"]["code"]["text"] = "Hypertension, essential"
         by_hash["resource"]["id"] = "late-copy"
-        bundle["entry"] = [bundle["entry"][0], by_id, by_hash]
+        matches = [by_hash, by_id] if hash_match_first else [by_id, by_hash]
+        bundle["entry"] = [bundle["entry"][0], *matches]
         data = json.dumps(bundle).encode()
 
         preview = client.post(
@@ -966,9 +994,9 @@ class TestExecute:
             "skipped_edited": 0,
         }
         db_session.expire_all()
-        updated = next(
-            p for p in _provenance(db_session, patient_id) if p.external_id == "cond-1"
-        )
+        provenance = _provenance(db_session, patient_id)
+        assert {p.external_id for p in provenance} == {"cond-1", "cond-2"}
+        updated = next(p for p in provenance if p.external_id == "cond-1")
         assert db_session.get(Condition, updated.record_id).diagnosis == (
             "Hypertension, essential"
         )
