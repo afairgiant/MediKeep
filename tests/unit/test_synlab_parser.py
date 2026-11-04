@@ -104,11 +104,11 @@ class TestSynlabReport:
         assert calcium.value == 2.32
         assert calcium.unit == "mmol/L"
 
-    def test_egfr_unit_left_for_library_default(self, parser):
-        """Egfr unit left for library default."""
+    def test_egfr_keeps_its_unit(self, parser):
+        """The cut-off eGFR unit is printed in full."""
         egfr = by_name(parser.parse(SYNLAB_REPORT_TEXT))["Estimated GFR"]
         assert egfr.value == 104
-        assert egfr.unit == ""
+        assert egfr.unit == "mL/min/1.73m2"
         assert egfr.reference_range == ">60"
 
     def test_below_limit_result_is_text(self, parser):

@@ -446,11 +446,6 @@ class SynlabParser(BaseLabParser):
         range_raw = fields.get("range") or ""
 
         test_name = self._test_name(code, desc, unit)
-        if test_name == "Estimated GFR":
-            # The Bulk Entry unit pattern stops at the "." in "mL/min/1.73m2"
-            # and then loses the range; leaving the unit empty lets it fill in
-            # the library default instead.
-            unit = ""
 
         flag = ""
         if fields.get("flag"):

@@ -100,8 +100,8 @@ function getValidatedDate(value: Date | null | unknown): Date | null {
  * - "BUN,18,mg/dL,7-20,Normal" → CSV_PATTERN
  */
 
-// Common unit pattern handles: standard units (mg/dL, g/dL, %), ratios (x10E3/uL), and special characters (μ)
-const UNIT_PATTERN = String.raw`[a-zA-Z0-9/%μ]+(?:/[a-zA-Z0-9]+)?|x10E\d+/[a-zA-Z]+`;
+// Common unit pattern handles: standard units (mg/dL, g/dL, %), ratios (x10E3/uL), decimals (mL/min/1.73m2), and special characters (μ)
+const UNIT_PATTERN = String.raw`[a-zA-Z0-9/%μ]+(?:\.\d+[a-zA-Z0-9²]*)?(?:/[a-zA-Z0-9]+)?|x10E\d+/[a-zA-Z]+`;
 
 // Pattern components for better readability
 const TEST_NAME = String.raw`(.+?)`;

@@ -351,6 +351,38 @@ describe('TestComponentBulkEntry Parser', () => {
   });
 });
 
+describe('UNIT_PATTERN: units with a decimal', () => {
+  it.each([
+    ['Estimated GFR: 99 mL/min/1.73m2 (>60)', 'mL/min/1.73m2'],
+    ['eGFR: 88 mL/min/1.73 (>59)', 'mL/min/1.73'],
+    ['eGFR: 88 mL/min/1.73m² (>59)', 'mL/min/1.73m²'],
+  ])('keeps the whole unit and the range of "%s"', (line, unit) => {
+    const match = line.match(REGEX_PATTERNS.FULL_PATTERN);
+    expect(match).not.toBeNull();
+    expect(match![3]).toBe(unit);
+    expect(match![6]).toMatch(/^>\d+$/);
+  });
+
+  it.each([
+    ['WBC: 7.5 x10E3/uL (4.0-11.0)', 'x10E3/uL'],
+    ['Glucose: 91 mg/dL (60-100)', 'mg/dL'],
+    ['Hematocrit: 42.8 % (39.5-50.5)', '%'],
+  ])('leaves the unit of "%s" as it was', (line, unit) => {
+    const match = line.match(REGEX_PATTERNS.FULL_PATTERN);
+    expect(match![3]).toBe(unit);
+    expect(match![4]).not.toBeUndefined();
+    expect(match![5]).not.toBeUndefined();
+  });
+
+  it('keeps the range of a tabular line with a decimal unit', () => {
+    const match = 'eGFR 88 mL/min/1.73m2 60-120'.match(
+      REGEX_PATTERNS.TABULAR_PATTERN
+    );
+    expect(match![3]).toBe('mL/min/1.73m2');
+    expect([match![4], match![5]]).toEqual(['60', '120']);
+  });
+});
+
 /**
  * Textual / semi-quantitative results (Epic MyChart urinalysis, GFR, etc.).
  * These are emitted by the backend Epic MyChart card parser as bare
