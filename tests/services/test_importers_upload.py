@@ -121,6 +121,8 @@ class TestContentHash:
         assert content_hash([120]) != content_hash([121])
         assert content_hash(["2019-03-02"]) != content_hash(["2019-03-03"])
         assert content_hash(["I10"]) == content_hash(["i10"])
+        assert content_hash(["007"]) != content_hash(["7"])
+        assert content_hash(["0.5"]) == content_hash([0.5])
 
     def test_extreme_numbers_hash_as_text(self):
         """Test that values past the decimal context fall back to text instead of raising."""
@@ -171,9 +173,22 @@ class TestFhirBundleImporter:
         )
         # Not JSON at all, but the header is there and parsing is to_bundle's job
         assert importer.validate_format(b'{"resourceType": "Bundle" garbage', "a.json")
-        late = b'{"id": "' + b"x" * 5000 + b'", "resourceType": "Bundle"}'
-        assert not importer.validate_format(late, "a.json")
         assert not importer.validate_format(b'{"resourceType": "Patient"}', "a.json")
+
+    def test_detection_parses_when_the_header_is_late(self):
+        """Test that a Bundle whose resourceType follows a large entry list is detected."""
+        importer = FhirBundleImporter()
+        entries = [{"resource": {"resourceType": "Condition", "id": "x" * 100}}] * 100
+        data = json.dumps(
+            {"resourceType": "Bundle", "entry": entries}, sort_keys=True
+        ).encode()
+        assert data.index(b'"resourceType": "Bundle"') > 4096
+        assert importer.validate_format(data, "a.json")
+        late_patient = json.dumps(
+            {"entry": entries, "resourceType": "Patient"}
+        ).encode()
+        assert not importer.validate_format(late_patient, "a.json")
+        assert not importer.validate_format(b"not json" + b" " * 5000, "a.json")
 
     def test_rejects_entries_that_are_not_objects(self):
         """Test that a non-object entry or resource names its index in the error."""

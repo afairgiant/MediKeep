@@ -35,6 +35,8 @@ def _normalize(part: object) -> str:
 def _looks_numeric(text: str) -> bool:
     """True for plain decimal strings like 7, -3.5 or 1e3; not for dates or codes."""
     stripped = text.lstrip("+-")
+    if len(stripped) > 1 and stripped[0] == "0" and stripped[1].isdigit():
+        return False  # Codes like 007 keep their zeros
     return (
         bool(stripped)
         and stripped[0].isdigit()

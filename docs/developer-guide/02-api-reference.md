@@ -5398,7 +5398,7 @@ by registering importers and mappers.
   "warnings": []
 }
 ```
-- **Notes**: The records, their provenance rows and one activity log entry (`imported` / `health_record_import`) are committed together, so a failure writes nothing. Duplicates are matched on the source record id first, then on a content hash; a provenance row is only updated by a file from the same source. Two executes of the same file at once can collide on the unique key (patient, record type, source, external id); the second one gets `409`.
+- **Notes**: The records, their provenance rows and one activity log entry (`imported` / `health_record_import`) are committed together, so a failure writes nothing. Duplicates are matched on the source record id first, then on a content hash; when one resource in the file matches a row by id and another by content, the id match wins regardless of order. A provenance row is only updated by a file from the same source. Two executes of the same file at once can collide on the unique key (patient, record type, source, external id); the second one gets `409`.
 
 ## 13. Integrations
 
