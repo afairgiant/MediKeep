@@ -400,3 +400,49 @@ class TestLookupCollisionWarning:
             "Test library collision detected at startup" in record.message
             for record in caplog.records
         )
+
+
+class TestHepatitisAndAutoimmuneGastritisAliases:
+    """Lock in which lab order names link to the HBsAg, APCA and IFAB entries."""
+
+    @pytest.mark.parametrize(
+        "lab_name, canonical",
+        [
+            ("HBsAg", "Hepatitis B Surface Antigen"),
+            ("HBs-Antigen", "Hepatitis B Surface Antigen"),
+            ("HBsAg Screen", "Hepatitis B Surface Antigen"),
+            ("Hepatitis B Surface Ag Screen", "Hepatitis B Surface Antigen"),
+            (
+                "Hepatitis B Surface Antigen w/Reflex Confirmation",
+                "Hepatitis B Surface Antigen",
+            ),
+            ("Parietal Cell Antibody, ELISA", "Parietal Cell Antibody"),
+            ("Parietal Cell Antibodies, IgG", "Parietal Cell Antibody"),
+            ("Antiparietal Cell Antibody", "Parietal Cell Antibody"),
+            ("Intrinsic Factor Ab", "Intrinsic Factor Antibody"),
+            ("Anti-Intrinsic Factor Antibody", "Intrinsic Factor Antibody"),
+        ],
+    )
+    def test_lab_names_resolve_to_their_entry(self, lab_name, canonical):
+        assert canonical_test_matching.find_canonical_match(lab_name) == canonical
+
+    def test_surface_antibody_stays_separate_from_antigen(self):
+        """Anti-HBs shows immunity and HBsAg shows infection: never the same trend."""
+        assert (
+            canonical_test_matching.find_canonical_match("Anti-HBs")
+            == "Hepatitis B Surface Antibody"
+        )
+
+    @pytest.mark.parametrize(
+        "lab_name",
+        [
+            # A separate qualitative test (LOINC 31444-3), not this U/mL entry.
+            "Intrinsic Factor Blocking Antibody",
+            "Intrinsic Factor Blocking Ab",
+            # Screen-plus-titer orders would put "1:40" on the U/mL trend.
+            "Parietal Cell Ab W/Refl Titer",
+            "Parietal Cell Antibody with Reflex to Titer",
+        ],
+    )
+    def test_different_assays_do_not_resolve(self, lab_name):
+        assert canonical_test_matching.find_canonical_match(lab_name) is None

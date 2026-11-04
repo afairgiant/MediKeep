@@ -2573,7 +2573,10 @@
         "HBs Antigen",
         "HBs-Antigen",
         "Hepatitis B Surface Ag",
-        "Hep B Surface Antigen"
+        "Hep B Surface Antigen",
+        "HBsAg Screen",
+        "Hepatitis B Surface Ag Screen",
+        "Hepatitis B Surface Antigen w/Reflex Confirmation"
       ],
       "is_common": true,
       "result_type": "qualitative",
@@ -2589,8 +2592,6 @@
         "Parietal Cell Ab",
         "Parietal Cell Antibodies",
         "Parietal Cell Antibody, ELISA",
-        "Parietal Cell Ab W/Refl Titer",
-        "Parietal Cell Antibody with Reflex to Titer",
         "Parietal Cell Antibodies, IgG",
         "Antiparietal Cell Antibody",
         "Anti-Parietal Cell Antibody"
