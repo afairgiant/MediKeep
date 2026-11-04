@@ -25,6 +25,7 @@ import re
 from typing import Dict, List, Optional, Tuple
 
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 
 from .base_parser import BaseLabParser, LabTestResult
 
@@ -348,8 +349,12 @@ class SynlabParser(BaseLabParser):
                 results.append(result)
 
         logger.info(
-            "Synlab parser finished",
-            extra={"component": "SynlabParser", "test_count": len(results)},
+            "synlab_parse_completed",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "synlab_parse_completed",
+                LogFields.COUNT: len(results),
+            },
         )
         return results
 
