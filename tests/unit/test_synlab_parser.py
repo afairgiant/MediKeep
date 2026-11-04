@@ -381,3 +381,42 @@ class TestSynlabRowsAndTiers:
         results = parser.parse("XQ Quotient 12\nNA Natrium 141 mmol/l 136 - 145")
         assert results[0].value == 12
         assert results[1].value == 141
+
+    @pytest.mark.parametrize(
+        "line, name, unit",
+        [
+            (
+                "KCL Kreatinin-Clearance 110 ml/min 80-140",
+                "Kreatinin-Clearance",
+                "mL/min",
+            ),
+            (
+                "ACR Albumin/Kreatinin-Quotient 12 mg/g <30",
+                "Albumin/Kreatinin-Quotient",
+                "mg/g",
+            ),
+        ],
+    )
+    def test_creatinine_derived_tests_keep_their_own_name(
+        self, parser, line, name, unit
+    ):
+        """Clearance and ratio tests stay off the creatinine trend."""
+        result = parser.parse(line)[0]
+        assert (result.test_name, result.unit) == (name, unit)
+
+    def test_plain_creatinine_still_maps(self, parser):
+        """An unknown code with a creatinine description still links."""
+        assert parser.parse("KREX Kreatinin 0.9 mg/dl 0.7-1.2")[0].test_name == (
+            "Creatinine"
+        )
+
+    @pytest.mark.parametrize(
+        "line, name",
+        [
+            ("XLH LDL/HDL - Index: 1.9 kA < 3", "LDL/HDL Ratio"),
+            ("XCH Chol./HDL-Quotient 3.9 kA <5", "Total Cholesterol/HDL Ratio"),
+        ],
+    )
+    def test_ratios_in_the_library_still_map(self, parser, line, name):
+        """Ratios with a library entry aren't caught by the quotient check."""
+        assert parser.parse(line)[0].test_name == name

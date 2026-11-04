@@ -112,6 +112,17 @@ CODE_TO_TEST: Dict[str, str] = {
     "AKIN": "Intrinsic Factor Antibody",
 }
 
+# Ratios that do have a library test, checked before _OWN_TEST_RE.
+RATIO_TO_TEST: List[Tuple[re.Pattern, str]] = [
+    (re.compile(r"LDL/HDL", re.IGNORECASE), "LDL/HDL Ratio"),
+    (re.compile(r"chol\.?/HDL", re.IGNORECASE), "Total Cholesterol/HDL Ratio"),
+]
+
+# Tests that name an analyte but measure something else, such as
+# Kreatinin-Clearance or Albumin/Kreatinin-Quotient. They keep their own name
+# rather than landing on the analyte's trend.
+_OWN_TEST_RE = re.compile(r"clearance|quotient", re.IGNORECASE)
+
 # German description -> canonical name, for codes not listed above.
 # Checked in order, so more specific patterns come first.
 DESCRIPTION_TO_TEST: List[Tuple[re.Pattern, str]] = [
@@ -130,8 +141,6 @@ DESCRIPTION_TO_TEST: List[Tuple[re.Pattern, str]] = [
         (r"g-?GT|gamma-?GT", "Gamma-glutamyl Transferase"),
         (r"hba1c", "Hemoglobin A1c"),
         (r"gluc?kose|glucose", "Glucose"),
-        (r"LDL/HDL", "LDL/HDL Ratio"),
-        (r"chol\.?/HDL", "Total Cholesterol/HDL Ratio"),
         (r"non-?HDL", "Non-HDL Cholesterol"),
         (r"\bHDL", "HDL Cholesterol"),
         (r"\bLDL", "LDL Cholesterol"),
@@ -259,6 +268,7 @@ _UNITS: Dict[str, Tuple[str, float]] = {
     "µiu/ml": ("mIU/L", 1),
     "ka": ("ratio", 1),
     "mm/h": ("mm/hr", 1),
+    "ml/min": ("mL/min", 1),
 }
 
 # Units without a "/" that may stand before a labelled range, besides _UNITS.
@@ -440,6 +450,11 @@ class SynlabParser(BaseLabParser):
         """Canonical test name: Synlab code first, then the German description."""
         if code in CODE_TO_TEST:
             return CODE_TO_TEST[code]
+        for pattern, name in RATIO_TO_TEST:
+            if pattern.search(desc):
+                return name
+        if _OWN_TEST_RE.search(desc):
+            return desc or code
         for pattern, name in DIFFERENTIAL:
             if pattern.search(desc):
                 return name if unit == "%" else f"{name} (Absolute)"
@@ -532,7 +547,7 @@ class SynlabParser(BaseLabParser):
         if unit == "G/l":  # Giga per liter (cell counts); "g/l" is grams
             return "K/uL", 1
         key = unit.replace("μ", "µ").lower()
-        if key.startswith("ml/min"):
+        if re.match(r"ml/min/1[.,]7", key):  # Printed cut off, e.g. "ml/min/1,7"
             return "mL/min/1.73m2", 1
         if key in _UNITS:
             return _UNITS[key]
