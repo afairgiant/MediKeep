@@ -710,3 +710,50 @@ class TestSynlabHintBlockEnds:
         """An unknown code keeps its result if the row has both."""
         result = parser.parse("Hinweise: x\nXYZ Foo <0.2 mg/dl <0.5")[0]
         assert result.qualitative_value == "<0.2"
+
+
+class TestSynlabScannedLayouts:
+    """Layouts from real reports, with made-up values."""
+
+    def test_tiers_with_text_after_the_range(self, parser):
+        """Tier lines can start with a range or end in text."""
+        results = parser.parse(
+            "VITDL 25-OH-Vitamin D 41.5 ng/ml Empfohlene Spiegel:\n"
+            "gesamt 20 - 70 bei Jüngeren\n"
+            "25 - 70 ab etwa 50 Jahre\n"
+            "> 30 optimaler Spiegel\n"
+            "< 10 schwerer Mangel\n"
+            "NA Natrium 141 mmol/l 136 - 145"
+        )
+        assert results[0].reference_range == (
+            "Empfohlene Spiegel:; gesamt 20 - 70 bei Jüngeren; "
+            "25 - 70 ab etwa 50 Jahre; > 30 optimaler Spiegel; < 10 schwerer Mangel"
+        )
+        assert results[1].test_name == "Sodium"
+
+    def test_unit_and_range_on_the_row_with_the_value_below(self, parser):
+        """The range bound on the row is not the result."""
+        results = parser.parse(
+            "CRP CRP quantitativ mg/dl < 0.5\n< 0.2\nNA Natrium 141 mmol/l 136 - 145"
+        )
+        assert results[0].qualitative_value == "<0.2"
+        assert (results[0].unit, results[0].reference_range) == ("mg/dL", "<0.5")
+        assert results[1].value == 141
+
+    def test_numeric_value_below_with_a_flag(self, parser):
+        """The next line can hold a flag and a number."""
+        result = parser.parse("FE Eisen mmol/l 12.5-32.2\n+ 40.1")[0]
+        assert (result.value, result.flag) == (40.1, "High")
+        assert (result.unit, result.reference_range) == ("mmol/L", "12.5-32.2")
+
+    def test_value_below_ends_a_hint_block(self, parser):
+        """This layout is a result row, even though its range is a comparison."""
+        results = parser.parse("Hinweise: x\nCRP CRP quantitativ mg/dl < 0.5\n< 0.2")
+        assert results[0].qualitative_value == "<0.2"
+
+    def test_row_with_a_comparison_range_keeps_its_own_value(self, parser):
+        """A normal row followed by another test is unchanged."""
+        results = parser.parse(
+            "CRP C-reak.Protein 0.3 mg/dl < 0.5\nNA Natrium 141 mmol/l 136 - 145"
+        )
+        assert results[0].value == 0.3

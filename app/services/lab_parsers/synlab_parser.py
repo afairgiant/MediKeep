@@ -236,6 +236,15 @@ _ROW_ANY_RANGE_RE = re.compile(
     rf"(?:(?P<flag>\+\+?|--?)\s+)?"
     rf"(?P<value>{_VALUE})\s+(?P<unit>{_UNIT})\s+(?P<range>\S.*)$"
 )
+# Unit and range on the row, and only the value on the next line:
+# "CRP CRP quantitativ mg/dl < 0.5" followed by "< 0.1".
+_ROW_VALUE_BELOW_RE = re.compile(
+    rf"^(?P<code>[A-Z][A-Z0-9]{{0,7}})\.?\s+(?P<desc>.*?)\s+"
+    rf"(?P<unit>[^\s\d<>+\-:]*/[^\s:]*)\s+(?P<range>{_RANGE})\s*$"
+)
+_VALUE_ALONE_RE = re.compile(
+    rf"^(?:(?P<flag>\+\+?|--?)\s+)?(?P<value>{_VALUE})\s*$", re.IGNORECASE
+)
 # A test whose value is printed on the following line ("HBS. HBs-Antigen").
 # The description may hold digits ("Vitamin B12") but no colon, which marks a
 # hint or a labelled range ("ESC 2019: LDL").
@@ -243,9 +252,9 @@ _ROW_NO_VALUE_RE = re.compile(r"^(?P<code>[A-Z][A-Z0-9]{0,7})\.?\s+(?P<desc>[^:]
 _VALUE_ONLY_RE = re.compile(
     rf"^(?:(?P<flag>\+\+?|--?)\s+)?(?P<value>{_VALUE})" + _TAIL, re.IGNORECASE
 )
-# A continuation of a tiered range: an optional label, then the range and
-# perhaps a unit ("fast optimal: 100 - 129", "> 20 ng/ml").
-_TIER_RE = re.compile(rf"^(?:[A-Za-zÄÖÜäöü][^:\d]*:?\s*)?{_RANGE}(?:\s+\S+)?$")
+# A continuation of a tiered range: an optional label, then the range and perhaps
+# more text ("fast optimal: 100 - 129", "gesamt 20 - 70 bei Jüngeren", "< 10 Mangel").
+_TIER_RE = re.compile(rf"^(?:[A-Za-zÄÖÜäöü][^:\d]*:?\s*)?{_RANGE}(?:\s+.*)?$")
 _HINT_RE = re.compile(r"^Hinweis", re.IGNORECASE)
 _DATE_RE = re.compile(r"Bericht(?:\s+\d+)?\s+vom\s+(\d{2})\.(\d{2})\.(\d{4})")
 _SKIP_RE = re.compile(
@@ -415,13 +424,20 @@ class SynlabParser(BaseLabParser):
             return any_range
         return row
 
+    @staticmethod
+    def _match_value_below(line: str, next_line: str) -> Optional[Dict]:
+        """Return the columns of a row whose next line holds only the value."""
+        row = _ROW_VALUE_BELOW_RE.match(line)
+        value = _VALUE_ALONE_RE.match(next_line)
+        return {**row.groupdict(), **value.groupdict()} if row and value else None
+
     def _ends_hint_block(self, line: str, next_line: str) -> bool:
         """True if a line after a "Hinweise" line is a real row again.
 
         Hint text can look like a row ("CV Risiko Zielwert < 116"), so a row only
         ends the block if it looks like a result rather than a target value.
         """
-        if _SKIP_RE.match(line):
+        if _SKIP_RE.match(line) or self._match_value_below(line, next_line):
             return True
         row = self._match_row(line)
         if row and not self._number_is_part_of_name(row, next_line):
@@ -457,6 +473,9 @@ class SynlabParser(BaseLabParser):
         that line uses both lines. The columns are None if this is not a result.
         """
         next_line = lines[i] if i < len(lines) else ""
+        value_below = self._match_value_below(line, next_line)
+        if value_below:
+            return value_below, (line, next_line), i + 1
         match = self._match_row(line)
         if match and not self._number_is_part_of_name(match, next_line):
             if match.group("code").upper() in PANEL_CODES:
