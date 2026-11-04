@@ -329,3 +329,15 @@ class TestSynlabRowsAndTiers:
     def test_real_unit_before_a_labelled_range_is_kept(self, parser, line, unit):
         """Real units stay units when a labelled range follows."""
         assert parser.parse(line)[0].unit == unit
+
+    def test_negative_value(self, parser):
+        """A negative result is a value, while "- 66" with a space is a flag."""
+        base_excess = parser.parse("BE Base excess -1.2 mmol/l -2.0 - 3.0")[0]
+        assert (base_excess.test_name, base_excess.value) == ("Base excess", -1.2)
+        assert base_excess.flag == ""
+        glucose = parser.parse("GLS Glucose - 66 mg/dl 70 - 100")[0]
+        assert (glucose.value, glucose.flag) == (66, "Low")
+
+    def test_scaling_a_range_with_a_negative_bound(self, parser):
+        """Scaling handles a negative bound instead of raising."""
+        assert parser._scale_range("-2000 - 3000", 0.001) == "-2-3"

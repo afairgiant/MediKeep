@@ -190,7 +190,7 @@ QUALITATIVE = {
 _NUM = r"\d+(?:[.,]\d+)?"
 # Qualitative words match in any case ("Negativ"); the code group in the row
 # pattern stays uppercase-only so prose lines are not taken for results.
-_VALUE = rf"(?:[<>]\s?{_NUM}|{_NUM}|(?i:nicht nachweisbar|nachweisbar|negativ|positiv))"
+_VALUE = rf"(?:[<>]\s?{_NUM}|-?{_NUM}|(?i:nicht nachweisbar|nachweisbar|negativ|positiv))"
 _RANGE = rf"(?:[<>]=?\s*{_NUM}|-?{_NUM}\s*[-–]\s*-?{_NUM})"
 # A unit never starts with a digit (except powers of ten such as "10^9/l")
 # and never contains a colon, which marks a labelled range.
@@ -526,8 +526,11 @@ class SynlabParser(BaseLabParser):
         m = re.match(r"^([<>]=?)\s*([\d.]+)$", rng)
         if m:
             return f"{m.group(1)}{self._fmt(float(m.group(2)) * factor)}"
-        low, high = (float(x) for x in rng.replace(" ", "").split("-"))
-        return f"{self._fmt(low * factor)}-{self._fmt(high * factor)}"
+        m = re.match(r"^(-?[\d.]+)\s*-\s*(-?[\d.]+)$", rng)
+        if m is None:
+            return rng
+        low, high = (float(x) * factor for x in m.groups())
+        return f"{self._fmt(low)}-{self._fmt(high)}"
 
     @staticmethod
     def _fmt(number: float) -> str:
