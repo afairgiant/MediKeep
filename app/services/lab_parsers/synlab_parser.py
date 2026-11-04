@@ -304,47 +304,21 @@ class SynlabParser(BaseLabParser):
             if not line or _SKIP_RE.match(line):
                 continue
 
-            match = _ROW_RE.match(line)
-            if match is None:
-                pending = self._match_row_without_value(line)
-                if pending and pending.group("code").upper() not in PANEL_CODES:
-                    nxt = _VALUE_ONLY_RE.match(lines[i]) if i < len(lines) else None
-                    if nxt:
-                        i += 1
-                        row_key = (line, lines[i - 1])
-                        if row_key in seen_rows:
-                            continue
-                        seen_rows[row_key] = None
-                        fields = {**pending.groupdict(), **nxt.groupdict()}
-                        fields["unit"], fields["range"] = self._separate_label_from_unit(
-                            fields.get("unit") or "", fields.get("range") or ""
-                        )
-                        result = self._build(fields, test_date)
-                        if result:
-                            results.append(result)
+            fields, row_key, i = self._read_row(line, lines, i)
+            if fields is None:
                 continue
-
-            if match.group("code").upper() in PANEL_CODES:
-                continue
-            fields = match.groupdict()
-            fields["unit"], fields["range"] = self._separate_label_from_unit(
-                fields.get("unit") or "", fields.get("range") or ""
-            )
-            # A labelled, tiered range continues on the following lines.
             # Collect the tiers before the duplicate check: when a page break
             # splits a tiered row, the repeated row is followed by the tiers
             # the first copy did not reach.
-            tiers: List[str] = []
-            if fields.get("range") and ":" in fields["range"]:
-                tiers, i = self._collect_tiers(lines, i, fields["range"])
-            if line in seen_rows:
-                self._merge_tiers(results, seen_rows[line], tiers)
+            tiers, i = self._read_tiers(fields, lines, i)
+            if row_key in seen_rows:
+                self._merge_tiers(results, seen_rows[row_key], tiers)
                 continue
             if tiers:
                 fields["tiers"] = "; ".join(tiers)
 
             result = self._build(fields, test_date)
-            seen_rows[line] = len(results) if result else None
+            seen_rows[row_key] = len(results) if result else None
             if result:
                 results.append(result)
 
@@ -363,6 +337,41 @@ class SynlabParser(BaseLabParser):
         return super().extract_date_from_text(text)
 
     # ------------------------------------------------------------------ helpers
+
+    def _read_row(
+        self, line: str, lines: List[str], i: int
+    ) -> Tuple[Optional[Dict], object, int]:
+        """Return the columns of the row at ``line``, its key and the next index.
+
+        ``lines[i]`` is the line after ``line``. A row whose value is printed on
+        that line uses both lines. The columns are None if this is not a result.
+        """
+        match = _ROW_RE.match(line)
+        if match:
+            if match.group("code").upper() in PANEL_CODES:
+                return None, line, i
+            return match.groupdict(), line, i
+
+        pending = self._match_row_without_value(line)
+        if not pending or pending.group("code").upper() in PANEL_CODES:
+            return None, line, i
+        nxt = _VALUE_ONLY_RE.match(lines[i]) if i < len(lines) else None
+        if not nxt:
+            return None, line, i
+        return {**pending.groupdict(), **nxt.groupdict()}, (line, lines[i]), i + 1
+
+    def _read_tiers(
+        self, fields: Dict, lines: List[str], i: int
+    ) -> Tuple[List[str], int]:
+        """Return the scaled tiers of a labelled range and the index after them."""
+        fields["unit"], fields["range"] = self._separate_label_from_unit(
+            fields.get("unit") or "", fields.get("range") or ""
+        )
+        if ":" not in fields["range"]:
+            return [], i
+        tiers, i = self._collect_tiers(lines, i, fields["range"])
+        _, factor = self._normalize_unit(fields["unit"])
+        return [self._scale_tier(tier, factor) for tier in tiers], i
 
     def _build(self, fields: Dict, test_date: Optional[str]) -> Optional[LabTestResult]:
         """Turn the matched columns of one row into a LabTestResult.
@@ -390,8 +399,6 @@ class SynlabParser(BaseLabParser):
 
         if fields.get("tiers"):
             reference_range = fields["tiers"]
-        elif ":" in range_raw:
-            reference_range = " ".join(range_raw.split())
         else:
             reference_range = self._scale_range(range_raw, factor)
 
@@ -531,6 +538,18 @@ class SynlabParser(BaseLabParser):
             return rng
         low, high = (float(x) * factor for x in m.groups())
         return f"{self._fmt(low)}-{self._fmt(high)}"
+
+    def _scale_tier(self, tier: str, factor: float) -> str:
+        """Scale the numbers after a tier's label ("normal: 3900 - 10200")."""
+        if factor == 1:
+            return tier
+        label, colon, numbers = tier.rpartition(":")
+        scaled = re.sub(
+            _NUM,
+            lambda m: self._fmt(float(m.group().replace(",", ".")) * factor),
+            numbers,
+        )
+        return f"{label}{colon}{scaled}"
 
     @staticmethod
     def _fmt(number: float) -> str:

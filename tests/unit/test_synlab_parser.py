@@ -341,3 +341,31 @@ class TestSynlabRowsAndTiers:
     def test_scaling_a_range_with_a_negative_bound(self, parser):
         """Scaling handles a negative bound instead of raising."""
         assert parser._scale_range("-2000 - 3000", 0.001) == "-2-3"
+
+    def test_next_line_rows_collect_all_tiers(self, parser):
+        """A next-line row reads its extra tiers like a same-line row."""
+        result = parser.parse(
+            "LDLD LDL-Chol. direkt\n"
+            "121 mg/dl optimal: < 100\n"
+            "fast optimal: 100 - 129\n"
+            "NA Natrium 141 mmol/l 136 - 145"
+        )
+        assert result[0].reference_range == "optimal: < 100; fast optimal: 100 - 129"
+        assert result[1].test_name == "Sodium"
+
+    def test_tiered_range_is_scaled_with_the_value(self, parser):
+        """A tier printed per microliter is scaled like the value."""
+        result = parser.parse("LEU Leukozyten 5120 n/µl normal: 3900 - 10200")[0]
+        assert (result.value, result.unit) == (5.12, "K/uL")
+        assert result.reference_range == "normal: 3.9 - 10.2"
+
+    def test_tiers_merged_after_a_page_break_are_scaled(self, parser):
+        """A tier from a repeated row uses the same scale as the first copy."""
+        results = parser.parse(
+            "LEU Leukozyten 5120 n/µl normal: 3900 - 10200\n"
+            "Seite 1\n"
+            "LEU Leukozyten 5120 n/µl normal: 3900 - 10200\n"
+            "hoch: > 10200"
+        )
+        assert len(results) == 1
+        assert results[0].reference_range == "normal: 3.9 - 10.2; hoch: > 10.2"
