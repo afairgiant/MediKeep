@@ -420,3 +420,34 @@ class TestSynlabRowsAndTiers:
     def test_ratios_in_the_library_still_map(self, parser, line, name):
         """Ratios with a library entry aren't caught by the quotient check."""
         assert parser.parse(line)[0].test_name == name
+
+    @pytest.mark.parametrize(
+        "line, name",
+        [
+            ("ULEU Leukozyten im Urin 12 /µl <25", "Leukozyten im Urin"),
+            ("UGLU Glucose i. U. 15 mg/dl <30", "Glucose i. U."),
+            ("UKRE Sammelurin-Kreatinin 1.2 g/l 0.5-2.0", "Sammelurin-Kreatinin"),
+            ("XBILI Bilirubin indirekt 0.4 mg/dl <0.8", "Bilirubin indirekt"),
+        ],
+    )
+    def test_other_tests_keep_their_own_name(self, parser, line, name):
+        """Urine tests and indirect bilirubin stay off the blood test trends."""
+        assert parser.parse(line)[0].test_name == name
+
+    def test_direct_bilirubin(self, parser):
+        """Direct bilirubin has its own library test."""
+        assert parser.parse("XBILD Bilirubin direkt 0.2 mg/dl <0.3")[0].test_name == (
+            "Direct Bilirubin"
+        )
+
+    @pytest.mark.parametrize(
+        "line, name",
+        [
+            ("XHS Harnsäure 5.1 mg/dl 3.4-7.0", "Uric Acid"),
+            ("XHST Harnstoff 29 mg/dl 19-44", "Urea"),
+            ("XBIL Bilirubin gesamt 0.6 mg/dl <1.2", "Total Bilirubin"),
+        ],
+    )
+    def test_similar_names_still_map(self, parser, line, name):
+        """Harn- names and total bilirubin aren't caught by the check."""
+        assert parser.parse(line)[0].test_name == name

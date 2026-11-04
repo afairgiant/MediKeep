@@ -119,9 +119,11 @@ RATIO_TO_TEST: List[Tuple[re.Pattern, str]] = [
 ]
 
 # Tests that name an analyte but measure something else, such as
-# Kreatinin-Clearance or Albumin/Kreatinin-Quotient. They keep their own name
-# rather than landing on the analyte's trend.
-_OWN_TEST_RE = re.compile(r"clearance|quotient", re.IGNORECASE)
+# Kreatinin-Clearance, Albumin/Kreatinin-Quotient or Leukozyten im Urin. They
+# keep their own name rather than landing on the blood analyte's trend.
+_OWN_TEST_RE = re.compile(
+    r"clearance|quotient|urin\b|\bim harn\b|\bi\.\s?U\b|\bindirekt", re.IGNORECASE
+)
 
 # German description -> canonical name, for codes not listed above.
 # Checked in order, so more specific patterns come first.
@@ -135,6 +137,7 @@ DESCRIPTION_TO_TEST: List[Tuple[re.Pattern, str]] = [
         (r"h[äa]matokrit", "Hematocrit"),
         (r"thrombozyten", "Platelet Count"),
         (r"alkalische phosphatase", "Alkaline Phosphatase"),
+        (r"bilirubin.*\bdirekt|\bdirekt.*bilirubin", "Direct Bilirubin"),
         (r"bilirubin", "Total Bilirubin"),
         (r"\bGOT\b|\bAST\b", "Aspartate Aminotransferase"),
         (r"\bGPT\b|\bALT\b", "Alanine Aminotransferase"),
