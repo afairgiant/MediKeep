@@ -24,6 +24,7 @@ microliter, which are scaled to K/uL.
 import re
 from typing import Dict, List, Optional, Tuple
 
+from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 
@@ -379,7 +380,7 @@ class SynlabParser(BaseLabParser):
                 self._merge_tiers(results, seen_rows[row_key], tiers)
                 continue
             if tiers:
-                fields["tiers"] = "; ".join(tiers)
+                fields["tiers"] = self._join_tiers(tiers)
 
             result = self._build(fields, test_date)
             seen_rows[row_key] = len(results) if result else None
@@ -591,6 +592,21 @@ class SynlabParser(BaseLabParser):
         return tiers, i
 
     @staticmethod
+    def _join_tiers(tiers: List[str]) -> str:
+        """Join tiers, leaving out those over the backend's reference range limit.
+
+        A range over the limit would get the whole Bulk Entry save rejected.
+        """
+        limit = LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+        joined = ""
+        for tier in tiers:
+            candidate = f"{joined}; {tier}" if joined else tier
+            if len(candidate) > limit:
+                break
+            joined = candidate
+        return joined
+
+    @staticmethod
     def _merge_tiers(
         results: List[LabTestResult], index: Optional[int], tiers: List[str]
     ) -> None:
@@ -605,7 +621,9 @@ class SynlabParser(BaseLabParser):
         if not result.reference_range:
             return
         known = result.reference_range.split("; ")
-        result.reference_range = "; ".join(known + [t for t in tiers if t not in known])
+        result.reference_range = SynlabParser._join_tiers(
+            known + [t for t in tiers if t not in known]
+        )
 
     @staticmethod
     def _number_is_part_of_name(row: re.Match, next_line: str) -> bool:

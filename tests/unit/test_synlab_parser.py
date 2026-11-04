@@ -2,6 +2,7 @@
 
 import pytest
 
+from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.services.lab_parsers import SynlabParser, lab_parser_registry
 from app.services.pdf_text_extraction_service import pdf_extraction_service
 from tests.fixtures.lab_text_samples import (
@@ -757,3 +758,22 @@ class TestSynlabScannedLayouts:
             "CRP C-reak.Protein 0.3 mg/dl < 0.5\nNA Natrium 141 mmol/l 136 - 145"
         )
         assert results[0].value == 0.3
+
+    def test_tiers_stay_within_the_backend_limit(self, parser):
+        """Too many tiers must not get the whole Bulk Entry save rejected."""
+        tiers = "\n".join(f"Stufe: {n} - {n + 1}" for n in range(100, 200))
+        result = parser.parse(f"HDL HDL-Chol. 64 mg/dl optimal: > 60\n{tiers}")[0]
+        limit = LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+        assert result.value == 64
+        assert 0 < len(result.reference_range) <= limit
+        assert result.reference_range.startswith("optimal: > 60; Stufe: 100 - 101")
+
+    def test_merged_tiers_stay_within_the_backend_limit(self, parser):
+        """The same applies to tiers merged after a page break."""
+        row = "HDL HDL-Chol. 64 mg/dl optimal: > 60"
+        first = "\n".join(f"Stufe: {n} - {n + 1}" for n in range(100, 125))
+        second = "\n".join(f"Stufe: {n} - {n + 1}" for n in range(200, 225))
+        results = parser.parse(f"{row}\n{first}\nSeite 1\n{row}\n{second}")
+        limit = LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+        assert len(results) == 1
+        assert len(results[0].reference_range) <= limit
