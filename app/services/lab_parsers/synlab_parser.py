@@ -231,6 +231,7 @@ _VALUE_ONLY_RE = re.compile(
 # A continuation of a tiered range: an optional label, then the range and
 # perhaps a unit ("fast optimal: 100 - 129", "> 20 ng/ml").
 _TIER_RE = re.compile(rf"^(?:[A-Za-zÄÖÜäöü][^:\d]*:?\s*)?{_RANGE}(?:\s+\S+)?$")
+_HINT_RE = re.compile(r"^Hinweis", re.IGNORECASE)
 _DATE_RE = re.compile(r"Bericht(?:\s+\d+)?\s+vom\s+(\d{2})\.(\d{2})\.(\d{4})")
 _SKIP_RE = re.compile(
     r"^(Seite \d|Laborwerte von|Labor-Bericht|LG-Bericht|Synlab$|Test\s+Beschreibung|"
@@ -310,11 +311,22 @@ class SynlabParser(BaseLabParser):
         # Maps each source row to the index of its result (None if no result).
         seen_rows: Dict[object, Optional[int]] = {}
 
+        in_hint_block = False
         i = 0
         while i < len(lines):
             line = lines[i]
             i += 1
-            if not line or _SKIP_RE.match(line):
+            if not line:
+                continue
+            if _HINT_RE.match(line):
+                in_hint_block = True
+                continue
+            if in_hint_block:
+                next_line = lines[i] if i < len(lines) else ""
+                if not self._ends_hint_block(line, next_line):
+                    continue
+                in_hint_block = False
+            if _SKIP_RE.match(line):
                 continue
 
             fields, row_key, i = self._read_row(line, lines, i)
@@ -350,6 +362,39 @@ class SynlabParser(BaseLabParser):
         return super().extract_date_from_text(text)
 
     # ------------------------------------------------------------------ helpers
+
+    def _ends_hint_block(self, line: str, next_line: str) -> bool:
+        """True if a line after a "Hinweise" line is a real row again.
+
+        Hint text can look like a row ("CV Risiko Zielwert < 116"), so a row only
+        ends the block if it looks like a result rather than a target value.
+        """
+        if _SKIP_RE.match(line):
+            return True
+        row = _ROW_RE.match(line)
+        if row and not self._number_is_part_of_name(row, next_line):
+            return self._row_is_a_result(row)
+        pending = self._match_row_without_value(line)
+        if not pending:
+            return False
+        if pending.group("code") in PANEL_CODES:
+            return True
+        nxt = _VALUE_ONLY_RE.match(next_line)
+        return nxt is not None and bool(
+            nxt.group("unit") or nxt.group("value").lower() in QUALITATIVE
+        )
+
+    @staticmethod
+    def _row_is_a_result(row: re.Match) -> bool:
+        """Tell a result row from a target value in hint text."""
+        code, value = row.group("code"), row.group("value")
+        if code in PANEL_CODES or value.lower() in QUALITATIVE:
+            return True
+        if not row.group("unit") and not row.group("range"):
+            return False
+        if code in CODE_TO_TEST:
+            return True
+        return ":" not in row.group("desc") and value[0] not in "<>"
 
     def _read_row(
         self, line: str, lines: List[str], i: int

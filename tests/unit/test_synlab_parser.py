@@ -451,3 +451,52 @@ class TestSynlabRowsAndTiers:
     def test_similar_names_still_map(self, parser, line, name):
         """Harn- names and total bilirubin aren't caught by the check."""
         assert parser.parse(line)[0].test_name == name
+
+
+class TestSynlabHintBlocks:
+    def test_all_lines_of_a_hint_block_are_skipped(self, parser):
+        """Target values in a hint block don't become results."""
+        assert (
+            parser.parse(
+                "Hinweise: Zielwerte\nESC 2019: LDL < 55\nCV Risiko Zielwert < 116"
+            )
+            == []
+        )
+
+    @pytest.mark.parametrize(
+        "line, name",
+        [
+            ("NHDL Non-HDL-Cholesterin + 173 mg/dl <145", "Non-HDL Cholesterol"),
+            ("CRP C-reak.Protein <0.15 mg/dl <0.50", "C-Reactive Protein"),
+            ("HEPC Anti-HCV negativ", "Hepatitis C Antibody"),
+            ("XQ Unbekannter Test 12 mg/dl 5-20", "Unbekannter Test"),
+        ],
+    )
+    def test_next_result_row_ends_the_block(self, parser, line, name):
+        """Parsing resumes at the first row that looks like a result."""
+        results = parser.parse(f"Hinweise: Zielwerte\nCV Risiko Zielwert < 116\n{line}")
+        assert [r.test_name for r in results] == [name]
+
+    def test_next_line_row_ends_the_block(self, parser):
+        """A row with its value on the next line also ends the block."""
+        results = parser.parse(
+            "Hinweise: Zielwerte\nserum ratsam.\nVITB12 Vitamin B 12\n412 pg/ml 211-911"
+        )
+        assert [(r.test_name, r.value) for r in results] == [("Vitamin B12", 412)]
+
+    def test_panel_header_ends_the_block(self, parser):
+        """A panel header ends the block and yields no result itself."""
+        results = parser.parse(
+            "Hinweise: Zielwerte\nKBBX Kleines Blutbild\nHB Hämoglobin 14.2 g/dl 13.5-17.2"
+        )
+        assert [r.test_name for r in results] == ["Hemoglobin"]
+
+    def test_page_header_ends_the_block(self, parser):
+        """The next page starts fresh, even with a unit-less first row."""
+        results = parser.parse(
+            "Hinweise: Zielwerte\n"
+            "Seite 1\n"
+            "Laborwerte von Dr. Muster\n"
+            "XQ Quotient 12"
+        )
+        assert [r.value for r in results] == [12]
