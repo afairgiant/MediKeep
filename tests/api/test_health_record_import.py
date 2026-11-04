@@ -1009,6 +1009,61 @@ class TestExecute:
         )
         assert len(_conditions(db_session, patient_id)) == 2
 
+    @pytest.mark.parametrize(
+        "entries,expected",
+        [
+            # A deferred copy still marks its id seen, so its repeat is a duplicate
+            (
+                [
+                    ("late-copy", "Hypertension, essential"),
+                    ("cond-1", "Hypertension, essential"),
+                    ("late-copy", "Something else"),
+                ],
+                {"new": 0, "duplicate": 2, "changed": 1, "edited": 0},
+            ),
+            # A repeated id reserves no hash, so a distinct resource with its content is new
+            (
+                [
+                    ("cond-1", "Hypertension, essential"),
+                    ("cond-1", "Something else"),
+                    ("other", "Something else"),
+                ],
+                {"new": 1, "duplicate": 1, "changed": 1, "edited": 0},
+            ),
+        ],
+        ids=["deferred-copy-id-repeats", "repeated-id-reserves-nothing"],
+    )
+    def test_repeated_ids_around_an_id_match(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        condition_mapper,
+        entries,
+        expected,
+    ):
+        """Test in-file id repeats next to a resource that matches a row by id."""
+        patient_id = user_with_patient["patient"].id
+        client.post(
+            _execute_url(patient_id), files=_upload(), headers=authenticated_headers
+        )
+        bundle = json.loads(FIXTURE.read_text())
+        template = bundle["entry"][1]
+        resources = []
+        for resource_id, text in entries:
+            entry = json.loads(json.dumps(template))
+            entry["resource"]["id"] = resource_id
+            entry["resource"]["code"]["text"] = text
+            resources.append(entry)
+        bundle["entry"] = [bundle["entry"][0], *resources]
+
+        preview = client.post(
+            _preview_url(patient_id),
+            files=_upload(json.dumps(bundle).encode()),
+            headers=authenticated_headers,
+        ).json()
+        assert preview["counts"]["condition"] == expected
+
     def test_external_id_is_unique_per_patient_type_and_source(
         self, db_session: Session, user_with_patient
     ):

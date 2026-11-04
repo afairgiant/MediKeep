@@ -222,10 +222,14 @@ class HealthRecordImportService:
         # One query per record type for the rows the provenance points at
         wanted: Dict[str, Set[int]] = {}
         models = {}
+        reserved_ids: Set[Tuple[str, str]] = set()
         for mapped, mapper, incoming_hash in mapped_items:
             existing, by_id = self._find_existing(plan, mapped, source, incoming_hash)
             if existing is not None:
-                if by_id:
+                id_key = (mapped.record_type, mapped.external_id)
+                # A repeat of an id is classified as a duplicate, so only the first reserves
+                if by_id and id_key not in reserved_ids:
+                    reserved_ids.add(id_key)
                     plan.matched_by_id.add(existing.id)
                     plan.id_matched_hashes.add((mapped.record_type, incoming_hash))
                 wanted.setdefault(mapped.record_type, set()).add(existing.record_id)
@@ -260,6 +264,8 @@ class HealthRecordImportService:
         existing, by_id = self._find_existing(plan, mapped, source, incoming_hash)
         # A copy of a resource the file matches by id defers to it, even when it comes first
         if not by_id and hash_key in plan.id_matched_hashes:
+            if mapped.external_id:
+                plan.seen_ids.add(id_key)
             return _PlannedRow(mapped, mapper, incoming_hash, DUPLICATE)
         # A resource repeated within the upload is a duplicate of the first copy
         if hash_key in plan.seen_hashes or (
