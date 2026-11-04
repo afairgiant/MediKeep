@@ -202,7 +202,9 @@ QUALITATIVE = {
 _NUM = r"\d+(?:[.,]\d+)?"
 # Qualitative words match in any case ("Negativ"); the code group in the row
 # pattern stays uppercase-only so prose lines are not taken for results.
-_VALUE = rf"(?:[<>]\s?{_NUM}|-?{_NUM}|(?i:nicht nachweisbar|nachweisbar|negativ|positiv))"
+_VALUE = (
+    rf"(?:[<>]\s?{_NUM}|-?{_NUM}|(?i:nicht nachweisbar|nachweisbar|negativ|positiv))"
+)
 _RANGE = rf"(?:[<>]=?\s*{_NUM}|-?{_NUM}\s*[-–]\s*-?{_NUM})"
 # A unit never starts with a digit (except powers of ten such as "10^9/l")
 # and never contains a colon, which marks a labelled range.
@@ -222,9 +224,7 @@ _ROW_RE = re.compile(
 # A test whose value is printed on the following line ("HBS. HBs-Antigen").
 # The description may hold digits ("Vitamin B12") but no colon, which marks a
 # hint or a labelled range ("ESC 2019: LDL").
-_ROW_NO_VALUE_RE = re.compile(
-    r"^(?P<code>[A-Z][A-Z0-9]{0,7})\.?\s+(?P<desc>[^:]+)$"
-)
+_ROW_NO_VALUE_RE = re.compile(r"^(?P<code>[A-Z][A-Z0-9]{0,7})\.?\s+(?P<desc>[^:]+)$")
 _VALUE_ONLY_RE = re.compile(
     rf"^(?:(?P<flag>\+\+?|--?)\s+)?(?P<value>{_VALUE})" + _TAIL, re.IGNORECASE
 )
@@ -436,7 +436,7 @@ class SynlabParser(BaseLabParser):
         """Turn the matched columns of one row into a LabTestResult.
 
         Qualitative words become qualitative results, ``<``/``>`` values become
-        text results, and numbers keep their reported unit (spelling normalized,
+        text results with their unit and range, and numbers keep their reported unit (spelling normalized,
         counts per microliter scaled to K/uL).
         """
         code = fields["code"].upper()
@@ -466,7 +466,8 @@ class SynlabParser(BaseLabParser):
                 test_date=test_date,
             )
         if raw_value[0] in "<>":
-            # Below/above the measuring range: kept as a text result.
+            # Below/above the measuring range: a text result, as the exact value
+            # isn't known, that still needs its unit, range and flag.
             digits = raw_value[1:].strip().replace(",", ".")
             if factor != 1:
                 digits = self._fmt(float(digits) * factor)
@@ -474,6 +475,9 @@ class SynlabParser(BaseLabParser):
                 test_name=test_name,
                 value=None,
                 qualitative_value=f"{raw_value[0]}{digits}",
+                unit=unit,
+                reference_range=reference_range,
+                flag=flag,
                 confidence=0.95,
                 test_date=test_date,
             )
@@ -522,15 +526,15 @@ class SynlabParser(BaseLabParser):
     ) -> None:
         """Add tiers from a repeated row to the earlier result of that row.
 
-        Only numeric results carry a reference range; qualitative and
-        ``<``/``>`` text results have none, so nothing is merged into them.
+        Qualitative results have no reference range, so nothing is merged into
+        them.
         """
         if index is None or not tiers:
             return
         result = results[index]
-        if result.value is None:
+        if not result.reference_range:
             return
-        known = result.reference_range.split("; ") if result.reference_range else []
+        known = result.reference_range.split("; ")
         result.reference_range = "; ".join(known + [t for t in tiers if t not in known])
 
     @staticmethod

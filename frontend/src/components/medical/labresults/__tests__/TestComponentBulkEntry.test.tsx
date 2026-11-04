@@ -13,6 +13,7 @@ import {
   REGEX_PATTERNS,
   QUALITATIVE_PATTERN,
   TEXTUAL_PATTERN,
+  textualFieldsFromMatch,
 } from '../TestComponentBulkEntry';
 
 /**
@@ -404,6 +405,44 @@ describe('TEXTUAL_PATTERN: semi-quantitative results', () => {
     expect(match).not.toBeNull();
     expect(match![1].trim()).toBe(expectedName);
     expect(match![2].trim()).toBe(expectedValue);
+  });
+
+  it.each([
+    [
+      'C-Reactive Protein: >60 mg/L (<5) [High]',
+      'C-Reactive Protein',
+      { textual_value: '>60 mg/L (<5)', status: 'high' },
+    ],
+    [
+      'C-Reactive Protein: <0.15 mg/dL (<0.50)',
+      'C-Reactive Protein',
+      { textual_value: '<0.15 mg/dL (<0.50)' },
+    ],
+    [
+      'Estimated GFR: >90 mL/min/1.73m2 (>60)',
+      'Estimated GFR',
+      { textual_value: '>90 mL/min/1.73m2 (>60)' },
+    ],
+    [
+      'GFR Calculation: >60 mL/min (>=60)',
+      'GFR Calculation',
+      { textual_value: '>60 mL/min (>=60)' },
+    ],
+    [
+      'HDL Cholesterol: >90 mg/dL (progn.günstig: > 60; Risiko erhöht: < 40)',
+      'HDL Cholesterol',
+      {
+        textual_value:
+          '>90 mg/dL (progn.günstig: > 60; Risiko erhöht: < 40)',
+      },
+    ],
+    ['GFR Calculation: >60', 'GFR Calculation', { textual_value: '>60' }],
+    ['Glucose, UA: 3+', 'Glucose, UA', { textual_value: '3+' }],
+  ])('keeps the unit, range and flag of "%s"', (line, name, fields) => {
+    const match = line.match(TEXTUAL_PATTERN);
+    expect(match).not.toBeNull();
+    expect(match![1].trim()).toBe(name);
+    expect(textualFieldsFromMatch(match!)).toEqual(fields);
   });
 
   it('does not match numeric results with unit and range', () => {

@@ -3,6 +3,7 @@
 import pytest
 
 from app.services.lab_parsers import SynlabParser, lab_parser_registry
+from app.services.pdf_text_extraction_service import pdf_extraction_service
 from tests.fixtures.lab_text_samples import (
     EMPTY_PDF_TEXT,
     LABCORP_CLEAN_TEXT,
@@ -500,3 +501,78 @@ class TestSynlabHintBlocks:
             "XQ Quotient 12"
         )
         assert [r.value for r in results] == [12]
+
+
+class TestSynlabComparisonResults:
+    def test_keeps_unit_flag_and_range(self, parser):
+        """A <, > result keeps what is needed to read it: mg/l vs mg/dl is 10x."""
+        result = parser.parse("CRP CRP + >60 mg/l <5")[0]
+        assert result.value is None
+        assert result.qualitative_value == ">60"
+        assert (result.unit, result.flag, result.reference_range) == (
+            "mg/L",
+            "High",
+            "<5",
+        )
+
+    def test_next_line_value_keeps_unit_and_range(self, parser):
+        """The same applies when the value is on the next line."""
+        result = parser.parse("CRP CRP quantitativ\n< 0.3 mg/dl < 0.5")[0]
+        assert result.qualitative_value == "<0.3"
+        assert (result.unit, result.reference_range) == ("mg/dL", "<0.5")
+
+    def test_keeps_tiers_also_after_a_page_break(self, parser):
+        """Tiers are collected and merged as for numeric results."""
+        results = parser.parse(
+            "HDL HDL-Chol. >90 mg/dl progn.günstig: > 60\n"
+            "Seite 1\n"
+            "HDL HDL-Chol. >90 mg/dl progn.günstig: > 60\n"
+            "Risiko erhöht: < 40"
+        )
+        assert len(results) == 1
+        assert results[0].reference_range == (
+            "progn.günstig: > 60; Risiko erhöht: < 40"
+        )
+
+    def test_counts_are_scaled(self, parser):
+        """Value and range use the same scale, as for numeric results."""
+        result = parser.parse("LEU Leukozyten <2000 n/µl 3900 - 10200")[0]
+        assert result.qualitative_value == "<2"
+        assert (result.unit, result.reference_range) == ("K/uL", "3.9-10.2")
+
+
+class TestSynlabFormattedText:
+    """The text the extraction service hands to Bulk Entry."""
+
+    @staticmethod
+    def formatted_lines(text):
+        result = pdf_extraction_service._try_lab_specific_parsing(
+            text, extraction_method="native"
+        )
+        return result["text"].split("\n")
+
+    def test_comparison_result_line(self):
+        """Comparison results use the normal line format."""
+        assert "C-Reactive Protein: <0.15 mg/dL (<0.50)" in self.formatted_lines(
+            SYNLAB_REPORT_TEXT
+        )
+
+    def test_flagged_comparison_result_line(self):
+        """A flag follows the range, as on numeric lines."""
+        text = SYNLAB_REPORT_TEXT.replace(
+            "CRP C-reak.Protein <0.15 mg/dl <0.50",
+            "CRP C-reak.Protein + >60 mg/l <5",
+        )
+        assert "C-Reactive Protein: >60 mg/L (<5) [High]" in self.formatted_lines(text)
+
+    def test_qualitative_result_line_stays_bare(self):
+        """A qualitative result stays bare for the Bulk Entry qualitative matcher."""
+        assert "Hepatitis C Antibody: Not Detected" in self.formatted_lines(
+            SYNLAB_REPORT_2023_TEXT
+        )
+
+    def test_egfr_line_keeps_unit_and_range(self):
+        """The eGFR line has the unit and the range."""
+        assert "Estimated GFR: 104.0 mL/min/1.73m2 (>60)" in self.formatted_lines(
+            SYNLAB_REPORT_TEXT
+        )

@@ -29,6 +29,7 @@ Synlab reports are in German. MediKeep maps each result to its English standardi
 - **German decimal commas** (*2,11*) are read correctly.
 - **Flags:** *+* is imported as High and *-* as Low.
 - **Tiered targets** (for example LDL "optimal: < 100; fast optimal: 100 - 129") are kept as reference-range text.
+- **Results below or above the measuring range** (for example CRP "<0.15 mg/dl") are imported as text results with their unit and range. They don't appear on trend charts, because the exact value isn't known.
 
 ### Result types
 
