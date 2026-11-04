@@ -302,3 +302,30 @@ class TestSynlabRowsAndTiers:
     def test_prose_is_not_read_as_a_one_letter_code(self, parser):
         """An unknown one-letter first word followed by a number is not a result."""
         assert parser.parse("A Bericht folgt\n12 Tage") == []
+
+    def test_negative_lower_bound(self, parser):
+        """A negative lower bound stays in the range column."""
+        result = parser.parse("BE Base excess 1.2 mmol/l -2.0 - 3.0")[0]
+        assert result.test_name == "Base excess"
+        assert (result.value, result.unit) == (1.2, "mmol/L")
+        assert result.reference_range == "-2.0-3.0"
+        assert result.flag == ""
+
+    def test_range_label_is_not_read_as_a_unit(self, parser):
+        """A row without a unit keeps its whole labelled range."""
+        result = parser.parse("CHQ Quotient 3.9 Risiko erhöht: > 5")[0]
+        assert result.value == 3.9
+        assert result.unit == ""
+        assert result.reference_range == "Risiko erhöht: > 5"
+
+    @pytest.mark.parametrize(
+        "line, unit",
+        [
+            ("HDL HDL-Chol. 64 mg/dl optimal: > 60", "mg/dL"),
+            ("MCH MCH 30.2 pg normal: 27 - 33", "pg"),
+            ("CHQ Quotient 3.9 kA optimal: < 5", "ratio"),
+        ],
+    )
+    def test_real_unit_before_a_labelled_range_is_kept(self, parser, line, unit):
+        """Real units stay units when a labelled range follows."""
+        assert parser.parse(line)[0].unit == unit

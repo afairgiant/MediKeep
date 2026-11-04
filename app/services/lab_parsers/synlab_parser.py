@@ -191,7 +191,7 @@ _NUM = r"\d+(?:[.,]\d+)?"
 # Qualitative words match in any case ("Negativ"); the code group in the row
 # pattern stays uppercase-only so prose lines are not taken for results.
 _VALUE = rf"(?:[<>]\s?{_NUM}|{_NUM}|(?i:nicht nachweisbar|nachweisbar|negativ|positiv))"
-_RANGE = rf"(?:[<>]=?\s*{_NUM}|{_NUM}\s*[-–]\s*{_NUM})"
+_RANGE = rf"(?:[<>]=?\s*{_NUM}|-?{_NUM}\s*[-–]\s*-?{_NUM})"
 # A unit never starts with a digit (except powers of ten such as "10^9/l")
 # and never contains a colon, which marks a labelled range.
 _UNIT = r"(?:10\^\d+/\S+|[^\s\d<>+\-:][^\s:]*)"
@@ -261,6 +261,9 @@ _UNITS: Dict[str, Tuple[str, float]] = {
     "mm/h": ("mm/hr", 1),
 }
 
+# Units without a "/" that may stand before a labelled range, besides _UNITS.
+_BARE_UNITS = {"pg"}
+
 
 class SynlabParser(BaseLabParser):
     """Parser for Synlab (Germany) lab reports."""
@@ -313,6 +316,9 @@ class SynlabParser(BaseLabParser):
                             continue
                         seen_rows[row_key] = None
                         fields = {**pending.groupdict(), **nxt.groupdict()}
+                        fields["unit"], fields["range"] = self._separate_label_from_unit(
+                            fields.get("unit") or "", fields.get("range") or ""
+                        )
                         result = self._build(fields, test_date)
                         if result:
                             results.append(result)
@@ -321,6 +327,9 @@ class SynlabParser(BaseLabParser):
             if match.group("code").upper() in PANEL_CODES:
                 continue
             fields = match.groupdict()
+            fields["unit"], fields["range"] = self._separate_label_from_unit(
+                fields.get("unit") or "", fields.get("range") or ""
+            )
             # A labelled, tiered range continues on the following lines.
             # Collect the tiers before the duplicate check: when a page break
             # splits a tiered row, the repeated row is followed by the tiers
@@ -478,6 +487,20 @@ class SynlabParser(BaseLabParser):
             and not _SKIP_RE.match(line)
             and not _ROW_RE.match(line)
         )
+
+    @staticmethod
+    def _separate_label_from_unit(unit: str, range_text: str) -> Tuple[str, str]:
+        """Return the first word of a labelled range to the range, if it isn't a unit.
+
+        In "3.9 Risiko erhöht: > 5" there is no unit, but the pattern can't tell
+        "Risiko erhöht:" from "mg/dl optimal:", so check what the word looks like.
+        """
+        if not unit or ":" not in range_text:
+            return unit, range_text
+        key = unit.replace("μ", "µ").lower()
+        if any(c in key for c in "/%^") or key in _UNITS or key in _BARE_UNITS:
+            return unit, range_text
+        return "", f"{unit} {range_text}"
 
     @staticmethod
     def _normalize_unit(unit: str) -> Tuple[str, float]:
