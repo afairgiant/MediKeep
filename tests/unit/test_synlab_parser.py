@@ -265,3 +265,40 @@ class TestSynlabPageBreakTiers:
             "optimal: < 100; fast optimal: 100 - 129; grenzw. erhöht: 130 - 159"
         )
         assert by_name(results)["Sodium"].value == 139
+
+
+class TestSynlabRowsAndTiers:
+    def test_tier_lines_do_not_swallow_the_next_test(self, parser):
+        """A test with a digit in its name is not a tier of the previous range."""
+        results = by_name(
+            parser.parse(
+                "HDL HDL-Chol. 64 mg/dl progn.günstig: > 60\n"
+                "Risiko erhöht: < 40\n"
+                "VITB12 Vitamin B12\n"
+                "412 pg/ml 211-911"
+            )
+        )
+        assert results["HDL Cholesterol"].reference_range == (
+            "progn.günstig: > 60; Risiko erhöht: < 40"
+        )
+        assert results["Vitamin B12"].value == 412
+        assert results["Vitamin B12"].unit == "pg/mL"
+        assert results["Vitamin B12"].reference_range == "211-911"
+
+    @pytest.mark.parametrize(
+        "text, name, value",
+        [
+            ("VITB12 Vitamin B12\n412 pg/ml 211-911", "Vitamin B12", 412),
+            ("HBA1C HbA1c\n5.4 % 4.0-6.0", "Hemoglobin A1c", 5.4),
+            ("VITDE Vitamin D3\n27.9 ng/ml 20.0-70.0", "Vitamin D", 27.9),
+            ("K Kalium\n4.2 mmol/l 3.5-5.1", "Potassium", 4.2),
+        ],
+    )
+    def test_value_on_next_line(self, parser, text, name, value):
+        """Digits in the name and one-letter codes work for next-line values."""
+        result = by_name(parser.parse(text))[name]
+        assert result.value == value
+
+    def test_prose_is_not_read_as_a_one_letter_code(self, parser):
+        """An unknown one-letter first word followed by a number is not a result."""
+        assert parser.parse("A Bericht folgt\n12 Tage") == []

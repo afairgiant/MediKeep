@@ -208,10 +208,17 @@ _ROW_RE = re.compile(
     rf"(?P<value>{_VALUE})" + _TAIL,
 )
 # A test whose value is printed on the following line ("HBS. HBs-Antigen").
-_ROW_NO_VALUE_RE = re.compile(r"^(?P<code>[A-Z][A-Z0-9]{1,7})\.?\s+(?P<desc>\D+)$")
+# The description may hold digits ("Vitamin B12") but no colon, which marks a
+# hint or a labelled range ("ESC 2019: LDL").
+_ROW_NO_VALUE_RE = re.compile(
+    r"^(?P<code>[A-Z][A-Z0-9]{0,7})\.?\s+(?P<desc>[^:]+)$"
+)
 _VALUE_ONLY_RE = re.compile(
     rf"^(?:(?P<flag>\+\+?|--?)\s+)?(?P<value>{_VALUE})" + _TAIL, re.IGNORECASE
 )
+# A continuation of a tiered range: an optional label, then the range and
+# perhaps a unit ("fast optimal: 100 - 129", "> 20 ng/ml").
+_TIER_RE = re.compile(rf"^(?:[A-Za-zÄÖÜäöü][^:\d]*:?\s*)?{_RANGE}(?:\s+\S+)?$")
 _DATE_RE = re.compile(r"Bericht(?:\s+\d+)?\s+vom\s+(\d{2})\.(\d{2})\.(\d{4})")
 _SKIP_RE = re.compile(
     r"^(Seite \d|Laborwerte von|Labor-Bericht|LG-Bericht|Synlab$|Test\s+Beschreibung|"
@@ -296,7 +303,7 @@ class SynlabParser(BaseLabParser):
 
             match = _ROW_RE.match(line)
             if match is None:
-                pending = _ROW_NO_VALUE_RE.match(line)
+                pending = self._match_row_without_value(line)
                 if pending and pending.group("code").upper() not in PANEL_CODES:
                     nxt = _VALUE_ONLY_RE.match(lines[i]) if i < len(lines) else None
                     if nxt:
@@ -452,15 +459,24 @@ class SynlabParser(BaseLabParser):
         result.reference_range = "; ".join(known + [t for t in tiers if t not in known])
 
     @staticmethod
+    def _match_row_without_value(line: str) -> Optional[re.Match]:
+        """Match a row whose value is on the next line.
+
+        A one-letter first word is only a code if Synlab uses it ("K Kalium");
+        otherwise any line of prose followed by a number would become a result.
+        """
+        match = _ROW_NO_VALUE_RE.match(line)
+        if match and len(match.group("code")) == 1:
+            return match if match.group("code") in CODE_TO_TEST else None
+        return match
+
+    @staticmethod
     def _is_tier_line(line: str) -> bool:
         """True for a continuation line of a tiered range ("fast optimal: 100 - 129")."""
         return (
-            bool(line)
-            and len(line) < 80
-            and re.search(r"\d", line) is not None
+            _TIER_RE.match(line) is not None
             and not _SKIP_RE.match(line)
             and not _ROW_RE.match(line)
-            and not _ROW_NO_VALUE_RE.match(line)
         )
 
     @staticmethod
