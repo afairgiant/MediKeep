@@ -14,6 +14,7 @@ import {
   QUALITATIVE_PATTERN,
   TEXTUAL_PATTERN,
 } from '../TestComponentBulkEntry';
+import { searchTests } from '../../../../constants/testLibrary';
 
 /**
  * Helper to parse a line using the same logic as TestComponentBulkEntry.
@@ -348,6 +349,38 @@ describe('TestComponentBulkEntry Parser', () => {
       expect(result).not.toBeNull();
       expect(result!.status).toBe('normal');
     });
+  });
+});
+
+describe('HBsAg and parietal cell library matching', () => {
+  const firstMatch = (name: string) => searchTests(name, 1)[0];
+
+  it.each([
+    'HBsAg',
+    'HBs-Antigen',
+    'HBsAg Screen',
+    'Hepatitis B Surface Ag Screen',
+    'Hepatitis B Surface Antigen w/Reflex Confirmation',
+  ])('links "%s" to the antigen entry', name => {
+    expect(firstMatch(name)?.test_name).toBe('Hepatitis B Surface Antigen');
+  });
+
+  it('keeps a numeric HBsAg result, since the save filter drops a number on a qualitative test', () => {
+    expect(firstMatch('HBsAg')?.result_type).toBe('quantitative');
+    const result = parseLine('HBsAg: 0.35 COI (<1.0)');
+    expect(result!.value).toBe(0.35);
+    expect(result!.unit).toBe('COI');
+  });
+
+  it('still reads a screen result as qualitative from the line itself', () => {
+    expect('HBsAg: Negative'.match(QUALITATIVE_PATTERN)![2]).toBe('Negative');
+  });
+
+  it.each([
+    'Parietal Cell Ab W/Refl Titer',
+    'Parietal Cell Antibody with Reflex to Titer',
+  ])('does not link the titer order "%s" to the U/mL entry', name => {
+    expect(firstMatch(name)).toBeUndefined();
   });
 });
 

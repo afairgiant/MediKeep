@@ -1,6 +1,6 @@
 {
-  "version": "1.8.1",
-  "lastUpdated": "2026-07-28",
+  "version": "1.8.2",
+  "lastUpdated": "2026-11-04",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -2579,7 +2579,7 @@
         "Hepatitis B Surface Antigen w/Reflex Confirmation"
       ],
       "is_common": true,
-      "result_type": "qualitative",
+      "result_type": "quantitative",
       "display_order": 176
     },
     {
