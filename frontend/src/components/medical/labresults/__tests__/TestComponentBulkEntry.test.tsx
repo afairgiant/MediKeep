@@ -436,6 +436,11 @@ describe('TEXTUAL_PATTERN: semi-quantitative results', () => {
           '>90 mg/dL (progn.günstig: > 60; Risiko erhöht: < 40)',
       },
     ],
+    [
+      'Thyroid Stimulating Hormone: <0.01 mIU/L (0.27 - 4.2 (Erw.)) [Low]',
+      'Thyroid Stimulating Hormone',
+      { textual_value: '<0.01 mIU/L (0.27 - 4.2 (Erw.))', status: 'low' },
+    ],
     ['GFR Calculation: >60', 'GFR Calculation', { textual_value: '>60' }],
     ['Glucose, UA: 3+', 'Glucose, UA', { textual_value: '3+' }],
   ])('keeps the unit, range and flag of "%s"', (line, name, fields) => {

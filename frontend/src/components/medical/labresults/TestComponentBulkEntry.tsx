@@ -166,7 +166,7 @@ export const TEXTUAL_PATTERN = new RegExp(
     String.raw`[1-4]\+|` +
     String.raw`[<>]=?\s*\d+(?:\.\d+)?(?:\s+(?:${UNIT_PATTERN}))?|` +
     String.raw`\d+(?:\.\d+)?\s*[-–]\s*\d+(?:\.\d+)?` +
-    String.raw`)(?:\s*\(([^)]*)\))?` +
+    String.raw`)(?:\s*\(((?:[^()]|\([^()]*\))*)\))?` +
     String.raw`(?:\s*\[(high|low|critical|abnormal|borderline)\])?\s*$`,
   'i'
 );
