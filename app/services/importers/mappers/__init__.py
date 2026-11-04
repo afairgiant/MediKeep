@@ -1,13 +1,16 @@
 """
 FHIR resource mappers.
 
-Registry keyed by FHIR resourceType. Mappers are added by later changes; the
-framework runs with none registered and reports every resource as unsupported.
+Registry keyed by FHIR resourceType. Resource types without a mapper are
+reported as unsupported by the import preview.
 """
 
 from typing import Dict, List, Optional
 
+from .allergy_mapper import AllergyMapper
 from .base_mapper import BaseResourceMapper, MappedRecord
+from .condition_mapper import ConditionMapper
+from .medication_mapper import MedicationRequestMapper, MedicationStatementMapper
 
 
 class ResourceMapperRegistry:
@@ -16,6 +19,13 @@ class ResourceMapperRegistry:
     def __init__(self):
         """Create the registry with the built-in mappers."""
         self._mappers: Dict[str, BaseResourceMapper] = {}
+        self._register_defaults()
+
+    def _register_defaults(self):
+        self.register(ConditionMapper())
+        self.register(AllergyMapper())
+        self.register(MedicationStatementMapper())
+        self.register(MedicationRequestMapper())
 
     def register(self, mapper: BaseResourceMapper):
         """Register a mapper by its RESOURCE_TYPE."""
@@ -39,8 +49,12 @@ resource_mapper_registry = ResourceMapperRegistry()
 
 
 __all__ = [
+    "AllergyMapper",
     "BaseResourceMapper",
+    "ConditionMapper",
     "MappedRecord",
+    "MedicationRequestMapper",
+    "MedicationStatementMapper",
     "ResourceMapperRegistry",
     "resource_mapper_registry",
 ]
