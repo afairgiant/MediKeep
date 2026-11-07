@@ -100,8 +100,8 @@ function getValidatedDate(value: Date | null | unknown): Date | null {
  * - "BUN,18,mg/dL,7-20,Normal" → CSV_PATTERN
  */
 
-// Common unit pattern handles: standard units (mg/dL, g/dL, %), ratios (x10E3/uL), and special characters (μ)
-const UNIT_PATTERN = String.raw`[a-zA-Z0-9/%μ]+(?:/[a-zA-Z0-9]+)?|x10E\d+/[a-zA-Z]+`;
+// Common unit pattern handles: standard units (mg/dL, g/dL, %), ratios (x10E3/uL), decimals (mL/min/1.73m2), and special characters (μ)
+const UNIT_PATTERN = String.raw`[a-zA-Z0-9/%μ]+(?:\.\d+[a-zA-Z0-9²]*)?(?:/[a-zA-Z0-9]+)?|x10E\d+/[a-zA-Z]+`;
 
 // Pattern components for better readability
 const TEST_NAME = String.raw`(.+?)`;
@@ -156,19 +156,38 @@ export const QUALITATIVE_PATTERN =
 // qualitative values. Common in urinalysis and estimated results, e.g.
 // "Ketones, UA: Trace", "Squamous Epi (lpf), UA: Few", "WBC, UA: None seen",
 // "GFR Calculation: >60", "Epithelial Cells: 0-10", "Glucose, UA: 3+".
-// The value must be exactly a recognized token at end-of-line, so numeric
-// results (which carry a unit and/or reference range) never match here.
+// A "<5" or ">60" value can carry a unit, and any value a "(range)" and a
+// "[flag]": "C-Reactive Protein: >60 mg/L (<5) [High]". Otherwise the value must
+// be exactly a recognized token at end-of-line, so numeric results (which carry
+// a unit and/or reference range) never match here.
 export const TEXTUAL_PATTERN = new RegExp(
   String.raw`^(.+?):\s*(` +
     // Titers: the numeric patterns would read "1:160" as the number 1.
     String.raw`[<>]?\s*1:\d+|` +
     String.raw`none seen|none|trace|few|rare|occasional|moderate|many|small|large|present|absent|` +
     String.raw`[1-4]\+|` +
-    String.raw`[<>]=?\s*\d+(?:\.\d+)?|` +
+    String.raw`[<>]=?\s*\d+(?:\.\d+)?(?:\s+(?:${UNIT_PATTERN}))?|` +
     String.raw`\d+(?:\.\d+)?\s*[-–]\s*\d+(?:\.\d+)?` +
-    String.raw`)\s*$`,
+    String.raw`)(?:\s*\(((?:[^()]|\([^()]*\))*)\))?` +
+    String.raw`(?:\s*\[(high|low|critical|abnormal|borderline)\])?\s*$`,
   'i'
 );
+
+/**
+ * Fields of a textual result from a TEXTUAL_PATTERN match. The range is kept in
+ * the text, because reference ranges are only shown for quantitative results.
+ */
+export function textualFieldsFromMatch(match: RegExpMatchArray): {
+  textual_value: string;
+  status?: string;
+} {
+  const value = match[2].trim();
+  const range = match[3]?.trim();
+  return {
+    textual_value: range ? `${value} (${range})` : value,
+    ...(match[4] ? { status: match[4].toLowerCase() } : {}),
+  };
+}
 
 /** Normalize qualitative value strings to standard values. */
 function normalizeQualitativeValue(raw: string): string {
@@ -626,7 +645,6 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           const textualMatch = trimmedLine.match(TEXTUAL_PATTERN);
           if (textualMatch) {
             const testName = textualMatch[1].trim().replace(/[,;:]+$/, '');
-            const textualValue = textualMatch[2].trim();
             if (testName) {
               parsed = {
                 test_name: testName,
@@ -636,7 +654,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
                 confidence: 0.7,
                 issues: [],
                 result_type: 'textual',
-                textual_value: textualValue,
+                ...textualFieldsFromMatch(textualMatch),
               };
             }
           }

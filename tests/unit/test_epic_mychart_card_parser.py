@@ -11,6 +11,7 @@ import pytest
 
 from app.services.lab_parsers import LabParserRegistry
 from app.services.lab_parsers.epic_mychart_card_parser import EpicMyChartCardParser
+from app.services.pdf_text_extraction_service import pdf_extraction_service
 from tests.fixtures.lab_text_samples import (
     EPIC_MYCHART_RENAL_PANEL,
     LABCORP_CLEAN_TEXT,
@@ -184,6 +185,12 @@ class TestQualitativeParsing:
         assert results[0].test_name == "GFR Calculation"
         assert results[0].qualitative_value == ">60"
         assert results[0].value is None
+
+    def test_inequality_line_keeps_unit_and_range(self):
+        result = pdf_extraction_service._try_lab_specific_parsing(
+            GFR_INEQUALITY, extraction_method="native"
+        )
+        assert result["text"] == "GFR Calculation: >60 mL/min (>=60)"
 
     def test_not_estab_numeric_value(self, parser):
         results = parser.parse(NOT_ESTAB_NUMERIC)

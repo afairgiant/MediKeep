@@ -299,3 +299,100 @@ lijnmature Granulocytes"
 0 0 11/23/2022 % Not Estab.
 % Free Testosterone 2.1 1.8 10/01/2022 % 1.5-4.2
 """
+
+
+# Synlab (Germany) "Labor-Bericht", as pdfplumber extracts it. Layout taken
+# from a real 2025 report; patient, practice and every result are made up.
+# Covers: wrapped descriptions ("(RDW)", eGFR unit split over two lines),
+# "+" flags, a hint block, a "<" result, and a row repeated after a page break.
+SYNLAB_REPORT_TEXT = """
+Laborwerte von Dr. med. Erika Musterfrau
+Musterstr. 1, 12345 Musterstadt
+Max Mustermann, geb. am 01.01.1980
+Tel.: 01234 56789
+E-Mail:
+Labor-Bericht 1234567890 vom 15.03.2025 - Endbefund
+Synlab
+Test Beschreibung +/- Ergebnis Einheit Normalwert
+-
+CRP C-reak.Protein <0.15 mg/dl <0.50
+FOLS Folsäure 8.4 ng/ml >5.38
+VITB12 Vitamin B 12 412 pg/ml 211-911
+Hinweise: Bei Vitamin B12-Spiegeln zwischen 150-350 pg/ml
+ist die Bestimmung von Holotranscobalamin im
+Serum ratsam.
+VITDE Vitamin D3 (25-OH) 27.9 ng/ml 20.0-70.0
+Seite 1
+Laborwerte von Dr. med. Erika Musterfrau
+LG-Bericht 1234567890 vom 15.03.2025 - Endbefund
+Synlab
+Test Beschreibung +/- Ergebnis Einheit Normalwert
+-
+KBBX Kleines Blutbild
+LEUK Leukozyten 6.40 10^9/l 3.90-10.2
+ERY Erythrozyten 4.71 10^12/l 4.30-5.75
+HB Hämoglobin 14.2 g/dl 13.5-17.2
+HK Hämatokrit 42.8 % 39.5-50.5
+MCV MCV 90.1 fl 80.0-99.0
+MCH MCH 30.2 pg 27.0-33.5
+MCHC MCHC 33.4 g/dl 31.5-36.0
+THROM Thrombozyten 248 10^9/l 150-370
+ERYVB Ery. Verteilungsbreite 12.8 % 11.5-14.7
+(RDW)
+GOT GOT(AST) 28.0 U/l <50.0
+GPT GPT (ALT) + 55.0 U/l <50.0
+GGT g-GT 34.0 U/l <60.0
+GLUN Glukose 91 mg/dl 60.0-100
+CHOL Cholesterin + 231 mg/dl <200
+HDL HDL-Cholesterin 58.0 mg/dl 40.0-90.0
+CHQ Chol./HDL-Quotient 3.98 kA <5.00
+LDL LDL-Cholesterin + 152 mg/dl <115
+Hinweise: Referenz- bzw. Zielwerte nach Riskokategorie
+niedriges CV Risiko Zielwert < 116
+moderates CV Risiko Zielwert < 100
+NHDL Non-HDL-Cholesterin + 173 mg/dl <145
+KREA Kreatinin 0.88 mg/dl 0.67-1.17
+CKDEPI eGFR nach 104 ml/min/1,7 >60
+CKD-EPI-Formel 3m? KOF
+HST Harnstoff 29.0 mg/dl 19.0-44.0
+Seite 1
+HST Harnstoff 29.0 mg/dl 19.0-44.0
+Laborwerte von Dr. med. Erika Musterfrau
+CA Calcium 2.32 mmol/l 2.10-2.55
+K Kalium 4.20 mmol/l 3.50-5.10
+FE Eisen 19.4 µmol/l 12.5-32.2
+TSH TSH basal 1.42 µU/ml 0.30-4.00
+Seite 2
+"""
+
+# Older Synlab layout (2023): counts per microliter, "G/l" platelets, a "-"
+# (low) flag, tiered ranges over several lines, results printed on the line
+# below their test, and qualitative serology. All values are made up.
+SYNLAB_REPORT_2023_TEXT = """
+Labor-Bericht vom 24.06.2023 - Endbefund
+Synlab
+Test Beschreibung +/- Ergebnis Einheit Normalwert
+KBBM Kleines Blutbild mit Thromboz.(EDTA)
+ERY Erythrozyten 4.90 Mio./µl 4.30 - 5.75
+LEU Leukozyten 5120 n/µl 3900 - 10200
+THR Thrombozyten 241 G/l 150 - 370
+GLS Nüchtern-Glucose - 66 mg/dl 70 - 100
+HDL HDL-Chol. 64 mg/dl progn.günstig: > 60
+Risiko erhöht: < 40
+LDLD LDL-Chol. direkt 121 mg/dl optimal: < 100
+fast optimal: 100 - 129
+grenzw. erhöht: 130 - 159
+NA Natrium 141 mmol/l 136 - 145
+GFRKM GFR (MDRD-F.kurz,m) 97,5 ml/min/1.7 > 60
+LDLHDL LDL/HDL - Index: 1.9 kA < 3
+CRP CRP quantitativ
+< 0.3 mg/dl < 0.5
+AKBELE Beleg(Parietal-)zell-AK 4.8 U/ml < 20
+AKIN AK gegen Intrinsicfaktor
+<1.5 U/ml < 20
+HBS. HBs-Antigen
+positiv
+HEPC Anti-HCV nicht nachweisbar
+NEUP Neutrophile 58.2 % 40.0 - 75.0
+NEUA Neutrophile absolut 2.98 G/l 1.80 - 7.70
+"""
