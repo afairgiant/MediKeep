@@ -737,7 +737,13 @@ class PDFTextExtractionService:
             for result in results:
                 # Qualitative result (no numeric value): "TestName: Negative".
                 # Emitted bare so the frontend qualitative matcher applies.
-                if result.value is None and result.qualitative_value:
+                # A "<5" or ">60" result still needs its unit, range and flag.
+                is_comparison = result.qualitative_value.startswith(("<", ">"))
+                if (
+                    result.value is None
+                    and result.qualitative_value
+                    and not is_comparison
+                ):
                     formatted_lines.append(
                         f"{result.test_name}: {result.qualitative_value}"
                     )
@@ -748,6 +754,8 @@ class PDFTextExtractionService:
 
                 if result.value is not None:
                     line_parts.append(str(result.value))
+                elif is_comparison:
+                    line_parts.append(result.qualitative_value)
 
                 if result.unit:
                     line_parts.append(result.unit)

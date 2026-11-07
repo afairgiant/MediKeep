@@ -12,6 +12,7 @@ from .epic_mychart_card_parser import EpicMyChartCardParser
 from .epic_mychart_parser import EpicMyChartSingleColumnParser
 from .labcorp_parser_v2 import LabCorpParserV2
 from .quest_parser import QuestParser
+from .synlab_parser import SynlabParser
 
 
 class LabParserRegistry:
@@ -36,6 +37,7 @@ class LabParserRegistry:
             EpicMyChartCardParser(),
             LabCorpParserV2(),  # Using improved V2 parser
             QuestParser(),
+            SynlabParser(),
             EpicMyChartSingleColumnParser(),
         ]
 
@@ -96,6 +98,7 @@ __all__ = [
     "LabTestResult",
     "LabCorpParserV2",
     "QuestParser",
+    "SynlabParser",
     "EpicMyChartCardParser",
     "EpicMyChartSingleColumnParser",
     "LabParserRegistry",
