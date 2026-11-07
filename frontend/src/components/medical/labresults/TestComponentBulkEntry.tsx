@@ -160,6 +160,8 @@ export const QUALITATIVE_PATTERN =
 // results (which carry a unit and/or reference range) never match here.
 export const TEXTUAL_PATTERN = new RegExp(
   String.raw`^(.+?):\s*(` +
+    // Titers: the numeric patterns would read "1:160" as the number 1.
+    String.raw`[<>]?\s*1:\d+|` +
     String.raw`none seen|none|trace|few|rare|occasional|moderate|many|small|large|present|absent|` +
     String.raw`[1-4]\+|` +
     String.raw`[<>]=?\s*\d+(?:\.\d+)?|` +
