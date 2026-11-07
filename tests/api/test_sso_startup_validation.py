@@ -374,8 +374,6 @@ class TestSealedInstanceWarning:
             "app.core.auth_mode.no_local_password_warning",
             **no_local_password_patch,
         ), patch(
-            "app.core.utils.test_initialization.ensure_tests_initialized"
-        ), patch(
             "app.services.backup_scheduler_service.BackupSchedulerService.get_instance",
             return_value=scheduler,
         ), patch(
