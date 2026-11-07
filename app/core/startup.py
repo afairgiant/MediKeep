@@ -253,19 +253,6 @@ async def startup_event():
         if db is not None:
             db.close()
 
-    # Initialize standardized tests from LOINC
-    try:
-        from app.core.utils.test_initialization import ensure_tests_initialized
-
-        db = SessionLocal()
-        try:
-            ensure_tests_initialized(db)
-        finally:
-            db.close()
-    except Exception as e:
-        logger.warning(f"Could not initialize standardized tests: {e}")
-        # Non-fatal - app can still function without pre-loaded tests
-
     # Initialize activity tracking
     # NOTE: Automatic activity tracking disabled to prevent double logging
     # Manual activity logging is used instead via app.api.activity_logging
