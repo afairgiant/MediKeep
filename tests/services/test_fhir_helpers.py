@@ -27,6 +27,18 @@ class TestFhirHelpers:
         assert f.to_float(True) is None
         assert f.to_float(float("inf")) is None
 
+    def test_to_float_rejects_extreme_exponents(self):
+        """Test that a value number_text would write as a huge string is rejected."""
+        assert f.to_float("1e-999990") is None
+        assert f.to_float("0e-999990") == 0.0
+        assert f.to_float("1e-51") is None
+        assert f.to_float("1e-50") == 1e-50
+        assert f.to_float(1e-300) is None
+        assert f.to_float("1e51") is None
+        assert f.to_float("1e50") == 1e50
+        assert f.to_float("0.00001") == 0.00001
+        assert f.to_float(2400000) == 2400000.0
+
     def test_bundle_index_is_shared_only_inside_indexed(self):
         """Test that one index serves a bundle inside indexed() and nothing outlives it."""
         bundle = {

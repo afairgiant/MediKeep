@@ -259,7 +259,10 @@ def _frequency_text(timing: Optional[dict], warnings: List[str]) -> Optional[str
     period_unit = repeat.get("periodUnit")
     unit = PERIOD_UNITS.get(period_unit) if isinstance(period_unit, str) else None
     if freq is None and repeat.get("frequency") is not None:
-        warnings.append("frequency is not a number, timing dropped")
+        warnings.append("frequency is not a usable number, timing dropped")
+        return None
+    if period is None and repeat.get("period") is not None:
+        warnings.append("period is not a usable number, timing dropped")
         return None
     if freq is None:
         freq = 1
@@ -426,8 +429,9 @@ class MedicationRequestMapper(_MedicationMapper):
     ) -> List[MappedRecord]:
         """Requests for a drug and start that a statement from the file already has.
 
-        Only statements that were mapped and validated count. The drug matches on the
-        RxNorm code when both sides have one, and on the name when either has none.
+        Only statements that were mapped and validated count, and not-taken ones do
+        not. The drug matches on the RxNorm code when both sides have one, and on the
+        name when either has none.
         """
         coded: Dict[str, _Starts] = {}
         named: Dict[str, _Starts] = {}
@@ -435,6 +439,8 @@ class MedicationRequestMapper(_MedicationMapper):
         for record, mapper in mapped:
             if not isinstance(mapper, MedicationStatementMapper):
                 continue
+            if record.data["status"] == STATEMENT_STATUS["not-taken"]:
+                continue  # A drug that was not taken does not stand for the request
             code = record.source_codes.get("rxnorm")
             start = record.data["effective_period_start"]
             name = f.fold(record.data["medication_name"])

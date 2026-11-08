@@ -289,6 +289,15 @@ class TestMedicationRequestMapper:
             assert mapped.data["frequency"] is None, period
             assert any("dropped" in w for w in mapped.warnings), period
 
+    def test_period_that_is_not_a_number_is_dropped_with_a_warning(self):
+        """Test that a bad period is reported like a bad frequency, not silently lost."""
+        for period in ("abc", "1e-999990"):
+            repeat = {"frequency": 2, "period": period, "periodUnit": "d"}
+            resource = _request(dosageInstruction=[{"timing": {"repeat": repeat}}])
+            mapped = self.mapper.map(resource, EMPTY)
+            assert mapped.data["frequency"] is None, period
+            assert "period is not a usable number, timing dropped" in mapped.warnings
+
     def test_zero_frequency_is_dropped_with_a_warning(self):
         """Test that a frequency of zero is not read as once."""
         repeat = {"frequency": 0, "period": 1, "periodUnit": "d"}
@@ -417,6 +426,20 @@ class TestDoseText:
         assert self._dose({"value": 12345678901234567890}) == "12345678901234567890"
         long_value = "12345678901234567890123456789012"
         assert self._dose({"value": long_value}) == long_value
+
+    def test_tiny_exponent_is_not_written_out(self):
+        """Test that 1e-999990, which reads as 0.0, is dropped, not written in full."""
+        resource = _statement(
+            dosage=[
+                {
+                    "text": "1 tablet",
+                    "doseAndRate": [{"doseQuantity": {"value": "1e-999990"}}],
+                }
+            ]
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.data["dosage"] == "1 tablet"
+        assert mapped.warnings == []
 
     def test_number_too_large_for_a_float_does_not_fail_the_resource(self):
         """Test that a JSON integer past float range drops the dose, not the medication."""
@@ -564,6 +587,15 @@ class TestRequestPrecedence:
         )
         statement.pop("effectivePeriod")
         assert _kept_requests(statement, _request()) == []
+
+    def test_not_taken_statement_does_not_cover(self):
+        """Test that a statement saying the drug was not taken leaves the request in."""
+        statement = _statement(
+            status="not-taken",
+            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler"),
+        )
+        statement.pop("effectivePeriod")
+        assert _kept_requests(statement, _request()) == ["mr1"]
 
     def test_statement_by_reference_covers(self):
         """Test that RxNorm is read through a referenced Medication."""

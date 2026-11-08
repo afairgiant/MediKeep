@@ -128,6 +128,11 @@ def past_date(value: Optional[date], warnings: List[str], what: str) -> Optional
     return value
 
 
+# A nonzero number must be at least 10**-MAX_EXPONENT and under 10**(MAX_EXPONENT + 1)
+# in size, since number_text writes it out in full; zero is written as "0"
+MAX_EXPONENT = 50
+
+
 def number_text(value: Any) -> str:
     """A number written out in full: 2400000, 0.00001 and 2.5, never 2.4e+06.
 
@@ -142,14 +147,24 @@ def number_text(value: Any) -> str:
 
 
 def to_float(value: Any) -> Optional[float]:
-    """A finite float from a number or numeric string, else None."""
+    """A finite float from a number or numeric string, else None.
+
+    The value must also be readable as a Decimal, which number_text uses, and a
+    nonzero one must be inside the MAX_EXPONENT range: "1e-999990" reads as 0.0, but
+    number_text would write it out as a million digits.
+    """
     if isinstance(value, bool):
         return None
     try:
         number = float(value)
-    except (TypeError, ValueError, OverflowError):
+        exact = Decimal(str(value).strip())
+    except (TypeError, ValueError, OverflowError, ArithmeticError):
         return None
-    return number if number == number and abs(number) != float("inf") else None
+    if number != number or abs(number) == float("inf"):
+        return None
+    if not exact.is_zero() and abs(exact.adjusted()) > MAX_EXPONENT:
+        return None
+    return number
 
 
 def period(resource: dict, base: str) -> Tuple[Optional[str], Optional[str]]:
