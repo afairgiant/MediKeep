@@ -139,3 +139,17 @@ class TestAllergyMapper:
         assert content_hash(self.mapper.hash_parts_for_row(row)) != content_hash(
             mapped.hash_parts
         )
+
+
+class TestMalformedAllergyFields:
+    """Wrongly typed fields are ignored rather than failing the resource."""
+
+    def test_non_string_criticality_and_reaction_parts(self):
+        """Test that a list criticality and string reaction entries are passed over."""
+        resource = _allergy(
+            criticality=["high"],
+            reaction=["hives", {"manifestation": "hives", "description": 5}],
+        )
+        mapped = AllergyMapper().map(resource, BUNDLE)
+        assert mapped.data["severity"] == "none"
+        assert mapped.data["reaction"] == "Not specified"

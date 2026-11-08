@@ -47,6 +47,6 @@ class TestFhirHelpers:
             assert (
                 f.resolve(bundle, "Medication", {"reference": "Medication/m2"}) is None
             )
-            assert index.by_type == {"Medication": [bundle["entry"][0]["resource"]]}
+            assert list(index.resources) == [("Medication", "m1")]
         assert f._CURRENT.get() is None
         assert f.bundle_index(bundle) is not index

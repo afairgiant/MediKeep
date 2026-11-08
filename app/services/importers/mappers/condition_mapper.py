@@ -29,6 +29,18 @@ MAX_ICD10 = 10
 MAX_SNOMED = 20
 MAX_NOTES = 5000
 
+# Columns a re-import overwrites; a local edit to any of them marks the row as edited
+HASH_FIELDS = (
+    "snomed_code",
+    "icd10_code",
+    "diagnosis",
+    "code_description",
+    "severity",
+    "onset_date",
+    "end_date",
+    "status",
+)
+
 
 class ConditionMapper(BaseResourceMapper):
     """Condition -> conditions row."""
@@ -46,18 +58,22 @@ class ConditionMapper(BaseResourceMapper):
         if verification in SKIPPED_VERIFICATION:
             return None
         code = resource.get("code")
-        diagnosis = f.display_for(code)
+        warnings: list = []
+        diagnosis = f.name_for(code, warnings, "diagnosis")
         if not diagnosis:
             return None
 
-        warnings: list = []
-        label = f"Condition/{resource.get('id', '?')}"
+        label = f"Condition/{f.resource_id(resource) or '?'}"
         onset_date = f.past_date(
             f.parse_date(f.period(resource, "onset")[0]), warnings, "onset date"
         )
         end_date = f.past_date(
             f.parse_date(f.period(resource, "abatement")[0]), warnings, "end date"
         )
+        # The dates are settled first, so a dropped end date never decides the status
+        if end_date and onset_date and end_date < onset_date:
+            warnings.append("abatement before onset, end date dropped")
+            end_date = None
         status = CONDITION_STATUS.get(
             f.status_code(resource, "clinicalStatus", f.CONDITION_CLINICAL)
         )
@@ -66,18 +82,13 @@ class ConditionMapper(BaseResourceMapper):
         # An abatement date means the condition is over whatever the status says
         if end_date and status not in ("resolved", "inactive"):
             status = "resolved"
-        if end_date and onset_date and end_date < onset_date:
-            warnings.append("abatement before onset, end date dropped")
-            end_date = None
 
-        icd_display = next(
-            (
-                c.get("display")
-                for c in f.codings(code)
-                if c.get("system") in (f.ICD10CM, f.ICD10) and c.get("display")
-            ),
-            None,
+        icd10 = f.whole_coding(
+            code, (f.ICD10CM, f.ICD10), MAX_ICD10, warnings, "ICD-10 code"
         )
+        icd10_code = f.code_text(icd10.get("code"))
+        # The description belongs to the coding whose code is stored
+        icd_display = f.text(icd10.get("display"))
         notes_parts = []
         if verification in NOTED_VERIFICATION:
             notes_parts.append(f"Verification: {verification}")
@@ -91,9 +102,7 @@ class ConditionMapper(BaseResourceMapper):
             "severity": self._severity(resource),
             "onset_date": onset_date,
             "end_date": end_date,
-            "icd10_code": f.whole_code(
-                code, (f.ICD10CM, f.ICD10), MAX_ICD10, warnings, "ICD-10 code"
-            ),
+            "icd10_code": icd10_code,
             "snomed_code": f.whole_code(
                 code, (f.SNOMED,), MAX_SNOMED, warnings, "SNOMED code"
             ),
@@ -106,57 +115,16 @@ class ConditionMapper(BaseResourceMapper):
         }
         return MappedRecord(
             record_type=self.RECORD_TYPE,
-            external_id=resource.get("id"),
+            external_id=f.resource_id(resource),
             data=data,
-            hash_parts=self._parts(
-                data["snomed_code"],
-                data["icd10_code"],
-                diagnosis,
-                data["code_description"],
-                data["severity"],
-                onset_date,
-                end_date,
-                status,
-            ),
+            hash_parts=self.hash_parts_for_data(data),
             label=label,
             warnings=warnings,
         )
 
     def hash_parts_for_row(self, row: Any) -> Tuple[Any, ...]:
-        """The same hash_parts, read back from an existing row."""
-        return self._parts(
-            row.snomed_code,
-            row.icd10_code,
-            row.diagnosis,
-            row.code_description,
-            row.severity,
-            row.onset_date,
-            row.end_date,
-            row.status,
-        )
-
-    @staticmethod
-    def _parts(
-        snomed,
-        icd10,
-        diagnosis,
-        code_description,
-        severity,
-        onset_date,
-        end_date,
-        status,
-    ) -> Tuple[Any, ...]:
-        """Normalize the same way from a resource and from a row."""
-        return (
-            snomed or None,
-            icd10 or None,
-            f.norm(diagnosis),
-            f.norm(code_description),
-            f.norm(severity),
-            f.iso(onset_date),
-            f.iso(end_date),
-            status,
-        )
+        """The hashed columns; content_hash folds case, spacing and date format."""
+        return tuple(getattr(row, name) for name in HASH_FIELDS)
 
     @staticmethod
     def _severity(resource: dict) -> Optional[str]:

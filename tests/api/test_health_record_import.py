@@ -1454,3 +1454,283 @@ class TestMapperFixture:
         assert "Condition/cond-htn: diagnosis truncated to 500 characters" in (
             response.json()["warnings"]
         )
+
+
+def _lisinopril_concept() -> dict:
+    return {
+        "coding": [
+            {
+                "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                "code": "314076",
+                "display": "Lisinopril 10 MG Oral Tablet",
+            }
+        ]
+    }
+
+
+def _medication_bundle(*resources: dict) -> bytes:
+    """A bundle holding only the given resources."""
+    return json.dumps(
+        {
+            "resourceType": "Bundle",
+            "type": "collection",
+            "entry": [{"resource": r} for r in resources],
+        }
+    ).encode()
+
+
+class TestMedicationPrecedence:
+    """Requests are dropped only for statements that are themselves imported."""
+
+    def _import(self, client, patient_id, headers, *resources):
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(_medication_bundle(*resources)),
+            headers=headers,
+        )
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    def test_malformed_statement_does_not_affect_requests(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a statement with a string medicationReference skips only itself."""
+        patient_id = user_with_patient["patient"].id
+        statement = {
+            "resourceType": "MedicationStatement",
+            "id": "ms-bad",
+            "status": "active",
+            "medicationReference": "Medication/1",
+        }
+        requests = [
+            {
+                "resourceType": "MedicationRequest",
+                "id": f"mr-{i}",
+                "status": "active",
+                "intent": "order",
+                "medicationCodeableConcept": {"text": name},
+            }
+            for i, name in enumerate(("Lisinopril", "Albuterol"))
+        ]
+        body = self._import(
+            client, patient_id, authenticated_headers, statement, *requests
+        )
+        assert body["counts"]["medication"]["created"] == 2
+        assert not any("MedicationRequest" in w for w in body["warnings"])
+        assert {m.medication_name for m in _medications(db_session, patient_id)} == {
+            "Lisinopril",
+            "Albuterol",
+        }
+
+    def test_request_with_string_dosage_is_still_mapped(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a string in dosageInstruction gives an empty dosage, not a skip."""
+        patient_id = user_with_patient["patient"].id
+        statement = {
+            "resourceType": "MedicationStatement",
+            "id": "ms-1",
+            "status": "active",
+            "medicationCodeableConcept": {"text": "Albuterol"},
+            "effectivePeriod": {"start": "2020-01-01"},
+        }
+        request = {
+            "resourceType": "MedicationRequest",
+            "id": "mr-1",
+            "status": "active",
+            "intent": "order",
+            "medicationCodeableConcept": {"text": "Lisinopril"},
+            "dosageInstruction": ["take one daily"],
+        }
+        body = self._import(
+            client, patient_id, authenticated_headers, statement, request
+        )
+        assert body["counts"]["medication"]["created"] == 2
+        assert not any("could not be mapped" in w for w in body["warnings"])
+
+    def test_text_statement_covers_coded_request_for_the_same_drug(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that one side having RxNorm and the other only a name still dedupes."""
+        patient_id = user_with_patient["patient"].id
+        medication = {
+            "resourceType": "Medication",
+            "id": "lisinopril",
+            "code": _lisinopril_concept(),
+        }
+        statement = {
+            "resourceType": "MedicationStatement",
+            "id": "ms-1",
+            "status": "active",
+            "medicationCodeableConcept": {"text": "Lisinopril 10 MG Oral Tablet"},
+        }
+        request = {
+            "resourceType": "MedicationRequest",
+            "id": "mr-1",
+            "status": "active",
+            "intent": "order",
+            "medicationReference": {"reference": "Medication/lisinopril"},
+            "dosageInstruction": [{"text": "Take 1 tablet daily"}],
+        }
+        body = self._import(
+            client, patient_id, authenticated_headers, medication, statement, request
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert len(_medications(db_session, patient_id)) == 1
+
+    def test_statement_failing_validation_does_not_cover_a_request(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a statement the import rejects leaves the request in."""
+        patient_id = user_with_patient["patient"].id
+        statement = {
+            "resourceType": "MedicationStatement",
+            "id": "ms-1",
+            "status": "active",
+            "medicationCodeableConcept": {
+                "coding": [
+                    {
+                        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                        "code": "314076",
+                        "display": "L",
+                    }
+                ]
+            },
+        }
+        request = {
+            "resourceType": "MedicationRequest",
+            "id": "mr-1",
+            "status": "active",
+            "intent": "order",
+            "medicationCodeableConcept": _lisinopril_concept(),
+        }
+        body = self._import(
+            client, patient_id, authenticated_headers, statement, request
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert [m.medication_name for m in _medications(db_session, patient_id)] == [
+            "Lisinopril 10 MG Oral Tablet"
+        ]
+
+
+class TestHashOfValidatedData:
+    """The incoming hash is taken from the values that are written."""
+
+    def test_value_changed_by_the_schema_is_not_a_local_edit(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        monkeypatch,
+    ):
+        """Test that a re-import after a schema rewrote a hashed value is a duplicate."""
+        from pydantic import field_validator
+
+        from app.schemas.medication import MedicationCreate
+
+        class ExpandingCreate(MedicationCreate):
+            @field_validator("dosage")
+            @classmethod
+            def expand(cls, v):
+                return v.replace(" tab", " tablet") if v else v
+
+        mapper = resource_mapper_registry.get_mapper("MedicationStatement")
+        monkeypatch.setattr(mapper, "CREATE_SCHEMA", ExpandingCreate)
+        patient_id = user_with_patient["patient"].id
+        data = _medication_bundle(
+            {
+                "resourceType": "MedicationStatement",
+                "id": "ms-1",
+                "status": "active",
+                "medicationCodeableConcept": {"text": "Lisinopril"},
+                "dosage": [{"text": "1 tab"}],
+            }
+        )
+        client.post(
+            _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        preview = client.post(
+            _preview_url(patient_id), files=_upload(data), headers=authenticated_headers
+        ).json()
+        assert preview["counts"]["medication"] == {
+            "new": 0,
+            "duplicate": 1,
+            "changed": 0,
+            "edited": 0,
+        }
+
+
+class TestMalformedResources:
+    """One badly formed resource never takes the rest of the file with it."""
+
+    def test_unhashable_id_does_not_fail_the_import(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that list and object ids are imported without an external id."""
+        patient_id = user_with_patient["patient"].id
+        data = _medication_bundle(
+            {
+                "resourceType": "MedicationStatement",
+                "id": ["x"],
+                "status": "active",
+                "medicationCodeableConcept": {"text": "Lisinopril"},
+            },
+            {
+                "resourceType": "MedicationStatement",
+                "id": {"a": 1},
+                "status": "active",
+                "medicationCodeableConcept": {"text": "Albuterol"},
+            },
+        )
+        response = client.post(
+            _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["counts"]["medication"]["created"] == 2
+
+    def test_dropped_request_reports_no_warnings(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that a request covered by a statement adds nothing to the warnings."""
+        patient_id = user_with_patient["patient"].id
+        data = _medication_bundle(
+            {
+                "resourceType": "MedicationStatement",
+                "id": "ms-1",
+                "status": "active",
+                "medicationCodeableConcept": _lisinopril_concept(),
+            },
+            {
+                "resourceType": "MedicationRequest",
+                "id": "mr-1",
+                "status": "active",
+                "intent": "order",
+                "medicationCodeableConcept": _lisinopril_concept(),
+                "dosageInstruction": [{"route": {"text": "Ophthalmic"}}],
+            },
+        )
+        body = client.post(
+            _preview_url(patient_id), files=_upload(data), headers=authenticated_headers
+        ).json()
+        assert body["counts"]["medication"]["new"] == 1
+        assert not any("MedicationRequest" in w for w in body["warnings"])

@@ -31,8 +31,8 @@ from app.schemas.health_record_import import (
 
 from . import provenance as prov
 from .mappers import MappedRecord, resource_mapper_registry
+from .mappers._fhir import indexed, resource_id
 from .mappers.base_mapper import MAPPING_ERRORS
-from .mappers._fhir import indexed
 from .patient_match import compare_patient
 
 logger = get_logger(__name__, "app")
@@ -165,7 +165,7 @@ class HealthRecordImportService:
     def _plan_entries(self, bundle: dict, patient: Patient, source: str) -> _Plan:
         """The plan body; run inside indexed(bundle)."""
         plan = _Plan()
-        mapped_items: List[Tuple[MappedRecord, Any, str]] = []
+        accepted: List[Tuple[MappedRecord, Any]] = []
         for index, entry in enumerate(bundle.get("entry", [])):
             resource = entry.get("resource") or {}
             resource_type = resource.get("resourceType")
@@ -184,7 +184,7 @@ class HealthRecordImportService:
                     plan.unsupported.get(resource_type, 0) + 1
                 )
                 continue
-            label = f"{resource_type}/{resource.get('id', '?')}"
+            label = f"{resource_type}/{resource_id(resource) or '?'}"
             try:
                 mapped = mapper.map(resource, bundle)
             except MAPPING_ERRORS as exc:
@@ -205,9 +205,12 @@ class HealthRecordImportService:
             if not self._validate(mapped, mapper, patient):
                 plan.warnings.append(f"Skipped {label}: failed validation")
                 continue
+            accepted.append((mapped, mapper))
+
+        mapped_items = []
+        for mapped, mapper in self._drop_covered(accepted):
             plan.warnings.extend(f"{mapped.label}: {w}" for w in mapped.warnings)
             mapped_items.append((mapped, mapper, prov.content_hash(mapped.hash_parts)))
-
         self._load_existing(plan, patient, mapped_items, source)
         for mapped, mapper, incoming_hash in mapped_items:
             plan.rows.append(
@@ -241,9 +244,22 @@ class HealthRecordImportService:
                 },
             )
             return False
-        # Keep the schema's normalized values so the row matches what the API would write
+        # Keep the schema's normalized values so the row matches what the API would write,
+        # and hash those values, so the stored hash always matches the written row
         mapped.data = {key: getattr(checked, key) for key in mapped.data}
+        mapped.hash_parts = mapper.hash_parts_for_data(mapped.data)
         return True
+
+    @staticmethod
+    def _drop_covered(
+        accepted: List[Tuple[MappedRecord, Any]],
+    ) -> List[Tuple[MappedRecord, Any]]:
+        """The accepted records minus those another record from the file stands for."""
+        mappers = dict.fromkeys(mapper for _, mapper in accepted)
+        dropped = {
+            id(record) for mapper in mappers for record in mapper.covered(accepted)
+        }
+        return [(m, mapper) for m, mapper in accepted if id(m) not in dropped]
 
     def _load_existing(
         self,

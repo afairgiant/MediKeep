@@ -6,6 +6,9 @@ from typing import List, Optional
 
 from app.models.patient import Patient
 
+from .mappers._fhir import fold as _norm
+from .mappers._fhir import text as _text
+
 
 @dataclass
 class PatientMatch:
@@ -29,11 +32,6 @@ def _first_patient(bundle: dict) -> Optional[dict]:
         if resource.get("resourceType") == "Patient":
             return resource
     return None
-
-
-def _text(value) -> Optional[str]:
-    """The value when it is a non-empty string, else None."""
-    return value if isinstance(value, str) and value.strip() else None
 
 
 def _name_parts(resource: dict):
@@ -62,11 +60,6 @@ def _parse_date(value) -> Optional[date]:
         return date.fromisoformat(value[:10])
     except ValueError:
         return None
-
-
-def _norm(value: Optional[str]) -> str:
-    """Lower-case with collapsed whitespace, for comparisons."""
-    return " ".join((value or "").split()).lower()
 
 
 def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:

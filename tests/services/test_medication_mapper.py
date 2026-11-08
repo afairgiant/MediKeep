@@ -132,7 +132,9 @@ class TestMedicationStatementMapper:
         cases = [
             ({"coding": [{"system": SNOMED, "code": "26643006"}]}, "oral"),
             ({"coding": [{"system": SNOMED, "code": "447694001"}]}, "inhalation"),
-            ({"coding": [{"system": SNOMED, "code": "45890007"}]}, "topical"),
+            ({"coding": [{"system": SNOMED, "code": "6064005"}]}, "topical"),
+            ({"coding": [{"system": SNOMED, "code": "45890007"}]}, None),
+            ({"text": "Ophthalmic route"}, None),
             ({"coding": [{"system": SNOMED, "code": "10547007"}]}, "aural"),
             ({"text": "Oral route"}, "oral"),
             ({"text": "Respiratory tract route"}, "inhalation"),
@@ -306,22 +308,6 @@ class TestMedicationRequestMapper:
             self.mapper.map(_request(status="draft"), EMPTY).data["status"] == "active"
         )
 
-    def test_statement_for_same_drug_wins(self):
-        """Test that a request is skipped when a statement covers the same drug and start."""
-        statement = _statement(
-            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler"),
-            effectivePeriod={"start": "2003-01-10"},
-        )
-        assert self.mapper.map(_request(), _bundle(statement, _request())) is None
-
-    def test_statement_that_fails_validation_does_not_block(self):
-        """Test that a statement the import would reject cannot stand in for the request."""
-        statement = _statement(
-            medicationCodeableConcept=_concept("745679", "A"),
-            effectivePeriod={"start": "2003-01-10"},
-        )
-        assert self.mapper.map(_request(), _bundle(statement, _request())) is not None
-
     def test_reference_resolves_by_exact_full_url(self):
         """Test that an absolute reference picks the entry with that fullUrl, not the first id match."""
         bundle = {
@@ -350,37 +336,6 @@ class TestMedicationRequestMapper:
         )
         resource.pop("medicationCodeableConcept")
         assert self.mapper.map(resource, bundle).data["medication_name"] == "Right Drug"
-
-    def test_statement_with_other_start_does_not_block(self):
-        """Test that a statement with a different start date leaves the request in."""
-        statement = _statement(
-            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler"),
-            effectivePeriod={"start": "2010-01-01"},
-        )
-        assert self.mapper.map(_request(), _bundle(statement, _request())) is not None
-
-    def test_statement_without_start_blocks(self):
-        """Test that a statement with no start date still covers the request."""
-        statement = _statement(
-            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler")
-        )
-        statement.pop("effectivePeriod")
-        assert self.mapper.map(_request(), _bundle(statement, _request())) is None
-
-    def test_statement_by_reference_blocks(self):
-        """Test that a statement referencing a Medication with the same RxNorm covers the request."""
-        medication = {
-            "resourceType": "Medication",
-            "id": "albuterol",
-            "code": _concept("745679", "Albuterol HFA"),
-        }
-        statement = _statement(
-            medicationReference={"reference": "Medication/albuterol"},
-            effectivePeriod={"start": "2003-01-10"},
-        )
-        statement.pop("medicationCodeableConcept")
-        bundle = _bundle(medication, statement, _request())
-        assert self.mapper.map(_request(), bundle) is None
 
     def test_large_bundle_is_indexed_once(self, monkeypatch):
         """Test that thousands of statements share one index instead of a scan per lookup."""
@@ -413,6 +368,22 @@ class TestMedicationRequestMapper:
         assert all(m is not None for m in mapped)
         assert mapped[0].data["medication_name"] == "Albuterol Inhaler"
 
+    def test_reference_resolved_once_per_map(self, monkeypatch):
+        """Test that one map() outside indexed() builds the index once, not per lookup."""
+        resource = _request(medicationReference={"reference": "Medication/missing"})
+        resource.pop("medicationCodeableConcept")
+        bundle = _bundle(resource)
+        built = []
+        real_index = f.BundleIndex
+
+        def counting_index(b):
+            built.append(b)
+            return real_index(b)
+
+        monkeypatch.setattr(f, "BundleIndex", counting_index)
+        assert self.mapper.map(resource, bundle) is None
+        assert built == [bundle]
+
     def test_hash_matches_row(self):
         """Test that a row built from the mapped data hashes the same as the resource."""
         mapped = self.mapper.map(_request(), EMPTY)
@@ -425,3 +396,412 @@ class TestMedicationRequestMapper:
         assert content_hash(self.mapper.hash_parts_for_row(row)) != content_hash(
             mapped.hash_parts
         )
+
+
+class TestDoseText:
+    """Doses keep their full value without scientific notation."""
+
+    mapper = MedicationStatementMapper()
+
+    def _dose(self, quantity):
+        resource = _statement(dosage=[{"doseAndRate": [{"doseQuantity": quantity}]}])
+        return self.mapper.map(resource, EMPTY).data["dosage"]
+
+    def test_large_and_small_values_are_written_in_full(self):
+        """Test the values from review: no exponent and no lost digits."""
+        assert self._dose({"value": 2400000, "unit": "[iU]"}) == "2400000 [iU]"
+        assert self._dose({"value": 1234567}) == "1234567"
+        assert self._dose({"value": 0.00001, "unit": "mg"}) == "0.00001 mg"
+        assert self._dose({"value": 2.50, "unit": "mg"}) == "2.5 mg"
+        assert self._dose({"value": "10", "unit": "mg"}) == "10 mg"
+        assert self._dose({"value": 12345678901234567890}) == "12345678901234567890"
+        long_value = "12345678901234567890123456789012"
+        assert self._dose({"value": long_value}) == long_value
+
+    def test_number_too_large_for_a_float_does_not_fail_the_resource(self):
+        """Test that a JSON integer past float range drops the dose, not the medication."""
+        mapped = self.mapper.map(
+            _statement(
+                dosage=[{"doseAndRate": [{"doseQuantity": {"value": 10**400}}]}]
+            ),
+            EMPTY,
+        )
+        assert mapped is not None
+        assert mapped.data["dosage"] is None
+        assert self._dose({"value": " 2.50 ", "unit": "mg"}) == "2.5 mg"
+
+    def test_dose_range_is_written_in_full(self):
+        """Test that both ends of a range keep their digits."""
+        resource = _statement(
+            dosage=[
+                {
+                    "doseAndRate": [
+                        {
+                            "doseRange": {
+                                "low": {"value": 1000000, "unit": "[iU]"},
+                                "high": {"value": 1500000, "unit": "[iU]"},
+                            }
+                        }
+                    ]
+                }
+            ]
+        )
+        assert self.mapper.map(resource, EMPTY).data["dosage"] == "1000000-1500000 [iU]"
+
+    def test_frequency_numbers_are_written_in_full(self):
+        """Test that timing counts never switch to scientific notation."""
+        repeat = {"frequency": 1, "period": 1000000, "periodUnit": "h"}
+        resource = _statement(dosage=[{"timing": {"repeat": repeat}}])
+        assert (
+            self.mapper.map(resource, EMPTY).data["frequency"] == "every 1000000 hours"
+        )
+        repeat = {"frequency": "12345678901234567891", "period": 3, "periodUnit": "d"}
+        resource = _statement(dosage=[{"timing": {"repeat": repeat}}])
+        assert (
+            self.mapper.map(resource, EMPTY)
+            .data["frequency"]
+            .startswith("12345678901234567891 times per 3 days")
+        )
+
+
+class TestRouteCodes:
+    """Only SNOMED route codes whose meaning matches a MediKeep route are mapped."""
+
+    mapper = MedicationStatementMapper()
+
+    def _route(self, code, text):
+        resource = _statement(
+            dosage=[
+                {
+                    "route": {
+                        "coding": [{"system": SNOMED, "code": code}],
+                        "text": text,
+                    }
+                }
+            ]
+        )
+        return self.mapper.map(resource, EMPTY)
+
+    def test_endocervical_and_body_cavity_are_not_mapped(self):
+        """Test the two codes from review fall back to notes with a warning."""
+        for code, text in (
+            ("372450004", "Endocervical route"),
+            ("420254004", "Body cavity route"),
+        ):
+            mapped = self._route(code, text)
+            assert mapped.data["route"] is None, code
+            assert f"Route: {text}" in mapped.data["notes"], code
+            assert any("not in MediKeep's list" in w for w in mapped.warnings), code
+
+    def test_unmapped_code_is_not_overridden_by_text(self):
+        """Test a code outside the map with text naming a MediKeep route maps nothing."""
+        for code, text in (
+            ("372450004", "Inhalation"),  # Endocervical
+            ("54485002", "Topical"),  # Ophthalmic
+            ("16857009", "Topical route"),  # Vaginal
+        ):
+            mapped = self._route(code, text)
+            assert mapped.data["route"] is None, code
+            assert f"Route: {text} (SNOMED {code})" in mapped.data["notes"], code
+            assert (
+                f"route code {code} is not in MediKeep's list, kept in notes"
+                in mapped.warnings
+            ), code
+
+    def test_unmapped_code_without_text_is_kept(self):
+        """Test a bare code outside the map is kept in the notes, not lost."""
+        mapped = self._route("54485002", None)
+        assert mapped.data["route"] is None
+        assert "Route: SNOMED 54485002" in mapped.data["notes"]
+
+
+def _kept_requests(*resources):
+    """Ids of the requests kept once the statements in the same file are seen."""
+    bundle = _bundle(*resources)
+    mappers = {
+        "MedicationStatement": MedicationStatementMapper(),
+        "MedicationRequest": MedicationRequestMapper(),
+    }
+    mapped = []
+    with f.indexed(bundle):
+        for resource in resources:
+            mapper = mappers.get(resource["resourceType"])
+            record = mapper.map(resource, bundle) if mapper else None
+            if record is not None:
+                mapped.append((record, mapper))
+    dropped = mappers["MedicationRequest"].covered(mapped)
+    return [
+        record.external_id
+        for record, mapper in mapped
+        if isinstance(mapper, MedicationRequestMapper)
+        and not any(record is d for d in dropped)
+    ]
+
+
+class TestRequestPrecedence:
+    """A request is dropped when an imported statement has the same drug and start."""
+
+    def test_statement_for_same_drug_and_start_covers_the_request(self):
+        """Test that matching RxNorm and start drop the request."""
+        statement = _statement(
+            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler"),
+            effectivePeriod={"start": "2003-01-10"},
+        )
+        assert _kept_requests(statement, _request()) == []
+
+    def test_statement_with_other_start_does_not_cover(self):
+        """Test that a different start date leaves the request in."""
+        statement = _statement(
+            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler"),
+            effectivePeriod={"start": "2010-01-01"},
+        )
+        assert _kept_requests(statement, _request()) == ["mr1"]
+
+    def test_statement_without_start_covers(self):
+        """Test that a statement with no start date covers every request for the drug."""
+        statement = _statement(
+            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler")
+        )
+        statement.pop("effectivePeriod")
+        assert _kept_requests(statement, _request()) == []
+
+    def test_statement_by_reference_covers(self):
+        """Test that RxNorm is read through a referenced Medication."""
+        medication = {
+            "resourceType": "Medication",
+            "id": "albuterol",
+            "code": _concept("745679", "Albuterol HFA"),
+        }
+        statement = _statement(
+            medicationReference={"reference": "Medication/albuterol"},
+            effectivePeriod={"start": "2003-01-10"},
+        )
+        statement.pop("medicationCodeableConcept")
+        assert _kept_requests(medication, statement, _request()) == []
+
+    def test_name_matches_when_only_one_side_has_rxnorm(self):
+        """Test that a text-only statement covers a coded request of the same name."""
+        statement = _statement(
+            medicationCodeableConcept={"text": "albuterol  INHALER"},
+            effectivePeriod={"start": "2003-01-10"},
+        )
+        assert _kept_requests(statement, _request()) == []
+
+    def test_different_rxnorm_codes_do_not_match_on_name(self):
+        """Test that two coded drugs with different codes are different drugs."""
+        statement = _statement(
+            medicationCodeableConcept=_concept("1", "Albuterol Inhaler"),
+            effectivePeriod={"start": "2003-01-10"},
+        )
+        assert _kept_requests(statement, _request()) == ["mr1"]
+
+    def test_only_statements_count(self):
+        """Test that one request never drops another."""
+        other = _request(id="mr2")
+        assert _kept_requests(other, _request()) == ["mr2", "mr1"]
+
+    def test_request_with_string_dosage_is_still_compared(self):
+        """Test that a string in dosageInstruction neither crashes nor escapes the check."""
+        statement = _statement(
+            medicationCodeableConcept=_concept("745679", "Albuterol Inhaler"),
+            effectivePeriod={"start": "2003-01-10"},
+        )
+        request = _request(dosageInstruction=["2 puffs twice daily"])
+        assert MedicationRequestMapper().map(request, EMPTY) is not None
+        assert _kept_requests(statement, request) == []
+
+
+class TestMalformedMedicationFields:
+    """Wrongly typed fields are ignored rather than failing the resource."""
+
+    mapper = MedicationStatementMapper()
+
+    def test_string_reference_and_list_unit(self):
+        """Test a string medicationReference and a list unit."""
+        resource = _statement(
+            medicationReference="Medication/1",
+            dosage=[{"doseAndRate": [{"doseQuantity": {"value": 5, "unit": ["mg"]}}]}],
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.data["dosage"] == "5"
+
+    def test_non_string_codes_are_not_written(self):
+        """Test that a list where a code belongs is ignored, not stringified."""
+        resource = _statement(
+            medicationCodeableConcept={
+                "coding": [
+                    {"system": RXNORM, "code": ["314076"], "display": "Lisinopril"}
+                ]
+            },
+            dosage=[{"route": {"coding": [{"system": SNOMED, "code": ["26643006"]}]}}],
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.source_codes == {}
+        assert mapped.data["route"] is None
+        assert "[" not in (mapped.data["notes"] or "")
+
+    def test_unusable_ids_become_none(self):
+        """Test that a list or object id is not used as the external id."""
+        for value in (["x"], {"a": 1}, True):
+            assert self.mapper.map(_statement(id=value), EMPTY).external_id is None
+        assert self.mapper.map(_statement(id=7), EMPTY).external_id == "7"
+
+
+class TestMedicationNames:
+    """Where a medication's name comes from."""
+
+    mapper = MedicationStatementMapper()
+
+    def test_reference_display_when_the_medication_has_no_name(self):
+        """Test that a resolved Medication without a code still uses the display."""
+        medication = {"resourceType": "Medication", "id": "m1"}
+        resource = _statement(
+            medicationReference={"reference": "Medication/m1", "display": "Lisinopril"}
+        )
+        resource.pop("medicationCodeableConcept")
+        mapped = self.mapper.map(resource, _bundle(medication))
+        assert mapped.data["medication_name"] == "Lisinopril"
+
+    def test_bare_rxnorm_code_is_used_with_a_warning(self):
+        """Test that a Medication with only a code is kept and reported."""
+        medication = {
+            "resourceType": "Medication",
+            "id": "m1",
+            "code": {"coding": [{"system": RXNORM, "code": "314076"}]},
+        }
+        resource = _statement(medicationReference={"reference": "Medication/m1"})
+        resource.pop("medicationCodeableConcept")
+        mapped = self.mapper.map(resource, _bundle(medication))
+        assert mapped.data["medication_name"] == "314076"
+        assert "no drug name in the file, the code is used" in mapped.warnings
+
+    def test_bare_non_rxnorm_code_is_kept_too(self):
+        """Test that an NDC-only medication is kept under its code, not dropped."""
+        resource = _statement(
+            medicationCodeableConcept={
+                "coding": [
+                    {"system": "http://hl7.org/fhir/sid/ndc", "code": "0071-0155"}
+                ]
+            }
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.data["medication_name"] == "0071-0155"
+        assert mapped.source_codes == {}
+        assert "no drug name in the file, the code is used" in mapped.warnings
+
+    def test_integer_code_is_kept_as_the_name(self):
+        """Test that a numeric code with no name is kept under the code."""
+        resource = _statement(
+            medicationCodeableConcept={"coding": [{"system": RXNORM, "code": 314076}]}
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.data["medication_name"] == "314076"
+        assert mapped.source_codes == {"rxnorm": "314076"}
+
+    def test_list_status_is_not_stringified(self):
+        """Test that a list status is treated as missing, without raising."""
+        mapped = self.mapper.map(_statement(status=["entered-in-error"]), EMPTY)
+        assert mapped.data["status"] == "active"
+
+    def test_contained_medication_with_numeric_id(self):
+        """Test that a contained Medication with id 1 matches reference #1."""
+        resource = _statement(
+            medicationReference={"reference": "#1"},
+            contained=[
+                {"resourceType": "Medication", "id": 1, "code": {"text": "Lisinopril"}}
+            ],
+        )
+        resource.pop("medicationCodeableConcept")
+        assert self.mapper.map(resource, EMPTY).data["medication_name"] == "Lisinopril"
+
+
+class TestRouteConflict:
+    """A route code wins over its text, but a disagreement is reported."""
+
+    mapper = MedicationStatementMapper()
+
+    def test_code_and_text_that_disagree(self):
+        """Test oral code with inhaled text: oral, a warning and the text in notes."""
+        resource = _statement(
+            dosage=[
+                {
+                    "route": {
+                        "coding": [{"system": SNOMED, "code": "26643006"}],
+                        "text": "Inhaled",
+                    }
+                }
+            ]
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.data["route"] == "oral"
+        assert "Route: Inhaled" in mapped.data["notes"]
+        assert any("does not match the route code" in w for w in mapped.warnings)
+
+    def test_code_with_text_medikeep_has_no_route_for(self):
+        """Test oral code with ophthalmic text: the text is kept and reported, not lost."""
+        resource = _statement(
+            dosage=[
+                {
+                    "route": {
+                        "coding": [{"system": SNOMED, "code": "26643006"}],
+                        "text": "Ophthalmic",
+                    }
+                }
+            ]
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.data["route"] == "oral"
+        assert "Route: Ophthalmic" in mapped.data["notes"]
+        assert mapped.warnings == [
+            "route text 'Ophthalmic' is not a route wording the importer knows,"
+            " the code is used and the text kept in notes"
+        ]
+
+    def test_snomed_synonyms_agree_with_their_code(self):
+        """Test the SNOMED synonyms of a mapped code are not reported as a mismatch."""
+        for code, display in (
+            ("26643006", "Oral use"),
+            ("26643006", "Oral route (qualifier value)"),
+            ("26643006", "Per os"),
+            ("26643006", "Orally"),
+            ("6064005", "Cutaneous use"),
+            ("47625008", "IV use"),
+            ("34206005", "Subdermal route"),
+            ("447694001", "Inhalation route"),
+            ("46713006", "Nasal use"),
+            ("10547007", "In ear"),
+            ("10547007", "Auricular use"),
+            ("37161004", "Per rectum (route) (qualifier value)"),
+            ("37161004", "Rectally"),
+            ("37839007", "Sublingually"),
+        ):
+            resource = _statement(
+                dosage=[
+                    {
+                        "route": {
+                            "coding": [
+                                {"system": SNOMED, "code": code, "display": display}
+                            ]
+                        }
+                    }
+                ]
+            )
+            mapped = self.mapper.map(resource, EMPTY)
+            assert mapped.warnings == [], display
+            assert mapped.data["notes"] is None or "Route:" not in mapped.data["notes"]
+
+    def test_code_and_text_that_agree(self):
+        """Test that matching code and text give no warning."""
+        resource = _statement(
+            dosage=[
+                {
+                    "route": {
+                        "coding": [{"system": SNOMED, "code": "26643006"}],
+                        "text": "Oral route",
+                    }
+                }
+            ]
+        )
+        mapped = self.mapper.map(resource, EMPTY)
+        assert mapped.data["route"] == "oral"
+        assert mapped.warnings == []

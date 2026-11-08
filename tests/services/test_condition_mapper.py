@@ -238,3 +238,95 @@ class TestConditionMapper:
                 mapped.hash_parts
             ), field_name
             setattr(row, field_name, original)
+
+
+class TestConditionDates:
+    """Status is worked out from the dates that survive the checks."""
+
+    mapper = ConditionMapper()
+
+    def test_abatement_before_onset_keeps_the_source_status(self):
+        """Test the case from review: active, onset after abatement."""
+        mapped = self.mapper.map(
+            _condition(onsetDateTime="2020-05-01", abatementDateTime="2019-01-01"),
+            BUNDLE,
+        )
+        assert mapped.data["status"] == "active"
+        assert mapped.data["end_date"] is None
+        assert mapped.warnings == ["abatement before onset, end date dropped"]
+
+    def test_abatement_before_onset_without_status_is_active(self):
+        """Test that a dropped end date no longer implies resolved."""
+        resource = _condition(
+            onsetDateTime="2020-05-01", abatementDateTime="2019-01-01"
+        )
+        resource.pop("clinicalStatus")
+        assert self.mapper.map(resource, BUNDLE).data["status"] == "active"
+
+    def test_list_values_are_not_written_as_text(self):
+        """Test that list codes and text are ignored instead of stringified."""
+        resource = _condition(
+            code={
+                "coding": [
+                    {"system": "http://snomed.info/sct", "code": ["59621000"]},
+                    {"system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10"},
+                ],
+                "text": ["Hypertension"],
+            }
+        )
+        mapped = self.mapper.map(resource, BUNDLE)
+        assert mapped.data["snomed_code"] is None
+        assert mapped.data["icd10_code"] == "I10"
+        assert mapped.data["diagnosis"] == "I10"
+        assert "no diagnosis text in the file, the code is used" in mapped.warnings
+
+    def test_code_description_belongs_to_the_stored_code(self):
+        """Test that a non-string display is ignored and the description matches the code."""
+        resource = _condition(
+            code={
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                        "code": "J10.ABCDEFGH",
+                        "display": "Too long",
+                    },
+                    {
+                        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                        "code": "J10",
+                        "display": ["Influenza"],
+                    },
+                    {
+                        "system": "http://hl7.org/fhir/sid/icd-10",
+                        "code": "J11",
+                        "display": "Influenza, virus not identified",
+                    },
+                ],
+                "text": "Flu",
+            }
+        )
+        mapped = self.mapper.map(resource, BUNDLE)
+        assert mapped.data["icd10_code"] == "J10"
+        assert mapped.data["code_description"] is None
+
+    def test_code_description_comes_from_the_same_system(self):
+        """Test that ICD-10-CM wins and its own display is used, not the WHO one."""
+        resource = _condition(
+            code={
+                "coding": [
+                    {
+                        "system": "http://hl7.org/fhir/sid/icd-10",
+                        "code": "J10",
+                        "display": "WHO text",
+                    },
+                    {
+                        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                        "code": "J10",
+                        "display": "CM text",
+                    },
+                ],
+                "text": "Flu",
+            }
+        )
+        mapped = self.mapper.map(resource, BUNDLE)
+        assert mapped.data["icd10_code"] == "J10"
+        assert mapped.data["code_description"] == "CM text"

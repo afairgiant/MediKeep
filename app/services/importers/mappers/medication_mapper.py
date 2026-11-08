@@ -4,15 +4,13 @@ Maps FHIR MedicationStatement and MedicationRequest resources onto the Medicatio
 
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from pydantic import ValidationError
+from typing import Any, Dict, List, Optional, Tuple
 
 from app.models.clinical import Medication
 from app.schemas.medication import MedicationCreate
 
 from . import _fhir as f
-from .base_mapper import MAPPING_ERRORS, BaseResourceMapper, MappedRecord
+from .base_mapper import BaseResourceMapper, MappedRecord
 
 STATEMENT_STATUS = {
     "active": "active",
@@ -31,54 +29,62 @@ REQUEST_STATUS = {
 }
 SKIPPED_STATUS = ("entered-in-error", "cancelled")
 
-# Route text (lower-cased, with a trailing "route" removed) -> MedicationBase route value
+# Routes are mapped only where a MediKeep value fits. Anything else (ophthalmic,
+# vaginal, transdermal, ...) is left empty and kept in the notes. Respiratory tract
+# is broader than inhalation (it includes nasal), but inhalation is the closest
+# value and nasal has its own code, so it maps to inhalation.
+# Route text (folded, with a trailing "(qualifier value)", "(route)", "route" or "use"
+# removed) -> MedicationBase route value. Includes the SNOMED CT synonyms of each code
+# in ROUTE_CODES, so a code's own wording is not reported as a mismatch.
 ROUTES = {
     "oral": "oral",
     "by mouth": "oral",
     "po": "oral",
+    "po - per os": "oral",
+    "per os": "oral",
+    "orally": "oral",
+    "per oral": "oral",
+    "peroral": "oral",
     "injection": "injection",
     "topical": "topical",
     "cutaneous": "topical",
-    "transdermal": "topical",
-    "dental": "topical",
-    "ophthalmic": "topical",
-    "vaginal": "topical",
     "intravenous": "intravenous",
     "iv": "intravenous",
     "intramuscular": "intramuscular",
     "im": "intramuscular",
     "subcutaneous": "subcutaneous",
     "sc": "subcutaneous",
+    "subdermal": "subcutaneous",
     "inhalation": "inhalation",
     "respiratory tract": "inhalation",
     "respiratory (inhalation)": "inhalation",
     "inhaled": "inhalation",
-    "endotracheal": "inhalation",
     "nasal": "nasal",
     "intranasal": "nasal",
     "rectal": "rectal",
+    "rectally": "rectal",
+    "per rectum": "rectal",
     "sublingual": "sublingual",
+    "sublingually": "sublingual",
     "otic": "aural",
+    "auricular": "aural",
     "auricular (otic)": "aural",
+    "in ear": "aural",
 }
-# SNOMED CT route codes -> MedicationBase route value
+ROUTE_SUFFIXES = (" (qualifier value)", " (route)", " route", " use")
+# SNOMED CT route codes -> MedicationBase route value. Each code was checked
+# against SNOMED CT; its preferred term is in the comment.
 ROUTE_CODES = {
-    "26643006": "oral",
-    "47625008": "intravenous",
-    "78421000": "intramuscular",
-    "34206005": "subcutaneous",
-    "6064005": "topical",
-    "45890007": "topical",
-    "372449004": "topical",
-    "54485002": "topical",
-    "16857009": "topical",
-    "447694001": "inhalation",
-    "372450004": "inhalation",
-    "46713006": "nasal",
-    "10547007": "aural",
-    "37161004": "rectal",
-    "37839007": "sublingual",
-    "420254004": "injection",
+    "26643006": "oral",  # Oral route
+    "47625008": "intravenous",  # Intravenous route
+    "78421000": "intramuscular",  # Intramuscular route
+    "34206005": "subcutaneous",  # Subcutaneous route
+    "6064005": "topical",  # Topical route
+    "447694001": "inhalation",  # Respiratory tract route (see above)
+    "46713006": "nasal",  # Nasal route
+    "10547007": "aural",  # Otic route
+    "37161004": "rectal",  # Rectal route
+    "37839007": "sublingual",  # Sublingual route
 }
 DOSE_UNITS = {
     "{tbl}": "tablet",
@@ -104,67 +110,129 @@ MAX_INDICATION = 500
 MAX_NOTES = 1000  # MedicationCreate allows 1000 here, less than the other tables
 MAX_TIMES_PER_PERIOD = 48
 
+# Columns a re-import overwrites; a local edit to any of them marks the row as edited
+HASH_FIELDS = (
+    "medication_name",
+    "dosage",
+    "frequency",
+    "route",
+    "indication",
+    "effective_period_start",
+    "effective_period_end",
+    "status",
+)
 
-def medication_name(resource: dict, bundle: dict) -> Optional[str]:
-    """Drug name from the inline concept, a contained Medication, or a bundle entry."""
-    name = f.display_for(resource.get("medicationCodeableConcept"))
+
+def _medication(resource: dict, bundle: dict) -> dict:
+    """The contained or bundled Medication that medicationReference points to, or {}."""
+    reference = f.obj(resource.get("medicationReference"))
+    target_id = f.ref_id(reference)
+    if target_id is None:
+        return {}
+    for contained in f.objects(resource.get("contained")):
+        if f.resource_id(contained) == target_id:
+            return contained
+    return f.resolve(bundle, "Medication", reference) or {}
+
+
+def medication_name(resource: dict, medication: dict) -> Optional[str]:
+    """Drug name from the inline concept, the referenced Medication, or the display.
+
+    A bare code is not a name, so a concept with only an RxNorm code does not count.
+    """
+    name = f.label_for(resource.get("medicationCodeableConcept")) or f.label_for(
+        medication.get("code")
+    )
     if name:
         return name
-    reference = resource.get("medicationReference") or {}
-    target_id = f.ref_id(reference)
-    for contained in resource.get("contained") or []:
-        if isinstance(contained, dict) and contained.get("id") == target_id:
-            return f.display_for(contained.get("code"))
-    target = f.resolve(bundle, "Medication", reference)
-    if target:
-        return f.display_for(target.get("code"))
-    return str(reference.get("display")).strip() if reference.get("display") else None
+    display = f.text(f.obj(resource.get("medicationReference")).get("display"))
+    return display.strip() if display else None
 
 
-def medication_code(resource: dict, bundle: dict) -> Optional[str]:
-    """RxNorm code from the inline concept, a contained Medication, or a bundle entry."""
-    code = f.code_for(resource.get("medicationCodeableConcept"), f.RXNORM)
-    if code:
-        return code
-    reference = resource.get("medicationReference")
-    target_id = f.ref_id(reference)
-    for contained in resource.get("contained") or []:
-        if isinstance(contained, dict) and contained.get("id") == target_id:
-            return f.code_for(contained.get("code"), f.RXNORM)
-    target = f.resolve(bundle, "Medication", reference)
-    return f.code_for(target.get("code"), f.RXNORM) if target else None
+def medication_code(resource: dict, medication: dict) -> Optional[str]:
+    """RxNorm code from the inline concept or the referenced Medication."""
+    return f.code_for(resource.get("medicationCodeableConcept"), f.RXNORM) or (
+        f.code_for(medication.get("code"), f.RXNORM)
+    )
 
 
-def route_value(concept: Optional[dict]) -> Tuple[Optional[str], Optional[str]]:
-    """(MedicationBase route value or None, the text as written)."""
-    text = f.display_for(concept)
+def _route_from_text(text: Optional[str]) -> Optional[str]:
+    """MedicationBase route value for a route wording, or None."""
+    key = f.fold(text)
+    for suffix in ROUTE_SUFFIXES:
+        if key.endswith(suffix):
+            key = key[: -len(suffix)]
+    return ROUTES.get(key)
+
+
+def route_value(
+    concept: Optional[dict],
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """(MedicationBase route value or None, text for the notes, warning).
+
+    A SNOMED code decides the route, and the wording only counts when there is no
+    code. A code outside ROUTE_CODES leaves the route empty even when the wording
+    names a MediKeep route, since the wording may not describe the code. Wording
+    that names another route, or that is not in ROUTES, is not stored as the route,
+    so it is returned for the notes with a warning.
+    """
+    label = f.label_for(concept)
     code = f.code_for(concept, f.SNOMED)
-    if code in ROUTE_CODES:
-        return ROUTE_CODES[code], text
-    key = " ".join((text or "").lower().split())
-    if key.endswith(" route"):
-        key = key[: -len(" route")]
-    return ROUTES.get(key), text
+    if code:
+        by_code = ROUTE_CODES.get(code)
+        if by_code is None:
+            kept = f"{label} (SNOMED {code})" if label else f"SNOMED {code}"
+            return (
+                None,
+                kept,
+                f"route code {code} is not in MediKeep's list, kept in notes",
+            )
+        by_text = _route_from_text(label)
+        if label is not None and by_text is None:
+            return (
+                by_code,
+                label,
+                f"route text '{label}' is not a route wording the importer knows,"
+                " the code is used and the text kept in notes",
+            )
+        if by_text is not None and by_text != by_code:
+            return (
+                by_code,
+                label,
+                f"route text '{label}' does not match the route code,"
+                " the code is used and the text kept in notes",
+            )
+        return by_code, None, None
+    by_text = _route_from_text(label)
+    text = f.display_for(concept)
+    if by_text is None and text:
+        return None, text, f"route '{text}' is not in MediKeep's list, kept in notes"
+    return by_text, None, None
+
+
+def _unit(quantity: dict) -> str:
+    """A Quantity's unit, falling back to its code, with UCUM count units spelled out."""
+    for key in ("unit", "code"):
+        unit = quantity.get(key)
+        if isinstance(unit, str) and unit.strip():
+            return DOSE_UNITS.get(unit.strip(), unit.strip())
+    return ""
 
 
 def _dose_text(dosage: dict) -> Optional[str]:
-    """Dose from doseQuantity or doseRange, with UCUM count units spelled out."""
-    for entry in dosage.get("doseAndRate") or []:
-        if not isinstance(entry, dict):
-            continue
-        quantity = entry.get("doseQuantity")
-        if isinstance(quantity, dict):
-            value = f.to_float(quantity.get("value"))
-            if value is not None:
-                unit = quantity.get("unit") or quantity.get("code") or ""
-                return f"{value:g} {DOSE_UNITS.get(unit, unit)}".strip()
-        rng = entry.get("doseRange")
-        if isinstance(rng, dict):
-            low = f.to_float((rng.get("low") or {}).get("value"))
-            high = f.to_float((rng.get("high") or {}).get("value"))
-            unit = (rng.get("high") or rng.get("low") or {}).get("unit") or ""
-            if low is not None and high is not None:
-                return f"{low:g}-{high:g} {unit}".strip()
+    """Dose from doseQuantity or doseRange, numbers written in full."""
+    for entry in f.objects(dosage.get("doseAndRate")):
+        quantity = f.obj(entry.get("doseQuantity"))
+        if f.to_float(quantity.get("value")) is not None:
+            return f"{f.number_text(quantity['value'])} {_unit(quantity)}".strip()
+        low = f.obj(f.obj(entry.get("doseRange")).get("low"))
+        high = f.obj(f.obj(entry.get("doseRange")).get("high"))
+        if (
+            f.to_float(low.get("value")) is not None
+            and f.to_float(high.get("value")) is not None
+        ):
+            numbers = f"{f.number_text(low['value'])}-{f.number_text(high['value'])}"
+            return f"{numbers} {_unit(high) or _unit(low)}".strip()
     return None
 
 
@@ -185,10 +253,11 @@ def _frequency_text(timing: Optional[dict], warnings: List[str]) -> Optional[str
     """Timing as short text like "daily" or "2 times per day"."""
     if not isinstance(timing, dict):
         return None
-    repeat = timing.get("repeat") or {}
+    repeat = f.obj(timing.get("repeat"))
     freq = f.to_float(repeat.get("frequency"))
     period = f.to_float(repeat.get("period"))
-    unit = PERIOD_UNITS.get(repeat.get("periodUnit"))
+    period_unit = repeat.get("periodUnit")
+    unit = PERIOD_UNITS.get(period_unit) if isinstance(period_unit, str) else None
     if freq is None and repeat.get("frequency") is not None:
         warnings.append("frequency is not a number, timing dropped")
         return None
@@ -208,16 +277,20 @@ def _frequency_text(timing: Optional[dict], warnings: List[str]) -> Optional[str
         elif freq == 1 and period == 1:
             text = "daily" if unit == "day" else f"every {unit}"
         elif freq == 1:
-            text = f"every {period:g} {unit}s"
+            text = f"every {f.number_text(repeat['period'])} {unit}s"
         elif period == 1:
-            text = f"{freq:g} times per {unit}"
+            text = f"{f.number_text(repeat['frequency'])} times per {unit}"
         else:
-            text = f"{freq:g} times per {period:g} {unit}s"
+            text = (
+                f"{f.number_text(repeat['frequency'])} times per"
+                f" {f.number_text(repeat['period'])} {unit}s"
+            )
     else:
         text = f.display_for(timing.get("code"))
     when = repeat.get("when")
-    if text and isinstance(when, list) and when:
-        text = f"{text} ({', '.join(str(w) for w in when)})"
+    when = [w for w in when if isinstance(w, str)] if isinstance(when, list) else []
+    if text and when:
+        text = f"{text} ({', '.join(when)})"
     return text
 
 
@@ -234,19 +307,31 @@ class _MedicationMapper(BaseResourceMapper):
 
     def map(self, resource: dict, bundle: dict) -> Optional[MappedRecord]:
         """Map one resource; None when cancelled, in error or unnamed."""
-        raw_status = str(resource.get("status") or "").lower()
+        raw_status = (f.text(resource.get("status")) or "").strip().lower()
         if raw_status in SKIPPED_STATUS:
             return None
-        name = medication_name(resource, bundle)
+        warnings: list = []
+        # Resolved once; each lookup outside indexed() would build a new BundleIndex
+        medication = _medication(resource, bundle)
+        rxnorm = medication_code(resource, medication)
+        name = medication_name(resource, medication)
+        if not name:
+            # Keep the drug under its code (RxNorm first, else any) rather than lose it
+            name = (
+                rxnorm
+                or f.first_code(resource.get("medicationCodeableConcept"))
+                or f.first_code(medication.get("code"))
+            )
+            if name:
+                warnings.append("no drug name in the file, the code is used")
         if not name:
             return None
-
-        warnings: list = []
-        dosages = resource.get(self.DOSAGE_FIELD) or []
-        dosage = dosages[0] if dosages and isinstance(dosages[0], dict) else {}
-        sig = " ".join(str(dosage.get("text") or "").split()) or None
+        dosages = f.objects(resource.get(self.DOSAGE_FIELD))
+        dosage = dosages[0] if dosages else {}
+        sig = f.text(dosage.get("text"))
+        sig = " ".join(sig.split()) if sig else None
         dose = _dose_text(dosage) or sig
-        route, route_text = route_value(dosage.get("route"))
+        route, route_note, route_warning = route_value(dosage.get("route"))
         status = self.STATUS_MAP.get(raw_status, "active")
         start, end = self.dates(resource, dosage)
         if start and end and end < start:
@@ -256,15 +341,13 @@ class _MedicationMapper(BaseResourceMapper):
         dose = f.fit(dose, MAX_DOSAGE, warnings, "dosage")
         # The full sig goes to notes when the dosage column does not hold it as is
         notes_parts = [f"Sig: {sig}"] if sig and sig != dose else []
-        if route is None and route_text:
-            # MediKeep only accepts its own route list; keep the original wording
-            warnings.append(
-                f"route '{route_text}' is not in MediKeep's list, kept in notes"
-            )
-            notes_parts.append(f"Route: {route_text}")
+        if route_note:
+            # MediKeep only accepts its own route list; keep what was not stored
+            warnings.append(route_warning)
+            notes_parts.append(f"Route: {route_note}")
         if f.notes_text(resource):
             notes_parts.append(f.notes_text(resource))
-        reasons = [f.display_for(c) for c in resource.get("reasonCode") or []]
+        reasons = [f.display_for(c) for c in f.objects(resource.get("reasonCode"))]
 
         name = f.fit(name, MAX_NAME, warnings, "name")
         data = {
@@ -293,50 +376,17 @@ class _MedicationMapper(BaseResourceMapper):
         }
         return MappedRecord(
             record_type=self.RECORD_TYPE,
-            external_id=resource.get("id"),
+            external_id=f.resource_id(resource),
             data=data,
-            hash_parts=self._parts(
-                name,
-                data["dosage"],
-                data["frequency"],
-                route,
-                data["indication"],
-                start,
-                end,
-                status,
-            ),
-            label=f"{self.RESOURCE_TYPE}/{resource.get('id', '?')}",
+            hash_parts=self.hash_parts_for_data(data),
+            label=f"{self.RESOURCE_TYPE}/{f.resource_id(resource) or '?'}",
             warnings=warnings,
+            source_codes={"rxnorm": rxnorm} if rxnorm else {},
         )
 
     def hash_parts_for_row(self, row: Any) -> Tuple[Any, ...]:
-        """The same hash_parts, read back from an existing row."""
-        return self._parts(
-            row.medication_name,
-            row.dosage,
-            row.frequency,
-            row.route,
-            row.indication,
-            row.effective_period_start,
-            row.effective_period_end,
-            row.status,
-        )
-
-    @staticmethod
-    def _parts(
-        name, dosage, frequency, route, indication, start, end, status
-    ) -> Tuple[Any, ...]:
-        """Normalize the same way from a resource and from a row."""
-        return (
-            f.norm(name),
-            f.norm(dosage),
-            f.norm(frequency),
-            f.norm(route),
-            f.norm(indication),
-            f.iso(start),
-            f.iso(end),
-            status,
-        )
+        """The hashed columns; content_hash folds case, spacing and date format."""
+        return tuple(getattr(row, name) for name in HASH_FIELDS)
 
     def dates(self, resource: dict, dosage: dict):
         """(start, end) dates for the resource type."""
@@ -362,68 +412,67 @@ class MedicationRequestMapper(_MedicationMapper):
     STATUS_MAP = REQUEST_STATUS
     DOSAGE_FIELD = "dosageInstruction"
 
-    def map(self, resource: dict, bundle: dict) -> Optional[MappedRecord]:
-        """Map one request, unless a statement for the same drug covers it."""
-        if self._has_statement(resource, bundle):
-            return None
-        return super().map(resource, bundle)
-
     def dates(self, resource: dict, dosage: dict):
-        bounds = ((dosage.get("timing") or {}).get("repeat") or {}).get(
-            "boundsPeriod"
-        ) or {}
-        validity = (resource.get("dispenseRequest") or {}).get("validityPeriod") or {}
+        repeat = f.obj(f.obj(dosage.get("timing")).get("repeat"))
+        bounds = f.obj(repeat.get("boundsPeriod"))
+        validity = f.obj(f.obj(resource.get("dispenseRequest")).get("validityPeriod"))
         # authoredOn is when the order was written, not when therapy began
         start = bounds.get("start") or validity.get("start")
         end = bounds.get("end") or validity.get("end")
         return f.parse_date(start), f.parse_date(end)
 
-    def _has_statement(self, resource: dict, bundle: dict) -> bool:
-        """True when a statement in the bundle covers the same drug and start."""
-        key = self._drug_key(resource, bundle)
-        if key is None:
-            return False
-        dosages = resource.get(self.DOSAGE_FIELD) or []
-        start, _ = self.dates(resource, dosages[0] if dosages else {})
-        starts = self._statement_starts(bundle).get(key)
-        if not starts:
-            return False
-        # A statement with no start date covers every request for the drug
-        return start is None or None in starts or start in starts
+    def covered(
+        self, mapped: List[Tuple[MappedRecord, BaseResourceMapper]]
+    ) -> List[MappedRecord]:
+        """Requests for a drug and start that a statement from the file already has.
 
-    def _statement_starts(self, bundle: dict) -> Dict[str, Set[Optional[date]]]:
-        """Drug key -> start dates of the bundle's usable statements, built once."""
-        index = f.bundle_index(bundle)
-        cached = index.memo.get("statement_starts")
-        if cached is not None:
-            return cached
-        starts: Dict[str, Set[Optional[date]]] = {}
-        for other in index.by_type.get("MedicationStatement", []):
-            if str(other.get("status") or "").lower() in SKIPPED_STATUS:
+        Only statements that were mapped and validated count. The drug matches on the
+        RxNorm code when both sides have one, and on the name when either has none.
+        """
+        coded: Dict[str, _Starts] = {}
+        named: Dict[str, _Starts] = {}
+        named_uncoded: Dict[str, _Starts] = {}
+        for record, mapper in mapped:
+            if not isinstance(mapper, MedicationStatementMapper):
                 continue
-            key = self._drug_key(other, bundle)
-            if key is None or not _usable_statement(other, bundle):
+            code = record.source_codes.get("rxnorm")
+            start = record.data["effective_period_start"]
+            name = f.fold(record.data["medication_name"])
+            if code:
+                coded.setdefault(code, _Starts()).add(start)
+            else:
+                named_uncoded.setdefault(name, _Starts()).add(start)
+            named.setdefault(name, _Starts()).add(start)
+
+        dropped = []
+        for record, mapper in mapped:
+            if mapper is not self:
                 continue
-            other_start = f.parse_date(f.period(other, "effective")[0])
-            starts.setdefault(key, set()).add(other_start)
-        index.memo["statement_starts"] = starts
-        return starts
+            code = record.source_codes.get("rxnorm")
+            name = f.fold(record.data["medication_name"])
+            if code:
+                candidates = [coded.get(code), named_uncoded.get(name)]
+            else:
+                candidates = [named.get(name)]
+            start = record.data["effective_period_start"]
+            if any(c is not None and c.covers(start) for c in candidates):
+                dropped.append(record)
+        return dropped
 
-    @staticmethod
-    def _drug_key(resource: dict, bundle: dict) -> Optional[str]:
-        """RxNorm code when present, else the lower-cased name."""
-        return medication_code(resource, bundle) or f.norm(
-            medication_name(resource, bundle)
-        )
 
+class _Starts:
+    """Start dates of the statements for one drug."""
 
-def _usable_statement(statement: dict, bundle: dict) -> bool:
-    """True when the statement will itself be imported, so it may stand in for a request."""
-    try:
-        mapped = MedicationStatementMapper().map(statement, bundle)
-        if mapped is None:
-            return False
-        MedicationCreate.model_validate({**mapped.data, "patient_id": 0})
-    except (ValidationError, *MAPPING_ERRORS):
-        return False
-    return True
+    def __init__(self):
+        self.dates: set = set()
+        self.open = False  # A statement without a start covers every request
+
+    def add(self, start: Optional[date]) -> None:
+        if start is None:
+            self.open = True
+        else:
+            self.dates.add(start)
+
+    def covers(self, start: Optional[date]) -> bool:
+        """True for a request with this start; a request without one is covered by any."""
+        return self.open or start is None or start in self.dates

@@ -20,6 +20,9 @@ MAX_ALLERGEN = 200
 MAX_REACTION = 500
 MAX_NOTES = 5000
 
+# Columns a re-import overwrites; a local edit to any of them marks the row as edited
+HASH_FIELDS = ("allergen", "reaction", "severity", "onset_date", "status")
+
 
 class AllergyMapper(BaseResourceMapper):
     """AllergyIntolerance -> allergies row."""
@@ -34,12 +37,12 @@ class AllergyMapper(BaseResourceMapper):
         verification = f.status_code(resource, "verificationStatus", "")
         if verification in ("entered-in-error", "refuted"):
             return None
-        allergen = f.display_for(resource.get("code"))
+        warnings: list = []
+        allergen = f.name_for(resource.get("code"), warnings, "allergen")
         if not allergen:
             return None
 
-        warnings: list = []
-        reactions = [r for r in resource.get("reaction") or [] if isinstance(r, dict)]
+        reactions = f.objects(resource.get("reaction"))
         reaction = f.fit(
             self._reaction_text(reactions), MAX_REACTION, warnings, "reaction"
         )
@@ -62,31 +65,16 @@ class AllergyMapper(BaseResourceMapper):
         }
         return MappedRecord(
             record_type=self.RECORD_TYPE,
-            external_id=resource.get("id"),
+            external_id=f.resource_id(resource),
             data=data,
-            hash_parts=self._parts(
-                allergen, data["reaction"], data["severity"], onset_date, status
-            ),
-            label=f"AllergyIntolerance/{resource.get('id', '?')}",
+            hash_parts=self.hash_parts_for_data(data),
+            label=f"AllergyIntolerance/{f.resource_id(resource) or '?'}",
             warnings=warnings,
         )
 
     def hash_parts_for_row(self, row: Any) -> Tuple[Any, ...]:
-        """The same hash_parts, read back from an existing row."""
-        return self._parts(
-            row.allergen, row.reaction, row.severity, row.onset_date, row.status
-        )
-
-    @staticmethod
-    def _parts(allergen, reaction, severity, onset_date, status) -> Tuple[Any, ...]:
-        """Normalize the same way from a resource and from a row."""
-        return (
-            f.norm(allergen),
-            f.norm(reaction),
-            f.norm(severity),
-            f.iso(onset_date),
-            status,
-        )
+        """The hashed columns; content_hash folds case, spacing and date format."""
+        return tuple(getattr(row, name) for name in HASH_FIELDS)
 
     @staticmethod
     def _reaction_text(reactions: List[dict]) -> Optional[str]:
@@ -94,12 +82,13 @@ class AllergyMapper(BaseResourceMapper):
         names: List[str] = []
         descriptions: List[str] = []
         for reaction in reactions:
-            for concept in reaction.get("manifestation") or []:
+            for concept in f.objects(reaction.get("manifestation")):
                 text = f.display_for(concept)
                 if text and text not in names:
                     names.append(text)
-            if reaction.get("description"):
-                descriptions.append(str(reaction["description"]).strip())
+            description = reaction.get("description")
+            if isinstance(description, str) and description.strip():
+                descriptions.append(description.strip())
         return ", ".join(names) or "; ".join(descriptions) or None
 
     @staticmethod
@@ -108,4 +97,7 @@ class AllergyMapper(BaseResourceMapper):
         for reaction in reactions:
             if reaction.get("severity") in ("mild", "moderate", "severe"):
                 return reaction["severity"]
-        return CRITICALITY_SEVERITY.get(resource.get("criticality"), "none")
+        criticality = resource.get("criticality")
+        if not isinstance(criticality, str):
+            return "none"
+        return CRITICALITY_SEVERITY.get(criticality, "none")
