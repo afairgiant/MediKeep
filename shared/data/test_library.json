@@ -1,6 +1,6 @@
 {
-  "version": "1.8.2",
-  "lastUpdated": "2026-11-04",
+  "version": "1.8.3",
+  "lastUpdated": "2026-11-09",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -743,13 +743,13 @@
     {
       "test_name": "LDL/HDL Ratio",
       "abbreviation": "LDL/HDL",
+      "test_code": "11054-4",
       "default_unit": "ratio",
       "category": "lipids",
       "common_names": [
         "LDL/HDL Ratio",
-        "Cholesterol Ratio",
-        "CHOL/HDLC RATIO",
-        "Total Cholesterol/HDL Ratio"
+        "LDL/HDL Index",
+        "LDL/HDL Quotient"
       ],
       "is_common": false,
       "display_order": 48,
@@ -1319,6 +1319,26 @@
       ],
       "is_common": true,
       "display_order": 81,
+      "result_type": "quantitative"
+    },
+    {
+      "test_name": "Total Cholesterol/HDL Ratio",
+      "abbreviation": "CHOL/HDL",
+      "test_code": "9830-1",
+      "default_unit": "ratio",
+      "category": "lipids",
+      "common_names": [
+        "Total Cholesterol/HDL Ratio",
+        "Cholesterol/HDL Ratio",
+        "CHOL/HDLC RATIO",
+        "Cholesterol Ratio",
+        "Chol/HDL Ratio",
+        "T. Chol/HDL Ratio",
+        "TC/HDL Ratio",
+        "TC/HDL"
+      ],
+      "is_common": false,
+      "display_order": 179,
       "result_type": "quantitative"
     },
     {

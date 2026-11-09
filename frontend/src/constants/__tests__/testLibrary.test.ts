@@ -47,6 +47,22 @@ describe('searchTests', () => {
     );
   });
 
+  test.each([
+    ['Cholesterol/HDL Ratio', 'Total Cholesterol/HDL Ratio'],
+    ['Cholesterol Ratio', 'Total Cholesterol/HDL Ratio'],
+    ['T. Chol/HDL Ratio', 'Total Cholesterol/HDL Ratio'],
+    ['CHOL', 'Total Cholesterol'],
+    ['LDL/HDL Ratio', 'LDL/HDL Ratio'],
+  ])('ranks "%s" to %s first (issue #1221)', (query, expected) => {
+    expect(searchTests(query, 1)[0]?.test_name).toBe(expected);
+  });
+
+  test('bare "TC" does not prefix-match the cholesterol ratio abbreviation', () => {
+    expect(searchTests('TC', 1)[0]?.test_name).not.toBe(
+      'Total Cholesterol/HDL Ratio'
+    );
+  });
+
   test('unknown query returns no results', () => {
     expect(searchTests('zzzzznotarealtest')).toEqual([]);
   });
