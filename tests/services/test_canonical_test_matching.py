@@ -289,11 +289,31 @@ class TestCanonicalTestMatchingService:
         result = matching_service.find_canonical_match("BUN/Cr")
         assert result == "BUN/Creatinine Ratio"
 
-        result = matching_service.find_canonical_match("LDL/HDL Ratio")
-        assert result == "LDL/HDL Ratio"
+    @pytest.mark.parametrize(
+        "name", ["LDL/HDL Ratio", "LDL/HDL", "LDL/HDL Index", "LDL/HDL Quotient"]
+    )
+    def test_ldl_hdl_ratio_aliases(self, matching_service, name):
+        assert matching_service.find_canonical_match(name) == "LDL/HDL Ratio"
 
-        result = matching_service.find_canonical_match("Cholesterol Ratio")
-        assert result == "LDL/HDL Ratio"
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "Total Cholesterol/HDL Ratio",
+            "Cholesterol/HDL Ratio",
+            "CHOL/HDLC RATIO",
+            "Cholesterol Ratio",
+            "Chol/HDL Ratio",
+            "T. Chol/HDL Ratio",
+            "TC/HDL Ratio",
+            "TC/HDL",
+            "CHOL/HDL",
+        ],
+    )
+    def test_total_cholesterol_hdl_ratio_aliases(self, matching_service, name):
+        """Regression for #1221: total cholesterol/HDL is a different test from LDL/HDL."""
+        assert (
+            matching_service.find_canonical_match(name) == "Total Cholesterol/HDL Ratio"
+        )
 
     # Test specific important tests
     def test_glucose_matching(self, matching_service):

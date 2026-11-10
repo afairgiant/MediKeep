@@ -50,3 +50,15 @@ def test_no_error_level_collisions_in_shipped_library(test_library_entries, caps
         f"Found {len(errors)} error-level collision(s) in shipped test_library.json:\n"
         + _format_results(errors)
     )
+
+
+def test_lipid_ratio_entries_have_loinc_codes(test_library_entries):
+    """Each lipid ratio entry names the one LOINC test it stands for (#1221)."""
+    missing = [
+        entry["test_name"]
+        for entry in test_library_entries
+        if entry.get("category") == "lipids"
+        and entry.get("default_unit") == "ratio"
+        and not entry.get("test_code")
+    ]
+    assert not missing, f"Lipid ratio entries without test_code: {missing}"
