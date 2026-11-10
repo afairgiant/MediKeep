@@ -446,3 +446,90 @@ class TestHepatitisAndAutoimmuneGastritisAliases:
     )
     def test_different_assays_do_not_resolve(self, lab_name):
         assert canonical_test_matching.find_canonical_match(lab_name) is None
+
+
+class TestBiopsyEntries:
+    """Lock in the biopsy library entries: qualitative pathology results."""
+
+    @pytest.mark.parametrize(
+        "lab_name, canonical",
+        [
+            ("Biopsy", "Biopsy"),
+            ("Tissue Biopsy", "Biopsy"),
+            ("Skin Biopsy", "Skin Biopsy"),
+            ("Skin Punch Biopsy", "Skin Biopsy"),
+            ("Dermatopathology", "Skin Biopsy"),
+            ("Bone Marrow Biopsy", "Bone Marrow Biopsy"),
+            ("BMB", "Bone Marrow Biopsy"),
+            ("Bone Marrow Trephine Biopsy", "Bone Marrow Biopsy"),
+        ],
+    )
+    def test_lab_names_resolve_to_their_entry(self, lab_name, canonical):
+        assert canonical_test_matching.find_canonical_match(lab_name) == canonical
+
+    @pytest.mark.parametrize("name", ["Biopsy", "Skin Biopsy", "Bone Marrow Biopsy"])
+    def test_entries_are_qualitative_pathology_results(self, name):
+        """A biopsy is a finding, not a number: it must not default to quantitative."""
+        info = canonical_test_matching.get_test_info(name)
+        assert info is not None
+        assert info["category"] == "pathology"
+        assert info["result_type"] == "qualitative"
+        assert info["default_unit"] == ""
+
+    def test_histopathology_is_not_treated_as_a_biopsy(self):
+        """Histopathology also covers resections; the form maps it to the report panel."""
+        assert canonical_test_matching.find_canonical_match("Histopathology") is None
+
+    def test_specific_biopsy_names_do_not_collapse_into_generic_entry(self):
+        """Organ-specific entries keep their own trend instead of the generic one."""
+        assert canonical_test_matching.find_canonical_match("Skin Biopsy") != "Biopsy"
+        assert (
+            canonical_test_matching.find_canonical_match("Bone Marrow Biopsy")
+            != "Biopsy"
+        )
+
+
+class TestCytologyMolecularAndFlowEntries:
+    """Lock in the cytology, IHC, molecular, flow cytometry and cytogenetics entries."""
+
+    EXPECTED_RESULT_TYPES = {
+        "Cytology": "qualitative",
+        "Immunohistochemistry": "qualitative",
+        "Molecular Pathology": "qualitative",
+        "Flow Cytometry": "textual",
+        "Cytogenetics": "textual",
+    }
+
+    @pytest.mark.parametrize(
+        "lab_name, canonical",
+        [
+            ("Cytology", "Cytology"),
+            ("Pap Smear", "Cytology"),
+            ("Papanicolaou Test", "Cytology"),
+            ("Fine Needle Aspiration", "Cytology"),
+            ("FNA", "Cytology"),
+            ("IHC", "Immunohistochemistry"),
+            ("Immunohistochemical Staining", "Immunohistochemistry"),
+            ("In Situ Hybridization", "Molecular Pathology"),
+            ("FISH", "Molecular Pathology"),
+            ("Immunophenotyping", "Flow Cytometry"),
+            ("Flow Cytometry Report", "Flow Cytometry"),
+            ("Karyotype", "Cytogenetics"),
+            ("Chromosome Analysis", "Cytogenetics"),
+        ],
+    )
+    def test_lab_names_resolve_to_their_entry(self, lab_name, canonical):
+        assert canonical_test_matching.find_canonical_match(lab_name) == canonical
+
+    @pytest.mark.parametrize("name", list(EXPECTED_RESULT_TYPES))
+    def test_entries_are_pathology_with_the_expected_result_type(self, name):
+        """Pap, IHC and molecular results are pos/neg; flow and cytogenetics are reports."""
+        info = canonical_test_matching.get_test_info(name)
+        assert info is not None
+        assert info["category"] == "pathology"
+        assert info["result_type"] == self.EXPECTED_RESULT_TYPES[name]
+        assert info["default_unit"] == ""
+
+    def test_pcr_stays_with_infectious_disease_tests(self):
+        """PCR is used far beyond pathology, so it is not an alias of the molecular entry."""
+        assert canonical_test_matching.find_canonical_match("PCR") is None

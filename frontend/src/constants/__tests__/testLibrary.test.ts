@@ -10,6 +10,8 @@ import {
   searchTests,
   getMatchedCommonName,
   getAutocompleteOptions,
+  getTestByName,
+  TEST_CATEGORY_TO_FORM_CATEGORY,
 } from '../testLibrary';
 
 describe('searchTests', () => {
@@ -91,3 +93,69 @@ describe('getMatchedCommonName', () => {
     );
   });
 });
+
+describe('biopsy entries', () => {
+  it.each(['Biopsy', 'Skin Biopsy', 'Bone Marrow Biopsy'])(
+    '%s is a qualitative pathology test with no unit',
+    name => {
+      const test = getTestByName(name);
+      expect(test).toBeDefined();
+      expect(test?.category).toBe('pathology');
+      expect(test?.result_type).toBe('qualitative');
+      expect(test?.default_unit).toBe('');
+    }
+  );
+
+  it('are found when searching "biopsy"', () => {
+    const names = searchTests('biopsy').map(r => r.test_name);
+    expect(names).toEqual(
+      expect.arrayContaining(['Biopsy', 'Skin Biopsy', 'Bone Marrow Biopsy'])
+    );
+  });
+
+  it('are found through a common name (dermatopathology)', () => {
+    const names = searchTests('dermatopathology').map(r => r.test_name);
+    expect(names).toContain('Skin Biopsy');
+  });
+
+  it('lists the generic entry first when searching the exact name', () => {
+    expect(searchTests('biopsy')[0].test_name).toBe('Biopsy');
+  });
+
+  it('fill the pathology category on the lab result form', () => {
+    const test = getTestByName('Skin Biopsy');
+    expect(TEST_CATEGORY_TO_FORM_CATEGORY[test!.category]).toBe('pathology');
+  });
+});
+
+describe('cytology, IHC, molecular, flow and cytogenetics entries', () => {
+  it.each([
+    ['Cytology', 'qualitative'],
+    ['Immunohistochemistry', 'qualitative'],
+    ['Molecular Pathology', 'qualitative'],
+    ['Flow Cytometry', 'textual'],
+    ['Cytogenetics', 'textual'],
+  ])('%s is a pathology test recorded as %s', (name, resultType) => {
+    const test = getTestByName(name);
+    expect(test).toBeDefined();
+    expect(test?.category).toBe('pathology');
+    expect(test?.result_type).toBe(resultType);
+    expect(test?.default_unit).toBe('');
+  });
+
+  it.each([
+    ['pap smear', 'Cytology'],
+    ['fna', 'Cytology'],
+    ['ihc', 'Immunohistochemistry'],
+    ['karyotype', 'Cytogenetics'],
+    ['immunophenotyping', 'Flow Cytometry'],
+    ['fish', 'Molecular Pathology'],
+  ])('search for "%s" finds %s', (query, name) => {
+    expect(searchTests(query).map(r => r.test_name)).toContain(name);
+  });
+
+  it('gives Immunohistochemistry its IHC abbreviation', () => {
+    expect(getTestByName('IHC')?.test_name).toBe('Immunohistochemistry');
+  });
+});
+

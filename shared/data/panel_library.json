@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2026-06-14",
+  "version": "1.1.0",
+  "lastUpdated": "2026-11-09",
   "panels": [
     {
       "panel_name": "Complete Blood Count",
@@ -313,6 +313,78 @@
       "common_names": ["Sonogram", "Sonography", "Ultrasonography", "Echography"],
       "is_common": true,
       "display_order": 39
+    },
+    {
+      "panel_name": "Biopsy",
+      "abbreviation": "",
+      "category": "pathology",
+      "common_names": ["Tissue Biopsy", "Biopsy Report", "Biopsy Pathology Report"],
+      "is_common": true,
+      "display_order": 40
+    },
+    {
+      "panel_name": "Skin Biopsy",
+      "abbreviation": "",
+      "category": "pathology",
+      "common_names": ["Skin Punch Biopsy", "Skin Shave Biopsy", "Skin Biopsy Report", "Dermatopathology"],
+      "is_common": true,
+      "display_order": 41
+    },
+    {
+      "panel_name": "Bone Marrow Biopsy",
+      "abbreviation": "BMB",
+      "category": "pathology",
+      "common_names": ["Bone Marrow Biopsy Report", "Bone Marrow Trephine Biopsy"],
+      "is_common": false,
+      "display_order": 42
+    },
+    {
+      "panel_name": "Pathology Report",
+      "abbreviation": "",
+      "category": "pathology",
+      "common_names": ["Pathology", "Histopathology", "Surgical Pathology", "Anatomic Pathology"],
+      "is_common": true,
+      "display_order": 43
+    },
+    {
+      "panel_name": "Cytology",
+      "abbreviation": "",
+      "category": "pathology",
+      "common_names": ["Cytopathology", "Cytology Report", "Pap Smear", "Pap Test", "Papanicolaou Test", "Fine Needle Aspiration", "Fine Needle Aspirate", "FNA"],
+      "is_common": true,
+      "display_order": 44
+    },
+    {
+      "panel_name": "Immunohistochemistry",
+      "abbreviation": "IHC",
+      "category": "pathology",
+      "common_names": ["IHC", "Immunohistochemical Staining", "Immunostain"],
+      "is_common": false,
+      "display_order": 45
+    },
+    {
+      "panel_name": "Molecular Pathology",
+      "abbreviation": "",
+      "category": "pathology",
+      "common_names": ["Molecular Pathology Testing", "In Situ Hybridization", "ISH", "FISH", "Fluorescence In Situ Hybridization"],
+      "is_common": false,
+      "display_order": 46
+    },
+    {
+      "panel_name": "Flow Cytometry",
+      "abbreviation": "",
+      "category": "pathology",
+      "common_names": ["Flow Cytometry Report", "Flow Cytometric Immunophenotyping", "Immunophenotyping"],
+      "is_common": false,
+      "display_order": 47
+    },
+    {
+      "panel_name": "Cytogenetics",
+      "abbreviation": "",
+      "category": "pathology",
+      "common_names": ["Karyotype", "Chromosome Analysis", "Chromosomal Analysis", "Cytogenetic Analysis"],
+      "is_common": false,
+      "display_order": 48
     }
   ]
 }

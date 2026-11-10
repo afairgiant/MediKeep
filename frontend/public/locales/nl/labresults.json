@@ -424,6 +424,7 @@
     },
     "refreshComponents": "Componenten vernieuwen",
     "resultType": {
+      "label": "Resultaattype",
       "qualitative": "Kwalitatief (Pos/Neg)",
       "quantitative": "Kwantitatief (Numeriek)",
       "textual": "Tekstueel (Rapport)"

@@ -1,8 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-  parseRefRangeText,
+  applyDefaultResultTypeToPristineRows,
   calculateStatus,
+  createEmptyRow,
+  getResultTypeSwitchFields,
+  isPristineRow,
   makeLegacyResultHandler,
+  parseRefRangeText,
 } from './labTestComponentUtils';
 
 const NONE = { min: null, max: null, minExclusive: false, maxExclusive: false };
@@ -198,5 +202,118 @@ describe('makeLegacyResultHandler', () => {
     const wrapped = makeLegacyResultHandler(handler);
 
     await expect(wrapped?.(point)).resolves.toBe(false);
+  });
+});
+
+describe('createEmptyRow', () => {
+  it('starts numeric unless a result type is given', () => {
+    expect(createEmptyRow(1).result_type).toBe('quantitative');
+    expect(createEmptyRow(1, 'textual').result_type).toBe('textual');
+  });
+});
+
+describe('getResultTypeSwitchFields', () => {
+  it('clears numeric fields and status when switching to textual', () => {
+    expect(getResultTypeSwitchFields('textual')).toEqual({
+      result_type: 'textual',
+      status: '',
+      qualitative_value: '',
+      textual_value: '',
+      value: '',
+      unit: '',
+      ref_range_min: '',
+      ref_range_max: '',
+      ref_range_text: '',
+    });
+  });
+
+  it('clears numeric fields and status when switching to qualitative', () => {
+    const fields = getResultTypeSwitchFields('qualitative');
+    expect(fields.result_type).toBe('qualitative');
+    expect(fields.status).toBe('');
+    expect(fields.value).toBe('');
+    expect(fields.unit).toBe('');
+    expect(fields.textual_value).toBe('');
+  });
+
+  it('keeps the unit and reference range when switching to quantitative', () => {
+    const fields = getResultTypeSwitchFields('quantitative');
+    expect(fields).toEqual({
+      result_type: 'quantitative',
+      status: '',
+      qualitative_value: '',
+      textual_value: '',
+    });
+    expect(fields).not.toHaveProperty('unit');
+    expect(fields).not.toHaveProperty('ref_range_min');
+  });
+
+  it('leaves a status derived from the old type out of the new one', () => {
+    const row = {
+      ...createEmptyRow(1, 'qualitative'),
+      qualitative_value: 'positive',
+      status: 'abnormal',
+    };
+    const switched = { ...row, ...getResultTypeSwitchFields('textual') };
+    expect(switched.status).toBe('');
+    expect(switched.qualitative_value).toBe('');
+  });
+});
+
+describe('isPristineRow', () => {
+  it('is true for a new row of any result type', () => {
+    expect(isPristineRow(createEmptyRow(1))).toBe(true);
+    expect(isPristineRow(createEmptyRow(1, 'textual'))).toBe(true);
+  });
+
+  it.each([
+    ['test name', { test_name: 'Glucose' }],
+    ['abbreviation', { abbreviation: 'GLU' }],
+    ['library link', { canonical_test_name: 'Glucose' }],
+    ['numeric value', { value: 0 }],
+    ['unit', { unit: 'mg/dL' }],
+    ['reference minimum', { ref_range_min: 0 }],
+    ['reference text', { ref_range_text: '<5' }],
+    ['qualitative value', { qualitative_value: 'negative' }],
+    ['textual value', { textual_value: 'Benign' }],
+    ['notes', { notes: 'fasting' }],
+  ])('is false once a %s has been entered', (_label, change) => {
+    expect(isPristineRow({ ...createEmptyRow(1), ...change })).toBe(false);
+  });
+
+  it('treats a whitespace-only test name as empty', () => {
+    expect(isPristineRow({ ...createEmptyRow(1), test_name: '   ' })).toBe(true);
+  });
+});
+
+describe('applyDefaultResultTypeToPristineRows', () => {
+  it('retypes untouched rows', () => {
+    const rows = [createEmptyRow(1), createEmptyRow(2)];
+    const result = applyDefaultResultTypeToPristineRows(rows, 'textual');
+    expect(result.map(r => r.result_type)).toEqual(['textual', 'textual']);
+  });
+
+  it('keeps the type of rows that have entered data', () => {
+    const named = { ...createEmptyRow(1), test_name: 'Glucose' };
+    const valued = { ...createEmptyRow(2), value: 5 };
+    const result = applyDefaultResultTypeToPristineRows(
+      [named, valued, createEmptyRow(3)],
+      'textual'
+    );
+    expect(result.map(r => r.result_type)).toEqual([
+      'quantitative',
+      'quantitative',
+      'textual',
+    ]);
+  });
+
+  it('returns the same array when nothing needs to change', () => {
+    const rows = [createEmptyRow(1), { ...createEmptyRow(2), test_name: 'X' }];
+    expect(applyDefaultResultTypeToPristineRows(rows, 'quantitative')).toBe(rows);
+  });
+
+  it('handles an empty list', () => {
+    const rows: ReturnType<typeof createEmptyRow>[] = [];
+    expect(applyDefaultResultTypeToPristineRows(rows, 'textual')).toBe(rows);
   });
 });

@@ -34,6 +34,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { useTestNameAutocomplete } from '../../../hooks/useTestNameAutocomplete';
+import { getDefaultResultTypeForCategory } from '../../../constants/labCategories';
 import {
   parseDateInput,
   formatDateInputChange,
@@ -46,6 +47,7 @@ import LabResultLinkTabButtons from './LabResultLinkTabs';
 import LabResultRecordLinksCard from './LabResultRecordLinksCard';
 import TestComponentsTab from './TestComponentsTab';
 import InlineTestComponentEntry from './InlineTestComponentEntry';
+import NameAutocompleteOption from './NameAutocompleteOption';
 import AdvancedModeSwitch from './AdvancedModeSwitch';
 import SameAsOrderedLink from './SameAsOrderedLink';
 import {
@@ -568,6 +570,12 @@ const LabResultFormWrapper = ({
                         data={nameOptions}
                         limit={50}
                         filter={({ options, limit }) => options.slice(0, limit)}
+                        renderOption={({ option }) => (
+                          <NameAutocompleteOption
+                            option={option.value}
+                            query={formData.test_name || ''}
+                          />
+                        )}
                         maxDropdownHeight={300}
                         placeholder={t('labresults:testName.placeholder')}
                         description={t('labresults:testName.description')}
@@ -990,6 +998,9 @@ const LabResultFormWrapper = ({
                     <Grid.Col span={12}>
                       <InlineTestComponentEntry
                         onRef={handleInlineComponentsRef}
+                        defaultResultType={getDefaultResultTypeForCategory(
+                          formData.test_category
+                        )}
                       />
                       {onSwitchToQuickImport && (
                         <Button

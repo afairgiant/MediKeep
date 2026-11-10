@@ -60,12 +60,14 @@ import {
   calculateStatus,
   capitalizeStatus,
   createEmptyRow,
+  getResultTypeSwitchFields,
   getStatusInputColor,
   hasFilledValue,
   sanitizeComponentForApi,
   ComponentRowData,
 } from '../../../utils/labTestComponentUtils';
 import { TestTemplate, PANEL_TEMPLATES } from '../../../constants/panelTemplateMap';
+import ResultTypeSelector from './ResultTypeSelector';
 
 interface TestComponentTemplatesProps {
   labResultId: number;
@@ -533,6 +535,11 @@ function TestComponentTemplates({
                               {t('shared:fields.testCode')}
                             </Text>
                           </Box>
+                          <Box style={{ width: '140px', minWidth: '140px' }}>
+                            <Text size="xs" fw={600}>
+                              {t('labresults:testComponents.resultType.label', 'Result type')}
+                            </Text>
+                          </Box>
                         </>
                       )}
                       <Box style={{ width: '100px', minWidth: '100px' }}>
@@ -728,6 +735,20 @@ function TestComponentTemplates({
                                       event.target.value
                                     )
                                   }
+                                />
+                              </Box>
+                              <Box
+                                style={{ width: '140px', minWidth: '140px' }}
+                              >
+                                <ResultTypeSelector
+                                  value={component.result_type}
+                                  onChange={resultType =>
+                                    updateComponentFields(
+                                      index,
+                                      getResultTypeSwitchFields(resultType)
+                                    )
+                                  }
+                                  showLabel={false}
                                 />
                               </Box>
                             </>

@@ -1,6 +1,6 @@
 {
-  "version": "1.8.2",
-  "lastUpdated": "2026-11-04",
+  "version": "1.8.3",
+  "lastUpdated": "2026-11-09",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -2614,6 +2614,120 @@
       "is_common": false,
       "result_type": "quantitative",
       "display_order": 178
+    },
+    {
+      "test_name": "Biopsy",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "Tissue Biopsy",
+        "Biopsy Report",
+        "Biopsy Pathology Report"
+      ],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 179
+    },
+    {
+      "test_name": "Skin Biopsy",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "Skin Punch Biopsy",
+        "Skin Shave Biopsy",
+        "Skin Biopsy Report",
+        "Dermatopathology"
+      ],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 180
+    },
+    {
+      "test_name": "Bone Marrow Biopsy",
+      "abbreviation": "BMB",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "Bone Marrow Biopsy Report",
+        "Bone Marrow Trephine Biopsy"
+      ],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 181
+    },
+    {
+      "test_name": "Cytology",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "Cytopathology",
+        "Cytology Report",
+        "Pap Smear",
+        "Pap Test",
+        "Papanicolaou Test",
+        "Fine Needle Aspiration",
+        "Fine Needle Aspirate",
+        "FNA"
+      ],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 182
+    },
+    {
+      "test_name": "Immunohistochemistry",
+      "abbreviation": "IHC",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "IHC",
+        "Immunohistochemical Staining",
+        "Immunostain"
+      ],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 183
+    },
+    {
+      "test_name": "Molecular Pathology",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "Molecular Pathology Testing",
+        "In Situ Hybridization",
+        "ISH",
+        "FISH",
+        "Fluorescence In Situ Hybridization"
+      ],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 184
+    },
+    {
+      "test_name": "Flow Cytometry",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "Flow Cytometry Report",
+        "Flow Cytometric Immunophenotyping",
+        "Immunophenotyping"
+      ],
+      "is_common": false,
+      "result_type": "textual",
+      "display_order": 185
+    },
+    {
+      "test_name": "Cytogenetics",
+      "default_unit": "",
+      "category": "pathology",
+      "common_names": [
+        "Karyotype",
+        "Chromosome Analysis",
+        "Chromosomal Analysis",
+        "Cytogenetic Analysis"
+      ],
+      "is_common": false,
+      "result_type": "textual",
+      "display_order": 186
     }
   ]
 }
