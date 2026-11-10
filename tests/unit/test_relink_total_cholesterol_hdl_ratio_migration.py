@@ -55,6 +55,9 @@ ROWS = [
     (5, "LDL/HDL Ratio", LDL_HDL),
     (6, "Cholesterol/HDL Ratio", "My Custom Ratio"),
     (7, "Cholesterol/HDL Ratio", None),
+    (8, "Cholesterol Ratio:", LDL_HDL),
+    (9, " CHOL/HDLC RATIO,; ", LDL_HDL),
+    (10, "LDL/HDL Ratio:", LDL_HDL),
 ]
 
 
@@ -71,6 +74,9 @@ def test_upgrade_relinks_only_total_cholesterol_names(engine):
         5: LDL_HDL,
         6: "My Custom Ratio",
         7: None,
+        8: TOTAL_CHOL_HDL,
+        9: TOTAL_CHOL_HDL,
+        10: LDL_HDL,
     }
 
 
