@@ -32,6 +32,7 @@ import {
   TestNameFields,
 } from '../../../hooks/useTestNameAutocomplete';
 import logger from '../../../services/logger';
+import NameAutocompleteOption from './NameAutocompleteOption';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import { useNestedDialog } from '../../../hooks/useNestedDialog';
 
@@ -307,6 +308,12 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
           data={nameOptions}
           limit={50}
           filter={({ options, limit }) => options.slice(0, limit)}
+          renderOption={({ option }) => (
+            <NameAutocompleteOption
+              option={option.value}
+              query={formData.test_name}
+            />
+          )}
           maxDropdownHeight={300}
           comboboxProps={{ zIndex: 3001 }}
           required

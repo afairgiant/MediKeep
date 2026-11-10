@@ -161,28 +161,91 @@ export const PANEL_TEMPLATES: TestTemplate[] = [
     id: 'mri',
     category: 'imaging',
     tests: [
-      { test_name: 'MRI', abbreviation: 'MRI', unit: '', default_display_order: 1, result_type: 'textual' },
+      { test_name: 'MRI', abbreviation: 'MRI', unit: '', default_display_order: 1, result_type: 'qualitative' },
     ],
   },
   {
     id: 'ct_scan',
     category: 'imaging',
     tests: [
-      { test_name: 'CT Scan', abbreviation: 'CT', unit: '', default_display_order: 1, result_type: 'textual' },
+      { test_name: 'CT Scan', abbreviation: 'CT', unit: '', default_display_order: 1, result_type: 'qualitative' },
     ],
   },
   {
     id: 'x_ray',
     category: 'imaging',
     tests: [
-      { test_name: 'X-Ray', abbreviation: 'XR', unit: '', default_display_order: 1, result_type: 'textual' },
+      { test_name: 'X-Ray', abbreviation: 'XR', unit: '', default_display_order: 1, result_type: 'qualitative' },
     ],
   },
   {
     id: 'ultrasound',
     category: 'imaging',
     tests: [
-      { test_name: 'Ultrasound', abbreviation: 'US', unit: '', default_display_order: 1, result_type: 'textual' },
+      { test_name: 'Ultrasound', abbreviation: 'US', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'biopsy',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Biopsy', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'skin_biopsy',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Skin Biopsy', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'bone_marrow_biopsy',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Bone Marrow Biopsy', abbreviation: 'BMB', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'pathology_report',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Pathology Report', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'cytology',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Cytology', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'immunohistochemistry',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Immunohistochemistry', abbreviation: 'IHC', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'molecular_pathology',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Molecular Pathology', unit: '', default_display_order: 1, result_type: 'qualitative' },
+    ],
+  },
+  {
+    id: 'flow_cytometry',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Flow Cytometry', unit: '', default_display_order: 1, result_type: 'textual' },
+    ],
+  },
+  {
+    id: 'cytogenetics',
+    category: 'pathology',
+    tests: [
+      { test_name: 'Cytogenetics', unit: '', default_display_order: 1, result_type: 'textual' },
     ],
   },
   {
@@ -442,6 +505,15 @@ const PANEL_NAME_TO_TEMPLATE_ID: Readonly<Record<string, string>> = {
   'CT Scan': 'ct_scan',
   'X-Ray': 'x_ray',
   'Ultrasound': 'ultrasound',
+  'Biopsy': 'biopsy',
+  'Skin Biopsy': 'skin_biopsy',
+  'Bone Marrow Biopsy': 'bone_marrow_biopsy',
+  'Pathology Report': 'pathology_report',
+  'Cytology': 'cytology',
+  'Immunohistochemistry': 'immunohistochemistry',
+  'Molecular Pathology': 'molecular_pathology',
+  'Flow Cytometry': 'flow_cytometry',
+  'Cytogenetics': 'cytogenetics',
   'Adrenal Function Panel': 'adrenal_function',
   'Allergy Testing Panel': 'allergy_testing',
   'B12 and Folate Panel': 'b12_folate',

@@ -424,6 +424,7 @@
     },
     "refreshComponents": "Aggiorna componenti",
     "resultType": {
+      "label": "Tipo di risultato",
       "qualitative": "Qualitativo (Pos/Neg)",
       "quantitative": "Quantitativo (Numerico)",
       "textual": "Testuale (Rapporto)"

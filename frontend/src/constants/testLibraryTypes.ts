@@ -24,7 +24,7 @@ export type TestCategory =
   | 'stomatology'
   | 'other';
 
-export type ResultType = 'quantitative' | 'qualitative';
+export type ResultType = 'quantitative' | 'qualitative' | 'textual';
 export type QualitativeValue =
   | 'positive'
   | 'negative'

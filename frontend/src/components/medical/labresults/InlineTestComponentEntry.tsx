@@ -42,9 +42,12 @@ import {
   CATEGORY_SELECT_OPTIONS,
   QUALITATIVE_SELECT_OPTIONS,
 } from '../../../constants/labCategories';
+import { ResultType } from '../../../constants/testLibraryTypes';
 import {
+  applyDefaultResultTypeToPristineRows,
   calculateStatus,
   capitalizeStatus,
+  getResultTypeSwitchFields,
   getStatusInputColor,
   createEmptyRow,
   isSubmittableComponent,
@@ -55,6 +58,7 @@ import {
 import { labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { useCurrentPatient } from '../../../hooks/useGlobalData';
 import logger from '../../../services/logger';
+import ResultTypeSelector from './ResultTypeSelector';
 
 export interface InlineTestComponentMethods {
   hasPendingComponents: () => boolean;
@@ -68,18 +72,25 @@ interface InlineTestComponentEntryProps {
   onRef?: (_methods: InlineTestComponentMethods | null) => void;
   disabled?: boolean;
   defaultExpanded?: boolean;
+  /** Result type that new, untouched rows start with (from the lab result category). */
+  defaultResultType?: ResultType;
 }
 
 function InlineTestComponentEntry({
   onRef,
   disabled = false,
   defaultExpanded = false,
+  defaultResultType = 'quantitative',
 }: InlineTestComponentEntryProps): React.ReactElement {
   const { t } = useTranslation(['medical', 'shared', 'labresults']);
   const [expanded, setExpanded] = useState(defaultExpanded);
-  const [components, setComponents] = useState<ComponentRowData[]>([
-    createEmptyRow(1),
+  const [components, setComponents] = useState<ComponentRowData[]>(() => [
+    createEmptyRow(1, defaultResultType),
   ]);
+  // Read through a ref so rows created by the callbacks below (including ones
+  // the parent triggers via onRef) always get the current category's default.
+  const defaultResultTypeRef = useRef(defaultResultType);
+  defaultResultTypeRef.current = defaultResultType;
   const justSelectedRef = useRef<{ index: number; value: string } | null>(null);
   const { patient } = useCurrentPatient() as any;
   const patientId = patient?.id;
@@ -103,9 +114,17 @@ function InlineTestComponentEntry({
   }, [components]);
 
   const clearComponents = useCallback(() => {
-    setComponents([createEmptyRow(1)]);
+    setComponents([createEmptyRow(1, defaultResultTypeRef.current)]);
     setExpanded(false);
   }, []);
+
+  // Untouched rows follow the category's default when it changes (e.g. picking
+  // the MRI panel); rows with entered data keep their type.
+  useEffect(() => {
+    setComponents(prev =>
+      applyDefaultResultTypeToPristineRows(prev, defaultResultType)
+    );
+  }, [defaultResultType]);
 
   // Assigned once prefillReferenceRange is defined below.
   const prefillRef = useRef<
@@ -113,7 +132,12 @@ function InlineTestComponentEntry({
   >(() => {});
 
   const applyTemplateRows = useCallback((rows: ComponentRowData[]) => {
-    setComponents(rows.length > 0 ? rows : [createEmptyRow(1)]);
+    const resultType = defaultResultTypeRef.current;
+    setComponents(
+      rows.length > 0
+        ? applyDefaultResultTypeToPristineRows(rows, resultType)
+        : [createEmptyRow(1, resultType)]
+    );
     if (rows.length > 0) setExpanded(true);
     rows.forEach(row => {
       const name = row.test_name.trim();
@@ -260,8 +284,23 @@ function InlineTestComponentEntry({
   prefillRef.current = prefillReferenceRange;
 
   const addRow = useCallback(() => {
-    setComponents(prev => [...prev, createEmptyRow(prev.length + 1)]);
+    setComponents(prev => [
+      ...prev,
+      createEmptyRow(prev.length + 1, defaultResultTypeRef.current),
+    ]);
   }, []);
+
+  /** Switch a row to another result type, clearing what was entered under the old one. */
+  const changeResultType = useCallback(
+    (index: number, rowId: number, resultType: ResultType) => {
+      // A reference-range prefill still in flight must not land on a row that
+      // is no longer numeric.
+      prefillControllers.current.get(rowId)?.abort();
+      prefillControllers.current.delete(rowId);
+      updateComponentFields(index, getResultTypeSwitchFields(resultType));
+    },
+    [updateComponentFields]
+  );
 
   const removeRow = useCallback((index: number) => {
     setComponents(prev =>
@@ -463,6 +502,16 @@ function InlineTestComponentEntry({
                       value={component.test_code || ''}
                       onChange={event =>
                         updateComponent(index, 'test_code', event.target.value)
+                      }
+                      disabled={disabled}
+                    />
+                  </Grid.Col>
+
+                  <Grid.Col span={12}>
+                    <ResultTypeSelector
+                      value={component.result_type}
+                      onChange={resultType =>
+                        changeResultType(index, component._rowId, resultType)
                       }
                       disabled={disabled}
                     />

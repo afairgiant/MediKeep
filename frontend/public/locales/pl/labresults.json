@@ -430,6 +430,7 @@
     },
     "refreshComponents": "Odśwież składniki",
     "resultType": {
+      "label": "Typ wyniku",
       "qualitative": "Jakościowy (Poz/Neg)",
       "quantitative": "Ilościowy (Numeryczny)",
       "textual": "Tekstowy (Raport)"

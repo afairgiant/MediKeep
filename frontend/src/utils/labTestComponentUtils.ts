@@ -13,6 +13,7 @@ import {
   labTestComponentApi,
 } from '../services/api/labTestComponentApi';
 import { ComponentCategory, ComponentStatus } from '../constants/labCategories';
+import { ResultType } from '../constants/testLibraryTypes';
 import logger from '../services/logger';
 
 /**
@@ -75,7 +76,10 @@ export interface ComponentRowData {
 }
 
 /** Create an empty component row with default values. */
-export function createEmptyRow(displayOrder: number): ComponentRowData {
+export function createEmptyRow(
+  displayOrder: number,
+  resultType: ResultType = 'quantitative'
+): ComponentRowData {
   return {
     _rowId: nextRowId++,
     test_name: '',
@@ -89,10 +93,68 @@ export function createEmptyRow(displayOrder: number): ComponentRowData {
     status: '',
     display_order: displayOrder,
     notes: '',
-    result_type: 'quantitative',
+    result_type: resultType,
     qualitative_value: '',
     textual_value: '',
   };
+}
+
+/**
+ * Fields to apply to a row when its result type is changed, so a value entered
+ * under the old type (and the status derived from it) doesn't carry over.
+ */
+export function getResultTypeSwitchFields(
+  resultType: ResultType
+): Partial<ComponentRowData> {
+  const fields: Partial<ComponentRowData> = {
+    result_type: resultType,
+    status: '',
+    qualitative_value: '',
+    textual_value: '',
+  };
+  if (resultType !== 'quantitative') {
+    fields.value = '';
+    fields.unit = '';
+    fields.ref_range_min = '';
+    fields.ref_range_max = '';
+    fields.ref_range_text = '';
+  }
+  return fields;
+}
+
+/** True when nothing has been entered in a row, whatever its result type. */
+export function isPristineRow(row: ComponentRowData): boolean {
+  return (
+    row.test_name.trim() === '' &&
+    !row.abbreviation &&
+    !row.test_code &&
+    !row.canonical_test_name &&
+    !row.notes &&
+    !row.status &&
+    row.value === '' &&
+    !row.unit &&
+    row.ref_range_min === '' &&
+    row.ref_range_max === '' &&
+    !row.ref_range_text &&
+    !row.qualitative_value &&
+    !row.textual_value
+  );
+}
+
+/**
+ * Give untouched rows the result type a category defaults to. Rows with any
+ * entered data keep their type. Returns the same array when nothing changes.
+ */
+export function applyDefaultResultTypeToPristineRows(
+  rows: ComponentRowData[],
+  resultType: ResultType
+): ComponentRowData[] {
+  const needsChange = (row: ComponentRowData) =>
+    isPristineRow(row) && (row.result_type ?? 'quantitative') !== resultType;
+  if (!rows.some(needsChange)) return rows;
+  return rows.map(row =>
+    needsChange(row) ? { ...row, result_type: resultType } : row
+  );
 }
 
 function isValidNumber(value: unknown): value is number {

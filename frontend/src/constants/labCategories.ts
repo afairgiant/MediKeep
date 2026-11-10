@@ -5,7 +5,7 @@
  * so they are defined once and reused across all lab result components.
  */
 
-import { TestCategory } from './testLibraryTypes';
+import { TestCategory, ResultType } from './testLibraryTypes';
 
 /**
  * All valid component categories.
@@ -80,6 +80,22 @@ export function getCategoryDisplayName(category: string): string {
  */
 export function getCategoryColor(category: string): string {
   return CATEGORY_COLORS[category] ?? 'gray';
+}
+
+/** Lab result categories whose results are a finding rather than a measurement. */
+const FINDING_RESULT_CATEGORIES = new Set(['imaging', 'pathology']);
+
+/**
+ * Result type a new test component row starts with for a lab result category.
+ * Imaging and pathology (MRI, biopsy, ...) report a finding, so they start
+ * qualitative; everything else, including no category yet, starts numeric.
+ */
+export function getDefaultResultTypeForCategory(
+  category: string | null | undefined
+): ResultType {
+  return category && FINDING_RESULT_CATEGORIES.has(category)
+    ? 'qualitative'
+    : 'quantitative';
 }
 
 /** Display names for qualitative result values. */

@@ -2,12 +2,14 @@ import { useState, useRef, useCallback } from 'react';
 import {
   getPanelAutocompleteOptions,
   extractPanelName,
+  getMatchedPanelAlias,
   getPanelByOption,
   PANEL_CATEGORY_TO_FORM_CATEGORY,
 } from '../constants/panelLibrary';
 import { getTemplateRowsForPanel } from '../constants/panelTemplateMap';
 import {
   getAutocompleteOptions as getTestAutocompleteOptions,
+  getMatchedCommonName,
   getTestByName,
   extractTestName,
   TEST_CATEGORY_TO_FORM_CATEGORY,
@@ -25,6 +27,44 @@ export interface TestNameFields {
   test_category?: string;
 }
 
+/** How many suggestions the name fields show (their Autocomplete `limit`). */
+const MAX_NAME_OPTIONS = 50;
+
+/**
+ * Suggestions for a lab result name. With nothing typed, the panels. Once
+ * something is typed, the matching panels followed by the matching individual
+ * tests, so a test that only shares an alias with a panel (A1c with the
+ * Diabetes Monitoring Panel) is still offered. A test listed under the same
+ * label as a panel (Cytology) appears once, as the panel.
+ */
+export function getNameOptions(
+  query: string,
+  limit: number = MAX_NAME_OPTIONS
+): string[] {
+  const panels = getPanelAutocompleteOptions(query, limit);
+  if (!query.trim()) return panels;
+
+  // Cutting the tests to `limit` before dropping the ones already listed as
+  // panels loses nothing: at most `panels.length` are dropped, and only
+  // `limit - panels.length` are needed to fill the list.
+  const listed = new Set(panels);
+  const tests = getTestAutocompleteOptions(query, limit).filter(
+    option => !listed.has(option)
+  );
+  return [...panels, ...tests].slice(0, limit);
+}
+
+/** The alias that made a suggestion match the query, when its own name did not. */
+export function getMatchedNameAlias(
+  option: string,
+  query: string
+): string | undefined {
+  const panel = getPanelByOption(option);
+  return panel
+    ? getMatchedPanelAlias(panel, query)
+    : getMatchedCommonName(extractTestName(option), query);
+}
+
 interface UseTestNameAutocompleteOptions {
   testName: string;
   getInlineMethods: () => InlineTestComponentMethods | null;
@@ -33,8 +73,8 @@ interface UseTestNameAutocompleteOptions {
 
 /**
  * Shared behavior for the lab result "test name" autocomplete: suggests panels
- * (falling back to individual tests), and on selection fills the category and
- * pre-populates the staged test component rows.
+ * and individual tests, and on selection fills the category and pre-populates
+ * the staged test component rows.
  */
 export function useTestNameAutocomplete({
   testName,
@@ -64,13 +104,7 @@ export function useTestNameAutocomplete({
     lastAutoPopulatedNameRef.current = '';
   }, []);
 
-  // Panels take priority; only fall back to individual tests when no panel matches,
-  // so the dropdown never mixes the two kinds of results.
-  const panelOptions = getPanelAutocompleteOptions(testName, 50);
-  const nameOptions =
-    panelOptions.length > 0
-      ? panelOptions
-      : getTestAutocompleteOptions(testName, 50);
+  const nameOptions = getNameOptions(testName);
 
   const handleChange = useCallback(
     (value: string) => {

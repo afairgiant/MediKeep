@@ -423,6 +423,7 @@
     },
     "refreshComponents": "刷新组件",
     "resultType": {
+      "label": "结果类型",
       "qualitative": "定性（阳性/阴性）",
       "quantitative": "定量（数值）",
       "textual": "文本（报告）"

@@ -98,7 +98,7 @@ describe('getTemplateRowsForPanel', () => {
     expect(mri!.length).toBe(1);
     expect(mri![0].test_name).toBe('MRI');
     expect(mri![0].category).toBe('imaging');
-    expect(mri![0].result_type).toBe('textual');
+    expect(mri![0].result_type).toBe('qualitative');
 
     const ct = getTemplateRowsForPanel('CT Scan');
     expect(ct![0].test_name).toBe('CT Scan');
@@ -112,7 +112,75 @@ describe('getTemplateRowsForPanel', () => {
     expect(us![0].test_name).toBe('Ultrasound');
     expect(us![0].abbreviation).toBe('US');
     expect(us![0].category).toBe('imaging');
-    expect(us![0].result_type).toBe('textual');
+    expect(us![0].result_type).toBe('qualitative');
+  });
+
+  it('starts every imaging row qualitative, not numeric', () => {
+    ['MRI', 'CT Scan', 'X-Ray', 'Ultrasound'].forEach(name => {
+      getTemplateRowsForPanel(name)!.forEach(r =>
+        expect(r.result_type, `result type in ${name}`).toBe('qualitative')
+      );
+    });
+  });
+
+  it('returns one qualitative pathology row for each biopsy and the pathology report', () => {
+    const expected: Record<string, string | undefined> = {
+      Biopsy: undefined,
+      'Skin Biopsy': undefined,
+      'Bone Marrow Biopsy': 'BMB',
+      'Pathology Report': undefined,
+    };
+    Object.entries(expected).forEach(([name, abbreviation]) => {
+      const rows = getTemplateRowsForPanel(name);
+      expect(rows, `rows for ${name}`).not.toBeNull();
+      expect(rows!.length).toBe(1);
+      expect(rows![0].test_name).toBe(name);
+      expect(rows![0].abbreviation).toBe(abbreviation ?? '');
+      expect(rows![0].category).toBe('pathology');
+      expect(rows![0].result_type).toBe('qualitative');
+      expect(rows![0].unit).toBe('');
+    });
+  });
+
+  it.each([
+    ['Cytology', 'qualitative', ''],
+    ['Immunohistochemistry', 'qualitative', 'IHC'],
+    ['Molecular Pathology', 'qualitative', ''],
+    ['Flow Cytometry', 'textual', ''],
+    ['Cytogenetics', 'textual', ''],
+  ])('returns one pathology row for %s recorded as %s', (name, resultType, abbreviation) => {
+    const rows = getTemplateRowsForPanel(name);
+    expect(rows).not.toBeNull();
+    expect(rows!.length).toBe(1);
+    expect(rows![0].test_name).toBe(name);
+    expect(rows![0].abbreviation).toBe(abbreviation);
+    expect(rows![0].category).toBe('pathology');
+    expect(rows![0].result_type).toBe(resultType);
+    expect(rows![0].unit).toBe('');
+  });
+
+  it('links each of those rows to its library test, whose result type agrees', () => {
+    ['Cytology', 'Immunohistochemistry', 'Molecular Pathology', 'Flow Cytometry', 'Cytogenetics'].forEach(name => {
+      const row = getTemplateRowsForPanel(name)![0];
+      const libraryTest = getTestByName(name);
+      expect(libraryTest, `library test ${name}`).toBeDefined();
+      expect(row.canonical_test_name).toBe(libraryTest!.test_name);
+      expect(row.result_type).toBe(libraryTest!.result_type);
+    });
+  });
+
+  it('links the biopsy rows to their library test, whose result type agrees', () => {
+    ['Biopsy', 'Skin Biopsy', 'Bone Marrow Biopsy'].forEach(name => {
+      const row = getTemplateRowsForPanel(name)![0];
+      const libraryTest = getTestByName(name);
+      expect(libraryTest, `library test ${name}`).toBeDefined();
+      expect(row.canonical_test_name).toBe(libraryTest!.test_name);
+      expect(row.result_type).toBe(libraryTest!.result_type);
+    });
+  });
+
+  it('leaves the pathology report unlinked (no library test)', () => {
+    expect(getTemplateRowsForPanel('Pathology Report')![0].canonical_test_name).toBeNull();
   });
 
   it('every returned row has a unique _rowId', () => {
