@@ -5,7 +5,8 @@ import {
   getNameOptions,
   useTestNameAutocomplete,
 } from './useTestNameAutocomplete';
-import { PANEL_LIBRARY } from '../constants/panelLibrary';
+import { PANEL_LIBRARY, getPanelAutocompleteOptions } from '../constants/panelLibrary';
+import { getAutocompleteOptions } from '../constants/testLibrary';
 import type { ComponentRowData } from '../utils/labTestComponentUtils';
 import type { InlineTestComponentMethods } from '../components/medical/labresults/InlineTestComponentEntry';
 
@@ -261,6 +262,21 @@ describe('getNameOptions', () => {
       const options = getNameOptions(query);
       expect(new Set(options).size, query).toBe(options.length);
     });
+  });
+
+  it('lists what filtering the untruncated panels and tests would', () => {
+    const untruncated = (query: string): string[] => {
+      const panels = getPanelAutocompleteOptions(query, Infinity);
+      const listed = new Set(panels);
+      const tests = getAutocompleteOptions(query, Infinity).filter(
+        option => !listed.has(option)
+      );
+      return [...panels, ...tests].slice(0, 50);
+    };
+
+    [...'abcdefghijklmnopqrstuvwxyz', 'biopsy', 'cyto', 'glucose', 'panel'].forEach(
+      query => expect(getNameOptions(query), query).toEqual(untruncated(query))
+    );
   });
 
   it('stops at the limit', () => {

@@ -44,6 +44,9 @@ export function getNameOptions(
   const panels = getPanelAutocompleteOptions(query, limit);
   if (!query.trim()) return panels;
 
+  // Cutting the tests to `limit` before dropping the ones already listed as
+  // panels loses nothing: at most `panels.length` are dropped, and only
+  // `limit - panels.length` are needed to fill the list.
   const listed = new Set(panels);
   const tests = getTestAutocompleteOptions(query, limit).filter(
     option => !listed.has(option)

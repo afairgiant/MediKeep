@@ -14,6 +14,7 @@ interface NameAutocompleteOptionProps {
   query: string;
 }
 
+/** The option text, with the matched alias underneath when there is one. */
 function NameAutocompleteOption({
   option,
   query,

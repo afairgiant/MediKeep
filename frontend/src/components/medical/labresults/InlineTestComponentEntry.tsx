@@ -290,6 +290,7 @@ function InlineTestComponentEntry({
     ]);
   }, []);
 
+  /** Switch a row to another result type, clearing what was entered under the old one. */
   const changeResultType = useCallback(
     (index: number, rowId: number, resultType: ResultType) => {
       // A reference-range prefill still in flight must not land on a row that

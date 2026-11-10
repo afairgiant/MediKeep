@@ -26,6 +26,7 @@ const DEFAULT_LABELS: Record<ResultType, string> = {
   textual: 'Textual (Report)',
 };
 
+/** Dropdown of the three result types; reports the type the user picks. */
 function ResultTypeSelector({
   value,
   onChange,
