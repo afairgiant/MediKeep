@@ -161,7 +161,7 @@ async def create_database_backup(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create database backup: {str(e)}",
+            detail="Failed to create database backup",
         )
 
 
@@ -210,7 +210,7 @@ async def create_files_backup(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create files backup: {str(e)}",
+            detail="Failed to create files backup",
         )
 
 
@@ -259,7 +259,7 @@ async def create_full_backup(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create full backup: {str(e)}",
+            detail="Failed to create full backup",
         )
 
 
@@ -286,7 +286,7 @@ async def list_backups(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to list backups: {str(e)}",
+            detail="Failed to list backups",
         )
 
 
@@ -413,7 +413,7 @@ async def download_backup(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to download backup: {str(e)}",
+            detail="Failed to download backup",
         )
 
 
@@ -499,7 +499,7 @@ async def delete_backup(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete backup: {str(e)}",
+            detail="Failed to delete backup",
         )
 
 
@@ -534,7 +534,7 @@ async def cleanup_old_backups(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to cleanup backups: {str(e)}",
+            detail="Failed to cleanup backups",
         )
 
 
@@ -573,7 +573,7 @@ async def cleanup_orphaned_files(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to cleanup orphaned files: {str(e)}",
+            detail="Failed to cleanup orphaned files",
         )
 
 
@@ -608,7 +608,7 @@ async def cleanup_all_old_data(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to cleanup old data: {str(e)}",
+            detail="Failed to cleanup old data",
         )
 
 
@@ -632,9 +632,7 @@ async def get_retention_stats(
         log_endpoint_error(
             logger, request, "Failed to get retention stats", e, user_id=current_user.id
         )
-        raise HTTPException(
-            status_code=500, detail=f"Failed to get retention stats: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail="Failed to get retention stats")
 
 
 @router.get("/settings/schedule", response_model=AutoBackupScheduleResponse)

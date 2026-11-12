@@ -9,6 +9,11 @@ from typing import Optional, Tuple
 
 import aiohttp
 
+from app.core.http.integration_errors import (
+    PAPERLESS_AUTH_FAILED_MESSAGE,
+    IntegrationErrorCode,
+    IntegrationFailureInfo,
+)
 from app.core.logging.config import get_logger
 from app.services.paperless_auth import PaperlessAuth
 from app.services.paperless_task_resolver import PaperlessTaskResolver
@@ -16,7 +21,7 @@ from app.services.paperless_task_resolver import PaperlessTaskResolver
 logger = get_logger(__name__)
 
 
-class PaperlessClientError(Exception):
+class PaperlessClientError(IntegrationFailureInfo, Exception):
     """Base exception for Paperless client errors."""
 
 
@@ -26,6 +31,13 @@ class PaperlessConnectionError(PaperlessClientError):
 
 class PaperlessUploadError(PaperlessClientError):
     """Upload-related errors."""
+
+
+class PaperlessClientAuthError(PaperlessClientError):
+    """Paperless rejected the configured credentials (HTTP 401/403)."""
+
+    integration_message = PAPERLESS_AUTH_FAILED_MESSAGE
+    integration_code = IntegrationErrorCode.AUTH_FAILED
 
 
 class PaperlessClient:
@@ -250,9 +262,14 @@ class PaperlessClient:
             async with self._session.get(url) as response:
                 if response.status == 404:
                     return None
+                if response.status in (401, 403):
+                    raise PaperlessClientAuthError(
+                        f"Paperless rejected the credentials (HTTP {response.status})"
+                    )
                 if response.status != 200:
                     raise PaperlessClientError(
-                        f"Get info failed with status {response.status}"
+                        f"Get info failed with status {response.status}",
+                        upstream_status=response.status,
                     )
 
                 return await response.json()

@@ -20,6 +20,7 @@ from app.api.v1.admin.csv_utils import stream_csv
 from app.core.constants import get_admin_roles_filter, is_admin_role
 from app.core.http.error_handling import APIException, handle_database_errors
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
@@ -1582,9 +1583,16 @@ def list_model_records(
         )
 
     except Exception as e:
+        _log_model_failure(
+            "model_records_list_failed",
+            f"Error fetching {model_name} records",
+            current_user,
+            model_name,
+            e,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching {model_name} records: {str(e)}",
+            detail=f"Error fetching {model_name} records",
         )
 
 
@@ -1680,9 +1688,16 @@ def get_model_record(
     except HTTPException:
         raise
     except Exception as e:
+        _log_model_failure(
+            "model_record_fetch_failed",
+            f"Error fetching {model_name} record",
+            current_user,
+            model_name,
+            e,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching {model_name} record: {str(e)}",
+            detail=f"Error fetching {model_name} record",
         )
 
 
@@ -1792,9 +1807,16 @@ def delete_model_record(
     except HTTPException:
         raise
     except Exception as e:
+        _log_model_failure(
+            "model_record_delete_failed",
+            f"Error deleting {model_name} record",
+            current_user,
+            model_name,
+            e,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error deleting {model_name} record: {str(e)}",
+            detail=f"Error deleting {model_name} record",
         )
 
 
@@ -2040,9 +2062,17 @@ def update_model_record(
     except HTTPException:
         raise
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            f"Error updating {model_name} record",
+            e,
+            model=model_name,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error updating {model_name} record: {str(e)}",
+            detail=f"Error updating {model_name} record",
         )
 
 
@@ -2100,14 +2130,38 @@ def create_model_record(
             detail=e.errors(),
         ) from e
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            f"Error creating {model_name} record",
+            e,
+            model=model_name,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error creating {model_name} record: {str(e)}",
+            detail=f"Error creating {model_name} record",
         )
 
 
 # Initialize logger
 logger = get_logger(__name__, "app")
+
+
+def _log_model_failure(
+    event: str, message: str, user: User, model_name: str, error: Exception
+) -> None:
+    """Log an unexpected admin model failure so the HTTP response can stay generic."""
+    logger.error(
+        message,
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: event,
+            LogFields.USER_ID: user.id,
+            LogFields.MODEL: model_name,
+            LogFields.ERROR: str(error),
+        },
+    )
 
 
 class AdminResetPasswordRequest(BaseModel):

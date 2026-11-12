@@ -125,8 +125,10 @@ class RestoreService:
         except Exception as e:
             logger.error(f"Failed to preview database restore: {str(e)}")
             return {
-                "warnings": [f"Could not analyze backup: {str(e)}"],
-                "affected_data": {"error": str(e)},
+                "warnings": [
+                    "Could not analyze the backup. See the server logs for details."
+                ],
+                "affected_data": {"error": "Backup analysis failed"},
             }
 
     async def _preview_files_restore(self, backup_path: Path) -> Dict[str, Any]:
@@ -186,8 +188,10 @@ class RestoreService:
         except Exception as e:
             logger.error(f"Failed to preview files restore: {str(e)}")
             return {
-                "warnings": [f"Could not analyze backup: {str(e)}"],
-                "affected_data": {"error": str(e)},
+                "warnings": [
+                    "Could not analyze the backup. See the server logs for details."
+                ],
+                "affected_data": {"error": "Backup analysis failed"},
             }
 
     async def _preview_full_restore(self, backup_path: Path) -> Dict[str, Any]:
@@ -262,8 +266,10 @@ class RestoreService:
         except Exception as e:
             logger.error(f"Failed to preview full restore: {str(e)}")
             return {
-                "warnings": [f"Could not analyze backup: {str(e)}"],
-                "affected_data": {"error": str(e)},
+                "warnings": [
+                    "Could not analyze the backup. See the server logs for details."
+                ],
+                "affected_data": {"error": "Backup analysis failed"},
             }
 
     async def execute_restore(
@@ -826,7 +832,7 @@ class RestoreService:
 
         except Exception as e:
             logger.error(f"Failed to get database stats: {str(e)}")
-            return {"error": str(e)}
+            return {"error": "Could not read database statistics"}
 
     async def _analyze_sql_backup(self, backup_path: Path) -> Dict[str, Any]:
         """Analyze SQL backup file content without loading into memory."""
@@ -848,7 +854,7 @@ class RestoreService:
 
         except Exception as e:
             logger.error(f"Failed to analyze SQL backup: {str(e)}")
-            return {"error": str(e)}
+            return {"error": "Could not analyze the SQL backup"}
 
     def generate_confirmation_token(self, backup_id: int) -> str:
         """Generate confirmation token for restore operation."""

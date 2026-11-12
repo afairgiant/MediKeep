@@ -12,6 +12,7 @@ from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.http.integration_errors import raise_if_integration_failure
 from app.core.logging.config import get_logger
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import EntityFile, User, UserPreferences, get_utc_now
@@ -291,9 +292,7 @@ class GenericEntityFileService:
             raise
         except Exception as e:
             logger.error(f"Error uploading file: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to upload file: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail="Failed to upload file")
 
     def get_entity_files(
         self, db: Session, entity_type: str, entity_id: int
@@ -332,9 +331,7 @@ class GenericEntityFileService:
             logger.error(
                 f"Error retrieving files for {entity_type} {entity_id}: {str(e)}"
             )
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve files: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail="Failed to retrieve files")
 
     def get_file_by_id(self, db: Session, file_id: int) -> Optional[EntityFile]:
         """
@@ -351,9 +348,7 @@ class GenericEntityFileService:
             return db.query(EntityFile).filter(EntityFile.id == file_id).first()
         except Exception as e:
             logger.error(f"Error retrieving file {file_id}: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve file: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail="Failed to retrieve file")
 
     async def _handle_remote_backend_deletion(
         self,
@@ -525,9 +520,7 @@ class GenericEntityFileService:
             raise
         except Exception as e:
             logger.error(f"Error deleting file {file_id}: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to delete file: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail="Failed to delete file")
 
     async def get_file_download_info(
         self, db: Session, file_id: int, current_user_id: Optional[int] = None
@@ -797,9 +790,7 @@ class GenericEntityFileService:
             raise
         except Exception as e:
             logger.error(f"Error getting batch file counts: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to get file counts: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail="Failed to get file counts")
 
     async def _upload_to_local(
         self,
@@ -1071,9 +1062,8 @@ class GenericEntityFileService:
 
         except Exception as e:
             logger.error(f"Error uploading to paperless: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to upload to paperless: {str(e)}"
-            )
+            raise_if_integration_failure(e, "Paperless")
+            raise HTTPException(status_code=500, detail="Failed to upload to paperless")
 
     async def _upload_to_papra(
         self,
@@ -1159,9 +1149,8 @@ class GenericEntityFileService:
 
         except Exception as e:
             logger.error(f"Error uploading to Papra: {str(e)}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to upload to Papra: {str(e)}"
-            )
+            raise_if_integration_failure(e, "Papra")
+            raise HTTPException(status_code=500, detail="Failed to upload to Papra")
 
     async def _get_papra_download_info(
         self, db: Session, file_record, current_user_id: Optional[int] = None
@@ -1314,7 +1303,7 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error updating file metadata {file_id}: {str(e)}")
             raise HTTPException(
-                status_code=500, detail=f"Failed to update file metadata: {str(e)}"
+                status_code=500, detail="Failed to update file metadata"
             )
 
     async def _delete_from_paperless(

@@ -12,6 +12,8 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
 )
 from app.core.http.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.crud.practitioner import practitioner
 from app.models.activity_log import EntityType
 from app.schemas.practitioner import (
@@ -21,6 +23,7 @@ from app.schemas.practitioner import (
 )
 
 router = APIRouter()
+logger = get_logger(__name__, "app")
 
 IN_USE_DETAIL = "Cannot delete a practitioner who is linked to records"
 
@@ -162,8 +165,18 @@ def delete_practitioner(
             entity_name="Practitioner",
             request=request,
         )
-    except IntegrityError:
+    except IntegrityError as exc:
         # A record was linked after the check; the database refused the delete
+        logger.warning(
+            "Practitioner delete refused by the database",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "practitioner_delete_blocked",
+                LogFields.USER_ID: current_user_id,
+                LogFields.RECORD_ID: practitioner_id,
+                LogFields.ERROR: str(exc),
+            },
+        )
         raise HTTPException(status_code=409, detail=IN_USE_DETAIL)
 
 

@@ -6,7 +6,6 @@ custom exception classes for different error types, database error handling,
 and integration with our structured logging system.
 """
 
-import traceback
 from contextlib import contextmanager
 from typing import Any, Optional
 
@@ -560,9 +559,10 @@ def create_fallback_exception_handler():
         Fallback handler for unhandled exceptions with detailed logging.
         """
         user_ip = get_client_ip(request)
-        tb = traceback.format_exc()
 
-        # Log comprehensive error information
+        # Log comprehensive error information. exc_info (rather than a pre-formatted
+        # traceback in `extra`) is what the JSON log file persists, with SQL
+        # parameter values removed; it also works outside an active except block.
         logger.error(
             f"Unhandled exception on {request.method} {request.url.path}",
             extra={
@@ -573,9 +573,9 @@ def create_fallback_exception_handler():
                 "method": request.method,
                 "exception_type": type(exc).__name__,
                 "exception_message": str(exc),
-                "traceback": tb,
                 "user_agent": request.headers.get("user-agent", "unknown"),
             },
+            exc_info=(type(exc), exc, exc.__traceback__),
         )
 
         # Create internal server error response

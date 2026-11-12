@@ -15,6 +15,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
+from app.core.http.integration_errors import (
+    IntegrationErrorCode,
+    integration_error_response,
+    raise_if_integration_failure,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
@@ -144,7 +149,15 @@ async def test_papra_connection(
                 )
             try:
                 token = decrypt_papra_token(prefs.papra_api_token_encrypted)
-            except SecurityError:
+            except SecurityError as exc:
+                log_endpoint_error(
+                    logger,
+                    request,
+                    "Failed to decrypt saved Papra token for connection test",
+                    exc,
+                    user_id=current_user_id,
+                    event="papra_token_decryption_failed",
+                )
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Failed to decrypt saved API token. Please re-enter your token.",
@@ -203,9 +216,11 @@ async def test_papra_connection(
             event="papra_connection_test_blocked",
             papra_url=connection_data.papra_url,
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(exc),
+        raise integration_error_response(
+            exc,
+            "Papra",
+            "Unable to connect to Papra",
+            fallback_code=IntegrationErrorCode.CONNECTION_FAILED,
         ) from exc
 
     except ValueError as exc:
@@ -222,6 +237,9 @@ async def test_papra_connection(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid connection parameters provided.",
         ) from exc
+
+    except HTTPException:
+        raise
 
     except Exception as exc:
         logger.error(
@@ -711,9 +729,11 @@ async def search_papra_documents(
             user_id=current_user_id,
             event="papra_document_search_connection_error",
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unable to connect to Papra: {exc}",
+        raise integration_error_response(
+            exc,
+            "Papra",
+            "Unable to connect to Papra",
+            fallback_code=IntegrationErrorCode.CONNECTION_FAILED,
         ) from exc
 
     except PapraClientError as exc:
@@ -725,9 +745,10 @@ async def search_papra_documents(
             user_id=current_user_id,
             event="papra_document_search_client_error",
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Papra error: {exc}",
+        raise integration_error_response(
+            exc,
+            "Papra",
+            "Papra error",
         ) from exc
 
     except SQLAlchemyError as exc:
@@ -756,6 +777,7 @@ async def search_papra_documents(
                 "stack_trace": traceback.format_exc(),
             },
         )
+        raise_if_integration_failure(exc, "Papra")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal error occurred while searching Papra documents.",

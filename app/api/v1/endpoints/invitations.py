@@ -270,6 +270,14 @@ async def respond_to_invitation(
                                 )
                             )
                         except IntegrityError as e:
+                            log_endpoint_error(
+                                logger,
+                                request,
+                                "Database constraint violation during bulk acceptance",
+                                e,
+                                user_id=current_user.id,
+                                invitation_id=invitation_id,
+                            )
                             raise HTTPException(
                                 status_code=status.HTTP_409_CONFLICT,
                                 detail="Database constraint violation during bulk acceptance",

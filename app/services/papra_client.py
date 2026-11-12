@@ -9,13 +9,18 @@ from typing import Optional, Tuple
 
 import aiohttp
 
+from app.core.http.integration_errors import (
+    PAPRA_AUTH_FAILED_MESSAGE,
+    IntegrationErrorCode,
+    IntegrationFailureInfo,
+)
 from app.core.logging.config import get_logger
 from app.services.papra_auth import PapraAuth
 
 logger = get_logger(__name__)
 
 
-class PapraClientError(Exception):
+class PapraClientError(IntegrationFailureInfo, Exception):
     """Base exception for Papra client errors."""
 
 
@@ -25,6 +30,19 @@ class PapraConnectionError(PapraClientError):
 
 class PapraUploadError(PapraClientError):
     """Upload-related errors."""
+
+
+class PapraClientAuthError(PapraClientError):
+    """Papra rejected the configured API token (HTTP 401/403)."""
+
+    integration_message = PAPRA_AUTH_FAILED_MESSAGE
+    integration_code = IntegrationErrorCode.AUTH_FAILED
+
+
+def _raise_if_token_rejected(status: int) -> None:
+    """Papra answers 401/403 when the API token is wrong or lacks permission."""
+    if status in (401, 403):
+        raise PapraClientAuthError(f"Papra rejected the API token (HTTP {status})")
 
 
 class PapraClient:
@@ -118,13 +136,15 @@ class PapraClient:
             async with self._session.post(
                 url, data=form_data, timeout=upload_timeout
             ) as response:
+                _raise_if_token_rejected(response.status)
                 if response.status not in [200, 201]:
                     error_text = await response.text()
                     logger.error(
                         f"Papra upload failed: {response.status} - {error_text}"
                     )
                     raise PapraUploadError(
-                        f"Upload failed with status {response.status}: {error_text}"
+                        f"Upload failed with status {response.status}: {error_text}",
+                        upstream_status=response.status,
                     )
 
                 result = await response.json()
@@ -149,7 +169,7 @@ class PapraClient:
         except aiohttp.ClientError as e:
             logger.error(f"Papra upload connection error: {e}")
             raise PapraConnectionError(f"Connection error during upload: {e}")
-        except PapraUploadError:
+        except (PapraUploadError, PapraClientAuthError):
             raise
         except Exception as e:
             logger.error(f"Unexpected Papra upload error: {e}")
@@ -263,10 +283,12 @@ class PapraClient:
             )
 
             async with self._session.get(url, params=params) as response:
+                _raise_if_token_rejected(response.status)
                 if response.status != 200:
                     error_text = await response.text()
                     raise PapraClientError(
-                        f"Document search failed with status {response.status}: {error_text}"
+                        f"Document search failed with status {response.status}: {error_text}",
+                        upstream_status=response.status,
                     )
 
                 data = await response.json()
@@ -307,9 +329,11 @@ class PapraClient:
             async with self._session.get(url) as response:
                 if response.status == 404:
                     return None
+                _raise_if_token_rejected(response.status)
                 if response.status != 200:
                     raise PapraClientError(
-                        f"Get info failed with status {response.status}"
+                        f"Get info failed with status {response.status}",
+                        upstream_status=response.status,
                     )
 
                 data = await response.json()

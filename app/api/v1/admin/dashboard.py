@@ -16,6 +16,7 @@ from sqlalchemy.sql import func
 
 from app.api import deps
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_error
 from app.core.utils.datetime_utils import (
     get_application_uptime_string,
@@ -37,6 +38,21 @@ from app.models.models import (
 )
 
 logger = get_logger(__name__, "app")
+
+
+def _log_check_failure(error: Exception, check: str) -> str:
+    """Log a failed admin health check and return text that is safe to send to the client."""
+    logger.error(
+        f"Admin health check failed: {check}: {error}",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "admin_health_check_failed",
+            LogFields.ERROR: str(error),
+            "check": check,
+        },
+    )
+    return "Check failed. See the server logs for details."
+
 
 router = APIRouter()
 
@@ -157,7 +173,7 @@ def get_dashboard_stats(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching dashboard stats: {str(e)}",
+            detail="Error fetching dashboard stats",
         )
 
 
@@ -249,7 +265,7 @@ def get_recent_activity(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching recent activity: {str(e)}",
+            detail="Error fetching recent activity",
         )
 
 
@@ -367,7 +383,7 @@ def get_system_health(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching system health: {str(e)}",
+            detail="Error fetching system health",
         )
 
 
@@ -469,7 +485,10 @@ def get_system_metrics(
                 "response_time_ms": api_response_time,
             }
         except Exception as e:
-            services_health["api"] = {"status": "error", "error": str(e)}
+            services_health["api"] = {
+                "status": "error",
+                "error": _log_check_failure(e, "api"),
+            }
 
         # 2. Authentication Service Health (test JWT operations)
         try:
@@ -484,7 +503,10 @@ def get_system_metrics(
             decode_access_token(test_token)
             services_health["authentication"] = {"status": "operational"}
         except Exception as e:
-            services_health["authentication"] = {"status": "error", "error": str(e)}
+            services_health["authentication"] = {
+                "status": "error",
+                "error": _log_check_failure(e, "authentication"),
+            }
 
         # 3. Frontend Logging Service Health (check log file writing)
         try:
@@ -496,14 +518,20 @@ def get_system_metrics(
             os.remove(test_log_file)
             services_health["frontend_logging"] = {"status": "operational"}
         except Exception as e:
-            services_health["frontend_logging"] = {"status": "error", "error": str(e)}
+            services_health["frontend_logging"] = {
+                "status": "error",
+                "error": _log_check_failure(e, "frontend_logging"),
+            }
 
         # 4. Admin Interface Health (check admin route accessibility)
         try:
             # Since we're already in an admin route, this is operational
             services_health["admin_interface"] = {"status": "operational"}
         except Exception as e:
-            services_health["admin_interface"] = {"status": "error", "error": str(e)}
+            services_health["admin_interface"] = {
+                "status": "error",
+                "error": _log_check_failure(e, "admin_interface"),
+            }
 
         # Real system performance metrics
         try:
@@ -650,7 +678,7 @@ def get_system_metrics(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching system metrics: {str(e)}",
+            detail="Error fetching system metrics",
         )
 
 
@@ -741,7 +769,7 @@ def get_storage_health(
                     "write_permission": False,
                     "size_mb": 0,
                     "file_count": 0,
-                    "error": str(e),
+                    "error": _log_check_failure(e, f"directory {dir_name}"),
                 }
                 overall_healthy = False
 
@@ -770,7 +798,7 @@ def get_storage_health(
         }
 
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        return {"status": "error", "error": _log_check_failure(e, "storage health")}
 
 
 @router.get("/analytics-data")
@@ -959,5 +987,5 @@ def get_analytics_data(
                 "labels": [f"{i:02d}:00" for i in range(24)],
                 "data": [0] * 24,
             },
-            "error": str(e),
+            "error": _log_check_failure(e, "analytics data"),
         }

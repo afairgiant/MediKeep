@@ -5,6 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.logging.constants import LogFields
 from app.crud.base import CRUDBase
 from app.models.models import MedicalSpecialty as MedicalSpecialtyModel
 from app.models.models import Practitioner as PractitionerModel
@@ -120,8 +121,17 @@ class CRUDMedicalSpecialty(
             )
         try:
             return super().delete(db, id=id)
-        except IntegrityError:
+        except IntegrityError as exc:
             db.rollback()
+            self.logger.warning(
+                "Specialty delete refused by the database",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "specialty_delete_blocked",
+                    LogFields.RECORD_ID: id,
+                    LogFields.ERROR: str(exc),
+                },
+            )
             raise HTTPException(
                 status_code=409,
                 detail=(

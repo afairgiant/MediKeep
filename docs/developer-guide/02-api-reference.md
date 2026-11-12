@@ -5428,6 +5428,67 @@ Base path: `/api/v1/paperless`
 
 `GET /paperless/documents`
 
+### 13.2 Integration Error Responses (Paperless-ngx and Papra)
+
+Linking, uploading and searching documents in Paperless-ngx or Papra
+(`POST /entity-files/{type}/{id}/files`, `.../link-paperless`, `.../link-papra`,
+`GET /papra/documents/search`) answer a failure with a message that says what went
+wrong and an `error_code` that identifies it:
+
+```json
+{
+  "data": null,
+  "status": "FAIL",
+  "message": "Unable to connect to Papra: connection refused. Check that Papra is running and that the URL and port are correct.",
+  "error_code": "integration_connection_refused",
+  "description": "HTTP 400 error occurred",
+  "detail": null
+}
+```
+
+- **Status**: `400`. These are never `401`: the frontend treats any `401` from this
+  API as an expired MediKeep session and signs the user out. An unrecognised
+  failure is still a generic `500` (for example `Failed to upload to paperless`).
+- **`POST /papra/test-connection` is the exception.** It reports a rejected API token, a
+  blocked redirect, or an unreachable server as HTTP `200` with
+  `{"status": "error", "message": "..."}` and no `error_code`, because the settings page
+  shows the message next to the form. The messages are fixed text written in this codebase.
+  Only a blocked URL (`integration_url_blocked`, HTTP `400`) and an unexpected error
+  (HTTP `500`) follow the contract on this page.
+- **No upstream text**: the integration URL is user-configured and may point at any
+  service reachable from the server, so nothing the other end wrote (response bodies,
+  library error strings) is returned. The message is built from text written in this
+  codebase, the kind of connection failure, and an upstream HTTP status number. The full
+  error is written to the server log.
+- **Clients**: every `error_code` starting with `integration_` carries a message that is
+  safe to show as written. Codes are stable: new ones are added, existing ones are not
+  renamed.
+
+| `error_code` | Meaning |
+| --- | --- |
+| `integration_auth_failed` | The token or credentials were rejected (HTTP 401/403 from the integration) |
+| `integration_connection_refused` | Nothing is listening at that address and port |
+| `integration_host_unreachable` | No route to the host |
+| `integration_dns_failed` | The host name could not be resolved |
+| `integration_timeout` | The request timed out |
+| `integration_tls_error` | The TLS certificate could not be verified |
+| `integration_redirect_blocked` | The server redirected to a different address |
+| `integration_url_blocked` | The configured URL is not allowed (private, link-local or insecure address) |
+| `integration_connection_failed` | The connection failed for another reason |
+| `integration_http_error` | The integration answered with an unexpected HTTP status (named in the message) |
+| `integration_duplicate_document` | Upload rejected: the document already exists |
+| `integration_unsupported_format` | Upload rejected: file type not supported |
+| `integration_file_too_large` | Upload rejected: file too large |
+| `integration_permission_denied` | Upload rejected: no permission |
+| `integration_storage_full` | Upload rejected: the integration is out of storage |
+| `integration_processing_failed` | Upload accepted but processing failed |
+| `integration_network_error` | Upload failed on the network |
+| `integration_upload_failed` | Upload rejected for a reason that is not classified |
+| `integration_error` | The integration reported an error with no further classification |
+
+Code and message travel in the `X-Error-Code` header and are copied into the body by the
+global error handler, as for the authentication codes.
+
 ---
 
 ## 14. System & Utilities

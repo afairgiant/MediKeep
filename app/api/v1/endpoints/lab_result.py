@@ -37,6 +37,7 @@ from app.core.http.error_handling import (
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
+    log_endpoint_error,
 )
 from app.core.utils.client_ip import request_audit_fields
 from app.crud.condition import condition as condition_crud
@@ -685,20 +686,41 @@ async def upload_lab_result_file(
             with open(file_path, "wb") as buffer:
                 buffer.write(file_content)
         except PermissionError as e:
+            log_endpoint_error(
+                logger,
+                request,
+                "Permission denied writing file. This may be a Docker bind mount permission issue. Please ensure the container has write permissions to the upload directory.",
+                e,
+                user_id=current_user.id,
+            )
             raise DatabaseException(
-                message=f"Permission denied writing file. This may be a Docker bind mount permission issue. Please ensure the container has write permissions to the upload directory: {str(e)}",
+                message="Permission denied writing file. This may be a Docker bind mount permission issue. Please ensure the container has write permissions to the upload directory.",
                 request=request,
                 original_error=e,
             )
         except OSError as e:
+            log_endpoint_error(
+                logger,
+                request,
+                "Failed to save file",
+                e,
+                user_id=current_user.id,
+            )
             raise DatabaseException(
-                message=f"Failed to save file: {str(e)}",
+                message="Failed to save file",
                 request=request,
                 original_error=e,
             )
         except Exception as e:
+            log_endpoint_error(
+                logger,
+                request,
+                "Error saving file",
+                e,
+                user_id=current_user.id,
+            )
             raise DatabaseException(
-                message=f"Error saving file: {str(e)}",
+                message="Error saving file",
                 request=request,
                 original_error=e,
             )
@@ -721,13 +743,20 @@ async def upload_lab_result_file(
             return db_file
         except Exception as e:
             # Clean up the uploaded file if database operation fails
+            log_endpoint_error(
+                logger,
+                request,
+                "Error creating file record",
+                e,
+                user_id=current_user.id,
+            )
             try:
                 if os.path.exists(file_path):
                     os.remove(file_path)
             except Exception:
                 pass
             raise DatabaseException(
-                message=f"Error creating file record: {str(e)}",
+                message="Error creating file record",
                 request=request,
                 original_error=e,
             )
@@ -779,8 +808,15 @@ def delete_lab_result_file(
             lab_result_file.delete(db, id=file_id)
             return {"message": "File deleted successfully"}
         except Exception as e:
+            log_endpoint_error(
+                logger,
+                request,
+                "Error deleting file",
+                e,
+                user_id=current_user.id,
+            )
             raise DatabaseException(
-                message=f"Error deleting file: {str(e)}",
+                message="Error deleting file",
                 request=request,
                 original_error=e,
             )
