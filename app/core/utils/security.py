@@ -100,7 +100,13 @@ def decode_access_token(token: str) -> dict:
 def redact_database_url(database_url: str) -> str:
     """DATABASE_URL with the password masked, safe to log or print."""
     try:
-        return make_url(database_url).render_as_string(hide_password=True)
+        url = make_url(database_url)
+        # libpq also accepts the password as a query parameter
+        query = {
+            key: "***" if key.lower() == "password" else value
+            for key, value in url.query.items()
+        }
+        return url.set(query=query).render_as_string(hide_password=True)
     except (ArgumentError, ValueError):
         return "<unparseable DATABASE_URL>"
 

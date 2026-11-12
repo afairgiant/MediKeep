@@ -17,6 +17,24 @@ class TestRedactDatabaseUrl:
         assert encode_url_credential(password) not in rendered
         assert rendered == "postgresql://medapp:***@db:5432/medapp"
 
+    @pytest.mark.parametrize("key", ["password", "PASSWORD"])
+    def test_query_string_password_is_masked(self, key):
+        url = f"postgresql://medapp@db:5432/medapp?sslmode=require&{key}=s%40cret"
+
+        rendered = redact_database_url(url)
+
+        assert "s@cret" not in rendered
+        assert "s%40cret" not in rendered
+        assert "sslmode=require" in rendered
+
+    def test_repeated_query_string_password_is_masked(self):
+        url = "postgresql://medapp@db:5432/medapp?password=first&password=second"
+
+        rendered = redact_database_url(url)
+
+        assert "first" not in rendered
+        assert "second" not in rendered
+
     def test_url_without_password_is_unchanged(self):
         url = "postgresql://medapp@db:5432/medapp"
 
