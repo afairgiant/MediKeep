@@ -204,6 +204,52 @@ def _enclosing_function(node: ast.AST, parents: dict):
     return current
 
 
+def _propagate_after_handler(carriers: set, function, inside: set) -> set:
+    """Follow exception text into variables built from it after the handler.
+
+    `msg = str(e)` in the handler, then `payload = {"error": msg}` (or
+    `payload["error"] = msg`, `payload.append(msg)`) later, makes `payload` carry it too.
+    """
+    carriers = set(carriers)
+    changed = True
+    while changed:
+        changed = False
+        for node in ast.walk(function):
+            if id(node) in inside:
+                continue
+            if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+                if node.value is None or not (_names_in(node.value) & carriers):
+                    continue
+                targets = (
+                    node.targets if isinstance(node, ast.Assign) else [node.target]
+                )
+                names = set()
+                for target in targets:
+                    for element in (
+                        ast.walk(target) if isinstance(target, ast.Tuple) else [target]
+                    ):
+                        root = (
+                            element.id
+                            if isinstance(element, ast.Name)
+                            else _store_root(element)
+                        )
+                        if root:
+                            names.add(root)
+            elif isinstance(node, ast.Call) and not _is_logging_call(node):
+                root = _container_root(node)
+                if not (
+                    root and any(_names_in(a) & carriers for a in _call_arguments(node))
+                ):
+                    continue
+                names = {root}
+            else:
+                continue
+            if not names <= carriers:
+                carriers |= names
+                changed = True
+    return carriers
+
+
 def _after_handler_leaks(handler: ast.ExceptHandler, tainted: set, function) -> list:
     """Exception text carried out of the handler in a variable, then returned or sent.
 
@@ -215,6 +261,7 @@ def _after_handler_leaks(handler: ast.ExceptHandler, tainted: set, function) -> 
     if not carriers or function is None:
         return []
     inside = {id(node) for node in ast.walk(handler)}
+    carriers = _propagate_after_handler(carriers, function, inside)
     leaks = []
     for node in ast.walk(function):
         if id(node) in inside:
@@ -546,6 +593,24 @@ class TestAttributeAndAfterHandlerDetector:
             ),
             # a list filled in the handler and returned after it
             ("errors = []", "errors.append(str(e))", 'return {"errors": errors}'),
+            # built from the handler's variable *after* the handler
+            ("", "msg = str(e)", 'payload = {"error": msg}\nreturn payload'),
+            (
+                "",
+                "msg = str(e)",
+                'text = f"failed: {msg}"\npayload = {"error": text}\nreturn payload',
+            ),
+            (
+                "",
+                "msg = str(e)",
+                'payload = {}\npayload["error"] = msg\nreturn payload',
+            ),
+            ("", "msg = str(e)", "payload = []\npayload.append(msg)\nreturn payload"),
+            (
+                "result = Response()",
+                "msg = str(e)",
+                "result.description = msg\nreturn result",
+            ),
         ],
     )
     def test_flags_exception_text_that_leaves_the_handler(
@@ -574,6 +639,12 @@ class TestAttributeAndAfterHandlerDetector:
             ),
             # exception text only used for logging inside the handler
             ("", "msg = str(e)\nlogger.error(msg)", 'return {"ok": True}'),
+            # the handler's variable is not used to build what is returned
+            (
+                "",
+                "msg = str(e)\nlogger.error(msg)",
+                'payload = {"error": "Failed"}\nreturn payload',
+            ),
             # something unrelated returned after the handler
             ("ok = True", "logger.error(str(e))", "return ok"),
             (
