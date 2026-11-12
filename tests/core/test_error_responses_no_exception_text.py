@@ -185,13 +185,50 @@ def _container_root(call: ast.Call):
     return root.id if isinstance(root, ast.Name) else None
 
 
-def _subscript_root(target: ast.AST):
-    if not isinstance(target, ast.Subscript):
+def _store_root(target: ast.AST):
+    """The name written into by `x[k] = v` or `x.attr = v` (and deeper chains)."""
+    if not isinstance(target, (ast.Subscript, ast.Attribute)):
         return None
-    root = target.value
+    root = target
     while isinstance(root, (ast.Attribute, ast.Subscript)):
         root = root.value
     return root.id if isinstance(root, ast.Name) else None
+
+
+def _enclosing_function(node: ast.AST, parents: dict):
+    current = parents.get(node)
+    while current is not None and not isinstance(
+        current, (ast.FunctionDef, ast.AsyncFunctionDef)
+    ):
+        current = parents.get(current)
+    return current
+
+
+def _after_handler_leaks(handler: ast.ExceptHandler, tainted: set, function) -> list:
+    """Exception text carried out of the handler in a variable, then returned or sent.
+
+    `result = {"error": str(e)}` inside the handler followed by `return result`
+    (or `raise HTTPException(detail=msg)`) after it never shows exception text
+    inside the handler itself.
+    """
+    carriers = tainted - {handler.name}
+    if not carriers or function is None:
+        return []
+    inside = {id(node) for node in ast.walk(handler)}
+    leaks = []
+    for node in ast.walk(function):
+        if id(node) in inside:
+            continue
+        if isinstance(node, ast.Return) and node.value is not None:
+            if _names_in(node.value) & carriers:
+                leaks.append((node.lineno, ast.unparse(node)[:100]))
+        elif isinstance(node, ast.Call) and _callee_name(node) in RESPONSE_CALLS:
+            arguments = list(node.args) + [
+                kw.value for kw in node.keywords if kw.arg not in NON_RESPONSE_KWARGS
+            ]
+            if any(_names_in(arg) & carriers for arg in arguments):
+                leaks.append((node.lineno, ast.unparse(node)[:100]))
+    return leaks
 
 
 def _payload_leaks(handler: ast.ExceptHandler, tainted: set) -> list:
@@ -219,7 +256,7 @@ def _payload_leaks(handler: ast.ExceptHandler, tainted: set) -> list:
                 leaks.append((node.lineno, ast.unparse(node)[:100]))
         elif isinstance(node, ast.Assign) and _names_in(node.value) & tainted:
             for target in node.targets:
-                root = _subscript_root(target)
+                root = _store_root(target)
                 if root and root not in assigned_here:
                     leaks.append((node.lineno, ast.unparse(node)[:100]))
     return leaks
@@ -228,15 +265,20 @@ def _payload_leaks(handler: ast.ExceptHandler, tainted: set) -> list:
 def find_exception_text_leaks(source: str, check_payloads: bool = False) -> list:
     """Return (line, snippet) for each leaky handler that echoes its exception.
 
-    With `check_payloads`, also flag exception text that is returned directly or
-    stored in a container that outlives the handler. That is how a leak reaches
+    With `check_payloads`, also flag exception text that is returned directly, stored
+    in a container or attribute that outlives the handler, or carried out in a
+    variable that is returned or sent after the handler. That is how a leak reaches
     the client without a response call inside the handler. It is meant for the
     endpoint layer, where a return value is the response.
     """
     leaks = []
-    for handler in (
-        n for n in ast.walk(ast.parse(source)) if isinstance(n, ast.ExceptHandler)
-    ):
+    tree = ast.parse(source)
+    parents = {
+        child: parent
+        for parent in ast.walk(tree)
+        for child in ast.iter_child_nodes(parent)
+    }
+    for handler in (n for n in ast.walk(tree) if isinstance(n, ast.ExceptHandler)):
         if not handler.name or not (
             _handler_type_names(handler) & LEAKY_EXCEPTION_TYPES
         ):
@@ -255,6 +297,11 @@ def find_exception_text_leaks(source: str, check_payloads: bool = False) -> list
                 leaks.append((call.lineno, ast.unparse(call)[:100]))
         if check_payloads:
             leaks.extend(_payload_leaks(handler, tainted))
+            leaks.extend(
+                _after_handler_leaks(
+                    handler, tainted, _enclosing_function(handler, parents)
+                )
+            )
     return leaks
 
 
@@ -461,6 +508,85 @@ class TestPayloadLeakDetector:
             '    return {"message": str(e)}\n'
         )
         assert find_exception_text_leaks(source, check_payloads=True) == []
+
+
+class TestAttributeAndAfterHandlerDetector:
+    """Exception text can leave a handler on an object, or in a variable used after it."""
+
+    @staticmethod
+    def _in_function(before: str, handler_body: str, after: str) -> str:
+        indent = lambda text: "".join(  # noqa: E731
+            f"    {line}\n" for line in text.splitlines()
+        )
+        return (
+            "def endpoint():\n"
+            + indent(before)
+            + "    try:\n        pass\n    except Exception as e:\n"
+            + "".join(f"        {line}\n" for line in handler_body.splitlines())
+            + indent(after)
+        )
+
+    @pytest.mark.parametrize(
+        ("before", "handler_body", "after"),
+        [
+            # the shape in the review: attribute write, return after the handler
+            ("result = Response()", "result.description = str(e)", "return result"),
+            # an attribute write on an object that outlives the handler
+            ("result = Response()", "result.description = str(e)", "pass"),
+            ("result = Response()", 'result.meta["k"] = f"failed: {e}"', "pass"),
+            # a response object created inside the handler, returned after it
+            ("", 'result = {"error": str(e)}', "return result"),
+            ("", "result = Response()\nresult.description = str(e)", "return result"),
+            # a variable filled in the handler and sent after it
+            ("", "msg = str(e)", "raise HTTPException(500, msg)"),
+            (
+                "",
+                'msg = f"failed: {e}"',
+                "raise HTTPException(status_code=500, detail=msg)",
+            ),
+            # a list filled in the handler and returned after it
+            ("errors = []", "errors.append(str(e))", 'return {"errors": errors}'),
+        ],
+    )
+    def test_flags_exception_text_that_leaves_the_handler(
+        self, before, handler_body, after
+    ):
+        source = self._in_function(before, handler_body, after)
+
+        assert find_exception_text_leaks(source, check_payloads=True), source
+
+    def test_these_are_only_checked_when_asked_for(self):
+        source = self._in_function("", 'result = {"error": str(e)}', "return result")
+
+        assert find_exception_text_leaks(source) == []
+
+    @pytest.mark.parametrize(
+        ("before", "handler_body", "after"),
+        [
+            # fixed text in the handler
+            ("", 'result = {"error": "Check failed"}', "return result"),
+            # the sanctioned helper logs the cause and returns fixed text
+            ("", 'result = {"error": _log_check_failure(e, "api")}', "return result"),
+            (
+                "result = Response()",
+                'result.description = "Check failed"',
+                "return result",
+            ),
+            # exception text only used for logging inside the handler
+            ("", "msg = str(e)\nlogger.error(msg)", 'return {"ok": True}'),
+            # something unrelated returned after the handler
+            ("ok = True", "logger.error(str(e))", "return ok"),
+            (
+                "",
+                'logger.error("failed", extra={"error": str(e)})',
+                'raise HTTPException(500, "Failed")',
+            ),
+        ],
+    )
+    def test_accepts_fixed_text_and_unrelated_values(self, before, handler_body, after):
+        source = self._in_function(before, handler_body, after)
+
+        assert find_exception_text_leaks(source, check_payloads=True) == [], source
 
 
 class TestUnloggedHandlerDetector:

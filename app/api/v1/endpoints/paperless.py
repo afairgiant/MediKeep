@@ -1300,6 +1300,9 @@ async def get_paperless_task_status(
             except HTTPException:
                 # Re-raise HTTP exceptions as-is
                 raise
+            except (PaperlessConnectionError, PaperlessAuthenticationError):
+                # Let the provider-specific handlers below log and answer these.
+                raise
             except Exception as e:
                 logger.error(
                     f"Error checking task status directly",
