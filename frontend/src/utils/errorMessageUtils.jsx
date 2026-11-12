@@ -10,7 +10,7 @@ import {
   SUCCESS_MESSAGES,
   getUserFriendlyError,
   formatErrorWithContext,
-  enhancePaperlessError,
+  getPaperlessErrorMessage,
 } from '../constants/errorMessages';
 import i18n from '../i18n/config';
 import { notifications } from '@mantine/notifications';
@@ -301,7 +301,7 @@ export const handleFileUploadError = (
   let errorMessage;
 
   if (storageBackend === 'paperless') {
-    errorMessage = enhancePaperlessError(error?.message || '');
+    errorMessage = getPaperlessErrorMessage(error);
   } else {
     errorMessage = getUserFriendlyError(error, 'upload');
   }

@@ -13,6 +13,8 @@ import {
   getErrorCategory,
   formatErrorWithContext,
   enhancePaperlessError,
+  getIntegrationErrorMessage,
+  getPaperlessErrorMessage,
   getUserFriendlyError,
   getErrorIcon,
 } from '../errorMessages';
@@ -143,6 +145,139 @@ describe('Error Messages System', () => {
     test('returns generic paperless error for unknown errors', () => {
       const result = enhancePaperlessError('Some unknown paperless error');
       expect(result).toBe(ERROR_MESSAGES.PAPERLESS_UNAVAILABLE);
+    });
+  });
+
+  describe('backend-described Paperless/Papra errors', () => {
+    // Messages the backend wrote itself. Each contains a word the keyword
+    // matching below would misread (permission, network, connect, invalid).
+    const coded = (message, errorCode) => {
+      const error = new Error(message);
+      error.errorCode = errorCode;
+      return error;
+    };
+
+    const described = [
+      [
+        "Permission denied uploading 'scan.pdf'. Please check your Paperless user permissions.",
+        'integration_permission_denied',
+      ],
+      [
+        "Network error uploading 'scan.pdf' to Paperless. Please try again.",
+        'integration_network_error',
+      ],
+      [
+        'Unable to connect to Papra: connection refused. Check that Papra is running and that the URL and port are correct.',
+        'integration_connection_refused',
+      ],
+      [
+        'Unable to connect to Paperless: the request timed out. Check that the URL is reachable and that Paperless is responding.',
+        'integration_timeout',
+      ],
+      [
+        'Papra authentication failed. Please check your API token and permissions.',
+        'integration_auth_failed',
+      ],
+      [
+        "File 'scan.pdf' has an unsupported format. Please check that the file type is supported by Paperless-ngx.",
+        'integration_unsupported_format',
+      ],
+    ];
+
+    describe('getIntegrationErrorMessage', () => {
+      test.each(described)(
+        'returns the message of a coded error: %s',
+        (message, code) => {
+          expect(getIntegrationErrorMessage(coded(message, code))).toBe(
+            message
+          );
+        }
+      );
+
+      test.each([
+        ['no code', coded('Some message', undefined)],
+        ['another code family', coded('Some message', 'invalid_credentials')],
+        [
+          'a code that only contains the prefix',
+          coded('Some message', 'x_integration_error'),
+        ],
+        ['a non-string code', coded('Some message', 42)],
+        ['an empty message', coded('', 'integration_error')],
+        ['a blank message', coded('   ', 'integration_error')],
+      ])('returns null for %s', (_label, error) => {
+        expect(getIntegrationErrorMessage(error)).toBeNull();
+      });
+
+      test.each([
+        ['a plain string', 'integration_error'],
+        ['null', null],
+        ['undefined', undefined],
+      ])('returns null for %s', (_label, value) => {
+        expect(getIntegrationErrorMessage(value)).toBeNull();
+      });
+    });
+
+    describe('getPaperlessErrorMessage', () => {
+      test.each(described)(
+        'shows a coded message as written: %s',
+        (message, code) => {
+          expect(getPaperlessErrorMessage(coded(message, code))).toBe(message);
+        }
+      );
+
+      test('a coded message is not collapsed into the unavailable fallback', () => {
+        const message = "File 'scan.pdf' is too large for Paperless.";
+        expect(
+          getPaperlessErrorMessage(coded(message, 'integration_file_too_large'))
+        ).not.toBe(ERROR_MESSAGES.PAPERLESS_UNAVAILABLE);
+      });
+
+      test('an uncoded error still goes through the keyword matching', () => {
+        expect(
+          getPaperlessErrorMessage(new Error('File appears to be a duplicate'))
+        ).toBe(ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT);
+        expect(
+          getPaperlessErrorMessage(new Error('Some unknown paperless error'))
+        ).toBe(ERROR_MESSAGES.PAPERLESS_UNAVAILABLE);
+      });
+
+      test('accepts a plain string and a missing error', () => {
+        expect(getPaperlessErrorMessage('Paperless not enabled')).toBe(
+          ERROR_MESSAGES.PAPERLESS_NOT_ENABLED
+        );
+        expect(getPaperlessErrorMessage(undefined)).toBe(
+          ERROR_MESSAGES.PAPERLESS_UNAVAILABLE
+        );
+      });
+    });
+
+    describe('getUserFriendlyError', () => {
+      test.each(described)(
+        'shows a coded message as written: %s',
+        (message, code) => {
+          expect(getUserFriendlyError(coded(message, code), 'upload')).toBe(
+            message
+          );
+        }
+      );
+
+      test('does not append an error code suffix to a described message', () => {
+        const message =
+          'Papra authentication failed. Please check your API token and permissions.';
+        const result = getUserFriendlyError(
+          coded(message, 'integration_auth_failed'),
+          'link'
+        );
+        expect(result).not.toMatch(/\(Error:/);
+      });
+
+      test('an uncoded error with the same words is still classified generically', () => {
+        const result = getUserFriendlyError(
+          new Error("Permission denied uploading 'scan.pdf'"),
+          'upload'
+        );
+        expect(result).toContain(ERROR_MESSAGES.PERMISSION_DENIED);
+      });
     });
   });
 

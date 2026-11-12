@@ -185,7 +185,7 @@ async def export_patient_data(
                 )
                 raise HTTPException(
                     status_code=500,
-                    detail=f"JSON serialization failed: {str(json_error)}",
+                    detail="JSON serialization failed",
                 )
 
         elif format == ExportFormat.CSV:
@@ -431,6 +431,8 @@ async def export_patient_data(
             scope=scope.value,
         )
         raise HTTPException(status_code=400, detail=error_message)
+    except HTTPException:
+        raise
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -441,7 +443,7 @@ async def export_patient_data(
             format_type=format.value,
             scope=scope.value,
         )
-        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Export failed")
 
 
 @router.get("/summary")
@@ -491,9 +493,7 @@ async def get_export_summary(
             e,
             user_id=current_user_id,
         )
-        raise HTTPException(
-            status_code=500, detail=f"Failed to generate export summary: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail="Failed to generate export summary")
 
 
 @router.get("/formats")
@@ -789,4 +789,4 @@ async def create_bulk_export(
             user_id=current_user_id,
             scope_count=len(request.scopes),
         )
-        raise HTTPException(status_code=500, detail=f"Bulk export failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Bulk export failed")

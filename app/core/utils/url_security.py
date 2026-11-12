@@ -62,6 +62,12 @@ UNRESOLVED_URL_ERROR = (
 # Shown when a plain-HTTP URL does not resolve to a private/loopback address.
 INSECURE_URL_ERROR = "External URLs must use HTTPS for security"
 
+# Every reason validate_integration_url can give. All are constants that name no
+# address, so they are safe to show to the user who typed the URL.
+URL_VALIDATION_MESSAGES = frozenset(
+    {UNRESOLVED_URL_ERROR, METADATA_URL_ERROR, PRIVATE_URL_ERROR, INSECURE_URL_ERROR}
+)
+
 
 def _normalize_ip(ip: _IpAddress) -> _IpAddress:
     """Unwrap an IPv4-mapped IPv6 address (``::ffff:a.b.c.d``) to its IPv4 form."""

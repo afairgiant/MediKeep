@@ -11,11 +11,16 @@ import uuid
 from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import aiohttp
 
 from app.core.config import settings
+from app.core.http.integration_errors import (
+    PAPERLESS_AUTH_FAILED_MESSAGE,
+    IntegrationErrorCode,
+    IntegrationFailureInfo,
+)
 from app.core.logging.config import get_logger
 from app.core.utils.integration_http import (
     UnsafeRedirectError,
@@ -52,7 +57,7 @@ def _build_title_fallback_query(query: str, user_id: Optional[int] = None) -> st
     return " AND ".join(clauses) if clauses else "*"
 
 
-class PaperlessError(Exception):
+class PaperlessError(IntegrationFailureInfo, Exception):
     """Base exception for paperless service errors."""
 
 
@@ -67,9 +72,110 @@ class PaperlessRedirectError(PaperlessConnectionError):
 class PaperlessAuthenticationError(PaperlessError):
     """Exception raised for authentication errors."""
 
+    integration_message = PAPERLESS_AUTH_FAILED_MESSAGE
+    integration_code = IntegrationErrorCode.AUTH_FAILED
+
 
 class PaperlessUploadError(PaperlessError):
     """Exception raised for upload errors."""
+
+
+# Paperless answers an upload with free text. It is only ever *classified* here:
+# the keywords pick one of these templates, and nothing Paperless wrote is quoted.
+# The templates interpolate only the user's own file name.
+_UPLOAD_ERROR_TEMPLATES = (
+    (
+        IntegrationErrorCode.DUPLICATE_DOCUMENT,
+        (
+            "duplicate",
+            "already exists",
+            "similar document",
+            "document with this checksum",
+            "identical file",
+        ),
+        "Document '{filename}' appears to be a duplicate. A similar or identical "
+        "document already exists in Paperless. Please check your Paperless "
+        "instance for existing documents.",
+    ),
+    (
+        IntegrationErrorCode.UNSUPPORTED_FORMAT,
+        (
+            "unsupported file",
+            "invalid file type",
+            "file format",
+            "not supported",
+            "invalid format",
+        ),
+        "File '{filename}' has an unsupported format. Please check that the file "
+        "type is supported by Paperless-ngx.",
+    ),
+    (
+        IntegrationErrorCode.FILE_TOO_LARGE,
+        ("file too large", "size exceeds", "maximum file size", "too big"),
+        "File '{filename}' is too large for Paperless. Please reduce the file size "
+        "or check your Paperless configuration.",
+    ),
+    (
+        IntegrationErrorCode.PERMISSION_DENIED,
+        ("permission denied", "access denied", "not authorized", "forbidden"),
+        "Permission denied uploading '{filename}'. Please check your Paperless "
+        "user permissions.",
+    ),
+    (
+        IntegrationErrorCode.STORAGE_FULL,
+        ("disk space", "storage full", "no space", "insufficient space"),
+        "Paperless storage is full. Unable to upload '{filename}'. Please contact "
+        "your administrator.",
+    ),
+    (
+        IntegrationErrorCode.PROCESSING_FAILED,
+        ("ocr failed", "processing failed", "document processing", "text extraction"),
+        "Paperless had trouble processing '{filename}'. The document was uploaded "
+        "but text extraction may have failed.",
+    ),
+    (
+        IntegrationErrorCode.NETWORK_ERROR,
+        ("timeout", "connection", "network", "request failed"),
+        "Network error uploading '{filename}' to Paperless. Please try again.",
+    ),
+)
+
+
+def parse_upload_error(
+    error_data: Union[Dict, str], filename: str, status: int = 400
+) -> Tuple[str, str]:
+    """Classify a Paperless upload error into (error code, user-facing message).
+
+    The message is always one of our own templates, so it is safe to show: the
+    upstream text decides *which* template, but is never included in it.
+    """
+    if isinstance(error_data, dict):
+        if "non_field_errors" in error_data:
+            errors = error_data["non_field_errors"]
+            if isinstance(errors, list) and errors:
+                error_msg = errors[0]
+            else:
+                error_msg = errors
+        elif "detail" in error_data:
+            error_msg = error_data["detail"]
+        elif "error" in error_data:
+            error_msg = error_data["error"]
+        else:
+            error_msg = error_data
+    else:
+        error_msg = error_data
+
+    error_lower = str(error_msg).lower()
+
+    for code, keywords, template in _UPLOAD_ERROR_TEMPLATES:
+        if any(keyword in error_lower for keyword in keywords):
+            return code, template.format(filename=filename)
+
+    return (
+        IntegrationErrorCode.UPLOAD_FAILED,
+        f"Paperless rejected '{filename}' (HTTP {int(status)}). Please check your "
+        "Paperless configuration or contact support.",
+    )
 
 
 class PaperlessServiceBase(ABC):
@@ -858,12 +964,17 @@ class PaperlessServiceToken(PaperlessServiceBase):
                 if response.status == 400:
                     try:
                         error_data = await response.json()
-                        error_message = self._parse_upload_error(error_data, filename)
-                        raise PaperlessUploadError(error_message)
                     except Exception:
-                        error_text = await response.text()
-                        error_message = self._parse_upload_error(error_text, filename)
-                        raise PaperlessUploadError(error_message)
+                        error_data = await response.text()
+                    error_code, error_message = parse_upload_error(
+                        error_data, filename, response.status
+                    )
+                    raise PaperlessUploadError(
+                        error_message,
+                        integration_message=error_message,
+                        integration_code=error_code,
+                        upstream_status=response.status,
+                    )
                 elif response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during upload"
@@ -871,7 +982,8 @@ class PaperlessServiceToken(PaperlessServiceBase):
                 elif response.status not in [200, 201]:
                     response_text = await response.text()
                     raise PaperlessUploadError(
-                        f"Upload failed: HTTP {response.status} - {response_text}"
+                        f"Upload failed: HTTP {response.status} - {response_text}",
+                        upstream_status=response.status,
                     )
 
                 # Get task UUID from response - read as text first then try to parse
@@ -937,123 +1049,6 @@ class PaperlessServiceToken(PaperlessServiceBase):
                 },
             )
             raise PaperlessUploadError(f"Upload failed: {str(e)}")
-
-    def _parse_upload_error(self, error_data: Union[Dict, str], filename: str) -> str:
-        """
-        Parse Paperless upload error and return user-friendly message.
-
-        Args:
-            error_data: Error response from Paperless API
-            filename: Original filename for context
-
-        Returns:
-            User-friendly error message
-        """
-        if isinstance(error_data, dict):
-            # Handle structured error responses
-            if "non_field_errors" in error_data:
-                errors = error_data["non_field_errors"]
-                if isinstance(errors, list) and errors:
-                    error_msg = errors[0]
-                else:
-                    error_msg = str(errors)
-            elif "detail" in error_data:
-                error_msg = error_data["detail"]
-            elif "error" in error_data:
-                error_msg = error_data["error"]
-            else:
-                error_msg = str(error_data)
-        else:
-            error_msg = str(error_data)
-
-        # Check for common error patterns and provide user-friendly messages
-        error_lower = error_msg.lower()
-
-        # Duplicate document detection
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "duplicate",
-                "already exists",
-                "similar document",
-                "document with this checksum",
-                "identical file",
-            ]
-        ):
-            return f"Document '{filename}' appears to be a duplicate. A similar or identical document already exists in Paperless. Please check your Paperless instance for existing documents."
-
-        # File format/type errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "unsupported file",
-                "invalid file type",
-                "file format",
-                "not supported",
-                "invalid format",
-            ]
-        ):
-            return f"File '{filename}' has an unsupported format. Please check that the file type is supported by Paperless-ngx."
-
-        # File size errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "file too large",
-                "size exceeds",
-                "maximum file size",
-                "too big",
-            ]
-        ):
-            return f"File '{filename}' is too large for Paperless. Please reduce the file size or check your Paperless configuration."
-
-        # Permission/access errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "permission denied",
-                "access denied",
-                "not authorized",
-                "forbidden",
-            ]
-        ):
-            return f"Permission denied uploading '{filename}'. Please check your Paperless user permissions."
-
-        # Storage/disk space errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "disk space",
-                "storage full",
-                "no space",
-                "insufficient space",
-            ]
-        ):
-            return f"Paperless storage is full. Unable to upload '{filename}'. Please contact your administrator."
-
-        # OCR/processing errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "ocr failed",
-                "processing failed",
-                "document processing",
-                "text extraction",
-            ]
-        ):
-            return f"Paperless had trouble processing '{filename}'. The document was uploaded but text extraction may have failed."
-
-        # Network/timeout errors
-        if any(
-            keyword in error_lower
-            for keyword in ["timeout", "connection", "network", "request failed"]
-        ):
-            return (
-                f"Network error uploading '{filename}' to Paperless. Please try again."
-            )
-
-        # Default message for unknown errors
-        return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
 
     async def download_document(self, document_id: int) -> bytes:
         """
@@ -1427,12 +1422,17 @@ class PaperlessService(PaperlessServiceBase):
                 if response.status == 400:
                     try:
                         error_data = await response.json()
-                        error_message = self._parse_upload_error(error_data, filename)
-                        raise PaperlessUploadError(error_message)
                     except Exception:
-                        error_text = await response.text()
-                        error_message = self._parse_upload_error(error_text, filename)
-                        raise PaperlessUploadError(error_message)
+                        error_data = await response.text()
+                    error_code, error_message = parse_upload_error(
+                        error_data, filename, response.status
+                    )
+                    raise PaperlessUploadError(
+                        error_message,
+                        integration_message=error_message,
+                        integration_code=error_code,
+                        upstream_status=response.status,
+                    )
                 elif response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during upload"
@@ -1440,7 +1440,8 @@ class PaperlessService(PaperlessServiceBase):
                 elif response.status not in [200, 201]:
                     response_text = await response.text()
                     raise PaperlessUploadError(
-                        f"Upload failed: HTTP {response.status} - {response_text}"
+                        f"Upload failed: HTTP {response.status} - {response_text}",
+                        upstream_status=response.status,
                     )
 
                 # Get task UUID from response - read as text first then try to parse
@@ -1506,123 +1507,6 @@ class PaperlessService(PaperlessServiceBase):
                 },
             )
             raise PaperlessUploadError(f"Upload failed: {str(e)}")
-
-    def _parse_upload_error(self, error_data: Union[Dict, str], filename: str) -> str:
-        """
-        Parse Paperless upload error and return user-friendly message.
-
-        Args:
-            error_data: Error response from Paperless API
-            filename: Original filename for context
-
-        Returns:
-            User-friendly error message
-        """
-        if isinstance(error_data, dict):
-            # Handle structured error responses
-            if "non_field_errors" in error_data:
-                errors = error_data["non_field_errors"]
-                if isinstance(errors, list) and errors:
-                    error_msg = errors[0]
-                else:
-                    error_msg = str(errors)
-            elif "detail" in error_data:
-                error_msg = error_data["detail"]
-            elif "error" in error_data:
-                error_msg = error_data["error"]
-            else:
-                error_msg = str(error_data)
-        else:
-            error_msg = str(error_data)
-
-        # Check for common error patterns and provide user-friendly messages
-        error_lower = error_msg.lower()
-
-        # Duplicate document detection
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "duplicate",
-                "already exists",
-                "similar document",
-                "document with this checksum",
-                "identical file",
-            ]
-        ):
-            return f"Document '{filename}' appears to be a duplicate. A similar or identical document already exists in Paperless. Please check your Paperless instance for existing documents."
-
-        # File format/type errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "unsupported file",
-                "invalid file type",
-                "file format",
-                "not supported",
-                "invalid format",
-            ]
-        ):
-            return f"File '{filename}' has an unsupported format. Please check that the file type is supported by Paperless-ngx."
-
-        # File size errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "file too large",
-                "size exceeds",
-                "maximum file size",
-                "too big",
-            ]
-        ):
-            return f"File '{filename}' is too large for Paperless. Please reduce the file size or check your Paperless configuration."
-
-        # Permission/access errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "permission denied",
-                "access denied",
-                "not authorized",
-                "forbidden",
-            ]
-        ):
-            return f"Permission denied uploading '{filename}'. Please check your Paperless user permissions."
-
-        # Storage/disk space errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "disk space",
-                "storage full",
-                "no space",
-                "insufficient space",
-            ]
-        ):
-            return f"Paperless storage is full. Unable to upload '{filename}'. Please contact your administrator."
-
-        # OCR/processing errors
-        if any(
-            keyword in error_lower
-            for keyword in [
-                "ocr failed",
-                "processing failed",
-                "document processing",
-                "text extraction",
-            ]
-        ):
-            return f"Paperless had trouble processing '{filename}'. The document was uploaded but text extraction may have failed."
-
-        # Network/timeout errors
-        if any(
-            keyword in error_lower
-            for keyword in ["timeout", "connection", "network", "request failed"]
-        ):
-            return (
-                f"Network error uploading '{filename}' to Paperless. Please try again."
-            )
-
-        # Default message for unknown errors
-        return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
 
     async def download_document(self, document_id: int) -> bytes:
         """

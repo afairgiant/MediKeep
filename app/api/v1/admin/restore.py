@@ -130,9 +130,7 @@ async def upload_backup_file(
         log_endpoint_error(
             logger, request, "Failed to upload backup file", e, user_id=current_user.id
         )
-        raise HTTPException(
-            status_code=500, detail=f"Failed to upload backup file: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail="Failed to upload backup file")
 
 
 @router.post("/preview/{backup_id}", response_model=RestorePreviewResponse)
@@ -175,9 +173,7 @@ async def preview_restore(
             user_id=current_user.id,
             backup_id=backup_id,
         )
-        raise HTTPException(
-            status_code=500, detail=f"Failed to preview restore: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail="Failed to preview restore")
 
 
 @router.post("/execute/{backup_id}", response_model=RestoreExecuteResponse)
@@ -228,9 +224,7 @@ async def execute_restore(
             user_id=current_user.id,
             backup_id=backup_id,
         )
-        raise HTTPException(
-            status_code=500, detail=f"Failed to execute restore: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail="Failed to execute restore")
 
 
 @router.get("/confirmation-token/{backup_id}")
@@ -275,5 +269,5 @@ async def get_confirmation_token(
             backup_id=backup_id,
         )
         raise HTTPException(
-            status_code=500, detail=f"Failed to generate confirmation token: {str(e)}"
+            status_code=500, detail="Failed to generate confirmation token"
         )

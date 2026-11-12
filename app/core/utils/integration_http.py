@@ -17,6 +17,7 @@ from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.url_security import (
+    URL_VALIDATION_MESSAGES,
     PinnedResolver,
     _IpAddress,
     validate_integration_url,
@@ -50,7 +51,18 @@ def pin_integration_url(url: str, error_cls: Type[Exception]) -> PinnedTarget:
             url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
         )
     except ValueError as exc:
-        raise error_cls(str(exc)) from exc
+        error = error_cls(str(exc))
+        # Only the fixed validation reasons are authored text; any other
+        # ValueError (e.g. a malformed port) keeps a generic reason.
+        error.integration_message = (
+            str(exc)
+            if str(exc) in URL_VALIDATION_MESSAGES
+            else "The integration URL could not be validated."
+        )
+        # Literal, not IntegrationErrorCode.URL_BLOCKED: integration_errors imports
+        # this module. A test keeps the two equal.
+        error.integration_code = "integration_url_blocked"
+        raise error from exc
     return PinnedTarget(url, tuple(ips))
 
 

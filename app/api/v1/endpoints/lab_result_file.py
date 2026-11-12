@@ -278,7 +278,7 @@ async def upload_file(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error saving file: {str(e)}",
+            detail="Error saving file",
         )
 
     # Create file entry in database
@@ -761,4 +761,13 @@ def check_storage_health(current_user: User = Depends(deps.get_current_user)):
         }
 
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        logger.error(
+            "Storage health check failed",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "storage_health_check_failed",
+                LogFields.USER_ID: current_user.id,
+                LogFields.ERROR: str(e),
+            },
+        )
+        return {"status": "error", "error": "Storage health check failed"}

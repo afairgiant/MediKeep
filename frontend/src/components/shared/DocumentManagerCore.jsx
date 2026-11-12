@@ -17,7 +17,7 @@ import logger from '../../services/logger';
 import {
   SUCCESS_MESSAGES,
   getUserFriendlyError,
-  enhancePaperlessError,
+  getPaperlessErrorMessage,
   formatErrorWithContext,
 } from '../../constants/errorMessages';
 import { generateId } from '../../utils/helpers';
@@ -1048,7 +1048,7 @@ const useDocumentManagerCore = ({
 
         // Enhance error messages for Paperless or use generic error handling
         if (selectedStorageBackend === 'paperless') {
-          errorMessage = enhancePaperlessError(err.message || '');
+          errorMessage = getPaperlessErrorMessage(err);
         } else {
           errorMessage = getUserFriendlyError(err, 'upload');
         }
@@ -1359,7 +1359,7 @@ const useDocumentManagerCore = ({
 
             // Enhance error messages for Paperless or use generic error handling
             if (selectedStorageBackendRef.current === 'paperless') {
-              errorMessage = enhancePaperlessError(error.message || '');
+              errorMessage = getPaperlessErrorMessage(error);
             } else {
               errorMessage = getUserFriendlyError(error, 'upload');
             }
@@ -1427,7 +1427,7 @@ const useDocumentManagerCore = ({
         } catch (error) {
           const errorMessage =
             pendingLink.source === 'paperless'
-              ? enhancePaperlessError(error?.message || '')
+              ? getPaperlessErrorMessage(error)
               : getUserFriendlyError(error, 'link');
 
           if (showProgressModal) {

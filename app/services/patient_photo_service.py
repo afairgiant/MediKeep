@@ -397,7 +397,7 @@ class PatientPhotoService:
             )
             raise HTTPException(
                 status_code=400,
-                detail=f"Unable to process image: {str(e)}. Please try a different photo",
+                detail="Unable to process image. Please try a different photo",
             )
 
     async def process_image(

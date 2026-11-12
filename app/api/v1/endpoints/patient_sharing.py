@@ -25,6 +25,7 @@ from app.exceptions.patient_sharing import (
     PendingInvitationError,
     RecipientNotFoundError,
     SelfShareError,
+    ShareNotFoundError,
 )
 from app.models.models import PatientShare, User
 from app.schemas.patient_sharing import (
@@ -518,9 +519,11 @@ def remove_my_access(
         )
 
         if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
+            raise HTTPException(status_code=404, detail="Patient not found")
         if "cannot remove" in str(e).lower() or "not shared" in str(e).lower():
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException(
+                status_code=400, detail="Cannot remove access to patients you own"
+            )
         raise HTTPException(status_code=500, detail="Failed to remove access")
 
 
@@ -573,7 +576,9 @@ async def revoke_patient_share(
         )
 
         if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
+            raise HTTPException(
+                status_code=404, detail="Patient not found or not owned by user"
+            )
         raise HTTPException(status_code=500, detail="Failed to revoke patient sharing")
 
 
@@ -618,6 +623,17 @@ def update_patient_share(
 
         return ShareResponse.from_orm(share)
 
+    except (ShareNotFoundError, InvalidPermissionLevelError) as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to update patient share",
+            e,
+            user_id=current_user.id,
+            patient_id=patient_id,
+            shared_with_user_id=shared_with_user_id,
+        )
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -630,8 +646,10 @@ def update_patient_share(
         )
 
         if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
-        raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException(
+                status_code=404, detail="Patient not found or not owned by user"
+            )
+        raise HTTPException(status_code=400, detail="Failed to update patient share")
 
 
 @router.get("/shared-with-me", response_model=None)
@@ -797,7 +815,9 @@ def get_patient_shares(
         )
 
         if "not found" in str(e).lower():
-            raise HTTPException(status_code=404, detail=str(e))
+            raise HTTPException(
+                status_code=404, detail="Patient not found or not owned by user"
+            )
         raise HTTPException(status_code=500, detail="Failed to retrieve patient shares")
 
 

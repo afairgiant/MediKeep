@@ -7,10 +7,26 @@ from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.deps import get_current_admin_user
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.models.models import User
 from app.services.file_management_service import file_management_service
 
 router = APIRouter()
+logger = get_logger(__name__, "app")
+
+
+def _log_trash_failure(event: str, user: User, error: Exception) -> None:
+    """Log a failed trash operation so the HTTP response can stay generic."""
+    logger.error(
+        "Trash operation failed",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: event,
+            LogFields.USER_ID: user.id,
+            LogFields.ERROR: str(error),
+        },
+    )
 
 
 @router.get("/trash/", response_model=List[Dict])
@@ -23,7 +39,8 @@ async def list_trash_contents(
     try:
         return file_management_service.list_trash_contents()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        _log_trash_failure("trash_list_failed", current_user, e)
+        raise HTTPException(status_code=500, detail="Failed to list trash contents")
 
 
 @router.post("/trash/cleanup")
@@ -36,7 +53,8 @@ async def cleanup_old_trash(
     try:
         return file_management_service.cleanup_old_trash()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        _log_trash_failure("trash_cleanup_failed", current_user, e)
+        raise HTTPException(status_code=500, detail="Failed to clean up trash")
 
 
 @router.post("/trash/restore")
@@ -55,7 +73,8 @@ async def restore_file_from_trash(
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="File not found in trash")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        _log_trash_failure("trash_restore_failed", current_user, e)
+        raise HTTPException(status_code=500, detail="Failed to restore file from trash")
 
 
 @router.delete("/trash/permanently-delete")
@@ -95,5 +114,10 @@ async def permanently_delete_from_trash(
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        _log_trash_failure("trash_permanent_delete_failed", current_user, e)
+        raise HTTPException(
+            status_code=500, detail="Failed to permanently delete file from trash"
+        )

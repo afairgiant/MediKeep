@@ -17,6 +17,10 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.api.v1.endpoints.entity_file import get_entity_by_type_and_id
 from app.core.database.database import get_db
+from app.core.http.integration_errors import (
+    integration_http_exception,
+    upstream_status_failure,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
@@ -1307,16 +1311,34 @@ async def get_paperless_task_status(
                 )
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Failed to check task status: {str(e)}",
+                    detail="Failed to check task status",
                 )
 
     except PaperlessAuthenticationError as e:
+        log_external_service(
+            logger,
+            service="paperless",
+            operation="task_status",
+            success=False,
+            error=str(e),
+            error_type=type(e).__name__,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Paperless authentication failed. Please check your credentials.",
         )
 
     except PaperlessConnectionError as e:
+        log_external_service(
+            logger,
+            service="paperless",
+            operation="task_status",
+            success=False,
+            error=str(e),
+            error_type=type(e).__name__,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unable to connect to Paperless server. Please check your configuration.",
@@ -1432,9 +1454,8 @@ async def search_paperless_documents(
                         logger.error(
                             f"Paperless search failed with status {response.status}: {error_text}"
                         )
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Paperless search failed: {error_text}",
+                        raise integration_http_exception(
+                            upstream_status_failure("Paperless", response.status)
                         )
                     return await response.json()
 
@@ -1526,12 +1547,30 @@ async def search_paperless_documents(
             return {"results": documents, "count": total_count}
 
     except PaperlessAuthenticationError as e:
+        log_external_service(
+            logger,
+            service="paperless",
+            operation="document_search",
+            success=False,
+            error=str(e),
+            error_type=type(e).__name__,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Paperless authentication failed. Please check your credentials.",
         )
 
     except PaperlessConnectionError as e:
+        log_external_service(
+            logger,
+            service="paperless",
+            operation="document_search",
+            success=False,
+            error=str(e),
+            error_type=type(e).__name__,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unable to connect to Paperless server. Please check your configuration.",
@@ -1552,7 +1591,7 @@ async def search_paperless_documents(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while searching documents: {str(e)}",
+            detail="An error occurred while searching documents",
         )
 
 

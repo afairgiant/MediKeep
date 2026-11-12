@@ -157,7 +157,7 @@ def get_dashboard_stats(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching dashboard stats: {str(e)}",
+            detail="Error fetching dashboard stats",
         )
 
 
@@ -249,7 +249,7 @@ def get_recent_activity(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching recent activity: {str(e)}",
+            detail="Error fetching recent activity",
         )
 
 
@@ -367,7 +367,7 @@ def get_system_health(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching system health: {str(e)}",
+            detail="Error fetching system health",
         )
 
 
@@ -650,7 +650,7 @@ def get_system_metrics(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching system metrics: {str(e)}",
+            detail="Error fetching system metrics",
         )
 
 

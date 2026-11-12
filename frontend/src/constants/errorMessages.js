@@ -260,6 +260,46 @@ export const enhancePaperlessError = originalError => {
   return ERROR_MESSAGES.PAPERLESS_UNAVAILABLE;
 };
 
+// Codes the backend sends for Paperless/Papra failures it has already put into
+// words that are safe to show (app/core/http/integration_errors.py). Matching the
+// prefix keeps this in step with the backend without a second list to maintain.
+const INTEGRATION_ERROR_CODE_PREFIX = 'integration_';
+
+/**
+ * The backend's own message for a Paperless/Papra failure, or null.
+ *
+ * Such a message is shown as written. Running it through the keyword matching
+ * below would misread it: "Permission denied uploading 'x'" is not a generic
+ * permission error, and "Network error uploading ..." is not a lost connection.
+ * @param {Error|string} error - The error thrown by apiService (carries errorCode)
+ * @returns {string|null} The message to show, or null if the error is not coded
+ */
+export const getIntegrationErrorMessage = error => {
+  const code = error?.errorCode;
+  const message = error?.message;
+
+  if (
+    typeof code === 'string' &&
+    code.startsWith(INTEGRATION_ERROR_CODE_PREFIX) &&
+    typeof message === 'string' &&
+    message.trim()
+  ) {
+    return message;
+  }
+  return null;
+};
+
+/**
+ * User-facing message for a failed Paperless operation.
+ * @param {Error|string} error - The error that was thrown
+ * @returns {string} The backend's message when it sent one, else the keyword match
+ */
+export const getPaperlessErrorMessage = error =>
+  getIntegrationErrorMessage(error) ??
+  enhancePaperlessError(
+    (typeof error === 'string' ? error : error?.message) || ''
+  );
+
 /**
  * Extract error code from error object or infer from message
  * @param {Error|string} error - The error object or message
@@ -288,6 +328,11 @@ const extractErrorCode = error => {
  * @returns {string} User-friendly error message with error code
  */
 export const getUserFriendlyError = (error, operation = 'operation') => {
+  const integrationMessage = getIntegrationErrorMessage(error);
+  if (integrationMessage) {
+    return integrationMessage;
+  }
+
   const errorMessage = typeof error === 'string' ? error : error?.message || '';
   const lowerError = errorMessage.toLowerCase();
 
@@ -472,6 +517,8 @@ export default {
   getErrorCategory,
   formatErrorWithContext,
   enhancePaperlessError,
+  getIntegrationErrorMessage,
+  getPaperlessErrorMessage,
   getUserFriendlyError,
   getErrorIcon,
 };

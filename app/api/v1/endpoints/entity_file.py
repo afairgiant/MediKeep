@@ -25,6 +25,11 @@ from app.api.activity_logging import log_create, log_delete, log_update
 from app.api.v1.endpoints.utils import handle_not_found
 from app.core.http.content_disposition import content_disposition_header
 from app.core.http.error_handling import MedicalRecordsAPIException, NotFoundException
+from app.core.http.integration_errors import (
+    IntegrationErrorCode,
+    integration_error_response,
+    raise_if_integration_failure,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
@@ -239,7 +244,7 @@ def get_entity_files(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve files: {str(e)}",
+            detail="Failed to retrieve files",
         )
 
 
@@ -365,7 +370,7 @@ async def upload_entity_file(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to upload file: {str(e)}",
+            detail="Failed to upload file",
         )
 
 
@@ -584,9 +589,11 @@ async def link_paperless_document(
             entity_type=entity_type,
             paperless_document_id=link_request.paperless_document_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unable to connect to Paperless: {str(e)}",
+        raise integration_error_response(
+            e,
+            "Paperless",
+            "Unable to connect to Paperless",
+            fallback_code=IntegrationErrorCode.CONNECTION_FAILED,
         )
 
     except PaperlessClientError as e:
@@ -599,8 +606,10 @@ async def link_paperless_document(
             entity_type=entity_type,
             paperless_document_id=link_request.paperless_document_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Paperless error: {str(e)}"
+        raise integration_error_response(
+            e,
+            "Paperless",
+            "Paperless error",
         )
 
     except Exception as e:
@@ -614,9 +623,10 @@ async def link_paperless_document(
             entity_id=entity_id,
             paperless_document_id=link_request.paperless_document_id,
         )
+        raise_if_integration_failure(e, "Paperless")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to link document: {str(e)}",
+            detail="Failed to link document",
         )
 
 
@@ -829,9 +839,11 @@ async def link_papra_document(
             entity_type=entity_type,
             papra_document_id=link_request.papra_document_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unable to connect to Papra: {str(e)}",
+        raise integration_error_response(
+            e,
+            "Papra",
+            "Unable to connect to Papra",
+            fallback_code=IntegrationErrorCode.CONNECTION_FAILED,
         )
 
     except PapraClientError as e:
@@ -844,9 +856,10 @@ async def link_papra_document(
             entity_type=entity_type,
             papra_document_id=link_request.papra_document_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Papra error: {str(e)}",
+        raise integration_error_response(
+            e,
+            "Papra",
+            "Papra error",
         )
 
     except Exception as e:
@@ -860,9 +873,10 @@ async def link_papra_document(
             entity_id=entity_id,
             papra_document_id=link_request.papra_document_id,
         )
+        raise_if_integration_failure(e, "Papra")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to link Papra document: {str(e)}",
+            detail="Failed to link Papra document",
         )
 
 
@@ -1200,9 +1214,12 @@ async def delete_file(
     except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
+        log_endpoint_error(
+            logger, request, "Failed to delete file", e, user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete file: {str(e)}",
+            detail="Failed to delete file",
         )
 
 
@@ -1283,9 +1300,16 @@ def update_file_metadata(
     except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to update file metadata",
+            e,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update file metadata: {str(e)}",
+            detail="Failed to update file metadata",
         )
 
 
@@ -1391,9 +1415,16 @@ def get_batch_file_counts(
     except HTTPException:
         raise
     except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to get batch file counts",
+            e,
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get batch file counts: {str(e)}",
+            detail="Failed to get batch file counts",
         )
 
 
@@ -1435,9 +1466,12 @@ def get_file_details(
     except HTTPException:
         raise
     except Exception as e:
+        log_endpoint_error(
+            logger, request, "Failed to get file details", e, user_id=current_user.id
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get file details: {str(e)}",
+            detail="Failed to get file details",
         )
 
 
@@ -1488,7 +1522,7 @@ async def check_paperless_sync_status(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to check paperless sync status: {str(e)}",
+            detail="Failed to check paperless sync status",
         )
 
 
@@ -1537,7 +1571,7 @@ async def check_papra_sync_status(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to check Papra sync status: {str(e)}",
+            detail="Failed to check Papra sync status",
         )
 
 
@@ -1579,5 +1613,5 @@ async def update_processing_files(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update processing files: {str(e)}",
+            detail="Failed to update processing files",
         )
