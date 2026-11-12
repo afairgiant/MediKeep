@@ -11,11 +11,13 @@ import sys
 from typing import Any, Dict
 
 from sqlalchemy import inspect, text
+from sqlalchemy.engine import make_url
 
 # Add the app directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "app"))
 
 from app.core.database.database import db_config, engine
+from app.core.utils.security import redact_database_url
 
 
 def check_database_type() -> Dict[str, Any]:
@@ -26,7 +28,7 @@ def check_database_type() -> Dict[str, Any]:
         Dictionary containing database information
     """
     info = {
-        "database_url": db_config.database_url,
+        "database_url": redact_database_url(db_config.database_url),
         "database_type": None,
         "connection_successful": False,
         "database_name": None,
@@ -51,24 +53,11 @@ def check_database_type() -> Dict[str, Any]:
             )
         elif db_config.database_url.startswith("postgresql"):
             info["database_type"] = "PostgreSQL"
-            # Parse PostgreSQL URL components
-            url_parts = db_config.database_url.replace("postgresql://", "").split("/")
-            if len(url_parts) >= 2:
-                auth_host = url_parts[0]
-                info["database_name"] = url_parts[1].split("?")[
-                    0
-                ]  # Remove query params if any
-
-                if "@" in auth_host:
-                    auth, host_port = auth_host.split("@")
-                    if ":" in auth:
-                        info["user"] = auth.split(":")[0]
-                    if ":" in host_port:
-                        info["host"] = host_port.split(":")[0]
-                        info["port"] = host_port.split(":")[1]
-                    else:
-                        info["host"] = host_port
-                        info["port"] = "5432"  # Default PostgreSQL port
+            url = make_url(db_config.database_url)
+            info["database_name"] = url.database
+            info["user"] = url.username
+            info["host"] = url.host
+            info["port"] = str(url.port or 5432)
 
         # Test connection
         with engine.connect() as connection:
@@ -111,8 +100,9 @@ def check_environment_variables() -> Dict[str, Any]:
     """
     Check relevant environment variables that affect database configuration.
     """
+    raw_url = os.getenv("DATABASE_URL")
     env_vars = {
-        "DATABASE_URL": os.getenv("DATABASE_URL"),
+        "DATABASE_URL": redact_database_url(raw_url) if raw_url else None,
         "DB_HOST": os.getenv("DB_HOST"),
         "DB_PORT": os.getenv("DB_PORT"),
         "DB_NAME": os.getenv("DB_NAME"),
@@ -139,7 +129,7 @@ def print_database_status():
         print("  No database-related environment variables found")
 
     print("\n🔗 CONFIGURED DATABASE URL:")
-    print(f"  {db_config.database_url}")
+    print(f"  {redact_database_url(db_config.database_url)}")
 
     # Check database type and connection
     print("\n🔍 DATABASE ANALYSIS:")

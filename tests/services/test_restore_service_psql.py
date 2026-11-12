@@ -1,7 +1,7 @@
 """Tests for the psql invocation used by database restores."""
 
 import subprocess
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -59,3 +59,65 @@ class TestNativePsqlRestore:
             await run_restore(side_effect=error)
 
         assert "syntax error" in str(exc.value)
+
+
+class TestPsqlConnectionPreflight:
+    @pytest.fixture
+    def service(self, tmp_path, conn_params):
+        service = RestoreService(MagicMock())
+        service.backup_dir = tmp_path
+        service._drop_all_tables = AsyncMock()
+        service._restore_with_native_psql = AsyncMock()
+        with patch(
+            "app.services.restore_service.SecurityValidator.validate_connection_params",
+            return_value=conn_params,
+        ), patch("app.services.restore_service.psql_binary", return_value=PSQL_18):
+            yield service
+
+    @pytest.fixture
+    def backup_file(self, tmp_path):
+        path = tmp_path / "dump.sql"
+        path.write_text("SELECT 1;")
+        return path
+
+    @pytest.mark.asyncio
+    async def test_failed_login_aborts_before_dropping_tables(
+        self, service, backup_file
+    ):
+        error = subprocess.CalledProcessError(
+            2, ["psql"], stderr="password authentication failed"
+        )
+
+        with patch("subprocess.run", side_effect=error):
+            with pytest.raises(Exception) as exc:
+                await service._restore_database(backup_file)
+
+        service._drop_all_tables.assert_not_awaited()
+        service._restore_with_native_psql.assert_not_awaited()
+        assert "before any changes" in str(exc.value)
+        assert "password authentication failed" in str(exc.value)
+
+    @pytest.mark.asyncio
+    async def test_timeout_aborts_before_dropping_tables(self, service, backup_file):
+        with patch(
+            "subprocess.run", side_effect=subprocess.TimeoutExpired(["psql"], 30)
+        ):
+            with pytest.raises(Exception, match="timed out"):
+                await service._restore_database(backup_file)
+
+        service._drop_all_tables.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_successful_check_proceeds_to_drop_and_restore(
+        self, service, backup_file, completed_process, conn_params
+    ):
+        with patch("subprocess.run", return_value=completed_process()) as mock_run:
+            await service._restore_database(backup_file)
+
+        cmd = mock_run.call_args.args[0]
+        assert cmd[0] == PSQL_18
+        assert cmd[-2:] == ["--command", "SELECT 1"]
+        assert conn_params["password"] not in cmd
+        assert mock_run.call_args.kwargs["env"]["PGPASSWORD"] == conn_params["password"]
+        service._drop_all_tables.assert_awaited_once()
+        service._restore_with_native_psql.assert_awaited_once()

@@ -196,7 +196,8 @@ export const useAdminData = config => {
             ? await actionMethod(actionData, signal)
             : await actionMethod(signal);
         },
-        { errorMessage: `Failed to execute ${actionName}` }
+        // The page-level error banner only renders before data loads, so callers must see the failure
+        { errorMessage: `Failed to execute ${actionName}`, rethrow: true }
       );
 
       if (result) {
