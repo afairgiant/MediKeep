@@ -193,6 +193,34 @@ class ConsoleFormatterWithRequestID(logging.Formatter):
         return formatted
 
 
+# Extra fields that carry the text of an exception: `error` (log_endpoint_error and
+# the handlers that follow it) and `original_error` (what handle_database_errors
+# passes through MedicalRecordsAPIException's `context`).
+_CAUSE_FIELDS = (LogFields.ERROR, "original_error")
+
+_SQL_PARAMETERS_MARKER = "[parameters:"
+_SQLALCHEMY_TRAILER = "\n(Background on this error"
+
+
+def redact_sql_parameters(text: str) -> str:
+    """Remove the bound parameter values SQLAlchemy puts in a statement error's text.
+
+    ``str()`` of an ``IntegrityError`` and similar ends with
+    ``[parameters: (...)]``, which holds the values being written. In a medical
+    record those can be patient data, so they must not reach a log file. The
+    parameter list is the last part before the "Background on this error" line (or
+    the end of the text), so the cut runs to there rather than matching brackets,
+    which the values themselves may contain.
+    """
+    start = text.find(_SQL_PARAMETERS_MARKER)
+    while start != -1:
+        end = text.find(_SQLALCHEMY_TRAILER, start)
+        end = len(text) if end == -1 else end
+        text = text[:start] + "[parameters: redacted]" + text[end:]
+        start = text.find(_SQL_PARAMETERS_MARKER, start + len("[parameters: redacted]"))
+    return text
+
+
 class MedicalRecordsJSONFormatter(logging.Formatter):
     """
     Custom JSON formatter for medical records system.
@@ -205,7 +233,7 @@ class MedicalRecordsJSONFormatter(logging.Formatter):
             LogFields.TIMESTAMP: datetime.utcnow().isoformat() + "Z",
             LogFields.LEVEL: record.levelname,
             LogFields.LOGGER: record.name,
-            LogFields.MESSAGE: record.getMessage(),
+            LogFields.MESSAGE: redact_sql_parameters(record.getMessage()),
         }
 
         # Add correlation ID if available
@@ -229,8 +257,17 @@ class MedicalRecordsJSONFormatter(logging.Formatter):
             if value is not None:
                 log_record[field] = str(value)
 
+        # The exception text behind a fixed client-facing message. Kept in the file so
+        # a failure can be diagnosed from app.log, with any SQL parameter values removed.
+        for field in _CAUSE_FIELDS:
+            cause = getattr(record, field, None)
+            if cause is not None:
+                log_record[field] = redact_sql_parameters(str(cause))
+
         if record.exc_info:
-            log_record[LogFields.TRACEBACK] = self.formatException(record.exc_info)
+            log_record[LogFields.TRACEBACK] = redact_sql_parameters(
+                self.formatException(record.exc_info)
+            )
 
         # Add source location for debug logs
         if record.levelno <= logging.DEBUG:

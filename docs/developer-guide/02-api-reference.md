@@ -5432,8 +5432,8 @@ Base path: `/api/v1/paperless`
 
 Linking, uploading and searching documents in Paperless-ngx or Papra
 (`POST /entity-files/{type}/{id}/files`, `.../link-paperless`, `.../link-papra`,
-`GET /papra/documents/search`, `POST /papra/test-connection`) answer a failure
-with a message that says what went wrong and an `error_code` that identifies it:
+`GET /papra/documents/search`) answer a failure with a message that says what went
+wrong and an `error_code` that identifies it:
 
 ```json
 {
@@ -5449,6 +5449,12 @@ with a message that says what went wrong and an `error_code` that identifies it:
 - **Status**: `400`. These are never `401`: the frontend treats any `401` from this
   API as an expired MediKeep session and signs the user out. An unrecognised
   failure is still a generic `500` (for example `Failed to upload to paperless`).
+- **`POST /papra/test-connection` is the exception.** It reports a rejected API token, a
+  blocked redirect, or an unreachable server as HTTP `200` with
+  `{"status": "error", "message": "..."}` and no `error_code`, because the settings page
+  shows the message next to the form. The messages are fixed text written in this codebase.
+  Only a blocked URL (`integration_url_blocked`, HTTP `400`) and an unexpected error
+  (HTTP `500`) follow the contract on this page.
 - **No upstream text**: the integration URL is user-configured and may point at any
   service reachable from the server, so nothing the other end wrote (response bodies,
   library error strings) is returned. The message is built from text written in this

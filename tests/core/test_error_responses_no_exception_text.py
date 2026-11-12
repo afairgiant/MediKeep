@@ -71,19 +71,27 @@ SANITIZER_CALLS = {
     "classify_connection_failure",
     "integration_error_response",
     "raise_if_integration_failure",
+    # app/api/v1/admin/dashboard.py: logs the exception, returns fixed text.
+    "_log_check_failure",
+}
+
+# Methods that put a value into a container.
+STORE_METHODS = {
+    "append",
+    "extend",
+    "add",
+    "update",
+    "insert",
+    "setdefault",
+    "appendleft",
 }
 # Attributes holding text we wrote (see IntegrationFailureInfo).
 SAFE_ATTRIBUTES = {"integration_message", "integration_code", "upstream_status"}
 
-# Keyword arguments that never reach the response body.
-NON_RESPONSE_KWARGS = {
-    "request",
-    "original_error",
-    "headers",
-    "error_code",
-    "data",
-    "context",
-}
+# Keyword arguments that never reach the client. Everything else does:
+# MedicalRecordsAPIException sends `data` and `error_code` in the body and `headers`
+# in the response, and HTTPException sends its `headers` too.
+NON_RESPONSE_KWARGS = {"request", "original_error", "context"}
 
 
 def _callee_name(call: ast.Call):
@@ -152,11 +160,79 @@ def _tainted_names(handler: ast.ExceptHandler) -> set:
                     if name not in tainted:
                         tainted.add(name)
                         changed = True
+        # errors.append(str(e)) taints `errors`, so returning it later is caught.
+        for call in (n for n in ast.walk(handler) if isinstance(n, ast.Call)):
+            root = _container_root(call)
+            if root and root not in tainted and not _is_logging_call(call):
+                if any(_names_in(a) & tainted for a in _call_arguments(call)):
+                    tainted.add(root)
+                    changed = True
     return tainted
 
 
-def find_exception_text_leaks(source: str) -> list:
-    """Return (line, snippet) for each leaky handler that echoes its exception."""
+def _call_arguments(call: ast.Call) -> list:
+    return list(call.args) + [kw.value for kw in call.keywords]
+
+
+def _container_root(call: ast.Call):
+    """The name of the container a store method (append, update, ...) writes into."""
+    func = call.func
+    if not (isinstance(func, ast.Attribute) and func.attr in STORE_METHODS):
+        return None
+    root = func.value
+    while isinstance(root, (ast.Attribute, ast.Subscript)):
+        root = root.value
+    return root.id if isinstance(root, ast.Name) else None
+
+
+def _subscript_root(target: ast.AST):
+    if not isinstance(target, ast.Subscript):
+        return None
+    root = target.value
+    while isinstance(root, (ast.Attribute, ast.Subscript)):
+        root = root.value
+    return root.id if isinstance(root, ast.Name) else None
+
+
+def _payload_leaks(handler: ast.ExceptHandler, tainted: set) -> list:
+    """Exception text returned directly, or stored in a container that outlives the handler."""
+    assigned_here = {
+        name
+        for stmt in ast.walk(handler)
+        if isinstance(stmt, ast.Assign)
+        for target in stmt.targets
+        if isinstance(target, ast.Name)
+        for name in [target.id]
+    } - tainted
+    leaks = []
+    for node in ast.walk(handler):
+        if isinstance(node, ast.Return) and node.value is not None:
+            if _names_in(node.value) & tainted:
+                leaks.append((node.lineno, ast.unparse(node)[:100]))
+        elif isinstance(node, ast.Call) and not _is_logging_call(node):
+            root = _container_root(node)
+            if (
+                root
+                and root not in assigned_here
+                and any(_names_in(a) & tainted for a in _call_arguments(node))
+            ):
+                leaks.append((node.lineno, ast.unparse(node)[:100]))
+        elif isinstance(node, ast.Assign) and _names_in(node.value) & tainted:
+            for target in node.targets:
+                root = _subscript_root(target)
+                if root and root not in assigned_here:
+                    leaks.append((node.lineno, ast.unparse(node)[:100]))
+    return leaks
+
+
+def find_exception_text_leaks(source: str, check_payloads: bool = False) -> list:
+    """Return (line, snippet) for each leaky handler that echoes its exception.
+
+    With `check_payloads`, also flag exception text that is returned directly or
+    stored in a container that outlives the handler. That is how a leak reaches
+    the client without a response call inside the handler. It is meant for the
+    endpoint layer, where a return value is the response.
+    """
     leaks = []
     for handler in (
         n for n in ast.walk(ast.parse(source)) if isinstance(n, ast.ExceptHandler)
@@ -177,6 +253,8 @@ def find_exception_text_leaks(source: str) -> list:
             ]
             if any(_names_in(arg) & tainted for arg in arguments):
                 leaks.append((call.lineno, ast.unparse(call)[:100]))
+        if check_payloads:
+            leaks.extend(_payload_leaks(handler, tainted))
     return leaks
 
 
@@ -262,6 +340,11 @@ class TestLeakDetector:
             "msg = str(e)\n    raise HTTPException(status_code=400, detail=msg)",
             'raise DatabaseException(message=f"Save failed: {e}", request=request)',
             'return JSONResponse(status_code=500, content={"error": str(e)})',
+            # Headers, error_code and data all reach the client.
+            'raise HTTPException(500, "x", headers={"X-Error-Code": str(e)})',
+            'raise BusinessLogicException(message="x", error_code=str(e))',
+            'raise BusinessLogicException(message="x", data=str(e))',
+            'raise HTTPException(500, "x", headers={"X-Error-Code": f"{e}"})',
             # The sanctioned attribute must not become a way to fall back to str(e).
             'raise HTTPException(500, getattr(e, "integration_message", str(e)))',
             "raise HTTPException(500, e.integration_message or str(e))",
@@ -323,6 +406,61 @@ class TestLeakDetector:
     )
     def test_ignores_safe_handlers(self, source):
         assert find_exception_text_leaks(source) == []
+
+
+class TestPayloadLeakDetector:
+    """Exception text can reach a client without a response call in the handler."""
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            'return {"message": str(e)}',
+            'return f"failed: {e}"',
+            'return {"status": "error", "error": f"Check failed: {e}"}',
+            # collected, then returned or raised later, outside the handler
+            "failed_scopes.append((scope, str(e)))",
+            "errors.extend([str(e)])",
+            'results["x"] = str(e)',
+            "msg = str(e)\n    failures.append(msg)",
+            # stored in a handler-local container that is then returned
+            'errors = []\n    errors.append(str(e))\n    return {"errors": errors}',
+        ],
+    )
+    def test_flags_returned_or_collected_exception_text(self, body):
+        source = f"try:\n    pass\nexcept Exception as e:\n    {body}\n"
+        assert find_exception_text_leaks(source, check_payloads=True)
+
+    def test_these_are_not_checked_unless_asked_for(self):
+        """Services return values for many reasons, so the rule is opt-in."""
+        source = (
+            'try:\n    pass\nexcept Exception as e:\n    return {"error": str(e)}\n'
+        )
+
+        assert find_exception_text_leaks(source) == []
+        assert find_exception_text_leaks(source, check_payloads=True)
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            'return {"status": "error", "error": "Check failed"}',
+            'return {"error": _log_check_failure(e, "api")}',
+            'services["api"] = {"error": _log_check_failure(e, "api")}',
+            'logger.error("failed", extra={"error": str(e)})',
+            'errors = []\n    errors.append("fixed text")\n    return {"errors": errors}',
+            # a local helper-built value that never touches the exception
+            'results["x"] = "ok"',
+        ],
+    )
+    def test_accepts_fixed_text_and_the_sanctioned_helper(self, body):
+        source = f"try:\n    pass\nexcept Exception as e:\n    {body}\n"
+        assert find_exception_text_leaks(source, check_payloads=True) == []
+
+    def test_ignores_authored_message_exceptions(self):
+        source = (
+            "try:\n    pass\nexcept ValueError as e:\n"
+            '    return {"message": str(e)}\n'
+        )
+        assert find_exception_text_leaks(source, check_payloads=True) == []
 
 
 class TestUnloggedHandlerDetector:
@@ -406,8 +544,12 @@ def test_no_exception_text_in_api_responses():
     """No handler for an unexpected failure may echo its exception to the client."""
     offenders = []
     for path in _app_python_files():
+        # In the endpoint layer a return value *is* the response, so returning or
+        # collecting exception text there is a leak too. Services return values
+        # for many other purposes, so only call-based leaks are checked there.
         for line, snippet in find_exception_text_leaks(
-            path.read_text(encoding="utf-8")
+            path.read_text(encoding="utf-8"),
+            check_payloads="api" in path.relative_to(APP_DIR).parts[:1],
         ):
             offenders.append(f"{path.relative_to(APP_DIR.parent)}:{line}  {snippet}")
 

@@ -381,6 +381,64 @@ class TestParseUploadError:
 
         assert "{evil}.pdf" in message
 
+    def test_a_file_name_containing_a_keyword_does_not_decide_the_reason(self):
+        """ "duplicate_notes.xls" is rejected for its type, not as a duplicate."""
+        code, _ = parse_upload_error(
+            {"detail": "Unsupported file type: duplicate_notes.xls"},
+            "duplicate_notes.xls",
+        )
+
+        assert code == IntegrationErrorCode.UNSUPPORTED_FORMAT
+
+    def test_the_other_documents_name_in_a_duplicate_message_is_not_a_second_reason(
+        self,
+    ):
+        code, _ = parse_upload_error(
+            {"detail": "Not consuming scan.pdf: It is a duplicate of other.pdf (#12)"},
+            "scan.pdf",
+        )
+
+        assert code == IntegrationErrorCode.DUPLICATE_DOCUMENT
+
+    @pytest.mark.parametrize("filename", ["a.pdf", "a", "scan.pdf", "x.y.z"])
+    def test_a_short_file_name_does_not_damage_the_words_that_carry_the_reason(
+        self, filename
+    ):
+        """Only whole tokens are removed; "a" must not be stripped out of "failed"."""
+        code, _ = parse_upload_error({"detail": "OCR failed on page 2"}, filename)
+
+        assert code == IntegrationErrorCode.PROCESSING_FAILED
+
+    def test_a_file_named_like_its_own_reason_falls_back_to_the_generic_message(self):
+        """Removing the name also removes the evidence, so nothing is guessed."""
+        code, _ = parse_upload_error(
+            {"detail": "It is a duplicate of x"}, "duplicate.pdf"
+        )
+
+        assert code == IntegrationErrorCode.UPLOAD_FAILED
+
+    def test_two_different_reasons_fall_back_to_the_generic_message(self):
+        code, _ = parse_upload_error(
+            {"detail": "duplicate document, and permission denied"}, "scan.pdf"
+        )
+
+        assert code == IntegrationErrorCode.UPLOAD_FAILED
+
+    def test_a_document_title_with_a_common_word_is_not_a_network_error(self):
+        code, _ = parse_upload_error(
+            {"detail": "Something unexpected about Connection agreement.pdf"},
+            "scan.pdf",
+        )
+
+        assert code == IntegrationErrorCode.UPLOAD_FAILED
+
+    def test_a_rejected_upload_is_never_described_as_uploaded(self):
+        """parse_upload_error only runs for a rejected (HTTP 400) upload."""
+        _, message = parse_upload_error({"detail": "OCR failed"}, "scan.pdf")
+
+        assert "was uploaded" not in message
+        assert "could not process" in message
+
 
 class _FakeResponse:
     def __init__(self, status, body, json_body):

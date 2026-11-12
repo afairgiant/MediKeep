@@ -19,6 +19,7 @@ from app.services.paperless_service import (
     PaperlessAuthenticationError,
     PaperlessConnectionError,
 )
+from tests.utils.log_output import persisted_causes
 
 TASK_UUID = "4a8e8eee-bc89-4290-a7a5-5d01cb08d54d"
 CAUSE = "CAUSE-DETAIL internal-paperless.lan:8000 refused"
@@ -57,7 +58,8 @@ async def _call(endpoint, error, prefs, db):
 
 
 def _causes(caplog):
-    return [str(getattr(record, "error", "")) for record in caplog.records]
+    """The causes as app.log stores them, not as the LogRecord holds them."""
+    return persisted_causes(caplog)
 
 
 @pytest.mark.asyncio
@@ -101,6 +103,7 @@ class TestPaperlessHandlersLogTheirCause:
                     db_session,
                 )
 
-        assert raised.value.status_code == 401
+        # 401 would make the frontend treat the MediKeep session as expired.
+        assert raised.value.status_code == 400
         assert CAUSE not in str(raised.value.detail)
         assert any(CAUSE in cause for cause in _causes(caplog))

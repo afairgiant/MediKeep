@@ -28,6 +28,17 @@ from app.services.file_management_service import file_management_service
 
 logger = get_logger(__name__, "app")
 
+
+def _record_failure(errors: List[str], message: str, error: Exception) -> None:
+    """Log a failed clean-up step and add a line without the cause to `errors`.
+
+    The clean-up results are returned by the admin API, so `errors` must not carry
+    the cause (an OS or database error, which names server paths).
+    """
+    logger.error(f"{message}: {error}")
+    errors.append(message)
+
+
 # Statuses of a backup that can be restored; verification failures are excluded.
 USABLE_BACKUP_STATUSES = frozenset({"created", "verified", "uploaded"})
 
@@ -564,7 +575,7 @@ class BackupService:
                     deleted_count += 1
 
                 except Exception as e:
-                    errors.append(f"Failed to delete backup {backup.id}: {str(e)}")
+                    _record_failure(errors, f"Failed to delete backup {backup.id}", e)
 
             self.db.commit()
 
@@ -604,12 +615,14 @@ class BackupService:
                                                 f"Deleted orphaned backup file: {file_path}"
                                             )
                                     except Exception as e:
-                                        errors.append(
-                                            f"Failed to delete orphaned file {file_path}: {str(e)}"
+                                        _record_failure(
+                                            errors,
+                                            f"Failed to delete orphaned file {file_path.name}",
+                                            e,
                                         )
 
                 except Exception as e:
-                    errors.append(f"Error scanning for orphaned files: {str(e)}")
+                    _record_failure(errors, "Error scanning for orphaned files", e)
 
             logger.info(
                 f"Enhanced cleanup completed: deleted {deleted_count} tracked backups and {orphaned_deleted} orphaned files. "
@@ -747,8 +760,10 @@ class BackupService:
                                         f"Deleted orphaned backup file: {file_path}"
                                     )
                                 except Exception as e:
-                                    errors.append(
-                                        f"Failed to delete orphaned file {file_path}: {str(e)}"
+                                    _record_failure(
+                                        errors,
+                                        f"Failed to delete orphaned file {file_path.name}",
+                                        e,
                                     )
 
             logger.info(

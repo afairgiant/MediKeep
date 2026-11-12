@@ -5,6 +5,7 @@ from pathlib import Path
 
 from app.core.config import settings
 from app.services.file_management_service import file_management_service
+from tests.utils.log_output import persisted_entries
 
 TRASH_URL = "/api/v1/admin/trash/"
 CLEANUP_URL = "/api/v1/admin/trash/cleanup"
@@ -46,12 +47,12 @@ class TestTrashErrorResponses:
 
         assert SECRET_TEXT not in response.text
         logged = [
-            r
-            for r in caplog.records
-            if getattr(r, "event", None) == "trash_list_failed"
+            entry
+            for entry in persisted_entries(caplog)
+            if entry.get("event") == "trash_list_failed"
         ]
         assert logged
-        assert SECRET_TEXT in str(logged[0].error)
+        assert SECRET_TEXT in logged[0]["error"]
 
     def test_permanent_delete_missing_file_stays_404(self, admin_client):
         """A deliberate 404 must not be re-wrapped as a 500 by the broad handler."""

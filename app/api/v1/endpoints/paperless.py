@@ -441,7 +441,7 @@ async def test_paperless_connection(
             paperless_url=connection_data.paperless_url,
         )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Authentication failed. Please check your credentials.",
         )
 
@@ -1325,7 +1325,7 @@ async def get_paperless_task_status(
             user_id=current_user.id,
         )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Paperless authentication failed. Please check your credentials.",
         )
 
@@ -1446,7 +1446,7 @@ async def search_paperless_documents(
                     if response.status == 401:
                         logger.error("Paperless authentication failed during search")
                         raise HTTPException(
-                            status_code=status.HTTP_401_UNAUTHORIZED,
+                            status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Paperless authentication failed",
                         )
                     if response.status != 200:
@@ -1557,7 +1557,7 @@ async def search_paperless_documents(
             user_id=current_user.id,
         )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Paperless authentication failed. Please check your credentials.",
         )
 

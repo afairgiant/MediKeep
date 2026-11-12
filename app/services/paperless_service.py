@@ -130,12 +130,21 @@ _UPLOAD_ERROR_TEMPLATES = (
     (
         IntegrationErrorCode.PROCESSING_FAILED,
         ("ocr failed", "processing failed", "document processing", "text extraction"),
-        "Paperless had trouble processing '{filename}'. The document was uploaded "
-        "but text extraction may have failed.",
+        "Paperless could not process '{filename}' (text extraction failed). Please "
+        "try again, or check that the document can be read.",
     ),
     (
         IntegrationErrorCode.NETWORK_ERROR,
-        ("timeout", "connection", "network", "request failed"),
+        (
+            "timeout",
+            "timed out",
+            "connection error",
+            "connection refused",
+            "connection reset",
+            "network error",
+            "network is unreachable",
+            "request failed",
+        ),
         "Network error uploading '{filename}' to Paperless. Please try again.",
     ),
 )
@@ -147,7 +156,9 @@ def parse_upload_error(
     """Classify a Paperless upload error into (error code, user-facing message).
 
     The message is always one of our own templates, so it is safe to show: the
-    upstream text decides *which* template, but is never included in it.
+    upstream text decides *which* template, but is never included in it. A reason
+    is only reported when exactly one matches; with none, or several, the generic
+    message is used rather than guessing which instruction applies.
     """
     if isinstance(error_data, dict):
         if "non_field_errors" in error_data:
@@ -166,10 +177,25 @@ def parse_upload_error(
         error_msg = error_data
 
     error_lower = str(error_msg).lower()
+    # The user's own file name says nothing about why the upload was rejected
+    # ("duplicate_notes.xls" is not a duplicate), so keep it out of the matching.
+    # Only whole tokens are removed: a short name such as "a.pdf" must not eat
+    # letters out of the words that carry the actual reason.
+    stem = filename.rsplit(".", 1)[0]
+    for name in sorted({filename.lower(), stem.lower()}, key=len, reverse=True):
+        if name:
+            error_lower = re.sub(
+                rf"(?<![a-z0-9]){re.escape(name)}(?![a-z0-9])", " ", error_lower
+            )
 
-    for code, keywords, template in _UPLOAD_ERROR_TEMPLATES:
-        if any(keyword in error_lower for keyword in keywords):
-            return code, template.format(filename=filename)
+    matches = [
+        (code, template)
+        for code, keywords, template in _UPLOAD_ERROR_TEMPLATES
+        if any(keyword in error_lower for keyword in keywords)
+    ]
+    if len(matches) == 1:
+        code, template = matches[0]
+        return code, template.format(filename=filename)
 
     return (
         IntegrationErrorCode.UPLOAD_FAILED,

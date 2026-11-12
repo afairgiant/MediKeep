@@ -32,6 +32,7 @@ from app.services.paperless_client import (
     PaperlessConnectionError,
 )
 from app.services.paperless_service import PaperlessServiceToken
+from tests.utils.log_output import persisted_causes
 from app.services.papra_client import (
     PapraClient,
     PapraClientAuthError,
@@ -176,7 +177,7 @@ class TestLinkFailures:
             response, IntegrationErrorCode.AUTH_FAILED, AUTH_MESSAGES[provider]
         )
         # The full error is in the log, not the response.
-        assert any(SECRET_TEXT in str(getattr(r, "error", "")) for r in caplog.records)
+        assert any(SECRET_TEXT in cause for cause in persisted_causes(caplog))
 
     def test_upstream_http_status(
         self, provider, authenticated_client, link_env, monkeypatch

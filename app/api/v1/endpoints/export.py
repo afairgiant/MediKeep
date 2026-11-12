@@ -730,7 +730,8 @@ async def create_bulk_export(
                             "scope": scope,
                         },
                     )
-                    failed_scopes.append((scope, error_msg))
+                    # error_msg is logged above; the client gets a fixed reason.
+                    failed_scopes.append((scope, "an unexpected error occurred"))
                     continue
 
         if exported_count == 0:

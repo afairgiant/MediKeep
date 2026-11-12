@@ -1,6 +1,7 @@
 """Backup admin endpoints: generic 500 to the client, full error in the log (issue #1200)."""
 
 from app.services.backup_service import BackupService
+from tests.utils.log_output import persisted_entries
 
 BACKUPS_URL = "/api/v1/admin/backups/"
 
@@ -25,7 +26,9 @@ def test_list_backups_failure_is_generic_for_client_and_detailed_in_log(
     assert SECRET_TEXT not in response.text
 
     logged = [
-        r for r in caplog.records if getattr(r, "event", None) == "endpoint_error"
+        entry
+        for entry in persisted_entries(caplog)
+        if entry.get("event") == "endpoint_error"
     ]
     assert logged
-    assert SECRET_TEXT in str(logged[0].error)
+    assert SECRET_TEXT in logged[0]["error"]

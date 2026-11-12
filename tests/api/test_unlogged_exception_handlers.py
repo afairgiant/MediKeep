@@ -15,13 +15,15 @@ import app.api.v1.endpoints.practitioner as practitioner_module
 from app.crud.base import CRUDBase
 from app.crud.medical_specialty import medical_specialty
 from app.models.models import UserPreferences
+from tests.utils.log_output import persisted_causes
 
 # Stands in for the detail that makes a failure diagnosable.
 CAUSE = "CAUSE-DETAIL constraint practitioners_fk /var/lib/db"
 
 
 def _logged_causes(caplog):
-    return [str(getattr(record, "error", "")) for record in caplog.records]
+    """The causes as app.log stores them, not as the LogRecord holds them."""
+    return persisted_causes(caplog)
 
 
 def _database_refusal() -> IntegrityError:

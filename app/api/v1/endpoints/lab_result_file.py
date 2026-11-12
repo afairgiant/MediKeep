@@ -42,6 +42,27 @@ from app.schemas.lab_result_file import (
 )
 
 logger = get_logger(__name__)
+
+
+def _record_file_failure(
+    errors: list, message: str, error: Exception, user: User
+) -> None:
+    """Log a failed file operation and add a line without the cause to `errors`.
+
+    `errors` is returned to the client; the cause (an OS or database error) is not.
+    """
+    logger.error(
+        message,
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "lab_result_file_operation_failed",
+            LogFields.USER_ID: user.id,
+            LogFields.ERROR: str(error),
+        },
+    )
+    errors.append(message)
+
+
 router = APIRouter()
 
 
@@ -656,7 +677,12 @@ def batch_file_operation(
                 try:
                     _remove_physical_file(file_obj)
                 except Exception as e:
-                    errors.append(f"Error deleting physical file {file_id}: {str(e)}")
+                    _record_file_failure(
+                        errors,
+                        f"Error deleting physical file {file_id}",
+                        e,
+                        current_user,
+                    )
 
                 # Delete from database
                 lab_result_file.delete(db=db, id=file_id)
@@ -670,7 +696,9 @@ def batch_file_operation(
                 )
 
         except Exception as e:
-            errors.append(f"Error processing file {file_id}: {str(e)}")
+            _record_file_failure(
+                errors, f"Error processing file {file_id}", e, current_user
+            )
 
     return {
         "operation": operation.operation,
@@ -706,7 +734,9 @@ def delete_all_files_for_lab_result(
                 deleted_files += 1
         except Exception as e:
             file_name = getattr(file_obj, "file_name", "unknown")
-            errors.append(f"Error deleting file {file_name}: {str(e)}")
+            _record_file_failure(
+                errors, f"Error deleting file {file_name}", e, current_user
+            )
 
     # Delete from database
     deleted_count = lab_result_file.delete_by_lab_result(
