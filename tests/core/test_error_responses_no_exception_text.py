@@ -204,18 +204,22 @@ def _enclosing_function(node: ast.AST, parents: dict):
     return current
 
 
-def _propagate_after_handler(carriers: set, function, inside: set) -> set:
+def _propagate_after_handler(carriers: set, function, after_line: int) -> set:
     """Follow exception text into variables built from it after the handler.
 
     `msg = str(e)` in the handler, then `payload = {"error": msg}` (or
     `payload["error"] = msg`, `payload.append(msg)`) later, makes `payload` carry it too.
+
+    Only code after the handler (by source line) is followed: `payload = {"error": msg}`
+    *before* the `try` holds whatever `msg` was then, not the exception. A loop body
+    could run an earlier statement again after the handler; that is not modelled.
     """
     carriers = set(carriers)
     changed = True
     while changed:
         changed = False
         for node in ast.walk(function):
-            if id(node) in inside:
+            if getattr(node, "lineno", 0) <= after_line:
                 continue
             if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
                 if node.value is None or not (_names_in(node.value) & carriers):
@@ -260,11 +264,11 @@ def _after_handler_leaks(handler: ast.ExceptHandler, tainted: set, function) -> 
     carriers = tainted - {handler.name}
     if not carriers or function is None:
         return []
-    inside = {id(node) for node in ast.walk(handler)}
-    carriers = _propagate_after_handler(carriers, function, inside)
+    after_line = handler.end_lineno
+    carriers = _propagate_after_handler(carriers, function, after_line)
     leaks = []
     for node in ast.walk(function):
-        if id(node) in inside:
+        if getattr(node, "lineno", 0) <= after_line:
             continue
         if isinstance(node, ast.Return) and node.value is not None:
             if _names_in(node.value) & carriers:
@@ -639,6 +643,14 @@ class TestAttributeAndAfterHandlerDetector:
             ),
             # exception text only used for logging inside the handler
             ("", "msg = str(e)\nlogger.error(msg)", 'return {"ok": True}'),
+            # built from the same name, but before the handler ran (the review's case)
+            (
+                'msg = "Failed"\npayload = {"error": msg}',
+                'msg = str(e)\nlogger.exception("Failed")',
+                "return payload",
+            ),
+            # returned before the handler can have set anything
+            ('msg = "Failed"', "msg = str(e)", 'return {"error": "Failed"}'),
             # the handler's variable is not used to build what is returned
             (
                 "",
