@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
 from app.crud.user import user as user_crud
+from app.crud.user_preferences import user_preferences
 from app.schemas.patient import PatientCreate
 from tests.utils.user import (
     create_random_user,
@@ -469,6 +470,79 @@ class TestUserPaperlessPreferences:
         # This documents expected behavior for future implementation
         if "paperless_has_credentials" in data:
             assert isinstance(data["paperless_has_credentials"], bool)
+
+
+class TestIntegrationConnectionVerifiedFlags:
+    """Regression tests for issue 1164: the Default Storage Location radios
+    stayed disabled after a reload because the verified flags were never
+    returned by /users/me/preferences.
+    """
+
+    def test_flags_default_to_false(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        response = client.get(
+            "/api/v1/users/me/preferences", headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["paperless_connection_verified"] is False
+        assert data["papra_connection_verified"] is False
+
+    def test_get_returns_persisted_flags(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        prefs = user_preferences.get_or_create_by_user_id(
+            db_session, user_id=user_with_patient["user"].id
+        )
+        user_preferences.update(
+            db_session,
+            db_obj=prefs,
+            obj_in={
+                "paperless_connection_verified": True,
+                "papra_connection_verified": False,
+            },
+        )
+
+        response = client.get(
+            "/api/v1/users/me/preferences", headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["paperless_connection_verified"] is True
+        assert data["papra_connection_verified"] is False
+
+    def test_put_response_returns_flags_and_cannot_set_them(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        prefs = user_preferences.get_or_create_by_user_id(
+            db_session, user_id=user_with_patient["user"].id
+        )
+        user_preferences.update(
+            db_session, db_obj=prefs, obj_in={"papra_connection_verified": True}
+        )
+
+        # Clients may not self-assert verification through the general endpoint
+        response = client.put(
+            "/api/v1/users/me/preferences",
+            json={"paperless_connection_verified": True, "language": "en"},
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["paperless_connection_verified"] is False
+        assert data["papra_connection_verified"] is True
 
 
 class TestUserAccountDeletion:

@@ -30,6 +30,11 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.core.utils.integration_http import UNSAFE_REDIRECT_MESSAGE
+from app.core.utils.integration_verification import (
+    normalize_integration_url,
+    verification_after_test,
+    verification_after_url_change,
+)
 from app.core.utils.stored_files import resolve_stored_file
 from app.crud.user_preferences import user_preferences
 from app.models.models import Patient, User
@@ -409,11 +414,16 @@ async def test_paperless_connection(
             result["used_saved_credentials"] = use_saved_credentials
             logger.debug(f"Final result with auth method: {result}")
 
-            # Mark connection as verified in the database
+            # Record the verification; the saved connection is only marked
+            # verified when it is the URL that was just tested
             prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
             if prefs:
                 user_preferences.update(
-                    db, db_obj=prefs, obj_in={"paperless_connection_verified": True}
+                    db,
+                    db_obj=prefs,
+                    obj_in=verification_after_test(
+                        "paperless", connection_data.paperless_url, prefs.paperless_url
+                    ),
                 )
 
             log_external_service(
@@ -793,11 +803,17 @@ async def update_paperless_settings(
         if "paperless_sync_tags" in settings:
             update_data["paperless_sync_tags"] = settings["paperless_sync_tags"]
 
-        # Reset connection verified only if URL changed (new server = must re-verify)
-        if "paperless_url" in update_data and update_data["paperless_url"] != (
-            user_prefs.paperless_url or ""
-        ):
-            update_data["paperless_connection_verified"] = False
+        # A new URL must be re-verified unless a test already succeeded against it
+        if "paperless_url" in update_data and normalize_integration_url(
+            update_data["paperless_url"]
+        ) != normalize_integration_url(user_prefs.paperless_url):
+            update_data.update(
+                verification_after_url_change(
+                    "paperless",
+                    update_data["paperless_url"],
+                    user_prefs.paperless_verified_url,
+                )
+            )
 
         # Update preferences
         updated_prefs = user_preferences.update(

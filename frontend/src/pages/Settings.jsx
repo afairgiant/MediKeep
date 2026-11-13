@@ -46,6 +46,11 @@ import { useLatestVersion } from '../hooks/useLatestVersion';
 import '../styles/pages/Settings.css';
 
 const SETTINGS_TABS = ['general', 'documents', 'notifications', 'about'];
+// Set by the server when a connection test succeeds; never edited or saved from here
+const SERVER_DERIVED_KEYS = [
+  'paperless_connection_verified',
+  'papra_connection_verified',
+];
 const DEFAULT_SESSION_TIMEOUT = 30;
 
 /**
@@ -93,6 +98,7 @@ export function getChangedKeys(localPreferences, serverPreferences, keyFilter) {
   }
 
   return Object.keys(localPreferences).filter(key => {
+    if (SERVER_DERIVED_KEYS.includes(key)) return false;
     if (keyFilter && !keyFilter(key)) return false;
     return !isSameValue(localPreferences[key], serverPreferences[key]);
   });
@@ -221,6 +227,8 @@ const Settings = () => {
       // Filter out unchanged fields to avoid validation issues
       const fieldsToUpdate = {};
       Object.keys(localPreferences).forEach(key => {
+        if (SERVER_DERIVED_KEYS.includes(key)) return;
+
         let localValue = localPreferences[key];
         let serverValue = userPreferences?.[key];
 

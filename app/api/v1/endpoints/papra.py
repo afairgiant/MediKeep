@@ -23,6 +23,11 @@ from app.core.http.integration_errors import (
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
+from app.core.utils.integration_verification import (
+    normalize_integration_url,
+    verification_after_test,
+    verification_after_url_change,
+)
 from app.crud.user_preferences import user_preferences
 from app.models.models import UserPreferences
 from app.schemas.user_preferences import PapraConnectionData
@@ -175,11 +180,16 @@ async def test_papra_connection(
             # Also fetch organizations so the frontend can populate the selector
             organizations = await auth.list_organizations()
 
-            # Mark connection as verified in the database
+            # Record the verification; the saved connection is only marked
+            # verified when it is the URL that was just tested
             prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
             if prefs:
                 user_preferences.update(
-                    db, db_obj=prefs, obj_in={"papra_connection_verified": True}
+                    db,
+                    db_obj=prefs,
+                    obj_in=verification_after_test(
+                        "papra", connection_data.papra_url, prefs.papra_url
+                    ),
                 )
 
             log_endpoint_access(
@@ -531,11 +541,15 @@ async def update_papra_settings(
 
             update_data["papra_api_token_encrypted"] = encrypted
 
-        # Reset connection verified only if URL changed (new server = must re-verify)
-        if "papra_url" in update_data and update_data["papra_url"] != (
-            prefs.papra_url or ""
-        ):
-            update_data["papra_connection_verified"] = False
+        # A new URL must be re-verified unless a test already succeeded against it
+        if "papra_url" in update_data and normalize_integration_url(
+            update_data["papra_url"]
+        ) != normalize_integration_url(prefs.papra_url):
+            update_data.update(
+                verification_after_url_change(
+                    "papra", update_data["papra_url"], prefs.papra_verified_url
+                )
+            )
 
         updated_prefs = user_preferences.update(db, db_obj=prefs, obj_in=update_data)
 
