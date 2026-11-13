@@ -1,11 +1,12 @@
 import re
-import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Optional
 
 import bcrypt
 import jwt
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
@@ -96,6 +97,20 @@ def decode_access_token(token: str) -> dict:
     )
 
 
+def redact_database_url(database_url: str) -> str:
+    """DATABASE_URL with the password masked, safe to log or print."""
+    try:
+        url = make_url(database_url)
+        # libpq also accepts the password as a query parameter
+        query = {
+            key: "***" if key.lower() == "password" else value
+            for key, value in url.query.items()
+        }
+        return url.set(query=query).render_as_string(hide_password=True)
+    except (ArgumentError, ValueError):
+        return "<unparseable DATABASE_URL>"
+
+
 class SecurityValidator:
     """Centralized security validation for backup/restore operations."""
 
@@ -105,13 +120,14 @@ class SecurityValidator:
         if not database_url:
             raise ValueError("DATABASE_URL not configured")
 
+        # Parse as the engine does so client tools receive the decoded credentials
         try:
-            parsed = urllib.parse.urlparse(database_url)
-        except Exception as e:
+            parsed = make_url(database_url)
+        except (ArgumentError, ValueError) as e:
             raise ValueError(f"Invalid DATABASE_URL format: {str(e)}")
 
         # Extract and validate components
-        hostname = parsed.hostname or "localhost"
+        hostname = parsed.host or "localhost"
         if not SecurityValidator._is_safe_hostname(hostname):
             raise ValueError(f"Unsafe hostname: {hostname}")
 
@@ -119,7 +135,7 @@ class SecurityValidator:
         if not SecurityValidator._is_safe_identifier(username):
             raise ValueError(f"Unsafe username: {username}")
 
-        database = parsed.path[1:] if parsed.path else "postgres"
+        database = parsed.database or "postgres"
         if not SecurityValidator._is_safe_identifier(database):
             raise ValueError(f"Unsafe database name: {database}")
 
@@ -142,7 +158,6 @@ class SecurityValidator:
             "username": username,
             "password": parsed.password or "",
             "database": database,
-            "url": database_url,
         }
 
     @staticmethod

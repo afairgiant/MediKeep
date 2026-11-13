@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { notifications } from '@mantine/notifications';
 import render from '../../../test-utils/render';
 import BackupManagement from '../BackupManagement';
 import { adminApiService } from '../../../services/api/adminApi';
@@ -8,13 +10,17 @@ vi.mock('../../../components/admin/AdminLayout', () => ({
   default: ({ children }) => <div>{children}</div>,
 }));
 
+const { mockExecuteAction } = vi.hoisted(() => ({
+  mockExecuteAction: vi.fn(),
+}));
+
 vi.mock('../../../hooks/useAdminData', () => ({
   useAdminData: () => ({
     data: { backups: [] },
     loading: false,
     error: null,
     refreshData: vi.fn(),
-    executeAction: vi.fn(),
+    executeAction: mockExecuteAction,
   }),
 }));
 
@@ -73,4 +79,21 @@ test('a disabled schedule shows as disabled without a summary line', async () =>
 
   expect(await screen.findByText('Auto-Backup Schedule')).toBeInTheDocument();
   expect(screen.getAllByText('Disabled').length).toBeGreaterThan(0);
+});
+
+test('a failed backup shows an error notification with the server message', async () => {
+  mockExecuteAction.mockRejectedValueOnce(new Error('Database dump failed'));
+  const show = vi.spyOn(notifications, 'show');
+  render(<BackupManagement />);
+
+  await userEvent.click(
+    await screen.findByRole('button', { name: /Create Full Backup/ })
+  );
+
+  expect(show).toHaveBeenCalledWith(
+    expect.objectContaining({
+      color: 'red',
+      message: expect.stringContaining('Database dump failed'),
+    })
+  );
 });

@@ -13,6 +13,7 @@ from app.core.events import get_event_registry, setup_event_system
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields, sanitize_log_input
 from app.core.utils.datetime_utils import set_application_startup_time
+from app.core.utils.security import redact_database_url
 from app.services.notification_handlers import create_notification_handler
 
 logger = get_logger(__name__, "app")
@@ -183,7 +184,9 @@ async def startup_event():
 
         # Provide helpful troubleshooting information
         if settings.DATABASE_URL.startswith("postgresql"):
-            error_msg += f"\n   Database URL: {settings.DATABASE_URL}"
+            error_msg += (
+                f"\n   Database URL: {redact_database_url(settings.DATABASE_URL)}"
+            )
             error_msg += "\n   💡 Possible solutions:"
             error_msg += "\n      • Start your PostgreSQL database container: docker-compose up -d postgres"
             error_msg += (

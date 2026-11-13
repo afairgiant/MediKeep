@@ -424,6 +424,9 @@ class RestoreService:
                 settings.DATABASE_URL
             )
 
+            # Dropping tables is irreversible, so prove psql can log in first
+            await self._check_psql_connection(conn_params)
+
             # Step 1: Drop existing tables to allow restore to recreate them
             self._debug_print("RESTORE DEBUG: Step 1 - Dropping tables with CASCADE...")
             logger.info("Step 1: Dropping tables with CASCADE...")
@@ -461,16 +464,14 @@ class RestoreService:
             logger.info("Dropping existing tables with CASCADE to allow restore...")
 
             # Get list of all user tables (excluding only backup_records to preserve backup history)
-            tables_query = text(
-                """
+            tables_query = text("""
                 SELECT tablename 
                 FROM pg_tables 
                 WHERE schemaname = 'public' 
                 AND tablename != 'backup_records'
                 AND tablename ~ '^[a-zA-Z][a-zA-Z0-9_]*$'  -- Validate table names
                 ORDER BY tablename
-            """
-            )
+            """)
 
             result = self.db.execute(tables_query).fetchall()
             table_names = [row[0] for row in result]
@@ -544,13 +545,9 @@ class RestoreService:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-    async def _restore_with_native_psql(
-        self, backup_path: Path, conn_params: Dict[str, str]
-    ) -> None:
-        """Restore database using native psql command within container."""
-        logger.info("Using native psql for database restore")
-
-        cmd = [
+    @staticmethod
+    def _psql_connection_args(conn_params: Dict[str, str]) -> list:
+        return [
             psql_binary(),
             "--host",
             conn_params["hostname"],
@@ -560,18 +557,69 @@ class RestoreService:
             conn_params["username"],
             "--dbname",
             conn_params["database"],
+            "--no-password",
+        ]
+
+    @staticmethod
+    def _psql_env(conn_params: Dict[str, str]) -> Dict[str, str]:
+        env = os.environ.copy()
+        env["PGPASSWORD"] = conn_params["password"]
+        return env
+
+    async def _check_psql_connection(self, conn_params: Dict[str, str]) -> None:
+        """Run a trivial query through psql with the restore's credentials.
+
+        Raises:
+            Exception: psql could not connect or authenticate; nothing was changed.
+        """
+        cmd = self._psql_connection_args(conn_params) + [
+            "--quiet",
+            "--command",
+            "SELECT 1",
+        ]
+
+        try:
+            subprocess.run(
+                cmd,
+                env=self._psql_env(conn_params),
+                check=True,
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True,
+                timeout=30,
+            )
+        except subprocess.CalledProcessError as e:
+            error_details = f"psql could not connect (exit code {e.returncode})"
+            if e.stderr:
+                error_details += f". Error output: {e.stderr}"
+            logger.error(error_details)
+            raise Exception(
+                f"Database restore aborted before any changes: {error_details}"
+            )
+        except subprocess.TimeoutExpired:
+            logger.error("psql connection check timed out")
+            raise Exception(
+                "Database restore aborted before any changes: "
+                "psql connection check timed out"
+            )
+
+    async def _restore_with_native_psql(
+        self, backup_path: Path, conn_params: Dict[str, str]
+    ) -> None:
+        """Restore database using native psql command within container."""
+        logger.info("Using native psql for database restore")
+
+        cmd = self._psql_connection_args(conn_params) + [
             "--file",
             str(backup_path),
             "--single-transaction",  # All-or-nothing restore
             "--echo-errors",  # Show errors
             "--quiet",  # Reduce verbose output
-            "--no-password",
             "--set",
             "ON_ERROR_STOP=on",  # Stop on first error
         ]
 
-        env = os.environ.copy()
-        env["PGPASSWORD"] = conn_params["password"]
+        env = self._psql_env(conn_params)
 
         self._debug_print("RESTORE DEBUG: Running native psql command")
         logger.debug("Executing native psql restore command")
@@ -800,13 +848,11 @@ class RestoreService:
         """Get current database statistics."""
         try:
             # Get table counts
-            tables_query = text(
-                """
+            tables_query = text("""
                 SELECT schemaname, tablename, n_tup_ins as inserts, n_tup_upd as updates, n_tup_del as deletes
                 FROM pg_stat_user_tables 
                 ORDER BY schemaname, tablename
-            """
-            )
+            """)
 
             result = self.db.execute(tables_query).fetchall()
 

@@ -21,8 +21,8 @@ export const useApi = () => {
 
       const result = await apiCall(controller.signal);
 
-      // Check if request was cancelled
-      if (controller.signal.aborted) {
+      // A rethrow caller awaits this exact request, so a newer one superseding it does not void the result
+      if (controller.signal.aborted && !options.rethrow) {
         return null;
       }
 
@@ -50,6 +50,9 @@ export const useApi = () => {
           setError(friendlyError);
         }
         // API error logged by apiService automatically
+      }
+      if (options.rethrow && err.name !== 'AbortError') {
+        throw err;
       }
       return null;
     } finally {

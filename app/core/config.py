@@ -5,7 +5,7 @@ import logging
 import os
 import secrets
 from pathlib import Path
-from urllib.parse import quote_plus
+from urllib.parse import quote
 
 from dotenv import load_dotenv
 
@@ -53,10 +53,15 @@ DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "")
 
-# URL-encode credentials to handle special characters (@, :, /, #, etc.)
-# This prevents URL parsing issues when passwords contain these characters
-DB_USER = quote_plus(_DB_USER_RAW) if _DB_USER_RAW else ""
-DB_PASS = quote_plus(_DB_PASS_RAW) if _DB_PASS_RAW else ""
+
+def encode_url_credential(value: str) -> str:
+    """Percent-encode a credential for the userinfo part of a SQLAlchemy URL."""
+    # quote_plus would turn a space into '+', which SQLAlchemy does not decode back
+    return quote(value, safe="")
+
+
+DB_USER = encode_url_credential(_DB_USER_RAW)
+DB_PASS = encode_url_credential(_DB_PASS_RAW)
 
 
 _KNOWN_INSECURE_SECRETS = [
