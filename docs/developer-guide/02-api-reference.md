@@ -5406,6 +5406,25 @@ by registering importers and mappers.
 ```
 - **Notes**: The records, their provenance rows and one activity log entry (`imported` / `health_record_import`) are committed together, so a failure writes nothing. Duplicates are matched on the source record id first, then on a content hash; when one resource in the file matches a row by id and another by content, the id match wins regardless of order. A provenance row is only updated by a file from the same source. Two executes of the same file at once can collide on the unique key (patient, record type, source, external id); the second one gets `409`.
 
+#### Supported Resources
+
+| FHIR resource | Record type | Table |
+|---|---|---|
+| `Condition` | `condition` | `conditions` |
+| `AllergyIntolerance` | `allergy` | `allergies` |
+| `MedicationStatement`, `MedicationRequest` | `medication` | `medications` |
+
+Decisions where the source and the table do not line up:
+
+- Allergies without a reaction are stored with reaction `Not specified`, since the column is required. Severity comes from the first reaction that has one, then from `criticality` (`high` is severe, `low` is mild), else `none`.
+- RxNorm codes have no column in the medications table; one is written only as the medication name when the file gives no drug name. Statuses `cancelled` and `entered-in-error` are skipped, `not-taken` becomes `cancelled`, `intended` and `draft` become `active`.
+- Routes are mapped from SNOMED codes and common wordings only where one of the values `MedicationBase` accepts fits. The respiratory tract route (`447694001`) is broader than `inhalation`, but maps to it as the closest value; nasal has its own code. Any other route (ophthalmic, vaginal, transdermal and so on) is left empty and kept in the notes as `Route: ...`, with a warning. A SNOMED code decides the route, and the wording only counts when there is no code. A code outside the map leaves the route empty even when the wording names a MediKeep route, and is kept in the notes as `Route: <wording> (SNOMED <code>)` with a warning. When a mapped code comes with wording that names a different route, or wording the importer does not recognize, the wording is kept in the notes and reported; each mapped code's SNOMED CT synonyms (`Oral use`, `Per os`, ...) are recognized. Doses and timing numbers are written in full (`2400000 [iU]`, never `2.4e+06`). A nonzero number of 10^51 or more, or under 10^-50, in size (such as `1e-999990`) is not used: the dose moves on to the next `doseAndRate` entry and then to the sig text, and a timing with such a period or frequency is dropped with a warning. A timing period under one day or hour is written as `N times per day` (or `per hour`), rounded half up.
+- A `MedicationRequest` is dropped, without a warning, when a `MedicationStatement` in the same file covers the same drug with the same start date, or when either has no start date, so one prescription does not become two rows. The drug matches on the RxNorm code (read through a referenced `Medication` when needed) when both sides have one, and on the name when either side has none. The check runs after the whole file has been mapped and validated, so only statements that map and pass validation count, whether or not they are already in MediKeep. A `not-taken` statement never counts.
+- A resource whose name is only a code (no text or display) is kept with the code as its name and a warning. One with no name and no code is skipped without a warning. A medication name falls back to `medicationReference.display` when the referenced `Medication` has no name.
+- Conditions with verification status `refuted` or `entered-in-error` are skipped; `provisional`, `differential` and `unconfirmed` are imported with a `Verification: ...` note. Status `remission` becomes `inactive`. An abatement date sets `resolved` unless the status is already `resolved` or `inactive`; an abatement before the onset is dropped with a warning first and does not affect the status. Without a `clinicalStatus` the status is `resolved` when an abatement date remains, else `active`. Values longer than a column allows are cut and reported in `warnings`, except ICD-10 and SNOMED codes, which are never cut: the next code that fits is used, or none.
+- Every mapped row is validated through the record type's create schema (`ConditionCreate`, `AllergyCreate`, `MedicationCreate`) before it is written; a row that fails is skipped with `Skipped <type>/<id>: failed validation`. Only the failing field names and error types are logged, never the values. Onset and end dates after today, which those schemas reject, are dropped by the mapper with a warning so the rest of the row still imports.
+- The content hash is taken from the validated values that are written and covers every column a re-import overwrites, so an edit to any of them marks the row as changed and, by default, leaves it alone. `notes`, `tags`, a condition's `condition_name` and a medication's `medication_type` are never overwritten: the source sets them only when the row is created.
+
 ## 13. Integrations
 
 ### 13.1 Paperless-ngx
