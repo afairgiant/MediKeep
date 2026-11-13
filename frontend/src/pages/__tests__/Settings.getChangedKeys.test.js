@@ -38,6 +38,21 @@ describe('getChangedKeys', () => {
     expect(getChangedKeys(local, server)).toEqual(['blood_donation_intervals']);
   });
 
+  test('ignores the server-derived connection verified flags', () => {
+    // A successful Test Connection flips the flag locally before the context
+    // reloads; that must not look like an unsaved edit.
+    const server = {
+      paperless_connection_verified: false,
+      papra_connection_verified: false,
+    };
+    const local = {
+      paperless_connection_verified: true,
+      papra_connection_verified: true,
+    };
+
+    expect(getChangedKeys(local, server)).toEqual([]);
+  });
+
   test('still reports changes for plain scalar fields', () => {
     const server = { unit_system: 'imperial' };
     const local = { unit_system: 'metric' };

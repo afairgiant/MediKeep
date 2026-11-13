@@ -719,6 +719,12 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
 - **Note**: `language` is `null` until the user explicitly picks one. Clients should
   fall back to browser detection in that case and may persist the detected code with a
   `PUT`; an explicit `"en"` is a real choice and overrides detection.
+- **Note**: `paperless_connection_verified` and `papra_connection_verified` are read-only
+  booleans. They become `true` when a connection test succeeds against the saved URL, or
+  when the URL is saved after a successful test of that same URL, and reset to `false`
+  when a save changes the URL to one that has not been tested. Clients use them to decide
+  whether Paperless-ngx or Papra can be chosen as the default storage location. They are
+  ignored if sent in a `PUT`.
 
 ### Update User Preferences
 

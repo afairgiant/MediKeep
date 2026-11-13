@@ -159,6 +159,7 @@ class UserPreferences(Base):
     paperless_auto_sync = Column(Boolean, default=False, nullable=False)
     paperless_sync_tags = Column(Boolean, default=True, nullable=False)
     paperless_connection_verified = Column(Boolean, default=False, nullable=False)
+    paperless_verified_url = Column(String(500), nullable=True)
 
     # Papra integration fields
     papra_enabled = Column(Boolean, default=False, nullable=False)
@@ -168,6 +169,7 @@ class UserPreferences(Base):
         String(255), nullable=True
     )  # Default organization ID
     papra_connection_verified = Column(Boolean, default=False, nullable=False)
+    papra_verified_url = Column(String(500), nullable=True)
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)

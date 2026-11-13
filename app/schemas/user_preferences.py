@@ -393,7 +393,9 @@ class UserPreferencesResponse(UserPreferences):
 
     paperless_has_token: bool = False
     paperless_has_credentials: bool = False
+    paperless_connection_verified: bool = False
     papra_has_token: bool = False
+    papra_connection_verified: bool = False
     papra_organization_id: Optional[str] = None
 
 

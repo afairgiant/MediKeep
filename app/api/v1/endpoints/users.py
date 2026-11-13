@@ -209,7 +209,13 @@ def get_current_user_preferences(
             preferences.paperless_username_encrypted
             and preferences.paperless_password_encrypted
         )
+        response["paperless_connection_verified"] = bool(
+            preferences.paperless_connection_verified
+        )
         response["papra_has_token"] = bool(preferences.papra_api_token_encrypted)
+        response["papra_connection_verified"] = bool(
+            preferences.papra_connection_verified
+        )
         response["papra_organization_id"] = preferences.papra_organization_id
 
         return response
@@ -272,10 +278,16 @@ def update_current_user_preferences(
                 updated_preferences.paperless_username_encrypted
                 and updated_preferences.paperless_password_encrypted
             ),
+            "paperless_connection_verified": bool(
+                updated_preferences.paperless_connection_verified
+            ),
             "default_storage_backend": updated_preferences.default_storage_backend,
             "papra_enabled": updated_preferences.papra_enabled,
             "papra_url": updated_preferences.papra_url,
             "papra_has_token": bool(updated_preferences.papra_api_token_encrypted),
+            "papra_connection_verified": bool(
+                updated_preferences.papra_connection_verified
+            ),
             "papra_organization_id": updated_preferences.papra_organization_id,
             "created_at": updated_preferences.created_at,
             "updated_at": updated_preferences.updated_at,
