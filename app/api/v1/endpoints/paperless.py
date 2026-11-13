@@ -495,6 +495,9 @@ async def test_paperless_connection(
             paperless_url=connection_data.paperless_url,
         )
 
+    except HTTPException:
+        raise
+
     except Exception as e:
         # Log the exception with more detail for debugging
         logger.error(

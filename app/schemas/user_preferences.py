@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, StrictInt, ValidationInfo, field_validator
+from pydantic import BaseModel, ConfigDict, StrictInt, field_validator, model_validator
 
 from app.models.enums import get_all_donation_types, get_all_hemoglobin_units
 from app.services.blood_donation_eligibility import (
@@ -411,56 +411,64 @@ class PaperlessConnectionData(BaseModel):
         """Validate paperless URL format and security."""
         return _validate_integration_url(v)
 
+    @field_validator(
+        "paperless_api_token",
+        "paperless_username",
+        "paperless_password",
+        mode="before",
+    )
+    @classmethod
+    def blank_credential_to_none(cls, v):
+        """Treat empty or whitespace-only credentials as not provided."""
+        if isinstance(v, str) and not v.strip():
+            return None
+        return v
+
     @field_validator("paperless_api_token")
     @classmethod
     def validate_api_token(cls, v):
         """Validate API token format if provided."""
-        if v is not None and v.strip():
-            if len(v.strip()) < 10:
-                raise ValueError("API token appears to be too short")
-            return v.strip()
-        return v
+        if v is None:
+            return v
+        if len(v.strip()) < 10:
+            raise ValueError("API token appears to be too short")
+        return v.strip()
 
     @field_validator("paperless_username")
     @classmethod
-    def validate_username(cls, v, info: ValidationInfo):
-        """Validate username format when provided."""
-        # If token is provided, username is optional
-        if info.data.get("paperless_api_token"):
-            return v.strip() if v else v
-
-        # If no token, username is required
-        if not v or len(v.strip()) == 0:
-            raise ValueError("Username is required when no API token is provided")
-        if len(v) < 2:
+    def validate_username(cls, v):
+        """Validate username format if provided."""
+        if v is None:
+            return v
+        if len(v.strip()) < 2:
             raise ValueError("Username too short")
         return v.strip()
 
     @field_validator("paperless_password")
     @classmethod
-    def validate_password(cls, v, info: ValidationInfo):
-        """Validate password format when provided."""
-        # If token is provided, password is optional
-        if info.data.get("paperless_api_token"):
+    def validate_password(cls, v):
+        """Validate password format if provided."""
+        if v is None:
             return v
-
-        # If no token, password is required
-        if not v or len(v.strip()) == 0:
-            raise ValueError("Password is required when no API token is provided")
         if len(v) < 3:
             raise ValueError("Password too short")
-
-        # Check for valid authentication method
-        token = info.data.get("paperless_api_token")
-        username = info.data.get("paperless_username")
-
-        # If no token and no username/password combination
-        if not token and (not username or not v):
-            raise ValueError(
-                "Either API token or username/password combination is required"
-            )
-
         return v
+
+    @model_validator(mode="after")
+    def validate_auth_method(self):
+        """Allow a token, a username/password pair, or nothing at all.
+
+        Providing no credentials is valid: the test-connection endpoint then
+        falls back to the credentials saved in the user's preferences and
+        returns a 400 if none are saved.
+        """
+        if self.paperless_api_token:
+            return self
+        if bool(self.paperless_username) != bool(self.paperless_password):
+            raise ValueError(
+                "Both username and password are required when no API token is provided"
+            )
+        return self
 
 
 class PapraConnectionData(BaseModel):

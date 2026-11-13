@@ -30,9 +30,14 @@ export const testPaperlessConnection = async (
   if (apiToken) {
     payload.paperless_api_token = apiToken;
   } else {
-    // Only add username/password if no API token is provided
-    payload.paperless_username = username;
-    payload.paperless_password = password;
+    // Only add username/password if no API token is provided. Omit blank
+    // values so the backend falls back to the saved credentials.
+    if (username) {
+      payload.paperless_username = username;
+    }
+    if (password) {
+      payload.paperless_password = password;
+    }
   }
 
   return apiService.post('/paperless/test-connection', payload);
