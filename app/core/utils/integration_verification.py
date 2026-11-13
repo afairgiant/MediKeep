@@ -30,6 +30,21 @@ def verification_after_test(
     return updates
 
 
+def verification_after_save(
+    service: str,
+    new_url: Optional[str],
+    stored_url: Optional[str],
+    verified_url: Optional[str],
+) -> Dict[str, Any]:
+    """Column updates a settings save must apply alongside the new URL.
+
+    Empty when the save leaves the URL as it was, so verification is untouched.
+    """
+    if normalize_integration_url(new_url) == normalize_integration_url(stored_url):
+        return {}
+    return verification_after_url_change(service, new_url, verified_url)
+
+
 def verification_after_url_change(
     service: str, new_url: Optional[str], verified_url: Optional[str]
 ) -> Dict[str, Any]:

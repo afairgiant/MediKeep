@@ -3,6 +3,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
+from app.core.utils.integration_verification import verification_after_save
 from app.crud.base import CRUDBase
 from app.models.models import UserPreferences
 from app.schemas.user_preferences import UserPreferencesCreate, UserPreferencesUpdate
@@ -95,6 +96,21 @@ class CRUDUserPreferences(
 
             # Update preferences
             update_data = obj_in.model_dump(exclude_unset=True)
+
+            # A new integration URL is unverified unless a test already passed
+            # against it, whichever route the change arrives through
+            for service in ("paperless", "papra"):
+                url_field = f"{service}_url"
+                if url_field in update_data:
+                    update_data.update(
+                        verification_after_save(
+                            service,
+                            update_data[url_field],
+                            getattr(preferences, url_field),
+                            getattr(preferences, f"{service}_verified_url"),
+                        )
+                    )
+
             for field, value in update_data.items():
                 setattr(preferences, field, value)
 

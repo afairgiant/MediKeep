@@ -31,9 +31,8 @@ from app.core.logging.helpers import (
 )
 from app.core.utils.integration_http import UNSAFE_REDIRECT_MESSAGE
 from app.core.utils.integration_verification import (
-    normalize_integration_url,
+    verification_after_save,
     verification_after_test,
-    verification_after_url_change,
 )
 from app.core.utils.stored_files import resolve_stored_file
 from app.crud.user_preferences import user_preferences
@@ -804,13 +803,12 @@ async def update_paperless_settings(
             update_data["paperless_sync_tags"] = settings["paperless_sync_tags"]
 
         # A new URL must be re-verified unless a test already succeeded against it
-        if "paperless_url" in update_data and normalize_integration_url(
-            update_data["paperless_url"]
-        ) != normalize_integration_url(user_prefs.paperless_url):
+        if "paperless_url" in update_data:
             update_data.update(
-                verification_after_url_change(
+                verification_after_save(
                     "paperless",
                     update_data["paperless_url"],
+                    user_prefs.paperless_url,
                     user_prefs.paperless_verified_url,
                 )
             )

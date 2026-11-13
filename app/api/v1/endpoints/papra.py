@@ -24,9 +24,8 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.utils.integration_verification import (
-    normalize_integration_url,
+    verification_after_save,
     verification_after_test,
-    verification_after_url_change,
 )
 from app.crud.user_preferences import user_preferences
 from app.models.models import UserPreferences
@@ -542,12 +541,13 @@ async def update_papra_settings(
             update_data["papra_api_token_encrypted"] = encrypted
 
         # A new URL must be re-verified unless a test already succeeded against it
-        if "papra_url" in update_data and normalize_integration_url(
-            update_data["papra_url"]
-        ) != normalize_integration_url(prefs.papra_url):
+        if "papra_url" in update_data:
             update_data.update(
-                verification_after_url_change(
-                    "papra", update_data["papra_url"], prefs.papra_verified_url
+                verification_after_save(
+                    "papra",
+                    update_data["papra_url"],
+                    prefs.papra_url,
+                    prefs.papra_verified_url,
                 )
             )
 

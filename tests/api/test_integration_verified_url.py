@@ -15,6 +15,7 @@ import app.api.v1.endpoints.papra as papra_module
 from app.api.v1.endpoints import paperless as paperless_endpoint
 from app.core.utils.integration_verification import (
     normalize_integration_url,
+    verification_after_save,
     verification_after_test,
     verification_after_url_change,
 )
@@ -175,7 +176,6 @@ class TestPaperlessVerifiedUrl:
 
         assert saved["paperless_connection_verified"] is True
 
-
     def test_resaving_the_same_url_with_a_trailing_slash_changes_nothing(
         self, authenticated_client, paperless_connects
     ):
@@ -240,7 +240,91 @@ class TestPapraVerifiedUrl:
         assert saved["papra_connection_verified"] is True
 
 
+class TestGeneralPreferencesRoute:
+    """PUT /users/me/preferences accepts the URLs too, so it must not leave a
+    connection verified for a URL that was never tested (CodeRabbit, PR 1232).
+    """
+
+    @staticmethod
+    def _put(client, payload):
+        response = client.put(PREFS_URL, json=payload)
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    def test_paperless_url_change_unverifies(
+        self, authenticated_client, paperless_connects
+    ):
+        _paperless_test(authenticated_client, URL_A)
+        _paperless_save(authenticated_client, URL_A)
+        assert _verified(authenticated_client, "paperless") is True
+
+        body = self._put(authenticated_client, {"paperless_url": URL_B})
+
+        assert body["paperless_connection_verified"] is False
+        assert _verified(authenticated_client, "paperless") is False
+
+    def test_papra_url_change_unverifies(self, authenticated_client, papra_connects):
+        _papra_test(authenticated_client, URL_A)
+        _papra_save(authenticated_client, URL_A)
+        assert _verified(authenticated_client, "papra") is True
+
+        body = self._put(authenticated_client, {"papra_url": URL_B})
+
+        assert body["papra_connection_verified"] is False
+
+    def test_url_that_was_just_tested_stays_verified(
+        self, authenticated_client, paperless_connects
+    ):
+        _paperless_test(authenticated_client, URL_A)
+
+        body = self._put(authenticated_client, {"paperless_url": URL_A})
+
+        assert body["paperless_connection_verified"] is True
+
+    def test_clearing_the_url_unverifies(
+        self, authenticated_client, paperless_connects
+    ):
+        _paperless_test(authenticated_client, URL_A)
+        _paperless_save(authenticated_client, URL_A)
+
+        body = self._put(authenticated_client, {"paperless_url": None})
+
+        assert body["paperless_connection_verified"] is False
+
+    def test_unrelated_fields_leave_verification_alone(
+        self, authenticated_client, paperless_connects
+    ):
+        _paperless_test(authenticated_client, URL_A)
+        _paperless_save(authenticated_client, URL_A)
+
+        body = self._put(authenticated_client, {"language": "en"})
+
+        assert body["paperless_connection_verified"] is True
+
+    def test_resending_the_saved_url_leaves_verification_alone(
+        self, authenticated_client, paperless_connects
+    ):
+        _paperless_test(authenticated_client, URL_A)
+        _paperless_save(authenticated_client, URL_A)
+
+        body = self._put(authenticated_client, {"paperless_url": URL_A})
+
+        assert body["paperless_connection_verified"] is True
+
+
 class TestVerificationHelpers:
+    def test_after_save_with_unchanged_url_updates_nothing(self):
+        assert verification_after_save("papra", URL_A + "/", URL_A, URL_B) == {}
+
+    def test_after_save_with_new_url_defers_to_the_verified_url(self):
+        assert verification_after_save("papra", URL_A, URL_B, URL_A) == {
+            "papra_connection_verified": True
+        }
+        assert verification_after_save("papra", URL_A, URL_B, None) == {
+            "papra_connection_verified": False,
+            "papra_verified_url": None,
+        }
+
     @pytest.mark.parametrize(
         "value, expected",
         [
