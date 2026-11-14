@@ -6,7 +6,8 @@ birth date is not. Records of a person born on another day than the selected
 patient are left out when the file also holds someone born on the selected
 patient's day, and with them the records whose patient cannot be told. In
 every other file all is kept and warned about, for the user to judge at the
-preview.
+preview. A person with no birth date in the file is kept too: when the name
+is the selected patient's, with a warning that only the name could be checked.
 
 A birth date may be given as a year or a year and month only. It is compared
 as far as it goes: a different year is another person, the same year alone
@@ -21,6 +22,7 @@ from typing import Dict, List, Optional, Tuple
 from app.models.patient import Patient
 
 from .base_importer import ImportFormatError
+from .mappers import resource_mapper_registry
 from .mappers._fhir import fold as _norm
 from .mappers._fhir import objects, resource_id
 from .mappers._fhir import text as _text
@@ -351,11 +353,16 @@ def _without(
     Also returns the index in the bundle of each entry kept, how many records
     each of the given Patients lost, and how many were dropped because the
     patient they name is not in the file: once someone is left out, a record
-    that cannot be given to a kept Patient may be theirs. A record that names no patient at all (an Organization, a
-    Medication) is shared and kept: one where neither subject nor patient is
-    present, or where the value is null. Any other value, an empty one
-    included, has to name a Patient in the file. A Provenance has no subject;
-    it goes when one of its targets is a Patient left out.
+    that cannot be given to a kept Patient may be theirs. A record that names
+    no patient at all (an Organization, a Medication) is shared and kept: one
+    where neither subject nor patient is present, or where the value is null.
+    Any other value, an empty one included, has to name a Patient in the file.
+    A Provenance has no subject; it goes when one of its targets is a Patient
+    left out.
+
+    A record of a type the import stores (see _stored) is never shared: it
+    would become a row of the selected patient, so one that names no patient
+    is dropped and counted with those whose patient is not in the file.
     """
     index = _PatientIndex(bundle, others)
     left_out = dict.fromkeys(others, 0)
@@ -375,7 +382,7 @@ def _without(
                 for name in PATIENT_REFERENCE_FIELDS
                 if resource.get(name) is not None
             ]
-            shared = not references
+            shared = not references and not _stored(resource)
         owners = [index.find(reference) for reference in references]
         other = next((o for o in owners if o is not None and id(o) in others), None)
         if other is not None:
@@ -386,6 +393,20 @@ def _without(
         else:
             unidentified += 1
     return {**bundle, "entry": entries}, positions, left_out, unidentified
+
+
+def _stored(resource: dict) -> bool:
+    """True when the import would write the resource as a row of the selected patient.
+
+    These are the types with a registered mapper, each of which says whose it
+    is in subject or patient. Every other type is at most counted as
+    unsupported, so nothing of it can end up under the wrong patient.
+    """
+    resource_type = resource.get("resourceType")
+    return (
+        isinstance(resource_type, str)
+        and resource_mapper_registry.get_mapper(resource_type) is not None
+    )
 
 
 def _left_out_warnings(
@@ -409,7 +430,13 @@ def _left_out_warnings(
 
 
 def _differences(resource: dict, patient: Patient) -> List[str]:
-    """Warnings for a Patient resource that differs from the selection or cannot be checked."""
+    """Warnings for a Patient resource that differs from the selection or cannot be checked.
+
+    A Patient with no readable birth date gets one line: that it could not be
+    checked at all, that its name differs, or, when the name is all that
+    agrees and the selected patient has a birth date, that only the name
+    could be checked.
+    """
     given, family, text = _name_parts(resource)
     warnings = []
     # Middle names are common in exports and absent in MediKeep, so compare
@@ -432,5 +459,10 @@ def _differences(resource: dict, patient: Patient) -> List[str]:
         warnings.append(
             f"The file's birth date {birth_date_text(birth_date)} differs from "
             f"the selected patient's {patient.birth_date.isoformat()}."
+        )
+    elif birth_date is None and patient.birth_date and not warnings:
+        warnings.append(
+            f"The file has no usable birth date for {text}, so only the name "
+            "could be checked against the selected patient."
         )
     return warnings

@@ -39,9 +39,9 @@ The import runs in two steps through the API (`/api/v1/health-records`, see the 
 | Section | What it tells you |
 |---------|-------------------|
 | **Counts** | Per record type, how many rows are new, duplicates of an earlier import, or changed |
-| **Patient in file** | The name and birth date of the patient the file describes, with a warning when they differ from the selected patient. A patient record without a usable name or birth date gets a warning that it could not be checked. See [Files with more than one person](#files-with-more-than-one-person) |
+| **Patient in file** | The name and birth date of the patient the file describes, with a warning when they differ from the selected patient. A patient record without a usable name or birth date gets a warning that it could not be checked, and one with a matching name but no birth date a warning that only the name could be checked. See [Files with more than one person](#files-with-more-than-one-person) |
 | **Unsupported** | Resource types in the file that MediKeep does not import yet |
-| **Warnings** | Sections the converter does not map, entries it skipped, values that were shortened to fit, and a count of records that two documents in a zip describe differently (the newest document's version is kept; when the documents have the same date or no date, the version from the one later in the zip is kept and the warning says so) |
+| **Warnings** | Sections the converter does not map, entries it skipped, values that were shortened to fit, and a count of records that two documents in a zip describe differently (the newest document's version is kept; when one of the documents has no date, the version from the latest dated document is kept, and when the documents have the same date or no date, the version from the one later in the zip is kept; the warning says which) |
 
 ### Files with more than one person
 
@@ -55,10 +55,11 @@ When the file does hold someone with the selected patient's birth date:
 |--------------------|--------------|
 | Same birth date as the selected patient, same name | Imported |
 | Same birth date, different name | Imported, with a warning that names them. Check the preview before you execute |
-| No birth date in the file, or only a year or month that fits the selected patient's | Imported and compared by name only: a warning if the name differs, none if it is the same. With neither a usable name nor a birth date, a warning that the person could not be checked |
+| No birth date in the file | Imported and compared by name only: a warning if the name differs, and if it is the same a warning that only the name could be checked. With neither a usable name nor a birth date, a warning that the person could not be checked |
+| Only a year or month, which fits the selected patient's | Imported and compared by name only: a warning if the name differs, none if it is the same |
 | Different birth date | Left out. The preview and the result say who was left out, with the birth date as the file gives it, and how many records |
 
-When someone is left out, MediKeep imports only the records it can tie to a person who is kept. A record that names a patient who cannot be found in the file is left out too, and one warning counts them. Records that name no patient, such as an organization or a medication definition, are kept.
+When someone is left out, MediKeep imports a problem, allergy or medication only when it names a person who is kept. A record that names a patient who cannot be found in the file is left out too, and so is a problem, allergy or medication that names no patient at all; one warning counts them. Other records that name no patient, such as an organization or a medication definition, are kept: they are about nobody in particular and are not stored as records of their own. When nobody is left out, the file is taken to be about one person and a record that names no patient is imported with the rest.
 
 The patient warnings come in this order: the count of records whose patient could not be found, one line per person left out, then the warnings about the people kept. At most 20 are listed and one more line counts the rest.
 
@@ -74,12 +75,12 @@ For example, with a selected patient born 1980-04-12, a file with one person giv
 Three kinds of file are refused because the people in them cannot be told apart:
 
 - A file in which a person who would be left out and a person who would be kept have the same patient id, so a record could belong to either.
-- A zip in which documents use the same ids for records of people with different birth dates, so one person's records would replace the other's when the documents are combined. Import each document separately.
+- A zip in which documents use the same ids for records under different patient ids, unless both patients have the same full birth date (year, month and day). Without that, nothing shows that the records are one person's, and one person's records could replace the other's when the documents are combined. Import each document separately.
 - A zip in which documents give different birth dates for the same patient id, so two people would become one. Import each document separately.
 
-A zip is not refused for either reason when a document gives no birth date, or when the birth dates can be one person's. Documents that give one person different patient ids are combined as before. When documents give the same patient id a birth date in full and as a year or month only, the full one is used.
+Documents with the same patient id are combined unless the birth dates they give for it cannot be one person's: a document that gives no birth date for it, or only a year or month that fits, is combined with the rest, records with the same ids included. Documents that give one person different patient ids are combined when they have no record ids in common, or when both patient ids have the same full birth date. A year or month only, or no birth date, for either patient id is not enough: with record ids in common the zip is refused, even when the documents are in fact one person's. When documents give the same patient id a birth date in full and as a year or month only, or not at all, the full one is used, also to tell whose a record is.
 
-Two people who share a birth date, such as twins, are not told apart automatically. The warning names them, and the documents should be imported one at a time: in a zip, records of theirs with the same ids are combined as if they were one person's.
+Two people who share a birth date, such as twins, are not told apart automatically. A warning names the other person only when their name differs from the selected patient's. In a zip, documents with the same patient id and birth date are also combined into one patient, under the name in the copy that is kept, so there may be no warning at all, and records of theirs with the same ids are combined as if they were one person's. Import such documents one at a time.
 
 ---
 

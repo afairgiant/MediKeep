@@ -9,6 +9,7 @@ import re
 import time
 import zipfile
 from datetime import date
+from itertools import permutations
 from pathlib import Path
 from typing import Optional
 from unittest.mock import patch
@@ -153,6 +154,36 @@ def _unsupported_only() -> bytes:
         if e["resource"]["resourceType"] in ("Patient", "Observation")
     ]
     return json.dumps(bundle).encode()
+
+
+def _person_entry(key: str, given: str, birth: Optional[str]) -> dict:
+    """A Patient entry named <given> Sampleton, with a birth date when one is given."""
+    resource = {
+        "resourceType": "Patient",
+        "id": key,
+        "name": [{"given": [given], "family": "Sampleton"}],
+    }
+    if birth:
+        resource["birthDate"] = birth
+    return {"resource": resource}
+
+
+def _condition_entry(key: str, owner: Optional[str]) -> dict:
+    """A Condition entry "Diagnosis <key>", with a subject when an owner is given."""
+    resource = {
+        "resourceType": "Condition",
+        "id": key,
+        "code": {"text": f"Diagnosis {key}"},
+    }
+    if owner:
+        resource["subject"] = {"reference": f"Patient/{owner}"}
+    return {"resource": resource}
+
+
+def _people_bundle(*entries: dict) -> bytes:
+    return json.dumps(
+        {"resourceType": "Bundle", "type": "collection", "entry": list(entries)}
+    ).encode()
 
 
 def _conditions(db: Session, patient_id: int):
@@ -979,6 +1010,158 @@ class TestExecute:
             assert any(w.startswith("Left out 2 records") for w in body["warnings"])
         assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
             "Diagnosis j1"
+        ]
+
+    def test_record_naming_no_patient_is_left_out_with_another_person_in_the_file(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a condition without a subject is not stored once someone is left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _person_entry("r", "Robin", "1975-01-01"),
+            _condition_entry("r1", "r"),
+            _condition_entry("whose", None),
+            {"resource": {"resourceType": "Organization", "id": "org"}},
+        )
+        expected = [
+            "Left out 1 record whose patient could not be identified in the file.",
+            "Left out 1 record for Robin Sampleton, whose birth date 1975-01-01 "
+            "differs from the selected patient's 1980-04-12.",
+        ]
+
+        preview = client.post(
+            _preview_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert preview.status_code == 200, preview.text
+        body = preview.json()
+        assert body["warnings"] == expected
+        assert body["total_resources"] == 2
+        assert body["counts"] == {
+            "condition": {"new": 1, "duplicate": 0, "changed": 0, "edited": 0}
+        }
+        assert body["unsupported"] == {"Organization": 1}
+        assert _conditions(db_session, patient.id) == []
+
+        response = client.post(
+            _execute_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["warnings"] == expected
+        assert response.json()["counts"]["condition"]["created"] == 1
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
+        ]
+
+    def test_record_naming_no_patient_is_imported_when_nobody_is_left_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a file about one person still imports a condition without a subject."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _condition_entry("whose", None),
+        )
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["warnings"] == []
+        assert sorted(c.diagnosis for c in _conditions(db_session, patient.id)) == [
+            "Diagnosis j1",
+            "Diagnosis whose",
+        ]
+
+    def test_patient_without_a_birth_date_is_imported_with_a_warning(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a matching name alone imports, and both steps say only the name was checked."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", None), _condition_entry("j1", "j")
+        )
+        expected = [
+            "The file has no usable birth date for Jane Sampleton, so only the "
+            "name could be checked against the selected patient."
+        ]
+
+        preview = client.post(
+            _preview_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert preview.status_code == 200, preview.text
+        assert preview.json()["warnings"] == expected
+        assert preview.json()["patient"]["full_name"] == "Jane Sampleton"
+        assert preview.json()["counts"]["condition"]["new"] == 1
+        assert _conditions(db_session, patient.id) == []
+
+        response = client.post(
+            _execute_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["warnings"] == expected
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
+        ]
+
+    def test_patient_without_a_birth_date_next_to_a_person_left_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a person known by name only is kept and reported after the person left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _person_entry("x", "Jane", None),
+            _condition_entry("x1", "x"),
+            _person_entry("r", "Robin", "1975-01-01"),
+            _condition_entry("r1", "r"),
+        )
+        expected = [
+            "Left out 1 record for Robin Sampleton, whose birth date 1975-01-01 "
+            "differs from the selected patient's 1980-04-12.",
+            "The file has no usable birth date for Jane Sampleton, so only the "
+            "name could be checked against the selected patient.",
+        ]
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["warnings"] == expected
+        assert sorted(c.diagnosis for c in _conditions(db_session, patient.id)) == [
+            "Diagnosis j1",
+            "Diagnosis x1",
         ]
 
     def test_mapper_error_is_reported_without_detail(
@@ -2082,6 +2265,53 @@ class TestCcdaFixture:
                 assert response.status_code == 400, response.text
                 assert SHARED_RECORD_IDS_MESSAGE in response.text
         assert _conditions(db_session, patient.id) == []
+        assert _import_logs(db_session, patient.id) == []
+
+    @pytest.mark.parametrize(
+        "birth", [b'<birthTime value="1984"/>', b'<birthTime nullFlavor="UNK"/>']
+    )
+    def test_zip_reusing_record_ids_of_a_patient_without_a_full_birth_date_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        birth,
+    ):
+        """Test that another person's document cannot replace the records of a document that gives only the birth year, or none."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # The selected patient under another Patient id, with the fixture's entry ids
+        partial = (
+            jane.replace(b'<birthTime value="19840722"/>', birth)
+            .replace(b'extension="E1234567"', b'extension="E1111111"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00041"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000041"')
+        )
+        assert partial.count(birth) == 1
+        # Born in the same year, so the year alone does not tell her from Jane
+        robin = _with_own_content(
+            jane.replace(b"<given>Jane</given>", b"<given>Robin</given>")
+            .replace(b'<birthTime value="19840722"/>', b'<birthTime value="19840801"/>')
+            .replace(b'extension="E1234567"', b'extension="E7654321"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00043"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        )
+        # Jane in full, so Robin would be left out after the merge
+        full = _other_person(jane, b"Jane", None, b"2222222")
+        for documents in permutations((partial, robin, full)):
+            for url in (_preview_url(patient.id), _execute_url(patient.id)):
+                response = client.post(
+                    url,
+                    files=_upload(_zip_of(*documents), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400, response.text
+                assert SHARED_RECORD_IDS_MESSAGE in response.text
+        assert _stored_names(db_session, patient.id) == []
         assert _import_logs(db_session, patient.id) == []
 
     def test_zip_with_another_person_imports_only_the_selected_patient(

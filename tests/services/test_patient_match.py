@@ -8,6 +8,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.services.importers import ImportFormatError
+from app.services.importers.mappers import resource_mapper_registry
 from app.services.importers.patient_match import (
     MAX_PATIENT_WARNINGS,
     NO_MATCHING_PATIENT_MESSAGE,
@@ -74,6 +75,13 @@ def _left_out(count, birth="1975-01-01", name="Robin Sampleton"):
 def _unidentified(count):
     noun = "record" if count == 1 else "records"
     return f"Left out {count} {noun} whose patient could not be identified in the file."
+
+
+def _name_only(name="Jane Sampleton"):
+    return (
+        f"The file has no usable birth date for {name}, so only the name could "
+        "be checked against the selected patient."
+    )
 
 
 def _ids(bundle):
@@ -238,6 +246,34 @@ class TestComparePatient:
         }
         assert compare_patient(bundle, _patient()).warnings == []
 
+    @pytest.mark.parametrize("birth", [None, "soon", "1980-13", 1980])
+    def test_matching_name_without_a_birth_date_warns(self, birth):
+        """Test that a name that matches is reported as all that was checked."""
+        bundle = _bundle(["Jane", "Quinn"], "Sampleton", birth=birth)
+        match = compare_patient(bundle, _patient())
+        assert match.full_name == "Jane Quinn Sampleton"
+        assert match.warnings == [_name_only("Jane Quinn Sampleton")]
+
+    def test_different_name_without_a_birth_date_gets_only_the_name_warning(self):
+        """Test that a person gets one line: the name difference already asks for a look."""
+        match = compare_patient(_bundle(["Robin"], "Sampleton", birth=None), _patient())
+        assert match.warnings == [
+            "The file is for Robin Sampleton but the selected patient is Jane Sampleton."
+        ]
+
+    def test_missing_birth_date_is_not_reported_when_the_selected_patient_has_none(
+        self,
+    ):
+        """Test that there is no birth date warning when there was nothing to compare one with."""
+        bundle = _bundle(["Jane"], "Sampleton", birth=None)
+        assert compare_patient(bundle, _patient(birth=None)).warnings == []
+
+    def test_same_name_without_a_birth_date_twice_warns_once(self):
+        """Test that two such Patient records of one name give one line."""
+        bundle = _bundle(["Jane"], "Sampleton", birth=None)
+        bundle["entry"].append(_bundle(["Jane"], "Sampleton", birth=None)["entry"][0])
+        assert compare_patient(bundle, _patient()).warnings == [_name_only()]
+
     def test_bundle_without_patient(self):
         """Test that a bundle with no Patient resource yields an empty match."""
         match = compare_patient({"entry": []}, _patient())
@@ -264,7 +300,7 @@ class TestComparePatient:
         assert match.full_name == "Jane"
         assert match.birth_date is None
         assert match.gender is None
-        assert match.warnings == []
+        assert match.warnings == [_name_only("Jane")]
 
 
 class TestBirthDateParts:
@@ -413,8 +449,10 @@ class TestOtherPeopleInTheFile:
             "The file is for Robin Sampleton but the selected patient is Jane Sampleton.",
         ]
 
-    def test_person_without_a_birth_date_and_the_same_name_gets_no_warning(self):
-        """Test that a missing birth date alone is not warned about when the name matches."""
+    def test_person_without_a_birth_date_and_the_same_name_is_kept_with_a_warning(
+        self,
+    ):
+        """Test that a person known by a matching name only is kept and reported as such."""
         bundle = {
             "entry": [
                 *_person(*self.JANE),
@@ -424,7 +462,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1", "x", "x-c0", "x-c1"]
-        assert match.warnings == [_left_out(2)]
+        assert match.warnings == [_left_out(2), _name_only()]
 
     def test_nobody_is_left_out_without_a_person_with_the_birth_date(self):
         """Test that a person with no birth date is not enough to leave another person out."""
@@ -437,6 +475,7 @@ class TestOtherPeopleInTheFile:
         match = compare_patient(bundle, _patient())
         assert match.bundle is bundle
         assert match.warnings == [
+            _name_only(),
             "The file is for Robin Sampleton but the selected patient is Jane Sampleton.",
             "The file's birth date 1975-01-01 differs from the selected patient's "
             "1980-04-12.",
@@ -526,15 +565,14 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert match.bundle is bundle
-        assert match.warnings == []
-        assert not any("1960-01-04" in w or "1960-02-02" in w for w in match.warnings)
+        assert match.warnings == [_name_only()]
 
     @pytest.mark.parametrize(
         "birth",
         ["1975-13", "1975-00", "0000", "197", "19-5", "+975", "1975-1", "soon", 1975],
     )
     def test_invalid_partial_birth_date_is_not_read(self, birth):
-        """Test that a value that is no year or year and month leaves nobody out and warns of no date."""
+        """Test that a value that is no year or year and month leaves nobody out and is reported as no birth date."""
         bundle = {
             "entry": [
                 *_person(*self.JANE),
@@ -543,7 +581,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert match.bundle is bundle
-        assert match.warnings == []
+        assert match.warnings == [_name_only()]
 
     @pytest.mark.parametrize(
         "births",
@@ -1022,6 +1060,88 @@ class TestOtherPeopleInTheFile:
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1", "shared"]
         assert match.warnings == [_left_out(0)]
+
+    @pytest.mark.parametrize("fields", [{}, {"subject": None}, {"patient": None}])
+    @pytest.mark.parametrize(
+        "resource_type",
+        ["Condition", "AllergyIntolerance", "MedicationStatement", "MedicationRequest"],
+    )
+    def test_record_of_an_imported_type_that_names_no_patient_is_left_out(
+        self, resource_type, fields
+    ):
+        """Test that a record the import would store is not shared when it says nothing of whose it is."""
+        record = {"resource": {"resourceType": resource_type, "id": "whose", **fields}}
+        bundle = {
+            "entry": [
+                *_person(*self.JANE),
+                *_person(*self.ROBIN, records=0),
+                record,
+            ]
+        }
+        match = compare_patient(bundle, _patient())
+        assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
+        assert match.warnings == [_unidentified(1), _left_out(0)]
+
+    def test_every_type_with_a_mapper_has_to_name_its_patient(self):
+        """Test that the types held to this are the ones the import can store."""
+        records = [
+            {"resource": {"resourceType": resource_type, "id": resource_type}}
+            for resource_type in resource_mapper_registry.supported_types()
+        ]
+        assert len(records) >= 4
+        bundle = {
+            "entry": [*_person(*self.JANE), *records, *_person(*self.ROBIN, records=0)]
+        }
+        match = compare_patient(bundle, _patient())
+        assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
+        assert match.warnings == [_unidentified(len(records)), _left_out(0)]
+
+    def test_records_naming_no_patient_and_an_unknown_one_are_counted_together(self):
+        """Test that the one line counts both kinds of record that cannot be given to anyone."""
+        bundle = {
+            "entry": [
+                *_person(*self.JANE),
+                *_person(*self.ROBIN),
+                {"resource": {"resourceType": "Condition", "id": "a"}},
+                _record("b", {"reference": "Patient/nobody"}),
+            ]
+        }
+        match = compare_patient(bundle, _patient())
+        assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
+        assert match.warnings == [_unidentified(2), _left_out(2)]
+
+    @pytest.mark.parametrize(
+        "resource",
+        [
+            {"resourceType": "Observation", "id": "kept"},
+            {"resourceType": "Encounter", "id": "kept", "subject": None},
+            {"resourceType": "Patient", "id": "kept", "birthDate": "1980-04-12"},
+            {"resourceType": ["Condition"], "id": "kept"},
+            {"id": "kept"},
+        ],
+    )
+    def test_record_that_would_not_be_stored_is_kept_without_a_patient(self, resource):
+        """Test that only the types with a mapper are held to naming a patient."""
+        bundle = {
+            "entry": [
+                *_person(*self.JANE),
+                *_person(*self.ROBIN, records=0),
+                {"resource": resource},
+            ]
+        }
+        match = compare_patient(bundle, _patient())
+        assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1", "kept"]
+        assert match.warnings == [_left_out(0)]
+
+    def test_record_naming_no_patient_is_kept_when_nobody_is_left_out(self):
+        """Test that a file about one person is passed through with such a record in it."""
+        record = {"resource": {"resourceType": "Condition", "id": "whose"}}
+        for other in ([], _person("j2", "Janet", "Married", "1980-04-12")):
+            bundle = {"entry": [*_person(*self.JANE), record, *other]}
+            match = compare_patient(bundle, _patient())
+            assert match.bundle is bundle
+            assert match.positions is None
+            assert not any(w.startswith("Left out") for w in match.warnings)
 
     def test_null_field_next_to_a_reference_does_not_make_the_record_shared(self):
         """Test that the field that is set decides when the other one is null."""

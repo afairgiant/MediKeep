@@ -34,8 +34,9 @@ UNSAFE_DOCUMENT_MESSAGE = (
     "Not a valid C-CDA document: DOCTYPE and entity declarations are not accepted"
 )
 SHARED_RECORD_IDS_MESSAGE = (
-    "Documents in the zip are for different people but use the same record ids, "
-    "so they cannot be combined. Import each document separately."
+    "Documents in the zip use the same record ids for patients that cannot be "
+    "confirmed to be one person, so they cannot be combined. Import each document "
+    "separately."
 )
 PATIENT_ID_BIRTH_DATES_MESSAGE = (
     "Documents in the zip give different birth dates for the same patient id, "
@@ -241,45 +242,72 @@ def _sort_key(date: Optional[datetime]) -> Tuple[int, datetime]:
 def _patient_birth_dates(bundles: List[dict]) -> Dict[str, BirthDate]:
     """The most exact birth date the documents give for each Patient id.
 
-    Raises when merging the documents would mix the records of two people.
+    Raises when merging the documents could mix the records of two people.
     The merge keeps one copy per resource type and id, before the patients are
-    compared. So it is refused when two documents use one id for a record of
-    different people, where one person's record would replace the other's, and
-    when they use one Patient id for different people, where both would become
-    one Patient.
+    compared. So it is refused when two documents use one id for records of
+    Patients not known to be one person, where one person's record would
+    replace the other's, and when they use one Patient id for different
+    people, where both would become one Patient.
 
-    The birth date tells people apart, as in patient_match: a record's person
-    is the Patient its subject or patient names in its own document, and only
-    birth dates that cannot be one person's are a difference. Documents may
-    give one person different Patient ids, so the ids alone say nothing. A
-    copy whose Patient is not in its document or has no readable birth date
-    is merged, and so are the resources that describe the document.
+    A record's person is the Patient its subject or patient names in its own
+    document. Copies of a record under one Patient id are merged: the birth
+    dates given for that id were checked, and only ones that cannot be one
+    person's are a difference, as in patient_match. Documents may give one
+    person different Patient ids, so copies under different ids are merged
+    only when both Patients have a birth date in full and it is the same day.
+    A year, a year and month or no birth date does not show that: the other
+    Patient may be someone else born in that year, whose copy would replace
+    this one and then be left out. The Patient's birth date is the most exact
+    one any document gives for its id, which is what the merged Patient will
+    have: the document of the record may give only the year, or none.
+
+    A copy that names no Patient, or one that is not in its document, is not
+    checked and is merged, and so are the resources that describe the
+    document.
 
     A Patient id that no document gives a readable birth date is not in the
     result.
     """
-    # The most exact birth date seen so far for each Patient id and record
+    # The most exact birth date seen so far for each Patient id.
+    # The Patients of every document are read before any record is checked
     patients: Dict[str, BirthDate] = {}
-    records: Dict[Tuple[str, str], Optional[BirthDate]] = {}
+    present: List[Dict[str, str]] = []
     for bundle in bundles:
-        # A record may come before its Patient, so read the Patients first
-        born: Dict[str, Optional[BirthDate]] = {}
+        # Reference to Patient id, for the Patients of this document
+        own: Dict[str, str] = {}
         for entry in bundle.get("entry", []):
             resource = entry["resource"]
             if resource["resourceType"] == "Patient":
-                birth_date = read_birth_date(resource.get("birthDate"))
-                born[f"Patient/{resource['id']}"] = birth_date
+                own[f"Patient/{resource['id']}"] = resource["id"]
                 _same_person(
-                    patients, resource["id"], birth_date, PATIENT_ID_BIRTH_DATES_MESSAGE
+                    patients,
+                    resource["id"],
+                    read_birth_date(resource.get("birthDate")),
+                    PATIENT_ID_BIRTH_DATES_MESSAGE,
                 )
+        present.append(own)
+    # The Patient id of the first copy of each record. Every later copy is
+    # compared with it alone: the same full date is shared by all that pass
+    owners: Dict[Tuple[str, str], str] = {}
+    for bundle, own in zip(bundles, present):
         for entry in bundle.get("entry", []):
             resource = entry["resource"]
             if resource["resourceType"] in (*DOCUMENT_RESOURCE_TYPES, "Patient"):
                 continue
-            birth_date = born.get(_patient_reference(resource))
-            key = (resource["resourceType"], resource["id"])
-            _same_person(records, key, birth_date, SHARED_RECORD_IDS_MESSAGE)
+            owner = own.get(_patient_reference(resource))
+            if owner is None:
+                continue
+            first = owners.setdefault((resource["resourceType"], resource["id"]), owner)
+            if first != owner and not _born_the_same_day(
+                patients.get(first), patients.get(owner)
+            ):
+                raise ImportFormatError(SHARED_RECORD_IDS_MESSAGE)
     return patients
+
+
+def _born_the_same_day(first: Optional[BirthDate], second: Optional[BirthDate]) -> bool:
+    """True when both birth dates are given to the day and are the same day."""
+    return first is not None and len(first) == 3 and first == second
 
 
 def _same_person(
@@ -331,7 +359,11 @@ def _conflict_notes(documents: List[Tuple[Optional[datetime], dict]]) -> List[st
     from a later-dated document than every copy that differs from it is counted
     as settled by date. When a differing copy has the same date as the kept one,
     or neither has a date, only the order in the archive chose between them, and
-    those are counted apart so the note does not claim a newest document.
+    those are counted apart so the note does not claim a newest document. Nor
+    does it when the kept copy is dated and a differing one is not, since the
+    undated document may be the newer: those have a count of their own. Each
+    resource is counted once, under the least certain of these that applies:
+    order in the archive, then an undated copy, then date.
 
     Only content is compared. The resources that describe the document itself
     are left out (Provenance records the archive member it came from,
@@ -349,7 +381,8 @@ def _conflict_notes(documents: List[Tuple[Optional[datetime], dict]]) -> List[st
             content = {k: v for k, v in resource.items() if k != "meta"}
             copies.setdefault(key, []).append((rank, content))
 
-    by_date = by_position = 0
+    undated = _sort_key(None)
+    by_date = by_dated = by_position = 0
     for versions in copies.values():
         kept_rank, kept = versions[-1]
         differing = [rank for rank, content in versions[:-1] if content != kept]
@@ -357,6 +390,8 @@ def _conflict_notes(documents: List[Tuple[Optional[datetime], dict]]) -> List[st
             continue
         if kept_rank in differing:
             by_position += 1
+        elif undated in differing:
+            by_dated += 1
         else:
             by_date += 1
 
@@ -365,6 +400,12 @@ def _conflict_notes(documents: List[Tuple[Optional[datetime], dict]]) -> List[st
         notes.append(
             f"{_records_appear(by_date)} in more than one document with different "
             "content; the newest document's copy was kept"
+        )
+    if by_dated:
+        notes.append(
+            f"{_records_appear(by_dated)} in more than one document with different "
+            "content, and one of the documents has no date; the copy from the "
+            "latest dated document was kept"
         )
     if by_position:
         notes.append(

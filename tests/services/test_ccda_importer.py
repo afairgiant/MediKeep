@@ -8,6 +8,7 @@ import sys
 import time
 import zipfile
 from datetime import date, datetime, timezone
+from itertools import permutations
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -264,10 +265,67 @@ class TestConflictNotes:
         assert "newest" not in notes[0]
 
     def test_dated_document_beats_an_undated_one(self):
-        """Test that a dated copy replacing an undated one counts as decided by date."""
+        """Test that a dated copy replacing an undated one is not called the newest."""
         notes = self._notes((0, self._bundle(a="x")), (1, self._bundle(a="y")))
+        assert notes == [
+            "1 record appears in more than one document with different content, "
+            "and one of the documents has no date; "
+            "the copy from the latest dated document was kept"
+        ]
+
+    def test_undated_copy_among_older_dated_ones_is_not_settled_by_date(self):
+        """Test that one undated copy that differs is enough, wherever the dated ones are."""
+        notes = self._notes(
+            (0, self._bundle(a="w", b="w")),
+            (1, self._bundle(a="x", b="x")),
+            (2, self._bundle(a="y", b="y")),
+        )
+        assert notes == [
+            "2 records appear in more than one document with different content, "
+            "and one of the documents has no date; "
+            "the copy from the latest dated document was kept"
+        ]
+
+    def test_undated_copy_equal_to_the_kept_one_does_not_decide(self):
+        """Test that an undated copy with the kept content leaves the record settled by date."""
+        notes = self._notes(
+            (0, self._bundle(a="y")),
+            (1, self._bundle(a="x")),
+            (2, self._bundle(a="y")),
+        )
         assert len(notes) == 1
         assert "newest" in notes[0]
+
+    def test_same_date_comes_before_an_undated_copy(self):
+        """Test that a record with a same-date copy and an undated one is counted once, by position."""
+        notes = self._notes(
+            (0, self._bundle(a="w")),
+            (2, self._bundle(a="x")),
+            (2, self._bundle(a="y")),
+        )
+        assert len(notes) == 1
+        assert notes[0].startswith("1 record appears")
+        assert "later in the zip" in notes[0]
+
+    def test_each_record_is_counted_in_one_note(self):
+        """Test the three notes together, in order, with every record in exactly one."""
+        notes = self._notes(
+            (0, self._bundle(b="w", c="w", d="w", e="w")),
+            (0, self._bundle(e="x")),
+            (1, self._bundle(a="x", b="x", c="x", d="w")),
+            (2, self._bundle(a="y", b="y", c="x", d="y")),
+            (2, self._bundle(c="z")),
+        )
+        assert notes == [
+            "1 record appears in more than one document with different content; "
+            "the newest document's copy was kept",
+            "2 records appear in more than one document with different content, "
+            "and one of the documents has no date; "
+            "the copy from the latest dated document was kept",
+            "2 records appear in more than one document with different content, "
+            "and the documents have the same date or no date; "
+            "the copy from the document later in the zip was kept",
+        ]
 
     def test_both_kinds_are_counted_apart(self):
         """Test that records settled by date and by position each get their own count."""
@@ -340,13 +398,15 @@ class TestPatientBirthDates:
         _patient_birth_dates([self._bundle("jane"), self._bundle("jane-2")])
 
     @pytest.mark.parametrize("birth", ["1984", "1984-07", None, "soon", 1984])
-    def test_birth_date_that_does_not_differ_is_merged(self, birth):
-        """Test that a missing, unreadable or less exact birth date is no reason to refuse."""
+    def test_other_patient_id_without_the_full_birth_date_is_refused(self, birth):
+        """Test that a missing, unreadable or less exact birth date does not show that two Patient ids are one person."""
         for bundles in (
             [self._bundle("jane"), self._bundle("jane-2", birth=birth)],
             [self._bundle("jane-2", birth=birth), self._bundle("jane")],
         ):
-            _patient_birth_dates(bundles)
+            with pytest.raises(ImportFormatError) as raised:
+                _patient_birth_dates(bundles)
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
 
     @pytest.mark.parametrize("birth", ["1975", "1984-08", "1984-07-23"])
     def test_birth_date_that_differs_in_any_part_is_refused(self, birth):
@@ -474,11 +534,127 @@ class TestPatientBirthDates:
         robin = self._bundle("robin", birth="1975")
         # Another person, so with a record id of their own
         robin["entry"][1]["resource"]["id"] = "c2"
-        bundles.extend([robin, self._bundle("sam", birth=None)])
+        sam = self._bundle("sam", birth=None)
+        sam["entry"][1]["resource"]["id"] = "c3"
+        bundles.extend([robin, sam])
         assert _patient_birth_dates(bundles) == {
             "jane": (1984, 7, 22),
             "robin": (1975,),
         }
+
+    def _shared_record(self, partial, other):
+        """Three documents: jane in full, jane as partial with c2, another Patient id with c2."""
+        documents = [
+            self._bundle("jane"),
+            self._bundle("jane", birth=partial),
+            self._bundle("robin", birth=other),
+        ]
+        for document in documents[1:]:
+            document["entry"][1]["resource"]["id"] = "c2"
+        return documents
+
+    @pytest.mark.parametrize("partial", ["1984", None, "soon"])
+    @pytest.mark.parametrize("other", ["1984-08-01", "1984-07", "1984", None])
+    @pytest.mark.parametrize("order", list(permutations(range(3))))
+    def test_record_is_held_to_the_birth_date_another_document_gives_its_patient(
+        self, order, other, partial
+    ):
+        """Test that a record of a Patient id goes by the full birth date, wherever the document that gives it comes."""
+        documents = self._shared_record(partial, other)
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates([documents[i] for i in order])
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    @pytest.mark.parametrize("partial", ["1984", None, "soon"])
+    @pytest.mark.parametrize("order", list(permutations(range(3))))
+    def test_record_of_one_person_is_merged_with_the_full_birth_date_known(
+        self, order, partial
+    ):
+        """Test that the full birth date from another document lets a Patient id with the same one share the record."""
+        documents = self._shared_record(partial, self.JANE_BORN)
+        assert _patient_birth_dates([documents[i] for i in order])["jane"] == (
+            1984,
+            7,
+            22,
+        )
+
+    def _reused_record(self, birth):
+        """Three documents: x with c1 and only `birth`, y born another day with c1, x's person in full as z with c2."""
+        again = self._bundle("z")
+        again["entry"][1]["resource"]["id"] = "c2"
+        return [
+            self._bundle("x", birth=birth),
+            self._bundle("y", birth="1984-08-01"),
+            again,
+        ]
+
+    @pytest.mark.parametrize("birth", ["1984", "1984-07", None, "soon"])
+    @pytest.mark.parametrize("order", list(permutations(range(3))))
+    def test_record_of_a_patient_id_without_the_full_birth_date_is_not_replaced(
+        self, order, birth
+    ):
+        """Test that another Patient id cannot share a record of one whose birth date is not given in full."""
+        documents = self._reused_record(birth)
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates([documents[i] for i in order])
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    @pytest.mark.parametrize(
+        "births", [(None, None), ("soon", None), ("1984", "1984"), ("1984-07", "1984")]
+    )
+    def test_two_patient_ids_without_full_birth_dates_are_refused(self, births):
+        """Test that nothing shows two Patient ids to be one person when neither has a full birth date."""
+        for first, second in (births, births[::-1]):
+            with pytest.raises(ImportFormatError) as raised:
+                _patient_birth_dates(
+                    [self._bundle("x", birth=first), self._bundle("y", birth=second)]
+                )
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    @pytest.mark.parametrize(
+        "births, known",
+        [
+            ((None, None), None),
+            (("1984", None), (1984,)),
+            (("1984", "1984-07"), (1984, 7)),
+            (("soon", "1984"), (1984,)),
+        ],
+    )
+    def test_one_patient_id_without_a_full_birth_date_is_merged(self, births, known):
+        """Test that copies under one Patient id need no birth date to be merged."""
+        for first, second in (births, births[::-1]):
+            born = _patient_birth_dates(
+                [self._bundle("x", birth=first), self._bundle("x", birth=second)]
+            )
+            assert born.get("x") == known
+
+    @pytest.mark.parametrize("order", list(permutations(range(3))))
+    def test_three_patient_ids_with_one_full_birth_date_are_merged(self, order):
+        """Test that any number of Patient ids share a record when all have the same full birth date."""
+        documents = [self._bundle(patient) for patient in ("x", "y", "z")]
+        _patient_birth_dates([documents[i] for i in order])
+
+    @pytest.mark.parametrize("birth", ["1984", None, "1984-07-23"])
+    @pytest.mark.parametrize("order", list(permutations(range(3))))
+    def test_third_patient_id_without_the_same_full_birth_date_is_refused(
+        self, order, birth
+    ):
+        """Test that every Patient id of a record is checked, wherever its document comes."""
+        documents = [
+            self._bundle("x"),
+            self._bundle("z"),
+            self._bundle("y", birth=birth),
+        ]
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates([documents[i] for i in order])
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_many_patient_ids_of_one_record_are_checked_in_linear_time(self):
+        """Test that a record is not compared with every earlier copy."""
+        documents = [self._bundle(f"p{i}") for i in range(20_000)]
+        start = time.monotonic()
+        _patient_birth_dates(documents)
+        assert time.monotonic() - start < 5.0
 
     def test_same_id_for_one_person_is_merged(self):
         """Test that two versions of one person's record are left to the merge."""
