@@ -4,6 +4,7 @@ Unit tests for paperless service.
 
 import pytest
 import asyncio
+from types import SimpleNamespace
 import datetime as datetime_module
 from unittest.mock import Mock, AsyncMock, patch
 import aiohttp
@@ -16,6 +17,7 @@ from app.services.paperless_service import (
     PaperlessError,
     PaperlessConnectionError,
     PaperlessAuthenticationError,
+    PaperlessCredentialsError,
     PaperlessUploadError,
     _build_title_fallback_query,
     create_paperless_service,
@@ -23,6 +25,7 @@ from app.services.paperless_service import (
     create_paperless_service_with_username_password,
 )
 from app.services.credential_encryption import credential_encryption
+from app.services.paperless_auth_methods import credential_kwargs
 
 
 class TestPaperlessService:
@@ -731,6 +734,34 @@ class TestPaperlessServiceCreation:
             create_paperless_service(
                 self.paperless_url, invalid_encrypted_token, self.user_id
             )
+
+    def test_unset_auth_method_falls_back_to_username_password(self):
+        """Users who never chose a method keep the token-then-password fallback."""
+        prefs = SimpleNamespace(
+            paperless_api_token_encrypted="not-decryptable",
+            paperless_username_encrypted=credential_encryption.encrypt_token("alice"),
+            paperless_password_encrypted=credential_encryption.encrypt_token("secret"),
+            paperless_auth_method=None,
+        )
+
+        service = create_paperless_service(
+            self.paperless_url, **credential_kwargs(prefs), user_id=self.user_id
+        )
+        assert service.username == "alice"
+
+        # Once the token is the chosen method, there is no silent fallback
+        prefs.paperless_auth_method = "token"
+        with pytest.raises(PaperlessCredentialsError):
+            create_paperless_service(
+                self.paperless_url, **credential_kwargs(prefs), user_id=self.user_id
+            )
+
+    def test_blocked_url_with_valid_credentials_is_a_connection_error(self):
+        """A blocked URL must not be reported as unreadable credentials."""
+        encrypted_token = credential_encryption.encrypt_token(self.api_token)
+
+        with pytest.raises(PaperlessConnectionError):
+            create_paperless_service("http://169.254.169.254", encrypted_token)
 
     def test_create_service_empty_token(self):
         """Test service creation with empty token raises no-credentials error."""

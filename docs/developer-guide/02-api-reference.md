@@ -725,6 +725,10 @@ recorded in the activity log (`two_factor_enabled`, `two_factor_disabled`,
   when a save changes the URL to one that has not been tested. Clients use them to decide
   whether Paperless-ngx or Papra can be chosen as the default storage location. They are
   ignored if sent in a `PUT`.
+- **Note**: `paperless_auth_method` is the Paperless-ngx authentication method in effect
+  (`token` or `basic_auth`). It is the user's saved choice, or, if they never chose one,
+  the first method that has saved credentials, else `token`. It is saved through
+  `PUT /paperless/settings`, not this endpoint.
 
 ### Update User Preferences
 
@@ -5453,6 +5457,34 @@ Base path: `/api/v1/paperless`
 
 `GET /paperless/documents`
 
+#### Paperless Settings
+
+`GET /paperless/settings` · `PUT /paperless/settings`
+
+- **Authentication method**: `paperless_auth_method` is `token` or `basic_auth`. Only the
+  chosen method's saved credentials are used for every Paperless request, so a saved token
+  no longer takes priority once `basic_auth` is chosen (and the other way round). Both
+  credential sets are kept when switching. Users who never chose a method keep the earlier
+  behaviour: a saved token is tried first, and username/password is used if the token cannot be used. Methods are registered in
+  `app/services/paperless_auth_methods.py`; the column has no database constraint, so
+  adding a method does not need a migration.
+- **`PUT` validation**: an unknown `paperless_auth_method` returns `400`, as does a method
+  that would have no credentials after the update. Credentials sent in the same request
+  count.
+- **Response**: both return the method in effect as `paperless_auth_method`.
+
+#### Test Paperless Connection
+
+`POST /paperless/test-connection`
+
+- **Request Body**: `paperless_url`, then either `paperless_api_token`, or
+  `paperless_username` and `paperless_password`, or none of them to test saved credentials.
+- **`paperless_auth_method`** (optional): which method's saved credentials to test when
+  none are sent. Defaults to the stored choice. An unknown value returns `422`; a method
+  with no saved credentials returns `400`.
+- **Errors**: `400` with `X-Error-Code: integration_credentials_unusable` when the saved
+  credentials cannot be decrypted (see the error table in 13.2).
+
 ### 13.2 Integration Error Responses (Paperless-ngx and Papra)
 
 Linking, uploading and searching documents in Paperless-ngx or Papra
@@ -5492,6 +5524,7 @@ wrong and an `error_code` that identifies it:
 | `error_code` | Meaning |
 | --- | --- |
 | `integration_auth_failed` | The token or credentials were rejected (HTTP 401/403 from the integration) |
+| `integration_credentials_unusable` | No usable credentials: the saved ones cannot be decrypted (for example after `SECRET_KEY` changed) or none were provided. Raised before any request is made; HTTP `400` |
 | `integration_connection_refused` | Nothing is listening at that address and port |
 | `integration_host_unreachable` | No route to the host |
 | `integration_dns_failed` | The host name could not be resolved |

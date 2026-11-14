@@ -40,6 +40,7 @@ class IntegrationErrorCode:
 
     # Credentials
     AUTH_FAILED = "integration_auth_failed"
+    CREDENTIALS_UNUSABLE = "integration_credentials_unusable"
 
     # Connection
     CONNECTION_FAILED = "integration_connection_failed"
@@ -70,6 +71,10 @@ class IntegrationErrorCode:
 
 PAPERLESS_AUTH_FAILED_MESSAGE = (
     "Paperless authentication failed. Please check your credentials and permissions."
+)
+PAPERLESS_CREDENTIALS_UNUSABLE_MESSAGE = (
+    "The saved Paperless credentials could not be read. "
+    "Please re-enter your API token or username and password, save, and try again."
 )
 PAPRA_AUTH_FAILED_MESSAGE = (
     "Papra authentication failed. Please check your API token and permissions."

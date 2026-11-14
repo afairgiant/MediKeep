@@ -30,6 +30,24 @@
       "title": "Probleem melden"
     }
   },
+  "integration": {
+    "enable": "{{name}}-integratie inschakelen",
+    "serverUrl": "Server-URL",
+    "defaultUrlDescription": "HTTP is toegestaan voor lokale adressen, HTTPS is vereist voor externe URL's",
+    "urlRequired": "URL is vereist",
+    "urlInvalid": "Ongeldig URL-formaat",
+    "urlBadScheme": "URL moet beginnen met http:// of https://",
+    "apiToken": "API-token",
+    "tokenPlaceholder": "Voer uw API-token in",
+    "tokenSavedPlaceholder": "Token opgeslagen - laat leeg om het huidige te behouden",
+    "tokenTooShort": "Het token lijkt te kort",
+    "tokenRequired": "API-token is vereist",
+    "testConnection": "Verbinding testen",
+    "testing": "Bezig met testen...",
+    "connectedTo": "Verbinding met {{name}} geslaagd",
+    "connectionFailedTo": "Kan geen verbinding maken met {{name}}. Controleer uw URL en inloggegevens.",
+    "statusConnected": "Verbonden"
+  },
   "paperlessConnection": {
     "privateUrlNote": "Privé- en interne adressen (localhost, 192.168.x.x, 10.x.x.x) worden ondersteund voor zelf-gehoste installaties. Cloud-metadata- en link-local-adressen (169.254.x.x) worden om veiligheidsredenen altijd geblokkeerd. Als uw beheerder integraties heeft beperkt tot openbare adressen, worden privé-URL's geweigerd.",
     "apiTokenHelp": "Uw Paperless-ngx API-token. U vindt het in het Paperless-beheerdersdashboard onder Instellingen.",
@@ -47,7 +65,18 @@
     "urlLabel": "Server-URL",
     "usernameHelp": "Uw Paperless-ngx gebruikersnaam.",
     "usernameLabel": "Gebruikersnaam",
-    "usernamePassword": "Gebruikersnaam en wachtwoord"
+    "usernamePassword": "Gebruikersnaam en wachtwoord",
+    "authMethodDescription": "API-tokens zijn veiliger. Genereer er een in het beheerpaneel van Paperless-ngx.",
+    "noSavedCredentials": "Nog geen opgeslagen inloggegevens voor deze methode. Voer ze hieronder in om deze te gebruiken.",
+    "usernamePlaceholder": "Voer uw gebruikersnaam in",
+    "passwordPlaceholder": "Voer uw wachtwoord in",
+    "passwordSavedPlaceholder": "Wachtwoord opgeslagen - laat leeg om het huidige te behouden",
+    "autoSyncLabel": "Automatische controle van de synchronisatiestatus inschakelen",
+    "autoSyncDescription": "Controleer automatisch of documenten nog bestaan in Paperless wanneer pagina's worden geladen",
+    "syncTagsLabel": "Documenttags en categorieën synchroniseren",
+    "syncTagsDescription": "Documentmetadata gesynchroniseerd houden met Paperless (Binnenkort beschikbaar)",
+    "loadingSettings": "Instellingen laden...",
+    "credentialsIncomplete": "Voer zowel uw gebruikersnaam als wachtwoord in om de verbinding te testen."
   },
   "papra": {
     "privateUrlNote": "Privé- en interne adressen (localhost, 192.168.x.x, 10.x.x.x) worden ondersteund voor zelf-gehoste installaties. Cloud-metadata- en link-local-adressen (169.254.x.x) worden om veiligheidsredenen altijd geblokkeerd. Als uw beheerder integraties heeft beperkt tot openbare adressen, worden privé-URL's geweigerd.",

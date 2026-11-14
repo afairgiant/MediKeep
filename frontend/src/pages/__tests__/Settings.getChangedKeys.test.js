@@ -1,5 +1,10 @@
 import { describe, test, expect } from 'vitest';
-import { getChangedKeys, isSameValue } from '../Settings';
+import {
+  assertPaperlessAuthMethodUsable,
+  getChangedKeys,
+  isSameValue,
+} from '../Settings';
+import { isPaperlessSetting } from '../../constants/paperlessSettings';
 
 describe('isSameValue', () => {
   test('treats primitives by === ', () => {
@@ -58,5 +63,64 @@ describe('getChangedKeys', () => {
     const local = { unit_system: 'metric' };
 
     expect(getChangedKeys(local, server)).toEqual(['unit_system']);
+  });
+});
+
+describe('Paperless authentication method', () => {
+  test('switching the method is a Paperless change that enables saving', () => {
+    const server = { paperless_auth_method: 'token', unit_system: 'imperial' };
+    const local = {
+      paperless_auth_method: 'basic_auth',
+      unit_system: 'imperial',
+    };
+
+    expect(getChangedKeys(local, server, isPaperlessSetting)).toEqual([
+      'paperless_auth_method',
+    ]);
+    expect(
+      getChangedKeys(local, server, key => !isPaperlessSetting(key))
+    ).toEqual([]);
+  });
+
+  test('switching back to the saved method is no longer a change', () => {
+    const server = { paperless_auth_method: 'token' };
+    const local = { paperless_auth_method: 'token' };
+
+    expect(getChangedKeys(local, server, isPaperlessSetting)).toEqual([]);
+  });
+});
+
+describe('assertPaperlessAuthMethodUsable', () => {
+  test('blocks selecting a method that has no credentials', () => {
+    expect(() =>
+      assertPaperlessAuthMethodUsable(
+        { paperless_auth_method: 'basic_auth' },
+        { paperless_auth_method: 'basic_auth', paperless_has_token: true }
+      )
+    ).toThrow('no credentials');
+  });
+
+  test('allows a method with saved credentials', () => {
+    expect(() =>
+      assertPaperlessAuthMethodUsable(
+        { paperless_auth_method: 'basic_auth' },
+        { paperless_has_credentials: true }
+      )
+    ).not.toThrow();
+  });
+
+  test('allows a method whose credentials are typed in the same save', () => {
+    expect(() =>
+      assertPaperlessAuthMethodUsable(
+        { paperless_auth_method: 'basic_auth' },
+        { paperless_username: 'admin', paperless_password: 'secret' }
+      )
+    ).not.toThrow();
+  });
+
+  test('ignores saves that do not change the method', () => {
+    expect(() =>
+      assertPaperlessAuthMethodUsable({ unit_system: 'metric' }, {})
+    ).not.toThrow();
   });
 });

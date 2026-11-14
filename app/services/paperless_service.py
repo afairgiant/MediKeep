@@ -18,6 +18,7 @@ import aiohttp
 from app.core.config import settings
 from app.core.http.integration_errors import (
     PAPERLESS_AUTH_FAILED_MESSAGE,
+    PAPERLESS_CREDENTIALS_UNUSABLE_MESSAGE,
     IntegrationErrorCode,
     IntegrationFailureInfo,
 )
@@ -74,6 +75,18 @@ class PaperlessAuthenticationError(PaperlessError):
 
     integration_message = PAPERLESS_AUTH_FAILED_MESSAGE
     integration_code = IntegrationErrorCode.AUTH_FAILED
+
+
+class PaperlessCredentialsError(PaperlessError):
+    """No usable credentials: none were provided, or the saved ones cannot be decrypted.
+
+    This is raised before any request is made, so it says nothing about the
+    Paperless server itself. A common cause is a changed SECRET_KEY, which makes
+    previously saved credentials unreadable.
+    """
+
+    integration_message = PAPERLESS_CREDENTIALS_UNUSABLE_MESSAGE
+    integration_code = IntegrationErrorCode.CREDENTIALS_UNUSABLE
 
 
 class PaperlessUploadError(PaperlessError):
@@ -1967,31 +1980,35 @@ def create_paperless_service(
                 logger.debug("Encrypted token received, attempting decryption")
                 api_token = credential_encryption.decrypt_token(encrypted_token)
                 logger.debug(f"Token decryption successful: {bool(api_token)}")
+            except Exception as e:
+                logger.warning(f"Token decryption failed for user {user_id}: {e}")
+            else:
+                # Outside the try: a blocked or unresolvable URL must surface as
+                # a connection error, not as unreadable credentials
                 if api_token:
                     logger.info(
                         f"Creating paperless service with token auth for user {user_id}"
                     )
                     return PaperlessServiceToken(paperless_url, api_token, user_id)
-            except Exception as e:
-                logger.warning(f"Token decryption failed for user {user_id}: {e}")
 
         # Priority 2: Username/Password authentication
         if encrypted_username and encrypted_password:
             try:
                 username = credential_encryption.decrypt_token(encrypted_username)
                 password = credential_encryption.decrypt_token(encrypted_password)
+            except Exception as e:
+                logger.warning(
+                    f"Username/password decryption failed for user {user_id}: {e}"
+                )
+            else:
                 if username and password:
                     logger.info(
                         f"Creating paperless service with basic auth for user {user_id}"
                     )
                     return PaperlessService(paperless_url, username, password, user_id)
-            except Exception as e:
-                logger.warning(
-                    f"Username/password decryption failed for user {user_id}: {e}"
-                )
 
         # No valid credentials found
-        raise PaperlessError("No valid authentication credentials provided")
+        raise PaperlessCredentialsError("No valid authentication credentials provided")
 
     except PaperlessError:
         raise

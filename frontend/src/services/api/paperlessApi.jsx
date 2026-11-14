@@ -14,17 +14,23 @@ import { apiService } from './index';
  * @param {string} username - Username for authentication (optional if apiToken provided)
  * @param {string} password - Password for authentication (optional if apiToken provided)
  * @param {string} apiToken - API token for authentication (optional)
+ * @param {string} authMethod - Method whose saved credentials to test when none are typed (optional)
  * @returns {Promise} Connection test results
  */
 export const testPaperlessConnection = async (
   paperlessUrl,
   username,
   password,
-  apiToken
+  apiToken,
+  authMethod
 ) => {
   const payload = {
     paperless_url: paperlessUrl,
   };
+
+  if (authMethod) {
+    payload.paperless_auth_method = authMethod;
+  }
 
   // Add API token if provided (prioritized over username/password)
   if (apiToken) {
