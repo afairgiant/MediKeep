@@ -66,6 +66,7 @@ class _Plan:
     unsupported: Dict[str, int] = field(default_factory=dict)
     total_resources: int = 0
     warnings: List[str] = field(default_factory=list)
+    skip_reasons: Set[str] = field(default_factory=set)  # Already in warnings
     seen_hashes: Set[Tuple[str, str]] = field(default_factory=set)
     seen_ids: Set[Tuple[str, str]] = field(default_factory=set)
     matched_by_id: Set[int] = field(default_factory=set)  # Provenance ids
@@ -88,6 +89,7 @@ class HealthRecordImportService:
         patient: Patient,
         source: str,
         format_key: str,
+        notes: Optional[List[str]] = None,
     ) -> HealthRecordImportPreviewResponse:
         """Classify every resource without writing anything."""
         plan = self._build_plan(bundle, patient, source)
@@ -117,7 +119,7 @@ class HealthRecordImportService:
             counts=counts,
             unsupported=plan.unsupported,
             patient=summary,
-            warnings=[*match.warnings, *plan.warnings],
+            warnings=[*match.warnings, *(notes or []), *plan.warnings],
         )
 
     def execute(
@@ -130,6 +132,7 @@ class HealthRecordImportService:
         request: Optional[Request] = None,
         sections: Optional[Set[str]] = None,
         skip_edited: bool = True,
+        notes: Optional[List[str]] = None,
     ) -> HealthRecordImportResponse:
         """Write the planned rows, their provenance and the log entry in one transaction."""
         match = compare_patient(bundle, patient)
@@ -150,7 +153,7 @@ class HealthRecordImportService:
             import_batch_id=batch_id,
             counts=counts,
             unsupported=plan.unsupported,
-            warnings=[*match.warnings, *plan.warnings],
+            warnings=[*match.warnings, *(notes or []), *plan.warnings],
         )
         self._log_activity(response, patient, user_id, request)
         self.db.commit()
@@ -201,6 +204,10 @@ class HealthRecordImportService:
                 plan.warnings.append(f"Skipped {label}: could not be mapped")
                 continue
             if mapped is None:
+                reason = mapper.skip_reason(resource, bundle)
+                if reason and reason not in plan.skip_reasons:
+                    plan.skip_reasons.add(reason)
+                    plan.warnings.append(reason)
                 continue
             if not self._validate(mapped, mapper, patient):
                 plan.warnings.append(f"Skipped {label}: failed validation")

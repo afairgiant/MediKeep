@@ -70,6 +70,10 @@ pages:
     wiki_page: SSO-Setup-Guide
     title: SSO Setup Guide
 
+  - source: docs/health-record-import.md
+    wiki_page: Health-Record-Import
+    title: Health Record Import
+
   - source: docs/wiki/Paperless-Integration.md
     wiki_page: Paperless-Integration
     title: Paperless-ngx Integration

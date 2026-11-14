@@ -7,6 +7,7 @@ from datetime import date
 from app.models.clinical import Medication
 from app.services.importers.mappers import _fhir as f
 from app.services.importers.mappers.medication_mapper import (
+    NO_KNOWN_MEDICATIONS,
     MedicationRequestMapper,
     MedicationStatementMapper,
 )
@@ -405,6 +406,101 @@ class TestMedicationRequestMapper:
         assert content_hash(self.mapper.hash_parts_for_row(row)) != content_hash(
             mapped.hash_parts
         )
+
+
+class TestNoMedicationStatements:
+    """Test entries that say there is no medication, or not to give one."""
+
+    statements = MedicationStatementMapper()
+    requests = MedicationRequestMapper()
+    NOTHING = {
+        "coding": [
+            {"system": SNOMED, "code": "410942007", "display": "Drug or medicament"}
+        ]
+    }
+
+    def test_not_taken_drug_or_medicament_is_no_known_medications(self):
+        """Test that the C-CDA "no known medications" entry is skipped with a warning."""
+        resource = _statement(
+            status="not-taken", medicationCodeableConcept=self.NOTHING
+        )
+        assert self.statements.map(resource, EMPTY) is None
+        assert self.statements.skip_reason(resource, EMPTY) == NO_KNOWN_MEDICATIONS
+
+    def test_no_known_medications_through_a_referenced_medication(self):
+        """Test that the rule also applies when the code is on a bundled Medication."""
+        medication = {"resourceType": "Medication", "id": "m1", "code": self.NOTHING}
+        resource = _statement(
+            status="not-taken", medicationReference={"reference": "Medication/m1"}
+        )
+        del resource["medicationCodeableConcept"]
+        bundle = _bundle(resource, medication)
+        assert self.statements.map(resource, bundle) is None
+        assert self.statements.skip_reason(resource, bundle) == NO_KNOWN_MEDICATIONS
+
+    def test_taken_drug_or_medicament_and_not_taken_drug_are_kept(self):
+        """Test that only the not-taken generic concept counts as no medications."""
+        generic = _statement(medicationCodeableConcept=self.NOTHING)
+        assert self.statements.map(generic, EMPTY).data["status"] == "active"
+        named = _statement(status="not-taken")
+        assert self.statements.map(named, EMPTY).data["status"] == "cancelled"
+        assert (
+            self.statements.skip_reason(_statement(status="entered-in-error"), EMPTY)
+            is None
+        )
+
+    def test_no_known_medications_situation_code(self):
+        """Test that SNOMED's "No known medications" is skipped with the warning."""
+        situation = {
+            "coding": [
+                {
+                    "system": SNOMED,
+                    "code": "787481004",
+                    "display": "No known medications",
+                }
+            ]
+        }
+        for status in ("active", "completed"):
+            resource = _statement(status=status, medicationCodeableConcept=situation)
+            assert self.statements.map(resource, EMPTY) is None
+            assert self.statements.skip_reason(resource, EMPTY) == NO_KNOWN_MEDICATIONS
+        # Not taking "no known medications" is a double negative: skipped silently
+        resource = _statement(status="not-taken", medicationCodeableConcept=situation)
+        assert self.statements.map(resource, EMPTY) is None
+        assert self.statements.skip_reason(resource, EMPTY) is None
+
+    def test_do_not_perform_drug_or_medicament_is_an_order_not_to_give(self):
+        """Test that a do-not-give order is worded literally, whatever its drug."""
+        resource = _request(doNotPerform=True, medicationCodeableConcept=self.NOTHING)
+        assert self.requests.map(resource, EMPTY) is None
+        assert self.requests.skip_reason(resource, EMPTY) == (
+            "Skipped MedicationRequest/mr1: an order not to give the medication"
+        )
+
+    def test_withdrawn_entries_give_no_warning(self):
+        """Test that cancelled and entered-in-error entries are skipped silently."""
+        for status in ("cancelled", "entered-in-error"):
+            for drug in (self.NOTHING, _concept("1191", "aspirin")):
+                order = _request(
+                    status=status, doNotPerform=True, medicationCodeableConcept=drug
+                )
+                assert self.requests.map(order, EMPTY) is None
+                assert self.requests.skip_reason(order, EMPTY) is None
+            statement = _statement(
+                status=status, medicationCodeableConcept=self.NOTHING
+            )
+            assert self.statements.map(statement, EMPTY) is None
+            assert self.statements.skip_reason(statement, EMPTY) is None
+
+    def test_do_not_perform_request_is_skipped_with_a_warning(self):
+        """Test that an order not to give a drug does not become an active medication."""
+        resource = _request(doNotPerform=True)
+        assert self.requests.map(resource, EMPTY) is None
+        assert self.requests.skip_reason(resource, EMPTY) == (
+            "Skipped MedicationRequest/mr1: an order not to give the medication"
+        )
+        assert self.requests.map(_request(doNotPerform=False), EMPTY) is not None
+        assert self.requests.skip_reason(_request(), EMPTY) is None
 
 
 class TestDoseText:

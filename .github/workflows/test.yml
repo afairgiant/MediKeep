@@ -68,7 +68,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt -r requirements-import.txt
           pip install pytest-cov
 
       - name: Run tests

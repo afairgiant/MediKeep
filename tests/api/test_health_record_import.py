@@ -1,9 +1,12 @@
 """
-Test the health record import API endpoints with a hand-written FHIR bundle.
+Test the health record import API endpoints with a hand-written FHIR bundle, a
+MyChart-style C-CDA and a synthetic export in Epic's real layout.
 """
 
 import io
 import json
+import time
+import zipfile
 from datetime import date
 from pathlib import Path
 from typing import Optional
@@ -26,7 +29,7 @@ from app.models.models import (
     PatientShare,
 )
 from app.schemas.patient import PatientCreate
-from app.services.importers import upload
+from app.services.importers import ccda_available, upload
 from app.services.importers.mappers import _fhir as f
 from app.services.importers.mappers import resource_mapper_registry
 from app.services.importers.service import HealthRecordImportService
@@ -35,6 +38,8 @@ from tests.utils.user import create_random_user, create_user_token_headers
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "health_record_import"
 FIXTURE = FIXTURES / "fhir_bundle_minimal.json"
 MAPPER_FIXTURE = FIXTURES / "fhir_bundle_mapper.json"
+MYCHART_CCD = FIXTURES / "mychart_like_ccd.xml"
+EPIC_CCD = FIXTURES / "mychart_epic_synthetic.xml"
 FORMATS_URL = "/api/v1/health-records/import/formats"
 
 
@@ -51,6 +56,19 @@ def _upload(data: Optional[bytes] = None, name: str = "bundle.json"):
     return {
         "file": (name, io.BytesIO(data or FIXTURE.read_bytes()), "application/json")
     }
+
+
+def _xdm_zip(xml: bytes, members: int = 1) -> bytes:
+    """Wrap a C-CDA in the folder layout MyChart's download produces."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for i in range(members):
+            zf.writestr(
+                f"MachineReadable_XDMFormat/IHE_XDM/SUBSET{i:02d}/DOC0001.XML", xml
+            )
+        zf.writestr("MachineReadable_XDMFormat/IHE_XDM/SUBSET00/METADATA.XML", "<x/>")
+        zf.writestr("MachineReadable_XDMFormat/INDEX.HTM", "<html></html>")
+    return buf.getvalue()
 
 
 def _bundle_with_diagnosis(diagnosis: str) -> bytes:
@@ -162,11 +180,12 @@ class TestFormats:
     """Test the formats endpoint."""
 
     def test_lists_formats_and_limit(self, client: TestClient, authenticated_headers):
-        """Test that the formats endpoint lists the FHIR bundle format and the size limit."""
+        """Test that the formats endpoint lists the available formats and the size limit."""
         response = client.get(FORMATS_URL, headers=authenticated_headers)
         assert response.status_code == 200
         body = response.json()
-        assert {f["key"] for f in body["formats"]} == {"fhir_bundle"}
+        expected = {"fhir_bundle", "ccda"} if ccda_available() else {"fhir_bundle"}
+        assert {f["key"] for f in body["formats"]} == expected
         assert body["max_file_size_bytes"] == upload.MAX_IMPORT_FILE_SIZE
 
     def test_requires_auth(self, client: TestClient):
@@ -238,7 +257,7 @@ class TestPreview:
         patient_id = user_with_patient["patient"].id
         response = client.post(
             _preview_url(patient_id),
-            files=_upload(b"<x/>", "export.xml"),
+            files=_upload(b"<x/>", "export.csv"),
             headers=authenticated_headers,
         )
         assert response.status_code == 422
@@ -1679,6 +1698,32 @@ class TestHashOfValidatedData:
 class TestMalformedResources:
     """One badly formed resource never takes the rest of the file with it."""
 
+    def test_many_skip_reasons_plan_in_linear_time(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that skip warnings are deduplicated without rescanning the list."""
+        count = 40000
+        bundle = {
+            "resourceType": "Bundle",
+            "entry": [
+                {
+                    "resource": {
+                        "resourceType": "MedicationRequest",
+                        "id": f"r{i}",
+                        "doNotPerform": True,
+                    }
+                }
+                for i in range(count)
+            ],
+        }
+        started = time.monotonic()
+        result = HealthRecordImportService(db_session).preview(
+            bundle, user_with_patient["patient"], "fhir_bundle", "fhir_bundle"
+        )
+        # Linear takes a fraction of a second; a scan per reason took about 7 s
+        assert time.monotonic() - started < 10
+        assert result.warnings[-1] == f"{count - 50} more warnings not shown"
+
     def test_unhashable_id_does_not_fail_the_import(
         self,
         client: TestClient,
@@ -1734,3 +1779,252 @@ class TestMalformedResources:
         ).json()
         assert body["counts"]["medication"]["new"] == 1
         assert not any("MedicationRequest" in w for w in body["warnings"])
+
+
+# The C-CDA fixtures need the optional library; without it these tests are skipped
+needs_library = pytest.mark.skipif(
+    not ccda_available(), reason="healthrecord-bridge is not installed"
+)
+
+
+@needs_library
+class TestCcdaFixture:
+    """Test preview and execute on the MyChart-style C-CDA, as XML and as a zip."""
+
+    # Resources the converter produces besides the Patient; the three mapped
+    # types give 2 conditions, 1 allergy (the "no known food allergy" entry
+    # maps to nothing) and 2 medications
+    TOTAL_RESOURCES = 25
+    EXPECTED_NEW = {"condition": 2, "allergy": 1, "medication": 2}
+
+    def test_preview_xml(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test counts, the file's patient and the converter's notes for the XML."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(MYCHART_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert (body["source"], body["format_key"]) == ("ccda", "ccda")
+        assert body["total_resources"] == self.TOTAL_RESOURCES
+        assert {k: v["new"] for k, v in body["counts"].items()} == self.EXPECTED_NEW
+        assert body["unsupported"]["Observation"] == 9
+        assert body["patient"] == {
+            "full_name": "Ms. Jane Quinn Sampleton",
+            "birth_date": "1984-07-22",
+            "gender": "female",
+        }
+        assert any("Plan of Treatment" in w for w in body["warnings"])
+        assert any("selected patient" in w for w in body["warnings"])
+        assert "Allergies: file states no known food allergies" in body["warnings"]
+        assert "Allergies: file states no known allergies" not in body["warnings"]
+
+    def test_preview_zip_matches_xml(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that the MyChart zip previews the same as its XML."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["format_key"] == "ccda"
+        assert body["total_resources"] == self.TOTAL_RESOURCES
+        assert {k: v["new"] for k, v in body["counts"].items()} == self.EXPECTED_NEW
+
+    def test_execute_then_reimport(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test rows and provenance from the zip, then duplicates from the XML."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == self.EXPECTED_NEW
+
+        diagnoses = {c.diagnosis for c in _conditions(db_session, patient_id)}
+        assert "Essential hypertension" in diagnoses
+        assert {a.allergen for a in _allergies(db_session, patient_id)} == {
+            "Penicillin G"
+        }
+        assert len(_medications(db_session, patient_id)) == 2
+        provenance = _provenance(db_session, patient_id)
+        assert len(provenance) == 5
+        assert {p.source for p in provenance} == {"ccda"}
+        assert len(_import_logs(db_session, patient_id)) == 1
+
+        # The same document as bare XML carries the same ids, so nothing is created twice
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(MYCHART_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == {
+            "condition": 0,
+            "allergy": 0,
+            "medication": 0,
+        }
+        assert {
+            k: v["skipped_duplicate"] for k, v in counts.items()
+        } == self.EXPECTED_NEW
+
+    def test_zip_over_member_cap(
+        self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch
+    ):
+        """Test that a zip with too many entries is rejected."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBERS", 2)
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            data={"format_key": "ccda"},
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes(), members=3), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 400
+        assert "entries" in response.text
+
+    def test_zip_over_member_cap_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch
+    ):
+        """Test that auto-detection reports the cap, not an unrecognized format."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBERS", 2)
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes(), members=3), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 400
+        assert "over the 2 limit" in response.text
+        assert "Could not recognize" not in response.text
+
+
+@needs_library
+class TestEpicFixture:
+    """Test preview and execute on the synthetic export in Epic's real layout."""
+
+    # Resources the converter produces besides the Patient. The allergies
+    # section holds one "no known allergies" entry, which the converter marks
+    # refuted and the mapper drops with a warning, so there is no allergy section
+    TOTAL_RESOURCES = 180
+    EXPECTED_NEW = {"condition": 4, "medication": 5}
+
+    def test_preview_xml(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test counts, the file's patient, unsupported types and converter notes."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(EPIC_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert (body["source"], body["format_key"]) == ("ccda", "ccda")
+        assert body["total_resources"] == self.TOTAL_RESOURCES
+        assert {k: v["new"] for k, v in body["counts"].items()} == self.EXPECTED_NEW
+        assert "allergy" not in body["counts"]
+        # Labs, vitals and social history are Observations; lab panels are DiagnosticReports
+        assert body["unsupported"]["Observation"] == 151
+        assert body["unsupported"]["DiagnosticReport"] == 11
+        assert body["patient"] == {
+            "full_name": "Alex Testperson",
+            "birth_date": "1964-01-01",
+            "gender": "other",
+        }
+        warnings = body["warnings"]
+        assert (
+            "The file's birth date 1964-01-01 differs from the selected "
+            "patient's 1990-01-01."
+        ) in warnings
+        assert "Allergies: file states no known allergies" in warnings
+        assert "Section 'Care Teams' is not converted yet (1 entry)" in warnings
+        assert not [w for w in warnings if "(0 entries)" in w]
+        assert "Results: 2 skipped (organizer has no codable observations)" in warnings
+
+    def test_execute_then_reimport_as_zip(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test rows and provenance from the XML, then duplicates from the zip."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(EPIC_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == self.EXPECTED_NEW
+        assert (
+            "Allergies: file states no known allergies" in response.json()["warnings"]
+        )
+
+        conditions = {c.icd10_code: c for c in _conditions(db_session, patient_id)}
+        assert set(conditions) == {"N18.1", "J32.9", "J18.9", "J11.1"}
+        assert conditions["N18.1"].diagnosis == "Chronic kidney disease stage 1"
+        assert conditions["N18.1"].snomed_code == "431855005"
+        assert conditions["N18.1"].onset_date == date(2024, 1, 17)
+        assert _allergies(db_session, patient_id) == []
+        medications = {
+            m.medication_name: m for m in _medications(db_session, patient_id)
+        }
+        assert len(medications) == 5
+        losartan = medications["losartan potassium 50 MG Oral Tablet"]
+        assert (losartan.dosage, losartan.frequency, losartan.route) == (
+            "50 mg",
+            "daily",
+            "oral",
+        )
+        assert losartan.effective_period_start == date(2025, 3, 7)
+        # Epic writes twice daily as period 0.5 d
+        sertraline = medications["sertraline 50 MG Oral Tablet"]
+        assert sertraline.frequency == "2 times per day"
+        assert sertraline.notes == "Sig: Take 1 tablet by mouth twice daily."
+        # No timing bounds; authoredOn is the order date, not the start of therapy
+        levothyroxine = medications["levothyroxine sodium 0.1 MG Oral Tablet"]
+        assert levothyroxine.effective_period_start is None
+        assert (
+            medications["atorvastatin 80 MG Oral Tablet"].effective_period_start is None
+        )
+        provenance = _provenance(db_session, patient_id)
+        assert len(provenance) == 9
+        assert {p.source for p in provenance} == {"ccda"}
+        assert len(_import_logs(db_session, patient_id)) == 1
+
+        # The same document inside a MyChart zip carries the same ids
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(_xdm_zip(EPIC_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == {
+            "condition": 0,
+            "medication": 0,
+        }
+        assert {
+            k: v["skipped_duplicate"] for k, v in counts.items()
+        } == self.EXPECTED_NEW
+        assert len(_provenance(db_session, patient_id)) == 9

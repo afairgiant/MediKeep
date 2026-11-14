@@ -5350,6 +5350,12 @@ FHIR R4 Bundle by a format importer, then resource mappers write MediKeep rows
 and an `import_provenance` row per record. Formats and resource types are added
 by registering importers and mappers.
 
+C-CDA documents and MyChart zips are converted by the
+[healthrecord-bridge](https://github.com/barkerd427/healthrecord-bridge) package,
+pinned in `requirements-import.txt`. It is installed in the Docker image; on a
+bare install it is optional, and the `ccda` format is only listed when it is
+present.
+
 #### Import Formats
 
 `GET /health-records/import/formats`
@@ -5359,7 +5365,10 @@ by registering importers and mappers.
 - **Success Response** (200):
 ```json
 {
-  "formats": [{"key": "fhir_bundle", "name": "FHIR R4 Bundle (JSON)", "extensions": ["json"]}],
+  "formats": [
+    {"key": "fhir_bundle", "name": "FHIR R4 Bundle (JSON)", "extensions": ["json"]},
+    {"key": "ccda", "name": "C-CDA document or MyChart export (XML, zip)", "extensions": ["xml", "zip"]}
+  ],
   "max_file_size_bytes": 52428800
 }
 ```
@@ -5383,7 +5392,7 @@ by registering importers and mappers.
   "warnings": []
 }
 ```
-- **Notes**: `changed` counts rows that exist but differ, either because the file changed or because the row was edited in MediKeep; `edited` is the part of `changed` that execute skips by default. A resource repeated within one file counts as `duplicate` after its first copy. Resource types without a mapper are counted under `unsupported` and produce no warning. `warnings` includes a line when the file's patient name or birth date differs from the selected patient, and one line per entry that was skipped: an entry whose `resourceType` is missing or not a string (also counted under `unsupported.invalid`) or a resource its mapper could not read; warnings never carry parser or mapper error text.
+- **Notes**: `changed` counts rows that exist but differ, either because the file changed or because the row was edited in MediKeep; `edited` is the part of `changed` that execute skips by default. A resource repeated within one file counts as `duplicate` after its first copy. Resource types without a mapper are counted under `unsupported` and produce no warning. `warnings` includes a line when the file's patient name or birth date differs from the selected patient, one line per entry that was skipped (an entry whose `resourceType` is missing or not a string, also counted under `unsupported.invalid`, or a resource its mapper could not read), one line for each kind of current no-known-allergies statement in the file (such as food) and one for a no-known-medications statement, whose entries are skipped, and a `Skipped` line for a medication order not to give a drug, which is skipped. For C-CDA input it also has one line per unconverted section that has entries, per converted section marked with a `nullFlavor`, and per section and reason for skipped entries, with a count; past 20 such lines the rest are counted in one more line, and when a zip holds several documents each line starts with the document's path in the zip. Warnings never carry parser or mapper error text. A zip is read in memory, stored or deflate entries only, with a cap of 500 entries, and on the XML documents it reads, 50 MB in total, the same as a bare upload; every C-CDA inside it is converted and merged by resource type and id, and the upload is rejected if any of them cannot be read.
 - **Errors**: `422` for a missing, oversized or wrong-extension file; `400` for a file the importer cannot parse
 
 #### Execute Import
@@ -5416,8 +5425,8 @@ by registering importers and mappers.
 
 Decisions where the source and the table do not line up:
 
-- Allergies without a reaction are stored with reaction `Not specified`, since the column is required. Severity comes from the first reaction that has one, then from `criticality` (`high` is severe, `low` is mild), else `none`.
-- RxNorm codes have no column in the medications table; one is written only as the medication name when the file gives no drug name. Statuses `cancelled` and `entered-in-error` are skipped, `not-taken` becomes `cancelled`, `intended` and `draft` become `active`.
+- Allergies without a reaction are stored with reaction `Not specified`, since the column is required. Severity comes from the first reaction that has one, then from `criticality` (`high` is severe, `low` is mild), else `none`. Allergies with verification status `refuted` or `entered-in-error` are skipped. An entry that states there are no known allergies is skipped: a refuted entry coded with a SNOMED kind of allergy (`419199007` allergy to substance, `609328004` allergic disposition, `416098002` drug, `414285001` food, `426232007` environmental, `232347008` animal dander, `444316004` seasonal, `12481000132103` biological substance, or a propensity to adverse reactions code), or an entry coded with a SNOMED no-known-allergy situation (`716186003` and every code under it: `409137002` drug, `429625007` food, `428607008` environmental, `428197003` insect, `716220001` animal, `1003774007` latex) that is neither refuted nor entered in error. Unless its clinical status is `inactive` or `resolved`, it adds the warning `Allergies: file states no known <kind>`. A refuted no-known-allergy entry is skipped without a warning.
+- RxNorm codes have no column in the medications table; one is written only as the medication name when the file gives no drug name. Statuses `cancelled` and `entered-in-error` are skipped, `not-taken` becomes `cancelled`, `intended` and `draft` become `active`. A `not-taken` statement of SNOMED `410942007` (drug or medicament) is how C-CDA says there are no known medications; it is skipped with the warning `Medications: file states no known medications`, as is a statement or request coded with SNOMED `787481004` (no known medications); a `not-taken` one of that code is a double negative and is skipped without a warning. A `MedicationRequest` with `doNotPerform` is an order not to give the drug and is skipped with a `Skipped MedicationRequest/<id>: ...` warning. A cancelled or entered-in-error entry gets neither warning.
 - Routes are mapped from SNOMED codes and common wordings only where one of the values `MedicationBase` accepts fits. The respiratory tract route (`447694001`) is broader than `inhalation`, but maps to it as the closest value; nasal has its own code. Any other route (ophthalmic, vaginal, transdermal and so on) is left empty and kept in the notes as `Route: ...`, with a warning. A SNOMED code decides the route, and the wording only counts when there is no code. A code outside the map leaves the route empty even when the wording names a MediKeep route, and is kept in the notes as `Route: <wording> (SNOMED <code>)` with a warning. When a mapped code comes with wording that names a different route, or wording the importer does not recognize, the wording is kept in the notes and reported; each mapped code's SNOMED CT synonyms (`Oral use`, `Per os`, ...) are recognized. Doses and timing numbers are written in full (`2400000 [iU]`, never `2.4e+06`). A nonzero number of 10^51 or more, or under 10^-50, in size (such as `1e-999990`) is not used: the dose moves on to the next `doseAndRate` entry and then to the sig text, and a timing with such a period or frequency is dropped with a warning. A timing period under one day or hour is written as `N times per day` (or `per hour`), rounded half up.
 - A `MedicationRequest` is dropped, without a warning, when a `MedicationStatement` in the same file covers the same drug with the same start date, or when either has no start date, so one prescription does not become two rows. The drug matches on the RxNorm code (read through a referenced `Medication` when needed) when both sides have one, and on the name when either side has none. The check runs after the whole file has been mapped and validated, so only statements that map and pass validation count, whether or not they are already in MediKeep. A `not-taken` statement never counts.
 - A resource whose name is only a code (no text or display) is kept with the code as its name and a warning. One with no name and no code is skipped without a warning. A medication name falls back to `medicationReference.display` when the referenced `Medication` has no name.

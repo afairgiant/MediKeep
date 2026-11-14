@@ -50,6 +50,10 @@ class BaseResourceMapper(ABC):
     def map(self, resource: dict, bundle: dict) -> Optional[MappedRecord]:
         """Map one resource to a MappedRecord, or None to skip it."""
 
+    def skip_reason(self, resource: dict, bundle: dict) -> Optional[str]:
+        """Warning to show for a resource that map() skipped, or None to skip it silently."""
+        return None
+
     @abstractmethod
     def hash_parts_for_row(self, row: Any) -> Tuple[Any, ...]:
         """The same hash_parts, read back from an existing row."""

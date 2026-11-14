@@ -1,5 +1,5 @@
 """
-Health record import endpoints (FHIR bundles now; C-CDA via a later importer).
+Health record import endpoints (FHIR bundles, C-CDA documents and MyChart zips).
 """
 
 from typing import Any, Optional
@@ -57,10 +57,10 @@ def _load_bundle(file: UploadFile, format_key: Optional[str], request: Request):
                 message="Could not recognize the file format", request=request
             )
     try:
-        bundle = importer.to_bundle(data, file.filename)
+        bundle, notes = importer.to_bundle(data, file.filename)
     except ImportFormatError as exc:
         raise BusinessLogicException(message=str(exc), request=request) from exc
-    return importer, bundle
+    return importer, bundle, notes
 
 
 @router.get("/import/formats", response_model=HealthRecordImportFormatsResponse)
@@ -90,12 +90,12 @@ def preview_import(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Parse an upload and report what an import would create, skip or change."""
-    importer, bundle = _load_bundle(file, format_key, request)
+    importer, bundle, notes = _load_bundle(file, format_key, request)
 
     with handle_database_errors(request=request):
         patient = db.query(Patient).filter(Patient.id == patient_id).first()
         result = HealthRecordImportService(db).preview(
-            bundle, patient, importer.SOURCE, importer.FORMAT_KEY
+            bundle, patient, importer.SOURCE, importer.FORMAT_KEY, notes=notes
         )
 
         log_data_access(
@@ -127,7 +127,7 @@ def execute_import(
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Execute the import, creating records and provenance rows."""
-    importer, bundle = _load_bundle(file, format_key, request)
+    importer, bundle, notes = _load_bundle(file, format_key, request)
     selected = (
         {s.strip() for s in sections.split(",") if s.strip()} if sections else None
     )
@@ -143,6 +143,7 @@ def execute_import(
             request=request,
             sections=selected,
             skip_edited=skip_edited,
+            notes=notes,
         )
 
         created = sum(c.created for c in result.counts.values())
