@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 // Mock dependencies BEFORE importing the hook so the module captures the mocks.
 vi.mock('../../services/api', () => ({
@@ -232,5 +232,79 @@ describe('useDocumentManagerCore — pending link queue (issue #852)', () => {
     expect(result.current.pendingFiles).toHaveLength(0);
     expect(result.current.pendingLinks).toHaveLength(0);
     expect(result.current.hasPendingFiles()).toBe(false);
+  });
+});
+
+describe('useDocumentManagerCore — deleting an unfinished Paperless upload (issue #1243)', () => {
+  const WARNING_KEY = 'fileList.deleteUnfinishedPaperlessWarning';
+
+  const paperlessFile = overrides => ({
+    id: 7,
+    entity_type: 'lab-result',
+    entity_id: 3,
+    file_name: 'report.pdf',
+    file_path: 'paperless://',
+    storage_backend: 'paperless',
+    sync_status: 'synced',
+    paperless_document_id: '42',
+    paperless_task_uuid: null,
+    ...overrides,
+  });
+
+  const confirmMessageFor = async file => {
+    apiService.getEntityFiles.mockResolvedValue([file]);
+    const { result } = renderHook(() =>
+      useDocumentManagerCore(
+        baseProps({ entityType: 'lab-result', entityId: 3, mode: 'view' })
+      )
+    );
+    await waitFor(() => expect(result.current.files).toHaveLength(1));
+
+    await act(async () => {
+      await result.current.handleImmediateDelete(file.id);
+    });
+
+    return window.confirm.mock.calls[0][0];
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Cancel at the confirm step so no delete request is made
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('warns that the document may remain in Paperless while the upload is still processing', async () => {
+    const message = await confirmMessageFor(
+      paperlessFile({
+        sync_status: 'processing',
+        paperless_document_id: null,
+        paperless_task_uuid: '3f1c7a52-9e0b-4d0e-8c1a-0b6f5d2a7e11',
+      })
+    );
+
+    expect(message).toContain(WARNING_KEY);
+    expect(apiService.deleteEntityFile).not.toHaveBeenCalled();
+  });
+
+  it('does not warn for a Paperless document that has finished uploading', async () => {
+    const message = await confirmMessageFor(paperlessFile());
+
+    expect(message).not.toContain(WARNING_KEY);
+  });
+
+  it('does not warn when the upload failed and no task is left to complete', async () => {
+    const message = await confirmMessageFor(
+      paperlessFile({
+        sync_status: 'failed',
+        paperless_document_id: null,
+        paperless_task_uuid: null,
+      })
+    );
+
+    expect(message).not.toContain(WARNING_KEY);
   });
 });

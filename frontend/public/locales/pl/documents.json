@@ -23,6 +23,7 @@
     "noFiles": "Brak plików"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "To przesyłanie nie zostało jeszcze przetworzone w Paperless. Jeśli Paperless zakończy je później, dokument może pozostać w Paperless po usunięciu go tutaj.",
     "fileDetails": "SZCZEGÓŁY PLIKU",
     "loading": "Ładowanie plików...",
     "markedCount": "{{count}} plik oznaczony do usunięcia",

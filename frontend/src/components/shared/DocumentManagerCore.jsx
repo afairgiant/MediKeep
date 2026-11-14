@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import {
   getPaperlessSettings,
@@ -137,6 +138,8 @@ const useDocumentManagerCore = ({
       performanceMonitor.lastViewModeLog = now;
     }
   }
+
+  const { t } = useTranslation('documents');
 
   // State management
   const [files, setFiles] = useState([]);
@@ -1642,6 +1645,16 @@ const useDocumentManagerCore = ({
           'Are you sure you want to unlink this document? It will remain in Papra.';
       }
 
+      // Paperless is still consuming this upload (task known, no document yet).
+      // Deleting here cannot remove a document that Paperless creates later.
+      const hasUnfinishedPaperlessUpload =
+        file?.storage_backend === 'paperless' &&
+        !file.paperless_document_id &&
+        !!file.paperless_task_uuid;
+      if (hasUnfinishedPaperlessUpload) {
+        confirmMessage = `${confirmMessage}\n\n${t('fileList.deleteUnfinishedPaperlessWarning')}`;
+      }
+
       if (!window.confirm(confirmMessage)) {
         return;
       }
@@ -1697,7 +1710,7 @@ const useDocumentManagerCore = ({
         setLoading(false);
       }
     },
-    [entityType, entityId, loadFiles, onError, files]
+    [entityType, entityId, loadFiles, onError, files, t]
   );
 
   // Performance optimization: Memoize pending file description change handler

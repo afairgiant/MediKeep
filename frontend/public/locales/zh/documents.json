@@ -23,6 +23,7 @@
     "noFiles": "无文件"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "此上传在 Paperless 中尚未处理完成。如果 Paperless 稍后完成处理，即使在此处删除，文档仍可能保留在 Paperless 中。",
     "fileDetails": "文件详情",
     "loading": "正在加载文件...",
     "markedCount": "{{count}} 个文件标记为删除",

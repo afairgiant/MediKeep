@@ -23,6 +23,7 @@
     "noFiles": "Δεν υπάρχουν αρχεία"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Αυτή η μεταφόρτωση δεν έχει ολοκληρωθεί στο Paperless. Αν το Paperless την ολοκληρώσει αργότερα, το έγγραφο μπορεί να παραμείνει στο Paperless αφού διαγραφεί εδώ.",
     "fileDetails": "ΛΕΠΤΟΜΕΡΕΙΕΣ ΑΡΧΕΙΟΥ",
     "loading": "Φόρτωση αρχείων...",
     "markedCount": "{{count}} αρχείο επισημασμένο για διαγραφή",

@@ -23,6 +23,7 @@
     "noFiles": "Keine Dateien"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Dieser Upload wurde in Paperless noch nicht fertig verarbeitet. Wenn Paperless ihn später abschließt, kann das Dokument in Paperless verbleiben, auch wenn es hier gelöscht wurde.",
     "fileDetails": "DATEIDETAILS",
     "loading": "Dateien werden geladen...",
     "markedCount": "{{count}} Datei zum Löschen markiert",

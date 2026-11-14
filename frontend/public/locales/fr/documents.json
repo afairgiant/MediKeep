@@ -23,6 +23,7 @@
     "noFiles": "Aucun fichier"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Ce téléversement n'a pas fini d'être traité dans Paperless. Si Paperless le termine plus tard, le document pourra rester dans Paperless après sa suppression ici.",
     "fileDetails": "DETAILS DU FICHIER",
     "loading": "Chargement des fichiers...",
     "markedCount": "{{count}} fichier(s) marqué(s) pour suppression",

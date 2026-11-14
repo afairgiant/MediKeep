@@ -23,6 +23,7 @@
     "noFiles": "No files"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "This upload has not finished processing in Paperless. If Paperless completes it later, the document may remain in Paperless after it is deleted here.",
     "fileDetails": "FILE DETAILS",
     "loading": "Loading files...",
     "markedCount": "{{count}} file marked for deletion",

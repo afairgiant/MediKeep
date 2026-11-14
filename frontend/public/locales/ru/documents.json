@@ -23,6 +23,7 @@
     "noFiles": "Нет файлов"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Эта загрузка ещё не завершила обработку в Paperless. Если Paperless завершит её позже, документ может остаться в Paperless после удаления здесь.",
     "fileDetails": "ПОДРОБНОСТИ ФАЙЛА",
     "loading": "Загрузка файлов...",
     "markedCount": "{{count}} файл отмечен для удаления",

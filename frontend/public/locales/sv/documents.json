@@ -23,6 +23,7 @@
     "noFiles": "Inga filer"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Den här uppladdningen har inte slutfört bearbetningen i Paperless. Om Paperless slutför den senare kan dokumentet finnas kvar i Paperless efter att det tagits bort här.",
     "fileDetails": "FILDETALJER",
     "loading": "Laddar filer...",
     "markedCount": "{{count}} fil markerad för borttagning",

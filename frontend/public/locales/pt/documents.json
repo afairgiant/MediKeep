@@ -23,6 +23,7 @@
     "noFiles": "Nenhum ficheiro"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Este envio ainda não terminou de ser processado no Paperless. Se o Paperless concluí-lo mais tarde, o documento poderá permanecer no Paperless depois de ser excluído aqui.",
     "fileDetails": "DETALHES DO FICHEIRO",
     "loading": "A carregar ficheiros...",
     "markedCount": "{{count}} ficheiro marcado para eliminação",

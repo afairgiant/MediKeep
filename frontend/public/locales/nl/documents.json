@@ -23,6 +23,7 @@
     "noFiles": "Geen bestanden"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Deze upload is nog niet klaar met verwerken in Paperless. Als Paperless de upload later voltooit, kan het document in Paperless blijven staan nadat het hier is verwijderd.",
     "fileDetails": "BESTANDSDETAILS",
     "loading": "Bestanden laden...",
     "markedCount": "{{count}} bestand gemarkeerd voor verwijdering",
