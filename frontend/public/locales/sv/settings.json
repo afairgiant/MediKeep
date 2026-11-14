@@ -30,6 +30,24 @@
       "title": "Rapportera ett problem"
     }
   },
+  "integration": {
+    "enable": "Aktivera {{name}}-integrationen",
+    "serverUrl": "Server-URL",
+    "defaultUrlDescription": "HTTP tillåts för lokala adresser, HTTPS krävs för externa URL:er",
+    "urlRequired": "URL krävs",
+    "urlInvalid": "Ogiltigt URL-format",
+    "urlBadScheme": "URL måste börja med http:// eller https://",
+    "apiToken": "API-token",
+    "tokenPlaceholder": "Ange din API-token",
+    "tokenSavedPlaceholder": "Token sparad - lämna tomt för att behålla den nuvarande",
+    "tokenTooShort": "Token verkar vara för kort",
+    "tokenRequired": "API-token krävs",
+    "testConnection": "Testa anslutning",
+    "testing": "Testar...",
+    "connectedTo": "Ansluten till {{name}}",
+    "connectionFailedTo": "Kan inte ansluta till {{name}}. Kontrollera din URL och uppgifter.",
+    "statusConnected": "Ansluten"
+  },
   "paperlessConnection": {
     "privateUrlNote": "Privata och interna adresser (localhost, 192.168.x.x, 10.x.x.x) stöds för självhostade installationer. Moln-metadata- och link-local-adresser (169.254.x.x) blockeras alltid av säkerhetsskäl. Om din administratör har begränsat integrationer till offentliga adresser kommer privata URL:er att avvisas.",
     "apiTokenHelp": "Din paperless-ngx API-token. Hitta den i Paperless-adminpanelen under Inställningar.",
@@ -47,7 +65,17 @@
     "urlLabel": "Server-URL",
     "usernameHelp": "Ditt paperless-ngx användarnamn.",
     "usernameLabel": "Användarnamn",
-    "usernamePassword": "Användarnamn och lösenord"
+    "usernamePassword": "Användarnamn och lösenord",
+    "authMethodDescription": "API-token är säkrare. Skapa en i administrationspanelen i Paperless-ngx.",
+    "noSavedCredentials": "Inga sparade uppgifter för den här metoden än. Ange dem nedan för att använda den.",
+    "usernamePlaceholder": "Ange ditt användarnamn",
+    "passwordPlaceholder": "Ange ditt lösenord",
+    "passwordSavedPlaceholder": "Lösenord sparat - lämna tomt för att behålla det nuvarande",
+    "autoSyncLabel": "Aktivera automatisk kontroll av synkroniseringsstatus",
+    "autoSyncDescription": "Kontrollera automatiskt om dokument fortfarande finns i Paperless när sidor laddas",
+    "syncTagsLabel": "Synkronisera dokumenttaggar och kategorier",
+    "syncTagsDescription": "Håll dokumentmetadata synkroniserad med Paperless (Kommer snart)",
+    "loadingSettings": "Laddar inställningar..."
   },
   "papra": {
     "privateUrlNote": "Privata och interna adresser (localhost, 192.168.x.x, 10.x.x.x) stöds för självhostade installationer. Moln-metadata- och link-local-adresser (169.254.x.x) blockeras alltid av säkerhetsskäl. Om din administratör har begränsat integrationer till offentliga adresser kommer privata URL:er att avvisas.",

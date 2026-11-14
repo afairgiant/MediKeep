@@ -30,6 +30,24 @@
       "title": "Problem melden"
     }
   },
+  "integration": {
+    "enable": "{{name}}-Integration aktivieren",
+    "serverUrl": "Server-URL",
+    "defaultUrlDescription": "HTTP ist für lokale Adressen erlaubt, für externe URLs ist HTTPS erforderlich",
+    "urlRequired": "URL ist erforderlich",
+    "urlInvalid": "Ungültiges URL-Format",
+    "urlBadScheme": "Die URL muss mit http:// oder https:// beginnen",
+    "apiToken": "API-Token",
+    "tokenPlaceholder": "API-Token eingeben",
+    "tokenSavedPlaceholder": "Token gespeichert - leer lassen, um das aktuelle beizubehalten",
+    "tokenTooShort": "Das Token scheint zu kurz zu sein",
+    "tokenRequired": "API-Token ist erforderlich",
+    "testConnection": "Verbindung testen",
+    "testing": "Wird getestet...",
+    "connectedTo": "Erfolgreich mit {{name}} verbunden",
+    "connectionFailedTo": "Verbindung zu {{name}} nicht möglich. Bitte überprüfen Sie Ihre URL und Anmeldedaten.",
+    "statusConnected": "Verbunden"
+  },
   "paperlessConnection": {
     "privateUrlNote": "Private und interne Adressen (localhost, 192.168.x.x, 10.x.x.x) werden für selbst gehostete Setups unterstützt. Cloud-Metadaten- und Link-Local-Adressen (169.254.x.x) werden aus Sicherheitsgründen immer blockiert. Wenn Ihr Administrator Integrationen auf öffentliche Adressen beschränkt hat, werden private URLs abgelehnt.",
     "apiTokenHelp": "Ihr Paperless-ngx-API-Token. Sie finden es im Paperless-Adminbereich unter Einstellungen.",
@@ -47,7 +65,17 @@
     "urlLabel": "Server-URL",
     "usernameHelp": "Ihr Paperless-ngx-Benutzername.",
     "usernameLabel": "Benutzername",
-    "usernamePassword": "Benutzername & Passwort"
+    "usernamePassword": "Benutzername & Passwort",
+    "authMethodDescription": "API-Tokens sind sicherer. Erstellen Sie eines im Administrationsbereich von Paperless-ngx.",
+    "noSavedCredentials": "Für diese Methode sind noch keine Anmeldedaten gespeichert. Geben Sie sie unten ein, um sie zu verwenden.",
+    "usernamePlaceholder": "Benutzernamen eingeben",
+    "passwordPlaceholder": "Passwort eingeben",
+    "passwordSavedPlaceholder": "Passwort gespeichert - leer lassen, um das aktuelle beizubehalten",
+    "autoSyncLabel": "Automatische Prüfung des Synchronisierungsstatus aktivieren",
+    "autoSyncDescription": "Beim Laden von Seiten automatisch prüfen, ob Dokumente in Paperless noch vorhanden sind",
+    "syncTagsLabel": "Dokument-Tags und Kategorien synchronisieren",
+    "syncTagsDescription": "Dokument-Metadaten mit Paperless synchron halten (Demnächst verfügbar)",
+    "loadingSettings": "Einstellungen werden geladen..."
   },
   "papra": {
     "privateUrlNote": "Private und interne Adressen (localhost, 192.168.x.x, 10.x.x.x) werden für selbst gehostete Setups unterstützt. Cloud-Metadaten- und Link-Local-Adressen (169.254.x.x) werden aus Sicherheitsgründen immer blockiert. Wenn Ihr Administrator Integrationen auf öffentliche Adressen beschränkt hat, werden private URLs abgelehnt.",

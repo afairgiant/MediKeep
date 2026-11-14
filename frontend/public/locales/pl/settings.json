@@ -30,6 +30,24 @@
       "title": "Zgłoś problem"
     }
   },
+  "integration": {
+    "enable": "Włącz integrację z {{name}}",
+    "serverUrl": "Adres URL serwera",
+    "defaultUrlDescription": "HTTP jest dozwolony dla adresów lokalnych, HTTPS jest wymagany dla zewnętrznych adresów URL",
+    "urlRequired": "Adres URL jest wymagany",
+    "urlInvalid": "Nieprawidłowy format adresu URL",
+    "urlBadScheme": "Adres URL musi zaczynać się od http:// lub https://",
+    "apiToken": "Token API",
+    "tokenPlaceholder": "Wprowadź token API",
+    "tokenSavedPlaceholder": "Token zapisany - pozostaw puste, aby zachować bieżący",
+    "tokenTooShort": "Token wydaje się za krótki",
+    "tokenRequired": "Token API jest wymagany",
+    "testConnection": "Testuj połączenie",
+    "testing": "Testowanie...",
+    "connectedTo": "Pomyślnie połączono z {{name}}",
+    "connectionFailedTo": "Nie można połączyć się z {{name}}. Sprawdź adres URL i dane uwierzytelniające.",
+    "statusConnected": "Połączono"
+  },
   "paperlessConnection": {
     "privateUrlNote": "Adresy prywatne i wewnętrzne (localhost, 192.168.x.x, 10.x.x.x) są obsługiwane w instalacjach samodzielnie hostowanych. Adresy metadanych chmury i link-local (169.254.x.x) są zawsze blokowane ze względów bezpieczeństwa. Jeśli administrator ograniczył integracje do adresów publicznych, prywatne adresy URL zostaną odrzucone.",
     "apiTokenHelp": "Twój token API paperless-ngx. Znajdziesz go w panelu administracyjnym Paperless w ustawieniach.",
@@ -47,7 +65,17 @@
     "urlLabel": "Adres URL serwera",
     "usernameHelp": "Twoja nazwa użytkownika paperless-ngx.",
     "usernameLabel": "Nazwa użytkownika",
-    "usernamePassword": "Nazwa użytkownika i hasło"
+    "usernamePassword": "Nazwa użytkownika i hasło",
+    "authMethodDescription": "Tokeny API są bezpieczniejsze. Wygeneruj token w panelu administracyjnym Paperless-ngx.",
+    "noSavedCredentials": "Brak zapisanych danych uwierzytelniających dla tej metody. Wprowadź je poniżej, aby jej używać.",
+    "usernamePlaceholder": "Wprowadź nazwę użytkownika",
+    "passwordPlaceholder": "Wprowadź hasło",
+    "passwordSavedPlaceholder": "Hasło zapisane - pozostaw puste, aby zachować bieżące",
+    "autoSyncLabel": "Włącz automatyczne sprawdzanie stanu synchronizacji",
+    "autoSyncDescription": "Automatycznie sprawdzaj, czy dokumenty nadal istnieją w Paperless po załadowaniu stron",
+    "syncTagsLabel": "Synchronizuj tagi i kategorie dokumentów",
+    "syncTagsDescription": "Utrzymuj synchronizację metadanych dokumentów z Paperless (Już wkrótce)",
+    "loadingSettings": "Ładowanie ustawień..."
   },
   "papra": {
     "privateUrlNote": "Adresy prywatne i wewnętrzne (localhost, 192.168.x.x, 10.x.x.x) są obsługiwane w instalacjach samodzielnie hostowanych. Adresy metadanych chmury i link-local (169.254.x.x) są zawsze blokowane ze względów bezpieczeństwa. Jeśli administrator ograniczył integracje do adresów publicznych, prywatne adresy URL zostaną odrzucone.",

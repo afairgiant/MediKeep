@@ -64,6 +64,10 @@ from app.schemas.entity_file import (
     FileOperationResult,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
+from app.services.paperless_auth_methods import (
+    credential_kwargs,
+    has_usable_credentials,
+)
 from app.services.paperless_client import (
     PaperlessClientError,
 )
@@ -449,10 +453,7 @@ async def link_paperless_document(
             )
 
         # Check if credentials exist
-        has_auth = user_prefs.paperless_api_token_encrypted or (
-            user_prefs.paperless_username_encrypted
-            and user_prefs.paperless_password_encrypted
-        )
+        has_auth = has_usable_credentials(user_prefs)
 
         if not user_prefs.paperless_url or not has_auth:
             raise HTTPException(
@@ -463,9 +464,7 @@ async def link_paperless_document(
         # Create Paperless client and verify document exists
         paperless_client = create_paperless_client(
             url=user_prefs.paperless_url,
-            encrypted_token=user_prefs.paperless_api_token_encrypted,
-            encrypted_username=user_prefs.paperless_username_encrypted,
-            encrypted_password=user_prefs.paperless_password_encrypted,
+            **credential_kwargs(user_prefs),
             user_id=current_user_id,
         )
 

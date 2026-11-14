@@ -30,6 +30,24 @@
       "title": "รายงานปัญหา"
     }
   },
+  "integration": {
+    "enable": "เปิดใช้งานการเชื่อมต่อ {{name}}",
+    "serverUrl": "URL เซิร์ฟเวอร์",
+    "defaultUrlDescription": "อนุญาตให้ใช้ HTTP สำหรับที่อยู่ภายใน ต้องใช้ HTTPS สำหรับ URL ภายนอก",
+    "urlRequired": "ต้องระบุ URL",
+    "urlInvalid": "รูปแบบ URL ไม่ถูกต้อง",
+    "urlBadScheme": "URL ต้องขึ้นต้นด้วย http:// หรือ https://",
+    "apiToken": "โทเค็น API",
+    "tokenPlaceholder": "ป้อนโทเค็น API ของคุณ",
+    "tokenSavedPlaceholder": "บันทึกโทเค็นแล้ว - เว้นว่างไว้เพื่อใช้โทเค็นปัจจุบัน",
+    "tokenTooShort": "โทเค็นสั้นเกินไป",
+    "tokenRequired": "ต้องระบุโทเค็น API",
+    "testConnection": "ทดสอบการเชื่อมต่อ",
+    "testing": "กำลังทดสอบ...",
+    "connectedTo": "เชื่อมต่อกับ {{name}} สำเร็จ",
+    "connectionFailedTo": "ไม่สามารถเชื่อมต่อกับ {{name}} ได้ โปรดตรวจสอบ URL และข้อมูลประจำตัว",
+    "statusConnected": "เชื่อมต่อแล้ว"
+  },
   "paperlessConnection": {
     "privateUrlNote": "ที่อยู่ส่วนตัวและภายใน (localhost, 192.168.x.x, 10.x.x.x) รองรับสำหรับการติดตั้งแบบโฮสต์เอง ที่อยู่ cloud-metadata และ link-local (169.254.x.x) จะถูกบล็อกเสมอเพื่อความปลอดภัย หากผู้ดูแลระบบของคุณจำกัดการเชื่อมต่อให้ใช้เฉพาะที่อยู่สาธารณะ URL ส่วนตัวจะถูกปฏิเสธ",
     "apiTokenHelp": "โทเค็น API ของ paperless-ngx ของคุณ ค้นหาได้ในแผงควบคุมผู้ดูแลระบบ Paperless ในส่วนการตั้งค่า",
@@ -47,7 +65,17 @@
     "urlLabel": "URL เซิร์ฟเวอร์",
     "usernameHelp": "ชื่อผู้ใช้ paperless-ngx ของคุณ",
     "usernameLabel": "ชื่อผู้ใช้",
-    "usernamePassword": "ชื่อผู้ใช้และรหัสผ่าน"
+    "usernamePassword": "ชื่อผู้ใช้และรหัสผ่าน",
+    "authMethodDescription": "โทเค็น API ปลอดภัยกว่า สร้างได้จากแผงผู้ดูแลระบบของ Paperless-ngx",
+    "noSavedCredentials": "ยังไม่มีข้อมูลประจำตัวที่บันทึกไว้สำหรับวิธีนี้ ป้อนข้อมูลด้านล่างเพื่อใช้งาน",
+    "usernamePlaceholder": "ป้อนชื่อผู้ใช้ของคุณ",
+    "passwordPlaceholder": "ป้อนรหัสผ่านของคุณ",
+    "passwordSavedPlaceholder": "บันทึกรหัสผ่านแล้ว - เว้นว่างไว้เพื่อใช้รหัสผ่านปัจจุบัน",
+    "autoSyncLabel": "เปิดใช้งานการตรวจสอบสถานะการซิงค์อัตโนมัติ",
+    "autoSyncDescription": "ตรวจสอบอัตโนมัติว่าเอกสารยังมีอยู่ใน Paperless หรือไม่เมื่อโหลดหน้า",
+    "syncTagsLabel": "ซิงค์แท็กและหมวดหมู่ของเอกสาร",
+    "syncTagsDescription": "ซิงค์ข้อมูลเมตาของเอกสารกับ Paperless ให้ตรงกัน (เร็วๆ นี้)",
+    "loadingSettings": "กำลังโหลดการตั้งค่า..."
   },
   "papra": {
     "privateUrlNote": "ที่อยู่ส่วนตัวและภายใน (localhost, 192.168.x.x, 10.x.x.x) รองรับสำหรับการติดตั้งแบบโฮสต์เอง ที่อยู่ cloud-metadata และ link-local (169.254.x.x) จะถูกบล็อกเสมอเพื่อความปลอดภัย หากผู้ดูแลระบบของคุณจำกัดการเชื่อมต่อให้ใช้เฉพาะที่อยู่สาธารณะ URL ส่วนตัวจะถูกปฏิเสธ",

@@ -30,6 +30,24 @@
       "title": "Signaler un problème"
     }
   },
+  "integration": {
+    "enable": "Activer l'intégration {{name}}",
+    "serverUrl": "URL du serveur",
+    "defaultUrlDescription": "HTTP est autorisé pour les adresses locales, HTTPS est requis pour les URL externes",
+    "urlRequired": "L'URL est requise",
+    "urlInvalid": "Format d'URL invalide",
+    "urlBadScheme": "L'URL doit commencer par http:// ou https://",
+    "apiToken": "Jeton d'API",
+    "tokenPlaceholder": "Saisissez votre jeton d'API",
+    "tokenSavedPlaceholder": "Jeton enregistré - laissez vide pour conserver l'actuel",
+    "tokenTooShort": "Le jeton semble trop court",
+    "tokenRequired": "Le jeton d'API est requis",
+    "testConnection": "Tester la connexion",
+    "testing": "Test en cours...",
+    "connectedTo": "Connexion à {{name}} réussie",
+    "connectionFailedTo": "Connexion à {{name}} impossible. Veuillez vérifier votre URL et vos identifiants.",
+    "statusConnected": "Connecté"
+  },
   "paperlessConnection": {
     "apiTokenHelp": "Votre jeton d'API Paperless-ngx. Vous pouvez le trouver dans l'onglet d'administration de Paperless, sous Paramètres.",
     "apiTokenLabel": "Jeton d'API",
@@ -47,7 +65,17 @@
     "urlLabel": "URL du serveur",
     "usernameHelp": "Votre nom d'utilisateur pour Paperless-ngx.",
     "usernameLabel": "Nom d'utilisateur",
-    "usernamePassword": "Nom d'utilisateur et mot de passe"
+    "usernamePassword": "Nom d'utilisateur et mot de passe",
+    "authMethodDescription": "Les jetons d'API sont plus sécurisés. Générez-en un dans le panneau d'administration de Paperless-ngx.",
+    "noSavedCredentials": "Aucun identifiant enregistré pour cette méthode. Saisissez-les ci-dessous pour l'utiliser.",
+    "usernamePlaceholder": "Saisissez votre nom d'utilisateur",
+    "passwordPlaceholder": "Saisissez votre mot de passe",
+    "passwordSavedPlaceholder": "Mot de passe enregistré - laissez vide pour conserver l'actuel",
+    "autoSyncLabel": "Activer la vérification automatique de l'état de synchronisation",
+    "autoSyncDescription": "Vérifie automatiquement si les documents existent toujours dans Paperless au chargement des pages",
+    "syncTagsLabel": "Synchroniser les étiquettes et catégories des documents",
+    "syncTagsDescription": "Garder les métadonnées des documents synchronisées avec Paperless (bientôt disponible)",
+    "loadingSettings": "Chargement des paramètres..."
   },
   "papra": {
     "apiTokenPlaceholder": "Saisissez votre jeton d'API Papra",

@@ -21,6 +21,7 @@ from app.schemas.user_preferences import (
     UserPreferencesUpdate,
 )
 from app.services.auth_session import end_other_sessions, record_account_change
+from app.services.paperless_auth_methods import resolve_auth_method
 from app.services.user_deletion_service import UserDeletionService
 
 router = APIRouter()
@@ -212,6 +213,7 @@ def get_current_user_preferences(
         response["paperless_connection_verified"] = bool(
             preferences.paperless_connection_verified
         )
+        response["paperless_auth_method"] = resolve_auth_method(preferences)
         response["papra_has_token"] = bool(preferences.papra_api_token_encrypted)
         response["papra_connection_verified"] = bool(
             preferences.papra_connection_verified
@@ -281,6 +283,7 @@ def update_current_user_preferences(
             "paperless_connection_verified": bool(
                 updated_preferences.paperless_connection_verified
             ),
+            "paperless_auth_method": resolve_auth_method(updated_preferences),
             "default_storage_backend": updated_preferences.default_storage_backend,
             "papra_enabled": updated_preferences.papra_enabled,
             "papra_url": updated_preferences.papra_url,

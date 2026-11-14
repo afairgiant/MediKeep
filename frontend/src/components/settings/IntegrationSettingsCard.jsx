@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Switch,
   TextInput,
@@ -27,13 +28,13 @@ import {
  * @param {function} props.onTokenChange - Callback when token changes
  * @param {string} [props.tokenPlaceholder] - Token input placeholder text
  * @param {boolean} props.hasTokenSaved - Whether a token is saved server-side
- * @param {boolean} [props.hasAlternateAuth] - Whether alternate auth exists (e.g. username/password)
  * @param {function} props.onTestConnection - Callback to trigger connection test
  * @param {boolean} props.testingConnection - Whether a test is in progress
  * @param {string|null} props.connectionStatus - 'success', 'error', or null
  * @param {string} [props.connectionMessage] - Message to show with connection status
  * @param {function} [props.validateUrl] - Custom URL validator, returns error string or null
- * @param {function} [props.renderAuthExtras] - Render prop for extra auth fields
+ * @param {boolean} [props.showTokenField=true] - Whether to render the API token field (rendered after renderAuthExtras)
+ * @param {function} [props.renderAuthExtras] - Render prop for extra auth fields, rendered above the token field
  * @param {function} [props.renderExtras] - Render prop for integration-specific sections
  * @param {boolean} [props.loading] - Whether a save operation is in progress
  */
@@ -50,30 +51,34 @@ const IntegrationSettingsCard = ({
   onTokenChange,
   tokenPlaceholder,
   hasTokenSaved = false,
-  hasAlternateAuth = false,
   onTestConnection,
   testingConnection = false,
   connectionStatus = null,
   connectionMessage = '',
   validateUrl,
+  showTokenField = true,
   renderAuthExtras,
   renderExtras,
   loading = false,
 }) => {
+  const { t } = useTranslation('settings');
   const [showToken, setShowToken] = useState(false);
   const [urlError, setUrlError] = useState(null);
   const [tokenError, setTokenError] = useState(null);
 
   const defaultValidateUrl = value => {
-    if (!value) return 'URL is required';
+    if (!value) return t('integration.urlRequired', 'URL is required');
     // HTTPS-vs-private is decided by the backend, which resolves the host from its own network.
     try {
       const parsed = new URL(value);
       if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        return 'URL must start with http:// or https://';
+        return t(
+          'integration.urlBadScheme',
+          'URL must start with http:// or https://'
+        );
       }
     } catch {
-      return 'Invalid URL format';
+      return t('integration.urlInvalid', 'Invalid URL format');
     }
     return null;
   };
@@ -89,7 +94,7 @@ const IntegrationSettingsCard = ({
   const handleTokenChange = event => {
     const value = event.currentTarget.value.trim();
     if (value && value.length < 10) {
-      setTokenError('Token appears too short');
+      setTokenError(t('integration.tokenTooShort', 'Token appears too short'));
     } else {
       setTokenError(null);
     }
@@ -102,9 +107,10 @@ const IntegrationSettingsCard = ({
       setUrlError(uErr);
       return;
     }
-    // Token is optional if saved credentials or alternate auth (e.g. username/password) exists
-    if (!token && !hasTokenSaved && !hasAlternateAuth) {
-      setTokenError('API token is required');
+    // Token is optional if one is already saved, and is not checked at all
+    // while the token field is hidden (e.g. username/password auth is selected)
+    if (showTokenField && !token && !hasTokenSaved) {
+      setTokenError(t('integration.tokenRequired', 'API token is required'));
       return;
     }
     setUrlError(null);
@@ -119,14 +125,17 @@ const IntegrationSettingsCard = ({
   return (
     <Stack gap="md">
       <Switch
-        label={`Enable ${name} integration`}
+        label={t('integration.enable', {
+          name,
+          defaultValue: 'Enable {{name}} integration',
+        })}
         checked={enabled}
         onChange={event => onEnabledChange(event.currentTarget.checked)}
         disabled={loading}
       />
 
       <TextInput
-        label="Server URL"
+        label={t('integration.serverUrl', 'Server URL')}
         placeholder={
           urlPlaceholder ||
           `https://${name.toLowerCase().replace(/[^a-z]/g, '')}.example.com`
@@ -137,7 +146,10 @@ const IntegrationSettingsCard = ({
         disabled={disabled || testingConnection}
         description={
           urlDescription ||
-          'HTTP is allowed for local addresses, HTTPS required for external URLs'
+          t(
+            'integration.defaultUrlDescription',
+            'HTTP is allowed for local addresses, HTTPS required for external URLs'
+          )
         }
       />
 
@@ -147,22 +159,28 @@ const IntegrationSettingsCard = ({
         </Alert>
       )}
 
-      <PasswordInput
-        label="API Token"
-        placeholder={
-          hasTokenSaved && !token
-            ? 'Token saved - leave blank to keep current'
-            : tokenPlaceholder || 'Enter your API token'
-        }
-        value={token}
-        onChange={handleTokenChange}
-        error={tokenError}
-        disabled={disabled || testingConnection}
-        visible={showToken}
-        onVisibilityChange={setShowToken}
-      />
-
       {renderAuthExtras && renderAuthExtras({ disabled, testingConnection })}
+
+      {showTokenField && (
+        <PasswordInput
+          label={t('integration.apiToken', 'API Token')}
+          placeholder={
+            hasTokenSaved && !token
+              ? t(
+                  'integration.tokenSavedPlaceholder',
+                  'Token saved - leave blank to keep current'
+                )
+              : tokenPlaceholder ||
+                t('integration.tokenPlaceholder', 'Enter your API token')
+          }
+          value={token}
+          onChange={handleTokenChange}
+          error={tokenError}
+          disabled={disabled || testingConnection}
+          visible={showToken}
+          onVisibilityChange={setShowToken}
+        />
+      )}
 
       <Group justify="flex-start" gap="sm">
         <Button
@@ -171,20 +189,30 @@ const IntegrationSettingsCard = ({
           loading={testingConnection}
           disabled={!canTest}
         >
-          {testingConnection ? 'Testing...' : 'Test Connection'}
+          {testingConnection
+            ? t('integration.testing', 'Testing...')
+            : t('integration.testConnection', 'Test Connection')}
         </Button>
       </Group>
 
       {connectionStatus === 'success' && (
         <Alert color="green" variant="light">
-          {connectionMessage || `Successfully connected to ${name}`}
+          {connectionMessage ||
+            t('integration.connectedTo', {
+              name,
+              defaultValue: 'Successfully connected to {{name}}',
+            })}
         </Alert>
       )}
 
       {connectionStatus === 'error' && (
         <Alert color="red" variant="light">
           {connectionMessage ||
-            `Unable to connect to ${name}. Check your URL and credentials.`}
+            t('integration.connectionFailedTo', {
+              name,
+              defaultValue:
+                'Unable to connect to {{name}}. Check your URL and credentials.',
+            })}
         </Alert>
       )}
 

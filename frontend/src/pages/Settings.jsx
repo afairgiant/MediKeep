@@ -30,6 +30,7 @@ import { cleanupOutOfSyncFiles } from '../services/api/paperlessApi.jsx';
 import frontendLogger from '../services/frontendLogger';
 import {
   PAPERLESS_SETTING_KEYS,
+  hasPaperlessCredentials,
   isPaperlessSetting,
 } from '../constants/paperlessSettings';
 import { isPapraSetting } from '../constants/papraSettings';
@@ -102,6 +103,22 @@ export function getChangedKeys(localPreferences, serverPreferences, keyFilter) {
     if (keyFilter && !keyFilter(key)) return false;
     return !isSameValue(localPreferences[key], serverPreferences[key]);
   });
+}
+
+/**
+ * Throws when the changes select a Paperless authentication method that has no
+ * saved or typed credentials. Saving that would break every Paperless operation.
+ */
+export function assertPaperlessAuthMethodUsable(
+  fieldsToUpdate,
+  localPreferences
+) {
+  const method = fieldsToUpdate.paperless_auth_method;
+  if (method && !hasPaperlessCredentials(localPreferences, method)) {
+    throw new Error(
+      'The selected Paperless authentication method has no credentials'
+    );
+  }
 }
 
 /**
@@ -261,6 +278,11 @@ const Settings = () => {
         frontendLogger.logInfo('No changes to save', { component: 'Settings' });
         return userPreferences;
       }
+
+      // Selecting a method with no credentials would break every Paperless
+      // operation. Stop before anything is saved: general settings are saved
+      // before the Paperless ones and could not be rolled back.
+      assertPaperlessAuthMethodUsable(fieldsToUpdate, localPreferences);
 
       // Split fields into paperless, papra, and general settings
       const paperlessFields = {};
@@ -857,8 +879,8 @@ const Settings = () => {
                       fw={500}
                     >
                       {localPreferences?.paperless_connection_verified
-                        ? 'Connected'
-                        : 'Enabled'}
+                        ? t('integration.statusConnected', 'Connected')
+                        : t('shared:labels.enabled', 'Enabled')}
                     </Text>
                   )}
                 </Group>
@@ -913,8 +935,8 @@ const Settings = () => {
                       fw={500}
                     >
                       {localPreferences?.papra_connection_verified
-                        ? 'Connected'
-                        : 'Enabled'}
+                        ? t('integration.statusConnected', 'Connected')
+                        : t('shared:labels.enabled', 'Enabled')}
                     </Text>
                   )}
                 </Group>

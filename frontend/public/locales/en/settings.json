@@ -30,6 +30,24 @@
       "title": "Report an Issue"
     }
   },
+  "integration": {
+    "enable": "Enable {{name}} integration",
+    "serverUrl": "Server URL",
+    "defaultUrlDescription": "HTTP is allowed for local addresses, HTTPS required for external URLs",
+    "urlRequired": "URL is required",
+    "urlInvalid": "Invalid URL format",
+    "urlBadScheme": "URL must start with http:// or https://",
+    "apiToken": "API Token",
+    "tokenPlaceholder": "Enter your API token",
+    "tokenSavedPlaceholder": "Token saved - leave blank to keep current",
+    "tokenTooShort": "Token appears too short",
+    "tokenRequired": "API token is required",
+    "testConnection": "Test Connection",
+    "testing": "Testing...",
+    "connectedTo": "Successfully connected to {{name}}",
+    "connectionFailedTo": "Unable to connect to {{name}}. Check your URL and credentials.",
+    "statusConnected": "Connected"
+  },
   "paperlessConnection": {
     "apiTokenHelp": "Your paperless-ngx API token. Find it in the Paperless admin panel under Settings.",
     "apiTokenLabel": "API Token",
@@ -47,7 +65,17 @@
     "urlLabel": "Server URL",
     "usernameHelp": "Your paperless-ngx username.",
     "usernameLabel": "Username",
-    "usernamePassword": "Username & Password"
+    "usernamePassword": "Username & Password",
+    "authMethodDescription": "API tokens are more secure. Generate one in your Paperless-ngx admin panel.",
+    "noSavedCredentials": "No saved credentials for this method yet. Enter them below to use it.",
+    "usernamePlaceholder": "Enter your username",
+    "passwordPlaceholder": "Enter your password",
+    "passwordSavedPlaceholder": "Password saved - leave blank to keep current",
+    "autoSyncLabel": "Enable automatic sync status checking",
+    "autoSyncDescription": "Automatically check if documents still exist in Paperless when pages load",
+    "syncTagsLabel": "Sync document tags and categories",
+    "syncTagsDescription": "Keep document metadata synchronized with Paperless (Coming Soon)",
+    "loadingSettings": "Loading settings..."
   },
   "papra": {
     "apiTokenPlaceholder": "Enter your Papra API token",

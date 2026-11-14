@@ -9,6 +9,7 @@ from app.services.blood_donation_eligibility import (
     MAX_DONATION_INTERVAL_DAYS,
     MIN_DONATION_INTERVAL_DAYS,
 )
+from app.services.paperless_auth_methods import is_valid_auth_method
 
 # Supported languages - single source of truth
 SUPPORTED_LANGUAGES = [
@@ -120,6 +121,8 @@ class UserPreferencesBase(BaseModel):
     paperless_api_token: Optional[str] = None
     paperless_username: Optional[str] = None
     paperless_password: Optional[str] = None
+    # Lenient on read: the resolved method is filled in by the endpoints.
+    paperless_auth_method: Optional[str] = None
     default_storage_backend: Optional[str] = "local"
     paperless_auto_sync: Optional[bool] = False
     paperless_sync_tags: Optional[bool] = True
@@ -406,12 +409,24 @@ class PaperlessConnectionData(BaseModel):
     paperless_api_token: Optional[str] = None
     paperless_username: Optional[str] = None
     paperless_password: Optional[str] = None
+    # Which saved credentials to test when none are typed; defaults to the stored choice.
+    paperless_auth_method: Optional[str] = None
 
     @field_validator("paperless_url")
     @classmethod
     def validate_url(cls, v):
         """Validate paperless URL format and security."""
         return _validate_integration_url(v)
+
+    @field_validator("paperless_auth_method", mode="before")
+    @classmethod
+    def validate_selected_auth_method(cls, v):
+        """Accept only registered methods; blank means the stored choice."""
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return None
+        if not is_valid_auth_method(v):
+            raise ValueError("Unknown Paperless authentication method")
+        return v
 
     @field_validator(
         "paperless_api_token",

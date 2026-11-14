@@ -18,6 +18,7 @@ import aiohttp
 from app.core.config import settings
 from app.core.http.integration_errors import (
     PAPERLESS_AUTH_FAILED_MESSAGE,
+    PAPERLESS_CREDENTIALS_UNUSABLE_MESSAGE,
     IntegrationErrorCode,
     IntegrationFailureInfo,
 )
@@ -74,6 +75,18 @@ class PaperlessAuthenticationError(PaperlessError):
 
     integration_message = PAPERLESS_AUTH_FAILED_MESSAGE
     integration_code = IntegrationErrorCode.AUTH_FAILED
+
+
+class PaperlessCredentialsError(PaperlessError):
+    """No usable credentials: none were provided, or the saved ones cannot be decrypted.
+
+    This is raised before any request is made, so it says nothing about the
+    Paperless server itself. A common cause is a changed SECRET_KEY, which makes
+    previously saved credentials unreadable.
+    """
+
+    integration_message = PAPERLESS_CREDENTIALS_UNUSABLE_MESSAGE
+    integration_code = IntegrationErrorCode.CREDENTIALS_UNUSABLE
 
 
 class PaperlessUploadError(PaperlessError):
@@ -1991,7 +2004,7 @@ def create_paperless_service(
                 )
 
         # No valid credentials found
-        raise PaperlessError("No valid authentication credentials provided")
+        raise PaperlessCredentialsError("No valid authentication credentials provided")
 
     except PaperlessError:
         raise

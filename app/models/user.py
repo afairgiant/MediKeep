@@ -153,6 +153,9 @@ class UserPreferences(Base):
     paperless_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
     paperless_username_encrypted = Column(Text, nullable=True)  # Encrypted username
     paperless_password_encrypted = Column(Text, nullable=True)  # Encrypted password
+    # Chosen authentication method (see app.services.paperless_auth_methods).
+    # NULL means never chosen: the first method with saved credentials is used.
+    paperless_auth_method = Column(String(32), nullable=True)
     default_storage_backend = Column(
         String(20), default="local", nullable=False
     )  # 'local', 'paperless', or 'papra'

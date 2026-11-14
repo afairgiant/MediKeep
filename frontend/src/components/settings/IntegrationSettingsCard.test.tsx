@@ -66,3 +66,47 @@ describe('IntegrationSettingsCard URL validation', () => {
     expect(onTestConnection).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('IntegrationSettingsCard token field', () => {
+  it('renders the API token field by default', () => {
+    renderCard();
+    expect(screen.getByLabelText('API Token')).toBeInTheDocument();
+  });
+
+  it('hides the API token field when showTokenField is false', () => {
+    renderCard({ showTokenField: false });
+    expect(screen.queryByLabelText('API Token')).not.toBeInTheDocument();
+  });
+
+  it('renders auth extras above the token field', () => {
+    renderCard({
+      renderAuthExtras: () => <div data-testid="auth-extras" />,
+    });
+    const extras = screen.getByTestId('auth-extras');
+    const tokenInput = screen.getByLabelText('API Token');
+    expect(
+      extras.compareDocumentPosition(tokenInput) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it('requires a token to test when the field is shown and none is saved', () => {
+    const { onTestConnection } = renderCard({
+      url: 'http://paperless-container:8000',
+      token: '',
+    });
+    fireEvent.click(screen.getByRole('button', { name: /test connection/i }));
+    expect(onTestConnection).not.toHaveBeenCalled();
+    expect(screen.getByText('API token is required')).toBeInTheDocument();
+  });
+
+  it('does not require a token to test when the field is hidden', () => {
+    const { onTestConnection } = renderCard({
+      url: 'http://paperless-container:8000',
+      token: '',
+      showTokenField: false,
+    });
+    fireEvent.click(screen.getByRole('button', { name: /test connection/i }));
+    expect(onTestConnection).toHaveBeenCalledTimes(1);
+  });
+});

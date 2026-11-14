@@ -30,6 +30,24 @@
       "title": "反馈问题"
     }
   },
+  "integration": {
+    "enable": "启用 {{name}} 集成",
+    "serverUrl": "服务器 URL",
+    "defaultUrlDescription": "本地地址允许使用 HTTP，外部 URL 需要使用 HTTPS",
+    "urlRequired": "必须填写 URL",
+    "urlInvalid": "URL 格式无效",
+    "urlBadScheme": "URL 必须以 http:// 或 https:// 开头",
+    "apiToken": "API 令牌",
+    "tokenPlaceholder": "输入您的 API 令牌",
+    "tokenSavedPlaceholder": "令牌已保存 - 留空以保留当前令牌",
+    "tokenTooShort": "令牌似乎太短",
+    "tokenRequired": "必须填写 API 令牌",
+    "testConnection": "测试连接",
+    "testing": "测试中...",
+    "connectedTo": "已成功连接到 {{name}}",
+    "connectionFailedTo": "无法连接到 {{name}}。请检查您的 URL 和凭据。",
+    "statusConnected": "已连接"
+  },
   "paperlessConnection": {
     "privateUrlNote": "私有和内部地址（localhost、192.168.x.x、10.x.x.x）支持自托管部署。出于安全考虑，云元数据和链路本地地址（169.254.x.x）始终被阻止。如果管理员已将集成限制为公共地址，则私有 URL 将被拒绝。",
     "apiTokenHelp": "您的 paperless-ngx API 令牌。可在 Paperless 管理面板的设置中找到。",
@@ -47,7 +65,17 @@
     "urlLabel": "服务器 URL",
     "usernameHelp": "您的 paperless-ngx 用户名。",
     "usernameLabel": "用户名",
-    "usernamePassword": "用户名和密码"
+    "usernamePassword": "用户名和密码",
+    "authMethodDescription": "API 令牌更安全。请在 Paperless-ngx 管理面板中生成。",
+    "noSavedCredentials": "此方法尚未保存凭据。请在下方输入以使用该方法。",
+    "usernamePlaceholder": "输入您的用户名",
+    "passwordPlaceholder": "输入您的密码",
+    "passwordSavedPlaceholder": "密码已保存 - 留空以保留当前密码",
+    "autoSyncLabel": "启用自动同步状态检查",
+    "autoSyncDescription": "页面加载时自动检查文档在 Paperless 中是否仍然存在",
+    "syncTagsLabel": "同步文档标签和分类",
+    "syncTagsDescription": "保持文档元数据与 Paperless 同步（即将推出）",
+    "loadingSettings": "正在加载设置..."
   },
   "papra": {
     "privateUrlNote": "私有和内部地址（localhost、192.168.x.x、10.x.x.x）支持自托管部署。出于安全考虑，云元数据和链路本地地址（169.254.x.x）始终被阻止。如果管理员已将集成限制为公共地址，则私有 URL 将被拒绝。",

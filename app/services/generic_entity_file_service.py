@@ -23,6 +23,10 @@ from app.schemas.entity_file import (
     FileOperationResult,
 )
 from app.services.file_management_service import FileManagementService
+from app.services.paperless_auth_methods import (
+    credential_kwargs,
+    has_usable_credentials,
+)
 
 # New simplified architecture
 from app.services.paperless_client import (
@@ -111,9 +115,7 @@ class GenericEntityFileService:
         """
         return create_paperless_client(
             url=user_prefs.paperless_url,
-            encrypted_token=user_prefs.paperless_api_token_encrypted,
-            encrypted_username=user_prefs.paperless_username_encrypted,
-            encrypted_password=user_prefs.paperless_password_encrypted,
+            **credential_kwargs(user_prefs),
             user_id=user_id,
         )
 
@@ -187,15 +189,9 @@ class GenericEntityFileService:
                         detail="Paperless integration is not enabled. Please enable it in settings before uploading to Paperless.",
                     )
 
-                # Check if we have either token OR username/password credentials
-                has_token = bool(user_prefs.paperless_api_token_encrypted)
-                has_credentials = bool(
-                    user_prefs.paperless_username_encrypted
-                    and user_prefs.paperless_password_encrypted
-                )
-
-                if not user_prefs.paperless_url or (
-                    not has_token and not has_credentials
+                # Check that the chosen authentication method has saved credentials
+                if not user_prefs.paperless_url or not has_usable_credentials(
+                    user_prefs
                 ):
                     raise HTTPException(
                         status_code=400,
@@ -671,9 +667,7 @@ class GenericEntityFileService:
 
                 paperless_service = create_paperless_service(
                     user_prefs.paperless_url,
-                    encrypted_token=user_prefs.paperless_api_token_encrypted,
-                    encrypted_username=user_prefs.paperless_username_encrypted,
-                    encrypted_password=user_prefs.paperless_password_encrypted,
+                    **credential_kwargs(user_prefs),
                     user_id=user.id,
                 )
 
@@ -912,14 +906,8 @@ class GenericEntityFileService:
                 detail="Paperless integration is not enabled for this user",
             )
 
-        # Check if we have either token OR username/password credentials
-        has_token = bool(user_prefs.paperless_api_token_encrypted)
-        has_credentials = bool(
-            user_prefs.paperless_username_encrypted
-            and user_prefs.paperless_password_encrypted
-        )
-
-        if not user_prefs.paperless_url or (not has_token and not has_credentials):
+        # Check that the chosen authentication method has saved credentials
+        if not user_prefs.paperless_url or not has_usable_credentials(user_prefs):
             raise HTTPException(
                 status_code=400, detail="Paperless configuration is incomplete"
             )
@@ -953,9 +941,7 @@ class GenericEntityFileService:
 
             paperless_service = create_paperless_service(
                 user_prefs.paperless_url,
-                encrypted_token=user_prefs.paperless_api_token_encrypted,
-                encrypted_username=user_prefs.paperless_username_encrypted,
-                encrypted_password=user_prefs.paperless_password_encrypted,
+                **credential_kwargs(user_prefs),
                 user_id=current_user_id,
             )
 
@@ -1740,10 +1726,7 @@ class GenericEntityFileService:
                 return {}
 
             # Check if credentials exist (either token or username/password)
-            has_auth = user_prefs.paperless_api_token_encrypted or (
-                user_prefs.paperless_username_encrypted
-                and user_prefs.paperless_password_encrypted
-            )
+            has_auth = has_usable_credentials(user_prefs)
             if not user_prefs.paperless_url or not has_auth:
                 logger.warning(
                     f"Cannot check paperless sync: incomplete paperless configuration (user: {current_user_id})"
@@ -1761,9 +1744,7 @@ class GenericEntityFileService:
 
             paperless_service = create_paperless_service(
                 user_prefs.paperless_url,
-                encrypted_token=user_prefs.paperless_api_token_encrypted,
-                encrypted_username=user_prefs.paperless_username_encrypted,
-                encrypted_password=user_prefs.paperless_password_encrypted,
+                **credential_kwargs(user_prefs),
                 user_id=current_user_id,
             )
 

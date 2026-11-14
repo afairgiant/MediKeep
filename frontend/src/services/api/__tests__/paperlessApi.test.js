@@ -55,4 +55,20 @@ describe('testPaperlessConnection', () => {
       paperless_password: 'secret',
     });
   });
+
+  it('sends the auth method so the right saved credentials are tested', async () => {
+    await testPaperlessConnection(url, '', '', '', 'basic_auth');
+
+    expect(apiService.post).toHaveBeenCalledWith('/paperless/test-connection', {
+      paperless_url: url,
+      paperless_auth_method: 'basic_auth',
+    });
+  });
+
+  it('omits the auth method when none is given', async () => {
+    await testPaperlessConnection(url, '', '', '');
+
+    const payload = apiService.post.mock.calls[0][1];
+    expect(payload).not.toHaveProperty('paperless_auth_method');
+  });
 });
