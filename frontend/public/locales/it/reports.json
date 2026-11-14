@@ -137,19 +137,6 @@
     "totalCount_one": "{{count}} totali",
     "totalCount_other": "{{count}} totali"
   },
-  "dataExport": {
-    "availableData": "Dati disponibili",
-    "bulkExport": "Esportazione massiva",
-    "csvDescription": "Il formato CSV è ideale per i fogli di calcolo",
-    "dateFilterNote": "I filtri per data si applicano a tutti i tipi selezionati",
-    "exportInfo": "Informazioni sull'esportazione",
-    "exportTitle": "Esporta cartelle cliniche",
-    "includeFilesNote": "Questo potrebbe aumentare significativamente la dimensione del download",
-    "jsonDescription": "Il formato JSON fornisce la struttura dati completa",
-    "pdfDescription": "Il formato PDF crea report stampabili",
-    "singleExport": "Esportazione singola",
-    "zipDescription": "Le esportazioni massive vengono impacchettate in un file ZIP"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "{{count}} altro elemento",

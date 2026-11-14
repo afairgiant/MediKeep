@@ -137,19 +137,6 @@
     "totalCount_one": "{{count}} totalt",
     "totalCount_other": "{{count}} totalt"
   },
-  "dataExport": {
-    "availableData": "Tillgänglig data",
-    "bulkExport": "Massexport",
-    "csvDescription": "CSV-format är idealiskt för kalkylblad",
-    "dateFilterNote": "Datumfilter gäller för alla valda typer",
-    "exportInfo": "Exportinformation",
-    "exportTitle": "Exportera journalhandlingar",
-    "includeFilesNote": "Detta kan avsevärt öka nedladdningsstorleken",
-    "jsonDescription": "JSON-format ger fullständig datastruktur",
-    "pdfDescription": "PDF-format skapar utskrivbara rapporter",
-    "singleExport": "Enskild export",
-    "zipDescription": "Massexporter paketeras i en ZIP-fil"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "{{count}} ytterligare objekt",

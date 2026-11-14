@@ -136,19 +136,6 @@
     "totalCount_one": "รวม {{count}} รายการ",
     "totalCount_other": "รวม {{count}} รายการ"
   },
-  "dataExport": {
-    "availableData": "ข้อมูลที่มี",
-    "bulkExport": "ส่งออกเป็นชุด",
-    "csvDescription": "รูปแบบ CSV เหมาะสำหรับสเปรดชีต",
-    "dateFilterNote": "ตัวกรองวันที่จะใช้กับทุกประเภทที่เลือก",
-    "exportInfo": "ข้อมูลการส่งออก",
-    "exportTitle": "ส่งออกบันทึกทางการแพทย์",
-    "includeFilesNote": "อาจทำให้ขนาดไฟล์ดาวน์โหลดใหญ่ขึ้นอย่างมาก",
-    "jsonDescription": "รูปแบบ JSON ให้โครงสร้างข้อมูลแบบเต็มรูปแบบ",
-    "pdfDescription": "รูปแบบ PDF สร้างรายงานที่พิมพ์ได้",
-    "singleExport": "ส่งออกเดี่ยว",
-    "zipDescription": "การส่งออกเป็นชุดจะถูกบรรจุในไฟล์ ZIP"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "อีก {{count}} รายการ",

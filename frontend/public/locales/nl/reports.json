@@ -137,19 +137,6 @@
     "totalCount_one": "{{count}} totaal",
     "totalCount_other": "{{count}} totaal"
   },
-  "dataExport": {
-    "availableData": "Beschikbare gegevens",
-    "bulkExport": "Bulkexport",
-    "csvDescription": "CSV-formaat is ideaal voor spreadsheets",
-    "dateFilterNote": "Datumfilters zijn van toepassing op alle geselecteerde typen",
-    "exportInfo": "Exportinformatie",
-    "exportTitle": "Medische dossiers exporteren",
-    "includeFilesNote": "Dit kan de downloadgrootte aanzienlijk vergroten",
-    "jsonDescription": "JSON-formaat biedt de volledige gegevensstructuur",
-    "pdfDescription": "PDF-formaat maakt afdrukbare rapporten aan",
-    "singleExport": "Enkelvoudige export",
-    "zipDescription": "Bulkexporten worden verpakt in een ZIP-bestand"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "{{count}} extra item",

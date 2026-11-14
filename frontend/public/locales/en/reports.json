@@ -137,19 +137,6 @@
     "totalCount_one": "{{count}} total",
     "totalCount_other": "{{count}} total"
   },
-  "dataExport": {
-    "availableData": "Available Data",
-    "bulkExport": "Bulk Export",
-    "csvDescription": "CSV format is ideal for spreadsheets",
-    "dateFilterNote": "Date filters apply to all selected types",
-    "exportInfo": "Export Information",
-    "exportTitle": "Export Medical Records",
-    "includeFilesNote": "This may significantly increase the download size",
-    "jsonDescription": "JSON format provides full data structure",
-    "pdfDescription": "PDF format creates printable reports",
-    "singleExport": "Single Export",
-    "zipDescription": "Bulk exports are packaged in a ZIP file"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "{{count}} more item",

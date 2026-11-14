@@ -137,19 +137,6 @@
     "totalCount_one": "{{count}} σύνολο",
     "totalCount_other": "{{count}} σύνολο"
   },
-  "dataExport": {
-    "availableData": "Διαθέσιμα Δεδομένα",
-    "bulkExport": "Μαζική Εξαγωγή",
-    "csvDescription": "Η μορφή CSV είναι ιδανική για υπολογιστικά φύλλα",
-    "dateFilterNote": "Τα φίλτρα ημερομηνίας ισχύουν για όλους τους επιλεγμένους τύπους",
-    "exportInfo": "Πληροφορίες Εξαγωγής",
-    "exportTitle": "Εξαγωγή Ιατρικών Αρχείων",
-    "includeFilesNote": "Αυτό ενδέχεται να αυξήσει σημαντικά το μέγεθος λήψης",
-    "jsonDescription": "Η μορφή JSON παρέχει πλήρη δομή δεδομένων",
-    "pdfDescription": "Η μορφή PDF δημιουργεί εκτυπώσιμες αναφορές",
-    "singleExport": "Μεμονωμένη Εξαγωγή",
-    "zipDescription": "Οι μαζικές εξαγωγές συσκευάζονται σε αρχείο ZIP"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "{{count}} ακόμη στοιχείο",

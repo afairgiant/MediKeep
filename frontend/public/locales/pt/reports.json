@@ -137,19 +137,6 @@
     "totalCount_one": "{{count}} total",
     "totalCount_other": "{{count}} total"
   },
-  "dataExport": {
-    "availableData": "Dados Disponíveis",
-    "bulkExport": "Exportação em Massa",
-    "csvDescription": "O formato CSV é ideal para folhas de cálculo",
-    "dateFilterNote": "Os filtros de data aplicam-se a todos os tipos selecionados",
-    "exportInfo": "Informações de Exportação",
-    "exportTitle": "Exportar Registos Médicos",
-    "includeFilesNote": "Isto pode aumentar significativamente o tamanho do download",
-    "jsonDescription": "O formato JSON fornece estrutura completa de dados",
-    "pdfDescription": "O formato PDF cria relatórios imprimíveis",
-    "singleExport": "Exportação Individual",
-    "zipDescription": "As exportações em massa são empacotadas num ficheiro ZIP"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "mais {{count}} item",

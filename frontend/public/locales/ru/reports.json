@@ -145,19 +145,6 @@
     "totalCount_one": "{{count}} всего",
     "totalCount_other": "{{count}} всего"
   },
-  "dataExport": {
-    "availableData": "Доступные данные",
-    "bulkExport": "Массовый экспорт",
-    "csvDescription": "Формат CSV идеален для электронных таблиц",
-    "dateFilterNote": "Фильтры по датам применяются ко всем выбранным типам",
-    "exportInfo": "Информация об экспорте",
-    "exportTitle": "Экспорт медицинских записей",
-    "includeFilesNote": "Это может значительно увеличить размер загрузки",
-    "jsonDescription": "Формат JSON предоставляет полную структуру данных",
-    "pdfDescription": "Формат PDF создаёт печатные отчёты",
-    "singleExport": "Одиночный экспорт",
-    "zipDescription": "Массовые экспорты упаковываются в ZIP-файл"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "ещё {{count}} элемент",
