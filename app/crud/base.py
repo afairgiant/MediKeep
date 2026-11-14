@@ -733,8 +733,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             )
             raise
 
-    def delete(self, db: Session, *, id: int) -> ModelType:
-        """Delete a record by ID."""
+    def delete(self, db: Session, *, id: int, commit: bool = True) -> ModelType:
+        """Delete a record by ID.
+
+        Pass ``commit=False`` when the delete is one step of a larger
+        operation: the row is flushed but the caller owns the transaction, so
+        a later failure in the same request rolls the whole unit of work back
+        instead of leaving a half-deleted aggregate behind.
+        """
         record_id = str(id)
 
         self.logger.info(
@@ -778,7 +784,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             )
 
             db.delete(obj)
-            db.commit()
+            if commit:
+                db.commit()
+            else:
+                db.flush()
 
             self.logger.info(
                 f"Successfully deleted {self.model_name} record",

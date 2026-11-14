@@ -179,3 +179,42 @@ def test_admin_delete_user_without_patient_keeps_activity_logs(
     )
     assert len(detached) == 2
     assert all(row.user_id is None for row in detached)
+
+
+def test_failed_user_delete_does_not_leave_patient_deleted(
+    admin_client, db_session: Session, test_user, test_patient, monkeypatch
+):
+    """#1239 review: patient and user must delete atomically.
+
+    The endpoint deletes the patient before it deletes the user, and the
+    patient CRUD used to commit on its own. Any failure in the user branch then
+    left the patient (and every medical record cascading off it) permanently
+    gone while the user row survived. Failing the audit write between the two
+    deletes proves the pair is now one transaction.
+    """
+    from app.api.v1.admin import models as admin_models
+
+    db_session.commit()
+    user_id = test_user.id
+    patient_id = test_patient.id
+
+    def _boom(**_kwargs):
+        raise RuntimeError("injected failure after the patient delete")
+
+    monkeypatch.setattr(admin_models, "safe_log_activity", _boom)
+
+    response = admin_client.delete(f"/api/v1/admin/models/user/{user_id}")
+
+    assert response.status_code == 500, (
+        "the injected failure must reach the client, not be swallowed: "
+        f"got {response.status_code}"
+    )
+
+    db_session.rollback()
+    db_session.expire_all()
+    assert (
+        db_session.query(Patient).filter(Patient.id == patient_id).first() is not None
+    ), "patient was deleted even though the user delete failed"
+    assert (
+        db_session.query(User).filter(User.id == user_id).first() is not None
+    ), "user was deleted even though the delete failed"

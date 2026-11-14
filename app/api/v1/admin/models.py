@@ -1790,8 +1790,14 @@ def delete_model_record(
                         {"active_patient_id": None}, synchronize_session=False
                     )
 
-                    # Delete patient record (automatically cascades to all medical data)
-                    patient_crud.delete(db, id=patient_id)
+                    # Delete patient record (automatically cascades to all medical
+                    # data). commit=False: the patient delete is flushed into the
+                    # request's transaction but not committed, so the user delete
+                    # below and this delete land (or roll back) together. Without
+                    # it, a failure in the user branch leaves the patient and all
+                    # medical data permanently deleted while the user row survives
+                    # (CodeRabbit #1239).
+                    patient_crud.delete(db, id=patient_id, commit=False)
 
         if model_name == "user" and record_id is not None:
             # activity_logs.user_id has no ON DELETE action and the column is
