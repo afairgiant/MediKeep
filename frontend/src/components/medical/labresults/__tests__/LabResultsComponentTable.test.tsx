@@ -135,6 +135,23 @@ describe('LabResultsComponentTable', () => {
     ).toBeInTheDocument();
   });
 
+  it('does not render filter controls or table headers when there are no components', () => {
+    render(
+      <LabResultsComponentTable
+        components={[]}
+        labResults={defaultLabResults}
+        practitioners={defaultPractitioners}
+      />,
+      { skipRouter: true }
+    );
+
+    // #892: an empty Components view must not show a header row for a table
+    // that has nothing in it, nor filters that cannot match anything.
+    expect(screen.queryByText('Filters & Search')).not.toBeInTheDocument();
+    expect(screen.queryByText('Test Name')).not.toBeInTheDocument();
+    expect(screen.queryByRole('columnheader')).not.toBeInTheDocument();
+  });
+
   it('groups components by canonical_test_name and shows one summary row per unique test', () => {
     const components = [
       makeComponent({ id: 1, canonical_test_name: 'Glucose', completed_date: '2024-01-15', value: 95 }),

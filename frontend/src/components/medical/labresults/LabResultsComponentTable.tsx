@@ -347,7 +347,8 @@ const LabResultsComponentTable: React.FC<Props> = ({
 
   return (
     <Stack gap="sm">
-      {/* Filters */}
+      {/* Filters - only useful when there is data to filter */}
+      {components.length > 0 && (
       <Card withBorder shadow="sm" p="sm" radius="md">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 50%', minWidth: 0 }}>
@@ -468,10 +469,12 @@ const LabResultsComponentTable: React.FC<Props> = ({
           </Card>
         </Collapse>
       </Card>
+      )}
 
       {/* Table */}
       <Paper withBorder radius="md" className="lab-components-table-wrapper" style={{ overflow: 'auto' }}>
         <Table striped highlightOnHover>
+          {components.length > 0 && (
           <Table.Thead>
             <Table.Tr>
               <Table.Th style={{ width: 80 }}>
@@ -495,6 +498,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
               <Table.Th />
             </Table.Tr>
           </Table.Thead>
+          )}
           <Table.Tbody>
             {groupedTests.length === 0 ? (
               <Table.Tr>

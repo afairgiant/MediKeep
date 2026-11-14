@@ -370,7 +370,8 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
   return (
     <>
       <Stack gap="md">
-        {/* Collapsible filter bar */}
+        {/* Collapsible filter bar - only useful when there is data to filter */}
+        {components.length > 0 && (
         <Card withBorder shadow="sm" p="sm" radius="md">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 50%', minWidth: 0 }}>
@@ -513,6 +514,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
             </Card>
           </Collapse>
         </Card>
+        )}
 
         {/* Loading state */}
         {loading && (
