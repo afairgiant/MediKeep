@@ -6,12 +6,20 @@ healthrecord-bridge package, which is an optional install.
 
 import re
 from datetime import datetime, timezone
-from typing import Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 
 from .base_importer import BaseHealthRecordImporter, ImportFormatError
+from .patient_match import (
+    PATIENT_REFERENCE_FIELDS,
+    BirthDate,
+    birth_date_text,
+    birth_dates_compatible,
+    more_exact_birth_date,
+    read_birth_date,
+)
 from .upload import iter_zip_members
 
 logger = get_logger(__name__, "app")
@@ -24,6 +32,14 @@ MISSING_LIBRARY_MESSAGE = (
 INVALID_DOCUMENT_MESSAGE = "Not a valid C-CDA document"
 UNSAFE_DOCUMENT_MESSAGE = (
     "Not a valid C-CDA document: DOCTYPE and entity declarations are not accepted"
+)
+SHARED_RECORD_IDS_MESSAGE = (
+    "Documents in the zip are for different people but use the same record ids, "
+    "so they cannot be combined. Import each document separately."
+)
+PATIENT_ID_BIRTH_DATES_MESSAGE = (
+    "Documents in the zip give different birth dates for the same patient id, "
+    "so they cannot be combined. Import each document separately."
 )
 
 MAX_NOTES = 20
@@ -176,6 +192,7 @@ class CcdaImporter(BaseHealthRecordImporter):
         # The sort is stable, so documents with one date keep their archive order
         converted.sort(key=lambda item: _sort_key(item[0]))
         bundles = [bundle for _, _, bundle, _ in converted]
+        born = _patient_birth_dates(bundles)
         notes = _conflict_notes([(date, bundle) for date, _, bundle, _ in converted])
         for _, name, _, report in converted:
             notes.extend(
@@ -185,7 +202,10 @@ class CcdaImporter(BaseHealthRecordImporter):
             hidden = len(notes) - MAX_NOTES
             noun = "note" if hidden == 1 else "notes"
             notes = [*notes[:MAX_NOTES], f"{hidden} more conversion {noun} not shown"]
-        return merge_bundles(bundles), notes
+        merged = merge_bundles(bundles)
+        # The last copy of a Patient may give less of the birth date than another
+        _keep_exact_birth_dates(merged, born)
+        return merged, notes
 
     @staticmethod
     def _documents(data: bytes) -> Iterator[Tuple[str, bytes]]:
@@ -216,6 +236,91 @@ def _document_date(bundle: dict) -> Optional[datetime]:
 def _sort_key(date: Optional[datetime]) -> Tuple[int, datetime]:
     """Undated documents sort first, so any dated document outranks them."""
     return (1, date) if date else (0, datetime.min.replace(tzinfo=timezone.utc))
+
+
+def _patient_birth_dates(bundles: List[dict]) -> Dict[str, BirthDate]:
+    """The most exact birth date the documents give for each Patient id.
+
+    Raises when merging the documents would mix the records of two people.
+    The merge keeps one copy per resource type and id, before the patients are
+    compared. So it is refused when two documents use one id for a record of
+    different people, where one person's record would replace the other's, and
+    when they use one Patient id for different people, where both would become
+    one Patient.
+
+    The birth date tells people apart, as in patient_match: a record's person
+    is the Patient its subject or patient names in its own document, and only
+    birth dates that cannot be one person's are a difference. Documents may
+    give one person different Patient ids, so the ids alone say nothing. A
+    copy whose Patient is not in its document or has no readable birth date
+    is merged, and so are the resources that describe the document.
+
+    A Patient id that no document gives a readable birth date is not in the
+    result.
+    """
+    # The most exact birth date seen so far for each Patient id and record
+    patients: Dict[str, BirthDate] = {}
+    records: Dict[Tuple[str, str], Optional[BirthDate]] = {}
+    for bundle in bundles:
+        # A record may come before its Patient, so read the Patients first
+        born: Dict[str, Optional[BirthDate]] = {}
+        for entry in bundle.get("entry", []):
+            resource = entry["resource"]
+            if resource["resourceType"] == "Patient":
+                birth_date = read_birth_date(resource.get("birthDate"))
+                born[f"Patient/{resource['id']}"] = birth_date
+                _same_person(
+                    patients, resource["id"], birth_date, PATIENT_ID_BIRTH_DATES_MESSAGE
+                )
+        for entry in bundle.get("entry", []):
+            resource = entry["resource"]
+            if resource["resourceType"] in (*DOCUMENT_RESOURCE_TYPES, "Patient"):
+                continue
+            birth_date = born.get(_patient_reference(resource))
+            key = (resource["resourceType"], resource["id"])
+            _same_person(records, key, birth_date, SHARED_RECORD_IDS_MESSAGE)
+    return patients
+
+
+def _same_person(
+    seen: dict, key, birth_date: Optional[BirthDate], message: str
+) -> None:
+    """Note the birth date given for key; raise when it cannot go with an earlier one."""
+    if birth_date is None:
+        return
+    known = seen.get(key)
+    if not birth_dates_compatible(known, birth_date):
+        raise ImportFormatError(message)
+    seen[key] = more_exact_birth_date(known, birth_date)
+
+
+def _keep_exact_birth_dates(merged: dict, born: Dict[str, BirthDate]) -> None:
+    """Give each Patient of the merged bundle the most exact birth date known for its id.
+
+    The merge keeps the last copy of a Patient, which may give only the year
+    of a birth date that an earlier document gave in full, and the patients
+    are compared by what the merged copy says. Only birthDate is set, on a
+    copy of the resource, and only when the known value gives more parts than
+    the merged one.
+    """
+    for entry in merged.get("entry", []):
+        resource = entry["resource"]
+        if resource["resourceType"] != "Patient":
+            continue
+        known = born.get(resource["id"])
+        current = read_birth_date(resource.get("birthDate"))
+        if more_exact_birth_date(current, known) != current:
+            entry["resource"] = {**resource, "birthDate": birth_date_text(known)}
+
+
+def _patient_reference(resource: dict) -> Optional[str]:
+    """The reference string of the resource's subject or patient, or None."""
+    for name in PATIENT_REFERENCE_FIELDS:
+        value = resource.get(name)
+        reference = value.get("reference") if isinstance(value, dict) else None
+        if isinstance(reference, str):
+            return reference
+    return None
 
 
 def _conflict_notes(documents: List[Tuple[Optional[datetime], dict]]) -> List[str]:

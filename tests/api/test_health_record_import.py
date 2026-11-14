@@ -5,6 +5,7 @@ MyChart-style C-CDA and a synthetic export in Epic's real layout.
 
 import io
 import json
+import re
 import time
 import zipfile
 from datetime import date
@@ -30,9 +31,16 @@ from app.models.models import (
 )
 from app.schemas.patient import PatientCreate
 from app.services.importers import ccda_available, upload
+from app.services.importers.ccda_importer import (
+    PATIENT_ID_BIRTH_DATES_MESSAGE,
+    SHARED_RECORD_IDS_MESSAGE,
+)
 from app.services.importers.mappers import _fhir as f
 from app.services.importers.mappers import resource_mapper_registry
-from app.services.importers.patient_match import NOTHING_TO_COMPARE_MESSAGE
+from app.services.importers.patient_match import (
+    NO_MATCHING_PATIENT_MESSAGE,
+    NOTHING_TO_COMPARE_MESSAGE,
+)
 from app.services.importers.service import HealthRecordImportService
 from tests.utils.user import create_random_user, create_user_token_headers
 
@@ -72,6 +80,63 @@ def _xdm_zip(xml: bytes, members: int = 1) -> bytes:
     return buf.getvalue()
 
 
+def _other_person(
+    xml: bytes, given: bytes, birth: Optional[bytes], mark: bytes
+) -> bytes:
+    """The C-CDA fixture as a different person: own name, ids and entry ids.
+
+    The birth date is replaced too unless birth is None.
+    """
+    other = (
+        xml.replace(b"<given>Jane</given>", b"<given>" + given + b"</given>")
+        .replace(b'extension="E1234567"', b'extension="E' + mark + b'"')
+        .replace(b'extension="MRN00042"', b'extension="MRN' + mark + b'"')
+        .replace(b'extension="CCD-2024-000042"', b'extension="CCD-' + mark + b'"')
+    )
+    if birth is not None:
+        other = other.replace(
+            b'<birthTime value="19840722"/>', b'<birthTime value="' + birth + b'"/>'
+        )
+    other, changed = re.subn(
+        rb'extension="([A-Z]+-\d+(?:-[A-Z0-9]+)?)"',
+        rb'extension="' + mark + rb'-\1"',
+        other,
+    )
+    assert changed > 10
+    return other
+
+
+# Part of every name that _with_own_content gives a record
+OWN_CONTENT = "Robin-only"
+
+
+def _with_own_content(xml: bytes) -> bytes:
+    """The C-CDA fixture with a problem, the drug allergy and a medication under other names.
+
+    A copy of the fixture under other ids maps to rows with the fixture's own
+    content, which an import of both stores once. These names make the rows
+    of the copy differ, so a stored row shows which document it came from.
+    """
+    names = (
+        (b"Acute bronchitis", b"Robin-only problem"),
+        (b"Penicillin G", b"Robin-only allergen"),
+        (b"atorvastatin", b"Robin-only drug"),
+    )
+    for old, new in names:
+        assert old in xml
+        xml = xml.replace(old, new)
+    return xml
+
+
+def _zip_of(*documents: bytes) -> bytes:
+    """A zip with each document in its own XDM subset folder."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for i, document in enumerate(documents, 1):
+            zf.writestr(f"IHE_XDM/SUBSET{i:02d}/DOC0001.XML", document)
+    return buf.getvalue()
+
+
 def _bundle_with_diagnosis(diagnosis: str) -> bytes:
     """The fixture with the first condition's text changed."""
     bundle = json.loads(FIXTURE.read_text())
@@ -100,6 +165,26 @@ def _allergies(db: Session, patient_id: int):
 
 def _medications(db: Session, patient_id: int):
     return db.query(Medication).filter(Medication.patient_id == patient_id).all()
+
+
+def _stored_names(db: Session, patient_id: int):
+    """(record type, name) of each condition, allergy and medication row, sorted."""
+    return sorted(
+        [
+            *(("condition", c.diagnosis) for c in _conditions(db, patient_id)),
+            *(("allergy", a.allergen) for a in _allergies(db, patient_id)),
+            *(("medication", m.medication_name) for m in _medications(db, patient_id)),
+        ]
+    )
+
+
+def _assert_only_stored(db: Session, patient_id: int, alone: dict):
+    """Check that the stored rows are those of the preview `alone` and none has a name from _with_own_content."""
+    names = _stored_names(db, patient_id)
+    assert not [name for _, name in names if OWN_CONTENT in name]
+    for record_type in ("condition", "allergy", "medication"):
+        stored = [name for kind, name in names if kind == record_type]
+        assert len(stored) == alone["counts"][record_type]["new"] > 0
 
 
 def _provenance(db: Session, patient_id: int):
@@ -831,6 +916,69 @@ class TestExecute:
         assert [w for w in body["warnings"] if w.startswith("Skipped")] == [
             "Skipped entry 5: resourceType missing or not a string",
             "Skipped entry 6: resourceType missing or not a string",
+        ]
+
+    def test_skipped_entry_is_numbered_by_its_place_in_the_upload(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the entry number in a warning counts the entries of people left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+
+        def person(key, given, birth):
+            return {
+                "resource": {
+                    "resourceType": "Patient",
+                    "id": key,
+                    "name": [{"given": [given], "family": "Sampleton"}],
+                    "birthDate": birth,
+                }
+            }
+
+        def condition(key, owner):
+            return {
+                "resource": {
+                    "resourceType": "Condition",
+                    "id": key,
+                    "subject": {"reference": f"Patient/{owner}"},
+                    "code": {"text": f"Diagnosis {key}"},
+                }
+            }
+
+        bundle = {
+            "resourceType": "Bundle",
+            "type": "collection",
+            "entry": [
+                person("r", "Robin", "1975-01-01"),
+                condition("r1", "r"),
+                condition("r2", "r"),
+                person("j", "Jane", "1980-04-12"),
+                # No subject, so it is kept as a shared record and reaches the plan
+                {"resource": {"id": "bad"}},
+                condition("j1", "j"),
+            ],
+        }
+        data = json.dumps(bundle).encode()
+
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert body["unsupported"] == {"invalid": 1}
+            assert [w for w in body["warnings"] if w.startswith("Skipped")] == [
+                "Skipped entry 4: resourceType missing or not a string"
+            ]
+            assert any(w.startswith("Left out 2 records") for w in body["warnings"])
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
         ]
 
     def test_mapper_error_is_reported_without_detail(
@@ -1891,23 +2039,284 @@ class TestCcdaFixture:
         """Test that documents for different patients in one zip each get a warning."""
         patient_id = user_with_patient["patient"].id
         jane = MYCHART_CCD.read_bytes()
-        robin = jane.replace(b"<given>Jane</given>", b"<given>Robin</given>").replace(
-            b'extension="E1234567"', b'extension="E7654321"'
-        )
-        assert robin != jane
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr("IHE_XDM/SUBSET01/DOC0001.XML", jane)
-            zf.writestr("IHE_XDM/SUBSET02/DOC0001.XML", robin)
+        # The same birth date, so neither is left out
+        robin = _other_person(jane, b"Robin", None, b"7654321")
         response = client.post(
             _preview_url(patient_id),
-            files=_upload(buf.getvalue(), "MyChart.zip"),
+            files=_upload(_zip_of(jane, robin), "MyChart.zip"),
             headers=authenticated_headers,
         )
         assert response.status_code == 200, response.text
         mismatches = [w for w in response.json()["warnings"] if "The file is for" in w]
         assert len(mismatches) == 2
         assert any("Robin" in w for w in mismatches)
+
+    def test_zip_of_two_people_with_the_same_record_ids_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that documents of different people that reuse entry ids are refused, not merged."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Only the person differs; the entry ids are the fixture's own
+        robin = (
+            jane.replace(b"<given>Jane</given>", b"<given>Robin</given>")
+            .replace(b'<birthTime value="19840722"/>', b'<birthTime value="19750101"/>')
+            .replace(b'extension="E1234567"', b'extension="E7654321"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00043"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        )
+        for documents in ((jane, robin), (robin, jane)):
+            for url in (_preview_url(patient.id), _execute_url(patient.id)):
+                response = client.post(
+                    url,
+                    files=_upload(_zip_of(*documents), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400, response.text
+                assert SHARED_RECORD_IDS_MESSAGE in response.text
+        assert _conditions(db_session, patient.id) == []
+        assert _import_logs(db_session, patient.id) == []
+
+    def test_zip_with_another_person_imports_only_the_selected_patient(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a second person's document in a zip is left out of preview and execute."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Her rows differ from Jane's, or the stored rows could not show whose they are
+        robin = _with_own_content(
+            _other_person(jane, b"Robin", b"19750101", b"7654321")
+        )
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        assert alone["counts"]["condition"]["new"] > 0
+        assert not any(w.startswith("Left out") for w in alone["warnings"])
+        for documents in ((robin, jane), (jane, robin)):
+            both = post(_preview_url(patient.id), _zip_of(*documents))
+            assert both["counts"] == alone["counts"]
+            assert both["unsupported"] == alone["unsupported"]
+            assert both["total_resources"] == alone["total_resources"]
+            assert both["patient"] == alone["patient"]
+            left_out = [w for w in both["warnings"] if w.startswith("Left out")]
+            # Every record of Robin's but the organization, which both documents share
+            assert left_out == [
+                f"Left out {alone['total_resources'] - 1} records for Ms. Robin Quinn "
+                "Sampleton, whose birth date 1975-01-01 differs from the selected "
+                "patient's 1984-07-22."
+            ]
+            assert not any("The file is for" in w for w in both["warnings"])
+
+        done = post(_execute_url(patient.id), _zip_of(robin, jane))
+        assert [w for w in done["warnings"] if w.startswith("Left out")] == left_out
+        _assert_only_stored(db_session, patient.id, alone)
+        assert {k: v["created"] for k, v in done["counts"].items()} == {
+            k: v["new"] for k, v in alone["counts"].items()
+        }
+
+    def test_zip_with_a_person_known_only_by_birth_year_leaves_them_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a second person whose document gives only a birth year is left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Her rows differ from Jane's, or the stored rows could not show whose they are
+        robin = _with_own_content(_other_person(jane, b"Robin", b"1975", b"7654321"))
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        expected = [
+            f"Left out {alone['total_resources'] - 1} records for Ms. Robin Quinn "
+            "Sampleton, whose birth date 1975 differs from the selected patient's "
+            "1984-07-22."
+        ]
+        for documents in ((robin, jane), (jane, robin)):
+            both = post(_preview_url(patient.id), _zip_of(*documents))
+            assert both["counts"] == alone["counts"]
+            assert both["patient"] == alone["patient"]
+            assert [w for w in both["warnings"] if w.startswith("Left out")] == expected
+            assert not any("The file is for" in w for w in both["warnings"])
+
+        done = post(_execute_url(patient.id), _zip_of(robin, jane))
+        assert [w for w in done["warnings"] if w.startswith("Left out")] == expected
+        _assert_only_stored(db_session, patient.id, alone)
+        assert {k: v["created"] for k, v in done["counts"].items()} == {
+            k: v["new"] for k, v in alone["counts"].items()
+        }
+
+    def test_zip_with_a_less_exact_copy_of_the_patient_still_leaves_the_other_person_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a later document giving only the selected patient's birth year does not let a second person in."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # The same Patient id in another document; later in the zip, so its copy is the one merged
+        year_only = jane.replace(
+            b'<birthTime value="19840722"/>', b'<birthTime value="1984"/>'
+        ).replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        assert year_only.count(b'<birthTime value="1984"/>') == 1
+        robin = _with_own_content(
+            _other_person(jane, b"Robin", b"19750101", b"7654321")
+        )
+        data = _zip_of(jane, year_only, robin)
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        expected = [
+            f"Left out {alone['total_resources'] - 1} records for Ms. Robin Quinn "
+            "Sampleton, whose birth date 1975-01-01 differs from the selected "
+            "patient's 1984-07-22."
+        ]
+        both = post(_preview_url(patient.id), data)
+        assert both["counts"] == alone["counts"]
+        assert both["patient"] == alone["patient"]
+        assert [w for w in both["warnings"] if w.startswith("Left out")] == expected
+        assert not any(w.startswith("The file") for w in both["warnings"])
+
+        done = post(_execute_url(patient.id), data)
+        assert [w for w in done["warnings"] if w.startswith("Left out")] == expected
+        _assert_only_stored(db_session, patient.id, alone)
+        assert {k: v["created"] for k, v in done["counts"].items()} == {
+            k: v["new"] for k, v in alone["counts"].items()
+        }
+
+    def test_zip_of_one_person_under_two_patient_ids_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that one person's documents that give the Patient different ids import as one file."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Swapping the two patientRole ids changes the Patient id the converter derives
+        ids = (
+            b'      <id root="1.2.840.114350.1.13.999.2.7.5.737384.14" extension="E1234567"/>\n',
+            b'      <id root="1.2.840.114350.1.13.999.2.7.3.688884.100" extension="MRN00042"/>\n',
+        )
+        assert ids[0] + ids[1] in jane
+        again = jane.replace(ids[0] + ids[1], ids[1] + ids[0]).replace(
+            b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"'
+        )
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        both = post(_preview_url(patient.id), _zip_of(jane, again))
+        assert both["counts"] == alone["counts"]
+        assert both["patient"] == alone["patient"]
+        assert not any(w.startswith(("Left out", "The file")) for w in both["warnings"])
+        post(_execute_url(patient.id), _zip_of(jane, again))
+        assert (
+            len(_conditions(db_session, patient.id))
+            == alone["counts"]["condition"]["new"]
+        )
+
+    def test_zip_with_two_people_under_one_patient_id_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that documents giving one Patient id two birth dates are refused, not merged."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Another person with her own entry ids and the fixture's patientRole ids
+        robin = (
+            _other_person(jane, b"Robin", b"19750101", b"7654321")
+            .replace(b'extension="E7654321"', b'extension="E1234567"')
+            .replace(b'extension="MRN7654321"', b'extension="MRN00042"')
+        )
+        for documents in ((jane, robin), (robin, jane)):
+            for url in (_preview_url(patient.id), _execute_url(patient.id)):
+                response = client.post(
+                    url,
+                    files=_upload(_zip_of(*documents), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400, response.text
+                assert PATIENT_ID_BIRTH_DATES_MESSAGE in response.text
+        assert _conditions(db_session, patient.id) == []
+        assert _import_logs(db_session, patient.id) == []
+
+    def test_zip_of_other_people_only_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a zip of several people, none born on the selected patient's day, is refused."""
+        patient_id = user_with_patient["patient"].id
+        jane = MYCHART_CCD.read_bytes()
+        data = _zip_of(jane, _other_person(jane, b"Robin", b"19750101", b"7654321"))
+        for url in (_preview_url(patient_id), _execute_url(patient_id)):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 400, response.text
+            assert NO_MATCHING_PATIENT_MESSAGE in response.text
+        assert _conditions(db_session, patient_id) == []
+        assert _import_logs(db_session, patient_id) == []
 
     def test_zip_over_member_cap(
         self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch

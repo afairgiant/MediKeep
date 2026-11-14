@@ -94,9 +94,12 @@ def preview_import(
 
     with handle_database_errors(request=request):
         patient = db.query(Patient).filter(Patient.id == patient_id).first()
-        result = HealthRecordImportService(db).preview(
-            bundle, patient, importer.SOURCE, importer.FORMAT_KEY, notes=notes
-        )
+        try:
+            result = HealthRecordImportService(db).preview(
+                bundle, patient, importer.SOURCE, importer.FORMAT_KEY, notes=notes
+            )
+        except ImportFormatError as exc:
+            raise BusinessLogicException(message=str(exc), request=request) from exc
 
         log_data_access(
             logger,
@@ -134,17 +137,21 @@ def execute_import(
 
     with handle_database_errors(request=request):
         patient = db.query(Patient).filter(Patient.id == patient_id).first()
-        result = HealthRecordImportService(db).execute(
-            bundle,
-            patient,
-            importer.SOURCE,
-            importer.FORMAT_KEY,
-            user_id=current_user_id,
-            request=request,
-            sections=selected,
-            skip_edited=skip_edited,
-            notes=notes,
-        )
+        try:
+            result = HealthRecordImportService(db).execute(
+                bundle,
+                patient,
+                importer.SOURCE,
+                importer.FORMAT_KEY,
+                user_id=current_user_id,
+                request=request,
+                sections=selected,
+                skip_edited=skip_edited,
+                notes=notes,
+            )
+        except ImportFormatError as exc:
+            # Raised by the patient check, before anything is written
+            raise BusinessLogicException(message=str(exc), request=request) from exc
 
         created = sum(c.created for c in result.counts.values())
         log_data_access(

@@ -7,7 +7,7 @@ import io
 import sys
 import time
 import zipfile
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -26,11 +26,16 @@ from app.services.importers.ccda_importer import (
     MAX_NOTE_TEXT,
     MAX_NOTES,
     MISSING_LIBRARY_MESSAGE,
+    PATIENT_ID_BIRTH_DATES_MESSAGE,
+    SHARED_RECORD_IDS_MESSAGE,
     UNSAFE_DOCUMENT_MESSAGE,
     _conflict_notes,
+    _keep_exact_birth_dates,
+    _patient_birth_dates,
     _report_notes,
     looks_like_ccda,
 )
+from app.services.importers.patient_match import compare_patient
 
 # Conversion needs the optional library; without it these tests are skipped
 needs_library = pytest.mark.skipif(
@@ -71,6 +76,42 @@ def _with_prolog(xml: bytes, prolog: bytes) -> bytes:
     """The fixture with its XML declaration followed by extra prolog text."""
     declaration, rest = xml.split(b"?>", 1)
     return declaration + b"?>" + prolog + rest
+
+
+def _same_person_under_another_id(xml: bytes) -> bytes:
+    """The fixture as a second document of the same person, whose Patient gets another id.
+
+    The converter takes the Patient id from the first patientRole id, so the
+    two are swapped. The entry ids stay the fixture's own.
+    """
+    first = b'      <id root="1.2.840.114350.1.13.999.2.7.5.737384.14" extension="E1234567"/>\n'
+    second = b'      <id root="1.2.840.114350.1.13.999.2.7.3.688884.100" extension="MRN00042"/>\n'
+    assert first + second in xml
+    return xml.replace(first + second, second + first).replace(
+        b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"'
+    )
+
+
+def _without_patient_ids(xml: bytes, document_id: bytes) -> bytes:
+    """The fixture with a patientRole id of nullFlavor, so the Patient id comes from the document id."""
+    first = b'      <id root="1.2.840.114350.1.13.999.2.7.5.737384.14" extension="E1234567"/>\n'
+    second = b'      <id root="1.2.840.114350.1.13.999.2.7.3.688884.100" extension="MRN00042"/>\n'
+    assert first + second in xml
+    return xml.replace(first + second, b'      <id nullFlavor="UNK"/>\n').replace(
+        b'extension="CCD-2024-000042"', b'extension="' + document_id + b'"'
+    )
+
+
+def _patients(bundle: dict) -> list:
+    return [
+        e["resource"]
+        for e in bundle["entry"]
+        if e["resource"]["resourceType"] == "Patient"
+    ]
+
+
+def _count(bundle: dict, resource_type: str) -> int:
+    return sum(e["resource"]["resourceType"] == resource_type for e in bundle["entry"])
 
 
 def _later_copy(xml: bytes) -> bytes:
@@ -252,6 +293,315 @@ class TestConflictNotes:
         )
         assert len(notes) == 1
         assert "newest" in notes[0]
+
+
+class TestPatientBirthDates:
+    """Test the pass over the documents before the merge: ids reused for different people and the birth date of each Patient id."""
+
+    JANE_BORN = "1984-07-22"
+    ROBIN_BORN = "1975-01-01"
+
+    @staticmethod
+    def _bundle(patient, by="subject", birth=JANE_BORN, **extra):
+        """One document: a Patient, a condition c1 that points at it and an organization."""
+        condition = {"resourceType": "Condition", "id": "c1", **extra}
+        if patient:
+            condition[by] = {"reference": f"Patient/{patient}"}
+        person = {"resourceType": "Patient", "id": patient or "nobody"}
+        if birth:
+            person["birthDate"] = birth
+        resources = [
+            person,
+            condition,
+            {"resourceType": "Organization", "id": "org"},
+            {
+                "resourceType": "DocumentReference",
+                "id": "doc",
+                "subject": {"reference": f"Patient/{patient}"},
+            },
+            {"resourceType": "Provenance", "id": "prov"},
+        ]
+        return {"entry": [{"resource": resource} for resource in resources]}
+
+    def test_same_id_for_two_people_is_refused(self):
+        """Test that one record id pointing at Patients born on different days stops the merge."""
+        for by in ("subject", "patient"):
+            with pytest.raises(ImportFormatError) as raised:
+                _patient_birth_dates(
+                    [
+                        self._bundle("jane", by),
+                        self._bundle("robin", by, birth=self.ROBIN_BORN),
+                    ]
+                )
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_one_person_under_two_patient_ids_is_merged(self):
+        """Test that documents that give one person different Patient ids are not taken for two people."""
+        _patient_birth_dates([self._bundle("jane"), self._bundle("jane-2")])
+
+    @pytest.mark.parametrize("birth", ["1984", "1984-07", None, "soon", 1984])
+    def test_birth_date_that_does_not_differ_is_merged(self, birth):
+        """Test that a missing, unreadable or less exact birth date is no reason to refuse."""
+        for bundles in (
+            [self._bundle("jane"), self._bundle("jane-2", birth=birth)],
+            [self._bundle("jane-2", birth=birth), self._bundle("jane")],
+        ):
+            _patient_birth_dates(bundles)
+
+    @pytest.mark.parametrize("birth", ["1975", "1984-08", "1984-07-23"])
+    def test_birth_date_that_differs_in_any_part_is_refused(self, birth):
+        """Test that a year or year and month is compared as far as it goes."""
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates(
+                [self._bundle("jane"), self._bundle("robin", birth=birth)]
+            )
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_patient_missing_from_its_document_is_merged(self):
+        """Test that a record whose Patient is not in its own document is not refused."""
+        other = self._bundle("robin", birth=self.ROBIN_BORN)
+        other["entry"][1]["resource"]["subject"] = {"reference": "Patient/elsewhere"}
+        _patient_birth_dates([self._bundle("jane"), other])
+
+    def test_reference_is_looked_up_in_its_own_document(self):
+        """Test that a record goes by the Patient its reference names, not by the first Patient of its document."""
+        robin = self._bundle("jane", birth=None)
+        robin["entry"][1]["resource"]["subject"] = {"reference": "Patient/robin"}
+        robin["entry"].append(
+            {
+                "resource": {
+                    "resourceType": "Patient",
+                    "id": "robin",
+                    "birthDate": self.ROBIN_BORN,
+                }
+            }
+        )
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates([self._bundle("jane"), robin])
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_patient_id_read_in_another_document_does_not_decide(self):
+        """Test that a reference is not followed to a Patient that only another document has."""
+        sam = self._bundle("sam", birth=None)
+        sam["entry"][1]["resource"]["subject"] = {"reference": "Patient/robin"}
+        other = self._bundle("robin", birth=self.ROBIN_BORN)
+        other["entry"][1]["resource"]["id"] = "other"
+        # c1 is jane's in the first document; in the third nothing says whose it is
+        _patient_birth_dates([self._bundle("jane"), other, sam])
+
+    def test_copy_without_a_birth_date_does_not_hide_a_later_difference(self):
+        """Test that every copy with a birth date is compared, whatever lies between them."""
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates(
+                [
+                    self._bundle("a", birth="1984"),
+                    self._bundle("b", birth=None),
+                    self._bundle("c", birth="1984-07-22"),
+                    self._bundle("d", birth="1984-08"),
+                ]
+            )
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_one_patient_id_with_two_birth_dates_is_refused(self):
+        """Test that two people under one Patient id are not merged into one."""
+        for first, second in (
+            (self.JANE_BORN, self.ROBIN_BORN),
+            (self.ROBIN_BORN, self.JANE_BORN),
+            ("1975", self.JANE_BORN),
+        ):
+            other = self._bundle("jane", birth=second)
+            # No record id is shared: the Patient alone is the collision
+            other["entry"][1]["resource"]["id"] = "c2"
+            with pytest.raises(ImportFormatError) as raised:
+                _patient_birth_dates([self._bundle("jane", birth=first), other])
+            assert str(raised.value) == PATIENT_ID_BIRTH_DATES_MESSAGE
+
+    @pytest.mark.parametrize("birth", [JANE_BORN, "1984", None, "soon"])
+    def test_one_patient_id_with_birth_dates_that_agree_is_merged(self, birth):
+        """Test that one Patient id is merged when no document gives it another birth date."""
+        _patient_birth_dates([self._bundle("jane"), self._bundle("jane", birth=birth)])
+
+    def test_patient_copy_without_a_birth_date_does_not_hide_a_later_difference(self):
+        """Test that a Patient id is checked against every earlier copy with a birth date."""
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates(
+                [
+                    self._bundle("jane", birth="1975"),
+                    self._bundle("jane", birth=None),
+                    self._bundle("jane", birth="1975-01-01"),
+                    self._bundle("jane", birth="1975-02"),
+                ]
+            )
+        assert str(raised.value) == PATIENT_ID_BIRTH_DATES_MESSAGE
+
+    def test_less_exact_copy_between_two_months_does_not_hide_the_difference(self):
+        """Test that a year after one month does not let another month of that year pass."""
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates(
+                [
+                    self._bundle("a", birth="1984-07"),
+                    self._bundle("b", birth="1984"),
+                    self._bundle("c", birth="1984-08"),
+                ]
+            )
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_less_exact_patient_copy_between_two_months_does_not_hide_the_difference(
+        self,
+    ):
+        """Test that a Patient id is held to the most exact birth date given for it so far."""
+        bundles = []
+        for i, birth in enumerate(("1984-07", "1984", "1984-08")):
+            bundle = self._bundle("jane", birth=birth)
+            # No record id is shared: the Patient alone is the collision
+            bundle["entry"][1]["resource"]["id"] = f"c{i}"
+            bundles.append(bundle)
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates(bundles)
+        assert str(raised.value) == PATIENT_ID_BIRTH_DATES_MESSAGE
+
+    @pytest.mark.parametrize(
+        "births",
+        [
+            ("1984-07-22", "1984"),
+            ("1984", "1984-07-22"),
+            ("1984-07", "1984-07-22", None, "1984", "soon"),
+        ],
+    )
+    def test_most_exact_birth_date_of_each_patient_id_is_returned(self, births):
+        """Test that the result holds, per Patient id, the birth date with the most parts, in any order."""
+        bundles = [self._bundle("jane", birth=birth) for birth in births]
+        robin = self._bundle("robin", birth="1975")
+        # Another person, so with a record id of their own
+        robin["entry"][1]["resource"]["id"] = "c2"
+        bundles.extend([robin, self._bundle("sam", birth=None)])
+        assert _patient_birth_dates(bundles) == {
+            "jane": (1984, 7, 22),
+            "robin": (1975,),
+        }
+
+    def test_same_id_for_one_person_is_merged(self):
+        """Test that two versions of one person's record are left to the merge."""
+        _patient_birth_dates(
+            [self._bundle("jane", code="x"), self._bundle("jane", code="y")]
+        )
+
+    def test_copy_without_a_patient_is_ignored(self):
+        """Test that a copy with no subject does not count as another person's."""
+        _patient_birth_dates(
+            [self._bundle("jane"), self._bundle(None), self._bundle("jane")]
+        )
+
+    def test_same_id_under_another_type_is_not_a_collision(self):
+        """Test that the resource type is part of what has to be shared."""
+        other = self._bundle("robin", birth=self.ROBIN_BORN)
+        other["entry"][1]["resource"]["resourceType"] = "Observation"
+        _patient_birth_dates([self._bundle("jane"), other])
+
+    def test_many_documents_are_checked_in_linear_time(self):
+        """Test that the check walks each document once."""
+        bundle = {
+            "entry": [
+                {
+                    "resource": {
+                        "resourceType": "Patient",
+                        "id": "jane",
+                        "birthDate": self.JANE_BORN,
+                    }
+                },
+                *(
+                    {
+                        "resource": {
+                            "resourceType": "Condition",
+                            "id": f"c{i}",
+                            "subject": {"reference": "Patient/jane"},
+                        }
+                    }
+                    for i in range(2_000)
+                ),
+            ]
+        }
+        start = time.monotonic()
+        _patient_birth_dates([bundle] * 200)
+        assert time.monotonic() - start < 5.0
+
+
+class TestKeepExactBirthDates:
+    """Test that the merged Patient gets the most exact birth date known for its id."""
+
+    @staticmethod
+    def _merged(*resources):
+        return {"entry": [{"fullUrl": "urn:x", "resource": r} for r in resources]}
+
+    @pytest.mark.parametrize(
+        "merged_birth, known, expected",
+        [
+            ("1984", (1984, 7, 22), "1984-07-22"),
+            ("1984", (1984, 7), "1984-07"),
+            ("1984-07", (1984, 7, 22), "1984-07-22"),
+            (None, (1984,), "1984"),
+            ("soon", (1984, 7, 22), "1984-07-22"),
+            ("1984-07-22", (1984, 7, 22), "1984-07-22"),
+            ("1984-07-22", (1984,), "1984-07-22"),
+        ],
+    )
+    def test_birth_date_is_set_only_when_the_known_one_is_more_exact(
+        self, merged_birth, known, expected
+    ):
+        """Test the forms written and that an equal or less exact known value changes nothing."""
+        patient = {"resourceType": "Patient", "id": "jane", "gender": "female"}
+        if merged_birth:
+            patient["birthDate"] = merged_birth
+        merged = self._merged(patient)
+        _keep_exact_birth_dates(merged, {"jane": known})
+        assert merged == self._merged({**patient, "birthDate": expected})
+
+    def test_only_the_birth_date_of_the_named_patient_is_touched(self):
+        """Test that other fields, other Patients and other resource types stay as merged."""
+        jane = {
+            "resourceType": "Patient",
+            "id": "jane",
+            "birthDate": "1984",
+            "name": [{"family": "Sampleton"}],
+        }
+        robin = {"resourceType": "Patient", "id": "robin", "birthDate": "1975"}
+        nameless = {"resourceType": "Patient", "id": "sam"}
+        condition = {"resourceType": "Condition", "id": "jane", "birthDate": "1984"}
+        merged = self._merged(jane, robin, nameless, condition)
+        _keep_exact_birth_dates(merged, {"jane": (1984, 7, 22)})
+        assert merged == self._merged(
+            {**jane, "birthDate": "1984-07-22"}, robin, nameless, condition
+        )
+        # The document's own copy is not written to
+        assert jane["birthDate"] == "1984"
+        assert merged["entry"][1]["resource"] is robin
+
+    def test_documents_in_either_order_give_the_same_patient(self):
+        """Test the two steps together on hand-built documents, last copy winning as in the merge."""
+        full = TestPatientBirthDates._bundle("jane", birth="1984-07-22")
+        year = TestPatientBirthDates._bundle("jane", birth="1984")
+        for documents in ([full, year], [year, full]):
+            born = _patient_birth_dates(documents)
+            merged = self._merged(documents[-1]["entry"][0]["resource"])
+            _keep_exact_birth_dates(merged, born)
+            assert [e["resource"]["birthDate"] for e in merged["entry"]] == [
+                "1984-07-22"
+            ]
+
+    def test_many_patients_are_walked_once(self):
+        """Test that the pass over the merged bundle is linear."""
+        count = 200_000
+        merged = self._merged(
+            *(
+                {"resourceType": "Patient", "id": str(i), "birthDate": "1984"}
+                for i in range(count)
+            )
+        )
+        born = {str(i): (1984, 7, 22) for i in range(count)}
+        start = time.monotonic()
+        _keep_exact_birth_dates(merged, born)
+        assert time.monotonic() - start < 5.0
+        assert {e["resource"]["birthDate"] for e in merged["entry"]} == {"1984-07-22"}
 
 
 class TestValidateFormat:
@@ -438,6 +788,99 @@ class TestToBundle:
         assert second != first
         _, notes = CcdaImporter().to_bundle(_xdm_zip(first, second), "export.zip")
         assert not any("different content" in n for n in notes)
+
+    def test_documents_of_two_people_with_the_same_record_ids_are_refused(self):
+        """Test that one person's records cannot replace another's in the merge."""
+        jane = MYCHART_CCD.read_bytes()
+        # Another person's document from the same template: every entry id is reused
+        robin = (
+            jane.replace(b"<given>Jane</given>", b"<given>Robin</given>")
+            .replace(b'<birthTime value="19840722"/>', b'<birthTime value="19750101"/>')
+            .replace(b'extension="E1234567"', b'extension="E7654321"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00043"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        )
+        for first, second in ((jane, robin), (robin, jane)):
+            with pytest.raises(ImportFormatError) as raised:
+                CcdaImporter().to_bundle(_xdm_zip(first, second), "export.zip")
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_documents_of_one_person_with_different_patient_ids_are_merged(self):
+        """Test that one person's documents merge when each gives the Patient another id."""
+        jane = MYCHART_CCD.read_bytes()
+        single, _ = CcdaImporter().to_bundle(jane, "ccd.xml")
+        pairs = [
+            (jane, _same_person_under_another_id(jane)),
+            (
+                _without_patient_ids(jane, b"CCD-2024-000042"),
+                _without_patient_ids(jane, b"CCD-2024-000043"),
+            ),
+        ]
+        for first, second in pairs:
+            merged, _ = CcdaImporter().to_bundle(_xdm_zip(first, second), "export.zip")
+            people = _patients(merged)
+            assert len({p["id"] for p in people}) == 2
+            assert {p["birthDate"] for p in people} == {"1984-07-22"}
+            # Each problem, allergy and medication once, not once per document
+            for kind in ("Condition", "AllergyIntolerance", "MedicationStatement"):
+                assert _count(merged, kind) == _count(single, kind) > 0
+
+    def test_one_patient_id_for_two_people_is_refused(self):
+        """Test that a document cannot replace the Patient of another person's document."""
+        jane = MYCHART_CCD.read_bytes()
+        # The same patientRole ids, so the same Patient id, for someone born another day
+        robin = (
+            jane.replace(b"<given>Jane</given>", b"<given>Robin</given>")
+            .replace(b'<birthTime value="19840722"/>', b'<birthTime value="19750101"/>')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        )
+        for first, second in ((jane, robin), (robin, jane)):
+            with pytest.raises(ImportFormatError) as raised:
+                CcdaImporter().to_bundle(_xdm_zip(first, second), "export.zip")
+            assert str(raised.value) == PATIENT_ID_BIRTH_DATES_MESSAGE
+
+    @pytest.mark.parametrize("year_copy_last", [True, False])
+    def test_patient_in_two_documents_keeps_the_most_exact_birth_date(
+        self, year_copy_last
+    ):
+        """Test that a copy with only the birth year does not replace the full date, whatever the zip order."""
+        full = MYCHART_CCD.read_bytes()
+        # The same person and patientRole ids in another document of the same date
+        year = full.replace(
+            b'<birthTime value="19840722"/>', b'<birthTime value="1984"/>'
+        ).replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        assert year.count(b'<birthTime value="1984"/>') == 1
+        documents = (full, year) if year_copy_last else (year, full)
+        merged, _ = CcdaImporter().to_bundle(_xdm_zip(*documents), "export.zip")
+        people = _patients(merged)
+        assert [p["birthDate"] for p in people] == ["1984-07-22"]
+        # Everything else is the last copy's, as the merge left it
+        last, _ = CcdaImporter().to_bundle(documents[-1], "ccd.xml")
+        assert {**people[0], "birthDate": None} == {
+            **_patients(last)[0],
+            "birthDate": None,
+        }
+        selected = SimpleNamespace(
+            first_name="Jane", last_name="Sampleton", birth_date=date(1984, 7, 22)
+        )
+        match = compare_patient(merged, selected)
+        assert match.birth_date == date(1984, 7, 22)
+        assert match.warnings == []
+
+    def test_birth_date_given_as_a_year_is_compared_with_the_selected_patient(self):
+        """Test that a document whose birthTime is only a year is told from the selected patient."""
+        other = MYCHART_CCD.read_bytes().replace(
+            b'<birthTime value="19840722"/>', b'<birthTime value="1975"/>'
+        )
+        bundle, _ = CcdaImporter().to_bundle(other, "ccd.xml")
+        assert [p["birthDate"] for p in _patients(bundle)] == ["1975"]
+        selected = SimpleNamespace(
+            first_name="Jane", last_name="Sampleton", birth_date=date(1984, 7, 22)
+        )
+        assert compare_patient(bundle, selected).warnings == [
+            "The file's birth date 1975 differs from the selected patient's "
+            "1984-07-22."
+        ]
 
     def test_notes_past_the_cap_are_counted(self):
         """Test that notes over the limit end with a count instead of vanishing."""

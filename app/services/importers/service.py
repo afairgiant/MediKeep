@@ -92,7 +92,8 @@ class HealthRecordImportService:
         notes: Optional[List[str]] = None,
     ) -> HealthRecordImportPreviewResponse:
         """Classify every resource without writing anything."""
-        plan = self._build_plan(bundle, patient, source)
+        match = compare_patient(bundle, patient)
+        plan = self._build_plan(match.bundle, patient, source, match.positions)
         counts: Dict[str, SectionPreviewCount] = {}
         for row in plan.rows:
             section = counts.setdefault(row.mapped.record_type, SectionPreviewCount())
@@ -104,7 +105,6 @@ class HealthRecordImportService:
                 section.changed += 1
             if row.locally_edited:
                 section.edited += 1
-        match = compare_patient(bundle, patient)
         summary = None
         if match.found:
             summary = ImportedPatientSummary(
@@ -136,7 +136,7 @@ class HealthRecordImportService:
     ) -> HealthRecordImportResponse:
         """Write the planned rows, their provenance and the log entry in one transaction."""
         match = compare_patient(bundle, patient)
-        plan = self._build_plan(bundle, patient, source)
+        plan = self._build_plan(match.bundle, patient, source, match.positions)
         batch_id = uuid.uuid4().hex
         counts: Dict[str, SectionResultCount] = {}
 
@@ -159,13 +159,30 @@ class HealthRecordImportService:
         self.db.commit()
         return response
 
-    def _build_plan(self, bundle: dict, patient: Patient, source: str) -> _Plan:
-        """Map each resource and classify it against existing provenance."""
+    def _build_plan(
+        self,
+        bundle: dict,
+        patient: Patient,
+        source: str,
+        positions: Optional[List[int]] = None,
+    ) -> _Plan:
+        """Map each resource and classify it against existing provenance.
+
+        positions gives each entry's index in the upload when the bundle is a
+        copy with entries left out, so that warnings number entries as the
+        user's file does.
+        """
         # The mappers share one index of the bundle, dropped when the plan is done
         with indexed(bundle):
-            return self._plan_entries(bundle, patient, source)
+            return self._plan_entries(bundle, patient, source, positions)
 
-    def _plan_entries(self, bundle: dict, patient: Patient, source: str) -> _Plan:
+    def _plan_entries(
+        self,
+        bundle: dict,
+        patient: Patient,
+        source: str,
+        positions: Optional[List[int]] = None,
+    ) -> _Plan:
         """The plan body; run inside indexed(bundle)."""
         plan = _Plan()
         accepted: List[Tuple[MappedRecord, Any]] = []
@@ -177,8 +194,9 @@ class HealthRecordImportService:
             plan.total_resources += 1
             if not isinstance(resource_type, str) or not resource_type:
                 plan.unsupported["invalid"] = plan.unsupported.get("invalid", 0) + 1
+                position = index if positions is None else positions[index]
                 plan.warnings.append(
-                    f"Skipped entry {index}: resourceType missing or not a string"
+                    f"Skipped entry {position}: resourceType missing or not a string"
                 )
                 continue
             mapper = resource_mapper_registry.get_mapper(resource_type)
