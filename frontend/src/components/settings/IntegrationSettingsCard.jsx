@@ -28,6 +28,7 @@ import {
  * @param {string} [props.tokenPlaceholder] - Token input placeholder text
  * @param {boolean} props.hasTokenSaved - Whether a token is saved server-side
  * @param {boolean} [props.hasAlternateAuth] - Whether alternate auth exists (e.g. username/password)
+ * @param {boolean} [props.showTokenField] - Whether to render the API token field (default true)
  * @param {function} props.onTestConnection - Callback to trigger connection test
  * @param {boolean} props.testingConnection - Whether a test is in progress
  * @param {string|null} props.connectionStatus - 'success', 'error', or null
@@ -51,6 +52,7 @@ const IntegrationSettingsCard = ({
   tokenPlaceholder,
   hasTokenSaved = false,
   hasAlternateAuth = false,
+  showTokenField = true,
   onTestConnection,
   testingConnection = false,
   connectionStatus = null,
@@ -103,7 +105,7 @@ const IntegrationSettingsCard = ({
       return;
     }
     // Token is optional if saved credentials or alternate auth (e.g. username/password) exists
-    if (!token && !hasTokenSaved && !hasAlternateAuth) {
+    if (showTokenField && !token && !hasTokenSaved && !hasAlternateAuth) {
       setTokenError('API token is required');
       return;
     }
@@ -147,20 +149,22 @@ const IntegrationSettingsCard = ({
         </Alert>
       )}
 
-      <PasswordInput
-        label="API Token"
-        placeholder={
-          hasTokenSaved && !token
-            ? 'Token saved - leave blank to keep current'
-            : tokenPlaceholder || 'Enter your API token'
-        }
-        value={token}
-        onChange={handleTokenChange}
-        error={tokenError}
-        disabled={disabled || testingConnection}
-        visible={showToken}
-        onVisibilityChange={setShowToken}
-      />
+      {showTokenField && (
+        <PasswordInput
+          label="API Token"
+          placeholder={
+            hasTokenSaved && !token
+              ? 'Token saved - leave blank to keep current'
+              : tokenPlaceholder || 'Enter your API token'
+          }
+          value={token}
+          onChange={handleTokenChange}
+          error={tokenError}
+          disabled={disabled || testingConnection}
+          visible={showToken}
+          onVisibilityChange={setShowToken}
+        />
+      )}
 
       {renderAuthExtras && renderAuthExtras({ disabled, testingConnection })}
 
