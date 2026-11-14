@@ -17,7 +17,7 @@ from app.services.importers import (
     health_record_importer_registry,
     upload,
 )
-from app.services.importers.provenance import content_hash
+from app.services.importers.provenance import _normalize, content_hash
 
 
 def _zip(members: dict) -> bytes:
@@ -231,6 +231,18 @@ class TestContentHash:
         for value in ("1e1000000", "-1E999999", float("inf"), float("nan")):
             assert content_hash([value]) == content_hash([str(value).lower()])
         assert content_hash(["1e1000000"]) != content_hash(["1e1000001"])
+
+    def test_extreme_exponents_are_not_written_out(self):
+        """Test that 1e-999990 is hashed by value in a short form, not as a million digits."""
+        same = ["1e-999990", "0.1e-999989", Decimal("1e-999990"), "10e-999991"]
+        assert len({content_hash([value]) for value in same}) == 1
+        assert content_hash(["1e-999990"]) != content_hash(["1e-999991"])
+        assert content_hash(["1e60"]) != content_hash(["1e61"])
+        for value in ("1e-999990", "1e60", "-2.5e-70"):
+            assert len(_normalize(value)) < 20, value
+        # Numbers in the everyday range keep the plain form
+        assert _normalize("1.2e2") == "120"
+        assert _normalize("1e-50") == "0." + "0" * 49 + "1"
 
 
 class TestFhirBundleImporter:
