@@ -23,6 +23,7 @@
     "noFiles": "Aucun fichier"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Ce téléversement n'a pas fini d'être traité dans Paperless. Si Paperless le termine plus tard, le document pourra rester dans Paperless après sa suppression ici.",
     "fileDetails": "DETAILS DU FICHIER",
     "loading": "Chargement des fichiers...",
     "markedCount": "{{count}} fichier(s) marqué(s) pour suppression",
@@ -35,7 +36,13 @@
     "statusDuplicate": "Doublon",
     "statusFailed": "Echec",
     "statusMissing": "Manquant",
-    "statusProcessing": "Traitement en cours"
+    "statusProcessing": "Traitement en cours",
+    "viewUnavailable": {
+      "missing": "Ce document est introuvable dans son service de stockage. Il a peut-être été supprimé là-bas. Vous pouvez le retirer de cette liste.",
+      "processing": "Ce document est encore en cours de traitement par Paperless et ne peut pas encore être ouvert. Réessayez dans un instant.",
+      "title": "Document indisponible",
+      "unavailable": "Ce document n'a pas été enregistré correctement et ne peut pas être ouvert. Vous pouvez le retirer puis le téléverser à nouveau."
+    }
   },
   "fileUpload": {
     "accepted": "Acceptés : {{types}} • Taille max : {{size}}Mb",

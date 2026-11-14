@@ -23,6 +23,7 @@
     "noFiles": "Inga filer"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Den här uppladdningen har inte slutfört bearbetningen i Paperless. Om Paperless slutför den senare kan dokumentet finnas kvar i Paperless efter att det tagits bort här.",
     "fileDetails": "FILDETALJER",
     "loading": "Laddar filer...",
     "markedCount": "{{count}} fil markerad för borttagning",
@@ -35,7 +36,13 @@
     "statusDuplicate": "Duplikat",
     "statusFailed": "Misslyckades",
     "statusMissing": "Saknas",
-    "statusProcessing": "Bearbetar"
+    "statusProcessing": "Bearbetar",
+    "viewUnavailable": {
+      "missing": "Dokumentet hittades inte i lagringstjänsten. Det kan ha tagits bort där. Du kan ta bort det från den här listan.",
+      "processing": "Dokumentet bearbetas fortfarande av Paperless och kan inte öppnas ännu. Försök igen om en stund.",
+      "title": "Dokumentet är inte tillgängligt",
+      "unavailable": "Dokumentet sparades inte korrekt och kan inte öppnas. Du kan ta bort det och ladda upp det igen."
+    }
   },
   "fileUpload": {
     "accepted": "Godkända: {{types}} • Max storlek: {{size}}MB",

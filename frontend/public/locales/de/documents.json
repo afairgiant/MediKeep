@@ -23,6 +23,7 @@
     "noFiles": "Keine Dateien"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Dieser Upload wurde in Paperless noch nicht fertig verarbeitet. Wenn Paperless ihn später abschließt, kann das Dokument in Paperless verbleiben, auch wenn es hier gelöscht wurde.",
     "fileDetails": "DATEIDETAILS",
     "loading": "Dateien werden geladen...",
     "markedCount": "{{count}} Datei zum Löschen markiert",
@@ -35,7 +36,13 @@
     "statusDuplicate": "Duplikat",
     "statusFailed": "Fehlgeschlagen",
     "statusMissing": "Fehlend",
-    "statusProcessing": "Wird verarbeitet"
+    "statusProcessing": "Wird verarbeitet",
+    "viewUnavailable": {
+      "missing": "Dieses Dokument wurde im Speicherdienst nicht gefunden. Möglicherweise wurde es dort gelöscht. Sie können es aus dieser Liste entfernen.",
+      "processing": "Dieses Dokument wird noch von Paperless verarbeitet und kann noch nicht geöffnet werden. Bitte versuchen Sie es gleich noch einmal.",
+      "title": "Dokument nicht verfügbar",
+      "unavailable": "Dieses Dokument wurde nicht erfolgreich gespeichert und kann nicht geöffnet werden. Sie können es entfernen und erneut hochladen."
+    }
   },
   "fileUpload": {
     "accepted": "Akzeptiert: {{types}} • Max. Größe: {{size}}MB",

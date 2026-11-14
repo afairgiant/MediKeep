@@ -23,6 +23,7 @@
     "noFiles": "Brak plików"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "To przesyłanie nie zostało jeszcze przetworzone w Paperless. Jeśli Paperless zakończy je później, dokument może pozostać w Paperless po usunięciu go tutaj.",
     "fileDetails": "SZCZEGÓŁY PLIKU",
     "loading": "Ładowanie plików...",
     "markedCount": "{{count}} plik oznaczony do usunięcia",
@@ -35,7 +36,13 @@
     "statusDuplicate": "Duplikat",
     "statusFailed": "Nie powiodło się",
     "statusMissing": "Brak",
-    "statusProcessing": "Przetwarzanie"
+    "statusProcessing": "Przetwarzanie",
+    "viewUnavailable": {
+      "missing": "Nie znaleziono tego dokumentu w usłudze przechowywania. Mógł zostać tam usunięty. Możesz usunąć go z tej listy.",
+      "processing": "Ten dokument jest nadal przetwarzany przez Paperless i nie można go jeszcze otworzyć. Spróbuj ponownie za chwilę.",
+      "title": "Dokument niedostępny",
+      "unavailable": "Ten dokument nie został poprawnie zapisany i nie można go otworzyć. Możesz go usunąć i przesłać ponownie."
+    }
   },
   "fileUpload": {
     "accepted": "Akceptowane: {{types}} • Maksymalny rozmiar: {{size}}MB",

@@ -23,6 +23,7 @@
     "noFiles": "Sin archivos"
   },
   "fileList": {
+    "deleteUnfinishedPaperlessWarning": "Esta carga aún no ha terminado de procesarse en Paperless. Si Paperless la completa más tarde, el documento podría permanecer en Paperless después de eliminarlo aquí.",
     "fileDetails": "DETALLES DEL ARCHIVO",
     "loading": "Cargando archivos...",
     "markedCount": "{{count}} archivo marcado para eliminación",
@@ -35,7 +36,13 @@
     "statusDuplicate": "Duplicado",
     "statusFailed": "Fallido",
     "statusMissing": "Faltante",
-    "statusProcessing": "Procesando"
+    "statusProcessing": "Procesando",
+    "viewUnavailable": {
+      "missing": "No se encontró este documento en su servicio de almacenamiento. Es posible que se haya eliminado allí. Puede quitarlo de esta lista.",
+      "processing": "Paperless todavía está procesando este documento y aún no se puede abrir. Inténtelo de nuevo en un momento.",
+      "title": "Documento no disponible",
+      "unavailable": "Este documento no se guardó correctamente, por lo que no se puede abrir. Puede quitarlo y volver a subirlo."
+    }
   },
   "fileUpload": {
     "accepted": "Aceptados: {{types}} • Tamaño máximo: {{size}}MB",

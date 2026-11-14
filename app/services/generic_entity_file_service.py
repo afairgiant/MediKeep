@@ -386,6 +386,19 @@ class GenericEntityFileService:
             )
             return True
 
+        # No remote document ID means the upload never finished (still
+        # processing, or its task failed), so there is nothing to remove from
+        # the remote backend. This must be checked before the reference count
+        # below, which would otherwise match every other record whose ID is
+        # also NULL and skip the remote delete for the wrong reason.
+        if not document_id:
+            logger.info(
+                f"{backend_name} record {file_record.id} has no document ID "
+                f"(sync_status: {file_record.sync_status}). "
+                f"Nothing to delete remotely; removing database record only."
+            )
+            return False
+
         # Uploaded document - check if other records reference it
         doc_id_column = getattr(EntityFile, document_id_attr)
         other_references = (

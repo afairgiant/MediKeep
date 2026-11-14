@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import {
   getPaperlessSettings,
@@ -137,6 +138,8 @@ const useDocumentManagerCore = ({
       performanceMonitor.lastViewModeLog = now;
     }
   }
+
+  const { t } = useTranslation('documents');
 
   // State management
   const [files, setFiles] = useState([]);
@@ -980,8 +983,9 @@ const useDocumentManagerCore = ({
               result.success === null &&
               result.isBackgroundProcessing
             ) {
-              // Background processing - show as processing/uploading with appropriate message
-              updateFileProgress(fileId, 75, 'uploading', result.message);
+              // Background processing - show as processing (not uploading, which
+              // keeps the spinner running) with appropriate message
+              updateFileProgress(fileId, 75, 'processing', result.message);
               completeUpload(true, result.message); // Consider this successful since it's processing in background
             } else if (result.isDuplicate) {
               updateFileProgress(fileId, 0, 'failed', result.message);
@@ -1296,6 +1300,26 @@ const useDocumentManagerCore = ({
                     targetEntityId,
                     fileName: pendingFile.file.name,
                     documentId: result.documentId,
+                    component: 'DocumentManagerCore',
+                  });
+                } else if (result.isBackgroundProcessing) {
+                  // Paperless is still consuming the file. Not a failure: the
+                  // record stays "processing" and is resolved in the background.
+                  if (showProgressModal) {
+                    updateFileProgress(
+                      fileId,
+                      75,
+                      'processing',
+                      result.message
+                    );
+                  }
+
+                  logger.info('document_manager_batch_paperless_background', {
+                    message:
+                      'Individual Paperless file continues processing in background',
+                    entityType,
+                    targetEntityId,
+                    fileName: pendingFile.file.name,
                     component: 'DocumentManagerCore',
                   });
                 } else if (result.isDuplicate) {
@@ -1621,6 +1645,16 @@ const useDocumentManagerCore = ({
           'Are you sure you want to unlink this document? It will remain in Papra.';
       }
 
+      // Paperless is still consuming this upload (task known, no document yet).
+      // Deleting here cannot remove a document that Paperless creates later.
+      const hasUnfinishedPaperlessUpload =
+        file?.storage_backend === 'paperless' &&
+        !file.paperless_document_id &&
+        !!file.paperless_task_uuid;
+      if (hasUnfinishedPaperlessUpload) {
+        confirmMessage = `${confirmMessage}\n\n${t('fileList.deleteUnfinishedPaperlessWarning')}`;
+      }
+
       if (!window.confirm(confirmMessage)) {
         return;
       }
@@ -1676,7 +1710,7 @@ const useDocumentManagerCore = ({
         setLoading(false);
       }
     },
-    [entityType, entityId, loadFiles, onError, files]
+    [entityType, entityId, loadFiles, onError, files, t]
   );
 
   // Performance optimization: Memoize pending file description change handler
