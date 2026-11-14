@@ -32,6 +32,7 @@ from app.schemas.patient import PatientCreate
 from app.services.importers import ccda_available, upload
 from app.services.importers.mappers import _fhir as f
 from app.services.importers.mappers import resource_mapper_registry
+from app.services.importers.patient_match import NOTHING_TO_COMPARE_MESSAGE
 from app.services.importers.service import HealthRecordImportService
 from tests.utils.user import create_random_user, create_user_token_headers
 
@@ -783,7 +784,7 @@ class TestExecute:
         user_with_patient,
         authenticated_headers,
     ):
-        """Test that non-string Patient fields give no summary and still import with a log entry."""
+        """Test that non-string Patient fields give no summary, a warning, and still import."""
         patient_id = user_with_patient["patient"].id
         bundle = json.loads(FIXTURE.read_text())
         bundle["entry"][0]["resource"].update(
@@ -796,7 +797,7 @@ class TestExecute:
         )
         assert preview.status_code == 200, preview.text
         assert preview.json()["patient"] is None
-        assert preview.json()["warnings"] == []
+        assert preview.json()["warnings"] == [NOTHING_TO_COMPARE_MESSAGE]
 
         response = client.post(
             _execute_url(patient_id), files=_upload(data), headers=authenticated_headers

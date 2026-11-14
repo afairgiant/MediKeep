@@ -39,9 +39,9 @@ The import runs in two steps through the API (`/api/v1/health-records`, see the 
 | Section | What it tells you |
 |---------|-------------------|
 | **Counts** | Per record type, how many rows are new, duplicates of an earlier import, or changed |
-| **Patient in file** | The name and birth date of the patient the file describes, with a warning when they differ from the selected patient. A zip whose documents describe more than one person gets a warning for each |
+| **Patient in file** | The name and birth date of the patient the file describes, with a warning when they differ from the selected patient. A zip whose documents describe more than one person gets a warning for each, and a patient record without a usable name or birth date gets a warning that it could not be checked |
 | **Unsupported** | Resource types in the file that MediKeep does not import yet |
-| **Warnings** | Sections the converter does not map, entries it skipped, values that were shortened to fit, and a count of records that two documents in a zip describe differently (the newest document's version is kept) |
+| **Warnings** | Sections the converter does not map, entries it skipped, values that were shortened to fit, and a count of records that two documents in a zip describe differently (the newest document's version is kept; when the documents have the same date or no date, the version from the one later in the zip is kept and the warning says so) |
 
 ---
 

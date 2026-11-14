@@ -9,6 +9,13 @@ from app.models.patient import Patient
 from .mappers._fhir import fold as _norm
 from .mappers._fhir import text as _text
 
+# Most patient warnings listed before the rest are only counted
+MAX_PATIENT_WARNINGS = 20
+NOTHING_TO_COMPARE_MESSAGE = (
+    "The file has a patient record without a usable name or birth date, "
+    "so it could not be checked against the selected patient."
+)
+
 
 @dataclass
 class PatientMatch:
@@ -67,6 +74,8 @@ def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
 
     The summary comes from the first Patient. Every Patient is compared with the
     selected one, since a zip of documents can describe more than one person.
+    Each distinct warning is given once, and past MAX_PATIENT_WARNINGS the rest
+    are counted in one line.
     """
     patients = _patients(bundle)
     if not patients:
@@ -78,15 +87,24 @@ def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
         birth_date=_parse_date(patients[0].get("birthDate")),
         gender=_text(patients[0].get("gender")),
     )
+    seen = set()
     for resource in patients:
         for warning in _differences(resource, patient):
-            if warning not in match.warnings:
+            if warning in seen:
+                continue
+            seen.add(warning)
+            if len(match.warnings) < MAX_PATIENT_WARNINGS:
                 match.warnings.append(warning)
+    hidden = len(seen) - len(match.warnings)
+    if hidden:
+        match.warnings.append(
+            f"{hidden} more patient {'warning' if hidden == 1 else 'warnings'} not shown"
+        )
     return match
 
 
 def _differences(resource: dict, patient: Patient) -> List[str]:
-    """Warnings for a Patient resource whose name or birth date differ from the selection."""
+    """Warnings for a Patient resource that differs from the selection or cannot be checked."""
     given, family, text = _name_parts(resource)
     warnings = []
     # Middle names are common in exports and absent in MediKeep, so compare
@@ -103,6 +121,8 @@ def _differences(resource: dict, patient: Patient) -> List[str]:
             f"{patient.first_name} {patient.last_name}."
         )
     birth_date = _parse_date(resource.get("birthDate"))
+    if not (file_first or file_last or birth_date):
+        return [NOTHING_TO_COMPARE_MESSAGE]
     if birth_date and patient.birth_date and birth_date != patient.birth_date:
         warnings.append(
             f"The file's birth date {birth_date.isoformat()} differs from "

@@ -7,6 +7,7 @@ import io
 import sys
 import time
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -26,6 +27,7 @@ from app.services.importers.ccda_importer import (
     MAX_NOTES,
     MISSING_LIBRARY_MESSAGE,
     UNSAFE_DOCUMENT_MESSAGE,
+    _conflict_notes,
     _report_notes,
     looks_like_ccda,
 )
@@ -127,6 +129,41 @@ class TestLooksLikeCcda:
         )
         assert looks_like_ccda(data)
 
+    def test_namespace_must_be_bound_to_the_root(self):
+        """Test that a CDA namespace declared for another prefix does not qualify the root."""
+        assert not looks_like_ccda(
+            b'<ClinicalDocument xmlns="urn:other" xmlns:cda="urn:hl7-org:v3"/>'
+        )
+        assert not looks_like_ccda(
+            b'<cda:ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:cda="urn:other"/>'
+        )
+        assert not looks_like_ccda(b'<ClinicalDocument xmlns:cda="urn:hl7-org:v3"/>')
+        assert not looks_like_ccda(
+            b"<ClinicalDocument note=\"xmlns='urn:hl7-org:v3'\" xmlns='urn:other'/>"
+        )
+        assert not looks_like_ccda(b"<ClinicalDocument/>")
+
+    def test_root_attributes_in_any_legal_form(self):
+        """Test single quotes, spaces round the equals sign and a '>' inside a value."""
+        assert looks_like_ccda(b"<x:ClinicalDocument xmlns:x='urn:hl7-org:v3'/>")
+        assert looks_like_ccda(b'<ClinicalDocument xmlns = "urn:hl7-org:v3">')
+        assert looks_like_ccda(
+            b'<ClinicalDocument\n  title="a > b"\n  xmlns="urn:hl7-org:v3">'
+        )
+
+    def test_long_root_tag_is_read_in_linear_time(self):
+        """Test that many attributes or an unclosed value on the root cost linear time."""
+        tags = (
+            b"<ClinicalDocument" + b' a="b"' * 200_000,
+            b'<ClinicalDocument a="' + b"x" * (4 * 1024 * 1024),
+            b"<ClinicalDocument" + b" " * (4 * 1024 * 1024),
+            b"<ClinicalDocument " + b"a" * (4 * 1024 * 1024),
+        )
+        for tag in tags:
+            start = time.monotonic()
+            assert not looks_like_ccda(tag)
+            assert time.monotonic() - start < 2.0
+
     def test_unclosed_prolog_is_rejected_quickly(self):
         """Test that megabytes of unterminated comment or instruction cost linear time."""
         heads = (
@@ -142,6 +179,79 @@ class TestLooksLikeCcda:
             start = time.monotonic()
             assert not looks_like_ccda(data)
             assert time.monotonic() - start < 1.0
+
+
+class TestConflictNotes:
+    """Test the notes about records that documents in one upload describe differently."""
+
+    WHEN = (
+        None,
+        datetime(2024, 3, 15, tzinfo=timezone.utc),
+        datetime(2024, 6, 1, tzinfo=timezone.utc),
+    )
+
+    @staticmethod
+    def _bundle(**conditions):
+        return {
+            "entry": [
+                {"resource": {"resourceType": "Condition", "id": key, "code": value}}
+                for key, value in conditions.items()
+            ]
+        }
+
+    def _notes(self, *documents):
+        """Notes for (index into WHEN, bundle) pairs, given oldest first."""
+        return _conflict_notes([(self.WHEN[i], bundle) for i, bundle in documents])
+
+    def test_identical_copies_give_no_note(self):
+        """Test that the same content in two documents is not a conflict."""
+        assert self._notes((1, self._bundle(a="x")), (2, self._bundle(a="x"))) == []
+
+    def test_newer_document_decides(self):
+        """Test that a later date is what the note credits."""
+        notes = self._notes((1, self._bundle(a="x")), (2, self._bundle(a="y")))
+        assert notes == [
+            "1 record appears in more than one document with different content; "
+            "the newest document's copy was kept"
+        ]
+
+    def test_undated_documents_do_not_claim_a_newest(self):
+        """Test that two undated documents are reported as kept by position."""
+        notes = self._notes((0, self._bundle(a="x")), (0, self._bundle(a="y")))
+        assert len(notes) == 1
+        assert "same date or no date" in notes[0]
+        assert "newest" not in notes[0]
+
+    def test_dated_document_beats_an_undated_one(self):
+        """Test that a dated copy replacing an undated one counts as decided by date."""
+        notes = self._notes((0, self._bundle(a="x")), (1, self._bundle(a="y")))
+        assert len(notes) == 1
+        assert "newest" in notes[0]
+
+    def test_both_kinds_are_counted_apart(self):
+        """Test that records settled by date and by position each get their own count."""
+        notes = self._notes(
+            (1, self._bundle(a="x", b="x", c="x")),
+            (2, self._bundle(a="y", b="y", c="x")),
+            (2, self._bundle(c="z")),
+        )
+        assert notes == [
+            "2 records appear in more than one document with different content; "
+            "the newest document's copy was kept",
+            "1 record appears in more than one document with different content, "
+            "and the documents have the same date or no date; "
+            "the copy from the document later in the zip was kept",
+        ]
+
+    def test_older_copy_equal_to_the_kept_one_is_not_a_tie(self):
+        """Test that only copies that differ from the kept one decide the wording."""
+        notes = self._notes(
+            (1, self._bundle(a="x")),
+            (2, self._bundle(a="y")),
+            (2, self._bundle(a="y")),
+        )
+        assert len(notes) == 1
+        assert "newest" in notes[0]
 
 
 class TestValidateFormat:
@@ -290,6 +400,29 @@ class TestToBundle:
             "1 record appears in more than one document with different content; "
             "the newest document's copy was kept"
         )
+
+    def test_other_xml_with_an_unused_cda_namespace_is_skipped(self):
+        """Test that a zip member whose root is in another namespace does not stop the import."""
+        other = b'<ClinicalDocument xmlns="urn:other" xmlns:cda="urn:hl7-org:v3"/>'
+        data = _xdm_zip(MYCHART_CCD.read_bytes(), other)
+        alone, _ = CcdaImporter().to_bundle(MYCHART_CCD.read_bytes(), "ccd.xml")
+        merged, _ = CcdaImporter().to_bundle(data, "export.zip")
+        assert len(merged["entry"]) == len(alone["entry"])
+
+    def test_same_date_conflict_does_not_claim_a_newest_document(self):
+        """Test that two versions with one date are reported as kept by position, not by age."""
+        first = MYCHART_CCD.read_bytes()
+        second = first.replace(b'<low value="20180214"/>', b'<low value="20180301"/>')
+        assert second != first
+        merged, notes = CcdaImporter().to_bundle(_xdm_zip(first, second), "export.zip")
+        onsets = [e["resource"].get("onsetDateTime") for e in merged["entry"]]
+        assert "2018-03-01" in onsets and "2018-02-14" not in onsets
+        assert notes[0] == (
+            "1 record appears in more than one document with different content, "
+            "and the documents have the same date or no date; "
+            "the copy from the document later in the zip was kept"
+        )
+        assert not any("newest" in n for n in notes)
 
     def test_same_entries_in_two_documents_are_not_conflicts(self):
         """Test that a second visit summary repeating the same entries adds no conflict note."""
