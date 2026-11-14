@@ -65,7 +65,11 @@ const PaperlessSettings = ({
       setConnectionStatus(null);
       setConnectionMessage('');
 
-      const token = preferences.paperless_api_token;
+      // Only the auth method the user selected supplies test credentials: a
+      // token saved earlier must not shadow the username/password now typed
+      // into the form (CodeRabbit #1238).
+      const token =
+        authMethod === 'token' ? preferences.paperless_api_token : '';
       const username = preferences.paperless_username;
       const password = preferences.paperless_password;
       const hasApiToken = token && token.trim();
