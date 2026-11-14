@@ -1782,8 +1782,31 @@ def delete_model_record(
                         ActivityLog.patient_id == patient_id
                     ).update({"patient_id": None}, synchronize_session=False)
 
-                    # Delete patient record (automatically cascades to all medical data)
-                    patient_crud.delete(db, id=patient_id)
+                    # Clear active_patient_id references before deleting the patient.
+                    # users.active_patient_id has no ON DELETE action, so leaving a
+                    # reference in place makes the patient delete fail with a
+                    # foreign key violation (#1171).
+                    db.query(User).filter(User.active_patient_id == patient_id).update(
+                        {"active_patient_id": None}, synchronize_session=False
+                    )
+
+                    # Delete patient record (automatically cascades to all medical
+                    # data). commit=False: the patient delete is flushed into the
+                    # request's transaction but not committed, so the user delete
+                    # below and this delete land (or roll back) together. Without
+                    # it, a failure in the user branch leaves the patient and all
+                    # medical data permanently deleted while the user row survives
+                    # (CodeRabbit #1239).
+                    patient_crud.delete(db, id=patient_id, commit=False)
+
+        if model_name == "user" and record_id is not None:
+            # activity_logs.user_id has no ON DELETE action and the column is
+            # nullable, so the audit trail is preserved by detaching it from the
+            # user being removed. This must run for every user delete, not only
+            # those that own a patient (#1171 follow-up, CodeRabbit #1239).
+            db.query(ActivityLog).filter(ActivityLog.user_id == record_id).update(
+                {"user_id": None}, synchronize_session=False
+            )
 
         # Log the deletion BEFORE actually deleting (to preserve record details)
         current_user_id = getattr(current_user, "id", None)
