@@ -5,9 +5,11 @@ and decides which saved credentials are handed to the service factory. Adding a
 method (for example SSO) means adding one entry to ``AUTH_METHODS`` and teaching
 the service factory to build it; callers do not branch on method names.
 
-A NULL or unrecognised stored value means the user never chose: the first
-method in registry order that has saved credentials is used, which is the
-behaviour from before the choice could be stored.
+A NULL or unrecognised stored value means the user never chose. That keeps the
+behaviour from before the choice could be stored: every saved credential is
+handed to the service factory, which tries the methods in registry order and
+moves on to the next if one cannot be used. Once a method is chosen, only its
+credentials are handed over.
 """
 
 from dataclasses import dataclass
@@ -66,6 +68,12 @@ def has_credentials(user_prefs, method: str) -> bool:
     )
 
 
+def stored_auth_method(user_prefs) -> Optional[str]:
+    """The method the user chose, or None if they never did (or it is unrecognised)."""
+    stored = getattr(user_prefs, "paperless_auth_method", None)
+    return stored if is_valid_auth_method(stored) else None
+
+
 def resolve_auth_method(user_prefs) -> str:
     """The method in effect for these preferences.
 
@@ -73,8 +81,8 @@ def resolve_auth_method(user_prefs) -> str:
     deselected method is never used silently. Without a valid stored choice,
     the first registered method with saved credentials is used, else the default.
     """
-    stored = getattr(user_prefs, "paperless_auth_method", None)
-    if is_valid_auth_method(stored):
+    stored = stored_auth_method(user_prefs)
+    if stored:
         return stored
     for method_id in AUTH_METHODS:
         if has_credentials(user_prefs, method_id):
@@ -85,17 +93,21 @@ def resolve_auth_method(user_prefs) -> str:
 def credential_kwargs(
     user_prefs, method: Optional[str] = None
 ) -> Dict[str, Optional[str]]:
-    """Encrypted credentials for ``create_paperless_service``, for one method only.
+    """Encrypted credentials for ``create_paperless_service``.
 
-    Credentials belonging to other methods are left out so a saved but
-    deselected credential cannot take priority in the service factory.
+    With a method named by the caller, or chosen by the user, only that
+    method's credentials are returned, so a saved but deselected credential
+    cannot take priority in the service factory. When nobody has chosen,
+    every saved credential is returned and the factory keeps its legacy
+    order and fallback between methods.
     """
     method_id = (
-        method if is_valid_auth_method(method) else resolve_auth_method(user_prefs)
+        method if is_valid_auth_method(method) else stored_auth_method(user_prefs)
     )
-    spec = AUTH_METHODS[method_id]
+    specs = AUTH_METHODS.values() if method_id is None else [AUTH_METHODS[method_id]]
     return {
         keyword: getattr(user_prefs, column, None)
+        for spec in specs
         for keyword, column in spec.credential_columns.items()
     }
 

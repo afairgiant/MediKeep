@@ -5446,7 +5446,7 @@ Base path: `/api/v1/paperless`
   chosen method's saved credentials are used for every Paperless request, so a saved token
   no longer takes priority once `basic_auth` is chosen (and the other way round). Both
   credential sets are kept when switching. Users who never chose a method keep the earlier
-  behaviour: a saved token wins, otherwise username/password. Methods are registered in
+  behaviour: a saved token is tried first, and username/password is used if the token cannot be used. Methods are registered in
   `app/services/paperless_auth_methods.py`; the column has no database constraint, so
   adding a method does not need a migration.
 - **`PUT` validation**: an unknown `paperless_auth_method` returns `400`, as does a method

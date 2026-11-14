@@ -341,10 +341,9 @@ async def test_paperless_connection(
                     detail="No saved credentials found. Please provide authentication details.",
                 )
 
-            # Test the method being edited if the client named one, else the stored choice
-            auth_method = connection_data.paperless_auth_method or resolve_auth_method(
-                user_prefs
-            )
+            # Test the method being edited if the client named one. Otherwise follow
+            # the stored choice, or the legacy order if the user never chose.
+            auth_method = connection_data.paperless_auth_method
 
             if not has_usable_credentials(user_prefs, auth_method):
                 raise HTTPException(
@@ -352,12 +351,13 @@ async def test_paperless_connection(
                     detail="No saved authentication credentials found. Please provide token or username/password.",
                 )
 
-            # Use only the chosen method's saved credentials
             saved_credentials = credential_kwargs(user_prefs, auth_method)
             encrypted_token = saved_credentials.get("encrypted_token")
             encrypted_username = saved_credentials.get("encrypted_username")
             encrypted_password = saved_credentials.get("encrypted_password")
-            logger.info(f"Using saved credentials: method={auth_method}")
+            logger.info(
+                f"Using saved credentials: method={auth_method or resolve_auth_method(user_prefs)}"
+            )
         else:
             # Use provided credentials, encrypt them
             logger.debug("Using provided credentials for test")

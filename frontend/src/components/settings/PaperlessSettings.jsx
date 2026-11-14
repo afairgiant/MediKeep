@@ -31,6 +31,16 @@ const DEFAULT_LABEL_WEIGHT = 500;
  * is a saved preference (paperless_auth_method), so changing it is an unsaved
  * change like any other setting.
  */
+// The values a connection test depends on, for telling whether the form still
+// holds what was tested
+const configOf = prefs => [
+  prefs?.paperless_url ?? '',
+  resolvePaperlessAuthMethod(prefs?.paperless_auth_method),
+  prefs?.paperless_api_token ?? '',
+  prefs?.paperless_username ?? '',
+  prefs?.paperless_password ?? '',
+];
+
 const PaperlessSettings = ({
   preferences,
   onPreferencesUpdate,
@@ -81,13 +91,13 @@ const PaperlessSettings = ({
       'Unable to connect. Please check your URL and credentials.'
     );
 
-    // A result for a method that is no longer selected (for example after
-    // Reset Changes) says nothing about the current form, so it is dropped
-    const testedMethod = authMethod;
+    // A result for a configuration that is no longer in the form (for example
+    // after Reset Changes) says nothing about the current form, so it is dropped
+    const testedConfig = configOf(preferences);
     const isOutdated = () =>
-      resolvePaperlessAuthMethod(
-        latestPreferences.current?.paperless_auth_method
-      ) !== testedMethod;
+      configOf(latestPreferences.current).some(
+        (value, index) => value !== testedConfig[index]
+      );
 
     try {
       setTestingConnection(true);
