@@ -732,6 +732,13 @@ class TestPaperlessServiceCreation:
                 self.paperless_url, invalid_encrypted_token, self.user_id
             )
 
+    def test_blocked_url_with_valid_credentials_is_a_connection_error(self):
+        """A blocked URL must not be reported as unreadable credentials."""
+        encrypted_token = credential_encryption.encrypt_token(self.api_token)
+
+        with pytest.raises(PaperlessConnectionError):
+            create_paperless_service("http://169.254.169.254", encrypted_token)
+
     def test_create_service_empty_token(self):
         """Test service creation with empty token raises no-credentials error."""
         with pytest.raises(PaperlessError, match="No valid authentication credentials"):

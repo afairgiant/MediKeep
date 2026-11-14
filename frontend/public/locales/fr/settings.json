@@ -75,7 +75,8 @@
     "autoSyncDescription": "Vérifie automatiquement si les documents existent toujours dans Paperless au chargement des pages",
     "syncTagsLabel": "Synchroniser les étiquettes et catégories des documents",
     "syncTagsDescription": "Garder les métadonnées des documents synchronisées avec Paperless (bientôt disponible)",
-    "loadingSettings": "Chargement des paramètres..."
+    "loadingSettings": "Chargement des paramètres...",
+    "credentialsIncomplete": "Saisissez votre nom d'utilisateur et votre mot de passe pour tester la connexion."
   },
   "papra": {
     "apiTokenPlaceholder": "Saisissez votre jeton d'API Papra",

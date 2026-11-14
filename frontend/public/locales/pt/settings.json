@@ -75,7 +75,8 @@
     "autoSyncDescription": "Verificar automaticamente se os documentos ainda existem no Paperless ao carregar as páginas",
     "syncTagsLabel": "Sincronizar tags e categorias de documentos",
     "syncTagsDescription": "Manter os metadados dos documentos sincronizados com o Paperless (Em Breve)",
-    "loadingSettings": "Carregando configurações..."
+    "loadingSettings": "Carregando configurações...",
+    "credentialsIncomplete": "Digite o nome de usuário e a senha para testar a conexão."
   },
   "papra": {
     "privateUrlNote": "Endereços privados e internos (localhost, 192.168.x.x, 10.x.x.x) são compatíveis com instalações auto-hospedadas. Endereços de metadados de nuvem e link-local (169.254.x.x) são sempre bloqueados por segurança. Se o seu administrador restringiu as integrações a endereços públicos, as URLs privadas serão rejeitadas.",

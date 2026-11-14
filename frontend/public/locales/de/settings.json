@@ -75,7 +75,8 @@
     "autoSyncDescription": "Beim Laden von Seiten automatisch prüfen, ob Dokumente in Paperless noch vorhanden sind",
     "syncTagsLabel": "Dokument-Tags und Kategorien synchronisieren",
     "syncTagsDescription": "Dokument-Metadaten mit Paperless synchron halten (Demnächst verfügbar)",
-    "loadingSettings": "Einstellungen werden geladen..."
+    "loadingSettings": "Einstellungen werden geladen...",
+    "credentialsIncomplete": "Geben Sie Benutzername und Passwort ein, um die Verbindung zu testen."
   },
   "papra": {
     "privateUrlNote": "Private und interne Adressen (localhost, 192.168.x.x, 10.x.x.x) werden für selbst gehostete Setups unterstützt. Cloud-Metadaten- und Link-Local-Adressen (169.254.x.x) werden aus Sicherheitsgründen immer blockiert. Wenn Ihr Administrator Integrationen auf öffentliche Adressen beschränkt hat, werden private URLs abgelehnt.",

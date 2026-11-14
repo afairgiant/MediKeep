@@ -28,18 +28,21 @@ class PaperlessAuthMethod:
 
 
 # Registry order is the fallback priority when the user has not chosen a method.
+# The strings below are column names, not secrets (bandit B105 false positives).
 AUTH_METHODS: Dict[str, PaperlessAuthMethod] = {
     method.id: method
     for method in (
         PaperlessAuthMethod(
             id="token",
-            credential_columns={"encrypted_token": "paperless_api_token_encrypted"},
+            credential_columns={
+                "encrypted_token": "paperless_api_token_encrypted"  # nosec B105
+            },
         ),
         PaperlessAuthMethod(
             id="basic_auth",
             credential_columns={
                 "encrypted_username": "paperless_username_encrypted",
-                "encrypted_password": "paperless_password_encrypted",
+                "encrypted_password": "paperless_password_encrypted",  # nosec B105
             },
         ),
     )

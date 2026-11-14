@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Radio,
@@ -43,6 +43,10 @@ const PaperlessSettings = ({
   const authMethod = resolvePaperlessAuthMethod(
     preferences?.paperless_auth_method
   );
+  // Always the latest props, so a result that arrives after the user pressed
+  // Reset Changes is applied to the current preferences, not an old snapshot
+  const latestPreferences = useRef(preferences);
+  latestPreferences.current = preferences;
 
   // Don't render until preferences are loaded
   if (!preferences || Object.keys(preferences).length === 0) {
@@ -54,12 +58,13 @@ const PaperlessSettings = ({
   }
 
   const handleUpdate = updates => {
-    const updatedPrefs = { ...preferences, ...updates };
+    const current = latestPreferences.current;
+    const updatedPrefs = { ...current, ...updates };
 
     // If disabling and currently the active backend, fall back to local
     if (
       updates.paperless_enabled === false &&
-      preferences.default_storage_backend === 'paperless'
+      current.default_storage_backend === 'paperless'
     ) {
       updatedPrefs.default_storage_backend = 'local';
     }
@@ -76,6 +81,14 @@ const PaperlessSettings = ({
       'Unable to connect. Please check your URL and credentials.'
     );
 
+    // A result for a method that is no longer selected (for example after
+    // Reset Changes) says nothing about the current form, so it is dropped
+    const testedMethod = authMethod;
+    const isOutdated = () =>
+      resolvePaperlessAuthMethod(
+        latestPreferences.current?.paperless_auth_method
+      ) !== testedMethod;
+
     try {
       setTestingConnection(true);
       setConnectionStatus(null);
@@ -89,6 +102,21 @@ const PaperlessSettings = ({
         authMethod === 'basic_auth' ? preferences.paperless_password : '';
       const hasApiToken = token && token.trim();
       const hasCredentials = username && password;
+
+      // Only half a pair typed would silently test the saved credentials instead
+      if (
+        authMethod === 'basic_auth' &&
+        Boolean(username) !== Boolean(password)
+      ) {
+        setConnectionStatus('error');
+        setConnectionMessage(
+          t(
+            'paperlessConnection.credentialsIncomplete',
+            'Enter both your username and password to test the connection.'
+          )
+        );
+        return;
+      }
 
       let result;
       if (hasApiToken) {
@@ -114,6 +142,8 @@ const PaperlessSettings = ({
         result = await testPaperlessConnection(url, '', '', '', authMethod);
       }
 
+      if (isOutdated()) return;
+
       if (result.status === 'connected') {
         setConnectionStatus('success');
         setConnectionMessage(
@@ -134,6 +164,7 @@ const PaperlessSettings = ({
         });
       }
     } catch (error) {
+      if (isOutdated()) return;
       setConnectionStatus('error');
       setConnectionMessage(error.message || connectionFailedMessage);
       frontendLogger.logError('Paperless connection test error', {

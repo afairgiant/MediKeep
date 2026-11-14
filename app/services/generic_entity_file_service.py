@@ -41,7 +41,7 @@ from app.services.paperless_client import (
 from app.services.paperless_service import (
     PaperlessAuthenticationError,
     PaperlessError,
-    create_paperless_service_with_username_password,
+    create_paperless_service,
 )
 from app.services.paperless_task_status import extract_task, parse_task
 
@@ -2325,11 +2325,10 @@ class GenericEntityFileService:
                 return {}
 
             # Create paperless service
-            paperless_service = create_paperless_service_with_username_password(
+            paperless_service = create_paperless_service(
                 user_prefs.paperless_url,
-                user_prefs.paperless_username_encrypted,
-                user_prefs.paperless_password_encrypted,
-                current_user_id,
+                **credential_kwargs(user_prefs),
+                user_id=current_user_id,
             )
 
             status_updates = {}

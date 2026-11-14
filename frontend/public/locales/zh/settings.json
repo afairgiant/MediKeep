@@ -75,7 +75,8 @@
     "autoSyncDescription": "页面加载时自动检查文档在 Paperless 中是否仍然存在",
     "syncTagsLabel": "同步文档标签和分类",
     "syncTagsDescription": "保持文档元数据与 Paperless 同步（即将推出）",
-    "loadingSettings": "正在加载设置..."
+    "loadingSettings": "正在加载设置...",
+    "credentialsIncomplete": "请输入用户名和密码以测试连接。"
   },
   "papra": {
     "privateUrlNote": "私有和内部地址（localhost、192.168.x.x、10.x.x.x）支持自托管部署。出于安全考虑，云元数据和链路本地地址（169.254.x.x）始终被阻止。如果管理员已将集成限制为公共地址，则私有 URL 将被拒绝。",

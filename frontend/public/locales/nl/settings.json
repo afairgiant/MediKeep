@@ -75,7 +75,8 @@
     "autoSyncDescription": "Controleer automatisch of documenten nog bestaan in Paperless wanneer pagina's worden geladen",
     "syncTagsLabel": "Documenttags en categorieën synchroniseren",
     "syncTagsDescription": "Documentmetadata gesynchroniseerd houden met Paperless (Binnenkort beschikbaar)",
-    "loadingSettings": "Instellingen laden..."
+    "loadingSettings": "Instellingen laden...",
+    "credentialsIncomplete": "Voer zowel uw gebruikersnaam als wachtwoord in om de verbinding te testen."
   },
   "papra": {
     "privateUrlNote": "Privé- en interne adressen (localhost, 192.168.x.x, 10.x.x.x) worden ondersteund voor zelf-gehoste installaties. Cloud-metadata- en link-local-adressen (169.254.x.x) worden om veiligheidsredenen altijd geblokkeerd. Als uw beheerder integraties heeft beperkt tot openbare adressen, worden privé-URL's geweigerd.",

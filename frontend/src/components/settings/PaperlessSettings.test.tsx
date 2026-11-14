@@ -167,6 +167,25 @@ describe('PaperlessSettings test connection', () => {
     );
   });
 
+  it.each([
+    ['only a password', { paperless_password: 'new-secret' }],
+    ['only a username', { paperless_username: 'alice' }],
+  ])(
+    'does not test saved credentials when %s is typed',
+    async (_label, typed) => {
+      renderSettings({
+        paperless_auth_method: 'basic_auth',
+        paperless_has_credentials: true,
+        ...typed,
+      });
+      fireEvent.click(screen.getByRole('button', { name: /test connection/i }));
+      expect(
+        await screen.findByText(/enter both your username and password/i)
+      ).toBeInTheDocument();
+      expect(testPaperlessConnection).not.toHaveBeenCalled();
+    }
+  );
+
   it('tests the saved credentials of the selected method when nothing is typed', async () => {
     vi.mocked(testPaperlessConnection).mockResolvedValue({
       status: 'connected',

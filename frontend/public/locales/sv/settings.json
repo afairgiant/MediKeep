@@ -75,7 +75,8 @@
     "autoSyncDescription": "Kontrollera automatiskt om dokument fortfarande finns i Paperless när sidor laddas",
     "syncTagsLabel": "Synkronisera dokumenttaggar och kategorier",
     "syncTagsDescription": "Håll dokumentmetadata synkroniserad med Paperless (Kommer snart)",
-    "loadingSettings": "Laddar inställningar..."
+    "loadingSettings": "Laddar inställningar...",
+    "credentialsIncomplete": "Ange både användarnamn och lösenord för att testa anslutningen."
   },
   "papra": {
     "privateUrlNote": "Privata och interna adresser (localhost, 192.168.x.x, 10.x.x.x) stöds för självhostade installationer. Moln-metadata- och link-local-adresser (169.254.x.x) blockeras alltid av säkerhetsskäl. Om din administratör har begränsat integrationer till offentliga adresser kommer privata URL:er att avvisas.",
