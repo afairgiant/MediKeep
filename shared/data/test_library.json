@@ -748,6 +748,8 @@
       "category": "lipids",
       "common_names": [
         "LDL/HDL Ratio",
+        "LDL/HDL Cholesterol Ratio",
+        "Cholesterol in LDL/Cholesterol in HDL",
         "LDL/HDL Index",
         "LDL/HDL Quotient"
       ],
@@ -1338,7 +1340,7 @@
         "TC/HDL"
       ],
       "is_common": false,
-      "display_order": 179,
+      "display_order": 104,
       "result_type": "quantitative"
     },
     {
