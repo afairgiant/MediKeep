@@ -1782,6 +1782,14 @@ def delete_model_record(
                         ActivityLog.patient_id == patient_id
                     ).update({"patient_id": None}, synchronize_session=False)
 
+                    # Clear active_patient_id references before deleting the patient.
+                    # users.active_patient_id has no ON DELETE action, so leaving a
+                    # reference in place makes the patient delete fail with a
+                    # foreign key violation (#1171).
+                    db.query(User).filter(User.active_patient_id == patient_id).update(
+                        {"active_patient_id": None}, synchronize_session=False
+                    )
+
                     # Delete patient record (automatically cascades to all medical data)
                     patient_crud.delete(db, id=patient_id)
 
