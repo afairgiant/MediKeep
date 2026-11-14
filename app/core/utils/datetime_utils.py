@@ -110,6 +110,22 @@ def to_local(utc_datetime: datetime) -> Optional[datetime]:
         return None
 
 
+def serialize_datetime_utc(value: Optional[datetime]) -> Optional[str]:
+    """Serialize a UTC datetime with a trailing Z for API responses.
+
+    Database columns store naive UTC datetimes. Without the explicit ``Z``
+    suffix, JavaScript's ``new Date()`` interprets the value as local time and
+    shifts it by the viewer's UTC offset.
+    """
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    else:
+        value = value.astimezone(timezone.utc)
+    return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def format_datetime(utc_datetime: datetime, include_timezone: bool = True) -> str:
     """Format datetime for display."""
     if utc_datetime is None:
