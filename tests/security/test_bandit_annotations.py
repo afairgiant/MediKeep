@@ -64,8 +64,11 @@ def _unannotated_candidates():
         lines = source.splitlines()
         for rule, lineno in _iter_candidates(tree):
             line = lines[lineno - 1]
+            # Bandit reads everything after `nosec` up to the next `#` as its test
+            # list, so the reason must sit behind a second `#`. The legacy `-`
+            # separator is still accepted so older annotations keep passing.
             annotation = re.search(
-                r"# nosec {}\b.*-\s*\S".format(rule), line
+                r"# nosec {}\b.*(?:#|-)\s*\S".format(rule), line
             )
             if annotation is None:
                 rel = path.relative_to(APP_DIR.parent)

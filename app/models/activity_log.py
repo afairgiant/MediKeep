@@ -270,7 +270,7 @@ class ActionType:
 class LoginFailureReason:
     """Why a sign-in was refused, stored as the reason of a login_failed entry."""
 
-    WRONG_PASSWORD = "wrong_password"  # nosec B105 - audit reason code
+    WRONG_PASSWORD = "wrong_password"  # nosec B105 # audit reason code
     UNKNOWN_USER = "unknown_user"
     DEACTIVATED = "deactivated"
     WRONG_CODE = "wrong_code"
@@ -341,7 +341,7 @@ class ActivityCategory:
     USER_LOGIN = "user_login"
     USER_LOGOUT = "user_logout"
     USER_REGISTERED = "user_registered"
-    PASSWORD_CHANGED = "password_changed"  # nosec B105 - audit event code
+    PASSWORD_CHANGED = "password_changed"  # nosec B105 # audit event code
 
     # Admin events
     ADMIN_ACCESS = "admin_access"

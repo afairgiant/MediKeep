@@ -690,7 +690,7 @@ async def get_paperless_settings(
             return {
                 "paperless_enabled": False,
                 "paperless_url": "",
-                "paperless_has_token": False,  # nosec B105 - dict key with a boolean/token-type literal, not a credential
+                "paperless_has_token": False,  # nosec B105 # dict key with a boolean/token-type literal, not a credential
                 "paperless_has_credentials": False,
                 "paperless_connection_verified": False,
                 "paperless_auth_method": DEFAULT_AUTH_METHOD,
@@ -699,7 +699,7 @@ async def get_paperless_settings(
                 "paperless_sync_tags": True,
                 "papra_enabled": False,
                 "papra_url": "",
-                "papra_has_token": False,  # nosec B105 - dict key with a boolean/token-type literal, not a credential
+                "papra_has_token": False,  # nosec B105 # dict key with a boolean/token-type literal, not a credential
                 "papra_connection_verified": False,
                 "papra_organization_id": "",
             }

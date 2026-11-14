@@ -326,7 +326,7 @@ def complete_login(
 
     body = {
         "access_token": access_token,
-        "token_type": "bearer",  # nosec B105 - dict key with a boolean/token-type literal, not a credential
+        "token_type": "bearer",  # nosec B105 # dict key with a boolean/token-type literal, not a credential
         "session_timeout_minutes": session_timeout_minutes,
         "must_change_password": bool(user.must_change_password),
         **(extra_body or {}),
