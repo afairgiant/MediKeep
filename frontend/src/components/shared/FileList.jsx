@@ -31,6 +31,7 @@ import {
   IconX,
   IconUnlink,
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 
@@ -53,6 +54,31 @@ const FileList = ({
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByType, setFilterByType] = useState('');
+
+  const getViewUnavailableMessage = reason => {
+    switch (reason) {
+      case 'processing':
+        return t('fileList.viewUnavailable.processing');
+      case 'missing':
+        return t('fileList.viewUnavailable.missing');
+      default:
+        return t('fileList.viewUnavailable.unavailable');
+    }
+  };
+
+  // The view URL opens in a new tab, so a backend error there would render as
+  // raw JSON. Tell the user why the document can't be opened instead.
+  const handleViewClick = (file, unavailableReason) => {
+    if (unavailableReason) {
+      notifications.show({
+        title: t('fileList.viewUnavailable.title'),
+        message: getViewUnavailableMessage(unavailableReason),
+        color: 'yellow',
+      });
+      return;
+    }
+    onView(file.id, file.file_name);
+  };
 
   // Get file icon and color based on type
   const getFileIcon = (fileName, fileType) => {
@@ -337,6 +363,19 @@ const FileList = ({
               (file.file_path.startsWith('paperless://document/') ||
                 file.file_path.startsWith('papra://document/'));
 
+            // Remote documents the backend cannot serve (no remote ID yet, or gone)
+            let viewUnavailableReason = null;
+            if (isProcessing) {
+              viewUnavailableReason = 'processing';
+            } else if (isMissing) {
+              viewUnavailableReason = 'missing';
+            } else if (
+              file.storage_backend === 'paperless' &&
+              !file.paperless_document_id
+            ) {
+              viewUnavailableReason = 'unavailable';
+            }
+
             return (
               <Paper
                 key={file.id}
@@ -481,7 +520,9 @@ const FileList = ({
                           <ActionIcon
                             variant="light"
                             color="green"
-                            onClick={() => onView(file.id, file.file_name)}
+                            onClick={() =>
+                              handleViewClick(file, viewUnavailableReason)
+                            }
                             title="View file in new tab"
                           >
                             <IconEye size={16} />

@@ -35,7 +35,13 @@
     "statusDuplicate": "Duplicaat",
     "statusFailed": "Mislukt",
     "statusMissing": "Ontbrekend",
-    "statusProcessing": "Verwerken"
+    "statusProcessing": "Verwerken",
+    "viewUnavailable": {
+      "missing": "Dit document is niet gevonden in de opslagservice. Mogelijk is het daar verwijderd. U kunt het uit deze lijst verwijderen.",
+      "processing": "Dit document wordt nog verwerkt door Paperless en kan nog niet worden geopend. Probeer het zo opnieuw.",
+      "title": "Document niet beschikbaar",
+      "unavailable": "Dit document is niet correct opgeslagen en kan niet worden geopend. U kunt het verwijderen en opnieuw uploaden."
+    }
   },
   "fileUpload": {
     "accepted": "Geaccepteerd: {{types}} • Max. grootte: {{size}}MB",

@@ -211,6 +211,8 @@ export const pollPaperlessTaskStatus = async (
   const FOREGROUND_ATTEMPTS = 30; // 30 seconds of foreground polling
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    let pollError = null;
+
     try {
       const response = await apiService.get(
         `/paperless/tasks/${taskUuid}/status`
@@ -228,44 +230,46 @@ export const pollPaperlessTaskStatus = async (
         );
         return response;
       }
-
-      // After 30 seconds (30 attempts), transition to background processing
-      if (attempt === FOREGROUND_ATTEMPTS - 1 && onBackgroundTransition) {
-        logger.info(
-          `🔄 Transitioning to background processing after ${FOREGROUND_ATTEMPTS} attempts`
-        );
-
-        // Notify caller that we're going to background
-        onBackgroundTransition(taskUuid);
-
-        // Return a special "processing" status to indicate background mode
-        return {
-          status: 'PROCESSING_BACKGROUND',
-          task_uuid: taskUuid,
-          message:
-            'Task is taking longer than expected, continuing in background',
-        };
-      }
-
-      // Wait before next attempt if task is still pending/running
-      if (attempt < maxAttempts - 1) {
-        // Use longer intervals after transitioning to background (if we somehow get here)
-        const currentInterval =
-          attempt >= FOREGROUND_ATTEMPTS ? 10000 : intervalMs;
-        logger.info(`⏱️ Waiting ${currentInterval}ms before next attempt...`);
-        await new Promise(resolve => setTimeout(resolve, currentInterval));
-      }
     } catch (error) {
+      pollError = error;
       logger.info(
         `❌ Attempt ${attempt + 1}/${maxAttempts} failed:`,
         error.message
       );
-      // If we can't get task status, continue polling unless it's the last attempt
-      if (attempt === maxAttempts - 1) {
-        throw new Error(`Task status polling failed: ${error.message}`);
-      }
-      await new Promise(resolve => setTimeout(resolve, intervalMs));
     }
+
+    // After the foreground window, hand off to background processing whether
+    // the status checks are pending or failing. Otherwise an erroring status
+    // endpoint keeps the caller (and its upload dialog) waiting for the whole
+    // maxAttempts window.
+    if (attempt === FOREGROUND_ATTEMPTS - 1 && onBackgroundTransition) {
+      logger.info(
+        `🔄 Transitioning to background processing after ${FOREGROUND_ATTEMPTS} attempts`
+      );
+
+      // Notify caller that we're going to background
+      onBackgroundTransition(taskUuid);
+
+      // Return a special "processing" status to indicate background mode
+      return {
+        status: 'PROCESSING_BACKGROUND',
+        task_uuid: taskUuid,
+        message:
+          'Task is taking longer than expected, continuing in background',
+      };
+    }
+
+    if (attempt === maxAttempts - 1) {
+      if (pollError) {
+        throw new Error(`Task status polling failed: ${pollError.message}`);
+      }
+      break;
+    }
+
+    // Use longer intervals once past the foreground window (no background handler)
+    const currentInterval = attempt >= FOREGROUND_ATTEMPTS ? 10000 : intervalMs;
+    logger.info(`⏱️ Waiting ${currentInterval}ms before next attempt...`);
+    await new Promise(resolve => setTimeout(resolve, currentInterval));
   }
 
   throw new Error('Task polling timeout - task may still be processing');

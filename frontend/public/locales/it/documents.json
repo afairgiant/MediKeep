@@ -35,7 +35,13 @@
     "statusDuplicate": "Duplicato",
     "statusFailed": "Non riuscito",
     "statusMissing": "Mancante",
-    "statusProcessing": "In elaborazione"
+    "statusProcessing": "In elaborazione",
+    "viewUnavailable": {
+      "missing": "Questo documento non è stato trovato nel servizio di archiviazione. Potrebbe essere stato eliminato lì. Puoi rimuoverlo da questo elenco.",
+      "processing": "Questo documento è ancora in elaborazione da parte di Paperless e non può essere ancora aperto. Riprova tra un momento.",
+      "title": "Documento non disponibile",
+      "unavailable": "Questo documento non è stato salvato correttamente e non può essere aperto. Puoi rimuoverlo e caricarlo di nuovo."
+    }
   },
   "fileUpload": {
     "accepted": "Accettati: {{types}} • Dimensione max: {{size}}MB",

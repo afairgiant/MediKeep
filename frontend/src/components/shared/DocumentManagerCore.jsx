@@ -980,8 +980,9 @@ const useDocumentManagerCore = ({
               result.success === null &&
               result.isBackgroundProcessing
             ) {
-              // Background processing - show as processing/uploading with appropriate message
-              updateFileProgress(fileId, 75, 'uploading', result.message);
+              // Background processing - show as processing (not uploading, which
+              // keeps the spinner running) with appropriate message
+              updateFileProgress(fileId, 75, 'processing', result.message);
               completeUpload(true, result.message); // Consider this successful since it's processing in background
             } else if (result.isDuplicate) {
               updateFileProgress(fileId, 0, 'failed', result.message);
@@ -1296,6 +1297,26 @@ const useDocumentManagerCore = ({
                     targetEntityId,
                     fileName: pendingFile.file.name,
                     documentId: result.documentId,
+                    component: 'DocumentManagerCore',
+                  });
+                } else if (result.isBackgroundProcessing) {
+                  // Paperless is still consuming the file. Not a failure: the
+                  // record stays "processing" and is resolved in the background.
+                  if (showProgressModal) {
+                    updateFileProgress(
+                      fileId,
+                      75,
+                      'processing',
+                      result.message
+                    );
+                  }
+
+                  logger.info('document_manager_batch_paperless_background', {
+                    message:
+                      'Individual Paperless file continues processing in background',
+                    entityType,
+                    targetEntityId,
+                    fileName: pendingFile.file.name,
                     component: 'DocumentManagerCore',
                   });
                 } else if (result.isDuplicate) {

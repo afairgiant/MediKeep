@@ -2158,6 +2158,7 @@ Base path: `/api/v1/entity-files`
 
 - **Purpose**: Delete a specific file from a lab result
 - **Authentication**: Yes
+- **Remote storage**: For Paperless/Papra files the remote document is deleted too, except linked documents (unlinked only), documents still referenced by another record, and records marked `missing`. A record with no remote document ID (an upload still processing, or whose task failed) has nothing to remove remotely, so only the database record is deleted.
 - **Success Response** (200): File operation result
 
 > **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them.

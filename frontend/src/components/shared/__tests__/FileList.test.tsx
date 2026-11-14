@@ -1,0 +1,108 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MantineProvider } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import FileList from '../FileList';
+
+vi.mock('@mantine/notifications', () => ({
+  notifications: { show: vi.fn() },
+}));
+
+vi.mock('../../../hooks/useDateFormat', () => ({
+  useDateFormat: () => ({ formatDate: (value: string) => value }),
+}));
+
+const baseFile = {
+  id: 1,
+  file_name: 'report.pdf',
+  file_type: 'application/pdf',
+  storage_backend: 'paperless',
+  sync_status: 'synced',
+  paperless_document_id: '42',
+  file_path: 'paperless://',
+  uploaded_at: '2026-01-01T00:00:00',
+};
+
+function renderFileList(file: Record<string, unknown>, syncStatus = {}) {
+  const onView = vi.fn();
+  render(
+    <MantineProvider>
+      <FileList files={[file]} syncStatus={syncStatus} onView={onView} />
+    </MantineProvider>
+  );
+  fireEvent.click(screen.getByTitle('View file in new tab'));
+  return onView;
+}
+
+describe('FileList view button', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('opens a synced Paperless document', () => {
+    const onView = renderFileList(baseFile);
+
+    expect(onView).toHaveBeenCalledWith(1, 'report.pdf');
+    expect(notifications.show).not.toHaveBeenCalled();
+  });
+
+  it('opens a local file', () => {
+    const onView = renderFileList({
+      ...baseFile,
+      storage_backend: 'local',
+      paperless_document_id: null,
+      file_path: 'uploads/report.pdf',
+    });
+
+    expect(onView).toHaveBeenCalledWith(1, 'report.pdf');
+  });
+
+  it('explains instead of opening while Paperless is still processing the upload', () => {
+    const onView = renderFileList({
+      ...baseFile,
+      sync_status: 'processing',
+      paperless_document_id: null,
+      paperless_task_uuid: '3f1c7a52-9e0b-4d0e-8c1a-0b6f5d2a7e11',
+    });
+
+    expect(onView).not.toHaveBeenCalled();
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'fileList.viewUnavailable.processing',
+      })
+    );
+  });
+
+  it('explains instead of opening a document that is missing from Paperless', () => {
+    const onView = renderFileList({ ...baseFile, sync_status: 'missing' });
+
+    expect(onView).not.toHaveBeenCalled();
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'fileList.viewUnavailable.missing' })
+    );
+  });
+
+  it('explains instead of opening a document the live sync check could not find', () => {
+    const onView = renderFileList(baseFile, { 1: false });
+
+    expect(onView).not.toHaveBeenCalled();
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'fileList.viewUnavailable.missing' })
+    );
+  });
+
+  it('explains instead of opening a Paperless record that never got a document ID', () => {
+    const onView = renderFileList({
+      ...baseFile,
+      sync_status: 'failed',
+      paperless_document_id: null,
+    });
+
+    expect(onView).not.toHaveBeenCalled();
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'fileList.viewUnavailable.unavailable',
+      })
+    );
+  });
+});
