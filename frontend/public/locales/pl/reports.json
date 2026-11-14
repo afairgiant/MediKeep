@@ -229,7 +229,7 @@
         "title": "Format CSV:"
       },
       "fileAttachments": {
-        "description": "Gdy dostępne dla eksportów PDF, pliki wyników badań laboratoryjnych mogą być dołączone w archiwum ZIP.",
+        "description": "Załączniki wyeksportowanych rekordów są dodawane do archiwum ZIP: zawsze przy eksporcie zbiorczym oraz przy eksporcie pojedynczym, gdy wybrana jest opcja załączników plików.",
         "title": "Załączniki plików:"
       },
       "json": {

@@ -221,7 +221,7 @@
         "title": "CSV-formaat:"
       },
       "fileAttachments": {
-        "description": "Indien beschikbaar voor PDF-exporten, kunnen laboratoriumresultaatbestanden worden opgenomen in een ZIP-archief.",
+        "description": "Bijlagen bij de geëxporteerde gegevens worden toegevoegd aan een ZIP-archief: altijd bij bulkexports en bij enkelvoudige exports wanneer de optie voor bestandsbijlagen is geselecteerd.",
         "title": "Bestandsbijlagen:"
       },
       "json": {

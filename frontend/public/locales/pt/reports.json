@@ -221,7 +221,7 @@
         "title": "Formato CSV:"
       },
       "fileAttachments": {
-        "description": "Quando disponível para exportações PDF, os ficheiros de resultados laboratoriais podem ser incluídos num arquivo ZIP.",
+        "description": "Os anexos dos registos exportados são adicionados a um arquivo ZIP: sempre nas exportações em massa e, nas individuais, quando a opção de anexos está selecionada.",
         "title": "Anexos de Ficheiros:"
       },
       "json": {

@@ -221,7 +221,7 @@
         "title": "Format CSV :"
       },
       "fileAttachments": {
-        "description": "Quand ils sont disponibles pour une exportation au format PDF, les fichiers de résultats d'analyse peuvent être inclus dans une archive ZIP.",
+        "description": "Les pièces jointes des enregistrements exportés sont ajoutées à une archive ZIP : toujours pour les exportations de masse, et pour les exportations à l'unité lorsque l'option des pièces jointes est sélectionnée.",
         "title": "Pièces jointes :"
       },
       "json": {

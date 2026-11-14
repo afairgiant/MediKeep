@@ -220,7 +220,7 @@
         "title": "CSV 格式："
       },
       "fileAttachments": {
-        "description": "当可用于 PDF 导出时，实验室结果文件可以包含在 ZIP 存档中。",
+        "description": "所导出记录的附件会添加到 ZIP 存档中：批量导出始终包含，单独导出则在选中文件附件选项时包含。",
         "title": "文件附件："
       },
       "json": {

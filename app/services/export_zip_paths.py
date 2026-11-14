@@ -8,6 +8,12 @@ import os
 import unicodedata
 from typing import Dict, Set
 
+# Windows cannot create files or folders with these names, with or without an extension
+_WINDOWS_RESERVED_NAMES = frozenset(
+    {"CON", "PRN", "AUX", "NUL"}
+    | {f"{device}{number}" for device in ("COM", "LPT") for number in "0123456789¹²³"}
+)
+
 MAX_FOLDER_LENGTH = 60
 MAX_STEM_LENGTH = 80
 MAX_EXTENSION_LENGTH = 10
@@ -31,6 +37,14 @@ def clean_name(text: object, max_length: int) -> str:
     return cleaned.strip(".")[:max_length].rstrip(".")
 
 
+def _avoid_reserved_name(name: str) -> str:
+    """Prefix ``_`` when the part of ``name`` before its first dot is a Windows device
+    name (``CON``, ``nul.txt``, ``COM1.tar.gz``)."""
+    if name.split(".")[0].upper() in _WINDOWS_RESERVED_NAMES:
+        return f"_{name}"
+    return name
+
+
 class ZipPathAllocator:
     """Hands out ZIP paths that never repeat.
 
@@ -46,7 +60,7 @@ class ZipPathAllocator:
 
     def folder(self, label: str) -> str:
         """A folder path, named after ``label``, that has not been handed out yet."""
-        base = clean_name(label, MAX_FOLDER_LENGTH) or "files"
+        base = _avoid_reserved_name(clean_name(label, MAX_FOLDER_LENGTH) or "files")
         name, number = base, 1
         while name.casefold() in self._folders:
             number += 1
@@ -62,7 +76,7 @@ class ZipPathAllocator:
         The original extension is kept; ``folder`` must come from :meth:`folder`.
         """
         stem, extension = os.path.splitext(str(file_name or ""))
-        base = clean_name(stem, MAX_STEM_LENGTH) or "file"
+        base = _avoid_reserved_name(clean_name(stem, MAX_STEM_LENGTH) or "file")
         extension_body = "".join(c for c in extension if _is_kept(c))
         extension = (
             f".{extension_body[:MAX_EXTENSION_LENGTH]}" if extension_body else ""

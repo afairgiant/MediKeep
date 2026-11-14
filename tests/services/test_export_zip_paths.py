@@ -141,6 +141,49 @@ class TestFiles:
         assert "\\" not in parts[2] and ":" not in parts[2]
 
 
+class TestWindowsReservedNames:
+    @pytest.mark.parametrize(
+        "file_name",
+        [
+            "CON.pdf",
+            "nul.txt",
+            "Aux",
+            "PRN.pdf",
+            "COM1.pdf",
+            "lpt9.txt",
+            "con.tar.gz",
+            "COM\u00b9.pdf",
+        ],
+    )
+    def test_device_names_are_prefixed_so_windows_can_extract_them(self, file_name):
+        paths = ZipPathAllocator()
+        folder = paths.folder("r")
+
+        name = paths.file(folder, file_name).split("/")[-1]
+
+        assert name.startswith("_")
+        assert name[1:].lower().startswith(file_name.lower().split(".")[0])
+
+    @pytest.mark.parametrize(
+        "file_name", ["console.pdf", "ACON.pdf", "COM10.pdf", "con_x.pdf", "my.con.pdf"]
+    )
+    def test_names_that_only_contain_a_device_name_are_kept(self, file_name):
+        paths = ZipPathAllocator()
+        folder = paths.folder("r")
+
+        assert paths.file(folder, file_name) == f"{folder}/{file_name}"
+
+    def test_prefixed_name_still_gets_a_counter_on_collision(self):
+        paths = ZipPathAllocator()
+        folder = paths.folder("r")
+
+        assert paths.file(folder, "CON.pdf") == f"{folder}/_CON.pdf"
+        assert paths.file(folder, "CON.pdf") == f"{folder}/_CON_2.pdf"
+
+    def test_folder_label_that_is_a_device_name_is_prefixed(self):
+        assert ZipPathAllocator().folder("NUL") == "lab_files/_NUL"
+
+
 class TestCleanName:
     def test_keeps_letters_marks_and_numbers_from_any_script(self):
         # Thai vowel signs and tone marks are combining marks, not letters

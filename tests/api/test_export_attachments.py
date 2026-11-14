@@ -595,6 +595,32 @@ class TestSingleExportFormats:
         assert not any("attachments/" in line for line in detail_lines)
         assert not any("(" in line for line in detail_lines)
 
+    def test_pdf_still_renders_when_one_record_has_very_many_attachments(
+        self, client, db_session, user_with_patient, authenticated_headers, storage
+    ):
+        day = date(2026, 3, 4)
+        record = _add_record(
+            db_session, "medications", user_with_patient["patient"].id, day
+        )
+        for number in range(60):
+            _add_file(db_session, storage, "medications", record, f"f{number:02d}.txt")
+
+        zip_file = _zip(
+            _export(
+                client,
+                authenticated_headers,
+                format="pdf",
+                scope="medications",
+                include_files="true",
+            )
+        )
+
+        pdf_name = next(n for n in zip_file.namelist() if n.endswith(".pdf"))
+        with pdfplumber.open(io.BytesIO(zip_file.read(pdf_name))) as pdf:
+            text = "".join(page.extract_text() or "" for page in pdf.pages)
+        assert "PDF Generation Error" not in text
+        assert "f59.txt" in text.replace("\n", "").replace(" ", "")
+
     def test_pdf_footer_does_not_claim_files_when_there_are_none(
         self, client, db_session, user_with_patient, authenticated_headers
     ):

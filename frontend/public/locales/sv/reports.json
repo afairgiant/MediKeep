@@ -221,7 +221,7 @@
         "title": "CSV-format:"
       },
       "fileAttachments": {
-        "description": "När det är tillgängligt för PDF-exporter kan laboratorieresultatfiler inkluderas i ett ZIP-arkiv.",
+        "description": "Filbilagor till de exporterade posterna läggs till i ett ZIP-arkiv: alltid vid massexport och vid enskild export när alternativet för filbilagor är valt.",
         "title": "Filbilagor:"
       },
       "json": {

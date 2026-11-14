@@ -2558,7 +2558,10 @@ class ExportService:
 
             # Create the card as a table with label-value pairs
             if card_data:
-                card_table = Table(card_data, colWidths=[2.2 * inch, 4.3 * inch])
+                # splitInRow lets a row taller than a page (many attachments) split
+                card_table = Table(
+                    card_data, colWidths=[2.2 * inch, 4.3 * inch], splitInRow=1
+                )
 
                 # Define modern medical color scheme
                 label_bg_color = colors.Color(0.2, 0.4, 0.6)  # Professional blue

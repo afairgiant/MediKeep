@@ -221,7 +221,7 @@
         "title": "CSV Format:"
       },
       "fileAttachments": {
-        "description": "When available for PDF exports, lab result files can be included in a ZIP archive.",
+        "description": "File attachments of the exported records are added to a ZIP archive: always for bulk exports, and for single exports when the file attachments option is selected.",
         "title": "File Attachments:"
       },
       "json": {
