@@ -1793,6 +1793,15 @@ def delete_model_record(
                     # Delete patient record (automatically cascades to all medical data)
                     patient_crud.delete(db, id=patient_id)
 
+        if model_name == "user" and record_id is not None:
+            # activity_logs.user_id has no ON DELETE action and the column is
+            # nullable, so the audit trail is preserved by detaching it from the
+            # user being removed. This must run for every user delete, not only
+            # those that own a patient (#1171 follow-up, CodeRabbit #1239).
+            db.query(ActivityLog).filter(ActivityLog.user_id == record_id).update(
+                {"user_id": None}, synchronize_session=False
+            )
+
         # Log the deletion BEFORE actually deleting (to preserve record details)
         current_user_id = getattr(current_user, "id", None)
         if current_user_id is not None:

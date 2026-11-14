@@ -5,6 +5,7 @@ from datetime import date
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.models.activity_log import ActionType, ActivityLog, EntityType
 from app.models.models import Patient, User
 from app.services.user_deletion_service import UserDeletionService
 
@@ -105,3 +106,76 @@ def test_admin_model_delete_user_with_active_patient(
     assert test_admin_user.active_patient_id == untouched_patient.id
     kept = db_session.query(Patient).filter(Patient.id == untouched_patient.id).first()
     assert kept is not None
+
+
+def _log_rows(db_session: Session, user_id: int):
+    """Activity rows owned by `user_id` (the audit trail that must survive)."""
+    return db_session.query(ActivityLog).filter(ActivityLog.user_id == user_id).all()
+
+
+def _add_logs(db_session: Session, user_id: int, count: int = 2) -> None:
+    for i in range(count):
+        db_session.add(
+            ActivityLog(
+                user_id=user_id,
+                action=ActionType.VIEWED,
+                entity_type=EntityType.PATIENT,
+                entity_id=None,
+                description=f"fixture row {i}",
+            )
+        )
+    db_session.commit()
+
+
+def test_admin_delete_user_with_active_patient_keeps_activity_logs(
+    admin_client, db_session: Session, test_user, test_patient
+):
+    """#1171 follow-up (#1239 review): activity_logs.user_id has no ON DELETE
+    action, so a user with audit history must still delete, with the trail
+    detached rather than dropped."""
+    db_session.commit()
+    user_id = test_user.id
+    _add_logs(db_session, user_id)
+    assert len(_log_rows(db_session, user_id)) == 2
+
+    response = admin_client.delete(f"/api/v1/admin/models/user/{user_id}")
+
+    assert response.status_code == 200
+    assert db_session.query(User).filter(User.id == user_id).first() is None
+    detached = (
+        db_session.query(ActivityLog)
+        .filter(ActivityLog.description.like("fixture row %"))
+        .all()
+    )
+    assert len(detached) == 2, "audit trail must be preserved, not cascaded away"
+    assert all(row.user_id is None for row in detached)
+
+
+def test_admin_delete_user_without_patient_keeps_activity_logs(
+    admin_client, db_session: Session, test_admin_user
+):
+    """A user who never created a patient hits the user delete with no patient
+    branch at all, so the detach must not live inside that branch."""
+    bare = User(
+        username="bareuser",
+        email="bareuser@test.com",
+        password_hash="hashed",
+        full_name="Bare User",
+        role="user",
+    )
+    db_session.add(bare)
+    db_session.commit()
+    db_session.refresh(bare)
+    _add_logs(db_session, bare.id)
+
+    response = admin_client.delete(f"/api/v1/admin/models/user/{bare.id}")
+
+    assert response.status_code == 200
+    assert db_session.query(User).filter(User.id == bare.id).first() is None
+    detached = (
+        db_session.query(ActivityLog)
+        .filter(ActivityLog.description.like("fixture row %"))
+        .all()
+    )
+    assert len(detached) == 2
+    assert all(row.user_id is None for row in detached)
