@@ -1,0 +1,4 @@
+# Optional: C-CDA and MyChart zip import (app/services/importers/ccda_importer.py).
+# Installed in the Docker image; on a bare install run: pip install -r requirements-import.txt
+healthrecord-bridge==0.2.1
+lxml==6.1.3

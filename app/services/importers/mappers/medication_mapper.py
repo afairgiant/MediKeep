@@ -29,6 +29,14 @@ REQUEST_STATUS = {
 }
 SKIPPED_STATUS = ("entered-in-error", "cancelled")
 
+# SNOMED 410942007 "Drug or medicament": C-CDA says "no known medications" with a
+# negated entry of this code, which arrives as a not-taken statement
+NO_MEDICATION_CODES = {"410942007"}
+# SNOMED 787481004 "No known medications" says the same as a situation; a not-taken
+# statement of it is a double negative and is skipped without a warning
+NO_KNOWN_MEDICATION_CODES = {"787481004"}
+NO_KNOWN_MEDICATIONS = "Medications: file states no known medications"
+
 # Routes are mapped only where a MediKeep value fits. Anything else (ophthalmic,
 # vaginal, transdermal, ...) is left empty and kept in the notes. Respiratory tract
 # is broader than inhalation (it includes nasal), but inhalation is the closest
@@ -309,13 +317,21 @@ class _MedicationMapper(BaseResourceMapper):
     DOSAGE_FIELD = "dosage"
 
     def map(self, resource: dict, bundle: dict) -> Optional[MappedRecord]:
-        """Map one resource; None when cancelled, in error or unnamed."""
+        """
+        Map one resource; None when cancelled, in error, a do-not-give order,
+        unnamed or no medication.
+        """
         raw_status = (f.text(resource.get("status")) or "").strip().lower()
-        if raw_status in SKIPPED_STATUS:
+        if raw_status in SKIPPED_STATUS or resource.get("doNotPerform") is True:
             return None
         warnings: list = []
         # Resolved once; each lookup outside indexed() would build a new BundleIndex
         medication = _medication(resource, bundle)
+        if (
+            _states_no_medications(raw_status, resource, medication)
+            or _snomed_code(resource, medication) in NO_KNOWN_MEDICATION_CODES
+        ):
+            return None
         rxnorm = medication_code(resource, medication)
         name = medication_name(resource, medication)
         if not name:
@@ -394,6 +410,39 @@ class _MedicationMapper(BaseResourceMapper):
     def dates(self, resource: dict, dosage: dict):
         """(start, end) dates for the resource type."""
         raise NotImplementedError
+
+    def skip_reason(self, resource: dict, bundle: dict) -> Optional[str]:
+        """Warning for a do-not-give order or a "no known medications" statement.
+
+        Withdrawn (cancelled or entered-in-error) entries are skipped silently.
+        """
+        raw_status = (f.text(resource.get("status")) or "").strip().lower()
+        if raw_status in SKIPPED_STATUS:
+            return None
+        if resource.get("doNotPerform") is True:
+            label = f"{self.RESOURCE_TYPE}/{f.resource_id(resource) or '?'}"
+            return f"Skipped {label}: an order not to give the medication"
+        if _states_no_medications(raw_status, resource, _medication(resource, bundle)):
+            return NO_KNOWN_MEDICATIONS
+        return None
+
+
+def _snomed_code(resource: dict, medication: dict) -> Optional[str]:
+    """SNOMED code from the inline concept or the referenced Medication."""
+    return f.code_for(resource.get("medicationCodeableConcept"), f.SNOMED) or (
+        f.code_for(medication.get("code"), f.SNOMED)
+    )
+
+
+def _states_no_medications(raw_status: str, resource: dict, medication: dict) -> bool:
+    """
+    True for a not-taken statement of the generic drug concept, or for the
+    "No known medications" situation code when it is not itself not-taken.
+    """
+    code = _snomed_code(resource, medication)
+    if code in NO_KNOWN_MEDICATION_CODES:
+        return raw_status != "not-taken"
+    return raw_status == "not-taken" and code in NO_MEDICATION_CODES
 
 
 class MedicationStatementMapper(_MedicationMapper):

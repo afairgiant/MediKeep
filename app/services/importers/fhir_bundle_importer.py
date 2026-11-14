@@ -2,6 +2,7 @@
 
 import json
 import re
+from typing import List, Tuple
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -34,7 +35,7 @@ class FhirBundleImporter(BaseHealthRecordImporter):
         except ImportFormatError:
             return False
 
-    def to_bundle(self, data: bytes, filename: str) -> dict:
+    def to_bundle(self, data: bytes, filename: str) -> Tuple[dict, List[str]]:
         """Parse the JSON and check that it is a Bundle with an entry list."""
         bundle = self._load(data)
         if bundle.get("resourceType") != "Bundle":
@@ -50,7 +51,7 @@ class FhirBundleImporter(BaseHealthRecordImporter):
                     f"Bundle entry {index} resource is not an object"
                 )
         bundle["entry"] = entries
-        return bundle
+        return bundle, []
 
     @staticmethod
     def _load(data: bytes) -> dict:

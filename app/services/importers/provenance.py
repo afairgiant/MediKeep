@@ -9,6 +9,10 @@ from sqlalchemy.orm import Session
 
 from app.models.import_provenance import ImportProvenance
 
+# Past this exponent a number is hashed in scientific form; written out in full,
+# "1e-999990" would be a million characters
+HASH_EXPONENT_LIMIT = 50
+
 
 def _normalize(part: object) -> str:
     """One hash part as text: dates in ISO form, numbers canonical, the rest folded."""
@@ -25,6 +29,8 @@ def _normalize(part: object) -> str:
                 number = number.normalize()
                 if number == 0:
                     number = Decimal(0)
+                if abs(number.adjusted()) > HASH_EXPONENT_LIMIT:
+                    return format(number, "e")
                 return format(number, "f")
         except ArithmeticError:
             # Exponents past the decimal context (1e1000000) hash as text

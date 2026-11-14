@@ -41,10 +41,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy requirements
-COPY requirements.txt .
+COPY requirements.txt requirements-import.txt ./
 
 # Install Python dependencies + testing dependencies
-RUN pip install --no-cache-dir -r requirements.txt && \
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-import.txt && \
     pip install --no-cache-dir \
     pytest \
     pytest-asyncio \
