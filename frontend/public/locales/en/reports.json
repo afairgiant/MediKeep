@@ -204,7 +204,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "Export multiple data types together in a ZIP file",
+      "bulkDescription": "Export multiple data types together in a ZIP file, including their file attachments",
       "bulkExport": "Bulk Export",
       "singleDescription": "Export a single data type in your chosen format",
       "singleExport": "Single Export",
@@ -221,7 +221,7 @@
         "title": "CSV Format:"
       },
       "fileAttachments": {
-        "description": "When available for PDF exports, lab result files can be included in a ZIP archive.",
+        "description": "File attachments of the exported records are added to a ZIP archive: always for bulk exports, and for single exports when the file attachments option is selected.",
         "title": "File Attachments:"
       },
       "json": {

@@ -247,7 +247,9 @@
     "visitType": "Rodzaj wizyty",
     "zipCode": "Kod pocztowy",
     "createdAt": "Utworzono",
-    "updatedAt": "Ostatnia aktualizacja"
+    "updatedAt": "Ostatnia aktualizacja",
+    "zipFilePath": "Ścieżka w ZIP",
+    "fileName": "Nazwa pliku"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Lekarz POZ",
@@ -374,9 +376,14 @@
     "ageValue": "wiek {{age}}",
     "occurrencesRecorded": "Zapisano wystąpień: {{count}}",
     "recordsTruncated": "Uwaga: wyświetlono pierwsze {{shown}} z {{total}} rekordów. Aby uzyskać pełne dane, użyj eksportu CSV.",
-    "attachmentsIncluded": "Załączniki: dołączone (zobacz wyniki badań laboratoryjnych)",
+    "attachmentsIncluded": "Załączniki: dołączone (wymienione przy każdym rekordzie; pliki są w archiwum ZIP)",
     "attachmentsNotIncluded": "Załączniki: niedołączone",
-    "noFilesAttached": "Brak załączonych plików"
+    "noFilesAttached": "Brak załączonych plików",
+    "exportLeftOutIntro": "Tych plików nie udało się dołączyć do eksportu:",
+    "exportLeftOutNotFound": "nie znaleziono pliku",
+    "exportLeftOutNotConfigured": "integracja z {{service}} jest wyłączona lub nie została w pełni skonfigurowana",
+    "exportLeftOutDownloadFailed": "nie udało się pobrać z {{service}}",
+    "exportLeftOutFailed": "nie udało się dodać"
   },
   "values": {
     "wholeBlood": "Krew pełna",

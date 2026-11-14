@@ -101,7 +101,7 @@ export const exportService = {
 
       // Get filename from Content-Disposition header or use default
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'medical_records_bulk_export.zip';
+      let filename = `medical_records_bulk_${this._timestamp()}.zip`;
 
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(
@@ -163,14 +163,21 @@ export const exportService = {
   },
 
   /**
-   * Generate default filename for export
+   * Timestamp for filenames, like 20260115_083012
    */
-  _generateDefaultFilename(params) {
-    const timestamp = new Date()
+  _timestamp() {
+    return new Date()
       .toISOString()
       .slice(0, 19)
       .replace(/[-:]/g, '')
       .replace('T', '_');
+  },
+
+  /**
+   * Generate default filename for export
+   */
+  _generateDefaultFilename(params) {
+    const timestamp = this._timestamp();
 
     const scope = params.scope || 'export';
     const format = params.format || 'json';

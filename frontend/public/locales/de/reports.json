@@ -204,7 +204,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "Mehrere Datentypen zusammen als ZIP-Datei exportieren",
+      "bulkDescription": "Mehrere Datentypen zusammen als ZIP-Datei exportieren, einschließlich ihrer Dateianhänge",
       "bulkExport": "Massenexport",
       "singleDescription": "Einen einzelnen Datentyp im gewählten Format exportieren",
       "singleExport": "Einzelexport",
@@ -221,7 +221,7 @@
         "title": "CSV-Format:"
       },
       "fileAttachments": {
-        "description": "Bei PDF-Exporten können Laborergebnisdateien, sofern verfügbar, in einem ZIP-Archiv beigefügt werden.",
+        "description": "Dateianhänge der exportierten Datensätze werden in ein ZIP-Archiv aufgenommen: bei Massenexporten immer, bei Einzelexporten, wenn die Option für Dateianhänge ausgewählt ist.",
         "title": "Dateianhänge:"
       },
       "json": {

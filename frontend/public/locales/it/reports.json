@@ -204,7 +204,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "Esporta più tipi di dati insieme in un file ZIP",
+      "bulkDescription": "Esporta più tipi di dati insieme in un file ZIP, inclusi i relativi allegati",
       "bulkExport": "Esportazione massiva",
       "singleDescription": "Esporta un singolo tipo di dati nel formato scelto",
       "singleExport": "Esportazione singola",
@@ -221,7 +221,7 @@
         "title": "Formato CSV:"
       },
       "fileAttachments": {
-        "description": "Quando disponibili per le esportazioni PDF, i file dei risultati di laboratorio possono essere inclusi in un archivio ZIP.",
+        "description": "Gli allegati dei record esportati vengono aggiunti a un archivio ZIP: sempre nelle esportazioni massive e, in quelle singole, quando è selezionata l'opzione degli allegati.",
         "title": "Allegati:"
       },
       "json": {

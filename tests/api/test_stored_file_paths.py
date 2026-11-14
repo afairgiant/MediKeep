@@ -355,11 +355,11 @@ class TestPoisonedLabResultFile:
     ):
         _poison(db_session, LabResultFile, file_id, outside_file)
 
-        files = ExportService(db_session).get_lab_result_files(
-            user_with_patient["user"].id, None, None
+        files = ExportService(db_session).get_attachments(
+            user_with_patient["user"].id, ["lab_results"], None, None
         )
 
-        assert files == []
+        assert [f["file_path"] for f in files] == [None]
 
 
 class TestAdminFilePathGuard:

@@ -247,7 +247,9 @@
     "visitType": "就诊类型",
     "zipCode": "邮政编码",
     "createdAt": "创建时间",
-    "updatedAt": "最后更新"
+    "updatedAt": "最后更新",
+    "zipFilePath": "ZIP 中的路径",
+    "fileName": "文件名"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "主治医生",
@@ -374,9 +376,14 @@
     "ageValue": "年龄 {{age}}",
     "occurrencesRecorded": "已记录 {{count}} 次发生",
     "recordsTruncated": "注意：仅显示 {{total}} 条记录中的前 {{shown}} 条。如需完整数据，请使用 CSV 导出。",
-    "attachmentsIncluded": "附件：已包含（见检验结果）",
+    "attachmentsIncluded": "附件：已包含（列在每条记录下；文件在 ZIP 中）",
     "attachmentsNotIncluded": "附件：未包含",
-    "noFilesAttached": "无附件"
+    "noFilesAttached": "无附件",
+    "exportLeftOutIntro": "以下文件未能包含在此次导出中：",
+    "exportLeftOutNotFound": "未找到文件",
+    "exportLeftOutNotConfigured": "{{service}} 集成未启用或配置不完整",
+    "exportLeftOutDownloadFailed": "无法从 {{service}} 下载",
+    "exportLeftOutFailed": "无法添加"
   },
   "values": {
     "wholeBlood": "全血",

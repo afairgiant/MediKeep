@@ -10,7 +10,8 @@ import json
 import zipfile
 from datetime import date, datetime
 from enum import Enum
-from typing import List, Optional
+from functools import partial
+from typing import Callable, List, Optional, Tuple
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, field_validator
@@ -21,8 +22,18 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.crud.user_preferences import user_preferences as user_preferences_crud
-from app.models.models import User
+from app.services.export_attachments import (
+    INDEX_NAME,
+    LEFT_OUT_MANIFEST_NAME,
+    LeftOutFile,
+    build_attachments_index,
+    build_left_out_manifest,
+)
 from app.services.export_service import ExportService
+from app.services.paperless_auth_methods import (
+    credential_kwargs,
+    has_usable_credentials,
+)
 from app.services.paperless_client import create_paperless_client
 from app.services.papra_client import create_papra_client
 
@@ -45,6 +56,164 @@ def json_serializer(obj):
     if hasattr(obj, "__dict__"):
         return str(obj)
     return str(obj)
+
+
+# Remote storage backend -> name shown to the user
+REMOTE_SERVICE_NAMES = {"paperless": "Paperless-ngx", "papra": "Papra"}
+
+
+class _FileLeftOut(Exception):
+    """A file cannot be added to the ZIP; ``reason`` is a LeftOutFile reason."""
+
+    def __init__(self, reason: str, service: Optional[str] = None):
+        super().__init__(reason)
+        self.reason = reason
+        self.service = service
+
+
+def _remote_client_factory(
+    backend: str, file_info: dict, user_prefs, user_id: int
+) -> Optional[Callable]:
+    """Callable building the client for a Paperless/Papra file.
+
+    Uses the saved integration settings of the exporting user. Returns None when the
+    integration is disabled or not fully set up.
+    """
+    if not user_prefs:
+        return None
+
+    if backend == "paperless":
+        if not (
+            user_prefs.paperless_enabled
+            and user_prefs.paperless_url
+            and has_usable_credentials(user_prefs)
+        ):
+            return None
+        return partial(
+            create_paperless_client,
+            url=user_prefs.paperless_url,
+            **credential_kwargs(user_prefs),
+            user_id=user_id,
+        )
+
+    organization_id = (
+        file_info.get("papra_organization_id") or user_prefs.papra_organization_id
+    )
+    if not (
+        user_prefs.papra_enabled
+        and user_prefs.papra_url
+        and user_prefs.papra_api_token_encrypted
+        and organization_id
+    ):
+        return None
+    return partial(
+        create_papra_client,
+        url=user_prefs.papra_url,
+        encrypted_token=user_prefs.papra_api_token_encrypted,
+        organization_id=organization_id,
+        user_id=user_id,
+    )
+
+
+async def _download_remote_file(file_info: dict, user_prefs, user_id: int) -> bytes:
+    """Content of a file stored in Paperless-ngx or Papra, or raise _FileLeftOut."""
+    backend = file_info["storage_backend"]
+    service = REMOTE_SERVICE_NAMES.get(backend)
+    if service is None:
+        raise _FileLeftOut("failed")
+
+    document_id = file_info.get(f"{backend}_document_id")
+    if not document_id:
+        raise _FileLeftOut("not_found")
+
+    make_client = _remote_client_factory(backend, file_info, user_prefs, user_id)
+    if make_client is None:
+        raise _FileLeftOut("not_configured", service)
+
+    try:
+        async with make_client() as client:
+            return await client.download_document(document_id)
+    except Exception as download_error:
+        logger.warning(
+            f"Failed to download {service} document: {document_id}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: f"export_{backend}_download_failed",
+                LogFields.USER_ID: user_id,
+                LogFields.ERROR: str(download_error),
+                f"{backend}_document_id": document_id,
+            },
+        )
+        raise _FileLeftOut("download_failed", service) from download_error
+
+
+def _left_out_file(
+    attachment: dict, reason: str, service: Optional[str] = None
+) -> LeftOutFile:
+    return LeftOutFile(
+        file_name=attachment["file_name"],
+        scope=attachment["scope"],
+        record_label=attachment["record_label"],
+        record_date=attachment["record_date"],
+        reason=reason,
+        service=service,
+    )
+
+
+async def _write_attachments_to_zip(
+    zip_file: zipfile.ZipFile,
+    attachments: List[dict],
+    user_prefs,
+    user_id: int,
+    language: str,
+    date_format: str,
+) -> Tuple[int, int]:
+    """Add attachments to a ZIP, with an index of what was added and a list of what
+    could not be. Returns how many files were added and how many were left out."""
+    included: List[dict] = []
+    left_out: List[LeftOutFile] = []
+
+    for attachment in attachments:
+        try:
+            if attachment["storage_backend"] == "local":
+                if not attachment["file_path"]:
+                    raise _FileLeftOut("not_found")
+                zip_file.write(attachment["file_path"], attachment["zip_path"])
+            else:
+                zip_file.writestr(
+                    attachment["zip_path"],
+                    await _download_remote_file(attachment, user_prefs, user_id),
+                )
+            included.append(attachment)
+        except _FileLeftOut as left_out_error:
+            left_out.append(
+                _left_out_file(
+                    attachment, left_out_error.reason, left_out_error.service
+                )
+            )
+        except Exception as file_error:
+            logger.error(
+                f"Failed to add attachment to export ZIP: {attachment['file_name']}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "export_file_add_failed",
+                    LogFields.USER_ID: user_id,
+                    LogFields.ERROR: str(file_error),
+                    "file_name": attachment["file_name"],
+                },
+            )
+            left_out.append(_left_out_file(attachment, "failed"))
+
+    if included:
+        zip_file.writestr(
+            INDEX_NAME, build_attachments_index(included, language, date_format)
+        )
+    if left_out:
+        zip_file.writestr(
+            LEFT_OUT_MANIFEST_NAME,
+            build_left_out_manifest(left_out, language, date_format),
+        )
+    return len(included), len(left_out)
 
 
 class ExportFormat(str, Enum):
@@ -104,7 +273,7 @@ async def export_patient_data(
         None, description="End date for filtering records"
     ),
     include_files: bool = Query(
-        False, description="Include associated files (PDF only)"
+        False, description="Include files attached to the exported records (ZIP)"
     ),
     include_patient_info: bool = Query(
         True, description="Include patient information in export (all formats)"
@@ -124,7 +293,8 @@ async def export_patient_data(
     - **scope**: What data to include (all, medications, lab_results, etc.)
     - **start_date**: Filter records from this date onwards
     - **end_date**: Filter records up to this date
-    - **include_files**: Whether to include file attachments (PDF exports only)
+    - **include_files**: Whether to include the files attached to the exported records
+      (any format; the download is then a ZIP with the export and the files)
     - **include_patient_info**: Whether to include patient information in export
     - **unit_system**: Unit system for measurements (imperial or metric)"""
 
@@ -147,6 +317,14 @@ async def export_patient_data(
 
         export_service = ExportService(db)
 
+        attachments = (
+            export_service.get_attachments(
+                current_user_id, [scope.value], start_date, end_date
+            )
+            if include_files
+            else None
+        )
+
         # Generate the export
         export_data = await export_service.export_patient_data(
             user_id=current_user_id,
@@ -154,7 +332,7 @@ async def export_patient_data(
             scope=scope.value,
             start_date=start_date,
             end_date=end_date,
-            include_files=include_files,
+            attachments=attachments,
             include_patient_info=include_patient_info,
             unit_system=unit_system,
             language=language,
@@ -196,203 +374,6 @@ async def export_patient_data(
             content = "\ufeff" + csv_str
 
         elif format == ExportFormat.PDF:
-            if include_files:
-                # Create ZIP file with PDF and attached files
-                import os
-
-                pdf_content = await export_service.convert_to_pdf(
-                    export_data, include_files
-                )
-                files_info = export_service.get_lab_result_files(
-                    current_user_id, start_date, end_date
-                )
-
-                if files_info:
-                    # Create ZIP file in memory
-                    zip_buffer = io.BytesIO()
-                    files_added = 0
-
-                    # Query user once if there are remote-backend files to export
-                    has_remote_files = any(
-                        f.get("storage_backend") in ("paperless", "papra")
-                        for f in files_info
-                    )
-                    remote_user = None
-                    if has_remote_files:
-                        remote_user = (
-                            db.query(User).filter(User.id == current_user_id).first()
-                        )
-
-                    with zipfile.ZipFile(
-                        zip_buffer, "w", zipfile.ZIP_DEFLATED
-                    ) as zip_file:
-                        # Add the PDF to the ZIP
-                        pdf_filename = f"medical_records_{scope.value}_{timestamp}.pdf"
-                        zip_file.writestr(pdf_filename, pdf_content)
-
-                        # Add each lab result file to the ZIP
-                        for file_info in files_info:
-                            try:
-                                storage_backend = file_info.get(
-                                    "storage_backend", "local"
-                                )
-
-                                # Create a safe filename for the ZIP
-                                safe_filename = f"{file_info['test_name']}_{file_info['file_name']}".replace(
-                                    " ", "_"
-                                )
-                                # Remove any potentially problematic characters
-                                safe_filename = "".join(
-                                    c
-                                    for c in safe_filename
-                                    if c.isalnum() or c in "._-"
-                                )
-
-                                if storage_backend == "local":
-                                    # Handle local files
-                                    file_path = file_info["file_path"]
-                                    if file_path and os.path.exists(file_path):
-                                        zip_file.write(
-                                            file_path, f"lab_files/{safe_filename}"
-                                        )
-                                        files_added += 1
-                                    else:
-                                        logger.warning(
-                                            "Lab result file not found during export",
-                                            extra={
-                                                LogFields.CATEGORY: "app",
-                                                LogFields.EVENT: "export_file_not_found",
-                                                LogFields.USER_ID: current_user_id,
-                                                "file_path": file_path,
-                                            },
-                                        )
-                                elif storage_backend == "paperless":
-                                    # Handle paperless documents
-                                    paperless_doc_id = file_info.get(
-                                        "paperless_document_id"
-                                    )
-                                    if paperless_doc_id and remote_user:
-                                        if (
-                                            remote_user.paperless_enabled
-                                            and remote_user.paperless_url
-                                        ):
-                                            try:
-                                                # Use async context manager for proper cleanup
-                                                async with create_paperless_client(
-                                                    url=remote_user.paperless_url,
-                                                    encrypted_token=remote_user.paperless_api_token_encrypted,
-                                                    user_id=current_user_id,
-                                                ) as client:
-                                                    doc_content = (
-                                                        await client.download_document(
-                                                            paperless_doc_id
-                                                        )
-                                                    )
-                                                    zip_file.writestr(
-                                                        f"lab_files/{safe_filename}",
-                                                        doc_content,
-                                                    )
-                                                    files_added += 1
-                                            except Exception as paperless_error:
-                                                logger.warning(
-                                                    f"Failed to download paperless document: {paperless_doc_id}",
-                                                    extra={
-                                                        LogFields.CATEGORY: "app",
-                                                        LogFields.EVENT: "export_paperless_download_failed",
-                                                        LogFields.USER_ID: current_user_id,
-                                                        LogFields.ERROR: str(
-                                                            paperless_error
-                                                        ),
-                                                        "paperless_document_id": paperless_doc_id,
-                                                    },
-                                                )
-                                elif storage_backend == "papra":
-                                    # Handle Papra documents
-                                    papra_doc_id = file_info.get("papra_document_id")
-                                    papra_org_id = file_info.get(
-                                        "papra_organization_id"
-                                    )
-                                    if papra_doc_id and remote_user:
-                                        if (
-                                            getattr(remote_user, "papra_enabled", False)
-                                            and getattr(remote_user, "papra_url", None)
-                                            and getattr(
-                                                remote_user,
-                                                "papra_organization_id",
-                                                None,
-                                            )
-                                        ):
-                                            try:
-                                                async with create_papra_client(
-                                                    url=remote_user.papra_url,
-                                                    encrypted_token=remote_user.papra_api_token_encrypted,
-                                                    organization_id=papra_org_id
-                                                    or remote_user.papra_organization_id,
-                                                    user_id=current_user_id,
-                                                ) as client:
-                                                    doc_content = (
-                                                        await client.download_document(
-                                                            papra_doc_id
-                                                        )
-                                                    )
-                                                    zip_file.writestr(
-                                                        f"lab_files/{safe_filename}",
-                                                        doc_content,
-                                                    )
-                                                    files_added += 1
-                                            except Exception as papra_error:
-                                                logger.warning(
-                                                    f"Failed to download Papra document: {papra_doc_id}",
-                                                    extra={
-                                                        LogFields.CATEGORY: "app",
-                                                        LogFields.EVENT: "export_papra_download_failed",
-                                                        LogFields.USER_ID: current_user_id,
-                                                        LogFields.ERROR: str(
-                                                            papra_error
-                                                        ),
-                                                        "papra_document_id": papra_doc_id,
-                                                    },
-                                                )
-                            except Exception as file_error:
-                                logger.error(
-                                    f"Failed to add lab file to export ZIP: {file_info['file_name']}",
-                                    extra={
-                                        LogFields.CATEGORY: "app",
-                                        LogFields.EVENT: "export_file_add_failed",
-                                        LogFields.USER_ID: current_user_id,
-                                        LogFields.ERROR: str(file_error),
-                                        "file_name": file_info["file_name"],
-                                    },
-                                )
-                                continue
-
-                    zip_buffer.seek(0)
-                    zip_filename = (
-                        f"medical_records_{scope.value}_with_files_{timestamp}.zip"
-                    )
-
-                    zip_content = zip_buffer.getvalue()
-                    log_endpoint_access(
-                        logger,
-                        request,
-                        current_user_id,
-                        "export_zip_generated",
-                        message=f"Generated ZIP export with {files_added} files",
-                        export_filename=zip_filename,
-                        size_bytes=len(zip_content),
-                        files_included=files_added,
-                    )
-
-                    return Response(
-                        content=zip_content,
-                        media_type="application/zip",
-                        headers={
-                            "Content-Disposition": f'attachment; filename="{zip_filename}"',
-                            "Content-Length": str(len(zip_content)),
-                        },
-                    )
-
-            # Generate standard PDF export
             media_type = "application/pdf"
             filename = f"medical_records_{scope.value}_{timestamp}.pdf"
             content = await export_service.convert_to_pdf(export_data, include_files)
@@ -408,6 +389,41 @@ async def export_patient_data(
 
         if not content_bytes:
             raise HTTPException(status_code=500, detail="Generated content is empty")
+
+        if attachments:
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                zip_file.writestr(filename, content_bytes)
+                files_added, files_left_out = await _write_attachments_to_zip(
+                    zip_file,
+                    attachments,
+                    user_prefs,
+                    current_user_id,
+                    language,
+                    date_format_pref,
+                )
+
+            zip_filename = f"medical_records_{scope.value}_with_files_{timestamp}.zip"
+            zip_content = zip_buffer.getvalue()
+            log_endpoint_access(
+                logger,
+                request,
+                current_user_id,
+                "export_zip_generated",
+                message=f"Generated ZIP export with {files_added} files",
+                export_filename=zip_filename,
+                size_bytes=len(zip_content),
+                files_included=files_added,
+                files_left_out=files_left_out,
+            )
+            return Response(
+                content=zip_content,
+                media_type="application/zip",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{zip_filename}"',
+                    "Content-Length": str(len(zip_content)),
+                },
+            )
 
         return Response(
             content=content_bytes,
@@ -628,7 +644,8 @@ async def create_bulk_export(
 ):
     """
     Create a bulk export containing multiple data scopes in a ZIP file.
-    Each scope is exported as a separate file within the ZIP.
+    Each scope is exported as a separate file within the ZIP, together with the
+    files attached to the exported records.
     """
     try:
         log_endpoint_access(
@@ -649,8 +666,13 @@ async def create_bulk_export(
         export_service = ExportService(db)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+        attachments = export_service.get_attachments(
+            current_user_id, request.scopes, request.start_date, request.end_date
+        )
+
         zip_buffer = io.BytesIO()
         failed_scopes = []
+        exported_scopes = set()
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             exported_count = 0
@@ -664,7 +686,7 @@ async def create_bulk_export(
                         scope=scope,
                         start_date=request.start_date,
                         end_date=request.end_date,
-                        include_files=False,  # Files not supported in bulk export
+                        attachments=attachments,
                         include_patient_info=request.include_patient_info,
                         unit_system=request.unit_system,
                         language=language,
@@ -688,7 +710,7 @@ async def create_bulk_export(
                         filename = f"medical_records_{scope}_{timestamp}.csv"
                     elif request.format == ExportFormat.PDF:
                         content = await export_service.convert_to_pdf(
-                            export_data, include_files=False
+                            export_data, include_files=True
                         )
                         filename = f"medical_records_{scope}_{timestamp}.pdf"
                     else:
@@ -717,6 +739,7 @@ async def create_bulk_export(
                         ),
                     )
                     exported_count += 1
+                    exported_scopes.add(scope)
 
                 except Exception as e:
                     error_msg = str(e)
@@ -734,6 +757,22 @@ async def create_bulk_export(
                     failed_scopes.append((scope, "an unexpected error occurred"))
                     continue
 
+            files_added = files_left_out = 0
+            if exported_count:
+                # Files go with the scopes that made it into the ZIP
+                files_added, files_left_out = await _write_attachments_to_zip(
+                    zip_file,
+                    [
+                        a
+                        for a in attachments
+                        if "all" in exported_scopes or a["scope"] in exported_scopes
+                    ],
+                    user_prefs,
+                    current_user_id,
+                    language,
+                    date_format_pref,
+                )
+
         if exported_count == 0:
             # Include the actual failure reasons in the error message
             if failed_scopes:
@@ -748,8 +787,7 @@ async def create_bulk_export(
             )
 
         zip_buffer.seek(0)
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        zip_filename = f"medical_records_bulk_{date_str}.zip"
+        zip_filename = f"medical_records_bulk_{timestamp}.zip"
         zip_content = zip_buffer.getvalue()
 
         if not zip_content:
@@ -765,6 +803,8 @@ async def create_bulk_export(
             "bulk_export_completed",
             message="Bulk export completed successfully",
             exported_count=exported_count,
+            files_included=files_added,
+            files_left_out=files_left_out,
             export_filename=zip_filename,
             size_bytes=len(zip_content),
         )

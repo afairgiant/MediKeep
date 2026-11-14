@@ -247,7 +247,9 @@
     "visitType": "Besökstyp",
     "zipCode": "Postnummer",
     "createdAt": "Skapad",
-    "updatedAt": "Senast uppdaterad"
+    "updatedAt": "Senast uppdaterad",
+    "zipFilePath": "Sökväg i ZIP",
+    "fileName": "Filnamn"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primärvårdsläkare",
@@ -374,9 +376,14 @@
     "ageValue": "ålder {{age}}",
     "occurrencesRecorded": "{{count}} förekomst(er) registrerade",
     "recordsTruncated": "Obs: visar de första {{shown}} av {{total}} poster. Använd CSV-export för fullständiga data.",
-    "attachmentsIncluded": "Bifogade filer: inkluderade (se laboratorieresultat)",
+    "attachmentsIncluded": "Bifogade filer: inkluderade (anges för varje post; filerna finns i ZIP-filen)",
     "attachmentsNotIncluded": "Bifogade filer: inte inkluderade",
-    "noFilesAttached": "Inga filer bifogade"
+    "noFilesAttached": "Inga filer bifogade",
+    "exportLeftOutIntro": "Dessa filer kunde inte tas med i exporten:",
+    "exportLeftOutNotFound": "filen hittades inte",
+    "exportLeftOutNotConfigured": "integrationen med {{service}} är inte aktiverad eller inte helt konfigurerad",
+    "exportLeftOutDownloadFailed": "kunde inte laddas ned från {{service}}",
+    "exportLeftOutFailed": "kunde inte läggas till"
   },
   "values": {
     "wholeBlood": "Helblod",
