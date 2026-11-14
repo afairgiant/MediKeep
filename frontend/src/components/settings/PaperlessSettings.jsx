@@ -134,6 +134,7 @@ const PaperlessSettings = ({
       token={
         authMethod === 'token' ? preferences.paperless_api_token || '' : ''
       }
+      showTokenField={authMethod === 'token'}
       onTokenChange={value => handleUpdate({ paperless_api_token: value })}
       hasTokenSaved={hasTokenSaved}
       hasAlternateAuth={
