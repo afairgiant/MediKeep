@@ -136,19 +136,6 @@
     "totalCount_one": "共 {{count}} 条",
     "totalCount_other": "共 {{count}} 条"
   },
-  "dataExport": {
-    "availableData": "可用数据",
-    "bulkExport": "批量导出",
-    "csvDescription": "CSV 格式适用于电子表格",
-    "dateFilterNote": "日期过滤器适用于所有选定类型",
-    "exportInfo": "导出信息",
-    "exportTitle": "导出医疗记录",
-    "includeFilesNote": "这可能会显著增加下载大小",
-    "jsonDescription": "JSON 格式提供完整的数据结构",
-    "pdfDescription": "PDF 格式创建可打印报告",
-    "singleExport": "单独导出",
-    "zipDescription": "批量导出打包为 ZIP 文件"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "还有 {{count}} 项",

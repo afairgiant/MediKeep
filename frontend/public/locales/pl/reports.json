@@ -145,19 +145,6 @@
     "totalCount_one": "{{count}} łącznie",
     "totalCount_other": "{{count}} łącznie"
   },
-  "dataExport": {
-    "availableData": "Dostępne dane",
-    "bulkExport": "Eksport zbiorczy",
-    "csvDescription": "Format CSV jest idealny do arkuszy kalkulacyjnych",
-    "dateFilterNote": "Filtry dat dotyczą wszystkich wybranych typów",
-    "exportInfo": "Informacje eksportu",
-    "exportTitle": "Eksportuj dokumentację medyczną",
-    "includeFilesNote": "Może to znacznie zwiększyć rozmiar pobieranego pliku",
-    "jsonDescription": "Format JSON zapewnia pełną strukturę danych",
-    "pdfDescription": "Format PDF tworzy raporty do wydruku",
-    "singleExport": "Eksport pojedynczy",
-    "zipDescription": "Eksporty zbiorcze są pakowane w plik ZIP"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "{{count}} dodatkowy element",

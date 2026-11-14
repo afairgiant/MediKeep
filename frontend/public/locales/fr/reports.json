@@ -137,19 +137,6 @@
     "totalCount_one": "{{count}} au total",
     "totalCount_other": "{{count}} au total"
   },
-  "dataExport": {
-    "availableData": "Données disponibles",
-    "bulkExport": "Exportation de masse",
-    "csvDescription": "Le format CSV est idéal pour les tableurs",
-    "dateFilterNote": "Les filtres de date sont appliqués à tous les types sélectionnés",
-    "exportInfo": "Informations d'exportation",
-    "exportTitle": "Exporter des données médicales",
-    "includeFilesNote": "Ceci peut significativement augmenter la taille du téléchargement",
-    "jsonDescription": "Le format JSON offre une structure de données complète",
-    "pdfDescription": "Le format PDF crée des rapports imprimables",
-    "singleExport": "Exportation à l'unité",
-    "zipDescription": "Les exportations de masse sont rangées dans un fichier ZIP"
-  },
   "export": {
     "availableData": {
       "moreItems_one": "{{count}} entrée supplémentaire",
