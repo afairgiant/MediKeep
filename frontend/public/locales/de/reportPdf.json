@@ -247,7 +247,9 @@
     "visitType": "Besuchsart",
     "zipCode": "Postleitzahl",
     "createdAt": "Erstellt",
-    "updatedAt": "Zuletzt aktualisiert"
+    "updatedAt": "Zuletzt aktualisiert",
+    "zipFilePath": "Pfad im ZIP",
+    "fileName": "Dateiname"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Hausarzt",
@@ -374,9 +376,14 @@
     "ageValue": "Alter {{age}}",
     "occurrencesRecorded": "{{count}} Auftreten erfasst",
     "recordsTruncated": "Hinweis: Es werden die ersten {{shown}} von {{total}} Datensätzen angezeigt. Für vollständige Daten verwenden Sie den CSV-Export.",
-    "attachmentsIncluded": "Dateianhänge: Enthalten (siehe Laborergebnisse)",
+    "attachmentsIncluded": "Dateianhänge: Enthalten (bei jedem Datensatz aufgeführt; die Dateien befinden sich im ZIP)",
     "attachmentsNotIncluded": "Dateianhänge: Nicht enthalten",
-    "noFilesAttached": "Keine Dateien angehängt"
+    "noFilesAttached": "Keine Dateien angehängt",
+    "exportLeftOutIntro": "Diese Dateien konnten nicht in den Export aufgenommen werden:",
+    "exportLeftOutNotFound": "Datei nicht gefunden",
+    "exportLeftOutNotConfigured": "{{service}}-Integration ist nicht aktiviert oder nicht vollständig eingerichtet",
+    "exportLeftOutDownloadFailed": "konnte nicht von {{service}} heruntergeladen werden",
+    "exportLeftOutFailed": "konnte nicht hinzugefügt werden"
   },
   "values": {
     "wholeBlood": "Vollblut",

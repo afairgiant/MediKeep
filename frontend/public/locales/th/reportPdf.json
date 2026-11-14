@@ -247,7 +247,9 @@
     "visitType": "ประเภทการเข้าพบ",
     "zipCode": "รหัสไปรษณีย์",
     "createdAt": "สร้างเมื่อ",
-    "updatedAt": "อัปเดตล่าสุด"
+    "updatedAt": "อัปเดตล่าสุด",
+    "zipFilePath": "พาธใน ZIP",
+    "fileName": "ชื่อไฟล์"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "แพทย์ปฐมภูมิ",
@@ -374,9 +376,14 @@
     "ageValue": "อายุ {{age}}",
     "occurrencesRecorded": "บันทึกการเกิด {{count}} ครั้ง",
     "recordsTruncated": "หมายเหตุ: แสดง {{shown}} รายการแรกจากทั้งหมด {{total}} รายการ หากต้องการข้อมูลทั้งหมด โปรดใช้การส่งออก CSV",
-    "attachmentsIncluded": "ไฟล์แนบ: รวมอยู่ (ดูผลแล็บ)",
+    "attachmentsIncluded": "ไฟล์แนบ: รวมอยู่ (แสดงไว้ในแต่ละรายการ ไฟล์อยู่ใน ZIP)",
     "attachmentsNotIncluded": "ไฟล์แนบ: ไม่รวม",
-    "noFilesAttached": "ไม่มีไฟล์แนบ"
+    "noFilesAttached": "ไม่มีไฟล์แนบ",
+    "exportLeftOutIntro": "ไม่สามารถรวมไฟล์เหล่านี้ไว้ในการส่งออกนี้ได้:",
+    "exportLeftOutNotFound": "ไม่พบไฟล์",
+    "exportLeftOutNotConfigured": "การเชื่อมต่อ {{service}} ไม่ได้เปิดใช้งานหรือยังตั้งค่าไม่สมบูรณ์",
+    "exportLeftOutDownloadFailed": "ไม่สามารถดาวน์โหลดจาก {{service}} ได้",
+    "exportLeftOutFailed": "ไม่สามารถเพิ่มไฟล์ได้"
   },
   "values": {
     "wholeBlood": "โลหิตรวม",

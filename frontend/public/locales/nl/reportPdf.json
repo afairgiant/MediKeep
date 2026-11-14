@@ -247,7 +247,9 @@
     "visitType": "Type bezoek",
     "zipCode": "Postcode",
     "createdAt": "Aangemaakt",
-    "updatedAt": "Laatst bijgewerkt"
+    "updatedAt": "Laatst bijgewerkt",
+    "zipFilePath": "Pad in ZIP",
+    "fileName": "Bestandsnaam"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Huisarts",
@@ -374,9 +376,14 @@
     "ageValue": "leeftijd {{age}}",
     "occurrencesRecorded": "{{count}} keer geregistreerd",
     "recordsTruncated": "Let op: de eerste {{shown}} van {{total}} records worden getoond. Gebruik de CSV-export voor alle gegevens.",
-    "attachmentsIncluded": "Bijlagen: inbegrepen (zie labresultaten)",
+    "attachmentsIncluded": "Bijlagen: inbegrepen (vermeld bij elk item; de bestanden staan in het ZIP-bestand)",
     "attachmentsNotIncluded": "Bijlagen: niet inbegrepen",
-    "noFilesAttached": "Geen bestanden bijgevoegd"
+    "noFilesAttached": "Geen bestanden bijgevoegd",
+    "exportLeftOutIntro": "Deze bestanden konden niet in deze export worden opgenomen:",
+    "exportLeftOutNotFound": "bestand niet gevonden",
+    "exportLeftOutNotConfigured": "de integratie met {{service}} is niet ingeschakeld of niet volledig ingesteld",
+    "exportLeftOutDownloadFailed": "kon niet worden gedownload van {{service}}",
+    "exportLeftOutFailed": "kon niet worden toegevoegd"
   },
   "values": {
     "wholeBlood": "Volbloed",

@@ -203,7 +203,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "将多种数据类型一起导出到 ZIP 文件中",
+      "bulkDescription": "将多种数据类型及其附件一起导出到 ZIP 文件中",
       "bulkExport": "批量导出",
       "singleDescription": "以您选择的格式导出单一数据类型",
       "singleExport": "单独导出",

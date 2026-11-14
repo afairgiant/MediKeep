@@ -247,7 +247,9 @@
     "visitType": "Tipo de consulta",
     "zipCode": "Código postal",
     "createdAt": "Criado",
-    "updatedAt": "Última atualização"
+    "updatedAt": "Última atualização",
+    "zipFilePath": "Caminho no ZIP",
+    "fileName": "Nome do ficheiro"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Médico de Atenção Primária",
@@ -374,9 +376,14 @@
     "ageValue": "idade {{age}}",
     "occurrencesRecorded": "{{count}} ocorrência(s) registada(s)",
     "recordsTruncated": "Nota: a mostrar os primeiros {{shown}} de {{total}} registos. Para obter os dados completos, utilize a exportação CSV.",
-    "attachmentsIncluded": "Anexos: incluídos (ver resultados laboratoriais)",
+    "attachmentsIncluded": "Anexos: incluídos (indicados em cada registo; os ficheiros estão no ZIP)",
     "attachmentsNotIncluded": "Anexos: não incluídos",
-    "noFilesAttached": "Sem ficheiros anexados"
+    "noFilesAttached": "Sem ficheiros anexados",
+    "exportLeftOutIntro": "Estes ficheiros não puderam ser incluídos nesta exportação:",
+    "exportLeftOutNotFound": "ficheiro não encontrado",
+    "exportLeftOutNotConfigured": "a integração com {{service}} não está ativada ou não está totalmente configurada",
+    "exportLeftOutDownloadFailed": "não foi possível transferir de {{service}}",
+    "exportLeftOutFailed": "não foi possível adicionar"
   },
   "values": {
     "wholeBlood": "Sangue total",

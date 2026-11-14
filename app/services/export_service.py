@@ -19,7 +19,6 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
-from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
     Allergy,
     BloodDonation,
@@ -45,6 +44,7 @@ from app.services.blood_donation_units import (
     convert_hemoglobin_from_g_dl,
     resolve_hemoglobin_unit,
 )
+from app.services.export_attachments import ATTACHMENT_SOURCES, collect_attachments
 from app.services.patient_management import get_active_patient_for_user
 from app.services.report_translations import get_translator
 from app.utils.notes_markdown import (
@@ -162,7 +162,7 @@ class ExportService:
         scope: str,
         start_date: Optional[date] = None,
         end_date: Optional[date] = None,
-        include_files: bool = False,
+        attachments: Optional[List[Dict[str, Any]]] = None,
         include_patient_info: bool = True,
         unit_system: str = "imperial",
         language: str = "en",
@@ -178,7 +178,9 @@ class ExportService:
             scope: Data scope (all, medications, lab_results, etc.)
             start_date: Filter records from this date
             end_date: Filter records up to this date
-            include_files: Whether to include file attachments
+            attachments: Files from ``get_attachments`` that go with the export. Each
+                exported record then gets an ``attached_files`` entry listing its files.
+                None means the export has no attachments.
             include_patient_info: Whether to include patient information
             unit_system: Unit system for measurements ('imperial' or 'metric')
             hemoglobin_unit: Unit for blood donation hemoglobin (defaults to g/dL)
@@ -204,7 +206,10 @@ class ExportService:
                     "generated_at": datetime.now().isoformat(),
                     "format": format,
                     "scope": scope,
-                    "include_files": include_files,
+                    "include_files": attachments is not None,
+                    "has_attachments": any(
+                        scope == "all" or a["scope"] == scope for a in attachments or []
+                    ),
                     "include_patient_info": include_patient_info,
                     "unit_system": unit_system,
                     "language": language,
@@ -229,7 +234,6 @@ class ExportService:
                         patient,
                         start_date,
                         end_date,
-                        include_files,
                         unit_system,
                         hemoglobin_unit,
                     )
@@ -248,7 +252,7 @@ class ExportService:
                     logger.info("No medications found for export")
             elif scope == "lab_results":
                 export_data["lab_results"] = self._export_lab_results(
-                    patient, start_date, end_date, include_files
+                    patient, start_date, end_date
                 )
             elif scope == "allergies":
                 export_data["allergies"] = self._export_allergies(
@@ -317,6 +321,9 @@ class ExportService:
             else:
                 raise ValueError(f"Unsupported export scope: {scope}")
 
+            if attachments is not None:
+                self._add_attachment_listings(export_data, attachments)
+
             logger.info(f"Successfully exported {scope} data for patient {patient.id}")
 
             # Always return the dictionary data - let the API endpoint handle format conversion
@@ -377,16 +384,13 @@ class ExportService:
         patient: Patient,
         start_date: Optional[date],
         end_date: Optional[date],
-        include_files: bool = False,
         unit_system: str = "imperial",
         hemoglobin_unit: Optional[str] = None,
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """Export all patient data."""
         return {
             "medications": self._export_medications(patient, start_date, end_date),
-            "lab_results": self._export_lab_results(
-                patient, start_date, end_date, include_files
-            ),
+            "lab_results": self._export_lab_results(patient, start_date, end_date),
             "allergies": self._export_allergies(patient, start_date, end_date),
             "conditions": self._export_conditions(patient, start_date, end_date),
             "immunizations": self._export_immunizations(patient, start_date, end_date),
@@ -413,35 +417,36 @@ class ExportService:
             ),
         }
 
+    @staticmethod
+    def _date_filter_column(model):
+        """The column a date range filters ``model`` on, or None when it has no date."""
+        if hasattr(model, "date"):
+            return model.date
+        if hasattr(model, "effective_period_start"):  # Medication model
+            return model.effective_period_start
+        if hasattr(model, "date_administered"):  # Immunization model
+            return model.date_administered
+        if hasattr(model, "onset_date"):  # Condition and Allergy models
+            return model.onset_date
+        if hasattr(model, "ordered_date"):  # LabResult model
+            return model.ordered_date
+        if hasattr(model, "start_date"):  # Treatment model
+            return model.start_date
+        if hasattr(model, "recorded_date"):  # Vitals model
+            return model.recorded_date
+        if hasattr(model, "prescribed_date"):  # MedicalEquipment model
+            return model.prescribed_date
+        if hasattr(model, "donation_date"):  # BloodDonation model
+            return model.donation_date
+        if hasattr(model, "created_at"):
+            return model.created_at
+        return None
+
     def _apply_date_filter(
         self, query, model, start_date: Optional[date], end_date: Optional[date]
     ):
         """Apply date filtering to a query if start_date or end_date are provided."""
-        date_field = None
-
-        # Determine the appropriate date field based on the model
-        if hasattr(model, "date"):
-            date_field = model.date
-        elif hasattr(model, "effective_period_start"):  # Medication model
-            date_field = model.effective_period_start
-        elif hasattr(model, "date_administered"):  # Immunization model
-            date_field = model.date_administered
-        elif hasattr(model, "onset_date"):  # Condition model
-            date_field = model.onset_date
-        elif hasattr(model, "onset_date"):  # Allergy model
-            date_field = model.onset_date
-        elif hasattr(model, "ordered_date"):  # LabResult model
-            date_field = model.ordered_date
-        elif hasattr(model, "start_date"):  # Treatment model
-            date_field = model.start_date
-        elif hasattr(model, "recorded_date"):  # Vitals model
-            date_field = model.recorded_date
-        elif hasattr(model, "prescribed_date"):  # MedicalEquipment model
-            date_field = model.prescribed_date
-        elif hasattr(model, "donation_date"):  # BloodDonation model
-            date_field = model.donation_date
-        elif hasattr(model, "created_at"):
-            date_field = model.created_at
+        date_field = self._date_filter_column(model)
 
         if date_field is None:
             return query
@@ -523,14 +528,12 @@ class ExportService:
         patient: Patient,
         start_date: Optional[date],
         end_date: Optional[date],
-        include_files: bool = False,
     ) -> List[Dict[str, Any]]:
         """Export lab results data."""
 
         query = (
             self.db.query(LabResult)
             .options(joinedload(LabResult.practitioner))
-            .options(selectinload(LabResult.files))
             .options(selectinload(LabResult.test_components))
             .filter(LabResult.patient_id == patient.id)
         )
@@ -587,18 +590,6 @@ class ExportService:
                     components.append(comp_data)
                 result_dict["test_components"] = components
 
-            # Add file attachment information if files exist and include_files is True
-            if include_files:
-                if result.files:
-                    file_info = []
-                    for file in result.files:
-                        file_info.append(
-                            f"{file.file_name} ({file.file_type}, {self._format_file_size(file.file_size)})"
-                        )
-                    result_dict["attached_files"] = "; ".join(file_info)
-                else:
-                    result_dict["attached_files"] = "No files attached"
-
             results_data.append(result_dict)
 
         return results_data
@@ -614,60 +605,58 @@ class ExportService:
             size_bytes /= 1024.0
         return f"{size_bytes:.1f} TB"
 
-    def get_lab_result_files(
-        self, user_id: int, start_date: Optional[date], end_date: Optional[date]
+    def get_attachments(
+        self,
+        user_id: int,
+        scopes: List[str],
+        start_date: Optional[date],
+        end_date: Optional[date],
     ) -> List[Dict[str, Any]]:
-        """Get all lab result files for a patient.
+        """Files attached to the records ``scopes`` export for the active patient.
 
-        Returns files with storage backend info for proper handling of local vs paperless files.
+        Each file carries its ``zip_path``. A local file missing on disk is still
+        returned, with ``file_path`` None, so the export can report that it was left out.
         """
         patient = get_active_patient_for_user(self.db, user_id)
         if not patient:
             return []
-
-        # Query lab results with files
-        query = (
-            self.db.query(LabResult)
-            .options(joinedload(LabResult.files))
-            .filter(LabResult.patient_id == patient.id)
+        return collect_attachments(
+            self.db,
+            patient.id,
+            scopes,
+            start_date,
+            end_date,
+            self._date_filter_column,
         )
-        query = self._apply_date_filter(query, LabResult, start_date, end_date)
-        lab_results = query.all()
 
-        files_info = []
-        for result in lab_results:
-            for file in result.files:
-                storage_backend = getattr(file, "storage_backend", "local") or "local"
-                paperless_doc_id = getattr(file, "paperless_document_id", None)
+    def _add_attachment_listings(
+        self, export_data: Dict[str, Any], attachments: List[Dict[str, Any]]
+    ) -> None:
+        """Give each exported record of an attachable scope an ``attached_files`` list.
 
-                file_path = file.file_path
-                if storage_backend == "local":
-                    resolved = resolve_stored_file(file)
-                    if not resolved:
-                        logger.warning(
-                            f"Local file not found for lab result file {file.id}",
-                            extra={
-                                "category": "app",
-                                "event": "export_local_file_missing",
-                                "file_id": file.id,
-                            },
-                        )
-                        continue
-                    file_path = str(resolved)
+        Each entry holds ``zip_path``, ``file_name``, ``file_type`` and ``file_size``
+        (bytes) as separate values; the list is empty when the record has no files.
+        """
+        files_by_record: Dict[tuple, List[Dict[str, Any]]] = {}
+        for attachment in attachments:
+            files_by_record.setdefault(
+                (attachment["scope"], attachment["record_id"]), []
+            ).append(attachment)
 
-                files_info.append(
+        for source in ATTACHMENT_SOURCES:
+            records = export_data.get(source.scope)
+            if not isinstance(records, list):
+                continue
+            for record in records:
+                record["attached_files"] = [
                     {
-                        "file_path": file_path,
-                        "file_name": file.file_name,
-                        "file_type": file.file_type,
-                        "test_name": result.test_name,
-                        "file_size": file.file_size,
-                        "storage_backend": storage_backend,
-                        "paperless_document_id": paperless_doc_id,
+                        "zip_path": f["zip_path"],
+                        "file_name": f["file_name"],
+                        "file_type": f["file_type"],
+                        "file_size": f["file_size"],
                     }
-                )
-
-        return files_info
+                    for f in files_by_record.get((source.scope, record["id"]), [])
+                ]
 
     def _export_allergies(
         self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
@@ -1653,6 +1642,10 @@ class ExportService:
         if value is None or value == "":
             return ""
 
+        # Attached files: one path per line (type and size are in the JSON export)
+        if field_name == "attached_files" and isinstance(value, list):
+            return "\n".join(f["zip_path"] for f in value)
+
         # Format nested conditions (for family history)
         if field_name == "conditions" and isinstance(value, list):
             if not value:
@@ -1767,9 +1760,10 @@ class ExportService:
             clean_record = {}
             for field in fieldnames:
                 value = record.get(field)
-                clean_record[translated_headers[field]] = self._format_csv_value(
-                    field, value
-                )
+                cell = self._format_csv_value(field, value)
+                if translator and field == "attached_files" and not value:
+                    cell = translator.text("no_files_attached")
+                clean_record[translated_headers[field]] = cell
             writer.writerow(clean_record)
 
     async def convert_to_pdf(
@@ -1970,7 +1964,11 @@ class ExportService:
                 if metadata.get("include_files"):
                     story.append(
                         Paragraph(
-                            t.text("attachments_included"),
+                            t.text(
+                                "attachments_included"
+                                if metadata.get("has_attachments")
+                                else "no_files_attached"
+                            ),
                             styles["Normal"],
                         )
                     )
@@ -2088,6 +2086,16 @@ class ExportService:
             if field_name in _date_fields:
                 return t.format_date(value)
 
+            # Attached files: the path on one line, then the type and size on the next
+            if field_name == "attached_files" and isinstance(value, list):
+                if not value:
+                    return t.text("no_files_attached")
+                return "\n".join(
+                    f"{f['zip_path']}\n"
+                    f"{f['file_type']}, {self._format_file_size(f['file_size'])}"
+                    for f in value
+                )
+
             str_value = str(value)
 
             # Vitals carry their unit in a sibling field (e.g. weight_unit)
@@ -2194,9 +2202,6 @@ class ExportService:
                         for key, detail in value.items()
                         if detail not in (None, "")
                     ) or None
-
-            if field_name == "attached_files" and str_value == "No files attached":
-                return t.text("no_files_attached")
 
             if field_name == "relationship" and section_name in _RELATIONSHIP_SECTIONS:
                 return t.relationship(str_value)
@@ -2517,6 +2522,10 @@ class ExportService:
                     for key in record.keys()
                     if key != "id" and not key.endswith("_id")
                 ]
+
+            # Sections without a dedicated slot show attachments last
+            if "attached_files" in record and "attached_files" not in field_order:
+                field_order = [*field_order, "attached_files"]
 
             # Add fields to card in order
             for field_name in field_order:

@@ -204,7 +204,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "Mehrere Datentypen zusammen als ZIP-Datei exportieren",
+      "bulkDescription": "Mehrere Datentypen zusammen als ZIP-Datei exportieren, einschließlich ihrer Dateianhänge",
       "bulkExport": "Massenexport",
       "singleDescription": "Einen einzelnen Datentyp im gewählten Format exportieren",
       "singleExport": "Einzelexport",

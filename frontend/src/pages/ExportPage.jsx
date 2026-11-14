@@ -516,8 +516,8 @@ const ExportPage = () => {
               />
             </Group>
 
-            {/* Include Files Option (PDF only) */}
-            {exportConfig.format === 'pdf' && !bulkMode && (
+            {/* Include Files Option (single export; bulk exports always include files) */}
+            {!bulkMode && (
               <Checkbox
                 label={t('export.configuration.includeFiles')}
                 checked={exportConfig.includeFiles}

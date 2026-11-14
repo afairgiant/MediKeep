@@ -247,7 +247,9 @@
     "visitType": "Tipo di visita",
     "zipCode": "CAP",
     "createdAt": "Creato",
-    "updatedAt": "Ultimo aggiornamento"
+    "updatedAt": "Ultimo aggiornamento",
+    "zipFilePath": "Percorso nello ZIP",
+    "fileName": "Nome del file"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Medico di base",
@@ -374,9 +376,14 @@
     "ageValue": "età {{age}}",
     "occurrencesRecorded": "{{count}} occorrenza/e registrata/e",
     "recordsTruncated": "Nota: vengono mostrati i primi {{shown}} di {{total}} record. Per i dati completi, usare l'esportazione CSV.",
-    "attachmentsIncluded": "Allegati: inclusi (vedere i risultati di laboratorio)",
+    "attachmentsIncluded": "Allegati: inclusi (elencati per ogni registrazione; i file sono nello ZIP)",
     "attachmentsNotIncluded": "Allegati: non inclusi",
-    "noFilesAttached": "Nessun file allegato"
+    "noFilesAttached": "Nessun file allegato",
+    "exportLeftOutIntro": "Questi file non hanno potuto essere inclusi in questa esportazione:",
+    "exportLeftOutNotFound": "file non trovato",
+    "exportLeftOutNotConfigured": "l'integrazione con {{service}} non è attivata o non è completamente configurata",
+    "exportLeftOutDownloadFailed": "impossibile scaricare da {{service}}",
+    "exportLeftOutFailed": "impossibile aggiungere il file"
   },
   "values": {
     "wholeBlood": "Sangue intero",

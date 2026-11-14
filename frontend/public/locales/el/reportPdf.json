@@ -247,7 +247,9 @@
     "visitType": "Τύπος επίσκεψης",
     "zipCode": "Ταχυδρομικός κώδικας",
     "createdAt": "Δημιουργήθηκε",
-    "updatedAt": "Τελευταία ενημέρωση"
+    "updatedAt": "Τελευταία ενημέρωση",
+    "zipFilePath": "Διαδρομή στο ZIP",
+    "fileName": "Όνομα αρχείου"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Ιατρός Πρωτοβάθμιας Φροντίδας",
@@ -374,9 +376,14 @@
     "ageValue": "ηλικία {{age}}",
     "occurrencesRecorded": "Καταγράφηκαν {{count}} εμφανίσεις",
     "recordsTruncated": "Σημείωση: Εμφανίζονται οι πρώτες {{shown}} από {{total}} εγγραφές. Για πλήρη δεδομένα, χρησιμοποιήστε την εξαγωγή CSV.",
-    "attachmentsIncluded": "Συνημμένα αρχεία: Περιλαμβάνονται (βλ. αποτελέσματα εργαστηρίου)",
+    "attachmentsIncluded": "Συνημμένα αρχεία: Περιλαμβάνονται (αναφέρονται σε κάθε εγγραφή· τα αρχεία βρίσκονται στο ZIP)",
     "attachmentsNotIncluded": "Συνημμένα αρχεία: Δεν περιλαμβάνονται",
-    "noFilesAttached": "Δεν υπάρχουν συνημμένα αρχεία"
+    "noFilesAttached": "Δεν υπάρχουν συνημμένα αρχεία",
+    "exportLeftOutIntro": "Αυτά τα αρχεία δεν ήταν δυνατό να συμπεριληφθούν στην εξαγωγή:",
+    "exportLeftOutNotFound": "το αρχείο δεν βρέθηκε",
+    "exportLeftOutNotConfigured": "η ενσωμάτωση {{service}} δεν είναι ενεργοποιημένη ή δεν έχει ρυθμιστεί πλήρως",
+    "exportLeftOutDownloadFailed": "δεν ήταν δυνατή η λήψη από το {{service}}",
+    "exportLeftOutFailed": "δεν ήταν δυνατή η προσθήκη"
   },
   "values": {
     "wholeBlood": "Ολικό αίμα",

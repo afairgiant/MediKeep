@@ -247,7 +247,9 @@
     "visitType": "Type de visite",
     "zipCode": "Code postal",
     "createdAt": "Créé le",
-    "updatedAt": "Dernière mise à jour"
+    "updatedAt": "Dernière mise à jour",
+    "zipFilePath": "Chemin dans le ZIP",
+    "fileName": "Nom du fichier"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Médecin traitant",
@@ -374,9 +376,14 @@
     "ageValue": "âge {{age}}",
     "occurrencesRecorded": "{{count}} occurrence(s) enregistrée(s)",
     "recordsTruncated": "Remarque : affichage des {{shown}} premiers enregistrements sur {{total}}. Pour obtenir toutes les données, utilisez l'export CSV.",
-    "attachmentsIncluded": "Fichiers joints : inclus (voir résultats de laboratoire)",
+    "attachmentsIncluded": "Fichiers joints : inclus (indiqués pour chaque enregistrement ; les fichiers sont dans le ZIP)",
     "attachmentsNotIncluded": "Fichiers joints : non inclus",
-    "noFilesAttached": "Aucun fichier joint"
+    "noFilesAttached": "Aucun fichier joint",
+    "exportLeftOutIntro": "Ces fichiers n'ont pas pu être inclus dans cet export :",
+    "exportLeftOutNotFound": "fichier introuvable",
+    "exportLeftOutNotConfigured": "l'intégration {{service}} n'est pas activée ou pas entièrement configurée",
+    "exportLeftOutDownloadFailed": "n'a pas pu être téléchargé depuis {{service}}",
+    "exportLeftOutFailed": "n'a pas pu être ajouté"
   },
   "values": {
     "wholeBlood": "Sang total",

@@ -247,7 +247,9 @@
     "visitType": "Visit type",
     "zipCode": "ZIP / postal code",
     "createdAt": "Created",
-    "updatedAt": "Last updated"
+    "updatedAt": "Last updated",
+    "zipFilePath": "Path in ZIP",
+    "fileName": "File name"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primary Care Physician",
@@ -374,9 +376,14 @@
     "ageValue": "age {{age}}",
     "occurrencesRecorded": "{{count}} occurrence(s) recorded",
     "recordsTruncated": "Note: Showing first {{shown}} of {{total}} records. For complete data, use CSV export.",
-    "attachmentsIncluded": "File attachments: Included (see lab results)",
+    "attachmentsIncluded": "File attachments: Included (listed with each record; the files are in the ZIP)",
     "attachmentsNotIncluded": "File attachments: Not included",
-    "noFilesAttached": "No files attached"
+    "noFilesAttached": "No files attached",
+    "exportLeftOutIntro": "These files could not be included in this export:",
+    "exportLeftOutNotFound": "file not found",
+    "exportLeftOutNotConfigured": "{{service}} integration is not enabled or not fully set up",
+    "exportLeftOutDownloadFailed": "could not be downloaded from {{service}}",
+    "exportLeftOutFailed": "could not be added"
   },
   "values": {
     "wholeBlood": "Whole Blood",

@@ -203,7 +203,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "ส่งออกข้อมูลหลายประเภทรวมกันในไฟล์ ZIP",
+      "bulkDescription": "ส่งออกข้อมูลหลายประเภทรวมกันในไฟล์ ZIP พร้อมไฟล์แนบ",
       "bulkExport": "ส่งออกเป็นชุด",
       "singleDescription": "ส่งออกข้อมูลประเภทเดียวในรูปแบบที่เลือก",
       "singleExport": "ส่งออกเดี่ยว",

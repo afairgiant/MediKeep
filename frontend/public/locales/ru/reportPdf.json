@@ -247,7 +247,9 @@
     "visitType": "Тип визита",
     "zipCode": "Почтовый индекс",
     "createdAt": "Создано",
-    "updatedAt": "Последнее обновление"
+    "updatedAt": "Последнее обновление",
+    "zipFilePath": "Путь в ZIP",
+    "fileName": "Имя файла"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Лечащий врач",
@@ -374,9 +376,14 @@
     "ageValue": "возраст {{age}}",
     "occurrencesRecorded": "Записано эпизодов: {{count}}",
     "recordsTruncated": "Примечание: показаны первые {{shown}} из {{total}} записей. Для получения полных данных используйте экспорт в CSV.",
-    "attachmentsIncluded": "Вложения: включены (см. результаты анализов)",
+    "attachmentsIncluded": "Вложения: включены (указаны для каждой записи; файлы находятся в ZIP)",
     "attachmentsNotIncluded": "Вложения: не включены",
-    "noFilesAttached": "Нет прикреплённых файлов"
+    "noFilesAttached": "Нет прикреплённых файлов",
+    "exportLeftOutIntro": "Эти файлы не удалось включить в экспорт:",
+    "exportLeftOutNotFound": "файл не найден",
+    "exportLeftOutNotConfigured": "интеграция с {{service}} не включена или настроена не полностью",
+    "exportLeftOutDownloadFailed": "не удалось скачать из {{service}}",
+    "exportLeftOutFailed": "не удалось добавить"
   },
   "values": {
     "wholeBlood": "Цельная кровь",

@@ -212,7 +212,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "Экспорт нескольких типов данных вместе в ZIP-файл",
+      "bulkDescription": "Экспорт нескольких типов данных вместе в ZIP-файл, включая вложенные файлы",
       "bulkExport": "Массовый экспорт",
       "singleDescription": "Экспорт одного типа данных в выбранном формате",
       "singleExport": "Одиночный экспорт",

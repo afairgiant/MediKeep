@@ -212,7 +212,7 @@
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "Eksportuj wiele typów danych razem w pliku ZIP",
+      "bulkDescription": "Eksportuj wiele typów danych razem w pliku ZIP, wraz z załącznikami",
       "bulkExport": "Eksport zbiorczy",
       "singleDescription": "Eksportuj jeden typ danych w wybranym formacie",
       "singleExport": "Eksport pojedynczy",
