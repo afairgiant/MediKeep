@@ -25,6 +25,7 @@ import {
 } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
 import { DateInput } from '../adapters/DateInput';
+import { useKeyboardAwarePopoverProps } from '../../hooks/useKeyboardAwarePopover';
 import { useTranslation } from 'react-i18next';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { ResponsiveModal } from '../adapters';
@@ -114,6 +115,13 @@ const BaseMedicalForm = ({
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
   const { dateInputFormat, dateParser } = useDateFormat();
+
+  // Keeps the date picker calendar above the iOS on-screen keyboard
+  // so every day of the month stays tappable (issue #1235).
+  const keyboardAwarePopoverProps = useKeyboardAwarePopoverProps({
+    withinPortal: true,
+    zIndex: 3000,
+  });
 
   const {
     handleTextInputChange,
@@ -379,11 +387,11 @@ const BaseMedicalForm = ({
           clearable
           maxDate={dynamicMaxDate}
           minDate={dynamicMinDate}
-          popoverProps={{ withinPortal: true, zIndex: 3000 }}
+          popoverProps={keyboardAwarePopoverProps}
         />
       );
     },
-    [handleDateChange, formData, dateInputFormat, dateParser]
+    [handleDateChange, formData, dateInputFormat, dateParser, keyboardAwarePopoverProps]
   );
 
   // Callback for time input fields
