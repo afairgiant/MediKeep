@@ -22,16 +22,16 @@ class AuthErrorCode:
     EMAIL_TAKEN = "email_taken"
 
     # Password change
-    CURRENT_PASSWORD_INCORRECT = "current_password_incorrect"
-    PASSWORD_TOO_SHORT = "password_too_short"
-    PASSWORD_COMPLEXITY = "password_complexity"
+    CURRENT_PASSWORD_INCORRECT = "current_password_incorrect"  # nosec B105 - error code
+    PASSWORD_TOO_SHORT = "password_too_short"  # nosec B105 - error code
+    PASSWORD_COMPLEXITY = "password_complexity"  # nosec B105 - error code
 
     # Two-factor sign-in step
     MFA_TICKET_INVALID = "mfa_ticket_invalid"
     MFA_CODE_INVALID = "mfa_code_invalid"
     MFA_CODE_REUSED = "mfa_code_reused"
     MFA_BACKUP_CODE_REUSED = "mfa_backup_code_reused"
-    MFA_SECRET_UNAVAILABLE = "mfa_secret_unavailable"
+    MFA_SECRET_UNAVAILABLE = "mfa_secret_unavailable"  # nosec B105 - error code
     MFA_RATE_LIMITED = "mfa_rate_limited"
 
     # Two-factor settings
@@ -42,7 +42,7 @@ class AuthErrorCode:
     TWO_FACTOR_RATE_LIMITED = "two_factor_rate_limited"
 
     # SSO-only mode
-    SSO_ONLY_PASSWORD_LOGIN_DISABLED = "sso_only_password_login_disabled"
+    SSO_ONLY_PASSWORD_LOGIN_DISABLED = "sso_only_password_login_disabled"  # nosec B105 - error code
 
     # SSO flow
     SSO_NOT_ENABLED = "sso_not_enabled"
@@ -51,7 +51,7 @@ class AuthErrorCode:
     SSO_RATE_LIMITED = "sso_rate_limited"
     SSO_INVALID_RETURN_URL = "sso_invalid_return_url"
     SSO_AUTHENTICATION_FAILED = "sso_authentication_failed"
-    SSO_TOKEN_EXCHANGE_FAILED = "sso_token_exchange_failed"
+    SSO_TOKEN_EXCHANGE_FAILED = "sso_token_exchange_failed"  # nosec B105 - error code
     SSO_USERINFO_FAILED = "sso_userinfo_failed"
     SSO_ACCOUNT_LINK_FAILED = "sso_account_link_failed"
     SSO_STATE_INVALID = "sso_state_invalid"
@@ -62,15 +62,15 @@ class AuthErrorCode:
     SSO_NO_EMAIL_DOMAIN_RESTRICTED = "sso_no_email_domain_restricted"
 
     # Account conflict resolution
-    SSO_CONFLICT_TOKEN_INVALID = "sso_conflict_token_invalid"
-    SSO_CONFLICT_TOKEN_EXPIRED = "sso_conflict_token_expired"
+    SSO_CONFLICT_TOKEN_INVALID = "sso_conflict_token_invalid"  # nosec B105 - error code
+    SSO_CONFLICT_TOKEN_EXPIRED = "sso_conflict_token_expired"  # nosec B105 - error code
     SSO_CONFLICT_USER_NOT_FOUND = "sso_conflict_user_not_found"
     SSO_CONFLICT_INVALID_ACTION = "sso_conflict_invalid_action"
     SSO_CONFLICT_RESOLUTION_FAILED = "sso_conflict_resolution_failed"
 
     # GitHub manual account linking
-    SSO_GITHUB_TOKEN_INVALID = "sso_github_token_invalid"
-    SSO_GITHUB_TOKEN_EXPIRED = "sso_github_token_expired"
+    SSO_GITHUB_TOKEN_INVALID = "sso_github_token_invalid"  # nosec B105 - error code
+    SSO_GITHUB_TOKEN_EXPIRED = "sso_github_token_expired"  # nosec B105 - error code
     SSO_GITHUB_LINK_FAILED = "sso_github_link_failed"
     SSO_GITHUB_LINK_TWO_FACTOR = "sso_github_link_two_factor"
 

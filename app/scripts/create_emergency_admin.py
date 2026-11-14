@@ -130,7 +130,7 @@ def peek_system_state(username, promote, force):
 
 def create_emergency_admin(
     username: str = "admin",
-    password: str = "admin123",
+    password: str = "admin123",  # nosec B107 - CLI always prompts/overrides; first login must change it
     force: bool = False,
     promote: bool = False,
 ):
@@ -281,7 +281,7 @@ def create_emergency_admin(
                 metadata={
                     "source": "emergency_admin_script",
                     "role": "admin",
-                    "must_change_password": True,
+                    "must_change_password": True,  # nosec B105 - dict key with a boolean/token-type literal, not a credential
                     "admin_count_before": admin_count,
                     "force": force,
                 },

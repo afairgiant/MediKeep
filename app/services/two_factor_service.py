@@ -52,7 +52,7 @@ class BlockedReason:
     DISABLED_BY_OPERATOR = "disabled_by_operator"
     SSO_ONLY_MODE = "sso_only_mode"
     SSO_ACCOUNT = "sso_account"
-    SECRET_KEY_NOT_CONFIGURED = "secret_key_not_configured"
+    SECRET_KEY_NOT_CONFIGURED = "secret_key_not_configured"  # nosec B105 - block reason code
 
 
 class TotpSecretUnavailable(Exception):
