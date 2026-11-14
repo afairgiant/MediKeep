@@ -73,7 +73,7 @@ class EventType(str, Enum):
     SHARE_REVOKED = "share_revoked"
 
     # Security events
-    PASSWORD_CHANGED = "password_changed"
+    PASSWORD_CHANGED = "password_changed"  # nosec B105 # notification event code
     TWO_FACTOR_DISABLED = "two_factor_disabled"
     BACKUP_CODE_USED = "backup_code_used"
     SESSIONS_REVOKED = "sessions_revoked"

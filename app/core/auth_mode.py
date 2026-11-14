@@ -26,9 +26,9 @@ SEALED_INSTANCE_MESSAGE = (
     "SSO_ONLY_MODE."
 )
 
-NO_LOCAL_PASSWORD_EVENT = "sso_only_no_local_password"
+NO_LOCAL_PASSWORD_EVENT = "sso_only_no_local_password"  # nosec B105 # event name, not a credential
 NO_LOCAL_PASSWORD_MESSAGE = (
-    "SSO_ONLY_MODE is enabled and no account has a usable password. Unsetting the "
+    "SSO_ONLY_MODE is enabled and no account has a usable password. Unsetting the "  # nosec B105 # warning text
     "flag would leave a login form no account can answer, so recovery needs shell "
     "access to the host and app/scripts/create_emergency_admin.py. To restore the "
     "documented recovery path, give one administrator a local password."
