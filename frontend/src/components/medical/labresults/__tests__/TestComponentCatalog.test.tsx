@@ -271,6 +271,15 @@ describe('TestComponentCatalog', () => {
     expect(screen.getByText('No Test Results Found')).toBeInTheDocument();
   });
 
+  it('does not render the filter header when there are no components', () => {
+    render(<TestComponentCatalog {...defaultProps} components={[]} />);
+
+    // #892: with no test components there is nothing to search or filter, so
+    // the filter bar must not be shown above the empty state.
+    expect(screen.queryByText('Filters & Search')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('search-input')).not.toBeInTheDocument();
+  });
+
   it('groups items by category with category headers', () => {
     render(<TestComponentCatalog {...defaultProps} />);
 
