@@ -25,13 +25,13 @@ class PatientMatch:
         return bool(self.full_name or self.birth_date or self.gender)
 
 
-def _first_patient(bundle: dict) -> Optional[dict]:
-    """The bundle's first Patient resource, if any."""
-    for entry in bundle.get("entry", []):
-        resource = entry.get("resource") or {}
-        if resource.get("resourceType") == "Patient":
-            return resource
-    return None
+def _patients(bundle: dict) -> List[dict]:
+    """The bundle's Patient resources, in order."""
+    return [
+        resource
+        for entry in bundle.get("entry", [])
+        if (resource := entry.get("resource") or {}).get("resourceType") == "Patient"
+    ]
 
 
 def _name_parts(resource: dict):
@@ -63,18 +63,32 @@ def _parse_date(value) -> Optional[date]:
 
 
 def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
-    """Build a PatientMatch for the bundle's first Patient resource."""
-    resource = _first_patient(bundle)
-    if resource is None:
+    """Build a PatientMatch from the bundle's Patient resources.
+
+    The summary comes from the first Patient. Every Patient is compared with the
+    selected one, since a zip of documents can describe more than one person.
+    """
+    patients = _patients(bundle)
+    if not patients:
         return PatientMatch()
 
-    given, family, text = _name_parts(resource)
+    given, family, text = _name_parts(patients[0])
     match = PatientMatch(
         full_name=text,
-        birth_date=_parse_date(resource.get("birthDate")),
-        gender=_text(resource.get("gender")),
+        birth_date=_parse_date(patients[0].get("birthDate")),
+        gender=_text(patients[0].get("gender")),
     )
+    for resource in patients:
+        for warning in _differences(resource, patient):
+            if warning not in match.warnings:
+                match.warnings.append(warning)
+    return match
 
+
+def _differences(resource: dict, patient: Patient) -> List[str]:
+    """Warnings for a Patient resource whose name or birth date differ from the selection."""
+    given, family, text = _name_parts(resource)
+    warnings = []
     # Middle names are common in exports and absent in MediKeep, so compare
     # the first given name and the family name only
     file_first = _norm(given[0]) if given else ""
@@ -84,17 +98,14 @@ def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
     if (file_first and file_first != own_first) or (
         file_last and file_last != own_last
     ):
-        match.warnings.append(
+        warnings.append(
             f"The file is for {text} but the selected patient is "
             f"{patient.first_name} {patient.last_name}."
         )
-    if (
-        match.birth_date
-        and patient.birth_date
-        and match.birth_date != patient.birth_date
-    ):
-        match.warnings.append(
-            f"The file's birth date {match.birth_date.isoformat()} differs from "
+    birth_date = _parse_date(resource.get("birthDate"))
+    if birth_date and patient.birth_date and birth_date != patient.birth_date:
+        warnings.append(
+            f"The file's birth date {birth_date.isoformat()} differs from "
             f"the selected patient's {patient.birth_date.isoformat()}."
         )
-    return match
+    return warnings

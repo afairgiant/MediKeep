@@ -57,6 +57,22 @@ class TestComparePatient:
         assert len(match.warnings) == 1
         assert "1981-01-01" in match.warnings[0]
 
+    def test_every_patient_in_the_file_is_compared(self):
+        """Test that a second Patient resource that differs from the selection warns."""
+        bundle = _bundle(["Jane"], "Sampleton")
+        bundle["entry"].append(_bundle(["Robin"], "Sampleton")["entry"][0])
+        match = compare_patient(bundle, _patient())
+        assert match.full_name == "Jane Sampleton"
+        assert match.warnings == [
+            "The file is for Robin Sampleton but the selected patient is Jane Sampleton."
+        ]
+
+    def test_same_patient_twice_warns_once(self):
+        """Test that two records of one mismatching patient give one warning."""
+        bundle = _bundle(["Robin"], "Sampleton")
+        bundle["entry"].append(_bundle(["Robin"], "Sampleton")["entry"][0])
+        assert len(compare_patient(bundle, _patient()).warnings) == 1
+
     def test_bundle_without_patient(self):
         """Test that a bundle with no Patient resource yields an empty match."""
         match = compare_patient({"entry": []}, _patient())

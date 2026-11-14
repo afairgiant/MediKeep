@@ -1884,6 +1884,30 @@ class TestCcdaFixture:
             k: v["skipped_duplicate"] for k, v in counts.items()
         } == self.EXPECTED_NEW
 
+    def test_zip_with_two_patients_warns_for_each(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that documents for different patients in one zip each get a warning."""
+        patient_id = user_with_patient["patient"].id
+        jane = MYCHART_CCD.read_bytes()
+        robin = jane.replace(b"<given>Jane</given>", b"<given>Robin</given>").replace(
+            b'extension="E1234567"', b'extension="E7654321"'
+        )
+        assert robin != jane
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("IHE_XDM/SUBSET01/DOC0001.XML", jane)
+            zf.writestr("IHE_XDM/SUBSET02/DOC0001.XML", robin)
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(buf.getvalue(), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        mismatches = [w for w in response.json()["warnings"] if "The file is for" in w]
+        assert len(mismatches) == 2
+        assert any("Robin" in w for w in mismatches)
+
     def test_zip_over_member_cap(
         self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch
     ):

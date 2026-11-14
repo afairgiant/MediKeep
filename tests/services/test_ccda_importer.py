@@ -5,6 +5,7 @@ healthrecord-bridge, zip handling and the missing-library message.
 
 import io
 import sys
+import time
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -26,6 +27,7 @@ from app.services.importers.ccda_importer import (
     MISSING_LIBRARY_MESSAGE,
     UNSAFE_DOCUMENT_MESSAGE,
     _report_notes,
+    looks_like_ccda,
 )
 
 # Conversion needs the optional library; without it these tests are skipped
@@ -61,6 +63,85 @@ def _xdm_zip(xml: bytes, second: bytes = None) -> bytes:
 
 def _resource_types(bundle: dict) -> set:
     return {e["resource"]["resourceType"] for e in bundle["entry"]}
+
+
+def _with_prolog(xml: bytes, prolog: bytes) -> bytes:
+    """The fixture with its XML declaration followed by extra prolog text."""
+    declaration, rest = xml.split(b"?>", 1)
+    return declaration + b"?>" + prolog + rest
+
+
+def _later_copy(xml: bytes) -> bytes:
+    """A newer version of the fixture: later document date, one problem's onset corrected."""
+    return xml.replace(
+        b'<effectiveTime value="20240315143000-0500"/>',
+        b'<effectiveTime value="20240601090000-0500"/>',
+        1,
+    ).replace(b'<low value="20180214"/>', b'<low value="20180301"/>')
+
+
+class TestLooksLikeCcda:
+    """Test the root element check used to pick documents out of an upload."""
+
+    def test_long_comment_before_the_root_element(self):
+        """Test that a comment longer than any fixed sniff window does not hide the root."""
+        data = _with_prolog(
+            MYCHART_CCD.read_bytes(), b"<!-- " + b"x" * 100_000 + b" -->"
+        )
+        assert looks_like_ccda(data)
+        assert CcdaImporter().validate_format(_xdm_zip(data), "export.zip")
+
+    def test_utf8_byte_order_mark(self):
+        """Test that a UTF-8 byte order mark before the declaration is accepted."""
+        assert looks_like_ccda(b"\xef\xbb\xbf" + MYCHART_CCD.read_bytes())
+
+    def test_utf16_with_long_comment(self):
+        """Test that the UTF-16 check also reads past a long comment."""
+        text = MYCHART_CCD.read_text(encoding="utf-8").replace(
+            'encoding="UTF-8"', 'encoding="UTF-16"', 1
+        )
+        text = text.replace("?>", "?><!-- " + "x" * 100_000 + " -->", 1)
+        assert looks_like_ccda(text.encode("utf-16"))
+
+    def test_processing_instruction_and_doctype_are_skipped(self):
+        """Test that a stylesheet instruction or a DOCTYPE before the root is read past."""
+        xml = MYCHART_CCD.read_bytes()
+        assert looks_like_ccda(
+            _with_prolog(xml, b'<?xml-stylesheet type="text/xsl" href="cda.xsl"?>')
+        )
+        assert looks_like_ccda(
+            _with_prolog(xml, b"<!DOCTYPE ClinicalDocument [<!ENTITY a 'b'>]>")
+        )
+
+    def test_root_must_be_clinical_document(self):
+        """Test that the words appearing inside another root element do not count."""
+        data = b'<root xmlns="urn:hl7-org:v3"><ClinicalDocument/></root>'
+        assert not looks_like_ccda(data)
+        assert not looks_like_ccda(b'<ClinicalDocumentation xmlns="urn:hl7-org:v3"/>')
+        assert not looks_like_ccda(b'<ClinicalDocument xmlns="urn:other"/>')
+
+    def test_namespace_prefix_on_the_root(self):
+        """Test that a prefixed root element is accepted."""
+        data = (
+            b'<cda:ClinicalDocument xmlns:cda="urn:hl7-org:v3"></cda:ClinicalDocument>'
+        )
+        assert looks_like_ccda(data)
+
+    def test_unclosed_prolog_is_rejected_quickly(self):
+        """Test that megabytes of unterminated comment or instruction cost linear time."""
+        heads = (
+            b"<!--",
+            b"<?",
+            b"<!DOCTYPE x [",
+            b"<!--" * 200_000,
+            b"<!DOCTYPE a>" * 200_000,
+            b"<?a?>" * 200_000,
+        )
+        for head in heads:
+            data = head + b" " * (20 * 1024 * 1024)
+            start = time.monotonic()
+            assert not looks_like_ccda(data)
+            assert time.monotonic() - start < 1.0
 
 
 class TestValidateFormat:
@@ -180,10 +261,50 @@ class TestToBundle:
             for e in merged["entry"]
         ]
         assert len(ids) == len(set(ids)) == len(single["entry"])
+        assert not any("different content" in n for n in notes)
         # Notes from both documents are kept apart by member name
         assert any(
             n.startswith("MachineReadable_XDMFormat/IHE_XDM/SUBSET02") for n in notes
         )
+
+    def test_newest_document_wins_and_conflicts_are_counted(self):
+        """Test that an entry two documents share comes from the newer one, whatever the zip order."""
+        older = MYCHART_CCD.read_bytes()
+        newer = _later_copy(older)
+        newer_bundle, _ = CcdaImporter().to_bundle(newer, "ccd.xml")
+        corrected = [
+            e["resource"]
+            for e in newer_bundle["entry"]
+            if e["resource"].get("onsetDateTime") == "2018-03-01"
+        ]
+        assert len(corrected) == 1
+        # Newer document first in the archive, older second: last-wins would keep the old one
+        merged, notes = CcdaImporter().to_bundle(_xdm_zip(newer, older), "export.zip")
+        kept = [
+            e["resource"]
+            for e in merged["entry"]
+            if e["resource"]["id"] == corrected[0]["id"]
+        ]
+        assert kept == corrected
+        assert notes[0] == (
+            "1 record appears in more than one document with different content; "
+            "the newest document's copy was kept"
+        )
+
+    def test_same_entries_in_two_documents_are_not_conflicts(self):
+        """Test that a second visit summary repeating the same entries adds no conflict note."""
+        first = MYCHART_CCD.read_bytes()
+        # A different document id and date, the same clinical content
+        second = first.replace(
+            b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"'
+        ).replace(
+            b'<effectiveTime value="20240315143000-0500"/>',
+            b'<effectiveTime value="20240601090000-0500"/>',
+            1,
+        )
+        assert second != first
+        _, notes = CcdaImporter().to_bundle(_xdm_zip(first, second), "export.zip")
+        assert not any("different content" in n for n in notes)
 
     def test_notes_past_the_cap_are_counted(self):
         """Test that notes over the limit end with a count instead of vanishing."""
