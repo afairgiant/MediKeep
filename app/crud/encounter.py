@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
+from app.crud.utils import get_recent_records
 from app.models.base import Base
 from app.models.models import (
     Condition,
@@ -45,19 +46,10 @@ class CRUDEncounter(
     def get_recent(
         self, db: Session, *, patient_id: int, days: int = 30
     ) -> List[Encounter]:
+        """Encounters dated in the last ``days`` days up to today, newest first.
+
+        Future-dated (upcoming) encounters are excluded.
         """
-        Get recent encounters for a patient within specified days.
-
-        Args:
-            db: SQLAlchemy database session
-            patient_id: ID of the patient
-            days: Number of days to look back
-
-        Returns:
-            List of recent encounters
-        """
-        from app.crud.utils import get_recent_records
-
         return get_recent_records(
             db=db,
             model=self.model,

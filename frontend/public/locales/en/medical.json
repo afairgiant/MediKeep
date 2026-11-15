@@ -1656,6 +1656,14 @@
     "diagnosisAssessment": {
       "label": "Diagnosis/Assessment"
     },
+    "filters": {
+      "timing": {
+        "all": "All Visits",
+        "past": "Past",
+        "placeholder": "Upcoming or past",
+        "upcoming": "Upcoming"
+      }
+    },
     "followUpInstructions": {
       "label": "Follow-up Instructions"
     },
@@ -1714,7 +1722,7 @@
           "placeholder": "Recommended treatment or next steps..."
         },
         "visitDate": {
-          "description": "When the visit occurred",
+          "description": "When the visit took place or is scheduled",
           "label": "Visit Date",
           "placeholder": "Select visit date"
         },
@@ -1752,6 +1760,7 @@
     "table": {
       "visitType": "Visit Type"
     },
+    "upcoming": "Upcoming",
     "viewModal": {
       "chiefComplaint": "Chief Complaint",
       "followUpInstructions": "Follow-up Instructions",

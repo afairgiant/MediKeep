@@ -319,8 +319,13 @@ export const ResponsiveTable = memo(
 
       let processed = [...data];
 
-      // Apply sorting if enabled and data exists
-      if (sortable && (internalSortBy || sortBy) && processed.length > 0) {
+      // A controlled parent already ordered `data`, possibly with a custom comparator
+      if (
+        sortable &&
+        !isControlled &&
+        (internalSortBy || sortBy) &&
+        processed.length > 0
+      ) {
         const sortField = internalSortBy || sortBy;
         const direction = internalSortDirection || sortDirection;
 
@@ -343,6 +348,7 @@ export const ResponsiveTable = memo(
     }, [
       data,
       sortable,
+      isControlled,
       internalSortBy,
       sortBy,
       internalSortDirection,

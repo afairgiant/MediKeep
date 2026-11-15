@@ -19,6 +19,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
+from app.core.utils.datetime_utils import get_facility_today, is_future_date
 from app.models.models import (
     Allergy,
     BloodDonation,
@@ -874,6 +875,7 @@ class ExportService:
         )
         query = self._apply_date_filter(query, Encounter, start_date, end_date)
         encounters = query.all()
+        today = get_facility_today()
         return [
             {
                 "id": encounter.id,
@@ -897,6 +899,7 @@ class ExportService:
                 ),
                 "notes": encounter.notes,
                 "tags": encounter.tags,
+                "upcoming": is_future_date(encounter.date, today),
             }
             for encounter in encounters
         ]
@@ -1711,6 +1714,7 @@ class ExportService:
             "twenty_four_hour",
             "is_chronic",
             "is_deceased",
+            "upcoming",
         ]:
             if isinstance(value, bool):
                 return "Yes" if value else "No"
@@ -2103,6 +2107,10 @@ class ExportService:
                 unit = record.get(_VITAL_UNIT_FIELDS[field_name])
                 return f"{str_value} {unit}" if unit else str_value
 
+            # Only upcoming visits are flagged; "Upcoming: No" on every past visit is noise
+            if field_name == "upcoming":
+                return t.text("yes") if value is True else None
+
             # Format boolean values
             if field_name in [
                 "is_primary",
@@ -2427,6 +2435,7 @@ class ExportService:
             elif section_name == "encounters":
                 field_order = [
                     "date",
+                    "upcoming",
                     "reason",
                     "visit_type",
                     "chief_complaint",

@@ -249,7 +249,8 @@
     "createdAt": "Erstellt",
     "updatedAt": "Zuletzt aktualisiert",
     "zipFilePath": "Pfad im ZIP",
-    "fileName": "Dateiname"
+    "fileName": "Dateiname",
+    "upcoming": "Bevorstehend"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Hausarzt",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "Datei nicht gefunden",
     "exportLeftOutNotConfigured": "{{service}}-Integration ist nicht aktiviert oder nicht vollständig eingerichtet",
     "exportLeftOutDownloadFailed": "konnte nicht von {{service}} heruntergeladen werden",
-    "exportLeftOutFailed": "konnte nicht hinzugefügt werden"
+    "exportLeftOutFailed": "konnte nicht hinzugefügt werden",
+    "upcoming": "Bevorstehend"
   },
   "values": {
     "wholeBlood": "Vollblut",

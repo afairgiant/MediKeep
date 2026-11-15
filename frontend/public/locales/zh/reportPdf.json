@@ -249,7 +249,8 @@
     "createdAt": "创建时间",
     "updatedAt": "最后更新",
     "zipFilePath": "ZIP 中的路径",
-    "fileName": "文件名"
+    "fileName": "文件名",
+    "upcoming": "即将到来"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "主治医生",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "未找到文件",
     "exportLeftOutNotConfigured": "{{service}} 集成未启用或配置不完整",
     "exportLeftOutDownloadFailed": "无法从 {{service}} 下载",
-    "exportLeftOutFailed": "无法添加"
+    "exportLeftOutFailed": "无法添加",
+    "upcoming": "即将到来"
   },
   "values": {
     "wholeBlood": "全血",

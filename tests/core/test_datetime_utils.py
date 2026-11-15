@@ -6,10 +6,18 @@ of timezone-aware inputs to prevent double conversion bugs.
 """
 
 import pytest
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
-from app.core.utils.datetime_utils import to_utc, to_local, get_facility_timezone
+from app.core.utils.datetime_utils import (
+    ensure_date,
+    get_facility_timezone,
+    get_facility_today,
+    is_future_date,
+    to_local,
+    to_utc,
+)
 
 
 class TestToUtc:
@@ -207,3 +215,55 @@ class TestRoundTrip:
         assert back_to_utc.hour == original_utc.hour
         assert back_to_utc.minute == original_utc.minute
         assert back_to_utc.second == original_utc.second
+
+
+class TestEnsureDate:
+    def test_datetime_becomes_date(self):
+        result = ensure_date(datetime(2024, 1, 15, 10, 30))
+        assert result == date(2024, 1, 15)
+        assert type(result) is date
+
+    def test_date_and_string_pass_through(self):
+        assert ensure_date(date(2024, 1, 15)) == date(2024, 1, 15)
+        assert ensure_date("2024-01-15") == date(2024, 1, 15)
+        assert ensure_date(None) is None
+
+
+class TestGetFacilityToday:
+    def test_uses_the_facility_timezone(self):
+        # 03:00 UTC on Nov 16 is still Nov 15 in Los Angeles
+        utc_now = datetime(2026, 11, 16, 3, 0, tzinfo=timezone.utc)
+        la = ZoneInfo("America/Los_Angeles")
+        with patch(
+            "app.core.utils.datetime_utils.get_facility_timezone", return_value=la
+        ), patch("app.core.utils.datetime_utils.datetime") as mock_dt:
+            mock_dt.now.side_effect = lambda tz: utc_now.astimezone(tz)
+            assert get_facility_today() == date(2026, 11, 15)
+
+
+class TestIsFutureDate:
+    TODAY = date(2026, 11, 15)
+
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            ("2026-11-16", True),
+            (date(2027, 1, 1), True),
+            (datetime(2026, 11, 16, 0, 1), True),
+            ("2026-11-15", False),
+            (date(2026, 11, 14), False),
+            (None, False),
+            ("", False),
+            ("not a date", False),
+        ],
+    )
+    def test_compares_against_today(self, value, expected):
+        assert is_future_date(value, self.TODAY) is expected
+
+    def test_defaults_to_facility_today(self):
+        with patch(
+            "app.core.utils.datetime_utils.get_facility_today",
+            return_value=self.TODAY,
+        ):
+            assert is_future_date("2026-11-16") is True
+            assert is_future_date("2026-11-15") is False

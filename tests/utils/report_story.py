@@ -10,6 +10,8 @@ from app.services.report_translations import get_translator
 
 
 def _cell_text(cell: Any) -> str:
+    if isinstance(cell, list):
+        return " ".join(_cell_text(item) for item in cell)
     return str(cell.text) if isinstance(cell, Paragraph) else str(cell)
 
 

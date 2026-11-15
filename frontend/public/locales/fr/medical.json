@@ -1596,6 +1596,14 @@
     "diagnosisAssessment": {
       "label": "Diagnostic/Evaluation"
     },
+    "filters": {
+      "timing": {
+        "all": "Toutes les visites",
+        "past": "Passées",
+        "placeholder": "À venir ou passées",
+        "upcoming": "À venir"
+      }
+    },
     "followUpInstructions": {
       "label": "Instructions de suivi"
     },
@@ -1654,7 +1662,7 @@
           "placeholder": "Traitement recommandé ou prochaines étapes..."
         },
         "visitDate": {
-          "description": "Quand a eu lieu la visite",
+          "description": "Quand la visite a eu lieu ou est prévue",
           "label": "Date de la visite",
           "placeholder": "Sélectionnez la date de la visite"
         },
@@ -1692,6 +1700,7 @@
     "table": {
       "visitType": "Type de visite"
     },
+    "upcoming": "À venir",
     "viewModal": {
       "chiefComplaint": "Affection principale",
       "followUpInstructions": "Instructions de suivi",

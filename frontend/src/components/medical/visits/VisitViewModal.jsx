@@ -29,6 +29,7 @@ import logger from '../../../services/logger';
 import { rememberEditTab } from '../../../utils/editTabHandoff';
 import ViewModalFooter from '../../shared/ViewModalFooter';
 import NotesView from '../../shared/NotesView';
+import UpcomingVisitBadge from './UpcomingVisitBadge';
 
 const VisitViewModal = ({
   isOpen,
@@ -189,6 +190,7 @@ const VisitViewModal = ({
                     t('visits.viewModal.generalVisit', 'General Visit')}
                 </Title>
                 <Group gap="xs">
+                  <UpcomingVisitBadge visit={visit} />
                   {visit.visit_type && (
                     <Badge
                       color={getVisitTypeColor(visit.visit_type)}

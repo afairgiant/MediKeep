@@ -8,6 +8,7 @@ import render, { screen, fireEvent } from '../../../test-utils/render';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import MantineVisitForm from '../MantineVisitForm';
+import { visitFormFields } from '../../../utils/medicalFormFields/visit';
 
 /** A link tab's name, with or without its "(n)" count. */
 const withCount = (name: string) =>
@@ -293,5 +294,13 @@ describe('MantineVisitForm — linked record tabs', () => {
     expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       target: { name: 'pending_links', value: { procedures: [] } },
     });
+  });
+});
+
+describe('MantineVisitForm - visit date', () => {
+  it('does not cap the date at today, so upcoming visits can be entered', () => {
+    const dateField = visitFormFields.find(field => field.name === 'date');
+    expect(dateField).toBeDefined();
+    expect(dateField).not.toHaveProperty('maxDate');
   });
 });

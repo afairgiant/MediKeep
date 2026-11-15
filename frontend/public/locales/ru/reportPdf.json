@@ -249,7 +249,8 @@
     "createdAt": "Создано",
     "updatedAt": "Последнее обновление",
     "zipFilePath": "Путь в ZIP",
-    "fileName": "Имя файла"
+    "fileName": "Имя файла",
+    "upcoming": "Предстоящий"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Лечащий врач",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "файл не найден",
     "exportLeftOutNotConfigured": "интеграция с {{service}} не включена или настроена не полностью",
     "exportLeftOutDownloadFailed": "не удалось скачать из {{service}}",
-    "exportLeftOutFailed": "не удалось добавить"
+    "exportLeftOutFailed": "не удалось добавить",
+    "upcoming": "Предстоящий"
   },
   "values": {
     "wholeBlood": "Цельная кровь",

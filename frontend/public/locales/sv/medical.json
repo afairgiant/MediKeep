@@ -1656,6 +1656,14 @@
     "diagnosisAssessment": {
       "label": "Diagnos/Bedömning"
     },
+    "filters": {
+      "timing": {
+        "all": "Alla besök",
+        "past": "Tidigare",
+        "placeholder": "Kommande eller tidigare",
+        "upcoming": "Kommande"
+      }
+    },
     "followUpInstructions": {
       "label": "Uppföljningsinstruktioner"
     },
@@ -1714,7 +1722,7 @@
           "placeholder": "Rekommenderad behandling eller nästa steg..."
         },
         "visitDate": {
-          "description": "När besöket ägde rum",
+          "description": "När besöket ägde rum eller är planerat",
           "label": "Besöksdatum",
           "placeholder": "Välj besöksdatum"
         },
@@ -1752,6 +1760,7 @@
     "table": {
       "visitType": "Besökstyp"
     },
+    "upcoming": "Kommande",
     "viewModal": {
       "chiefComplaint": "Huvudbesvär",
       "followUpInstructions": "Uppföljningsinstruktioner",

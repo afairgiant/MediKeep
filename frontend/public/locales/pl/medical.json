@@ -1658,6 +1658,14 @@
     "diagnosisAssessment": {
       "label": "Diagnoza/Ocena"
     },
+    "filters": {
+      "timing": {
+        "all": "Wszystkie wizyty",
+        "past": "Minione",
+        "placeholder": "Nadchodzące lub minione",
+        "upcoming": "Nadchodzące"
+      }
+    },
     "followUpInstructions": {
       "label": "Zalecenia kontrolne"
     },
@@ -1716,7 +1724,7 @@
           "placeholder": "Zalecane leczenie lub kolejne kroki..."
         },
         "visitDate": {
-          "description": "Kiedy odbyła się wizyta",
+          "description": "Kiedy wizyta się odbyła lub jest zaplanowana",
           "label": "Data wizyty",
           "placeholder": "Wybierz datę wizyty"
         },
@@ -1754,6 +1762,7 @@
     "table": {
       "visitType": "Typ wizyty"
     },
+    "upcoming": "Nadchodząca",
     "viewModal": {
       "chiefComplaint": "Główna dolegliwość",
       "followUpInstructions": "Zalecenia kontrolne",

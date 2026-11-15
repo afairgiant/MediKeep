@@ -2,7 +2,7 @@
  * Visit form field configuration
  */
 
-import { tagsFieldConfig, getTodayEndOfDay } from './shared';
+import { tagsFieldConfig } from './shared';
 
 export const visitFormFields = [
   {
@@ -22,7 +22,6 @@ export const visitFormFields = [
     required: true,
     descriptionKey: 'medical:visits.form.fields.visitDate.description',
     gridColumn: 6,
-    maxDate: getTodayEndOfDay,
   },
   {
     name: 'practitioner_id',

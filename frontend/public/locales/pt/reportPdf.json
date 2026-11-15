@@ -249,7 +249,8 @@
     "createdAt": "Criado",
     "updatedAt": "Última atualização",
     "zipFilePath": "Caminho no ZIP",
-    "fileName": "Nome do ficheiro"
+    "fileName": "Nome do ficheiro",
+    "upcoming": "Próxima"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Médico de Atenção Primária",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "ficheiro não encontrado",
     "exportLeftOutNotConfigured": "a integração com {{service}} não está ativada ou não está totalmente configurada",
     "exportLeftOutDownloadFailed": "não foi possível transferir de {{service}}",
-    "exportLeftOutFailed": "não foi possível adicionar"
+    "exportLeftOutFailed": "não foi possível adicionar",
+    "upcoming": "Próxima"
   },
   "values": {
     "wholeBlood": "Sangue total",

@@ -249,7 +249,8 @@
     "createdAt": "สร้างเมื่อ",
     "updatedAt": "อัปเดตล่าสุด",
     "zipFilePath": "พาธใน ZIP",
-    "fileName": "ชื่อไฟล์"
+    "fileName": "ชื่อไฟล์",
+    "upcoming": "กำลังจะมาถึง"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "แพทย์ปฐมภูมิ",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "ไม่พบไฟล์",
     "exportLeftOutNotConfigured": "การเชื่อมต่อ {{service}} ไม่ได้เปิดใช้งานหรือยังตั้งค่าไม่สมบูรณ์",
     "exportLeftOutDownloadFailed": "ไม่สามารถดาวน์โหลดจาก {{service}} ได้",
-    "exportLeftOutFailed": "ไม่สามารถเพิ่มไฟล์ได้"
+    "exportLeftOutFailed": "ไม่สามารถเพิ่มไฟล์ได้",
+    "upcoming": "กำลังจะมาถึง"
   },
   "values": {
     "wholeBlood": "โลหิตรวม",
