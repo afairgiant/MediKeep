@@ -44,7 +44,8 @@ WORKDIR /app
 COPY requirements.txt requirements-import.txt ./
 
 # Install Python dependencies + testing dependencies
-RUN pip install --no-cache-dir -r requirements.txt -r requirements-import.txt && \
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir --require-hashes -r requirements-import.txt && \
     pip install --no-cache-dir \
     pytest \
     pytest-asyncio \

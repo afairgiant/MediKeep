@@ -90,7 +90,8 @@ COPY requirements.txt requirements-import.txt ./
 # Install Python dependencies with cache mount for faster builds
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip && \
-    pip install -r requirements.txt -r requirements-import.txt
+    pip install -r requirements.txt && \
+    pip install --require-hashes -r requirements-import.txt
 
 # Copy backend source files
 COPY app/ ./app/
