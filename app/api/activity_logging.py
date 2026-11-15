@@ -220,6 +220,7 @@ def log_crud_activity(
     description: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None,
     request: Optional[Request] = None,
+    commit: bool = True,
 ) -> bool:
     """
     Log a CRUD activity for an entity object.
@@ -233,6 +234,8 @@ def log_crud_activity(
         description: Optional custom description (auto-generated if not provided)
         metadata: Optional additional metadata
         request: Optional FastAPI request object for IP/user agent
+        commit: False adds the entry to the caller's transaction (flushed,
+            not committed), so it lands or rolls back with the caller's work
 
     Returns:
         True if logging succeeded, False otherwise
@@ -272,6 +275,7 @@ def log_crud_activity(
             metadata=safe_metadata,
             ip_address=ip_address,
             user_agent=user_agent,
+            commit=commit,
         )
 
         return True
@@ -303,6 +307,7 @@ def safe_log_activity(
     description: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None,
     request: Optional[Request] = None,
+    commit: bool = True,
 ) -> None:
     """
     Safely log an activity without raising exceptions.
@@ -319,6 +324,7 @@ def safe_log_activity(
         description: Optional custom description (auto-generated if not provided)
         metadata: Optional additional metadata
         request: Optional FastAPI request object for IP/user agent
+        commit: Passed through to log_crud_activity
     """
     try:
         log_crud_activity(
@@ -330,6 +336,7 @@ def safe_log_activity(
             description=description,
             metadata=metadata,
             request=request,
+            commit=commit,
         )
     except Exception as e:
         # Sanitize error message to prevent sensitive data exposure in logs

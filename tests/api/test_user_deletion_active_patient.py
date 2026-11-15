@@ -218,3 +218,45 @@ def test_failed_user_delete_does_not_leave_patient_deleted(
     assert (
         db_session.query(User).filter(User.id == user_id).first() is not None
     ), "user was deleted even though the delete failed"
+
+
+def test_failed_user_delete_after_audit_log_does_not_leave_patient_deleted(
+    admin_client, db_session: Session, test_user, test_patient, monkeypatch
+):
+    """#1239 review: the audit write must not commit the patient delete.
+
+    Here the real audit logging runs and succeeds, and the failure comes from
+    the user delete itself. If the audit write committed, the patient would
+    already be gone when the user delete fails.
+    """
+    from app.crud.user import user as user_crud
+
+    db_session.commit()
+    user_id = test_user.id
+    patient_id = test_patient.id
+
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("injected failure in the user delete")
+
+    monkeypatch.setattr(user_crud, "delete", _boom)
+
+    response = admin_client.delete(f"/api/v1/admin/models/user/{user_id}")
+
+    assert response.status_code == 500
+
+    db_session.rollback()
+    db_session.expire_all()
+    assert (
+        db_session.query(Patient).filter(Patient.id == patient_id).first() is not None
+    ), "patient was deleted even though the user delete failed"
+    assert db_session.query(User).filter(User.id == user_id).first() is not None
+    assert (
+        db_session.query(ActivityLog)
+        .filter(
+            ActivityLog.action == ActionType.DELETED,
+            ActivityLog.entity_type == "user",
+            ActivityLog.entity_id == user_id,
+        )
+        .first()
+        is None
+    ), "the audit entry for a delete that rolled back must not be kept"

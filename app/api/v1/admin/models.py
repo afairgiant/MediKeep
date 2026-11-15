@@ -1808,7 +1808,11 @@ def delete_model_record(
                 {"user_id": None}, synchronize_session=False
             )
 
-        # Log the deletion BEFORE actually deleting (to preserve record details)
+        # Log the deletion BEFORE actually deleting (to preserve record details).
+        # commit=False keeps the audit entry in the same transaction as the
+        # deletes: a committing audit write here would also commit the patient
+        # delete above, and a failed user delete would then leave the patient
+        # and its medical records gone (CodeRabbit #1239).
         current_user_id = getattr(current_user, "id", None)
         if current_user_id is not None:
             safe_log_activity(
@@ -1817,6 +1821,7 @@ def delete_model_record(
                 entity_type=model_name,
                 entity_obj=record,
                 user_id=current_user_id,
+                commit=False,
             )
 
         # Delete the record
