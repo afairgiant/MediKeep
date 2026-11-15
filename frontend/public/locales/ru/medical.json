@@ -1658,6 +1658,14 @@
     "diagnosisAssessment": {
       "label": "Диагноз/Заключение"
     },
+    "filters": {
+      "timing": {
+        "all": "Все визиты",
+        "past": "Прошедшие",
+        "placeholder": "Предстоящие или прошедшие",
+        "upcoming": "Предстоящие"
+      }
+    },
     "followUpInstructions": {
       "label": "Инструкции по наблюдению"
     },
@@ -1716,7 +1724,7 @@
           "placeholder": "Рекомендованное лечение или следующие шаги..."
         },
         "visitDate": {
-          "description": "Когда состоялся визит",
+          "description": "Когда состоялся или запланирован визит",
           "label": "Дата визита",
           "placeholder": "Выберите дату визита"
         },
@@ -1754,6 +1762,7 @@
     "table": {
       "visitType": "Тип визита"
     },
+    "upcoming": "Предстоящий",
     "viewModal": {
       "chiefComplaint": "Основная жалоба",
       "followUpInstructions": "Инструкции по наблюдению",

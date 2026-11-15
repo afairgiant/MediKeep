@@ -34,6 +34,11 @@ from reportlab.platypus import (
 )
 
 from app.core.logging.config import get_logger
+from app.core.utils.datetime_utils import (
+    ensure_date,
+    get_facility_today,
+    is_future_date,
+)
 from app.services.export_service import UnitConverter
 from app.services.report_fonts import (
     CJK_BOLD_FONT_PATHS,
@@ -891,10 +896,19 @@ class CustomReportPDFGenerator:
             f"<b>{t.text('categories_count')}:</b> {summary_data.get('total_categories', 0)}",
         ]
 
+        # Selected records arrive in no particular order
+        today = get_facility_today()
+        past_visit_dates = []
+        for visit in data.get("encounters", []):
+            try:
+                visit_date = ensure_date(visit.get("date"))
+            except ValueError:
+                continue
+            if visit_date is not None and visit_date <= today:
+                past_visit_dates.append(visit_date)
+
         # Column 2: Recent activity
-        recent_visits = len(
-            [v for v in data.get("encounters", [])[:3]]
-        )  # Last 3 visits
+        recent_visits = min(len(past_visit_dates), 3)
         recent_labs = len(
             [l for l in data.get("lab_results", [])[:5]]
         )  # Last 5 lab results
@@ -905,12 +919,11 @@ class CustomReportPDFGenerator:
         ]
 
         # Column 3: Important dates (if available)
-        last_visit_date = t.text("not_recorded")
-        if data.get("encounters"):
-            for visit in data["encounters"]:
-                if visit.get("date"):
-                    last_visit_date = self._format_date(visit["date"])
-                    break
+        last_visit_date = (
+            self._format_date(max(past_visit_dates))
+            if past_visit_dates
+            else t.text("not_recorded")
+        )
 
         col3_data = [
             f"<b>{t.text('last_visit')}:</b> {last_visit_date}",
@@ -2319,6 +2332,7 @@ class CustomReportPDFGenerator:
         # Sort by date, most recent first
         sorted_records = sorted(records, key=lambda x: x.get("date", ""), reverse=True)
 
+        today = get_facility_today()
         for record in sorted_records:
             # Debug logging
             logger.debug(f"Formatting encounter record {record.get('id', 'unknown')}")
@@ -2333,6 +2347,8 @@ class CustomReportPDFGenerator:
                 header_parts.append(f"- <b>{date}</b>")
             if visit_type:
                 header_parts.append(f"({visit_type})")
+            if is_future_date(record.get("date"), today):
+                header_parts.append(f"[{self.translator.text('upcoming')}]")
 
             story.append(
                 Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])

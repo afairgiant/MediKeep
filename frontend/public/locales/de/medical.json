@@ -1656,6 +1656,14 @@
     "diagnosisAssessment": {
       "label": "Diagnose/Beurteilung"
     },
+    "filters": {
+      "timing": {
+        "all": "Alle Besuche",
+        "past": "Vergangen",
+        "placeholder": "Bevorstehend oder vergangen",
+        "upcoming": "Bevorstehend"
+      }
+    },
     "followUpInstructions": {
       "label": "Nachsorgeanweisungen"
     },
@@ -1714,7 +1722,7 @@
           "placeholder": "Empfohlene Behandlung oder nächste Schritte..."
         },
         "visitDate": {
-          "description": "Wann der Besuch stattfand",
+          "description": "Wann der Besuch stattfand oder geplant ist",
           "label": "Besuchsdatum",
           "placeholder": "Besuchsdatum auswählen"
         },
@@ -1752,6 +1760,7 @@
     "table": {
       "visitType": "Besuchsart"
     },
+    "upcoming": "Bevorstehend",
     "viewModal": {
       "chiefComplaint": "Hauptbeschwerde",
       "followUpInstructions": "Nachsorgeanweisungen",

@@ -1656,6 +1656,14 @@
     "diagnosisAssessment": {
       "label": "Diagnose/beoordeling"
     },
+    "filters": {
+      "timing": {
+        "all": "Alle bezoeken",
+        "past": "Afgelopen",
+        "placeholder": "Aankomend of afgelopen",
+        "upcoming": "Aankomend"
+      }
+    },
     "followUpInstructions": {
       "label": "Vervolginstructies"
     },
@@ -1714,7 +1722,7 @@
           "placeholder": "Aanbevolen behandeling of vervolgstappen..."
         },
         "visitDate": {
-          "description": "Wanneer het bezoek plaatsvond",
+          "description": "Wanneer het bezoek plaatsvond of gepland is",
           "label": "Datum bezoek",
           "placeholder": "Selecteer datum bezoek"
         },
@@ -1752,6 +1760,7 @@
     "table": {
       "visitType": "Type bezoek"
     },
+    "upcoming": "Aankomend",
     "viewModal": {
       "chiefComplaint": "Hoofdklacht",
       "followUpInstructions": "Vervolginstructies",

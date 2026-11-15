@@ -437,6 +437,29 @@ describe('ResponsiveTable Component Tests', () => {
       const firstRow = screen.getAllByRole('row')[1]; // Skip header row
       expect(within(firstRow).getByText('Aspirin')).toBeInTheDocument();
     });
+
+    it('keeps the parent order when sorting is controlled', () => {
+      const parentOrder = [...sampleMedicationData].reverse();
+
+      renderResponsive(
+        <ResponsiveTable
+          {...sortableProps}
+          data={parentOrder}
+          sortBy="medication_name"
+          sortDirection="asc"
+          onSort={vi.fn()}
+        />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      const firstRow = screen.getAllByRole('row')[1];
+      expect(
+        within(firstRow).getByText(parentOrder[0].medication_name)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('columnheader', { name: /medication/i })
+      ).toHaveAttribute('aria-sort', 'ascending');
+    });
   });
 
   describe('Selection Functionality', () => {

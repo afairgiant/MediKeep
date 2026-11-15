@@ -1656,6 +1656,14 @@
     "diagnosisAssessment": {
       "label": "Diagnóstico/Avaliação"
     },
+    "filters": {
+      "timing": {
+        "all": "Todas as consultas",
+        "past": "Passadas",
+        "placeholder": "Próximas ou passadas",
+        "upcoming": "Próximas"
+      }
+    },
     "followUpInstructions": {
       "label": "Instruções de Acompanhamento"
     },
@@ -1714,7 +1722,7 @@
           "placeholder": "Tratamento recomendado ou próximas etapas..."
         },
         "visitDate": {
-          "description": "Quando a consulta ocorreu",
+          "description": "Quando a consulta ocorreu ou está agendada",
           "label": "Data da Consulta",
           "placeholder": "Selecione a data da consulta"
         },
@@ -1752,6 +1760,7 @@
     "table": {
       "visitType": "Tipo de Consulta"
     },
+    "upcoming": "Próxima",
     "viewModal": {
       "chiefComplaint": "Queixa Principal",
       "followUpInstructions": "Instruções de Acompanhamento",

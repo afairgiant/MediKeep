@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Container, Paper, Stack } from '@mantine/core';
+import { Container, Group, Paper, Stack, Text } from '@mantine/core';
 import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +39,8 @@ import {
   buildVisitPayload,
   validateVisitForm,
 } from '../../utils/visitFormUtils';
+import { isUpcomingVisit } from '../../utils/upcomingVisits';
+import UpcomingVisitBadge from '../../components/medical/visits/UpcomingVisitBadge';
 
 const Visits = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -210,6 +212,18 @@ const Visits = () => {
   );
   const formatters = {
     ...visitsBaseFormatters,
+    date: (value, visit) => {
+      const text = visitsBaseFormatters.date(value, visit);
+      if (!isUpcomingVisit(visit)) return text;
+      return (
+        <Group component="span" gap={6} wrap="nowrap">
+          <Text component="span" size="xs">
+            {text}
+          </Text>
+          <UpcomingVisitBadge visit={visit} size="xs" variant="light" />
+        </Group>
+      );
+    },
     condition_name: (value, visit) => {
       const condition = getConditionDetails(visit.condition_id);
       return condition?.diagnosis || '';
@@ -477,6 +491,9 @@ const Visits = () => {
                 persistKey="visits"
                 data={paginatedVisits}
                 pagination={false}
+                sortBy={dataManagement.sortBy}
+                sortDirection={dataManagement.sortOrder}
+                onSort={dataManagement.handleSortChange}
                 disableEdit={isViewOnly}
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
@@ -539,7 +556,7 @@ const Visits = () => {
                 onEdit={handleEditVisit}
                 onDelete={handleDeleteVisit}
                 formatters={{
-                  date: visitsBaseFormatters.date,
+                  date: formatters.date,
                   reason: visitsBaseFormatters.text,
                   visit_type: visitsBaseFormatters.simple,
                   location: visitsBaseFormatters.simple,

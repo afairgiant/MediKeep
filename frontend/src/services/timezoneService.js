@@ -1,8 +1,10 @@
 import { apiClient } from './apiClient';
 import logger from './logger';
 import {
+  formatDateForAPI,
   formatDateFromPattern,
   getPatternForFormat,
+  getTodayString,
   shiftDateToTimezone,
 } from '../utils/dateUtils';
 
@@ -113,6 +115,17 @@ class TimezoneService {
 
   getTimezone() {
     return this.timezone;
+  }
+
+  /**
+   * Today as YYYY-MM-DD in the server timezone, or the browser's until that loads.
+   * @returns {string}
+   */
+  getTodayKey() {
+    const today = this.initialized
+      ? formatDateForAPI(shiftDateToTimezone(new Date(), this.timezone))
+      : getTodayString();
+    return today ?? '';
   }
 }
 

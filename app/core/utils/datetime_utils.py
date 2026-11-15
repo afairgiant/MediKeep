@@ -37,6 +37,23 @@ def get_facility_timezone() -> ZoneInfo:
     return FACILITY_TIMEZONE
 
 
+def get_facility_today() -> date:
+    """Today's calendar date in the facility timezone."""
+    return datetime.now(get_facility_timezone()).date()
+
+
+def is_future_date(value: Any, today: Optional[date] = None) -> bool:
+    """True when ``value`` falls after ``today`` (default: facility today).
+
+    Accepts a date, datetime or ISO date string; empty or unparseable values are not future.
+    """
+    try:
+        parsed = ensure_date(value)
+    except ValueError:
+        return False
+    return parsed is not None and parsed > (today or get_facility_today())
+
+
 def get_utc_now() -> datetime:
     """
     Get the current UTC datetime with timezone awareness.
@@ -305,11 +322,12 @@ def ensure_date(value: Union[str, date, datetime, None]) -> Optional[date]:
     if value is None:
         return None
 
-    if isinstance(value, date):
-        return value
-
+    # datetime is a subclass of date, so it must be checked first
     if isinstance(value, datetime):
         return value.date()
+
+    if isinstance(value, date):
+        return value
 
     if isinstance(value, str):
         if not value.strip():

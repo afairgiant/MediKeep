@@ -1651,6 +1651,14 @@
     "diagnosisAssessment": {
       "label": "诊断/评估"
     },
+    "filters": {
+      "timing": {
+        "all": "所有就诊",
+        "past": "过去",
+        "placeholder": "即将到来或过去",
+        "upcoming": "即将到来"
+      }
+    },
     "followUpInstructions": {
       "label": "随访指导"
     },
@@ -1709,7 +1717,7 @@
           "placeholder": "推荐治疗或下一步措施..."
         },
         "visitDate": {
-          "description": "就诊发生的时间",
+          "description": "就诊已发生或计划的日期",
           "label": "就诊日期",
           "placeholder": "选择就诊日期"
         },
@@ -1747,6 +1755,7 @@
     "table": {
       "visitType": "就诊类型"
     },
+    "upcoming": "即将到来",
     "viewModal": {
       "chiefComplaint": "主要主诉",
       "followUpInstructions": "随访指导",

@@ -6,6 +6,8 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import NotesView from '../../shared/NotesView';
+import { isUpcomingVisit } from '../../../utils/upcomingVisits';
+import { UPCOMING_BADGE_COLOR, UPCOMING_LABEL_KEY } from './UpcomingVisitBadge';
 
 const VisitCard = ({
   visit,
@@ -101,6 +103,13 @@ const VisitCard = ({
 
     // Generate badges
     const badges = [];
+    if (isUpcomingVisit(visit)) {
+      // BaseMedicalCard takes badge data, not elements
+      badges.push({
+        label: t(UPCOMING_LABEL_KEY, 'Upcoming'),
+        color: UPCOMING_BADGE_COLOR,
+      });
+    }
     if (visit.visit_type) {
       badges.push({
         label: visit.visit_type,

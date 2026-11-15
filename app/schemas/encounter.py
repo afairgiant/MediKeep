@@ -10,7 +10,6 @@ from app.schemas.base_tags import (
     TaggedEntityUpdateMixin,
 )
 from app.schemas.validators import (
-    validate_date_not_future,
     validate_positive_id,
     validate_required_text,
     validate_text_field,
@@ -47,12 +46,6 @@ class EncounterBase(TaggedEntityMixin):
     def validate_notes(cls, v):
         """Validate notes field"""
         return validate_text_field(v, max_length=5000, field_name="Notes")
-
-    @field_validator("date")
-    @classmethod
-    def validate_date(cls, v):
-        """Validate encounter date"""
-        return validate_date_not_future(v, field_name="Encounter date")
 
     @field_validator("visit_type")
     @classmethod
@@ -169,12 +162,6 @@ class EncounterUpdate(TaggedEntityUpdateMixin):
     def validate_notes(cls, v):
         """Validate notes if provided"""
         return validate_text_field(v, max_length=5000, field_name="Notes")
-
-    @field_validator("date")
-    @classmethod
-    def validate_date(cls, v):
-        """Validate encounter date if provided"""
-        return validate_date_not_future(v, field_name="Encounter date")
 
     @field_validator("practitioner_id")
     @classmethod

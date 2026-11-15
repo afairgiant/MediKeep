@@ -12,6 +12,8 @@ from sqlalchemy import asc, desc
 from sqlalchemy.orm import Query, Session
 from sqlalchemy.sql.functions import count
 
+from app.core.utils.datetime_utils import get_facility_today
+
 # Type variable for SQLAlchemy models
 ModelType = TypeVar("ModelType")
 
@@ -173,29 +175,18 @@ def get_recent_records(
     order_by: Optional[str] = None,
     order_desc: bool = True,
 ) -> List[ModelType]:
-    """
-    Get recent records within the last N days.
+    """Records dated within the last ``days`` days up to today, for a Date column.
 
-    Args:
-        db: Database session
-        model: SQLAlchemy model class
-        date_field: Name of the date field to filter by
-        days: Number of days to look back
-        patient_id: Optional patient ID filter
-        skip: Number of records to skip
-        limit: Maximum number of records to return
-        order_by: Field name to order by
-        order_desc: Whether to order in descending order
-
-    Returns:
-        List of recent records
+    "Today" is the facility date, so future-dated (upcoming or scheduled)
+    records are excluded.
     """
-    cutoff_date = datetime.utcnow() - timedelta(days=days)
+    today = get_facility_today()
     return get_by_date_range(
         db=db,
         model=model,
         date_field=date_field,
-        start_date=cutoff_date,
+        start_date=today - timedelta(days=days),
+        end_date=today,
         patient_id=patient_id,
         skip=skip,
         limit=limit,

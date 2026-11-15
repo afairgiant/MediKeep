@@ -458,21 +458,74 @@ class TestEncounterAPI:
 
         assert response.status_code == 422
 
-    def test_encounter_validation_future_date(
-        self, client: TestClient, user_with_patient, authenticated_headers
+    @pytest.mark.parametrize("days_ahead", [1, 30, 365 * 10])
+    def test_create_future_encounter(
+        self, client: TestClient, user_with_patient, authenticated_headers, days_ahead
     ):
-        """Test validation error for future date."""
-        invalid_data = {
-            "reason": "Future encounter",
-            "date": str(date.today() + timedelta(days=30)),
-            "patient_id": user_with_patient["patient"].id,
-        }
-
+        """Upcoming visits can be entered ahead of time, with no upper limit."""
+        future_date = str(date.today() + timedelta(days=days_ahead))
         response = client.post(
-            "/api/v1/encounters/", json=invalid_data, headers=authenticated_headers
+            "/api/v1/encounters/",
+            json={
+                "reason": "Upcoming visit",
+                "date": future_date,
+                "patient_id": user_with_patient["patient"].id,
+            },
+            headers=authenticated_headers,
         )
 
-        assert response.status_code == 422
+        assert response.status_code == 200
+        assert response.json()["date"] == future_date
+
+    def test_update_encounter_to_future_date(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_encounter_data,
+    ):
+        """An existing visit can be moved to a future date."""
+        encounter_id = client.post(
+            "/api/v1/encounters/",
+            json=sample_encounter_data,
+            headers=authenticated_headers,
+        ).json()["id"]
+        future_date = str(date.today() + timedelta(days=14))
+
+        response = client.put(
+            f"/api/v1/encounters/{encounter_id}",
+            json={"date": future_date},
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        assert response.json()["date"] == future_date
+
+    def test_get_recent_encounters_excludes_upcoming(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Recent means already happened; upcoming visits are left out."""
+        patient_id = user_with_patient["patient"].id
+        for reason, offset in [("Past visit", -3), ("Upcoming visit", 3)]:
+            client.post(
+                "/api/v1/encounters/",
+                json={
+                    "reason": reason,
+                    "date": str(date.today() + timedelta(days=offset)),
+                    "patient_id": patient_id,
+                },
+                headers=authenticated_headers,
+            )
+
+        response = client.get(
+            f"/api/v1/encounters/patient/{patient_id}/recent?days=30",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        reasons = [enc["reason"] for enc in response.json()]
+        assert "Past visit" in reasons
+        assert "Upcoming visit" not in reasons
 
     def test_encounter_validation_short_reason(
         self, client: TestClient, user_with_patient, authenticated_headers

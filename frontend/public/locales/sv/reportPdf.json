@@ -249,7 +249,8 @@
     "createdAt": "Skapad",
     "updatedAt": "Senast uppdaterad",
     "zipFilePath": "Sökväg i ZIP",
-    "fileName": "Filnamn"
+    "fileName": "Filnamn",
+    "upcoming": "Kommande"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primärvårdsläkare",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "filen hittades inte",
     "exportLeftOutNotConfigured": "integrationen med {{service}} är inte aktiverad eller inte helt konfigurerad",
     "exportLeftOutDownloadFailed": "kunde inte laddas ned från {{service}}",
-    "exportLeftOutFailed": "kunde inte läggas till"
+    "exportLeftOutFailed": "kunde inte läggas till",
+    "upcoming": "Kommande"
   },
   "values": {
     "wholeBlood": "Helblod",

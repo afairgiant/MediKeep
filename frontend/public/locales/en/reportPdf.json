@@ -249,7 +249,8 @@
     "createdAt": "Created",
     "updatedAt": "Last updated",
     "zipFilePath": "Path in ZIP",
-    "fileName": "File name"
+    "fileName": "File name",
+    "upcoming": "Upcoming"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Primary Care Physician",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "file not found",
     "exportLeftOutNotConfigured": "{{service}} integration is not enabled or not fully set up",
     "exportLeftOutDownloadFailed": "could not be downloaded from {{service}}",
-    "exportLeftOutFailed": "could not be added"
+    "exportLeftOutFailed": "could not be added",
+    "upcoming": "Upcoming"
   },
   "values": {
     "wholeBlood": "Whole Blood",

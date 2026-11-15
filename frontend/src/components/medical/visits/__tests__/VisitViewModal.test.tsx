@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 
 import render, { screen, waitFor } from '../../../../test-utils/render';
 import VisitViewModal from '../VisitViewModal';
+import { formatDateForAPI } from '../../../../utils/dateUtils';
 
 /** A link tab's name, with or without its "(n)" count. */
 const withCount = (name: string) =>
@@ -154,5 +155,25 @@ describe('VisitViewModal - footer actions', () => {
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Close' })).toBeEnabled();
+  });
+});
+
+describe('VisitViewModal - upcoming badge', () => {
+  const daysFromToday = (days: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return formatDateForAPI(d);
+  };
+
+  it('labels a future-dated visit as upcoming', () => {
+    renderModal({ visit: { ...visit, date: daysFromToday(3) } });
+    expect(screen.getByText('Upcoming')).toBeInTheDocument();
+  });
+
+  it('does not label a visit dated today or earlier', () => {
+    renderModal({ visit: { ...visit, date: daysFromToday(0) } });
+    expect(
+      screen.queryByText('Upcoming')
+    ).not.toBeInTheDocument();
   });
 });

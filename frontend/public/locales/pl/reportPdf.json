@@ -249,7 +249,8 @@
     "createdAt": "Utworzono",
     "updatedAt": "Ostatnia aktualizacja",
     "zipFilePath": "Ścieżka w ZIP",
-    "fileName": "Nazwa pliku"
+    "fileName": "Nazwa pliku",
+    "upcoming": "Nadchodząca"
   },
   "insuranceDetails": {
     "primaryCarePhysician": "Lekarz POZ",
@@ -383,7 +384,8 @@
     "exportLeftOutNotFound": "nie znaleziono pliku",
     "exportLeftOutNotConfigured": "integracja z {{service}} jest wyłączona lub nie została w pełni skonfigurowana",
     "exportLeftOutDownloadFailed": "nie udało się pobrać z {{service}}",
-    "exportLeftOutFailed": "nie udało się dodać"
+    "exportLeftOutFailed": "nie udało się dodać",
+    "upcoming": "Nadchodząca"
   },
   "values": {
     "wholeBlood": "Krew pełna",

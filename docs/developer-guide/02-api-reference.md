@@ -2636,6 +2636,12 @@ Base path: `/api/v1/encounters`
 }
 ```
 
+- **Dates**: `date` may be in the future, so upcoming visits can be entered ahead of time; there is no upper limit. Create and update both accept future dates.
+
+`GET /encounters/patient/{patient_id}/recent?days=30`
+
+- **Purpose**: Encounters dated within the last `days` days, up to today in the server timezone (`TZ`). Future-dated (upcoming) encounters are excluded.
+
 #### Encounter-Lab Result Relationships
 
 Bidirectional many-to-many linking between encounters and lab results. Accessible from both the encounter side and the lab result side.
@@ -5343,6 +5349,7 @@ Base path: `/api/v1/export`
   - `patient_id` (integer, required): Patient to export
   - `format` (string, optional): `csv` or `pdf` (default: csv)
 - **Success Response**: File download
+- **Encounters**: each exported visit carries `upcoming` (boolean, true when dated after today in the server timezone). CSV shows it as a Yes/No column; the PDF shows it only on upcoming visits.
 
 ---
 

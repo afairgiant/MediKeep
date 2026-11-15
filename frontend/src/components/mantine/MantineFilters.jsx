@@ -65,6 +65,7 @@ const MantineFilters = ({
     showSearch = true,
     typePlaceholder,
     categoryPlaceholder,
+    statusPlaceholder,
   } = config;
 
   const { colorScheme } = useMantineColorScheme();
@@ -307,7 +308,11 @@ const MantineFilters = ({
                 {/* Status Filter */}
                 {showStatus && statusOptions && statusOptions.length > 1 && (
                   <Select
-                    placeholder={t('filters.placeholders.status', 'Status')}
+                    placeholder={
+                      statusPlaceholder
+                        ? t(statusPlaceholder, statusPlaceholder)
+                        : t('filters.placeholders.status', 'Status')
+                    }
                     value={filters.status}
                     onChange={value => updateFilter('status', value || 'all')}
                     data={statusOptions.map(option => ({
