@@ -120,6 +120,14 @@ class TestCreationPath:
         assert created is not None
         assert created.role == "admin"
 
+    def test_refuses_to_create_without_a_password(self, db_session: Session):
+        """No built-in default password: creation needs an explicit one."""
+        result = create_emergency_admin(username="rescue")
+
+        assert result is False
+        db_session.expire_all()
+        assert db_session.query(User).filter(User.username == "rescue").first() is None
+
     def test_refuses_to_create_when_admins_exist_without_force(
         self, db_session: Session
     ):

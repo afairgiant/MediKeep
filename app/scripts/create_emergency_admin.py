@@ -130,7 +130,7 @@ def peek_system_state(username, promote, force):
 
 def create_emergency_admin(
     username: str = "admin",
-    password: str = "admin123",  # nosec B107 # CLI always prompts/overrides; first login must change it
+    password: str | None = None,
     force: bool = False,
     promote: bool = False,
 ):
@@ -140,7 +140,8 @@ def create_emergency_admin(
 
     Args:
         username: Username for the target user.
-        password: Password for a newly created user. Ignored when promoting.
+        password: Password for a newly created user. Required to create a
+            user; ignored when promoting. There is no default password.
         force: If True, allow creating an additional admin even when admin
             users already exist.
         promote: If True, require promotion of an existing user with this
@@ -240,6 +241,10 @@ def create_emergency_admin(
                 "This script is intended for emergency recovery when no admins exist."
             )
             print("Re-run with --force to create an additional admin user anyway.")
+            return False
+
+        if not password:
+            print("A password is required to create a new admin user.")
             return False
 
         # must_change_password=True is set atomically in the same commit as
