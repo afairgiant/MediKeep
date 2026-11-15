@@ -26,10 +26,4 @@ class BaseHealthRecordImporter(ABC):
 
     @abstractmethod
     def to_bundle(self, data: bytes, filename: str) -> Tuple[dict, List[str]]:
-        """
-        Convert the upload into a FHIR R4 Bundle dict, or raise ImportFormatError.
-
-        Also returns notes about the conversion, shown in the preview and execute
-        warnings (for example sections the converter did not map); an empty list
-        when there are none.
-        """
+        """Convert the upload into a FHIR R4 Bundle dict and a list of conversion notes for the warnings, or raise ImportFormatError."""

@@ -1,18 +1,4 @@
-"""Compare the patients in an uploaded bundle with the selected MediKeep patient.
-
-A file can hold more than one person (a zip of documents put together by
-hand). The birth date decides who is who: names change and are abbreviated, a
-birth date is not. Records of a person born on another day than the selected
-patient are left out when the file also holds someone born on the selected
-patient's day, and with them the records whose patient cannot be told. In
-every other file all is kept and warned about, for the user to judge at the
-preview. A person with no birth date in the file is kept too: when the name
-is the selected patient's, with a warning that only the name could be checked.
-
-A birth date may be given as a year or a year and month only. It is compared
-as far as it goes: a different year is another person, the same year alone
-confirms nobody.
-"""
+"""Compare the patients in an uploaded bundle with the selected MediKeep patient."""
 
 import re
 from dataclasses import dataclass, field
@@ -41,7 +27,8 @@ SAME_ID_MESSAGE = (
     "The file has patient records for different people under the same id, so "
     "its records cannot be told apart. Import each person's file separately."
 )
-# Reference fields a record uses to say whose it is
+# Reference fields read on a record of any type to say whose it is, before
+# the field its mapper declares
 PATIENT_REFERENCE_FIELDS = ("subject", "patient")
 # Schemes of a reference or fullUrl that is nothing but an id
 URN_SCHEMES = ("urn:uuid:", "urn:oid:")
@@ -57,9 +44,8 @@ _FULL_DATE = re.compile(r"(\d{4})-(\d{2})-(\d{2})", re.ASCII)
 class PatientMatch:
     """Demographics found in the file and any differences from the selected patient.
 
-    bundle is what to import: the upload itself, or a copy without the records
-    of the people who were left out. positions then gives, for each entry of
-    the copy, its index in the upload; it is None for the upload itself.
+    bundle is what to import; when it is a copy with records left out,
+    positions gives each entry's index in the upload.
     """
 
     full_name: Optional[str] = None
@@ -73,6 +59,20 @@ class PatientMatch:
     def found(self) -> bool:
         """True when the file carried any demographics at all."""
         return bool(self.full_name or self.birth_date or self.gender)
+
+
+def patient_reference_fields(resource_type) -> Tuple[str, ...]:
+    """The fields that can name the patient of a resource of this type: subject and patient, then its mapper's."""
+    mapper = (
+        resource_mapper_registry.get_mapper(resource_type)
+        if isinstance(resource_type, str)
+        else None
+    )
+    if mapper is None:
+        return PATIENT_REFERENCE_FIELDS
+    return tuple(
+        dict.fromkeys((*PATIENT_REFERENCE_FIELDS, mapper.PATIENT_REFERENCE_FIELD))
+    )
 
 
 def _patients(bundle: dict) -> List[dict]:
@@ -102,17 +102,7 @@ def _name_parts(resource: dict):
 
 
 def read_birth_date(value) -> Optional[BirthDate]:
-    """The parts of a FHIR date that the string gives, or None when it is not a date.
-
-    Reads YYYY, YYYY-MM and YYYY-MM-DD, in digits and with these hyphens
-    only, after spaces around the value are dropped. A longer string such as
-    a dateTime is read by its first ten characters, which must be a
-    YYYY-MM-DD. No other form is read: not a week date (1960-W01-1), an
-    ordinal date (1960-033), a date without hyphens (19600202) or one with a
-    part of fewer digits (1960-2-2), and not a date that does not exist
-    (1960-02-30). The parts not given are not filled in, so a year alone is
-    not taken for the first of January.
-    """
+    """The parts given by a YYYY, YYYY-MM or YYYY-MM-DD string, or by the first ten characters of a longer one; else None."""
     value = _text(value)
     if value is None:
         return None
@@ -138,11 +128,7 @@ def read_birth_date(value) -> Optional[BirthDate]:
 def birth_dates_compatible(
     first: Optional[BirthDate], second: Optional[BirthDate]
 ) -> bool:
-    """True unless the two birth dates differ in a part that both give.
-
-    1975 and 1975-01-01 can be one person; 1975 and 1960 cannot. A birth date
-    that is missing or unreadable (None) differs from nothing.
-    """
+    """True unless the two birth dates differ in a part that both give; None differs from nothing."""
     if first is None or second is None:
         return True
     shared = min(len(first), len(second))
@@ -152,12 +138,7 @@ def birth_dates_compatible(
 def more_exact_birth_date(
     first: Optional[BirthDate], second: Optional[BirthDate]
 ) -> Optional[BirthDate]:
-    """The one of two compatible birth dates that gives more parts.
-
-    Compatibility does not carry over (1975 fits both 1975-01 and 1975-02), so
-    a run of values is checked against the most exact one seen so far: a value
-    that fits it fits every value before it.
-    """
+    """The one of two compatible birth dates that gives more parts."""
     if first is None or (second is not None and len(second) > len(first)):
         return second
     return first
@@ -183,17 +164,11 @@ def _differs(birth_date: Optional[BirthDate], patient: Patient) -> bool:
 
 
 def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
-    """Build a PatientMatch from the bundle's Patient resources.
-
-    Every Patient is compared with the selected one, since a zip of documents
-    can describe more than one person. Other people's records are left out of
-    match.bundle (see _other_people) and the summary comes from the first
-    Patient that is kept. Each distinct warning is given once, and past
-    MAX_PATIENT_WARNINGS the rest are counted in one line.
+    """Build a PatientMatch from the bundle's Patient resources, without the records of other people.
 
     Raises ImportFormatError when the file holds several people and none of
     them can be the selected patient, or when a person left out cannot be told
-    from one who is kept (see _PatientIndex).
+    from one who is kept.
     """
     patients = _patients(bundle)
     if not patients:
@@ -208,9 +183,7 @@ def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
         gender=_text(kept[0].get("gender")),
         bundle=bundle,
     )
-    # What was left out comes ahead of the warnings about the people kept.
-    # The one unidentified line is first, so it is always shown; the lines per
-    # person follow and, past the cap, are counted like any other warning
+    # The unidentified line, then one line per person left out, then the people kept
     found = []
     if others:
         match.bundle, match.positions, left_out, unidentified = _without(bundle, others)
@@ -238,18 +211,10 @@ def compare_patient(bundle: dict, patient: Patient) -> PatientMatch:
 
 
 def _other_people(patients: List[dict], patient: Patient) -> Dict[int, dict]:
-    """The Patient resources whose records are left out, keyed by id().
+    """The Patients with another birth date, keyed by id(), when one has the selected patient's; else none.
 
-    A Patient with a birth date other than the selected patient's is another
-    person. Their records are left out only when the file also has a Patient
-    with the selected patient's birth date: without one, nothing in the file
-    says which records are the selected patient's. A Patient with no readable
-    birth date is never left out and does not count as that match, and neither
-    does one whose year, or year and month, is all the file gives and agrees.
-    A file where the other birth dates given can all be one person's (the same
-    date, or a year and a date within it) is about one person and is kept
-    whole, with warnings, as a file with a single Patient always was. A file
-    of several other people is refused.
+    Raises ImportFormatError when no Patient has the selected patient's birth
+    date and the other birth dates cannot all be one person's.
     """
     own = patient.birth_date
     matching = False
@@ -264,8 +229,7 @@ def _other_people(patients: List[dict], patient: Patient) -> Dict[int, dict]:
         return {}
     if matching:
         return {id(p): p for p in patients if id(p) in differing}
-    # One person when every value fits the most exact one: each is then a
-    # leading part of it, and so of any longer value among them
+    # One person when every value fits the most exact one
     distinct = set(differing.values())
     longest = max(distinct, key=len)
     if all(birth_dates_compatible(value, longest) for value in distinct):
@@ -274,12 +238,7 @@ def _other_people(patients: List[dict], patient: Patient) -> Dict[int, dict]:
 
 
 def _patient_id(reference: str) -> Optional[str]:
-    """The Patient id a reference string or fullUrl names, or None.
-
-    Reads Patient/<id>, an absolute URL ending in /Patient/<id> (either may end
-    in /_history/<version>) and urn:uuid:<id> or urn:oid:<id>. The type is
-    checked, so Group/5 and Condition/5 name no Patient.
-    """
+    """The id in Patient/<id>, an absolute URL ending in it (either with /_history/<version>), urn:uuid:<id> or urn:oid:<id>; else None."""
     for scheme in URN_SCHEMES:
         if reference.startswith(scheme):
             return reference[len(scheme) :] or None
@@ -293,21 +252,10 @@ def _patient_id(reference: str) -> Optional[str]:
 
 
 class _PatientIndex:
-    """The bundle's Patient resources by entry fullUrl and by id.
-
-    A Patient is also known by the id its fullUrl ends in, which is what a
-    relative reference is resolved against when the resource has no id.
-    Spaces around a fullUrl or a reference are not part of it, and a fullUrl
-    of nothing else is taken as absent.
-    """
+    """The bundle's Patient resources by entry fullUrl and by id, the id a fullUrl ends in included."""
 
     def __init__(self, bundle: dict, others: Dict[int, dict]):
-        """Walk the bundle once.
-
-        Raises ImportFormatError when a Patient that is left out and one that
-        is kept go by the same fullUrl or id: a reference to it could mean
-        either, so no record could be given to the right person.
-        """
+        """Walk the bundle once; raise ImportFormatError when a Patient left out and one kept share a fullUrl or id."""
         self.by_url: Dict[str, dict] = {}
         self.by_id: Dict[str, dict] = {}
         # fullUrls of other resources: a reference to one is not to a Patient
@@ -351,18 +299,7 @@ def _without(
     """A copy of the bundle with only the records known to belong to the Patients kept.
 
     Also returns the index in the bundle of each entry kept, how many records
-    each of the given Patients lost, and how many were dropped because the
-    patient they name is not in the file: once someone is left out, a record
-    that cannot be given to a kept Patient may be theirs. A record that names
-    no patient at all (an Organization, a Medication) is shared and kept: one
-    where neither subject nor patient is present, or where the value is null.
-    Any other value, an empty one included, has to name a Patient in the file.
-    A Provenance has no subject; it goes when one of its targets is a Patient
-    left out.
-
-    A record of a type the import stores (see _stored) is never shared: it
-    would become a row of the selected patient, so one that names no patient
-    is dropped and counted with those whose patient is not in the file.
+    each of the given Patients lost, and how many were dropped as unidentified.
     """
     index = _PatientIndex(bundle, others)
     left_out = dict.fromkeys(others, 0)
@@ -379,7 +316,7 @@ def _without(
         else:
             references = [
                 resource[name]
-                for name in PATIENT_REFERENCE_FIELDS
+                for name in patient_reference_fields(resource.get("resourceType"))
                 if resource.get(name) is not None
             ]
             shared = not references and not _stored(resource)
@@ -396,12 +333,7 @@ def _without(
 
 
 def _stored(resource: dict) -> bool:
-    """True when the import would write the resource as a row of the selected patient.
-
-    These are the types with a registered mapper, each of which says whose it
-    is in subject or patient. Every other type is at most counted as
-    unsupported, so nothing of it can end up under the wrong patient.
-    """
+    """True when the resource's type has a registered mapper, so the import would write it as a row."""
     resource_type = resource.get("resourceType")
     return (
         isinstance(resource_type, str)
@@ -412,7 +344,7 @@ def _stored(resource: dict) -> bool:
 def _left_out_warnings(
     patients: List[dict], left_out: Dict[int, int], patient: Patient
 ) -> List[str]:
-    """One line per person left out, with the number of their records dropped."""
+    """One line per person who had records left out, with the number dropped."""
     totals: Dict[Tuple[str, str], int] = {}
     for resource in patients:
         if id(resource) not in left_out:
@@ -426,17 +358,12 @@ def _left_out_warnings(
         f"whose birth date {born} differs from the selected "
         f"patient's {patient.birth_date.isoformat()}."
         for (name, born), count in totals.items()
+        if count
     ]
 
 
 def _differences(resource: dict, patient: Patient) -> List[str]:
-    """Warnings for a Patient resource that differs from the selection or cannot be checked.
-
-    A Patient with no readable birth date gets one line: that it could not be
-    checked at all, that its name differs, or, when the name is all that
-    agrees and the selected patient has a birth date, that only the name
-    could be checked.
-    """
+    """Warnings for a Patient resource that differs from the selection or cannot be checked."""
     given, family, text = _name_parts(resource)
     warnings = []
     # Middle names are common in exports and absent in MediKeep, so compare

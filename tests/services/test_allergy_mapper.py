@@ -10,6 +10,7 @@ from app.services.importers.mappers.allergy_mapper import (
     NO_REACTION,
     AllergyMapper,
 )
+from app.services.importers.mappers.base_mapper import MappedRecord, Skipped
 from app.services.importers.provenance import content_hash
 
 CLINICAL = "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical"
@@ -115,20 +116,15 @@ class TestAllergyMapper:
             verificationStatus=refuted,
             code={"coding": [{"system": SNOMED, "code": "419199007"}]},
         )
-        assert self.mapper.map(resource, BUNDLE) is None
-        assert self.mapper.skip_reason(resource, BUNDLE) == NO_KNOWN_ALLERGIES
-        assert (
-            self.mapper.skip_reason(_allergy(verificationStatus=refuted), BUNDLE)
-            is None
-        )
+        assert self.mapper.map(resource, BUNDLE) == Skipped(NO_KNOWN_ALLERGIES)
+        assert self.mapper.map(_allergy(verificationStatus=refuted), BUNDLE) is None
 
     def test_refuted_without_code_is_skipped_without_a_reason(self):
         """Test that a refuted entry with no code is not read as no known allergies."""
         resource = _allergy(verificationStatus=_status("refuted", VERIFICATION))
         del resource["code"]
         assert self.mapper.map(resource, BUNDLE) is None
-        assert self.mapper.skip_reason(resource, BUNDLE) is None
-        assert self.mapper.skip_reason(_allergy(), BUNDLE) is None
+        assert isinstance(self.mapper.map(_allergy(), BUNDLE), MappedRecord)
 
     def test_refuted_kind_names_the_kind(self):
         """Test that a refuted food or drug allergy does not claim no allergies at all."""
@@ -150,8 +146,7 @@ class TestAllergyMapper:
                 verificationStatus=refuted,
                 code={"coding": [{"system": SNOMED, "code": code}]},
             )
-            assert self.mapper.map(resource, BUNDLE) is None
-            assert self.mapper.skip_reason(resource, BUNDLE) == reason
+            assert self.mapper.map(resource, BUNDLE) == Skipped(reason)
 
     def test_no_known_allergy_code_is_not_imported_as_an_allergy(self):
         """Test that a confirmed "no known allergy" entry is skipped with a reason."""
@@ -178,8 +173,7 @@ class TestAllergyMapper:
                         ]
                     },
                 )
-                assert self.mapper.map(resource, BUNDLE) is None
-                assert self.mapper.skip_reason(resource, BUNDLE) == reason
+                assert self.mapper.map(resource, BUNDLE) == Skipped(reason)
 
     def test_no_known_allergies_no_longer_current_gives_no_reason(self):
         """Test that an inactive or resolved no-allergy statement is skipped silently."""
@@ -195,7 +189,6 @@ class TestAllergyMapper:
             )
             for resource in (refuted_kind, situation):
                 assert self.mapper.map(resource, BUNDLE) is None
-                assert self.mapper.skip_reason(resource, BUNDLE) is None
 
     def test_refuted_no_known_allergy_is_skipped_without_a_reason(self):
         """Test that a refuted "no known allergy" is not reported as no allergies."""
@@ -204,7 +197,6 @@ class TestAllergyMapper:
             code={"coding": [{"system": SNOMED, "code": "716186003"}]},
         )
         assert self.mapper.map(resource, BUNDLE) is None
-        assert self.mapper.skip_reason(resource, BUNDLE) is None
 
     def test_without_name_is_skipped(self):
         """Test that an allergy without a code is not mapped."""

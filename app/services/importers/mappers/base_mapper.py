@@ -6,7 +6,7 @@ Each mapper turns one FHIR resource type into column values for one MediKeep mod
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from types import SimpleNamespace
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # What a mapper may raise on malformed input; the service skips the resource
 MAPPING_ERRORS = (
@@ -33,6 +33,13 @@ class MappedRecord:
     source_codes: Dict[str, str] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class Skipped:
+    """A resource that map() left out, with the warning to show for it."""
+
+    reason: str
+
+
 class BaseResourceMapper(ABC):
     """Base class for FHIR resource mappers."""
 
@@ -43,20 +50,25 @@ class BaseResourceMapper(ABC):
     # re-takes hash_parts from the validated data through hash_parts_for_data
     CREATE_SCHEMA: Any = None
 
+    # Reference field of the resource that names its patient
+    PATIENT_REFERENCE_FIELD = "subject"
+    # Types of other bundle resources that map() reads through a reference
+    REFERENCED_TYPES: Tuple[str, ...] = ()
+
     # Fields the user owns once a row exists; never overwritten on re-import
     preserve_on_update: Tuple[str, ...] = ("notes", "tags")
 
     @abstractmethod
-    def map(self, resource: dict, bundle: dict) -> Optional[MappedRecord]:
-        """Map one resource to a MappedRecord, or None to skip it."""
-
-    def skip_reason(self, resource: dict, bundle: dict) -> Optional[str]:
-        """Warning to show for a resource that map() skipped, or None to skip it silently."""
-        return None
+    def map(self, resource: dict, bundle: dict) -> Union[MappedRecord, Skipped, None]:
+        """Map one resource to a MappedRecord; Skipped to skip it with a warning, None silently."""
 
     @abstractmethod
     def hash_parts_for_row(self, row: Any) -> Tuple[Any, ...]:
         """The same hash_parts, read back from an existing row."""
+
+    def bundle_references(self, resource: dict) -> List[Tuple[str, dict]]:
+        """(type in REFERENCED_TYPES, Reference) for each reference map() looks up in the bundle."""
+        return []
 
     def hash_parts_for_data(self, data: dict) -> Tuple[Any, ...]:
         """hash_parts for mapped column values, read from an unsaved row like a stored one."""

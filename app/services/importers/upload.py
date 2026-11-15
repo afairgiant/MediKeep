@@ -14,13 +14,11 @@ from .base_importer import ImportFormatError
 
 MAX_IMPORT_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
 
-# Caps on what a zip may expand to, checked against each member's header before it
-# is read. A zip may expand to no more than a bare upload could carry
+# Caps on what a zip may expand to, checked against each member's header before it is read
 MAX_ZIP_MEMBERS = 500
 MAX_ZIP_MEMBER_BYTES = MAX_IMPORT_FILE_SIZE
-MAX_ZIP_TOTAL_BYTES = MAX_IMPORT_FILE_SIZE
-# Only these are read: zipfile inflates deflate in bounded pieces, but expands a
-# whole bzip2 or LZMA chunk at once, so a tiny member of those could cost gigabytes
+MAX_ZIP_TOTAL_BYTES = 250 * 1024 * 1024  # 250 MB
+# The compression methods that are read
 ZIP_METHODS = (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED)
 ZIP_READ_CHUNK = 1024 * 1024
 
@@ -65,7 +63,10 @@ def _is_unsafe_name(name: str) -> bool:
 def iter_zip_members(
     data: bytes, suffixes: Iterable[str]
 ) -> Iterator[Tuple[str, bytes]]:
-    """Yield (name, bytes) for zip members with one of the suffixes, from memory."""
+    """Yield (name, bytes) for zip members with one of the suffixes, from memory.
+
+    Every member's header is checked before the first member is read.
+    """
     wanted = tuple(s.lower() for s in suffixes)
     try:
         zf = zipfile.ZipFile(io.BytesIO(data))
@@ -85,6 +86,7 @@ def iter_zip_members(
                 f"Archive has {len(infos)} entries, over the {MAX_ZIP_MEMBERS} limit"
             )
         total = 0
+        wanted_infos = []
         # Messages leave out member names, which can name the patient and reach the log
         for info in infos:
             if _is_unsafe_name(info.filename):
@@ -105,9 +107,9 @@ def iter_zip_members(
                 raise ImportFormatError(
                     "An archive entry is encrypted or uses an unsupported format"
                 )
-            # The header's sizes are the uploader's claim. zipfile truncates the
-            # member to file_size (already under the cap) and checks the CRC, so
-            # reading in pieces keeps memory bounded whatever the stream holds
+            wanted_infos.append(info)
+        for info in wanted_infos:
+            # Read in pieces; zipfile stops at the header's file_size and checks the CRC
             try:
                 with zf.open(info) as fh:
                     content = b"".join(iter(lambda: fh.read(ZIP_READ_CHUNK), b""))
@@ -122,8 +124,7 @@ def iter_zip_members(
                     "An archive entry is corrupt or larger than its header claims"
                 ) from exc
             except (RuntimeError, NotImplementedError) as exc:
-                # zipfile raises these for encryption or a deflate variant it
-                # cannot read; the RuntimeError text names the member
+                # Raised for encryption or a deflate variant zipfile cannot read
                 raise ImportFormatError(
                     "An archive entry is encrypted or uses an unsupported format"
                 ) from exc

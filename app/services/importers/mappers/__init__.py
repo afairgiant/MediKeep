@@ -5,10 +5,10 @@ Registry keyed by FHIR resourceType. Resource types without a mapper are
 reported as unsupported by the import preview.
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set, Tuple
 
 from .allergy_mapper import AllergyMapper
-from .base_mapper import BaseResourceMapper, MappedRecord
+from .base_mapper import BaseResourceMapper, MappedRecord, Skipped
 from .condition_mapper import ConditionMapper
 from .medication_mapper import MedicationRequestMapper, MedicationStatementMapper
 
@@ -39,6 +39,21 @@ class ResourceMapperRegistry:
         """Get the mapper for a resourceType."""
         return self._mappers.get(resource_type)
 
+    def referenced_types(self) -> Set[str]:
+        """Return the resourceTypes some mapper reads through a reference."""
+        return {
+            resource_type
+            for mapper in self._mappers.values()
+            for resource_type in mapper.REFERENCED_TYPES
+        }
+
+    def bundle_references(self, resource: dict) -> List[Tuple[str, dict]]:
+        """Return (type, Reference) for each reference the resource's mapper looks up in the bundle."""
+        resource_type = resource.get("resourceType")
+        if not isinstance(resource_type, str) or resource_type not in self._mappers:
+            return []
+        return self._mappers[resource_type].bundle_references(resource)
+
     def supported_types(self) -> List[str]:
         """Return the registered resourceTypes."""
         return list(self._mappers.keys())
@@ -56,5 +71,6 @@ __all__ = [
     "MedicationRequestMapper",
     "MedicationStatementMapper",
     "ResourceMapperRegistry",
+    "Skipped",
     "resource_mapper_registry",
 ]

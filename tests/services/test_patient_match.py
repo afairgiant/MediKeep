@@ -8,7 +8,14 @@ from types import SimpleNamespace
 import pytest
 
 from app.services.importers import ImportFormatError
-from app.services.importers.mappers import resource_mapper_registry
+from app.services.importers.mappers import (
+    AllergyMapper,
+    BaseResourceMapper,
+    ConditionMapper,
+    MedicationRequestMapper,
+    MedicationStatementMapper,
+    resource_mapper_registry,
+)
 from app.services.importers.patient_match import (
     MAX_PATIENT_WARNINGS,
     NO_MATCHING_PATIENT_MESSAGE,
@@ -17,6 +24,7 @@ from app.services.importers.patient_match import (
     birth_dates_compatible,
     compare_patient,
     more_exact_birth_date,
+    patient_reference_fields,
     read_birth_date,
 )
 
@@ -692,6 +700,31 @@ class TestOtherPeopleInTheFile:
             "differs from the selected patient's 1980-04-12."
         ]
 
+    def test_person_left_out_without_records_is_not_named(self):
+        """Test that a person who owns no record in the file gets no line."""
+        bundle = {"entry": [*_person(*self.JANE), *_person(*self.ROBIN, records=0)]}
+        match = compare_patient(bundle, _patient())
+        assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
+        assert match.positions == [0, 1, 2]
+        assert match.warnings == []
+        assert match.full_name == "Jane Sampleton"
+
+    def test_only_people_with_records_left_out_get_a_line(self):
+        """Test that the lines name the people who lost records and nobody else."""
+        bundle = {
+            "entry": [
+                *_person(*self.JANE),
+                *_person(*self.ROBIN, records=0),
+                *_person("sam", "Sam", "Sampleton", "1990-05-05", records=1),
+                _record("lost", {"reference": "Patient/nobody"}),
+            ]
+        }
+        match = compare_patient(bundle, _patient())
+        assert match.warnings == [
+            _unidentified(1),
+            _left_out(1, birth="1990-05-05", name="Sam Sampleton"),
+        ]
+
     def test_left_out_person_without_a_name(self):
         """Test the wording when the person left out has no usable name."""
         entries = _person(*self.ROBIN)
@@ -798,7 +831,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "padded"]
-        assert match.warnings == [_left_out(0)]
+        assert match.warnings == []
 
     def test_padded_full_url_of_another_resource_is_not_followed(self):
         """Test that a padded fullUrl of a Condition still stops the lookup by id."""
@@ -816,7 +849,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["5", "other"]
-        assert match.warnings == [_unidentified(1), _left_out(0)]
+        assert match.warnings == [_unidentified(1)]
 
     def test_people_under_one_full_url_but_for_padding_are_rejected(self):
         """Test that a padded fullUrl is the same name as the unpadded one."""
@@ -904,7 +937,7 @@ class TestOtherPeopleInTheFile:
         bundle = {"entry": [*_person(*self.JANE), *robin]}
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
-        assert match.warnings == [_unidentified(1), _left_out(0)]
+        assert match.warnings == [_unidentified(1)]
 
     def test_relative_reference_is_resolved_against_an_absolute_full_url(self):
         """Test that Patient/<id> finds a Patient known only by a fullUrl ending in that id."""
@@ -964,7 +997,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "own"]
-        assert match.warnings == [_left_out(0)]
+        assert match.warnings == []
 
     @pytest.mark.parametrize(
         "subject",
@@ -991,7 +1024,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
-        assert match.warnings == [_unidentified(1), _left_out(0)]
+        assert match.warnings == [_unidentified(1)]
 
     def test_unidentified_records_are_counted_in_one_line(self):
         """Test the plural of the line for records whose patient is not in the file."""
@@ -1041,7 +1074,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
-        assert match.warnings == [_unidentified(1), _left_out(0)]
+        assert match.warnings == [_unidentified(1)]
 
     @pytest.mark.parametrize(
         "fields",
@@ -1059,7 +1092,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1", "shared"]
-        assert match.warnings == [_left_out(0)]
+        assert match.warnings == []
 
     @pytest.mark.parametrize("fields", [{}, {"subject": None}, {"patient": None}])
     @pytest.mark.parametrize(
@@ -1080,7 +1113,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
-        assert match.warnings == [_unidentified(1), _left_out(0)]
+        assert match.warnings == [_unidentified(1)]
 
     def test_every_type_with_a_mapper_has_to_name_its_patient(self):
         """Test that the types held to this are the ones the import can store."""
@@ -1094,7 +1127,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
-        assert match.warnings == [_unidentified(len(records)), _left_out(0)]
+        assert match.warnings == [_unidentified(len(records))]
 
     def test_records_naming_no_patient_and_an_unknown_one_are_counted_together(self):
         """Test that the one line counts both kinds of record that cannot be given to anyone."""
@@ -1131,7 +1164,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1", "kept"]
-        assert match.warnings == [_left_out(0)]
+        assert match.warnings == []
 
     def test_record_naming_no_patient_is_kept_when_nobody_is_left_out(self):
         """Test that a file about one person is passed through with such a record in it."""
@@ -1156,7 +1189,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1"]
-        assert match.warnings == [_unidentified(1), _left_out(0)]
+        assert match.warnings == [_unidentified(1)]
 
     @pytest.mark.parametrize("subject, patient", [("jane", "robin"), ("robin", "jane")])
     def test_record_naming_a_kept_and_a_left_out_patient_is_left_out(
@@ -1241,7 +1274,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "5", "jane-document"]
-        assert match.warnings == [_left_out(0)]
+        assert match.warnings == []
 
     def test_reference_to_the_full_url_of_another_resource_is_not_followed(self):
         """Test that urn:uuid:5 is the Condition with that fullUrl, not the left-out Patient/5."""
@@ -1264,7 +1297,7 @@ class TestOtherPeopleInTheFile:
         }
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "c", "jane-document"]
-        assert match.warnings == [_left_out(0)]
+        assert match.warnings == []
 
     def test_provenance_without_a_patient_target_is_kept(self):
         """Test that a Provenance naming no Patient is not counted as unidentified."""
@@ -1279,6 +1312,85 @@ class TestOtherPeopleInTheFile:
         match = compare_patient(bundle, _patient())
         assert _ids(match.bundle) == ["jane", "jane-c0", "jane-c1", "p"]
         assert match.warnings == [_left_out(2)]
+
+    def test_patient_field_declared_by_a_mapper_is_followed(self):
+        """Test that a stored type that names its patient in a field of its own is given to the right person."""
+
+        class CoverageMapper(BaseResourceMapper):
+            RESOURCE_TYPE = "Coverage"
+            PATIENT_REFERENCE_FIELD = "beneficiary"
+            map = hash_parts_for_row = None
+
+        def coverage(key, **fields):
+            return {"resource": {"resourceType": "Coverage", "id": key, **fields}}
+
+        bundle = {
+            "entry": [
+                *_person(*self.JANE, records=0),
+                *_person(*self.ROBIN, records=0),
+                coverage("janes", beneficiary={"reference": "Patient/jane"}),
+                coverage("robins", beneficiary={"reference": "Patient/robin"}),
+                coverage("nobodys", beneficiary={"reference": "Patient/zz"}),
+                coverage("unnamed"),
+                coverage(
+                    "both",
+                    beneficiary={"reference": "Patient/jane"},
+                    subject={"reference": "Patient/robin"},
+                ),
+            ]
+        }
+        # Without a mapper a Coverage is not stored and its field is not known
+        match = compare_patient(bundle, _patient())
+        assert _ids(match.bundle) == ["jane", "janes", "robins", "nobodys", "unnamed"]
+        resource_mapper_registry.register(CoverageMapper())
+        try:
+            match = compare_patient(bundle, _patient())
+        finally:
+            resource_mapper_registry.unregister("Coverage")
+        assert _ids(match.bundle) == ["jane", "janes"]
+        assert match.warnings == [_unidentified(2), _left_out(2)]
+
+    def test_subject_is_read_before_patient_on_every_type(self):
+        """Test that a record naming a left-out person in each field is counted for its subject's."""
+        sam = ("sam", "Sam", "Sampleton", "1990-09-09")
+        for resource_type in ("AllergyIntolerance", "Condition", "Organization"):
+            record = _record(
+                "r", {"reference": "Patient/robin"}, "subject", resource_type
+            )
+            record["resource"]["patient"] = {"reference": "Patient/sam"}
+            bundle = {
+                "entry": [
+                    *_person(*self.JANE, records=0),
+                    *_person(*self.ROBIN, records=0),
+                    *_person(*sam, records=0),
+                    record,
+                ]
+            }
+            match = compare_patient(bundle, _patient())
+            assert match.warnings == [_left_out(1)], resource_type
+        assert patient_reference_fields("AllergyIntolerance") == ("subject", "patient")
+
+    def test_each_mapper_declares_the_field_fhir_gives_its_type(self):
+        """Test the patient field of every registered mapper against FHIR R4."""
+        fields = {
+            resource_type: resource_mapper_registry.get_mapper(
+                resource_type
+            ).PATIENT_REFERENCE_FIELD
+            for resource_type in resource_mapper_registry.supported_types()
+        }
+        assert fields == {
+            "Condition": "subject",
+            "AllergyIntolerance": "patient",
+            "MedicationStatement": "subject",
+            "MedicationRequest": "subject",
+        }
+        for mapper_type in (
+            ConditionMapper,
+            AllergyMapper,
+            MedicationStatementMapper,
+            MedicationRequestMapper,
+        ):
+            assert "PATIENT_REFERENCE_FIELD" in vars(mapper_type)
 
     def test_left_out_lines_come_first_and_survive_the_cap(self):
         """Test that many name warnings cannot push the lines about what was left out past the cap."""

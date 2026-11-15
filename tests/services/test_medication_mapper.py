@@ -4,8 +4,12 @@ Tests for the FHIR MedicationStatement and MedicationRequest mappers.
 
 from datetime import date
 
+import pytest
+
 from app.models.clinical import Medication
 from app.services.importers.mappers import _fhir as f
+from app.services.importers.mappers import resource_mapper_registry
+from app.services.importers.mappers.base_mapper import MappedRecord, Skipped
 from app.services.importers.mappers.medication_mapper import (
     NO_KNOWN_MEDICATIONS,
     MedicationRequestMapper,
@@ -408,6 +412,211 @@ class TestMedicationRequestMapper:
         )
 
 
+class TestAmbiguousMedicationReference:
+    """Test statements whose medicationReference has differing copies in the bundle."""
+
+    mapper = MedicationStatementMapper()
+    AMBIGUOUS = (
+        "Skipped MedicationStatement/ms1: the file has more than one Medication "
+        "for its reference, with different content"
+    )
+
+    @staticmethod
+    def _medication(code, name, **fields):
+        return {
+            "resourceType": "Medication",
+            "id": "med-1",
+            "code": _concept(code, name),
+            **fields,
+        }
+
+    def _statement(self, reference="Medication/med-1", **fields):
+        resource = _statement(medicationReference={"reference": reference}, **fields)
+        del resource["medicationCodeableConcept"]
+        return resource
+
+    def _differing(self, statement):
+        return _bundle(
+            self._medication("314076", "Lisinopril 10 MG Oral Tablet"),
+            statement,
+            self._medication("860975", "Metformin 500 MG Oral Tablet"),
+        )
+
+    def test_differing_copies_skip_the_statement_with_a_warning(self):
+        """Test that neither copy names the drug, for any form of the reference."""
+        for reference in ("Medication/med-1", "urn:uuid:med-1"):
+            statement = self._statement(reference)
+            bundle = self._differing(statement)
+            assert self.mapper.map(statement, bundle) == Skipped(self.AMBIGUOUS)
+            with f.indexed(bundle):
+                assert self.mapper.map(statement, bundle) == Skipped(self.AMBIGUOUS)
+
+    def test_differing_copies_under_one_full_url_skip_the_statement(self):
+        """Test that a fullUrl shared by two differing Medications resolves to neither."""
+        url = "https://a.example/fhir/Medication/med-1"
+        statement = self._statement(url)
+        bundle = self._differing(statement)
+        for entry in bundle["entry"]:
+            if entry["resource"]["resourceType"] == "Medication":
+                entry["fullUrl"] = url
+        assert self.mapper.map(statement, bundle) == Skipped(self.AMBIGUOUS)
+
+    def test_full_url_shared_with_another_type_names_the_drug(self):
+        """Test that an Organization at the Medication's fullUrl does not make it ambiguous."""
+        url = "urn:uuid:med-1"
+        statement = self._statement(url)
+        medication = self._medication("314076", "Lisinopril")
+        organization = {"resourceType": "Organization", "id": "med-1"}
+        for resources in ((medication, organization), (organization, medication)):
+            bundle = _bundle(*resources, statement)
+            for entry in bundle["entry"][:2]:
+                entry["fullUrl"] = url
+            mapped = self.mapper.map(statement, bundle)
+            assert mapped.data["medication_name"] == "Lisinopril"
+
+    @pytest.mark.parametrize(
+        "reference",
+        [
+            "Medication/med-1/_history/2",
+            "https://x.example/Medication/med-1/_history/2",
+        ],
+    )
+    def test_versioned_reference_names_the_drug_of_its_id(self, reference):
+        """Test that the version is not read as the id of another Medication."""
+        statement = self._statement(reference)
+        other = {**self._medication("860975", "Metformin"), "id": "2"}
+        for resources in (
+            (self._medication("314076", "Lisinopril"), other),
+            (other, self._medication("314076", "Lisinopril")),
+        ):
+            mapped = self.mapper.map(statement, _bundle(*resources, statement))
+            assert mapped.data["medication_name"] == "Lisinopril"
+        assert self.mapper.map(statement, _bundle(other, statement)) is None
+        assert self.mapper.bundle_references(statement) == [
+            ("Medication", {"reference": reference})
+        ]
+        statement["contained"] = [self._medication("1", "Aspirin")]
+        assert self.mapper.bundle_references(statement) == []
+
+    def test_reference_display_names_the_drug_as_for_a_missing_target(self):
+        """Test that the statement's own display is used, as when the reference is not found."""
+        statement = self._statement()
+        statement["medicationReference"]["display"] = "Metformin"
+        missing = self.mapper.map(statement, _bundle(statement))
+        mapped = self.mapper.map(statement, self._differing(statement))
+        assert mapped.data == missing.data
+        assert mapped.data["medication_name"] == "Metformin"
+        assert mapped.source_codes == missing.source_codes == {}
+        assert mapped.warnings == missing.warnings
+
+    def test_missing_target_is_still_skipped_silently(self):
+        """Test that a reference to nothing in the bundle gives no warning."""
+        statement = self._statement()
+        assert self.mapper.map(statement, _bundle(statement)) is None
+
+    def test_identical_copies_resolve(self):
+        """Test that copies differing only in meta still name the drug."""
+        statement = self._statement()
+        bundle = _bundle(
+            self._medication("314076", "Lisinopril", meta={"source": "a.xml"}),
+            statement,
+            self._medication("314076", "Lisinopril", meta={"source": "b.xml"}),
+        )
+        mapped = self.mapper.map(statement, bundle)
+        assert mapped.data["medication_name"] == "Lisinopril"
+        assert mapped.source_codes == {"rxnorm": "314076"}
+
+    def test_contained_medication_is_read_before_the_bundle(self):
+        """Test that the statement's own contained Medication is not made ambiguous by the bundle."""
+        statement = self._statement("#med-1")
+        statement["contained"] = [self._medication("860975", "Metformin")]
+        mapped = self.mapper.map(statement, self._differing(statement))
+        assert mapped.data["medication_name"] == "Metformin"
+
+    def test_no_medication_code_on_a_differing_copy_is_not_read(self):
+        """Test that "no known medications" is not taken from an ambiguous Medication."""
+        nothing = {"coding": [{"system": SNOMED, "code": "410942007"}]}
+        statement = self._statement(status="not-taken")
+        bundle = _bundle(
+            {"resourceType": "Medication", "id": "med-1", "code": nothing},
+            statement,
+            self._medication("860975", "Metformin"),
+        )
+        assert self.mapper.map(statement, bundle) == Skipped(self.AMBIGUOUS)
+
+
+class TestBundleReferences:
+    """Test what the mappers say a resource looks up in the bundle."""
+
+    @staticmethod
+    def _statement(reference, **fields):
+        return {
+            "resourceType": "MedicationStatement",
+            "id": "ms1",
+            "medicationReference": reference,
+            **fields,
+        }
+
+    def test_medication_reference_is_looked_up(self):
+        """Test that both medication mappers and the registry give the medicationReference."""
+        reference = {"reference": "Medication/med-1"}
+        statement = self._statement(reference)
+        expected = [("Medication", reference)]
+        assert MedicationStatementMapper().bundle_references(statement) == expected
+        assert MedicationRequestMapper().bundle_references(statement) == expected
+        assert resource_mapper_registry.bundle_references(statement) == expected
+        assert {kind for kind, _ in expected} <= (
+            resource_mapper_registry.referenced_types()
+        )
+
+    def test_contained_medication_is_not_looked_up(self):
+        """Test that a reference answered by a contained Medication is left out."""
+        contained = [{"resourceType": "Medication", "id": "med-1"}]
+        statement = self._statement({"reference": "#med-1"}, contained=contained)
+        assert resource_mapper_registry.bundle_references(statement) == []
+
+    def test_resource_that_reads_no_other_has_no_references(self):
+        """Test that other mappers, unmapped types and malformed values give none."""
+        for resource in (
+            {"resourceType": "Condition", "id": "c1"},
+            {"resourceType": "Medication", "id": "med-1"},
+            {"resourceType": ["MedicationStatement"]},
+            {},
+            self._statement(None),
+            self._statement("Medication/med-1"),
+            self._statement({"reference": 5}),
+            self._statement({"reference": ["Medication/med-1"]}),
+            self._statement({"reference": "#"}, contained="x"),
+            self._statement({"display": "Metformin"}),
+        ):
+            assert resource_mapper_registry.bundle_references(resource) == []
+
+    def test_reference_given_is_the_one_map_resolves(self, monkeypatch):
+        """Test that map() looks up exactly the references given, and nothing when there are none."""
+        looked_up = []
+        target = f.BundleIndex.target
+        monkeypatch.setattr(
+            f.BundleIndex,
+            "target",
+            lambda self, kind, reference: (
+                looked_up.append((kind, reference)),
+                target(self, kind, reference),
+            )[1],
+        )
+        contained = [{"resourceType": "Medication", "id": "med-1"}]
+        for statement in (
+            self._statement({"reference": "Medication/med-1"}),
+            self._statement({"reference": "urn:uuid:med-1"}),
+            self._statement({"reference": "#med-1"}),
+            self._statement({"reference": "#med-1"}, contained=contained),
+            self._statement({"reference": 5}),
+            self._statement(None),
+        ):
+            del looked_up[:]
+            MedicationStatementMapper().map(statement, _bundle(statement))
+            assert looked_up == resource_mapper_registry.bundle_references(statement)
+
+
 class TestNoMedicationStatements:
     """Test entries that say there is no medication, or not to give one."""
 
@@ -424,8 +633,7 @@ class TestNoMedicationStatements:
         resource = _statement(
             status="not-taken", medicationCodeableConcept=self.NOTHING
         )
-        assert self.statements.map(resource, EMPTY) is None
-        assert self.statements.skip_reason(resource, EMPTY) == NO_KNOWN_MEDICATIONS
+        assert self.statements.map(resource, EMPTY) == Skipped(NO_KNOWN_MEDICATIONS)
 
     def test_no_known_medications_through_a_referenced_medication(self):
         """Test that the rule also applies when the code is on a bundled Medication."""
@@ -435,8 +643,7 @@ class TestNoMedicationStatements:
         )
         del resource["medicationCodeableConcept"]
         bundle = _bundle(resource, medication)
-        assert self.statements.map(resource, bundle) is None
-        assert self.statements.skip_reason(resource, bundle) == NO_KNOWN_MEDICATIONS
+        assert self.statements.map(resource, bundle) == Skipped(NO_KNOWN_MEDICATIONS)
 
     def test_taken_drug_or_medicament_and_not_taken_drug_are_kept(self):
         """Test that only the not-taken generic concept counts as no medications."""
@@ -444,10 +651,7 @@ class TestNoMedicationStatements:
         assert self.statements.map(generic, EMPTY).data["status"] == "active"
         named = _statement(status="not-taken")
         assert self.statements.map(named, EMPTY).data["status"] == "cancelled"
-        assert (
-            self.statements.skip_reason(_statement(status="entered-in-error"), EMPTY)
-            is None
-        )
+        assert self.statements.map(_statement(status="entered-in-error"), EMPTY) is None
 
     def test_no_known_medications_situation_code(self):
         """Test that SNOMED's "No known medications" is skipped with the warning."""
@@ -462,18 +666,15 @@ class TestNoMedicationStatements:
         }
         for status in ("active", "completed"):
             resource = _statement(status=status, medicationCodeableConcept=situation)
-            assert self.statements.map(resource, EMPTY) is None
-            assert self.statements.skip_reason(resource, EMPTY) == NO_KNOWN_MEDICATIONS
+            assert self.statements.map(resource, EMPTY) == Skipped(NO_KNOWN_MEDICATIONS)
         # Not taking "no known medications" is a double negative: skipped silently
         resource = _statement(status="not-taken", medicationCodeableConcept=situation)
         assert self.statements.map(resource, EMPTY) is None
-        assert self.statements.skip_reason(resource, EMPTY) is None
 
     def test_do_not_perform_drug_or_medicament_is_an_order_not_to_give(self):
         """Test that a do-not-give order is worded literally, whatever its drug."""
         resource = _request(doNotPerform=True, medicationCodeableConcept=self.NOTHING)
-        assert self.requests.map(resource, EMPTY) is None
-        assert self.requests.skip_reason(resource, EMPTY) == (
+        assert self.requests.map(resource, EMPTY) == Skipped(
             "Skipped MedicationRequest/mr1: an order not to give the medication"
         )
 
@@ -485,22 +686,19 @@ class TestNoMedicationStatements:
                     status=status, doNotPerform=True, medicationCodeableConcept=drug
                 )
                 assert self.requests.map(order, EMPTY) is None
-                assert self.requests.skip_reason(order, EMPTY) is None
             statement = _statement(
                 status=status, medicationCodeableConcept=self.NOTHING
             )
             assert self.statements.map(statement, EMPTY) is None
-            assert self.statements.skip_reason(statement, EMPTY) is None
 
     def test_do_not_perform_request_is_skipped_with_a_warning(self):
         """Test that an order not to give a drug does not become an active medication."""
         resource = _request(doNotPerform=True)
-        assert self.requests.map(resource, EMPTY) is None
-        assert self.requests.skip_reason(resource, EMPTY) == (
+        assert self.requests.map(resource, EMPTY) == Skipped(
             "Skipped MedicationRequest/mr1: an order not to give the medication"
         )
-        assert self.requests.map(_request(doNotPerform=False), EMPTY) is not None
-        assert self.requests.skip_reason(_request(), EMPTY) is None
+        for resource in (_request(doNotPerform=False), _request()):
+            assert isinstance(self.requests.map(resource, EMPTY), MappedRecord)
 
 
 class TestDoseText:

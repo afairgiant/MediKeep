@@ -34,7 +34,7 @@ Each hospital system has its own MyChart. Download from each one separately.
 
 ## How to Import
 
-The import runs in two steps through the API (`/api/v1/health-records`, see the developer guide): a **preview** that reads the file and reports what would happen, then an **execute** that writes the rows. The preview shows:
+The import runs in two steps through the API (`/api/v1/health-records`, see the developer guide): a **preview** that reads the file and reports what would happen, then an **execute** that writes the rows. A file can be up to 50 MB. A zip can hold up to 500 entries, and its documents up to 50 MB each and 250 MB together once unpacked. The preview shows:
 
 | Section | What it tells you |
 |---------|-------------------|
@@ -57,11 +57,11 @@ When the file does hold someone with the selected patient's birth date:
 | Same birth date, different name | Imported, with a warning that names them. Check the preview before you execute |
 | No birth date in the file | Imported and compared by name only: a warning if the name differs, and if it is the same a warning that only the name could be checked. With neither a usable name nor a birth date, a warning that the person could not be checked |
 | Only a year or month, which fits the selected patient's | Imported and compared by name only: a warning if the name differs, none if it is the same |
-| Different birth date | Left out. The preview and the result say who was left out, with the birth date as the file gives it, and how many records |
+| Different birth date | Left out. The preview and the result say who was left out, with the birth date as the file gives it, and how many records. A person who has no records in the file is left out without a line |
 
 When someone is left out, MediKeep imports a problem, allergy or medication only when it names a person who is kept. A record that names a patient who cannot be found in the file is left out too, and so is a problem, allergy or medication that names no patient at all; one warning counts them. Other records that name no patient, such as an organization or a medication definition, are kept: they are about nobody in particular and are not stored as records of their own. When nobody is left out, the file is taken to be about one person and a record that names no patient is imported with the rest.
 
-The patient warnings come in this order: the count of records whose patient could not be found, one line per person left out, then the warnings about the people kept. At most 20 are listed and one more line counts the rest.
+The patient warnings come in this order: the count of records whose patient could not be found, one line per person who had records left out, then the warnings about the people kept. At most 20 are listed and one more line counts the rest.
 
 When nobody in the file has the selected patient's birth date, what counts is the birth dates in it that differ from the selected patient's. A person with no birth date, or with only a year or month that fits the selected patient's, is not counted here:
 
@@ -72,11 +72,14 @@ When nobody in the file has the selected patient's birth date, what counts is th
 
 For example, with a selected patient born 1980-04-12, a file with one person given as 1980 and another as 1975-01-01 is imported whole with warnings: only 1975-01-01 differs.
 
-Three kinds of file are refused because the people in them cannot be told apart:
+Four kinds of file are refused because the people in them cannot be told apart:
 
 - A file in which a person who would be left out and a person who would be kept have the same patient id, so a record could belong to either.
 - A zip in which documents use the same ids for records under different patient ids, unless both patients have the same full birth date (year, month and day). Without that, nothing shows that the records are one person's, and one person's records could replace the other's when the documents are combined. Import each document separately.
 - A zip in which documents give different birth dates for the same patient id, so two people would become one. Import each document separately.
+- A zip in which documents under different patient ids describe a medication definition with the same id differently, unless both patients have the same full birth date. A medication takes its drug from that definition, so one person's medication could be given another person's drug. Definitions that are the same in both documents are combined. A document with a medication that points to a definition it does not hold counts as describing that definition differently. Import each document separately.
+
+A FHIR bundle is not refused for this, but a medication in it that does not hold its own medication definition is not given a drug when its reference fits two different definitions: two whose entry address (`fullUrl`) is the reference, or, when no definition has the reference as its address, two with the id in the reference. It is imported under the drug name it carries itself, or left out with a warning when it carries none. A reference that is the address of one definition takes that definition's drug, even when another definition has the same id. One that points to a definition left out with another person is not given that drug either: it is imported under the drug name it carries itself, or left out when it carries none.
 
 Documents with the same patient id are combined unless the birth dates they give for it cannot be one person's: a document that gives no birth date for it, or only a year or month that fits, is combined with the rest, records with the same ids included. Documents that give one person different patient ids are combined when they have no record ids in common, or when both patient ids have the same full birth date. A year or month only, or no birth date, for either patient id is not enough: with record ids in common the zip is refused, even when the documents are in fact one person's. When documents give the same patient id a birth date in full and as a year or month only, or not at all, the full one is used, also to tell whose a record is.
 

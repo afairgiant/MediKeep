@@ -2,26 +2,25 @@
 Maps FHIR AllergyIntolerance resources onto the Allergy table.
 """
 
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 from app.models.clinical import Allergy
 from app.schemas.allergy import AllergyCreate
 
 from . import _fhir as f
-from .base_mapper import BaseResourceMapper, MappedRecord
+from .base_mapper import BaseResourceMapper, MappedRecord, Skipped
 
 ALLERGY_STATUS = {"active": "active", "inactive": "inactive", "resolved": "resolved"}
 CRITICALITY_SEVERITY = {"low": "mild", "high": "severe"}
 
-# SNOMED codes for a kind of allergy rather than a substance, with what a refuted
-# one says there is none of; a C-CDA "no known allergies" entry arrives this way
+# SNOMED codes for a kind of allergy rather than a substance -> what a refuted one says there is none of
 ALLERGY_KIND_CODES = {
     "419199007": "allergies",  # Allergy to substance
-    "609328004": "allergies",  # Allergic disposition, active; 419199007 is not
+    "609328004": "allergies",  # Allergic disposition
     "416098002": "drug allergies",  # Allergy to drug
     "414285001": "food allergies",  # Allergy to food
     "426232007": "environmental allergies",  # Environmental allergy
-    "232347008": "animal allergies",  # Allergy to animal dander, inactive but still sent
+    "232347008": "animal allergies",  # Allergy to animal dander
     "444316004": "seasonal allergies",  # Seasonal allergy
     "12481000132103": "biological substance allergies",  # H/O: biological substance allergy
     "420134006": "adverse reactions",  # Propensity to adverse reaction
@@ -29,9 +28,7 @@ ALLERGY_KIND_CODES = {
     "419511003": "adverse reactions to drugs",  # ... to drug
     "418471000": "adverse reactions to food",  # ... to food
 }
-# SNOMED 716186003 "No known allergy" and every code under it (checked against the
-# SNOMED hierarchy on tx.fhir.org); always skipped, with a
-# warning unless refuted (a double negative) or entered in error
+# SNOMED 716186003 "No known allergy" and the codes under it -> what there is none of
 NO_KNOWN_ALLERGY_CODES = {
     "716186003": "allergies",  # No known allergy
     "409137002": "drug allergies",  # No known drug allergy
@@ -62,14 +59,18 @@ class AllergyMapper(BaseResourceMapper):
     RECORD_TYPE = "allergy"
     MODEL = Allergy
     CREATE_SCHEMA = AllergyCreate
+    PATIENT_REFERENCE_FIELD = "patient"
 
-    def map(self, resource: dict, bundle: dict) -> Optional[MappedRecord]:
-        """Map one AllergyIntolerance; None when refuted, in error, unnamed or a no-allergy statement."""
+    def map(self, resource: dict, bundle: dict) -> Union[MappedRecord, Skipped, None]:
+        """Map one AllergyIntolerance; Skipped for a current no-allergy statement, None for a past one and for any other refuted, withdrawn or unnamed one."""
         verification = f.status_code(resource, "verificationStatus", "")
-        if verification in ("entered-in-error", "refuted"):
+        if verification == "entered-in-error":
             return None
-        if f.code_for(resource.get("code"), f.SNOMED) in NO_KNOWN_ALLERGY_CODES:
-            return None
+        code = f.code_for(resource.get("code"), f.SNOMED)
+        if verification == "refuted":
+            return self._no_known(resource, ALLERGY_KIND_CODES.get(code))
+        if code in NO_KNOWN_ALLERGY_CODES:
+            return self._no_known(resource, NO_KNOWN_ALLERGY_CODES[code])
         warnings: list = []
         allergen = f.name_for(resource.get("code"), warnings, "allergen")
         if not allergen:
@@ -105,23 +106,14 @@ class AllergyMapper(BaseResourceMapper):
             warnings=warnings,
         )
 
-    def skip_reason(self, resource: dict, bundle: dict) -> Optional[str]:
-        """
-        The "no known allergies" warning for a skipped no-allergy statement that
-        is still current: a refuted kind of allergy, or a no-known-allergy
-        situation code that is neither refuted nor entered in error.
-        """
+    @staticmethod
+    def _no_known(resource: dict, kind: Optional[str]) -> Optional[Skipped]:
+        """Skipped with the "no known" warning for the kind; None without a kind or when inactive or resolved."""
+        if not kind:
+            return None
         if f.status_code(resource, "clinicalStatus", "") in ("inactive", "resolved"):
             return None
-        verification = f.status_code(resource, "verificationStatus", "")
-        code = f.code_for(resource.get("code"), f.SNOMED)
-        if verification == "refuted":
-            kind = ALLERGY_KIND_CODES.get(code)
-        elif verification != "entered-in-error":
-            kind = NO_KNOWN_ALLERGY_CODES.get(code)
-        else:
-            kind = None
-        return NO_KNOWN.format(kind) if kind else None
+        return Skipped(NO_KNOWN.format(kind))
 
     def hash_parts_for_row(self, row: Any) -> Tuple[Any, ...]:
         """The hashed columns; content_hash folds case, spacing and date format."""

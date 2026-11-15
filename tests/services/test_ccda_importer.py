@@ -4,6 +4,7 @@ healthrecord-bridge, zip handling and the missing-library message.
 """
 
 import io
+import re
 import sys
 import time
 import zipfile
@@ -20,7 +21,9 @@ from app.services.importers import (
     HealthRecordImporterRegistry,
     ImportFormatError,
     ccda_available,
+    ccda_importer,
     health_record_importer_registry,
+    upload,
 )
 from app.services.importers.ccda_importer import (
     INVALID_DOCUMENT_MESSAGE,
@@ -31,10 +34,16 @@ from app.services.importers.ccda_importer import (
     SHARED_RECORD_IDS_MESSAGE,
     UNSAFE_DOCUMENT_MESSAGE,
     _conflict_notes,
+    _document_date,
     _keep_exact_birth_dates,
     _patient_birth_dates,
+    _referred,
     _report_notes,
     looks_like_ccda,
+)
+from app.services.importers.mappers import (
+    BaseResourceMapper,
+    resource_mapper_registry,
 )
 from app.services.importers.patient_match import compare_patient
 
@@ -122,6 +131,45 @@ def _later_copy(xml: bytes) -> bytes:
         b'<effectiveTime value="20240601090000-0500"/>',
         1,
     ).replace(b'<low value="20180214"/>', b'<low value="20180301"/>')
+
+
+# Entries and resources no converter should produce, one per way of being malformed
+MALFORMED_ENTRIES = [
+    None,
+    "entry",
+    [],
+    {},
+    {"resource": None},
+    {"resource": "Patient"},
+    {"resource": ["Patient"]},
+    {"resource": {}},
+    {"resource": {"id": "jane"}},
+    {"resource": {"resourceType": None, "id": "jane"}},
+    {"resource": {"resourceType": ["Patient"], "id": "jane"}},
+    {"resource": {"resourceType": "Patient"}},
+    {"resource": {"resourceType": "Patient", "id": None}},
+    {"resource": {"resourceType": "Patient", "id": ["jane"]}},
+    {"resource": {"resourceType": "Patient", "id": {"value": "jane"}}},
+    {"resource": {"resourceType": "Condition"}},
+    {"resource": {"resourceType": "Condition", "id": ["c1"], "subject": "jane"}},
+    {"resource": {"resourceType": "DocumentReference", "date": ["2024"]}},
+]
+MALFORMED_BUNDLES = [{}, {"entry": None}, {"entry": "entries"}, {"entry": {"a": 1}}]
+
+
+def _fake_converter(monkeypatch, bundles: dict):
+    """Make the converter return the given bundle for each document name."""
+    import healthrecord_bridge.ccda
+
+    def convert(data, name):
+        return bundles[name], SimpleNamespace(documents=[])
+
+    monkeypatch.setattr(healthrecord_bridge.ccda, "convert_bytes", convert)
+
+
+def _stub_zip(*names: str) -> bytes:
+    """A zip of empty C-CDA documents under the given names."""
+    return _zip({name: '<ClinicalDocument xmlns="urn:hl7-org:v3"/>' for name in names})
 
 
 class TestLooksLikeCcda:
@@ -351,6 +399,47 @@ class TestConflictNotes:
         )
         assert len(notes) == 1
         assert "newest" in notes[0]
+
+    @pytest.mark.parametrize("entry", MALFORMED_ENTRIES)
+    def test_malformed_entry_is_skipped(self, entry):
+        """Test that an entry without a usable resource, type or id is passed over."""
+        older = self._bundle(a="x")
+        newer = self._bundle(a="y")
+        for bundle in (older, newer):
+            bundle["entry"].insert(0, entry)
+        assert self._notes((1, older), (2, newer)) == [
+            "1 record appears in more than one document with different content; "
+            "the newest document's copy was kept"
+        ]
+
+    @pytest.mark.parametrize("bundle", MALFORMED_BUNDLES)
+    def test_bundle_without_an_entry_list_gives_no_note(self, bundle):
+        """Test that a bundle whose entry is missing or not a list is read as empty."""
+        assert self._notes((1, bundle), (2, self._bundle(a="x"))) == []
+
+
+class TestDocumentDate:
+    """Test reading the document date from a converted bundle."""
+
+    @pytest.mark.parametrize("entry", MALFORMED_ENTRIES)
+    def test_malformed_entry_is_skipped(self, entry):
+        """Test that the date is still found past an entry that is malformed."""
+        document = {
+            "resource": {
+                "resourceType": "DocumentReference",
+                "id": "doc",
+                "date": "2024-03-15T00:00:00Z",
+            }
+        }
+        expected = datetime(2024, 3, 15, tzinfo=timezone.utc)
+        if isinstance(entry, dict) and "date" in (entry.get("resource") or {}):
+            expected = None
+        assert _document_date({"entry": [entry, document]}) == expected
+
+    @pytest.mark.parametrize("bundle", MALFORMED_BUNDLES)
+    def test_bundle_without_an_entry_list_has_no_date(self, bundle):
+        """Test that a bundle whose entry is missing or not a list has no date."""
+        assert _document_date(bundle) is None
 
 
 class TestPatientBirthDates:
@@ -701,6 +790,513 @@ class TestPatientBirthDates:
         _patient_birth_dates([bundle] * 200)
         assert time.monotonic() - start < 5.0
 
+    @pytest.mark.parametrize("entry", MALFORMED_ENTRIES)
+    def test_malformed_entry_is_skipped(self, entry):
+        """Test that an entry without a usable resource, type or id is passed over and the rest is still checked."""
+        jane = self._bundle("jane")
+        jane["entry"].insert(0, entry)
+        assert _patient_birth_dates([jane, self._bundle("jane")]) == {
+            "jane": (1984, 7, 22)
+        }
+        with pytest.raises(ImportFormatError) as raised:
+            _patient_birth_dates([jane, self._bundle("robin", birth=self.ROBIN_BORN)])
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    @pytest.mark.parametrize("bundle", MALFORMED_BUNDLES)
+    def test_bundle_without_an_entry_list_is_read_as_empty(self, bundle):
+        """Test that a bundle whose entry is missing or not a list holds nothing to check."""
+        assert _patient_birth_dates([bundle, self._bundle("jane")]) == {
+            "jane": (1984, 7, 22)
+        }
+
+    def test_patient_field_of_a_mapper_is_read(self):
+        """Test that a record's person is found through the field its mapper declares."""
+
+        class CoverageMapper(BaseResourceMapper):
+            RESOURCE_TYPE = "Coverage"
+            PATIENT_REFERENCE_FIELD = "beneficiary"
+            map = hash_parts_for_row = None
+
+        def coverage(patient, birth):
+            bundle = self._bundle(patient, by="beneficiary", birth=birth)
+            bundle["entry"][1]["resource"]["resourceType"] = "Coverage"
+            return bundle
+
+        documents = [
+            coverage("jane", self.JANE_BORN),
+            coverage("robin", self.ROBIN_BORN),
+        ]
+        _patient_birth_dates(documents)
+        resource_mapper_registry.register(CoverageMapper())
+        try:
+            with pytest.raises(ImportFormatError) as raised:
+                _patient_birth_dates(documents)
+        finally:
+            resource_mapper_registry.unregister("Coverage")
+        assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+
+class TestSharedMedication:
+    """Test the check of records that name no patient and that a stored record reads through a reference."""
+
+    JANE = ("jane", "1984-07-22")
+    ROBIN = ("robin", "1975-01-01")
+
+    @staticmethod
+    def _document(patient, birth, drug, source="a", patients=None, **medication):
+        """One document: its Patient, a statement of theirs and the Medication med-1 it refers to."""
+        people = [
+            {
+                "resourceType": "Patient",
+                "id": key,
+                **({"birthDate": born} if born else {}),
+            }
+            for key, born in (patients if patients is not None else [(patient, birth)])
+        ]
+        resources = [
+            *people,
+            {
+                "resourceType": "MedicationStatement",
+                "id": f"{patient}-statement",
+                "subject": {"reference": f"Patient/{patient}"},
+                "medicationReference": {"reference": "Medication/med-1"},
+            },
+            {
+                "resourceType": "Medication",
+                "id": "med-1",
+                "meta": {"source": source},
+                "code": {"text": drug},
+                **medication,
+            },
+        ]
+        return {"entry": [{"resource": resource} for resource in resources]}
+
+    def _refused(self, *documents):
+        for order in permutations(documents):
+            with pytest.raises(ImportFormatError) as raised:
+                _patient_birth_dates(list(order))
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def _merged(self, *documents):
+        for order in permutations(documents):
+            _patient_birth_dates(list(order))
+
+    def test_differing_copies_of_two_people_are_refused(self):
+        """Test that one person's statement cannot end up pointing at another person's drug."""
+        self._refused(
+            self._document(*self.JANE, "lisinopril"),
+            self._document(*self.ROBIN, "metformin"),
+        )
+
+    def test_identical_copies_of_two_people_are_merged(self):
+        """Test that the same content under one id is shared, whatever document it was converted from."""
+        self._merged(
+            self._document(*self.JANE, "lisinopril", source="a"),
+            self._document(*self.ROBIN, "lisinopril", source="b"),
+        )
+
+    def test_differing_copies_of_one_patient_id_are_merged(self):
+        """Test that two versions of one person's medication are left to the merge."""
+        self._merged(
+            self._document(*self.JANE, "lisinopril"),
+            self._document(*self.JANE, "lisinopril 10 mg"),
+        )
+
+    def test_differing_copies_under_two_patient_ids_of_one_person_are_merged(self):
+        """Test that the same full birth date is enough, as for records that name their patient."""
+        self._merged(
+            self._document(*self.JANE, "lisinopril"),
+            self._document("jane-2", "1984-07-22", "lisinopril 10 mg"),
+        )
+
+    @pytest.mark.parametrize("birth", ["1984", "1984-07", None, "1984-07-23"])
+    def test_differing_copies_under_patient_ids_not_known_to_be_one_person_are_refused(
+        self, birth
+    ):
+        """Test that a year, a year and month, no birth date or another day does not confirm one person."""
+        self._refused(
+            self._document(*self.JANE, "lisinopril"),
+            self._document("jane-2", birth, "metformin"),
+        )
+
+    def test_person_whose_copy_is_the_same_as_the_first_is_still_checked(self):
+        """Test that everyone with a copy has to be one person once any two copies differ."""
+        self._refused(
+            self._document(*self.JANE, "lisinopril"),
+            self._document(*self.ROBIN, "lisinopril"),
+            self._document("jane-2", "1984-07-22", "metformin"),
+        )
+
+    def test_any_field_but_meta_is_a_difference(self):
+        """Test that the whole content is compared, not the name alone."""
+        self._refused(
+            self._document(*self.JANE, "lisinopril"),
+            self._document(*self.ROBIN, "lisinopril", form={"text": "tablet"}),
+        )
+
+    @pytest.mark.parametrize(
+        "patients", [[], [("jane", "1984-07-22"), ("sam", "1984-07-22")]]
+    )
+    def test_document_without_exactly_one_patient(self, patients):
+        """Test that a document of nobody or of several people shares only identical copies."""
+        jane = self._document(*self.JANE, "lisinopril")
+        self._merged(
+            jane, self._document("robin", None, "lisinopril", patients=patients)
+        )
+        self._refused(
+            jane, self._document("robin", None, "metformin", patients=patients)
+        )
+
+    def test_two_documents_without_a_patient(self):
+        """Test that differing copies in documents of nobody are refused too."""
+        self._refused(
+            self._document("a", None, "lisinopril", patients=[]),
+            self._document("b", None, "metformin", patients=[]),
+        )
+
+    def test_repeat_of_the_patient_in_one_document_is_one_patient(self):
+        """Test that a document that lists its one Patient twice is still that person's."""
+        twice = [self.JANE, self.JANE]
+        self._merged(
+            self._document(*self.JANE, "lisinopril"),
+            self._document(*self.JANE, "lisinopril 10 mg", patients=twice),
+        )
+
+    def test_copies_within_one_document_are_not_compared(self):
+        """Test that the check is between documents: one document alone is never refused."""
+        document = self._document(*self.JANE, "lisinopril", patients=[])
+        document["entry"].append(
+            {"resource": {"resourceType": "Medication", "id": "med-1", "code": {}}}
+        )
+        self._merged(document)
+
+    def test_differing_organizations_of_two_people_are_merged(self):
+        """Test that a record no stored record reads from, such as the custodian, is not held to this."""
+
+        def with_organization(document, name):
+            document["entry"].append(
+                {
+                    "resource": {
+                        "resourceType": "Organization",
+                        "id": "org",
+                        "name": name,
+                    }
+                }
+            )
+            return document
+
+        self._merged(
+            with_organization(self._document(*self.JANE, "lisinopril"), "Clinic"),
+            with_organization(self._document(*self.ROBIN, "lisinopril"), "Clinic East"),
+        )
+
+    def test_medication_that_names_a_patient_goes_by_that_patient(self):
+        """Test that a subject on such a record is checked as on any other record."""
+        jane = self._document(*self.JANE, "lisinopril")
+        robin = self._document(*self.ROBIN, "lisinopril")
+        for document, patient in ((jane, "jane"), (robin, "robin")):
+            document["entry"][-1]["resource"]["subject"] = {
+                "reference": f"Patient/{patient}"
+            }
+        self._refused(jane, robin)
+
+    @staticmethod
+    def _subject(patient):
+        return {"reference": f"Patient/{patient}"}
+
+    def test_copy_that_names_its_patient_is_compared_with_one_that_does_not(self):
+        """Test that differing copies of two people are refused when only one copy has a subject."""
+        self._refused(
+            self._document(*self.JANE, "aspirin", subject=self._subject("jane")),
+            self._document(*self.ROBIN, "warfarin"),
+        )
+        self._refused(
+            self._document(*self.JANE, "aspirin"),
+            self._document(*self.ROBIN, "warfarin", subject=self._subject("robin")),
+        )
+
+    def test_copies_with_and_without_a_subject_in_three_documents(self):
+        """Test that every copy is checked, whichever of three documents names its patient."""
+        for named in range(3):
+            people = [self.JANE, ("jane-2", "1984-07-22"), self.ROBIN]
+            documents = [
+                self._document(
+                    *person,
+                    f"drug {place}",
+                    **({"subject": self._subject(person[0])} if place == named else {}),
+                )
+                for place, person in enumerate(people)
+            ]
+            self._refused(*documents)
+            self._merged(*documents[:2])
+
+    def test_copies_of_one_person_with_and_without_a_subject_are_merged(self):
+        """Test that a subject on one copy does not make another person of the same patient."""
+        named = self._document(*self.JANE, "aspirin", subject=self._subject("jane"))
+        self._merged(named, self._document(*self.JANE, "aspirin 81 mg"))
+        self._merged(
+            named,
+            self._document("jane-2", "1984-07-22", "aspirin 81 mg"),
+            self._document(*self.JANE, "aspirin"),
+        )
+
+    def test_copy_goes_by_the_patient_it_names_among_several(self):
+        """Test that a subject says whose a copy is in a document of several people."""
+        both = [self.JANE, self.ROBIN]
+        other = self._document(*self.JANE, "aspirin 81 mg")
+        self._merged(
+            self._document(
+                *self.JANE, "aspirin", patients=both, subject=self._subject("jane")
+            ),
+            other,
+        )
+        self._refused(
+            self._document(
+                *self.JANE, "aspirin", patients=both, subject=self._subject("robin")
+            ),
+            other,
+        )
+
+    def test_subject_that_names_no_patient_of_its_document_does_not_decide(self):
+        """Test that a copy whose subject is not in its document goes by the document's one Patient."""
+        stray = self._subject("sam")
+        self._refused(
+            self._document(*self.JANE, "aspirin", subject=stray),
+            self._document(*self.ROBIN, "warfarin"),
+        )
+        self._merged(
+            self._document(*self.JANE, "aspirin", subject=stray),
+            self._document(*self.JANE, "warfarin"),
+        )
+
+    REFERENCE_FORMS = (
+        "Medication/med-1",
+        " Medication/med-1 ",
+        "urn:uuid:med-1",
+        "#med-1",
+        "https://x.example/Medication/med-1",
+    )
+
+    def _referring(self, patient, birth, reference="Medication/med-1", **fields):
+        """One document: its Patient and a statement that refers to a Medication the document does not hold."""
+        document = self._document(patient, birth, "unused", **fields)
+        del document["entry"][-1]
+        document["entry"][-1]["resource"]["medicationReference"] = reference and {
+            "reference": reference
+        }
+        return document
+
+    @pytest.mark.parametrize("reference", REFERENCE_FORMS)
+    def test_reference_to_a_medication_of_another_persons_document_is_refused(
+        self, reference
+    ):
+        """Test that a statement cannot take its drug from a document of someone else."""
+        self._refused(
+            self._referring(*self.JANE, reference),
+            self._document(*self.ROBIN, "metformin"),
+        )
+
+    def test_reference_by_full_url_to_an_id_with_a_slash_is_refused(self):
+        """Test that urn:uuid:<id> counts as a reference to that whole id."""
+        robin = self._document(*self.ROBIN, "metformin")
+        robin["entry"][-1]["resource"]["id"] = "a/b"
+        self._refused(self._referring(*self.JANE, "urn:uuid:a/b"), robin)
+
+    @pytest.mark.parametrize("reference", REFERENCE_FORMS)
+    def test_reference_to_a_medication_of_the_same_person_is_merged(self, reference):
+        """Test that the same Patient id or the same full birth date lets the reference through."""
+        self._merged(
+            self._referring(*self.JANE, reference),
+            self._document(*self.JANE, "lisinopril"),
+        )
+        self._merged(
+            self._referring(*self.JANE, reference),
+            self._document("jane-2", "1984-07-22", "lisinopril"),
+            self._document(*self.JANE, "lisinopril 10 mg"),
+        )
+
+    @pytest.mark.parametrize("birth", ["1984", "1984-07", None, "1984-07-23"])
+    def test_reference_to_a_medication_of_someone_not_known_to_be_the_same_is_refused(
+        self, birth
+    ):
+        """Test that the reference is held to the rule for differing copies."""
+        self._refused(
+            self._referring(*self.JANE),
+            self._document("jane-2", birth, "lisinopril"),
+        )
+
+    def test_reference_among_identical_copies_of_two_people_is_refused(self):
+        """Test that a document without the Medication counts as a differing copy in three documents."""
+        self._refused(
+            self._referring(*self.JANE),
+            self._document(*self.JANE, "lisinopril"),
+            self._document(*self.ROBIN, "lisinopril"),
+        )
+        self._refused(
+            self._referring("jane-2", "1984-07-22"),
+            self._document(*self.JANE, "lisinopril"),
+            self._referring(*self.ROBIN),
+        )
+
+    @pytest.mark.parametrize(
+        "patients", [[], [("jane", "1984-07-22"), ("sam", "1984-07-22")]]
+    )
+    def test_reference_from_a_document_without_exactly_one_patient(self, patients):
+        """Test that a statement goes by the Patient it names in its document, else by nobody."""
+        referring = self._referring(*self.JANE, patients=patients)
+        self._refused(referring, self._document(*self.ROBIN, "lisinopril"))
+        if patients:
+            self._merged(referring, self._document(*self.JANE, "lisinopril"))
+        else:
+            self._refused(referring, self._document(*self.JANE, "lisinopril"))
+
+    def test_reference_to_a_medication_in_no_document_is_merged(self):
+        """Test that documents of two people may refer to an id none of them holds."""
+        self._merged(self._referring(*self.JANE), self._referring(*self.ROBIN))
+        self._merged(
+            self._referring(*self.JANE, "Medication/med-2"),
+            self._document(*self.ROBIN, "metformin"),
+        )
+
+    def test_reference_to_a_contained_medication_is_merged(self):
+        """Test that a statement that holds its own Medication refers to no other document."""
+        jane = self._referring(*self.JANE, "#med-1")
+        jane["entry"][-1]["resource"]["contained"] = [
+            {"resourceType": "Medication", "id": "med-1", "code": {"text": "aspirin"}}
+        ]
+        self._merged(jane, self._document(*self.ROBIN, "metformin"))
+
+    @pytest.mark.parametrize(
+        "reference",
+        [None, "", "Medication/", "urn:uuid:", "#", 5, ["Medication/med-1"], {}],
+    )
+    def test_malformed_reference_is_no_reference(self, reference):
+        """Test that a reference value of the wrong type or without an id is passed over."""
+        jane = self._referring(*self.JANE, None)
+        statement = jane["entry"][-1]["resource"]
+        robin = self._document(*self.ROBIN, "metformin")
+        for value in (reference, {"reference": reference}):
+            statement["medicationReference"] = value
+            for contained in (None, "x", [5, {"id": ["med-1"]}]):
+                statement["contained"] = contained
+                self._merged(jane, robin)
+
+    VERSIONED_FORMS = (
+        "Medication/med-1/_history/2",
+        "https://x.example/Medication/med-1/_history/2",
+    )
+
+    @pytest.mark.parametrize("reference", VERSIONED_FORMS)
+    def test_versioned_reference_is_checked_by_its_id(self, reference):
+        """Test that /_history/<version> is not read as the id referred to."""
+        jane = self._referring(*self.JANE, reference)
+        statement = jane["entry"][-1]["resource"]
+        assert list(_referred(statement)) == [("Medication", "med-1")]
+        self._refused(jane, self._document(*self.ROBIN, "metformin"))
+        robin = self._document(*self.ROBIN, "metformin")
+        robin["entry"][-1]["resource"]["id"] = "2"
+        self._merged(jane, robin)
+
+    def test_reference_to_an_id_another_type_also_has_is_checked(self):
+        """Test that an Organization with the Medication's id changes nothing."""
+        organization = {"resource": {"resourceType": "Organization", "id": "med-1"}}
+        for reference in self.REFERENCE_FORMS:
+            jane = self._referring(*self.JANE, reference)
+            robin = self._document(*self.ROBIN, "metformin")
+            for document in (jane, robin):
+                document["entry"].insert(1, organization)
+            self._refused(jane, robin)
+            del robin["entry"][-1]
+            self._merged(jane, robin)
+
+    @needs_library
+    @pytest.mark.parametrize(
+        "reference",
+        [
+            *REFERENCE_FORMS,
+            *VERSIONED_FORMS,
+            "urn:uuid:a/b",
+            "urn:uuid:Medication/med-1",
+            "urn:uuid:med-1/_history/2",
+            "Medication/_history",
+            "Medication/2",
+            "urn:uuid:2",
+            "Medication/a/b",
+            "Organization/med-1",
+            "Medication/none",
+        ],
+    )
+    def test_resolved_medication_is_among_the_keys_checked(self, reference):
+        """Test that whatever the merged bundle resolves a reference to is a key _referred gives."""
+        from healthrecord_bridge.fhir.bundle import merge_bundles
+
+        from app.services.importers.mappers._fhir import BundleIndex
+
+        ids = ("med-1", "2", "a/b", "b", "_history", "Medication/med-1")
+        jane = self._referring(*self.JANE, reference)
+        statement = jane["entry"][-1]["resource"]
+        keys = list(_referred(statement))
+        resolved = set()
+        for held in range(1, 2 ** len(ids)):
+            robin = self._document(*self.ROBIN, "metformin")
+            del robin["entry"][-1]
+            for place, key in enumerate(ids):
+                organization = {"resourceType": "Organization", "id": key}
+                medication = {"resourceType": "Medication", "id": key}
+                robin["entry"].insert(0, {"resource": organization})
+                if held >> place & 1:
+                    robin["entry"].append({"resource": medication})
+            for documents in ([jane, robin], [robin, jane]):
+                merged = merge_bundles(documents)
+                found, ambiguous = BundleIndex(merged).target(
+                    "Medication", statement["medicationReference"]
+                )
+                assert not ambiguous
+                if found is None:
+                    self._merged_once(documents, keys, robin)
+                    continue
+                assert ("Medication", found["id"]) in keys
+                resolved.add(found["id"])
+                with pytest.raises(ImportFormatError):
+                    _patient_birth_dates(documents)
+        assert resolved == {key for kind, key in keys if key in ids}
+
+    @staticmethod
+    def _merged_once(documents, keys, robin):
+        """The check passes unless a key it reports is held."""
+        held = {
+            (entry["resource"]["resourceType"], entry["resource"]["id"])
+            for entry in robin["entry"]
+        }
+        if held.isdisjoint(keys):
+            _patient_birth_dates(documents)
+
+    def test_reference_of_a_statement_without_an_id_is_checked(self):
+        """Test that the statement's own id plays no part."""
+        jane = self._referring(*self.JANE)
+        del jane["entry"][-1]["resource"]["id"]
+        self._refused(jane, self._document(*self.ROBIN, "metformin"))
+
+    def test_many_references_are_checked_in_linear_time(self):
+        """Test that documents referring to one id are each walked once."""
+        documents = [
+            self._referring(f"p{i}", "1984-07-22", "urn:uuid:med-1")
+            for i in range(20_000)
+        ]
+        documents.append(self._document("p0", "1984-07-22", "lisinopril"))
+        start = time.monotonic()
+        _patient_birth_dates(documents)
+        assert time.monotonic() - start < 5.0
+
+    def test_many_copies_are_checked_in_linear_time(self):
+        """Test that the check walks each document once."""
+        documents = [
+            self._document(f"p{i}", "1984-07-22", f"drug {i}") for i in range(20_000)
+        ]
+        start = time.monotonic()
+        _patient_birth_dates(documents)
+        assert time.monotonic() - start < 5.0
+
 
 class TestKeepExactBirthDates:
     """Test that the merged Patient gets the most exact birth date known for its id."""
@@ -779,6 +1375,23 @@ class TestKeepExactBirthDates:
         assert time.monotonic() - start < 5.0
         assert {e["resource"]["birthDate"] for e in merged["entry"]} == {"1984-07-22"}
 
+    @pytest.mark.parametrize("entry", MALFORMED_ENTRIES)
+    def test_malformed_entry_is_left_as_it_is(self, entry):
+        """Test that an entry without a usable resource, type or id is passed over."""
+        patient = {"resourceType": "Patient", "id": "jane", "birthDate": "1984"}
+        merged = {"entry": [entry, {"resource": patient}]}
+        _keep_exact_birth_dates(merged, {"jane": (1984, 7, 22)})
+        assert merged == {
+            "entry": [entry, {"resource": {**patient, "birthDate": "1984-07-22"}}]
+        }
+
+    @pytest.mark.parametrize("bundle", MALFORMED_BUNDLES)
+    def test_bundle_without_an_entry_list_is_left_as_it_is(self, bundle):
+        """Test that a bundle whose entry is missing or not a list is not touched."""
+        before = dict(bundle)
+        _keep_exact_birth_dates(bundle, {"jane": (1984, 7, 22)})
+        assert bundle == before
+
 
 class TestValidateFormat:
     """Test validate_format."""
@@ -808,11 +1421,33 @@ class TestValidateFormat:
         data = _xdm_zip(MYCHART_CCD.read_bytes())
         assert CcdaImporter().validate_format(data, "export.zip")
 
-    def test_rejects_zip_without_documents_and_non_zip(self):
-        """Test that a zip of other XML and a non-zip extension are not claimed."""
+    def test_claims_zip_without_documents_and_rejects_non_zip(self):
+        """Test that a zip of other XML is claimed, for to_bundle to explain, and a non-zip extension is not."""
         importer = CcdaImporter()
-        assert not importer.validate_format(_zip({"a.xml": "<a/>"}), "a.zip")
+        assert importer.validate_format(_zip({"a.xml": "<a/>"}), "a.zip")
         assert not importer.validate_format(MYCHART_CCD.read_bytes(), "ccd.txt")
+        assert not importer.validate_format(_zip({"a.xml": "<a/>"}), "a.json")
+
+    def test_zip_is_claimed_without_reading_it(self, monkeypatch):
+        """Test that detection does not inflate the archive, which to_bundle reads once."""
+
+        def read(data, suffixes):
+            raise AssertionError("the zip was read")
+
+        monkeypatch.setattr(ccda_importer, "iter_zip_members", read)
+        data = _xdm_zip(MYCHART_CCD.read_bytes())
+        assert CcdaImporter().validate_format(data, "export.ZIP")
+
+    @needs_library
+    def test_zip_without_documents_is_detected_and_explained(self):
+        """Test that auto-detection leads to the message about the missing documents."""
+        data = _zip({"a.xml": "<a/>", "notes.txt": "x"})
+        importer = health_record_importer_registry.detect(data, "a.zip")
+        assert importer.FORMAT_KEY == "ccda"
+        with pytest.raises(
+            ImportFormatError, match="^The zip file contains no C-CDA documents$"
+        ):
+            importer.to_bundle(data, "a.zip")
 
     @needs_library
     def test_claims_unreadable_zip_so_the_reason_is_reported(self):
@@ -1001,6 +1636,124 @@ class TestToBundle:
             for kind in ("Condition", "AllergyIntolerance", "MedicationStatement"):
                 assert _count(merged, kind) == _count(single, kind) > 0
 
+    def test_shared_medication_of_two_people_is_refused(self, monkeypatch):
+        """Test that the zip is refused when documents of two people give one Medication id different drugs."""
+        jane = TestSharedMedication._document("jane", "1984-07-22", "lisinopril")
+        robin = TestSharedMedication._document("robin", "1975-01-01", "metformin")
+        _fake_converter(monkeypatch, {"a.xml": jane, "b.xml": robin})
+        for names in (("a.xml", "b.xml"), ("b.xml", "a.xml")):
+            with pytest.raises(ImportFormatError) as raised:
+                CcdaImporter().to_bundle(_stub_zip(*names), "export.zip")
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    @pytest.mark.parametrize("reference", TestSharedMedication.REFERENCE_FORMS)
+    def test_reference_to_another_persons_medication_is_refused(
+        self, monkeypatch, reference
+    ):
+        """Test that the zip is refused when one person's statement would resolve to a Medication only another person's document holds."""
+        from healthrecord_bridge.fhir.bundle import merge_bundles
+
+        shared = TestSharedMedication()
+        jane = shared._referring("jane", "1984-07-22", reference)
+        robin = shared._document("robin", "1975-01-01", "metformin")
+        # Merged without the check, the statement takes the other document's drug
+        statement = jane["entry"][-1]["resource"]
+        mapper = resource_mapper_registry.get_mapper("MedicationStatement")
+        mapped = mapper.map(statement, merge_bundles([jane, robin]))
+        assert mapped.data["medication_name"] == "metformin"
+        _fake_converter(monkeypatch, {"a.xml": jane, "b.xml": robin})
+        for names in (("a.xml", "b.xml"), ("b.xml", "a.xml")):
+            with pytest.raises(ImportFormatError) as raised:
+                CcdaImporter().to_bundle(_stub_zip(*names), "export.zip")
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_reference_to_the_same_persons_medication_is_merged(self, monkeypatch):
+        """Test that a statement resolves to the Medication of another document of the same person."""
+        shared = TestSharedMedication()
+        jane = shared._referring("jane", "1984-07-22")
+        other = shared._document("jane-2", "1984-07-22", "lisinopril")
+        _fake_converter(monkeypatch, {"a.xml": jane, "b.xml": other})
+        for names in (("a.xml", "b.xml"), ("b.xml", "a.xml")):
+            merged, _ = CcdaImporter().to_bundle(_stub_zip(*names), "export.zip")
+            mapper = resource_mapper_registry.get_mapper("MedicationStatement")
+            mapped = mapper.map(jane["entry"][-1]["resource"], merged)
+            assert mapped.data["medication_name"] == "lisinopril"
+
+    @pytest.mark.parametrize("named", ["jane", "robin"])
+    def test_shared_medication_with_a_subject_on_one_copy_is_refused(
+        self, monkeypatch, named
+    ):
+        """Test that the zip is refused when only one of the differing Medication copies names its patient."""
+        documents = {
+            "jane": TestSharedMedication._document("jane", "1984-07-22", "aspirin"),
+            "robin": TestSharedMedication._document("robin", "1975-01-01", "warfarin"),
+        }
+        documents[named]["entry"][-1]["resource"]["subject"] = {
+            "reference": f"Patient/{named}"
+        }
+        _fake_converter(
+            monkeypatch, {"a.xml": documents["jane"], "b.xml": documents["robin"]}
+        )
+        for names in (("a.xml", "b.xml"), ("b.xml", "a.xml")):
+            with pytest.raises(ImportFormatError) as raised:
+                CcdaImporter().to_bundle(_stub_zip(*names), "export.zip")
+            assert str(raised.value) == SHARED_RECORD_IDS_MESSAGE
+
+    def test_shared_medication_with_the_same_content_is_merged(self, monkeypatch):
+        """Test that two people's documents with the same Medication still merge, each statement kept."""
+        jane = TestSharedMedication._document("jane", "1984-07-22", "lisinopril")
+        robin = TestSharedMedication._document(
+            "robin", "1975-01-01", "lisinopril", source="b"
+        )
+        _fake_converter(monkeypatch, {"a.xml": jane, "b.xml": robin})
+        merged, notes = CcdaImporter().to_bundle(_stub_zip("a.xml", "b.xml"), "x.zip")
+        assert notes == []
+        assert _count(merged, "Medication") == 1
+        assert _count(merged, "MedicationStatement") == 2
+
+    def test_custodian_that_differs_between_two_people_does_not_stop_the_merge(self):
+        """Test that documents of two people from one hospital merge when the organization's details differ."""
+        jane = MYCHART_CCD.read_bytes()
+        robin = (
+            jane.replace(b"<given>Jane</given>", b"<given>Robin</given>")
+            .replace(b'<birthTime value="19840722"/>', b'<birthTime value="19750101"/>')
+            .replace(b'extension="E1234567"', b'extension="E7654321"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00043"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+            .replace(
+                b"<name>Example Health System</name>", b"<name>Example Health</name>"
+            )
+        )
+        # Her entries get ids of their own; the custodian keeps its id
+        robin = re.sub(
+            rb'extension="([A-Z]+-\d+(?:-[A-Z0-9]+)?)"', rb'extension="R-\1"', robin
+        )
+        for documents in ((jane, robin), (robin, jane)):
+            merged, _ = CcdaImporter().to_bundle(_xdm_zip(*documents), "export.zip")
+            assert len(_patients(merged)) == 2
+            assert _count(merged, "Organization") == 1
+
+    @pytest.mark.parametrize("entry", MALFORMED_ENTRIES)
+    def test_malformed_converter_output_is_a_format_error(self, monkeypatch, entry):
+        """Test that an entry the converter should never produce gives the fixed message, alone and in a zip."""
+        good, _ = CcdaImporter().to_bundle(MYCHART_CCD.read_bytes(), "ccd.xml")
+        bad = {**good, "entry": [*good["entry"], entry]}
+        _fake_converter(monkeypatch, {"a.xml": good, "b.xml": bad})
+        for data, name in ((b"<x/>", "b.xml"), (_stub_zip("a.xml", "b.xml"), "x.zip")):
+            with pytest.raises(ImportFormatError) as raised:
+                CcdaImporter().to_bundle(data, name)
+            assert str(raised.value) == INVALID_DOCUMENT_MESSAGE
+
+    @pytest.mark.parametrize("bundle", [None, [], "bundle", *MALFORMED_BUNDLES])
+    def test_converter_output_that_is_no_bundle_is_a_format_error(
+        self, monkeypatch, bundle
+    ):
+        """Test that a result without an entry list gives the fixed message."""
+        _fake_converter(monkeypatch, {"b.xml": bundle})
+        with pytest.raises(ImportFormatError) as raised:
+            CcdaImporter().to_bundle(b"<x/>", "b.xml")
+        assert str(raised.value) == INVALID_DOCUMENT_MESSAGE
+
     def test_one_patient_id_for_two_people_is_refused(self):
         """Test that a document cannot replace the Patient of another person's document."""
         jane = MYCHART_CCD.read_bytes()
@@ -1115,6 +1868,126 @@ class TestToBundle:
         with pytest.raises(ImportFormatError) as excinfo:
             CcdaImporter().to_bundle(_xdm_zip(data), "smith-record.zip")
         assert str(excinfo.value) == UNSAFE_DOCUMENT_MESSAGE
+
+    @staticmethod
+    def _record_steps(monkeypatch, invalid=()):
+        """Record each member read from the zip and each conversion, in order."""
+        import healthrecord_bridge.ccda
+
+        steps = []
+        read_members = ccda_importer.iter_zip_members
+
+        def members(data, suffixes):
+            for name, content in read_members(data, suffixes):
+                steps.append(("read", name))
+                yield name, content
+
+        def convert(data, name):
+            steps.append(("convert", name))
+            if name in invalid:
+                raise ValueError(f"{name}: not a document")
+            patient = {"resourceType": "Patient", "id": "p1"}
+            bundle = {"resourceType": "Bundle", "entry": [{"resource": patient}]}
+            return bundle, SimpleNamespace(documents=[])
+
+        monkeypatch.setattr(ccda_importer, "iter_zip_members", members)
+        monkeypatch.setattr(healthrecord_bridge.ccda, "convert_bytes", convert)
+        return steps
+
+    def test_each_document_is_converted_before_the_next_is_read(self, monkeypatch):
+        """Test that the zip's documents are not all read before the first is converted."""
+        steps = self._record_steps(monkeypatch)
+        data = _zip(
+            {
+                "a.xml": '<ClinicalDocument xmlns="urn:hl7-org:v3"/>',
+                "METADATA.XML": "<x/>",
+                "b.xml": '<ClinicalDocument xmlns="urn:hl7-org:v3"/>',
+            }
+        )
+        merged, notes = CcdaImporter().to_bundle(data, "export.zip")
+        assert steps == [
+            ("read", "a.xml"),
+            ("convert", "a.xml"),
+            ("read", "METADATA.XML"),
+            ("read", "b.xml"),
+            ("convert", "b.xml"),
+        ]
+        assert _count(merged, "Patient") == 1
+        assert notes == []
+
+    @pytest.mark.parametrize(
+        "name, content, method, message",
+        [
+            ("../c.xml", "<a/>", zipfile.ZIP_DEFLATED, "Unsafe path in archive"),
+            (
+                "c.xml",
+                "x" * 101,
+                zipfile.ZIP_DEFLATED,
+                "An archive entry is 101 bytes, over the 100 byte limit",
+            ),
+            (
+                "c.xml",
+                "x" * 70,
+                zipfile.ZIP_DEFLATED,
+                "Archive expands past the 150 byte limit",
+            ),
+            (
+                "c.xml",
+                "<a/>",
+                zipfile.ZIP_BZIP2,
+                "An archive entry is encrypted or uses an unsupported format",
+            ),
+        ],
+        ids=["unsafe path", "member size", "total size", "method"],
+    )
+    def test_zip_with_a_refused_later_member_is_not_converted(
+        self, monkeypatch, name, content, method, message
+    ):
+        """Test that no document is read or converted when a later member's header is refused."""
+        steps = self._record_steps(monkeypatch)
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 100)
+        monkeypatch.setattr(upload, "MAX_ZIP_TOTAL_BYTES", 150)
+        document = '<ClinicalDocument xmlns="urn:hl7-org:v3"/>'
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", document)
+            zf.writestr("b.xml", document)
+            zf.writestr(name, content, compress_type=method)
+        with pytest.raises(ImportFormatError) as raised:
+            CcdaImporter().to_bundle(buf.getvalue(), "export.zip")
+        assert str(raised.value) == message
+        assert steps == []
+
+    def test_corrupt_member_after_an_invalid_document_is_the_error(self, monkeypatch):
+        """Test that a member that fails to read after an invalid document is the error given."""
+        steps = self._record_steps(monkeypatch, invalid=("a.xml",))
+        data = bytearray(_stub_zip("a.xml", "b.xml"))
+        # Change b.xml's CRC in the central directory, so reading it fails the check
+        crc = data.rfind(b"PK\x01\x02") + 16
+        data[crc] ^= 0xFF
+        with pytest.raises(ImportFormatError) as raised:
+            CcdaImporter().to_bundle(bytes(data), "export.zip")
+        assert (
+            str(raised.value)
+            == "An archive entry is corrupt or larger than its header claims"
+        )
+        assert steps == [("read", "a.xml"), ("convert", "a.xml")]
+
+    def test_first_invalid_document_is_the_error_and_ends_conversion(self, monkeypatch):
+        """Test that nothing is converted after a document that is not valid."""
+        steps = self._record_steps(monkeypatch, invalid=("b.xml",))
+        with pytest.raises(ImportFormatError) as raised:
+            CcdaImporter().to_bundle(_stub_zip("a.xml", "b.xml", "c.xml"), "x.zip")
+        assert str(raised.value) == INVALID_DOCUMENT_MESSAGE
+        assert [name for step, name in steps if step == "convert"] == [
+            "a.xml",
+            "b.xml",
+        ]
+        assert [name for step, name in steps if step == "read"] == [
+            "a.xml",
+            "b.xml",
+            "c.xml",
+        ]
 
 
 class TestOptionalLibrary:

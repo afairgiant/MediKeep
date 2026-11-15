@@ -32,7 +32,7 @@ from app.schemas.health_record_import import (
 from . import provenance as prov
 from .mappers import MappedRecord, resource_mapper_registry
 from .mappers._fhir import indexed, resource_id
-from .mappers.base_mapper import MAPPING_ERRORS
+from .mappers.base_mapper import MAPPING_ERRORS, Skipped
 from .patient_match import compare_patient
 
 logger = get_logger(__name__, "app")
@@ -93,7 +93,7 @@ class HealthRecordImportService:
     ) -> HealthRecordImportPreviewResponse:
         """Classify every resource without writing anything."""
         match = compare_patient(bundle, patient)
-        plan = self._build_plan(match.bundle, patient, source, match.positions)
+        plan = self._build_plan(match.bundle, patient, source, match.positions, bundle)
         counts: Dict[str, SectionPreviewCount] = {}
         for row in plan.rows:
             section = counts.setdefault(row.mapped.record_type, SectionPreviewCount())
@@ -136,7 +136,7 @@ class HealthRecordImportService:
     ) -> HealthRecordImportResponse:
         """Write the planned rows, their provenance and the log entry in one transaction."""
         match = compare_patient(bundle, patient)
-        plan = self._build_plan(match.bundle, patient, source, match.positions)
+        plan = self._build_plan(match.bundle, patient, source, match.positions, bundle)
         batch_id = uuid.uuid4().hex
         counts: Dict[str, SectionResultCount] = {}
 
@@ -165,15 +165,15 @@ class HealthRecordImportService:
         patient: Patient,
         source: str,
         positions: Optional[List[int]] = None,
+        upload: Optional[dict] = None,
     ) -> _Plan:
         """Map each resource and classify it against existing provenance.
 
-        positions gives each entry's index in the upload when the bundle is a
-        copy with entries left out, so that warnings number entries as the
-        user's file does.
+        positions gives each entry's index in the upload; upload is the whole
+        bundle when records were left out, and decides which references are ambiguous.
         """
         # The mappers share one index of the bundle, dropped when the plan is done
-        with indexed(bundle):
+        with indexed(bundle, upload):
             return self._plan_entries(bundle, patient, source, positions)
 
     def _plan_entries(
@@ -222,10 +222,11 @@ class HealthRecordImportService:
                 plan.warnings.append(f"Skipped {label}: could not be mapped")
                 continue
             if mapped is None:
-                reason = mapper.skip_reason(resource, bundle)
-                if reason and reason not in plan.skip_reasons:
-                    plan.skip_reasons.add(reason)
-                    plan.warnings.append(reason)
+                continue
+            if isinstance(mapped, Skipped):
+                if mapped.reason not in plan.skip_reasons:
+                    plan.skip_reasons.add(mapped.reason)
+                    plan.warnings.append(mapped.reason)
                 continue
             if not self._validate(mapped, mapper, patient):
                 plan.warnings.append(f"Skipped {label}: failed validation")

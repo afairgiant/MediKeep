@@ -6,18 +6,20 @@ healthrecord-bridge package, which is an optional install.
 
 import re
 from datetime import datetime, timezone
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 
 from .base_importer import BaseHealthRecordImporter, ImportFormatError
+from .mappers import resource_mapper_registry
+from .mappers._fhir import lookup_keys, obj, objects, resource_id, text
 from .patient_match import (
-    PATIENT_REFERENCE_FIELDS,
     BirthDate,
     birth_date_text,
     birth_dates_compatible,
     more_exact_birth_date,
+    patient_reference_fields,
     read_birth_date,
 )
 from .upload import iter_zip_members
@@ -50,6 +52,8 @@ MAX_NOTE_TEXT = 100
 CDA_NAMESPACE = b"urn:hl7-org:v3"
 # Resources about the document rather than the patient
 DOCUMENT_RESOURCE_TYPES = ("DocumentReference", "Provenance")
+# merge_bundles gives each record the fullUrl <prefix><id>
+MERGED_URL_PREFIX = "urn:uuid:"
 _UTF8_BOM = b"\xef\xbb\xbf"
 _UTF16_BOMS = (b"\xff\xfe", b"\xfe\xff")
 _WHITESPACE = re.compile(rb"[ \t\r\n]*")
@@ -62,12 +66,7 @@ _ATTRIBUTE = re.compile(
 
 
 def _root_start(data: bytes) -> Optional[int]:
-    """Where the root element's start tag begins, past the XML prolog, or None.
-
-    The prolog (declaration, processing instructions, comments and a DOCTYPE)
-    can be any length, so this scans rather than looking at a fixed head. Each
-    step moves forward, so the cost is linear in the file.
-    """
+    """Where the root element's start tag begins, past the XML prolog, or None."""
     pos = 0
     while True:
         pos = _WHITESPACE.match(data, pos).end()
@@ -82,9 +81,7 @@ def _root_start(data: bytes) -> Optional[int]:
                 return None
             pos = close + 3
         elif data.startswith(b"<!DOCTYPE", pos):
-            # An internal subset in [...] may itself hold '>' characters. The
-            # search for '[' stops at the candidate '>', so each step reads only
-            # its own declaration and a run of them stays linear
+            # The end is the '>' after an internal subset in [...], when there is one
             close = data.find(b">", pos)
             if close < 0:
                 return None
@@ -101,12 +98,7 @@ def _root_start(data: bytes) -> Optional[int]:
 
 
 def looks_like_ccda(data: bytes) -> bool:
-    """True when the root element is ClinicalDocument in the CDA namespace.
-
-    The namespace has to be the one bound to the root's own prefix (or the
-    default namespace for an unprefixed root); a declaration for some other
-    prefix does not count.
-    """
+    """True when the root element is ClinicalDocument and the namespace bound to its prefix is the CDA one."""
     if data.startswith(_UTF16_BOMS):
         # XML requires a byte order mark on UTF-16; read it as text
         data = data.decode("utf-16", errors="ignore").encode("utf-8")
@@ -137,18 +129,12 @@ class CcdaImporter(BaseHealthRecordImporter):
     SOURCE = "ccda"
 
     def validate_format(self, data: bytes, filename: str) -> bool:
-        """Accept a C-CDA .xml, or a .zip that holds one or cannot be read (to_bundle says why)."""
+        """Accept a C-CDA .xml, or any .zip: it is not read here, to_bundle says what is wrong with one."""
         name = filename.lower()
         if name.endswith(".xml"):
             return looks_like_ccda(data)
-        if name.endswith(".zip"):
-            try:
-                return any(True for _ in self._documents(data))
-            except ImportFormatError:
-                # A zip that breaks a cap or is damaged is still claimed, since
-                # this is the only zip format, so to_bundle reports the reason
-                return True
-        return False
+        # This is the only zip format
+        return name.endswith(".zip")
 
     def to_bundle(self, data: bytes, filename: str) -> Tuple[dict, List[str]]:
         """Convert every document in the upload into one merged Bundle."""
@@ -159,52 +145,57 @@ class CcdaImporter(BaseHealthRecordImporter):
             raise ImportFormatError(MISSING_LIBRARY_MESSAGE) from exc
 
         if filename.lower().endswith(".zip"):
-            documents = list(self._documents(data))
-            if not documents:
-                raise ImportFormatError("The zip file contains no C-CDA documents")
+            documents = self._documents(data)
         else:
-            documents = [(filename, data)]
+            documents = iter([(filename, data)])
 
         converted = []
+        count = 0
+        failure: Optional[Exception] = None
+        # Each document is converted as it is read; after one fails, the rest
+        # are read without converting and an archive error is raised first
         for name, content in documents:
+            count += 1
+            if failure is not None:
+                continue
             try:
                 bundle, report = convert_bytes(content, name)
+                _check_converted(bundle)
             except Exception as exc:
-                # CcdaError is the library's input error; anything else is a
-                # converter bug on odd input, still reported as an invalid file
-                logger.warning(
-                    "Health record import upload is not a valid C-CDA",
-                    extra={
-                        LogFields.EVENT: "health_import_invalid_ccda",
-                        LogFields.ERROR: type(exc).__name__,
-                    },
-                )
-                message = (
-                    UNSAFE_DOCUMENT_MESSAGE
-                    if isinstance(exc, UnsafeXmlError)
-                    else INVALID_DOCUMENT_MESSAGE
-                )
-                raise ImportFormatError(message) from exc
+                # Any error of the converter is reported as an invalid file
+                failure = exc
+                continue
             converted.append((_document_date(bundle), name, bundle, report))
+        if not count:
+            raise ImportFormatError("The zip file contains no C-CDA documents")
+        if failure is not None:
+            logger.warning(
+                "Health record import upload is not a valid C-CDA",
+                extra={
+                    LogFields.EVENT: "health_import_invalid_ccda",
+                    LogFields.ERROR: type(failure).__name__,
+                },
+            )
+            message = (
+                UNSAFE_DOCUMENT_MESSAGE
+                if isinstance(failure, UnsafeXmlError)
+                else INVALID_DOCUMENT_MESSAGE
+            )
+            raise ImportFormatError(message) from failure
 
-        # Documents may repeat an entry (the same problem in two visit summaries)
-        # and the merge keeps the last copy, so order them oldest first: the
-        # newest document's version wins, not the one last in the archive.
-        # The sort is stable, so documents with one date keep their archive order
+        # Oldest document first, in archive order within one date
         converted.sort(key=lambda item: _sort_key(item[0]))
         bundles = [bundle for _, _, bundle, _ in converted]
         born = _patient_birth_dates(bundles)
         notes = _conflict_notes([(date, bundle) for date, _, bundle, _ in converted])
         for _, name, _, report in converted:
-            notes.extend(
-                _report_notes(report, prefix=name if len(documents) > 1 else "")
-            )
+            notes.extend(_report_notes(report, prefix=name if count > 1 else ""))
         if len(notes) > MAX_NOTES:
             hidden = len(notes) - MAX_NOTES
             noun = "note" if hidden == 1 else "notes"
             notes = [*notes[:MAX_NOTES], f"{hidden} more conversion {noun} not shown"]
         merged = merge_bundles(bundles)
-        # The last copy of a Patient may give less of the birth date than another
+        # Each merged Patient gets the most exact birth date given for its id
         _keep_exact_birth_dates(merged, born)
         return merged, notes
 
@@ -218,9 +209,8 @@ class CcdaImporter(BaseHealthRecordImporter):
 
 def _document_date(bundle: dict) -> Optional[datetime]:
     """When the document was produced, from its DocumentReference, or None."""
-    for entry in bundle.get("entry", []):
-        resource = entry.get("resource") or {}
-        if resource.get("resourceType") == "DocumentReference":
+    for _, resource in _resources(bundle):
+        if resource["resourceType"] == "DocumentReference":
             value = resource.get("date")
             if not isinstance(value, str):
                 return None
@@ -234,75 +224,144 @@ def _document_date(bundle: dict) -> Optional[datetime]:
     return None
 
 
+def _check_converted(bundle) -> None:
+    """Raise ValueError unless every entry of the bundle holds a resource with a type and an id."""
+    entries = bundle.get("entry") if isinstance(bundle, dict) else None
+    if not isinstance(entries, list):
+        raise ValueError("converted bundle has no entry list")
+    for entry in entries:
+        resource = entry.get("resource") if isinstance(entry, dict) else None
+        if not (
+            isinstance(resource, dict)
+            and text(resource.get("resourceType"))
+            and isinstance(resource.get("id"), str)
+            and resource_id(resource) == resource["id"]
+        ):
+            raise ValueError("converted entry has no resource, type or id")
+
+
+def _resources(bundle: dict) -> Iterator[Tuple[dict, dict]]:
+    """Yield (entry, resource) for each entry whose resource has a resourceType; others are skipped."""
+    for entry in objects(obj(bundle).get("entry")):
+        resource = entry.get("resource")
+        if isinstance(resource, dict) and isinstance(resource.get("resourceType"), str):
+            yield entry, resource
+
+
+def _content(resource: dict) -> dict:
+    """The resource without its meta, which names the document it was converted from."""
+    return {key: value for key, value in resource.items() if key != "meta"}
+
+
 def _sort_key(date: Optional[datetime]) -> Tuple[int, datetime]:
     """Undated documents sort first, so any dated document outranks them."""
     return (1, date) if date else (0, datetime.min.replace(tzinfo=timezone.utc))
 
 
 def _patient_birth_dates(bundles: List[dict]) -> Dict[str, BirthDate]:
-    """The most exact birth date the documents give for each Patient id.
+    """The most exact birth date the documents give for each Patient id that has a readable one.
 
-    Raises when merging the documents could mix the records of two people.
-    The merge keeps one copy per resource type and id, before the patients are
-    compared. So it is refused when two documents use one id for records of
-    Patients not known to be one person, where one person's record would
-    replace the other's, and when they use one Patient id for different
-    people, where both would become one Patient.
-
-    A record's person is the Patient its subject or patient names in its own
-    document. Copies of a record under one Patient id are merged: the birth
-    dates given for that id were checked, and only ones that cannot be one
-    person's are a difference, as in patient_match. Documents may give one
-    person different Patient ids, so copies under different ids are merged
-    only when both Patients have a birth date in full and it is the same day.
-    A year, a year and month or no birth date does not show that: the other
-    Patient may be someone else born in that year, whose copy would replace
-    this one and then be left out. The Patient's birth date is the most exact
-    one any document gives for its id, which is what the merged Patient will
-    have: the document of the record may give only the year, or none.
-
-    A copy that names no Patient, or one that is not in its document, is not
-    checked and is merged, and so are the resources that describe the
-    document.
-
-    A Patient id that no document gives a readable birth date is not in the
-    result.
+    Raises ImportFormatError when a Patient id has birth dates that cannot be
+    one person's, or a record id is used for, or referred to by records of,
+    Patients not confirmed to be one person.
     """
-    # The most exact birth date seen so far for each Patient id.
-    # The Patients of every document are read before any record is checked
+    # The most exact birth date seen so far for each Patient id
     patients: Dict[str, BirthDate] = {}
     present: List[Dict[str, str]] = []
+    # The id of each document's Patient, or None unless it has exactly one
+    sole: List[Optional[str]] = []
     for bundle in bundles:
         # Reference to Patient id, for the Patients of this document
         own: Dict[str, str] = {}
-        for entry in bundle.get("entry", []):
-            resource = entry["resource"]
-            if resource["resourceType"] == "Patient":
-                own[f"Patient/{resource['id']}"] = resource["id"]
-                _same_person(
-                    patients,
-                    resource["id"],
-                    read_birth_date(resource.get("birthDate")),
-                    PATIENT_ID_BIRTH_DATES_MESSAGE,
-                )
+        ids = set()
+        for _, resource in _resources(bundle):
+            if resource["resourceType"] != "Patient":
+                continue
+            patient_id = resource_id(resource)
+            ids.add(patient_id)
+            if patient_id is None:
+                continue
+            own[f"Patient/{patient_id}"] = patient_id
+            _same_person(
+                patients,
+                patient_id,
+                read_birth_date(resource.get("birthDate")),
+                PATIENT_ID_BIRTH_DATES_MESSAGE,
+            )
         present.append(own)
-    # The Patient id of the first copy of each record. Every later copy is
-    # compared with it alone: the same full date is shared by all that pass
+        sole.append(ids.pop() if len(ids) == 1 else None)
+    # The Patient id of the first copy of each record, which later copies are compared with
     owners: Dict[Tuple[str, str], str] = {}
-    for bundle, own in zip(bundles, present):
-        for entry in bundle.get("entry", []):
-            resource = entry["resource"]
-            if resource["resourceType"] in (*DOCUMENT_RESOURCE_TYPES, "Patient"):
+    referenced = resource_mapper_registry.referenced_types()
+    # The first copy of each referenced record
+    copies: Dict[Tuple[str, str], dict] = {}
+    # For each referenced record: the person of every copy and of every record
+    # that refers to it from a document without a copy. The person is the Patient
+    # id the record names, else its document's one Patient id, else the
+    # document's place
+    shared: Dict[Tuple[str, str], Dict[Union[str, int], None]] = {}
+    differing = set()
+    for place, (bundle, own) in enumerate(zip(bundles, present)):
+        # The referenced records this document holds, and the people of its
+        # records that refer to each
+        held = set()
+        refer: Dict[Tuple[str, str], Dict[Union[str, int], None]] = {}
+        for _, resource in _resources(bundle):
+            key = (resource["resourceType"], resource_id(resource))
+            if key[0] in (*DOCUMENT_RESOURCE_TYPES, "Patient"):
                 continue
             owner = own.get(_patient_reference(resource))
+            person = owner if owner is not None else sole[place]
+            person = place if person is None else person
+            for target in _referred(resource):
+                refer.setdefault(target, {}).setdefault(person)
+            if key[1] is None:
+                continue
+            if key[0] in referenced:
+                held.add(key)
+                content = _content(resource)
+                shared.setdefault(key, {}).setdefault(person)
+                if content != copies.setdefault(key, content):
+                    differing.add(key)
             if owner is None:
                 continue
-            first = owners.setdefault((resource["resourceType"], resource["id"]), owner)
+            first = owners.setdefault(key, owner)
             if first != owner and not _born_the_same_day(
                 patients.get(first), patients.get(owner)
             ):
                 raise ImportFormatError(SHARED_RECORD_IDS_MESSAGE)
+        # A record referred to and not held counts as a copy that differs from every other
+        for key, people in refer.items():
+            if key not in held:
+                shared.setdefault(key, {}).update(people)
+                differing.add(key)
+    for key in differing:
+        # Referred to, but held by no document
+        if key not in copies:
+            continue
+        first, *rest = shared[key]
+        # A place is not a Patient id, so it has no birth date and confirms nobody
+        if not all(
+            _born_the_same_day(patients.get(first), patients.get(other))
+            for other in rest
+        ):
+            raise ImportFormatError(SHARED_RECORD_IDS_MESSAGE)
     return patients
+
+
+def _referred(resource: dict) -> Iterator[Tuple[str, str]]:
+    """Keys of the records the merged bundle can resolve the resource's references to: by fullUrl and by type and id."""
+    for resource_type, reference in resource_mapper_registry.bundle_references(
+        resource
+    ):
+        keys = lookup_keys(resource_type, reference)
+        if keys is None:
+            continue
+        url, key = keys
+        if url.startswith(MERGED_URL_PREFIX):
+            yield resource_type, url[len(MERGED_URL_PREFIX) :]
+        if key[1] is not None:
+            yield key
 
 
 def _born_the_same_day(first: Optional[BirthDate], second: Optional[BirthDate]) -> bool:
@@ -323,27 +382,19 @@ def _same_person(
 
 
 def _keep_exact_birth_dates(merged: dict, born: Dict[str, BirthDate]) -> None:
-    """Give each Patient of the merged bundle the most exact birth date known for its id.
-
-    The merge keeps the last copy of a Patient, which may give only the year
-    of a birth date that an earlier document gave in full, and the patients
-    are compared by what the merged copy says. Only birthDate is set, on a
-    copy of the resource, and only when the known value gives more parts than
-    the merged one.
-    """
-    for entry in merged.get("entry", []):
-        resource = entry["resource"]
+    """Set birthDate, on a copy of each merged Patient, to the known one for its id when that gives more parts."""
+    for entry, resource in _resources(merged):
         if resource["resourceType"] != "Patient":
             continue
-        known = born.get(resource["id"])
+        known = born.get(resource_id(resource))
         current = read_birth_date(resource.get("birthDate"))
         if more_exact_birth_date(current, known) != current:
             entry["resource"] = {**resource, "birthDate": birth_date_text(known)}
 
 
 def _patient_reference(resource: dict) -> Optional[str]:
-    """The reference string of the resource's subject or patient, or None."""
-    for name in PATIENT_REFERENCE_FIELDS:
+    """The reference string of the first field that names the resource's patient, or None."""
+    for name in patient_reference_fields(resource.get("resourceType")):
         value = resource.get(name)
         reference = value.get("reference") if isinstance(value, dict) else None
         if isinstance(reference, str):
@@ -352,34 +403,19 @@ def _patient_reference(resource: dict) -> Optional[str]:
 
 
 def _conflict_notes(documents: List[Tuple[Optional[datetime], dict]]) -> List[str]:
-    """Notes counting the resources that documents describe differently.
+    """Notes counting the resources whose copies differ, for (document date, bundle) pairs in merge order.
 
-    Takes (document date, bundle) pairs in merge order, oldest first, where the
-    last copy of a resource is the one kept. A resource whose kept copy comes
-    from a later-dated document than every copy that differs from it is counted
-    as settled by date. When a differing copy has the same date as the kept one,
-    or neither has a date, only the order in the archive chose between them, and
-    those are counted apart so the note does not claim a newest document. Nor
-    does it when the kept copy is dated and a differing one is not, since the
-    undated document may be the newer: those have a count of their own. Each
-    resource is counted once, under the least certain of these that applies:
-    order in the archive, then an undated copy, then date.
-
-    Only content is compared. The resources that describe the document itself
-    are left out (Provenance records the archive member it came from,
-    DocumentReference the date of each version), and so is each resource's
-    meta, which names the document it was converted from.
+    Each resource is counted once: as settled by archive order, else by an
+    undated copy, else by date.
     """
     copies = {}
     for date, bundle in documents:
         rank = _sort_key(date)
-        for entry in bundle.get("entry", []):
-            resource = entry["resource"]
-            if resource["resourceType"] in DOCUMENT_RESOURCE_TYPES:
+        for _, resource in _resources(bundle):
+            key = (resource["resourceType"], resource_id(resource))
+            if key[0] in DOCUMENT_RESOURCE_TYPES or key[1] is None:
                 continue
-            key = (resource["resourceType"], resource["id"])
-            content = {k: v for k, v in resource.items() if k != "meta"}
-            copies.setdefault(key, []).append((rank, content))
+            copies.setdefault(key, []).append((rank, _content(resource)))
 
     undated = _sort_key(None)
     by_date = by_dated = by_position = 0

@@ -4,13 +4,13 @@ Maps FHIR MedicationStatement and MedicationRequest resources onto the Medicatio
 
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from app.models.clinical import Medication
 from app.schemas.medication import MedicationCreate
 
 from . import _fhir as f
-from .base_mapper import BaseResourceMapper, MappedRecord
+from .base_mapper import BaseResourceMapper, MappedRecord, Skipped
 
 STATEMENT_STATUS = {
     "active": "active",
@@ -29,13 +29,15 @@ REQUEST_STATUS = {
 }
 SKIPPED_STATUS = ("entered-in-error", "cancelled")
 
-# SNOMED 410942007 "Drug or medicament": C-CDA says "no known medications" with a
-# negated entry of this code, which arrives as a not-taken statement
+# SNOMED 410942007 "Drug or medicament": a not-taken statement of it says no known medications
 NO_MEDICATION_CODES = {"410942007"}
-# SNOMED 787481004 "No known medications" says the same as a situation; a not-taken
-# statement of it is a double negative and is skipped without a warning
+# SNOMED 787481004 "No known medications": says the same unless the statement is not-taken
 NO_KNOWN_MEDICATION_CODES = {"787481004"}
 NO_KNOWN_MEDICATIONS = "Medications: file states no known medications"
+AMBIGUOUS_MEDICATION = (
+    "Skipped {}: the file has more than one Medication for its reference, "
+    "with different content"
+)
 
 # Routes are mapped only where a MediKeep value fits. Anything else (ophthalmic,
 # vaginal, transdermal, ...) is left empty and kept in the notes. Respiratory tract
@@ -131,16 +133,25 @@ HASH_FIELDS = (
 )
 
 
-def _medication(resource: dict, bundle: dict) -> dict:
-    """The contained or bundled Medication that medicationReference points to, or {}."""
+def _medication_reference(resource: dict) -> Tuple[Optional[dict], Optional[dict]]:
+    """(The contained Medication that medicationReference points to, else None; the reference to look up in the bundle, else None)."""
     reference = f.obj(resource.get("medicationReference"))
     target_id = f.ref_id(reference)
     if target_id is None:
-        return {}
+        return None, None
     for contained in f.objects(resource.get("contained")):
         if f.resource_id(contained) == target_id:
-            return contained
-    return f.resolve(bundle, "Medication", reference) or {}
+            return contained, None
+    return None, reference
+
+
+def _medication(resource: dict, bundle: dict) -> Tuple[dict, bool]:
+    """(The contained or bundled Medication that medicationReference points to or {}, True when the bundle's copies of it differ)."""
+    contained, reference = _medication_reference(resource)
+    if reference is None:
+        return contained or {}, False
+    medication, ambiguous = f.bundle_index(bundle).target("Medication", reference)
+    return medication or {}, ambiguous
 
 
 def medication_name(resource: dict, medication: dict) -> Optional[str]:
@@ -311,27 +322,40 @@ class _MedicationMapper(BaseResourceMapper):
     RECORD_TYPE = "medication"
     MODEL = Medication
     CREATE_SCHEMA = MedicationCreate
+    REFERENCED_TYPES = ("Medication",)
     # The source cannot tell prescription from over-the-counter; the user's choice stands
     preserve_on_update = ("notes", "tags", "medication_type")
     STATUS_MAP: dict = {}
     DOSAGE_FIELD = "dosage"
 
-    def map(self, resource: dict, bundle: dict) -> Optional[MappedRecord]:
+    def bundle_references(self, resource: dict) -> List[Tuple[str, dict]]:
+        """The medicationReference, unless a contained Medication answers it."""
+        reference = _medication_reference(resource)[1]
+        return [("Medication", reference)] if reference is not None else []
+
+    def map(self, resource: dict, bundle: dict) -> Union[MappedRecord, Skipped, None]:
         """
-        Map one resource; None when cancelled, in error, a do-not-give order,
-        unnamed or no medication.
+        Map one resource; Skipped for a do-not-give order, a "no known
+        medications" statement or an unnamed one whose medicationReference is
+        ambiguous, None when cancelled, in error, otherwise unnamed or a
+        not-taken "no known medications".
         """
         raw_status = (f.text(resource.get("status")) or "").strip().lower()
-        if raw_status in SKIPPED_STATUS or resource.get("doNotPerform") is True:
+        if raw_status in SKIPPED_STATUS:
             return None
+        label = f"{self.RESOURCE_TYPE}/{f.resource_id(resource) or '?'}"
+        if resource.get("doNotPerform") is True:
+            return Skipped(f"Skipped {label}: an order not to give the medication")
         warnings: list = []
         # Resolved once; each lookup outside indexed() would build a new BundleIndex
-        medication = _medication(resource, bundle)
-        if (
-            _states_no_medications(raw_status, resource, medication)
-            or _snomed_code(resource, medication) in NO_KNOWN_MEDICATION_CODES
+        medication, ambiguous = _medication(resource, bundle)
+        code = _snomed_code(resource, medication)
+        if code in NO_KNOWN_MEDICATION_CODES or (
+            raw_status == "not-taken" and code in NO_MEDICATION_CODES
         ):
-            return None
+            if code in NO_KNOWN_MEDICATION_CODES and raw_status == "not-taken":
+                return None
+            return Skipped(NO_KNOWN_MEDICATIONS)
         rxnorm = medication_code(resource, medication)
         name = medication_name(resource, medication)
         if not name:
@@ -344,7 +368,7 @@ class _MedicationMapper(BaseResourceMapper):
             if name:
                 warnings.append("no drug name in the file, the code is used")
         if not name:
-            return None
+            return Skipped(AMBIGUOUS_MEDICATION.format(label)) if ambiguous else None
         dosages = f.objects(resource.get(self.DOSAGE_FIELD))
         dosage = dosages[0] if dosages else {}
         sig = f.text(dosage.get("text"))
@@ -398,7 +422,7 @@ class _MedicationMapper(BaseResourceMapper):
             external_id=f.resource_id(resource),
             data=data,
             hash_parts=self.hash_parts_for_data(data),
-            label=f"{self.RESOURCE_TYPE}/{f.resource_id(resource) or '?'}",
+            label=label,
             warnings=warnings,
             source_codes={"rxnorm": rxnorm} if rxnorm else {},
         )
@@ -411,21 +435,6 @@ class _MedicationMapper(BaseResourceMapper):
         """(start, end) dates for the resource type."""
         raise NotImplementedError
 
-    def skip_reason(self, resource: dict, bundle: dict) -> Optional[str]:
-        """Warning for a do-not-give order or a "no known medications" statement.
-
-        Withdrawn (cancelled or entered-in-error) entries are skipped silently.
-        """
-        raw_status = (f.text(resource.get("status")) or "").strip().lower()
-        if raw_status in SKIPPED_STATUS:
-            return None
-        if resource.get("doNotPerform") is True:
-            label = f"{self.RESOURCE_TYPE}/{f.resource_id(resource) or '?'}"
-            return f"Skipped {label}: an order not to give the medication"
-        if _states_no_medications(raw_status, resource, _medication(resource, bundle)):
-            return NO_KNOWN_MEDICATIONS
-        return None
-
 
 def _snomed_code(resource: dict, medication: dict) -> Optional[str]:
     """SNOMED code from the inline concept or the referenced Medication."""
@@ -434,21 +443,11 @@ def _snomed_code(resource: dict, medication: dict) -> Optional[str]:
     )
 
 
-def _states_no_medications(raw_status: str, resource: dict, medication: dict) -> bool:
-    """
-    True for a not-taken statement of the generic drug concept, or for the
-    "No known medications" situation code when it is not itself not-taken.
-    """
-    code = _snomed_code(resource, medication)
-    if code in NO_KNOWN_MEDICATION_CODES:
-        return raw_status != "not-taken"
-    return raw_status == "not-taken" and code in NO_MEDICATION_CODES
-
-
 class MedicationStatementMapper(_MedicationMapper):
     """MedicationStatement -> medications row."""
 
     RESOURCE_TYPE = "MedicationStatement"
+    PATIENT_REFERENCE_FIELD = "subject"
     STATUS_MAP = STATEMENT_STATUS
     DOSAGE_FIELD = "dosage"
 
@@ -461,6 +460,7 @@ class MedicationRequestMapper(_MedicationMapper):
     """MedicationRequest -> medications row, unless a statement already covers it."""
 
     RESOURCE_TYPE = "MedicationRequest"
+    PATIENT_REFERENCE_FIELD = "subject"
     STATUS_MAP = REQUEST_STATUS
     DOSAGE_FIELD = "dosageInstruction"
 

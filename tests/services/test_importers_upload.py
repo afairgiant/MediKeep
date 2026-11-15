@@ -74,6 +74,81 @@ class TestZipMembers:
         with pytest.raises(ImportFormatError, match="expands past"):
             list(upload.iter_zip_members(data, (".xml",)))
 
+    def test_every_header_is_checked_before_a_member_is_yielded(self, monkeypatch):
+        """Test that a later member's header refuses the zip before the first member is returned."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 10)
+        monkeypatch.setattr(upload, "MAX_ZIP_TOTAL_BYTES", 15)
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "<a/>")
+            zf.writestr("b.xml", "<b/>", compress_type=zipfile.ZIP_BZIP2)
+        cases = {
+            "Unsafe path": _zip({"a.xml": "<a/>", "../b.txt": "x"}),
+            "over the 10 byte limit": _zip({"a.xml": "<a/>", "b.xml": "x" * 11}),
+            "expands past": _zip({"a.xml": "x" * 8, "b.xml": "x" * 8}),
+            "unsupported format": buf.getvalue(),
+        }
+        for message, data in cases.items():
+            members = upload.iter_zip_members(data, (".xml",))
+            with pytest.raises(ImportFormatError, match=message):
+                next(members)
+
+    def test_first_refused_header_in_archive_order_is_the_error(self, monkeypatch):
+        """Test that the checks keep their order within a member and across members."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 10)
+        monkeypatch.setattr(upload, "MAX_ZIP_TOTAL_BYTES", 15)
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "x" * 8, compress_type=zipfile.ZIP_BZIP2)
+            zf.writestr("b.xml", "x" * 11, compress_type=zipfile.ZIP_BZIP2)
+            zf.writestr("../c.xml", "x")
+        with pytest.raises(ImportFormatError, match="unsupported format"):
+            list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "x" * 8)
+            zf.writestr("b.xml", "x" * 11, compress_type=zipfile.ZIP_BZIP2)
+            zf.writestr("../c.xml", "x")
+        with pytest.raises(ImportFormatError, match="over the 10 byte limit"):
+            list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "x" * 8)
+            zf.writestr("b.xml", "x" * 8, compress_type=zipfile.ZIP_BZIP2)
+        with pytest.raises(ImportFormatError, match="expands past"):
+            list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+
+    def test_method_of_a_member_that_is_not_read_is_not_checked(self):
+        """Test that a bzip2 member with another suffix does not refuse the zip."""
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as zf:
+            zf.writestr("a.xml", "<a/>")
+            zf.writestr("scan.pdf", "x" * 50, compress_type=zipfile.ZIP_BZIP2)
+        members = list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+        assert members == [("a.xml", b"<a/>")]
+
+    def test_zip_may_expand_past_the_upload_limit(self):
+        """Test that the documents of a zip may add up to more than one upload, up to 250 MB."""
+        megabyte = 1024 * 1024
+        assert upload.MAX_IMPORT_FILE_SIZE == 50 * megabyte
+        assert upload.MAX_ZIP_MEMBER_BYTES == 50 * megabyte
+        assert upload.MAX_ZIP_TOTAL_BYTES == 250 * megabyte
+        assert upload.MAX_ZIP_MEMBERS == 500
+        data = _zip(
+            {"a.xml": b"\0" * (30 * megabyte), "b.xml": b"\0" * (30 * megabyte)}
+        )
+        assert len(data) < megabyte
+        sizes = [
+            len(content) for _, content in upload.iter_zip_members(data, (".xml",))
+        ]
+        assert sizes == [30 * megabyte, 30 * megabyte]
+
+    def test_total_cap_counts_only_the_members_read(self, monkeypatch):
+        """Test that members with another suffix do not count toward the total."""
+        monkeypatch.setattr(upload, "MAX_ZIP_TOTAL_BYTES", 15)
+        data = _zip({"a.xml": "x" * 10, "b.pdf": "x" * 10, "c.xml": "x" * 5})
+        assert len(list(upload.iter_zip_members(data, (".xml",)))) == 2
+
     def test_catches_header_that_understates_size(self, monkeypatch):
         """Test that a member larger than its header claims is rejected on read."""
         monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 10)

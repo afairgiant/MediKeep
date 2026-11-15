@@ -31,7 +31,7 @@ from app.models.models import (
     PatientShare,
 )
 from app.schemas.patient import PatientCreate
-from app.services.importers import ccda_available, upload
+from app.services.importers import ccda_available, ccda_importer, upload
 from app.services.importers.ccda_importer import (
     PATIENT_ID_BIRTH_DATES_MESSAGE,
     SHARED_RECORD_IDS_MESSAGE,
@@ -1061,6 +1061,33 @@ class TestExecute:
             "Diagnosis j1"
         ]
 
+    def test_person_left_out_without_records_is_not_named(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a person in the file who owns no record adds no warning to preview or execute."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _person_entry("r", "Robin", "1975-01-01"),
+        )
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["warnings"] == []
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
+        ]
+
     def test_record_naming_no_patient_is_imported_when_nobody_is_left_out(
         self,
         client: TestClient,
@@ -2027,6 +2054,490 @@ class TestHashOfValidatedData:
         }
 
 
+def _snomed(code: str) -> dict:
+    return {"coding": [{"system": f.SNOMED, "code": code}]}
+
+
+def _status_concept(code: str) -> dict:
+    return {"coding": [{"code": code}]}
+
+
+class TestSkipWarnings:
+    """Each resource a mapper skips gives its warning, or none, through the service."""
+
+    NO_KNOWN_ALLERGIES = "Allergies: file states no known allergies"
+    NO_KNOWN_MEDICATIONS = "Medications: file states no known medications"
+    PEANUT = {"text": "Peanut"}
+
+    def _warnings(self, db_session, user_with_patient, *resources):
+        result = HealthRecordImportService(db_session).preview(
+            json.loads(_medication_bundle(*resources)),
+            user_with_patient["patient"],
+            "fhir_bundle",
+            "fhir_bundle",
+        )
+        assert result.counts == {}
+        assert result.total_resources == len(resources)
+        return result.warnings
+
+    def _allergy(self, code, verification=None, clinical=None, **fields):
+        resource = {"resourceType": "AllergyIntolerance", "id": "a1", **fields}
+        if code is not None:
+            resource["code"] = code
+        if verification:
+            resource["verificationStatus"] = _status_concept(verification)
+        if clinical:
+            resource["clinicalStatus"] = _status_concept(clinical)
+        return resource
+
+    def _statement(self, status, concept=None, **fields):
+        resource = {"resourceType": "MedicationStatement", "id": "ms1", **fields}
+        if status is not None:
+            resource["status"] = status
+        if concept is not None:
+            resource["medicationCodeableConcept"] = concept
+        return resource
+
+    def test_allergy_skips_that_warn(self, db_session: Session, user_with_patient):
+        """Test the warning of each no-allergy statement that is still current."""
+        cases = [
+            (self._allergy(_snomed("716186003")), self.NO_KNOWN_ALLERGIES),
+            (
+                self._allergy(_snomed("429625007"), "confirmed", "active"),
+                "Allergies: file states no known food allergies",
+            ),
+            (self._allergy(_snomed("419199007"), "refuted"), self.NO_KNOWN_ALLERGIES),
+            (
+                self._allergy(_snomed("416098002"), "refuted", "active"),
+                "Allergies: file states no known drug allergies",
+            ),
+        ]
+        for resource, warning in cases:
+            assert self._warnings(db_session, user_with_patient, resource) == [
+                warning
+            ], resource
+
+    def test_allergy_skips_that_are_silent(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that withdrawn, refuted, outdated and unnamed allergies give no warning."""
+        cases = [
+            self._allergy(self.PEANUT, "entered-in-error"),
+            self._allergy(_snomed("716186003"), "entered-in-error"),
+            self._allergy(_snomed("419199007"), "entered-in-error"),
+            self._allergy(self.PEANUT, "refuted"),
+            self._allergy(None, "refuted"),
+            self._allergy(_snomed("716186003"), "refuted"),
+            self._allergy(_snomed("419199007"), "refuted", "inactive"),
+            self._allergy(_snomed("419199007"), "refuted", "resolved"),
+            self._allergy(_snomed("716186003"), None, "inactive"),
+            self._allergy(_snomed("716186003"), "confirmed", "resolved"),
+            self._allergy(None),
+            self._allergy({"coding": [{"system": f.SNOMED}]}, "confirmed", "active"),
+        ]
+        for resource in cases:
+            assert (
+                self._warnings(db_session, user_with_patient, resource) == []
+            ), resource
+
+    def test_medication_skips_that_warn(self, db_session: Session, user_with_patient):
+        """Test the warning of a do-not-give order and of each no-medication statement."""
+        not_to_give = "Skipped {}: an order not to give the medication"
+        referenced = self._statement(
+            "not-taken", medicationReference={"reference": "Medication/m1"}
+        )
+        medication = {
+            "resourceType": "Medication",
+            "id": "m1",
+            "code": _snomed("410942007"),
+        }
+        cases = [
+            (
+                [
+                    {
+                        "resourceType": "MedicationRequest",
+                        "id": "mr1",
+                        "status": "active",
+                        "doNotPerform": True,
+                        "medicationCodeableConcept": {"text": "Aspirin"},
+                    }
+                ],
+                not_to_give.format("MedicationRequest/mr1"),
+            ),
+            (
+                [{"resourceType": "MedicationStatement", "doNotPerform": True}],
+                not_to_give.format("MedicationStatement/?"),
+            ),
+            (
+                [self._statement("not-taken", _snomed("410942007"), doNotPerform=True)],
+                not_to_give.format("MedicationStatement/ms1"),
+            ),
+            (
+                [self._statement("not-taken", _snomed("410942007"))],
+                self.NO_KNOWN_MEDICATIONS,
+            ),
+            ([referenced, medication], self.NO_KNOWN_MEDICATIONS),
+            (
+                [self._statement("active", _snomed("787481004"))],
+                self.NO_KNOWN_MEDICATIONS,
+            ),
+            (
+                [self._statement(None, _snomed("787481004"))],
+                self.NO_KNOWN_MEDICATIONS,
+            ),
+        ]
+        for resources, warning in cases:
+            assert self._warnings(db_session, user_with_patient, *resources) == [
+                warning
+            ], resources
+
+    def test_medication_skips_that_are_silent(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that withdrawn, double-negative and unnamed medications give no warning."""
+        cases = [
+            self._statement("entered-in-error", {"text": "Aspirin"}),
+            self._statement("cancelled", {"text": "Aspirin"}, doNotPerform=True),
+            self._statement("entered-in-error", _snomed("410942007")),
+            self._statement("cancelled", _snomed("787481004")),
+            self._statement("not-taken", _snomed("787481004")),
+            self._statement("active"),
+            self._statement(
+                "active", medicationReference={"reference": "Medication/absent"}
+            ),
+            {
+                "resourceType": "MedicationRequest",
+                "id": "mr1",
+                "status": "cancelled",
+                "doNotPerform": True,
+                "medicationCodeableConcept": _snomed("410942007"),
+            },
+        ]
+        for resource in cases:
+            assert (
+                self._warnings(db_session, user_with_patient, resource) == []
+            ), resource
+
+    def test_condition_skips_are_silent(self, db_session: Session, user_with_patient):
+        """Test that refuted, withdrawn and unnamed conditions give no warning."""
+        cases = [
+            {
+                "resourceType": "Condition",
+                "id": "c1",
+                "code": {"text": "Asthma"},
+                "verificationStatus": _status_concept(verification),
+            }
+            for verification in ("refuted", "entered-in-error")
+        ]
+        cases.append({"resourceType": "Condition", "id": "c2"})
+        for resource in cases:
+            assert (
+                self._warnings(db_session, user_with_patient, resource) == []
+            ), resource
+
+    def test_each_skip_warning_is_given_once_in_file_order(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that repeated reasons give one line each, where the first one stood."""
+        warnings = self._warnings(
+            db_session,
+            user_with_patient,
+            self._statement("not-taken", _snomed("410942007")),
+            self._allergy(_snomed("716186003")),
+            self._allergy(_snomed("419199007"), "refuted", id="a2"),
+            self._allergy(_snomed("409137002"), id="a3"),
+            self._statement("active", _snomed("787481004"), id="ms2"),
+            self._statement("active", {"text": "Aspirin"}, doNotPerform=True, id="x"),
+            self._statement("active", {"text": "Aspirin"}, doNotPerform=True, id="x"),
+        )
+        assert warnings == [
+            self.NO_KNOWN_MEDICATIONS,
+            self.NO_KNOWN_ALLERGIES,
+            "Allergies: file states no known drug allergies",
+            "Skipped MedicationStatement/x: an order not to give the medication",
+        ]
+
+
+class TestSharedMedicationIds:
+    """A Medication id with differing copies in one bundle names no drug."""
+
+    AMBIGUOUS = (
+        "Skipped MedicationStatement/ms-b: the file has more than one Medication "
+        "for its reference, with different content"
+    )
+
+    @staticmethod
+    def _medication(name: str, **fields) -> dict:
+        return {
+            "resourceType": "Medication",
+            "id": "med-1",
+            "code": {"text": name},
+            **fields,
+        }
+
+    @staticmethod
+    def _statement(key: str, owner: str, **reference) -> dict:
+        return {
+            "resourceType": "MedicationStatement",
+            "id": key,
+            "status": "active",
+            "subject": {"reference": f"Patient/{owner}"},
+            "medicationReference": {"reference": "Medication/med-1", **reference},
+        }
+
+    def _execute(self, client, patient_id, headers, *entries):
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(_people_bundle(*entries)),
+            headers=headers,
+        )
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    def _people(self, patient):
+        return [
+            _person_entry("a", "Alex", "1960-02-02"),
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+        ]
+
+    def test_other_persons_drug_is_not_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the selected patient's statement does not take the first copy of the id."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            *self._people(patient),
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._statement("ms-a", "a")},
+            {"resource": self._medication("Metformin")},
+            {"resource": self._statement("ms-b", "b")},
+        )
+        assert body["counts"] == {}
+        assert self.AMBIGUOUS in body["warnings"]
+        assert _medications(db_session, patient.id) == []
+
+    @pytest.mark.parametrize("subject", ["Patient/zz", "Patient/a"])
+    def test_copy_left_out_with_another_person_still_counts(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        subject,
+    ):
+        """Test that a differing copy the patient filter drops keeps the id ambiguous."""
+        patient = user_with_patient["patient"]
+        data = _people_bundle(
+            *self._people(patient),
+            {"resource": self._medication("Metformin")},
+            {
+                "resource": self._medication(
+                    "Lisinopril", subject={"reference": subject}
+                )
+            },
+            {"resource": self._statement("ms-a", "a")},
+            {"resource": self._statement("ms-b", "b")},
+        )
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert body["counts"] == {}
+            assert self.AMBIGUOUS in body["warnings"]
+            assert any(w.startswith("Left out ") for w in body["warnings"])
+        assert _medications(db_session, patient.id) == []
+        assert _provenance(db_session, patient.id) == []
+
+    def _at_url(self, patient, owner: str, *names: str) -> bytes:
+        """A bundle whose statement ms-b refers to a fullUrl held only by the owner's Medications."""
+        url = "urn:uuid:med-1"
+        other = {"reference": f"Patient/{owner}"}
+        return _people_bundle(
+            *self._people(patient),
+            *(
+                {
+                    "fullUrl": url,
+                    "resource": {
+                        **self._medication(name, subject=other),
+                        "id": f"x{place}",
+                    },
+                }
+                for place, name in enumerate(names)
+            ),
+            {"resource": self._medication("Third drug")},
+            {"resource": self._statement("ms-b", "b", reference=url)},
+        )
+
+    @pytest.mark.parametrize(
+        "names, warned",
+        [(("Lisinopril", "Metformin"), True), (("Lisinopril",), False)],
+    )
+    def test_full_url_left_out_is_not_tried_by_id(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        names,
+        warned,
+    ):
+        """Test that a reference to a fullUrl of entries left out does not take the Medication with that id."""
+        patient = user_with_patient["patient"]
+        data = self._at_url(patient, "a", *names)
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert body["counts"] == {}
+            assert (self.AMBIGUOUS in body["warnings"]) is warned
+            assert [w for w in body["warnings"] if "ms-b" in w] == (
+                [self.AMBIGUOUS] if warned else []
+            )
+            assert any(w.startswith("Left out ") for w in body["warnings"])
+        assert _medications(db_session, patient.id) == []
+        assert _provenance(db_session, patient.id) == []
+
+    def test_full_url_kept_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the same file names the drug when the Medication at the fullUrl is the patient's."""
+        patient = user_with_patient["patient"]
+        data = self._at_url(patient, "b", "Lisinopril")
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            counts = response.json()["counts"]["medication"]
+            assert counts.get("new") == 1 or counts.get("created") == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Lisinopril"
+        ]
+
+    @pytest.mark.parametrize("medication_first", [True, False])
+    def test_full_url_shared_with_another_type_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        medication_first,
+    ):
+        """Test that an Organization at the fullUrl of the file's one Medication does not stop the import."""
+        patient = user_with_patient["patient"]
+        url = "urn:uuid:x"
+        shared = [
+            {"fullUrl": url, "resource": {**self._medication("DRUG"), "id": "x"}},
+            {"fullUrl": url, "resource": {"resourceType": "Organization", "id": "x"}},
+        ]
+        data = _people_bundle(
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+            *(shared if medication_first else reversed(shared)),
+            {"resource": self._statement("ms-b", "b", reference=url)},
+        )
+        for target in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                target, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert not any("ms-b" in warning for warning in body["warnings"])
+            counts = body["counts"]["medication"]
+            assert counts.get("new") == 1 or counts.get("created") == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "DRUG"
+        ]
+
+    def test_versioned_reference_is_imported_by_its_id(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that Medication/med-1/_history/2 does not take the drug of the Medication with id 2."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+            {"resource": {**self._medication("Metformin"), "id": "2"}},
+            {"resource": self._medication("Lisinopril")},
+            {
+                "resource": self._statement(
+                    "ms-b", "b", reference="Medication/med-1/_history/2"
+                )
+            },
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Lisinopril"
+        ]
+
+    def test_reference_display_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the statement's own display names the drug when the copies differ."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            *self._people(patient),
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._medication("Metformin")},
+            {"resource": self._statement("ms-b", "b", display="Metformin 500 mg")},
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert not any("ms-b" in warning for warning in body["warnings"])
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Metformin 500 mg"
+        ]
+
+    def test_identical_copies_are_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a Medication repeated with the same content still names the drug."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            *self._people(patient),
+            {"resource": self._medication("Metformin", meta={"source": "a"})},
+            {"resource": self._medication("Metformin", meta={"source": "b"})},
+            {"resource": self._statement("ms-b", "b")},
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Metformin"
+        ]
+
+
 class TestMalformedResources:
     """One badly formed resource never takes the rest of the file with it."""
 
@@ -2577,6 +3088,64 @@ class TestCcdaFixture:
         assert response.status_code == 400
         assert "over the 2 limit" in response.text
         assert "Could not recognize" not in response.text
+
+    def test_zip_without_documents_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that auto-detection says the zip holds no C-CDA, not that the format is unknown."""
+        patient_id = user_with_patient["patient"].id
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("IHE_XDM/SUBSET01/METADATA.XML", "<x/>")
+            zf.writestr("README.TXT", "stub")
+        for url in (_preview_url(patient_id), _execute_url(patient_id)):
+            for form in ({}, {"format_key": "ccda"}):
+                response = client.post(
+                    url,
+                    data=form,
+                    files=_upload(buf.getvalue(), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400
+                assert "The zip file contains no C-CDA documents" in response.text
+                assert "Could not recognize" not in response.text
+
+    def test_damaged_zip_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that auto-detection says a damaged zip is not a valid archive."""
+        patient_id = user_with_patient["patient"].id
+        whole = _xdm_zip(MYCHART_CCD.read_bytes())
+        for data in (b"not a zip", b"PK\x03\x04 not really", whole[: len(whole) // 2]):
+            response = client.post(
+                _preview_url(patient_id),
+                files=_upload(data, "MyChart.zip"),
+                headers=authenticated_headers,
+            )
+            assert response.status_code == 400
+            assert "File is not a valid zip archive" in response.text
+
+    def test_zip_is_read_once_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch
+    ):
+        """Test that auto-detection does not inflate the archive a second time."""
+        reads = []
+        read = ccda_importer.iter_zip_members
+
+        def counted(data, suffixes):
+            reads.append(len(data))
+            return read(data, suffixes)
+
+        monkeypatch.setattr(ccda_importer, "iter_zip_members", counted)
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["format_key"] == "ccda"
+        assert len(reads) == 1
 
 
 @needs_library

@@ -9,8 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.models.import_provenance import ImportProvenance
 
-# Past this exponent a number is hashed in scientific form; written out in full,
-# "1e-999990" would be a million characters
+# Past this exponent a number is hashed in scientific form
 HASH_EXPONENT_LIMIT = 50
 
 
