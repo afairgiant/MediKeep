@@ -95,6 +95,7 @@ class TestVisitTimeAndReminderFields:
             {"reminder_offsets": [31 * 1440]},
             {"reminder_offsets": [1440, 1440]},
             {"reminder_offsets": [i * 1440 for i in range(11)]},
+            {"reminder_offsets": [True]},
             {"visit_time": "25:00"},
         ],
         ids=[
@@ -103,6 +104,7 @@ class TestVisitTimeAndReminderFields:
             "too-far",
             "duplicate",
             "too-many",
+            "boolean",
             "bad-time",
         ],
     )
@@ -163,6 +165,17 @@ class TestVisitTimeAndReminderFields:
             f"{URL}{visit['id']}", json=sent, headers=authenticated_headers
         )
         assert response.status_code == expected
+
+    def test_update_rejects_boolean_offset(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        visit = _create(client, authenticated_headers, user_with_patient["patient"].id)
+        response = client.put(
+            f"{URL}{visit['id']}",
+            json={"reminder_offsets": [False]},
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 422
 
     def test_update_rejects_null_reminder_enabled(
         self, client: TestClient, user_with_patient, authenticated_headers

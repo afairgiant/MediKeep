@@ -8,6 +8,7 @@ from pydantic import (
     BaseModel,
     BeforeValidator,
     ConfigDict,
+    StrictInt,
     ValidationInfo,
     field_validator,
     model_validator,
@@ -43,8 +44,9 @@ VisitTime = Annotated[
     BeforeValidator(_blank_time_to_none),
     AfterValidator(_truncate_to_minute),
 ]
+# Strict so JSON true/false is rejected instead of coerced to 1/0
 ReminderOffsets = Annotated[
-    Optional[List[int]], AfterValidator(normalize_reminder_offsets)
+    Optional[List[StrictInt]], AfterValidator(normalize_reminder_offsets)
 ]
 
 

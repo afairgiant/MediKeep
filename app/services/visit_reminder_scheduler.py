@@ -65,12 +65,16 @@ class VisitReminderSchedulerService(MinuteReminderScheduler):
 
     async def _run_tick(self, db: Session, now_local: datetime) -> Dict[str, int]:
         minute = now_local.replace(second=0, microsecond=0, tzinfo=None)
+        if self._last_minute is None:
+            # Set before processing so a failed first tick is retried next minute
+            self._last_minute = minute - ONE_MINUTE
         last = self._last_minute
-        if last is not None and minute <= last:
+        if minute <= last:
             # DST fall-back repeats wall-clock minutes already covered
             return _counts()
-        since = last if last is not None and minute - last <= MAX_CATCH_UP else None
+        since = last if minute - last <= MAX_CATCH_UP else minute - ONE_MINUTE
         counts = await self._process_tick(db, minute, since)
+        # Only after success, so a failed tick's minutes are covered by the next one
         self._last_minute = minute
         return counts
 
@@ -84,7 +88,7 @@ class VisitReminderSchedulerService(MinuteReminderScheduler):
         """
         since = since or minute - ONE_MINUTE
         candidates = await asyncio.to_thread(
-            self._discover_candidates, db, since.date()
+            self._discover_candidates, db, since.date(), minute.date()
         )
         due: List[Tuple[object, int, str]] = [
             (row, offset, fire_at.strftime(FIRE_KEY_FORMAT))
@@ -100,11 +104,13 @@ class VisitReminderSchedulerService(MinuteReminderScheduler):
         already_fired = await asyncio.to_thread(
             self._fetch_already_fired, db, since.date()
         )
-        to_publish = [
-            (row, offset, key)
-            for row, offset, key in due
-            if (row.id, key) not in already_fired
-        ]
+        # Two offsets can share a fire time (a day reminder and an hour one)
+        claimed = set(already_fired)
+        to_publish = []
+        for row, offset, key in due:
+            if (row.id, key) not in claimed:
+                claimed.add((row.id, key))
+                to_publish.append((row, offset, key))
 
         # Each publish is an independent network send; one slow channel must not delay the rest
         await asyncio.gather(
@@ -120,8 +126,10 @@ class VisitReminderSchedulerService(MinuteReminderScheduler):
             published=len(to_publish),
         )
 
-    def _discover_candidates(self, db: Session, today_local: date) -> list:
-        """Visits with reminders on that are dated within reach of the longest offset."""
+    def _discover_candidates(
+        self, db: Session, first_day: date, last_day: date
+    ) -> list:
+        """Visits with reminders on, dated ``first_day`` to ``last_day`` + max lookahead."""
         return (
             db.query(
                 Encounter.id,
@@ -138,8 +146,8 @@ class VisitReminderSchedulerService(MinuteReminderScheduler):
             .join(Patient, Patient.id == Encounter.patient_id)
             .outerjoin(Practitioner, Practitioner.id == Encounter.practitioner_id)
             .filter(Encounter.reminder_enabled.is_(True))
-            .filter(Encounter.date >= today_local)
-            .filter(Encounter.date <= today_local + timedelta(days=MAX_LOOKAHEAD_DAYS))
+            .filter(Encounter.date >= first_day)
+            .filter(Encounter.date <= last_day + timedelta(days=MAX_LOOKAHEAD_DAYS))
             .all()
         )
 

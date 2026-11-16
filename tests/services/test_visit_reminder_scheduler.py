@@ -100,6 +100,18 @@ class TestFiring:
         mock_bus.publish.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def test_offsets_sharing_a_fire_time_send_once(
+        self, db_session, patient, mock_bus
+    ):
+        # 25.5 hours before 10:30 is the same minute as the day-before reminder
+        _make_visit(db_session, patient.id, reminder_offsets=[1440, 1530])
+
+        counts = await _tick(db_session, DAY_BEFORE_AT_NINE)
+
+        assert counts["due"] == 2
+        assert counts["events_published"] == 1
+
+    @pytest.mark.asyncio
     async def test_all_day_visit_fires_at_nine(self, db_session, patient, mock_bus):
         _make_visit(db_session, patient.id, visit_time=None, reminder_offsets=[0])
 
@@ -164,6 +176,40 @@ class TestCatchUp:
 
         assert counts["due"] == 0
         assert len(_published(mock_bus)) == 1
+
+    @pytest.mark.asyncio
+    async def test_failed_first_tick_is_retried(self, db_session, patient, mock_bus):
+        _make_visit(db_session, patient.id)
+        service = VisitReminderSchedulerService.get_instance()
+
+        with patch.object(
+            service, "_discover_candidates", side_effect=RuntimeError("db down")
+        ):
+            with pytest.raises(RuntimeError):
+                await service._run_tick(db_session, DAY_BEFORE_AT_NINE)
+        await service._run_tick(db_session, DAY_BEFORE_AT_NINE + timedelta(minutes=1))
+
+        assert len(_published(mock_bus)) == 1
+
+    @pytest.mark.asyncio
+    async def test_window_across_midnight_reaches_the_later_day(
+        self, db_session, patient, mock_bus
+    ):
+        # Fires at 00:01, a day past the earlier day's lookahead
+        _make_visit(
+            db_session,
+            patient.id,
+            date=date(2026, 12, 10),
+            visit_time=time(0, 0),
+            reminder_offsets=[43199],
+        )
+        service = VisitReminderSchedulerService.get_instance()
+
+        await service._run_tick(db_session, datetime(2026, 11, 9, 23, 59))
+        await service._run_tick(db_session, datetime(2026, 11, 10, 0, 1))
+
+        (event,) = _published(mock_bus)
+        assert event.scheduled_fire_local == "2026-11-10T00:01"
 
     @pytest.mark.asyncio
     async def test_long_gap_is_not_caught_up(self, db_session, patient, mock_bus):
