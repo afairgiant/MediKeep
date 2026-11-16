@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "当您的密码正确但两步验证码错误次数过多时",
       "name": "多次输入错误验证码"
+    },
+    "visit_reminder_due": {
+      "description": "在即将到来的就诊之前",
+      "name": "就诊提醒"
     }
   },
   "history": {

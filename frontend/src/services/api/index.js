@@ -1670,6 +1670,12 @@ class ApiService {
     );
   }
 
+  sendVisitTestReminder(encounterId, signal) {
+    return this.post(`/encounters/${encounterId}/reminders/test`, null, {
+      signal,
+    });
+  }
+
   // Insurance methods
   getInsurances(signal) {
     return this.getEntities(ENTITY_TYPES.INSURANCE, signal);

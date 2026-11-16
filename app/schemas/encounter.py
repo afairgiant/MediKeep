@@ -1,19 +1,51 @@
 from datetime import date as DateType
 from datetime import datetime
-from typing import List, Optional
+from datetime import time as TimeType
+from typing import Annotated, List, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from app.schemas.base_tags import (
     TaggedEntityMixin,
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.core.utils.visit_reminders import (
+    check_offsets_fit_visit_time,
+    normalize_reminder_offsets,
+)
 from app.schemas.validators import (
     validate_positive_id,
     validate_required_text,
     validate_text_field,
 )
+
+
+def _blank_time_to_none(v):
+    return None if v == "" else v
+
+
+def _truncate_to_minute(v: Optional[TimeType]) -> Optional[TimeType]:
+    return v.replace(second=0, microsecond=0) if v is not None else None
+
+
+# HH:MM facility local; blank means an all-day visit
+VisitTime = Annotated[
+    Optional[TimeType],
+    BeforeValidator(_blank_time_to_none),
+    AfterValidator(_truncate_to_minute),
+]
+ReminderOffsets = Annotated[
+    Optional[List[int]], AfterValidator(normalize_reminder_offsets)
+]
 
 
 class EncounterBase(TaggedEntityMixin):
@@ -32,6 +64,11 @@ class EncounterBase(TaggedEntityMixin):
     duration_minutes: Optional[int] = None
     location: Optional[str] = None
     priority: Optional[str] = None
+
+    visit_time: VisitTime = None
+    reminder_enabled: bool = False
+    reminder_offsets: ReminderOffsets = None
+    reminder_include_details: bool = False
 
     @field_validator("reason")
     @classmethod
@@ -125,6 +162,11 @@ class EncounterCreate(EncounterBase):
         """Validate condition ID"""
         return validate_positive_id(v, field_name="Condition ID")
 
+    @model_validator(mode="after")
+    def validate_reminders_fit_visit_time(self):
+        check_offsets_fit_visit_time(self.visit_time, self.reminder_offsets)
+        return self
+
 
 class EncounterUpdate(TaggedEntityUpdateMixin):
     """Schema for updating an existing encounter"""
@@ -144,6 +186,19 @@ class EncounterUpdate(TaggedEntityUpdateMixin):
     duration_minutes: Optional[int] = None
     location: Optional[str] = None
     priority: Optional[str] = None
+
+    visit_time: VisitTime = None
+    reminder_enabled: Optional[bool] = None
+    reminder_offsets: ReminderOffsets = None
+    reminder_include_details: Optional[bool] = None
+
+    @field_validator("reminder_enabled", "reminder_include_details")
+    @classmethod
+    def reject_null_flags(cls, v, info: ValidationInfo):
+        # Columns are NOT NULL; omit the field to leave it unchanged
+        if v is None:
+            raise ValueError(f"{info.field_name} must be true or false")
+        return v
 
     @field_validator("reason")
     @classmethod

@@ -1721,6 +1721,10 @@
           "label": "就诊日期",
           "placeholder": "选择就诊日期"
         },
+        "visitTime": {
+          "description": "全天就诊请留空",
+          "label": "开始时间"
+        },
         "visitType": {
           "description": "医疗就诊类型",
           "placeholder": "选择就诊类型"
@@ -1751,6 +1755,52 @@
     },
     "relatedCondition": {
       "label": "相关疾病（可选）"
+    },
+    "reminders": {
+      "allDayNote": "未设置开始时间，因此这是全天就诊：提醒将在 {{time}} 发送。在“就诊信息”标签页添加开始时间即可使用以小时或分钟计的提醒。",
+      "custom": {
+        "add": "添加",
+        "label": "自定义提前时间",
+        "unit": "单位"
+      },
+      "enabled": {
+        "description": "通过您的通知渠道发送通知。",
+        "label": "提醒我这次就诊"
+      },
+      "includeDetails": {
+        "description": "默认情况下，提醒只显示就诊原因和时间。",
+        "label": "包含医生和地点"
+      },
+      "noChannelsTitle": "未启用通知渠道",
+      "noChannelsWarning": "就诊提醒没有启用任何通知渠道。请打开通知设置启用一个。",
+      "noneSelected": "请至少选择一个提醒。",
+      "off": "关闭",
+      "offsets": {
+        "dayOf": "就诊当天",
+        "daysBefore_other": "提前 {{count}} 天",
+        "hoursBefore_other": "提前 {{count}} 小时",
+        "minutesBefore_other": "提前 {{count}} 分钟"
+      },
+      "openSettings": "打开通知设置",
+      "pastVisit": "此次就诊日期已过，因此不会发送提醒。",
+      "problems": {
+        "duplicate": "该提醒已设置。",
+        "needsTime": "以小时或分钟计的提醒需要设置开始时间。",
+        "tooFar": "提醒最多可提前 30 天。",
+        "tooMany": "最多可设置 {{max}} 个提醒。"
+      },
+      "saveBeforeTest": "请先保存就诊，再发送测试提醒。",
+      "tabLabel": "提醒",
+      "testButton": "立即发送测试提醒",
+      "testError": "测试提醒发送失败",
+      "testSuccess": "测试提醒已发送",
+      "timedNote": "按天的提醒在 {{time}} 发送；按小时或分钟的提醒从开始时间往前计算。",
+      "units": {
+        "days": "天",
+        "hours": "小时",
+        "minutes": "分钟"
+      },
+      "when": "时间"
     },
     "table": {
       "visitType": "就诊类型"

@@ -158,6 +158,14 @@ class Encounter(Base):
         String, nullable=True
     )  # Use EncounterPriority enum: routine, urgent, emergency
 
+    # Facility-local wall-clock start; null means an all-day visit
+    visit_time = Column(Time, nullable=True)
+
+    # Reminder offsets are minutes before the visit start
+    reminder_enabled = Column(Boolean, nullable=False, default=False)
+    reminder_offsets = Column(JSON, nullable=True)
+    reminder_include_details = Column(Boolean, nullable=False, default=False)
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
@@ -208,7 +216,10 @@ class Encounter(Base):
     )
 
     # Indexes for performance
-    __table_args__ = (Index("idx_encounters_patient_id", "patient_id"),)
+    __table_args__ = (
+        Index("idx_encounters_patient_id", "patient_id"),
+        Index("idx_encounters_reminder_enabled_date", "reminder_enabled", "date"),
+    )
 
 
 class Condition(Base):

@@ -304,3 +304,32 @@ describe('MantineVisitForm - visit date', () => {
     expect(dateField).not.toHaveProperty('maxDate');
   });
 });
+
+describe('MantineVisitForm - start time and reminders', () => {
+  const startTime = /Start Time|visitTime.label/;
+
+  it('offers an optional start time next to the date', () => {
+    render(<MantineVisitForm {...defaultProps} />);
+    expect(screen.getByLabelText(startTime)).toBeInTheDocument();
+  });
+
+  it('reports start time changes by field name', () => {
+    render(<MantineVisitForm {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(startTime), {
+      target: { value: '09:30' },
+    });
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: expect.objectContaining({ name: 'visit_time', value: '09:30' }),
+      })
+    );
+  });
+
+  it('has a Reminders tab with reminders off', async () => {
+    render(<MantineVisitForm {...defaultProps} />);
+    await userEvent.click(screen.getByRole('tab', { name: 'Reminders' }));
+    expect(
+      screen.getByRole('switch', { name: /Remind me about this visit/ })
+    ).not.toBeChecked();
+  });
+});

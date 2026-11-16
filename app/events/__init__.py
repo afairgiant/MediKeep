@@ -31,6 +31,7 @@ from app.events.security_events import (
     TwoFactorDisabledEvent,
     TwoFactorFailuresEvent,
 )
+from app.events.visit_events import VisitReminderDueEvent
 
 __all__ = [
     # Backup Events
@@ -48,4 +49,5 @@ __all__ = [
     "TwoFactorFailuresEvent",
     # Medical Events
     "MedicationReminderDueEvent",
+    "VisitReminderDueEvent",
 ]

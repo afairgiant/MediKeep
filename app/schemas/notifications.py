@@ -81,6 +81,7 @@ class EventType(str, Enum):
 
     # Medical events
     MEDICATION_REMINDER_DUE = "medication_reminder_due"
+    VISIT_REMINDER_DUE = "visit_reminder_due"
 
 
 class NotificationStatus(str, Enum):

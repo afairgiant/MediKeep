@@ -1726,6 +1726,10 @@
           "label": "Fecha de la Consulta",
           "placeholder": "Seleccione la fecha de la consulta"
         },
+        "visitTime": {
+          "description": "Déjelo vacío para una consulta de todo el día",
+          "label": "Hora de inicio"
+        },
         "visitType": {
           "description": "Tipo de consulta médica",
           "placeholder": "Seleccione tipo de consulta"
@@ -1756,6 +1760,55 @@
     },
     "relatedCondition": {
       "label": "Condición Relacionada (Opcional)"
+    },
+    "reminders": {
+      "allDayNote": "Sin hora de inicio, así que es una consulta de todo el día: los recordatorios se envían a las {{time}}. Añada una hora de inicio en la pestaña Información de la consulta para usar recordatorios en horas o minutos.",
+      "custom": {
+        "add": "Añadir",
+        "label": "Tiempo personalizado antes de la consulta",
+        "unit": "Unidad"
+      },
+      "enabled": {
+        "description": "Envía una notificación por sus canales de notificación.",
+        "label": "Recordarme esta consulta"
+      },
+      "includeDetails": {
+        "description": "Por defecto, un recordatorio solo muestra el motivo y la hora de la consulta.",
+        "label": "Incluir profesional y ubicación"
+      },
+      "noChannelsTitle": "Ningún canal de notificación activado",
+      "noChannelsWarning": "No hay ningún canal de notificación activado para los recordatorios de consultas. Abra la configuración de notificaciones para activar uno.",
+      "noneSelected": "Elija al menos un recordatorio.",
+      "off": "Desactivados",
+      "offsets": {
+        "dayOf": "El día de la consulta",
+        "daysBefore_one": "{{count}} día antes",
+        "daysBefore_other": "{{count}} días antes",
+        "hoursBefore_one": "{{count}} hora antes",
+        "hoursBefore_other": "{{count}} horas antes",
+        "minutesBefore_one": "{{count}} minuto antes",
+        "minutesBefore_other": "{{count}} minutos antes"
+      },
+      "openSettings": "Abrir configuración de notificaciones",
+      "pastVisit": "La fecha de esta consulta ya pasó, así que no se enviarán sus recordatorios.",
+      "problems": {
+        "duplicate": "Ese recordatorio ya está configurado.",
+        "needsTime": "Los recordatorios en horas o minutos necesitan una hora de inicio.",
+        "tooFar": "Los recordatorios pueden ser como máximo 30 días antes de la consulta.",
+        "tooMany": "Puede configurar hasta {{max}} recordatorios."
+      },
+      "saveBeforeTest": "Guarde primero la consulta para enviar un recordatorio de prueba.",
+      "tabLabel": "Recordatorios",
+      "testButton": "Enviar recordatorio de prueba ahora",
+      "testError": "No se pudo enviar el recordatorio de prueba",
+      "testSuccess": "Recordatorio de prueba enviado",
+      "timedNote": "Los recordatorios por días se envían a las {{time}}; los de horas o minutos se cuentan hacia atrás desde la hora de inicio.",
+      "units": {
+        "days": "Días",
+        "hours": "Horas",
+        "minutes": "Minutos"
+      },
+      "when": "Cuándo"
     },
     "table": {
       "visitType": "Tipo de Consulta"

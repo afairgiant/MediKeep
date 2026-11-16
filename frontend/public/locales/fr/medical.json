@@ -1666,6 +1666,10 @@
           "label": "Date de la visite",
           "placeholder": "Sélectionnez la date de la visite"
         },
+        "visitTime": {
+          "description": "Laissez vide pour une visite sur toute la journée",
+          "label": "Heure de début"
+        },
         "visitType": {
           "description": "Type de visite médicale",
           "placeholder": "Sélectionnez le type de visite"
@@ -1696,6 +1700,55 @@
     },
     "relatedCondition": {
       "label": "Condition concernée (optionnel)"
+    },
+    "reminders": {
+      "allDayNote": "Pas d'heure de début : c'est une visite sur toute la journée, les rappels sont envoyés à {{time}}. Ajoutez une heure de début dans l'onglet Infos de la visite pour utiliser des rappels en heures ou en minutes.",
+      "custom": {
+        "add": "Ajouter",
+        "label": "Délai personnalisé avant la visite",
+        "unit": "Unité"
+      },
+      "enabled": {
+        "description": "Envoie une notification via vos canaux de notification.",
+        "label": "Me rappeler cette visite"
+      },
+      "includeDetails": {
+        "description": "Par défaut, un rappel n'indique que le motif et l'heure de la visite.",
+        "label": "Inclure le praticien et le lieu"
+      },
+      "noChannelsTitle": "Aucun canal de notification activé",
+      "noChannelsWarning": "Aucun canal de notification n'est activé pour les rappels de visite. Ouvrez les paramètres de notification pour en activer un.",
+      "noneSelected": "Choisissez au moins un rappel.",
+      "off": "Désactivés",
+      "offsets": {
+        "dayOf": "Le jour de la visite",
+        "daysBefore_one": "{{count}} jour avant",
+        "daysBefore_other": "{{count}} jours avant",
+        "hoursBefore_one": "{{count}} heure avant",
+        "hoursBefore_other": "{{count}} heures avant",
+        "minutesBefore_one": "{{count}} minute avant",
+        "minutesBefore_other": "{{count}} minutes avant"
+      },
+      "openSettings": "Ouvrir les paramètres de notification",
+      "pastVisit": "La date de cette visite est passée, ses rappels ne seront donc pas envoyés.",
+      "problems": {
+        "duplicate": "Ce rappel existe déjà.",
+        "needsTime": "Les rappels en heures ou en minutes nécessitent une heure de début.",
+        "tooFar": "Les rappels peuvent être au plus 30 jours avant la visite.",
+        "tooMany": "Vous pouvez définir jusqu'à {{max}} rappels."
+      },
+      "saveBeforeTest": "Enregistrez d'abord la visite pour envoyer un rappel de test.",
+      "tabLabel": "Rappels",
+      "testButton": "Envoyer un rappel de test maintenant",
+      "testError": "Échec de l'envoi du rappel de test",
+      "testSuccess": "Rappel de test envoyé",
+      "timedNote": "Les rappels en jours sont envoyés à {{time}} ; les rappels en heures ou en minutes sont calculés à partir de l'heure de début.",
+      "units": {
+        "days": "Jours",
+        "hours": "Heures",
+        "minutes": "Minutes"
+      },
+      "when": "Quand"
     },
     "table": {
       "visitType": "Type de visite"

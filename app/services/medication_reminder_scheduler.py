@@ -19,132 +19,44 @@ the scheduled HH:MM are recorded.
 
 import asyncio
 from datetime import date, datetime
-from typing import Optional
+from typing import Dict
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.events.bus import get_event_bus
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.utils.datetime_utils import get_facility_timezone, to_utc
 from app.events.medication_events import MedicationReminderDueEvent
 from app.models.clinical import Medication
 from app.models.notifications import NotificationHistory
 from app.models.patient import Patient
+from app.services.reminder_scheduler_base import (
+    MinuteReminderScheduler,
+    facility_day_start_utc,
+)
 
 logger = get_logger(__name__, "app")
 
-JOB_ID = "medication_reminder_tick"
-
-
-class MedicationReminderSchedulerService:
+class MedicationReminderSchedulerService(MinuteReminderScheduler):
     """Singleton APScheduler wrapper that ticks medication reminders."""
 
-    _instance: Optional["MedicationReminderSchedulerService"] = None
+    JOB_ID = "medication_reminder_tick"
+    JOB_NAME = "Medication Reminder Tick"
+    LABEL = "Medication reminder"
+    EVENT_PREFIX = "medication_reminder"
+    TICK_COMPLETE_EVENT = "medication_reminders_tick_complete"
 
-    def __init__(self) -> None:
-        # Pass the facility timezone so CronTrigger evaluates wall-clock time
-        # in the right zone. The backup scheduler doesn't do this, which is
-        # acceptable for its single 02:00-by-default job but would be wrong
-        # for per-minute reminder firing.
-        self._scheduler: AsyncIOScheduler = AsyncIOScheduler(
-            timezone=get_facility_timezone()
+    async def _run_tick(self, db: Session, now_local: datetime) -> Dict[str, int]:
+        seen, due, skipped, published = await self._process_tick(
+            db, now_local.date(), now_local.strftime("%H:%M")
         )
-
-    @classmethod
-    def get_instance(cls) -> "MedicationReminderSchedulerService":
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
-
-    @classmethod
-    def reset_instance(cls) -> None:
-        """Tests only — tear down the singleton."""
-        if cls._instance is not None:
-            if cls._instance._scheduler.running:
-                cls._instance._scheduler.shutdown(wait=False)
-            cls._instance = None
-
-    async def start(self) -> None:
-        """Start the scheduler and register the per-minute tick job."""
-        if not self._scheduler.running:
-            self._scheduler.start()
-
-        self._scheduler.add_job(
-            self._tick,
-            # The explicit timezone matters: a pre-built CronTrigger defaults
-            # to the HOST timezone (tzlocal), not the scheduler's timezone.
-            trigger=CronTrigger(second=0, timezone=get_facility_timezone()),
-            id=JOB_ID,
-            name="Medication Reminder Tick",
-            replace_existing=True,
-            misfire_grace_time=120,
-            coalesce=True,
-        )
-
-        logger.info(
-            "Medication reminder scheduler started",
-            extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "medication_reminder_scheduler_started",
-            },
-        )
-
-    async def shutdown(self) -> None:
-        """Gracefully shut down the scheduler."""
-        if self._scheduler.running:
-            self._scheduler.shutdown(wait=False)
-            logger.info(
-                "Medication reminder scheduler stopped",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "medication_reminder_scheduler_stopped",
-                },
-            )
-
-    async def _tick(self) -> None:
-        """Discover due reminders and publish events for each."""
-        from app.core.database.database import SessionLocal
-
-        db: Session = SessionLocal()
-        try:
-            now_local = datetime.now(get_facility_timezone())
-            current_hhmm = now_local.strftime("%H:%M")
-            today_local = now_local.date()
-
-            candidates_seen, due, skipped_dedup, published = await self._process_tick(
-                db, today_local, current_hhmm
-            )
-
-            # Idle ticks (no candidates due) are the common case; logging them
-            # at INFO buries the rare actual work in 1440 noop lines per day.
-            log = logger.info if due else logger.debug
-            log(
-                "Medication reminder tick complete",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "medication_reminders_tick_complete",
-                    "candidates_seen": candidates_seen,
-                    "due": due,
-                    "skipped_dedup": skipped_dedup,
-                    "events_published": published,
-                },
-            )
-        except Exception as e:
-            logger.error(
-                "Medication reminder tick failed",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "medication_reminder_tick_error",
-                    LogFields.ERROR: str(e),
-                },
-                exc_info=True,
-            )
-        finally:
-            db.close()
+        return {
+            "candidates_seen": seen,
+            "due": due,
+            "skipped_dedup": skipped,
+            "events_published": published,
+        }
 
     async def _process_tick(
         self, db: Session, today_local: date, current_hhmm: str
@@ -255,10 +167,7 @@ class MedicationReminderSchedulerService:
         for east-of-UTC timezones).
         """
         scheduled_local_date = today_local.isoformat()
-        today_start_local = datetime.combine(today_local, datetime.min.time()).replace(
-            tzinfo=get_facility_timezone()
-        )
-        today_start_utc = to_utc(today_start_local)
+        today_start_utc = facility_day_start_utc(today_local)
 
         recent = (
             db.query(NotificationHistory.event_data)

@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "Quando la tua password viene usata ma troppi codici di verifica sono errati",
       "name": "Codici errati ripetuti"
+    },
+    "visit_reminder_due": {
+      "description": "Prima di una visita in programma",
+      "name": "Promemoria visita"
     }
   },
   "history": {

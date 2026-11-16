@@ -30,6 +30,8 @@ import { rememberEditTab } from '../../../utils/editTabHandoff';
 import ViewModalFooter from '../../shared/ViewModalFooter';
 import NotesView from '../../shared/NotesView';
 import UpcomingVisitBadge from './UpcomingVisitBadge';
+import { withStartTime } from '../../../utils/upcomingVisits';
+import { formatReminderOffset } from '../../../utils/visitReminders';
 
 const VisitViewModal = ({
   isOpen,
@@ -257,7 +259,9 @@ const VisitViewModal = ({
                         <Text fw={500} size="sm" c="dimmed">
                           {t('shared:labels.date', 'Date')}
                         </Text>
-                        <Text>{formatDate(visit.date)}</Text>
+                        <Text>
+                          {withStartTime(formatDate(visit.date), visit)}
+                        </Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">
@@ -307,6 +311,19 @@ const VisitViewModal = ({
                                 { minutes: visit.duration_minutes }
                               )
                             : t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('medical:visits.reminders.tabLabel', 'Reminders')}
+                        </Text>
+                        <Text c={visit.reminder_enabled ? 'inherit' : 'dimmed'}>
+                          {visit.reminder_enabled &&
+                          visit.reminder_offsets?.length
+                            ? visit.reminder_offsets
+                                .map(offset => formatReminderOffset(offset, t))
+                                .join(', ')
+                            : t('medical:visits.reminders.off', 'Off')}
                         </Text>
                       </Stack>
                     </SimpleGrid>

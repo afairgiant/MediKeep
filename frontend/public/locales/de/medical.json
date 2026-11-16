@@ -1726,6 +1726,10 @@
           "label": "Besuchsdatum",
           "placeholder": "Besuchsdatum auswählen"
         },
+        "visitTime": {
+          "description": "Leer lassen für einen ganztägigen Besuch",
+          "label": "Uhrzeit"
+        },
         "visitType": {
           "description": "Art des Arztbesuchs",
           "placeholder": "Besuchsart auswählen"
@@ -1756,6 +1760,55 @@
     },
     "relatedCondition": {
       "label": "Zugehörige Erkrankung (optional)"
+    },
+    "reminders": {
+      "allDayNote": "Keine Uhrzeit, daher ist dies ein ganztägiger Besuch: Erinnerungen werden um {{time}} gesendet. Geben Sie im Tab Besuchsinfo eine Uhrzeit an, um Erinnerungen in Stunden oder Minuten zu nutzen.",
+      "custom": {
+        "add": "Hinzufügen",
+        "label": "Eigene Zeit vor dem Besuch",
+        "unit": "Einheit"
+      },
+      "enabled": {
+        "description": "Sendet eine Benachrichtigung über Ihre Benachrichtigungskanäle.",
+        "label": "An diesen Besuch erinnern"
+      },
+      "includeDetails": {
+        "description": "Standardmäßig zeigt eine Erinnerung nur Grund und Uhrzeit des Besuchs.",
+        "label": "Behandler und Ort angeben"
+      },
+      "noChannelsTitle": "Kein Benachrichtigungskanal aktiviert",
+      "noChannelsWarning": "Für Besuchserinnerungen ist kein Benachrichtigungskanal aktiviert. Öffnen Sie die Benachrichtigungseinstellungen, um einen zu aktivieren.",
+      "noneSelected": "Wählen Sie mindestens eine Erinnerung.",
+      "off": "Aus",
+      "offsets": {
+        "dayOf": "Am Tag des Besuchs",
+        "daysBefore_one": "{{count}} Tag vorher",
+        "daysBefore_other": "{{count}} Tage vorher",
+        "hoursBefore_one": "{{count}} Stunde vorher",
+        "hoursBefore_other": "{{count}} Stunden vorher",
+        "minutesBefore_one": "{{count}} Minute vorher",
+        "minutesBefore_other": "{{count}} Minuten vorher"
+      },
+      "openSettings": "Benachrichtigungseinstellungen öffnen",
+      "pastVisit": "Das Datum dieses Besuchs ist vorbei, daher werden keine Erinnerungen gesendet.",
+      "problems": {
+        "duplicate": "Diese Erinnerung ist bereits eingerichtet.",
+        "needsTime": "Erinnerungen in Stunden oder Minuten benötigen eine Uhrzeit.",
+        "tooFar": "Erinnerungen können höchstens 30 Tage vor dem Besuch liegen.",
+        "tooMany": "Sie können bis zu {{max}} Erinnerungen einrichten."
+      },
+      "saveBeforeTest": "Speichern Sie den Besuch zuerst, um eine Testerinnerung zu senden.",
+      "tabLabel": "Erinnerungen",
+      "testButton": "Jetzt Testerinnerung senden",
+      "testError": "Testerinnerung konnte nicht gesendet werden",
+      "testSuccess": "Testerinnerung gesendet",
+      "timedNote": "Tageserinnerungen werden um {{time}} gesendet; Erinnerungen in Stunden oder Minuten zählen ab der Uhrzeit des Besuchs zurück.",
+      "units": {
+        "days": "Tage",
+        "hours": "Stunden",
+        "minutes": "Minuten"
+      },
+      "when": "Wann"
     },
     "table": {
       "visitType": "Besuchsart"

@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "Quand votre mot de passe est utilisé mais que trop de codes de double authentification sont incorrects",
       "name": "Codes incorrects répétés"
+    },
+    "visit_reminder_due": {
+      "description": "Avant une visite à venir",
+      "name": "Rappel de visite"
     }
   },
   "history": {

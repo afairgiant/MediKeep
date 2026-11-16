@@ -882,6 +882,11 @@ class ExportService:
                 "date": (
                     encounter.date.isoformat() if encounter.date is not None else None
                 ),
+                "time": (
+                    encounter.visit_time.strftime("%H:%M")
+                    if encounter.visit_time is not None
+                    else None
+                ),
                 "reason": encounter.reason,
                 "visit_type": encounter.visit_type,
                 "chief_complaint": encounter.chief_complaint,
@@ -2435,6 +2440,7 @@ class ExportService:
             elif section_name == "encounters":
                 field_order = [
                     "date",
+                    "time",
                     "upcoming",
                     "reason",
                     "visit_type",

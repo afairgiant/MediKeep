@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "När ditt lösenord används men för många tvåstegskoder är fel",
       "name": "Upprepade felaktiga koder"
+    },
+    "visit_reminder_due": {
+      "description": "Inför ett kommande besök",
+      "name": "Besökspåminnelse"
     }
   },
   "history": {

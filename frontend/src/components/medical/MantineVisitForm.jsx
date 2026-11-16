@@ -15,8 +15,10 @@ import {
   NumberInput,
   Text,
 } from '@mantine/core';
+import { TimeInput } from '@mantine/dates';
 import { DateInput } from '../adapters/DateInput';
 import {
+  IconBell,
   IconInfoCircle,
   IconStethoscope,
   IconNotes,
@@ -40,6 +42,7 @@ import NotesField from '../shared/NotesField';
 import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import { useSubDialog } from '../../contexts/SubDialogContext';
+import VisitRemindersPanel from './visits/VisitRemindersPanel';
 
 const MantineVisitForm = ({
   formError,
@@ -204,6 +207,15 @@ const MantineVisitForm = ({
           />
         );
 
+      case 'time':
+        return (
+          <TimeInput
+            {...commonProps}
+            value={formData[translatedField.name] || ''}
+            onChange={handleTextInputChange(translatedField.name)}
+          />
+        );
+
       case 'number':
         return (
           <NumberInput
@@ -279,6 +291,7 @@ const MantineVisitForm = ({
     [
       'reason',
       'date',
+      'visit_time',
       'practitioner_id',
       'visit_type',
       'priority',
@@ -330,6 +343,9 @@ const MantineVisitForm = ({
               >
                 {t('common:visits.form.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
+              <Tabs.Tab value="reminders" leftSection={<IconBell size={16} />}>
+                {t('medical:visits.reminders.tabLabel', 'Reminders')}
+              </Tabs.Tab>
               {!subDialog && (
                 <VisitLinkTabButtons
                   visitId={editingVisit?.id}
@@ -373,6 +389,18 @@ const MantineVisitForm = ({
                 <Stack gap="md">
                   {clinicalFields.map(field => renderField(field))}
                 </Stack>
+              </Box>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="reminders">
+              <Box mt="md">
+                {activeTab === 'reminders' && (
+                  <VisitRemindersPanel
+                    formData={formData}
+                    onInputChange={onInputChange}
+                    visitId={editingVisit?.id}
+                  />
+                )}
               </Box>
             </Tabs.Panel>
 

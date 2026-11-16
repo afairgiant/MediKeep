@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "Wanneer je wachtwoord wordt gebruikt maar te veel tweestapscodes verkeerd zijn",
       "name": "Herhaaldelijk verkeerde codes"
+    },
+    "visit_reminder_due": {
+      "description": "Voor een aankomend bezoek",
+      "name": "Bezoekherinnering"
     }
   },
   "history": {

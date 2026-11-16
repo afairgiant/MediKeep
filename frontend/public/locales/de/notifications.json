@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "Wenn Ihr Passwort verwendet wird, aber zu viele Zwei-Faktor-Codes falsch sind",
       "name": "Wiederholt falsche Codes"
+    },
+    "visit_reminder_due": {
+      "description": "Vor einem bevorstehenden Besuch",
+      "name": "Besuchserinnerung"
     }
   },
   "history": {

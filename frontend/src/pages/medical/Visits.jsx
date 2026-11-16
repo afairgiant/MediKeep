@@ -39,7 +39,11 @@ import {
   buildVisitPayload,
   validateVisitForm,
 } from '../../utils/visitFormUtils';
-import { isUpcomingVisit } from '../../utils/upcomingVisits';
+import {
+  getVisitStartTime,
+  isUpcomingVisit,
+  withStartTime,
+} from '../../utils/upcomingVisits';
 import UpcomingVisitBadge from '../../components/medical/visits/UpcomingVisitBadge';
 
 const Visits = () => {
@@ -112,22 +116,7 @@ const Visits = () => {
       // Reset form and close modal on complete success
       setShowModal(false);
       setEditingVisit(null);
-      setFormData({
-        reason: '',
-        date: '',
-        notes: '',
-        practitioner_id: '',
-        condition_id: '',
-        visit_type: '',
-        chief_complaint: '',
-        diagnosis: '',
-        treatment_plan: '',
-        follow_up_instructions: '',
-        duration_minutes: '',
-        location: '',
-        priority: '',
-        tags: [],
-      });
+      setFormData({ ...INITIAL_VISIT_FORM_DATA, pending_links: {} });
 
       // Only refresh if we created a new visit during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
@@ -213,7 +202,10 @@ const Visits = () => {
   const formatters = {
     ...visitsBaseFormatters,
     date: (value, visit) => {
-      const text = visitsBaseFormatters.date(value, visit);
+      const text = withStartTime(
+        visitsBaseFormatters.date(value, visit),
+        visit
+      );
       if (!isUpcomingVisit(visit)) return text;
       return (
         <Group component="span" gap={6} wrap="nowrap">
@@ -268,6 +260,10 @@ const Visits = () => {
       location: visit.location || '',
       priority: visit.priority || '',
       tags: visit.tags || [],
+      visit_time: getVisitStartTime(visit),
+      reminder_enabled: Boolean(visit.reminder_enabled),
+      reminder_offsets: visit.reminder_offsets || [],
+      reminder_include_details: Boolean(visit.reminder_include_details),
     });
     setShowModal(true);
   };

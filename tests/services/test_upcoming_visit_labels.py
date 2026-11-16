@@ -1,6 +1,6 @@
 """Future-dated visits are labelled as upcoming in exports and custom reports."""
 
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -28,6 +28,12 @@ class TestCustomReportEncounters:
     def test_upcoming_visit_header_is_labelled(self):
         lines = self._header_lines([{"reason": "Checkup", "date": "2026-12-01"}])
         assert lines[0].endswith(f"[{get_translator('en').text('upcoming')}]")
+
+    def test_header_shows_start_time(self):
+        lines = self._header_lines(
+            [{"reason": "Checkup", "date": "2026-12-01", "visit_time": time(9, 5)}]
+        )
+        assert "09:05" in lines[0]
 
     def test_past_visit_header_is_not_labelled(self):
         lines = self._header_lines([{"reason": "Checkup", "date": "2026-11-01"}])
@@ -95,6 +101,7 @@ class TestExportEncountersQuery:
                     patient_id=test_patient.id,
                     reason=reason,
                     date=TODAY + timedelta(days=offset),
+                    visit_time=time(14, 0) if reason == "Upcoming" else None,
                 )
             )
         db_session.commit()
@@ -108,3 +115,5 @@ class TestExportEncountersQuery:
 
         flags = {row["reason"]: row["upcoming"] for row in rows}
         assert flags == {"Past": False, "Today": False, "Upcoming": True}
+        times = {row["reason"]: row["time"] for row in rows}
+        assert times == {"Past": None, "Today": None, "Upcoming": "14:00"}

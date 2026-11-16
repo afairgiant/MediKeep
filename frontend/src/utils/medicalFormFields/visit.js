@@ -24,6 +24,13 @@ export const visitFormFields = [
     gridColumn: 6,
   },
   {
+    name: 'visit_time',
+    type: 'time',
+    labelKey: 'medical:visits.form.fields.visitTime.label',
+    descriptionKey: 'medical:visits.form.fields.visitTime.description',
+    gridColumn: 6,
+  },
+  {
     name: 'practitioner_id',
     type: 'select',
     labelKey: 'medical:visits.form.fields.attendingPractitioner.label',
@@ -31,7 +38,7 @@ export const visitFormFields = [
       'medical:visits.form.fields.attendingPractitioner.placeholder',
     descriptionKey:
       'medical:visits.form.fields.attendingPractitioner.description',
-    gridColumn: 6,
+    gridColumn: 12,
     searchable: true,
     clearable: true,
     dynamicOptions: 'practitioners',

@@ -284,6 +284,13 @@ async def startup_event():
         # Non-fatal - app still functions without reminders
 
     try:
+        from app.services.visit_reminder_scheduler import VisitReminderSchedulerService
+
+        await VisitReminderSchedulerService.get_instance().start()
+    except Exception as e:
+        logger.warning(f"Could not initialize visit reminder scheduler: {e}")
+
+    try:
         from app.services.data_retention_scheduler import (
             DataRetentionSchedulerService,
         )

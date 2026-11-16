@@ -2340,6 +2340,8 @@ class CustomReportPDFGenerator:
             # Header: Reason for visit and date (most important info)
             reason = record.get("reason", "Visit")
             date = self._format_date(record["date"]) if record.get("date") else ""
+            if date and record.get("visit_time"):
+                date = f"{date} {self._format_time(record['visit_time'])}"
             visit_type = record.get("visit_type", "")
 
             header_parts = [f"<b>{reason}</b>"]

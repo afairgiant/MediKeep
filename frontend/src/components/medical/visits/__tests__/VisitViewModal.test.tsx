@@ -177,3 +177,24 @@ describe('VisitViewModal - upcoming badge', () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe('VisitViewModal - start time and reminders', () => {
+  it('shows the start time with the date', () => {
+    renderModal({ visit: { ...visit, visit_time: '14:30:00' } });
+    expect(screen.getByText(/14:30$/)).toBeInTheDocument();
+  });
+
+  it('lists the reminders that are set', () => {
+    renderModal({
+      visit: { ...visit, reminder_enabled: true, reminder_offsets: [0, 1440] },
+    });
+    expect(
+      screen.getByText('Day of visit, 1 day before')
+    ).toBeInTheDocument();
+  });
+
+  it('says reminders are off when none are set', () => {
+    renderModal();
+    expect(screen.getByText('Off')).toBeInTheDocument();
+  });
+});

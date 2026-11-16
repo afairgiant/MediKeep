@@ -128,6 +128,7 @@ The comprehensive API service that provides all medical record management functi
 - `createEncounter(encounterData, signal)` - Create encounter
 - `updateEncounter(encounterId, encounterData, signal)` - Update encounter
 - `deleteEncounter(encounterId, signal)` - Delete encounter
+- `sendVisitTestReminder(encounterId, signal)` - Fire a one-shot test visit reminder notification
 
 #### Encounter-Lab Result Relationships
 
