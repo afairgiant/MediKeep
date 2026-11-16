@@ -194,6 +194,7 @@ title, message = registry.get_template("event_type", data)
 | `sessions_revoked` | security | The user signed out their other devices |
 | `two_factor_failures` | security | The correct password was followed by enough wrong codes to lock the code step |
 | `medication_reminder_due` | medical | A scheduled medication reminder time has arrived (fired by the per-minute `MedicationReminderSchedulerService`; idempotent via `NotificationHistory` dedup) |
+| `visit_reminder_due` | medical | A reminder for an upcoming visit is due (fired by the per-minute `VisitReminderSchedulerService`; dedup on `encounter_id` + `scheduled_fire_local`) |
 
 ---
 

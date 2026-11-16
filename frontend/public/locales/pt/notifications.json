@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "Quando a sua palavra-passe é utilizada mas demasiados códigos de dois fatores estão errados",
       "name": "Códigos errados repetidos"
+    },
+    "visit_reminder_due": {
+      "description": "Antes de uma próxima consulta",
+      "name": "Lembrete de consulta"
     }
   },
   "history": {

@@ -1,25 +1,31 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.v1.endpoints.encounter_links import register_encounter_link_routes
 from app.api.v1.endpoints.utils import (
+    ensure_reminder_can_send,
     handle_create_with_logging,
     handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
     verify_patient_ownership,
 )
+from app.core.events.bus import publish_from_thread
 from app.core.http.error_handling import (
     BusinessLogicException,
+    ValidationException,
     handle_database_errors,
 )
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
+from app.core.utils.visit_reminders import check_offsets_fit_visit_time
 from app.crud.encounter import encounter, encounter_lab_result
 from app.crud.lab_result import lab_result
+from app.events.visit_events import VisitReminderDueEvent
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.encounter import (
@@ -33,6 +39,7 @@ from app.schemas.encounter import (
     EncounterUpdate,
     EncounterWithRelations,
 )
+from app.services.visit_reminder_scheduler import EVENT_TYPE as VISIT_REMINDER_EVENT
 
 router = APIRouter()
 
@@ -172,7 +179,27 @@ def update_encounter(
     current_user: User = Depends(deps.get_current_user),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
-    """Update an encounter."""
+    """Update an encounter.
+
+    Raises 422 when the saved and sent start time and reminder offsets together
+    give an all-day visit an hour-based reminder.
+    """
+    sent = encounter_in.model_fields_set
+
+    def check_reminders_fit(existing) -> None:
+        visit_time = (
+            encounter_in.visit_time if "visit_time" in sent else existing.visit_time
+        )
+        offsets = (
+            encounter_in.reminder_offsets
+            if "reminder_offsets" in sent
+            else existing.reminder_offsets
+        )
+        try:
+            check_offsets_fit_visit_time(visit_time, offsets)
+        except ValueError as e:
+            raise ValidationException(message=str(e)) from e
+
     return handle_update_with_logging(
         db=db,
         crud_obj=encounter,
@@ -184,7 +211,66 @@ def update_encounter(
         request=request,
         current_user=current_user,
         current_user_patient_id=current_user_patient_id,
+        before_update=check_reminders_fit,
     )
+
+
+@router.post("/{encounter_id}/reminders/test", status_code=status.HTTP_204_NO_CONTENT)
+def send_test_visit_reminder(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    encounter_id: int,
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+) -> None:
+    """Send a one-shot test reminder for this visit to the patient owner's channels.
+
+    Needs edit access. Raises 400 when the visit's reminders are off, 422 when no
+    channel is enabled for visit reminders.
+    """
+    with handle_database_errors(request=request):
+        encounter_obj = encounter.get(db, id=encounter_id)
+        handle_not_found(encounter_obj, "Encounter", request)
+        verify_patient_ownership(
+            encounter_obj,
+            current_user_patient_id,
+            "encounter",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        owner_user_id = ensure_reminder_can_send(
+            db, encounter_obj, VISIT_REMINDER_EVENT, "visit"
+        )
+
+        practitioner = encounter_obj.practitioner
+        publish_from_thread(
+            VisitReminderDueEvent.for_visit(
+                owner_user_id=owner_user_id,
+                patient_id=encounter_obj.patient_id,
+                encounter_id=encounter_obj.id,
+                reason=encounter_obj.reason,
+                visit_date=encounter_obj.date,
+                visit_time=encounter_obj.visit_time,
+                include_details=encounter_obj.reminder_include_details,
+                practitioner_name=practitioner.name if practitioner else None,
+                location=encounter_obj.location,
+                is_test=True,
+            )
+        )
+
+        logger.info(
+            "Visit reminder test triggered",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "visit_reminder_test_triggered",
+                LogFields.RECORD_ID: encounter_obj.id,
+                LogFields.USER_ID: current_user_id,
+            },
+        )
 
 
 @router.delete("/{encounter_id}")

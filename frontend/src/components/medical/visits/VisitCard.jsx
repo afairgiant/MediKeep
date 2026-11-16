@@ -6,7 +6,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import NotesView from '../../shared/NotesView';
-import { isUpcomingVisit } from '../../../utils/upcomingVisits';
+import { isUpcomingVisit, withStartTime } from '../../../utils/upcomingVisits';
 import { UPCOMING_BADGE_COLOR, UPCOMING_LABEL_KEY } from './UpcomingVisitBadge';
 
 const VisitCard = ({
@@ -128,8 +128,10 @@ const VisitCard = ({
       {
         label: t('shared:labels.date'),
         value: visit.date,
-        render: value =>
-          value ? formatLongDate(value) : t('shared:labels.notSpecified'),
+        render: value => {
+          if (!value) return t('shared:labels.notSpecified');
+          return withStartTime(formatLongDate(value), visit);
+        },
       },
       {
         label: t('visits.attendingPractitioner.label'),

@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy.exc import DatabaseError, IntegrityError, SQLAlchemyError
@@ -10,8 +10,10 @@ from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.core.http.error_handling import (
+    BusinessLogicException,
     DatabaseException,
     NotFoundException,
+    ValidationException,
     handle_database_errors,
 )
 from app.core.logging.config import get_logger
@@ -225,6 +227,31 @@ def handle_create_with_logging(
         return entity_obj
 
 
+def ensure_reminder_can_send(
+    db: Session, record: Any, event_type: str, record_label: str
+) -> int:
+    """Owner user id to send ``record``'s test reminder to.
+
+    Raises BusinessLogicException (400) when the record's reminders are off and
+    ValidationException (422) when the patient owner has no channel on for ``event_type``.
+    """
+    from app.services.notification_service import NotificationService
+
+    if not record.reminder_enabled:
+        raise BusinessLogicException(
+            message=f"Reminders are not enabled for this {record_label}."
+        )
+    owner_user_id = record.patient.owner_user_id
+    if not NotificationService(db).has_enabled_route(owner_user_id, event_type):
+        raise ValidationException(
+            message=(
+                f"No notification channel is enabled for {record_label} reminders. "
+                "Open Notification Settings to enable a channel."
+            ),
+        )
+    return owner_user_id
+
+
 def handle_update_with_logging(
     db: Session,
     crud_obj: Any,
@@ -237,6 +264,7 @@ def handle_update_with_logging(
     current_user_patient_id: int = None,
     current_user: Any = None,
     permission: str = "edit",
+    before_update: Optional[Callable[[Any], None]] = None,
 ) -> Any:
     """
     Handle entity update with standardized logging and ownership verification.
@@ -253,6 +281,8 @@ def handle_update_with_logging(
         current_user_patient_id: Current user's patient ID (for ownership verification)
         current_user: Current user object (for multi-patient access verification)
         permission: Required permission level (default: 'edit')
+        before_update: Called with the stored entity after the access check and
+            before saving; raise to reject the update
 
     Returns:
         Updated entity object
@@ -277,6 +307,9 @@ def handle_update_with_logging(
                 current_user=current_user,
                 permission=permission,
             )
+
+        if before_update is not None:
+            before_update(entity_obj)
 
         patient_id = getattr(entity_obj, "patient_id", None)
 

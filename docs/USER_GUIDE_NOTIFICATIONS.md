@@ -116,6 +116,7 @@ After adding channels, you can configure which events trigger notifications:
 | Backup Completed | When a backup completes successfully | System |
 | Backup Failed | When a backup fails | System |
 | Medication Reminder | When it is time to take a scheduled medication | Medical |
+| Visit Reminder | Ahead of an upcoming visit | Medical |
 | Lab Results Available | When new lab results are added | Medical |
 | Abnormal Lab Results | When lab results are outside normal range | Medical |
 | Immunization Due | When an immunization is coming due | Medical |
@@ -145,6 +146,17 @@ with a red alert icon, and saving the medication shows a warning notification
 with the reasons. The warnings are informational; they do not block saving.
 
 Use the **Send test reminder now** button on the Reminders tab to verify the notification path without waiting for the schedule. The test bypasses the normal idempotency check and never blocks a real scheduled reminder.
+
+### Visit Reminders
+
+A visit dated in the future can remind you ahead of time:
+
+1. Open or create the visit and, if you know it, set its **Start Time** on the Visit Info tab
+2. Switch to the **Reminders** tab and turn on **Remind me about this visit** ("1 day before" is picked for you)
+3. Pick when to be reminded: 1 week, 2 days or 1 day before, the day of the visit, or 2 hours, 1 hour or 30 minutes before. Use **Custom time before the visit** for anything else, up to 30 days and 10 reminders per visit
+4. Save the visit
+
+Reminders in days ("1 day before", "day of visit") go out at 09:00 (facility time) on that day, or at the start time if the visit starts earlier. Reminders in hours or minutes count back from the start time. A visit with no start time is an all-day visit, so only reminders in days are available. By default the notification shows only the visit reason, date and time; tick **Include provider and location** to add those. Delivery uses the **patient owner's** enabled channels for the **Visit Reminder** event, and **Send test reminder now** works as it does for medications.
 
 ## Testing Channels
 

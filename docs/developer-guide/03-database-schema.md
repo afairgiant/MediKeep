@@ -819,6 +819,10 @@ JUNCTION TABLES (Many-to-Many)
 | duration_minutes | Integer | | Visit duration |
 | location | String | | office, hospital, telehealth |
 | priority | String | | EncounterPriority enum value |
+| visit_time | Time | | Facility-local start time; null means all day |
+| reminder_enabled | Boolean | NOT NULL, DEFAULT false | Visit reminders on |
+| reminder_offsets | JSON | | Minutes before the visit start, sorted |
+| reminder_include_details | Boolean | NOT NULL, DEFAULT false | Add practitioner and location to reminders |
 | tags | JSONB | DEFAULT [] | User tags |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
@@ -835,6 +839,7 @@ JUNCTION TABLES (Many-to-Many)
 
 **Indexes**:
 - `idx_encounters_patient_id` on patient_id
+- `idx_encounters_reminder_enabled_date` on (reminder_enabled, date), for the visit reminder scheduler
 
 **Business Rules**:
 - Reason and date are required

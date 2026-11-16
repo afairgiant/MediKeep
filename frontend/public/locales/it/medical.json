@@ -1726,6 +1726,10 @@
           "label": "Data della visita",
           "placeholder": "Seleziona la data della visita"
         },
+        "visitTime": {
+          "description": "Lascia vuoto per una visita di un giorno intero",
+          "label": "Ora di inizio"
+        },
         "visitType": {
           "description": "Tipo di visita medica",
           "placeholder": "Seleziona il tipo di visita"
@@ -1756,6 +1760,55 @@
     },
     "relatedCondition": {
       "label": "Condizione correlata (opzionale)"
+    },
+    "reminders": {
+      "allDayNote": "Nessuna ora di inizio, quindi è una visita di un giorno intero: i promemoria vengono inviati alle {{time}}. Aggiungi un'ora di inizio nella scheda Informazioni visita per usare promemoria in ore o minuti.",
+      "custom": {
+        "add": "Aggiungi",
+        "label": "Tempo personalizzato prima della visita",
+        "unit": "Unità"
+      },
+      "enabled": {
+        "description": "Invia una notifica tramite i tuoi canali di notifica.",
+        "label": "Ricordami questa visita"
+      },
+      "includeDetails": {
+        "description": "Per impostazione predefinita un promemoria mostra solo il motivo e l'ora della visita.",
+        "label": "Includi medico e luogo"
+      },
+      "noChannelsTitle": "Nessun canale di notifica attivo",
+      "noChannelsWarning": "Nessun canale di notifica è attivo per i promemoria delle visite. Apri le impostazioni di notifica per attivarne uno.",
+      "noneSelected": "Scegli almeno un promemoria.",
+      "off": "Disattivati",
+      "offsets": {
+        "dayOf": "Il giorno della visita",
+        "daysBefore_one": "{{count}} giorno prima",
+        "daysBefore_other": "{{count}} giorni prima",
+        "hoursBefore_one": "{{count}} ora prima",
+        "hoursBefore_other": "{{count}} ore prima",
+        "minutesBefore_one": "{{count}} minuto prima",
+        "minutesBefore_other": "{{count}} minuti prima"
+      },
+      "openSettings": "Apri impostazioni di notifica",
+      "pastVisit": "La data di questa visita è passata, quindi i promemoria non verranno inviati.",
+      "problems": {
+        "duplicate": "Questo promemoria è già impostato.",
+        "needsTime": "I promemoria in ore o minuti richiedono un'ora di inizio.",
+        "tooFar": "I promemoria possono essere al massimo 30 giorni prima della visita.",
+        "tooMany": "Puoi impostare fino a {{max}} promemoria."
+      },
+      "saveBeforeTest": "Salva prima la visita per inviare un promemoria di prova.",
+      "tabLabel": "Promemoria",
+      "testButton": "Invia ora un promemoria di prova",
+      "testError": "Invio del promemoria di prova non riuscito",
+      "testSuccess": "Promemoria di prova inviato",
+      "timedNote": "I promemoria in giorni vengono inviati alle {{time}}; quelli in ore o minuti si calcolano a ritroso dall'ora di inizio.",
+      "units": {
+        "days": "Giorni",
+        "hours": "Ore",
+        "minutes": "Minuti"
+      },
+      "when": "Quando"
     },
     "table": {
       "visitType": "Tipo di visita"

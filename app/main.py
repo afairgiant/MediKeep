@@ -50,6 +50,15 @@ async def lifespan(app: FastAPI):
             logger.warning(f"Error shutting down medication reminder scheduler: {e}")
 
         try:
+            from app.services.visit_reminder_scheduler import (
+                VisitReminderSchedulerService,
+            )
+
+            await VisitReminderSchedulerService.get_instance().shutdown()
+        except Exception as e:
+            logger.warning(f"Error shutting down visit reminder scheduler: {e}")
+
+        try:
             from app.services.data_retention_scheduler import (
                 DataRetentionSchedulerService,
             )

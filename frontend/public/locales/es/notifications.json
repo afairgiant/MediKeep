@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "Cuando se usa su contraseña pero demasiados códigos de verificación son incorrectos",
       "name": "Códigos incorrectos repetidos"
+    },
+    "visit_reminder_due": {
+      "description": "Antes de una próxima consulta",
+      "name": "Recordatorio de consulta"
     }
   },
   "history": {

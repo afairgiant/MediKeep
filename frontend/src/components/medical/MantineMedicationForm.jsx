@@ -45,7 +45,7 @@ import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
 import NotesField from '../shared/NotesField';
 import { apiService } from '../../services/api';
-import notificationApi from '../../services/api/notificationApi';
+import { useReminderChannelStatus } from '../../hooks/useReminderChannelStatus';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import RecordVisitsTab from '../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
@@ -91,40 +91,18 @@ const MantineMedicationForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Reminder-related state
-  const [hasReminderChannel, setHasReminderChannel] = useState(true);
   const [isSendingTestReminder, setIsSendingTestReminder] = useState(false);
 
   // Form handlers
   const { handleTextInputChange, handleCheckboxChange } =
     useFormHandlers(onInputChange);
 
-  // Check whether any notification channel is enabled for medication reminders.
-  // Used to surface a warning when the user enables reminders without a route
-  // for the notification to leave through. Fetched only when the Reminders tab
-  // is active (the warning lives there), and re-checked when switching between
-  // medications in the same modal so the warning reflects the channel state
-  // at the moment of editing, not the state at the first open.
-  useEffect(() => {
-    if (!isOpen || activeTab !== 'reminders') return;
-    let cancelled = false;
-    notificationApi
-      .getPreferenceMatrix()
-      .then(matrix => {
-        if (cancelled) return;
-        const channelStates =
-          matrix?.preferences?.medication_reminder_due || {};
-        const anyEnabled = Object.values(channelStates).some(Boolean);
-        setHasReminderChannel(anyEnabled);
-      })
-      .catch(() => {
-        // If the check fails we err on the side of NOT showing a warning —
-        // a transient API failure shouldn't block the form's primary purpose.
-        if (!cancelled) setHasReminderChannel(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isOpen, activeTab, editingMedication?.id]);
+  // Re-checked per medication so the warning reflects channels at the moment of editing
+  const [hasReminderChannel, setHasReminderChannel] = useReminderChannelStatus(
+    'medication_reminder_due',
+    isOpen && activeTab === 'reminders',
+    editingMedication?.id
+  );
 
   const handleSendTestReminder = async () => {
     if (!editingMedication?.id) return;

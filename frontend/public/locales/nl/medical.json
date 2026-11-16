@@ -1726,6 +1726,10 @@
           "label": "Datum bezoek",
           "placeholder": "Selecteer datum bezoek"
         },
+        "visitTime": {
+          "description": "Laat leeg voor een bezoek van een hele dag",
+          "label": "Begintijd"
+        },
         "visitType": {
           "description": "Type medisch bezoek",
           "placeholder": "Selecteer type bezoek"
@@ -1756,6 +1760,55 @@
     },
     "relatedCondition": {
       "label": "Gerelateerde aandoening (optioneel)"
+    },
+    "reminders": {
+      "allDayNote": "Geen begintijd, dus dit is een bezoek van een hele dag: herinneringen worden om {{time}} verstuurd. Voeg een begintijd toe op het tabblad Bezoekinfo om herinneringen in uren of minuten te gebruiken.",
+      "custom": {
+        "add": "Toevoegen",
+        "label": "Eigen tijd voor het bezoek",
+        "unit": "Eenheid"
+      },
+      "enabled": {
+        "description": "Stuurt een melding via je meldingskanalen.",
+        "label": "Herinner me aan dit bezoek"
+      },
+      "includeDetails": {
+        "description": "Standaard toont een herinnering alleen de reden en tijd van het bezoek.",
+        "label": "Zorgverlener en locatie vermelden"
+      },
+      "noChannelsTitle": "Geen meldingskanaal ingeschakeld",
+      "noChannelsWarning": "Er is geen meldingskanaal ingeschakeld voor bezoekherinneringen. Open de meldingsinstellingen om er een in te schakelen.",
+      "noneSelected": "Kies minstens één herinnering.",
+      "off": "Uit",
+      "offsets": {
+        "dayOf": "Op de dag van het bezoek",
+        "daysBefore_one": "{{count}} dag van tevoren",
+        "daysBefore_other": "{{count}} dagen van tevoren",
+        "hoursBefore_one": "{{count}} uur van tevoren",
+        "hoursBefore_other": "{{count}} uur van tevoren",
+        "minutesBefore_one": "{{count}} minuut van tevoren",
+        "minutesBefore_other": "{{count}} minuten van tevoren"
+      },
+      "openSettings": "Meldingsinstellingen openen",
+      "pastVisit": "De datum van dit bezoek is voorbij, dus de herinneringen worden niet verstuurd.",
+      "problems": {
+        "duplicate": "Die herinnering is al ingesteld.",
+        "needsTime": "Herinneringen in uren of minuten hebben een begintijd nodig.",
+        "tooFar": "Herinneringen kunnen maximaal 30 dagen voor het bezoek liggen.",
+        "tooMany": "Je kunt maximaal {{max}} herinneringen instellen."
+      },
+      "saveBeforeTest": "Sla het bezoek eerst op om een testherinnering te sturen.",
+      "tabLabel": "Herinneringen",
+      "testButton": "Nu een testherinnering sturen",
+      "testError": "Testherinnering versturen mislukt",
+      "testSuccess": "Testherinnering verstuurd",
+      "timedNote": "Herinneringen in dagen worden om {{time}} verstuurd; herinneringen in uren of minuten worden teruggerekend vanaf de begintijd.",
+      "units": {
+        "days": "Dagen",
+        "hours": "Uren",
+        "minutes": "Minuten"
+      },
+      "when": "Wanneer"
     },
     "table": {
       "visitType": "Type bezoek"

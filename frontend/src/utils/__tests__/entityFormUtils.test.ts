@@ -271,11 +271,36 @@ describe('visitFormUtils', () => {
       location: null,
       priority: null,
       tags: [],
+      visit_time: null,
+      reminder_enabled: false,
+      reminder_offsets: [],
+      reminder_include_details: false,
       patient_id: 7,
     });
     expect(
       buildVisitPayload({ ...filled, condition_id: '' }, 7).condition_id
     ).toBeNull();
+  });
+
+  it('sends reminders sorted, dropping hour offsets from an all-day visit', () => {
+    const reminders = {
+      ...filled,
+      reminder_enabled: true,
+      reminder_offsets: [1440, 60, 0],
+    };
+    expect(buildVisitPayload(reminders, 7).reminder_offsets).toEqual([0, 1440]);
+    expect(
+      buildVisitPayload({ ...reminders, visit_time: '09:30' }, 7)
+    ).toMatchObject({ visit_time: '09:30', reminder_offsets: [0, 60, 1440] });
+  });
+
+  it('saves reminders as off when no offset can fire', () => {
+    expect(
+      buildVisitPayload(
+        { ...filled, reminder_enabled: true, reminder_offsets: [60] },
+        7
+      )
+    ).toMatchObject({ reminder_enabled: false, reminder_offsets: [] });
   });
 
   it('never sends form-only fields', () => {

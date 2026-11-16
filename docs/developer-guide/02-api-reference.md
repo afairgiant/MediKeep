@@ -2637,6 +2637,21 @@ Base path: `/api/v1/encounters`
 ```
 
 - **Dates**: `date` may be in the future, so upcoming visits can be entered ahead of time; there is no upper limit. Create and update both accept future dates.
+- **Start time**: `visit_time` is an optional facility-local `"HH:MM"` (seconds are dropped; `""` or `null` means an all-day visit). Responses return `"HH:MM:SS"`.
+- **Reminder fields**: `reminder_enabled` (default `false`), `reminder_offsets` (minutes before the visit start; 0 to 43200, at most 10, no duplicates, sorted on save) and `reminder_include_details` (default `false`; adds practitioner and location to the notification, which otherwise carries only the reason, date and time). Whole-day offsets (multiples of 1440, including 0 for the day of the visit) fire at 09:00 facility time on that day, or at the start time when a visit starts before 09:00; other offsets count back from the start time. An all-day visit accepts only whole-day offsets. On update the check uses the saved values for whichever of `visit_time` and `reminder_offsets` the request leaves out, and returns 422 on a mismatch. Delivery uses the patient owner's enabled channels for the `visit_reminder_due` event.
+
+#### Send Test Visit Reminder
+
+`POST /encounters/{encounter_id}/reminders/test`
+
+- **Authentication**: Yes
+- **Purpose**: Send a one-shot test reminder for this visit to the patient owner's channels. Test events are flagged `is_test` and excluded from the scheduler's dedup.
+- **Authorization**: Needs edit access to the visit's patient.
+- **Success Response** (204): No content
+- **Error Responses**:
+  - `400` — Reminders are not enabled for this visit
+  - `404` — Visit not found or not accessible to the caller
+  - `422` — No notification channel is enabled for the `visit_reminder_due` event type for the patient owner
 
 `GET /encounters/patient/{patient_id}/recent?days=30`
 
@@ -5349,7 +5364,7 @@ Base path: `/api/v1/export`
   - `patient_id` (integer, required): Patient to export
   - `format` (string, optional): `csv` or `pdf` (default: csv)
 - **Success Response**: File download
-- **Encounters**: each exported visit carries `upcoming` (boolean, true when dated after today in the server timezone). CSV shows it as a Yes/No column; the PDF shows it only on upcoming visits.
+- **Encounters**: each exported visit carries `upcoming` (boolean, true when dated after today in the server timezone). CSV shows it as a Yes/No column; the PDF shows it only on upcoming visits. `time` is the visit start as `HH:MM`, or empty for an all-day visit.
 
 ---
 

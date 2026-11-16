@@ -1728,6 +1728,10 @@
           "label": "Data wizyty",
           "placeholder": "Wybierz datę wizyty"
         },
+        "visitTime": {
+          "description": "Pozostaw puste dla wizyty całodniowej",
+          "label": "Godzina rozpoczęcia"
+        },
         "visitType": {
           "description": "Typ wizyty medycznej",
           "placeholder": "Wybierz typ wizyty"
@@ -1758,6 +1762,61 @@
     },
     "relatedCondition": {
       "label": "Powiązane schorzenie (opcjonalnie)"
+    },
+    "reminders": {
+      "allDayNote": "Brak godziny rozpoczęcia, więc to wizyta całodniowa: przypomnienia są wysyłane o {{time}}. Dodaj godzinę rozpoczęcia na karcie Informacje o wizycie, aby używać przypomnień w godzinach lub minutach.",
+      "custom": {
+        "add": "Dodaj",
+        "label": "Własny czas przed wizytą",
+        "unit": "Jednostka"
+      },
+      "enabled": {
+        "description": "Wysyła powiadomienie przez Twoje kanały powiadomień.",
+        "label": "Przypomnij mi o tej wizycie"
+      },
+      "includeDetails": {
+        "description": "Domyślnie przypomnienie pokazuje tylko powód i godzinę wizyty.",
+        "label": "Uwzględnij lekarza i miejsce"
+      },
+      "noChannelsTitle": "Brak włączonego kanału powiadomień",
+      "noChannelsWarning": "Żaden kanał powiadomień nie jest włączony dla przypomnień o wizytach. Otwórz ustawienia powiadomień, aby go włączyć.",
+      "noneSelected": "Wybierz co najmniej jedno przypomnienie.",
+      "off": "Wyłączone",
+      "offsets": {
+        "dayOf": "W dniu wizyty",
+        "daysBefore_few": "{{count}} dni wcześniej",
+        "daysBefore_many": "{{count}} dni wcześniej",
+        "daysBefore_one": "{{count}} dzień wcześniej",
+        "daysBefore_other": "{{count}} dnia wcześniej",
+        "hoursBefore_few": "{{count}} godziny wcześniej",
+        "hoursBefore_many": "{{count}} godzin wcześniej",
+        "hoursBefore_one": "{{count}} godzinę wcześniej",
+        "hoursBefore_other": "{{count}} godziny wcześniej",
+        "minutesBefore_few": "{{count}} minuty wcześniej",
+        "minutesBefore_many": "{{count}} minut wcześniej",
+        "minutesBefore_one": "{{count}} minutę wcześniej",
+        "minutesBefore_other": "{{count}} minuty wcześniej"
+      },
+      "openSettings": "Otwórz ustawienia powiadomień",
+      "pastVisit": "Data tej wizyty minęła, więc przypomnienia nie zostaną wysłane.",
+      "problems": {
+        "duplicate": "To przypomnienie jest już ustawione.",
+        "needsTime": "Przypomnienia w godzinach lub minutach wymagają godziny rozpoczęcia.",
+        "tooFar": "Przypomnienia mogą być najwyżej 30 dni przed wizytą.",
+        "tooMany": "Możesz ustawić maksymalnie {{max}} przypomnień."
+      },
+      "saveBeforeTest": "Najpierw zapisz wizytę, aby wysłać przypomnienie testowe.",
+      "tabLabel": "Przypomnienia",
+      "testButton": "Wyślij teraz przypomnienie testowe",
+      "testError": "Nie udało się wysłać przypomnienia testowego",
+      "testSuccess": "Wysłano przypomnienie testowe",
+      "timedNote": "Przypomnienia w dniach są wysyłane o {{time}}; przypomnienia w godzinach lub minutach są liczone wstecz od godziny rozpoczęcia.",
+      "units": {
+        "days": "Dni",
+        "hours": "Godziny",
+        "minutes": "Minuty"
+      },
+      "when": "Kiedy"
     },
     "table": {
       "visitType": "Typ wizyty"

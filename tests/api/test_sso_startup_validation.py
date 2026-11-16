@@ -380,6 +380,10 @@ class TestSealedInstanceWarning:
             "app.services.medication_reminder_scheduler."
             "MedicationReminderSchedulerService.get_instance",
             return_value=scheduler,
+        ), patch(
+            "app.services.visit_reminder_scheduler."
+            "VisitReminderSchedulerService.get_instance",
+            return_value=scheduler,
         ):
             from app.core.startup import startup_event
 

@@ -1726,6 +1726,10 @@
           "label": "Visit Date",
           "placeholder": "Select visit date"
         },
+        "visitTime": {
+          "description": "Leave empty for an all-day visit",
+          "label": "Start Time"
+        },
         "visitType": {
           "description": "Type of medical visit",
           "placeholder": "Select visit type"
@@ -1756,6 +1760,55 @@
     },
     "relatedCondition": {
       "label": "Related Condition (Optional)"
+    },
+    "reminders": {
+      "allDayNote": "No start time, so this is an all-day visit: reminders go out at {{time}}. Add a start time on the Visit Info tab to use reminders in hours or minutes.",
+      "custom": {
+        "add": "Add",
+        "label": "Custom time before the visit",
+        "unit": "Unit"
+      },
+      "enabled": {
+        "description": "Sends a notification through your notification channels.",
+        "label": "Remind me about this visit"
+      },
+      "includeDetails": {
+        "description": "By default a reminder shows only the visit reason and time.",
+        "label": "Include provider and location"
+      },
+      "noChannelsTitle": "No notification channel enabled",
+      "noChannelsWarning": "No notification channel is turned on for visit reminders. Open Notification Settings to enable one.",
+      "noneSelected": "Pick at least one reminder.",
+      "off": "Off",
+      "offsets": {
+        "dayOf": "Day of visit",
+        "daysBefore_one": "{{count}} day before",
+        "daysBefore_other": "{{count}} days before",
+        "hoursBefore_one": "{{count}} hour before",
+        "hoursBefore_other": "{{count}} hours before",
+        "minutesBefore_one": "{{count}} minute before",
+        "minutesBefore_other": "{{count}} minutes before"
+      },
+      "openSettings": "Open Notification Settings",
+      "pastVisit": "This visit's date has passed, so its reminders won't be sent.",
+      "problems": {
+        "duplicate": "That reminder is already set.",
+        "needsTime": "Reminders in hours or minutes need a start time.",
+        "tooFar": "Reminders can be at most 30 days before the visit.",
+        "tooMany": "You can set up to {{max}} reminders."
+      },
+      "saveBeforeTest": "Save the visit first to send a test reminder.",
+      "tabLabel": "Reminders",
+      "testButton": "Send test reminder now",
+      "testError": "Failed to send test reminder",
+      "testSuccess": "Test reminder sent",
+      "timedNote": "Day reminders go out at {{time}}; reminders in hours or minutes count back from the start time.",
+      "units": {
+        "days": "Days",
+        "hours": "Hours",
+        "minutes": "Minutes"
+      },
+      "when": "When"
     },
     "table": {
       "visitType": "Visit Type"

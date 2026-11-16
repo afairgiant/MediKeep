@@ -1726,6 +1726,10 @@
           "label": "Besöksdatum",
           "placeholder": "Välj besöksdatum"
         },
+        "visitTime": {
+          "description": "Lämna tomt för ett heldagsbesök",
+          "label": "Starttid"
+        },
         "visitType": {
           "description": "Typ av läkarbesök",
           "placeholder": "Välj besökstyp"
@@ -1756,6 +1760,55 @@
     },
     "relatedCondition": {
       "label": "Relaterat tillstånd (valfritt)"
+    },
+    "reminders": {
+      "allDayNote": "Ingen starttid, så detta är ett heldagsbesök: påminnelser skickas kl. {{time}}. Lägg till en starttid på fliken Besöksinfo för att använda påminnelser i timmar eller minuter.",
+      "custom": {
+        "add": "Lägg till",
+        "label": "Egen tid före besöket",
+        "unit": "Enhet"
+      },
+      "enabled": {
+        "description": "Skickar en avisering via dina aviseringskanaler.",
+        "label": "Påminn mig om det här besöket"
+      },
+      "includeDetails": {
+        "description": "Som standard visar en påminnelse bara besökets orsak och tid.",
+        "label": "Ta med vårdgivare och plats"
+      },
+      "noChannelsTitle": "Ingen aviseringskanal aktiverad",
+      "noChannelsWarning": "Ingen aviseringskanal är aktiverad för besökspåminnelser. Öppna aviseringsinställningarna för att aktivera en.",
+      "noneSelected": "Välj minst en påminnelse.",
+      "off": "Av",
+      "offsets": {
+        "dayOf": "Besöksdagen",
+        "daysBefore_one": "{{count}} dag före",
+        "daysBefore_other": "{{count}} dagar före",
+        "hoursBefore_one": "{{count}} timme före",
+        "hoursBefore_other": "{{count}} timmar före",
+        "minutesBefore_one": "{{count}} minut före",
+        "minutesBefore_other": "{{count}} minuter före"
+      },
+      "openSettings": "Öppna aviseringsinställningar",
+      "pastVisit": "Datumet för det här besöket har passerat, så påminnelserna skickas inte.",
+      "problems": {
+        "duplicate": "Den påminnelsen finns redan.",
+        "needsTime": "Påminnelser i timmar eller minuter kräver en starttid.",
+        "tooFar": "Påminnelser kan som mest ligga 30 dagar före besöket.",
+        "tooMany": "Du kan ställa in upp till {{max}} påminnelser."
+      },
+      "saveBeforeTest": "Spara besöket först för att skicka en testpåminnelse.",
+      "tabLabel": "Påminnelser",
+      "testButton": "Skicka testpåminnelse nu",
+      "testError": "Det gick inte att skicka testpåminnelsen",
+      "testSuccess": "Testpåminnelse skickad",
+      "timedNote": "Påminnelser i dagar skickas kl. {{time}}; påminnelser i timmar eller minuter räknas bakåt från starttiden.",
+      "units": {
+        "days": "Dagar",
+        "hours": "Timmar",
+        "minutes": "Minuter"
+      },
+      "when": "När"
     },
     "table": {
       "visitType": "Besökstyp"

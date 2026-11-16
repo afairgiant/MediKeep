@@ -252,6 +252,10 @@
     "two_factor_failures": {
       "description": "Gdy użyto Twojego hasła, ale zbyt wiele kodów weryfikacji dwuetapowej było błędnych",
       "name": "Powtarzające się błędne kody"
+    },
+    "visit_reminder_due": {
+      "description": "Przed nadchodzącą wizytą",
+      "name": "Przypomnienie o wizycie"
     }
   },
   "history": {

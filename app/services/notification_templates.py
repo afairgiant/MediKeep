@@ -161,6 +161,38 @@ def medication_reminder_due_template(data: Dict) -> Tuple[str, str]:
     return (title, body)
 
 
+def visit_reminder_due_template(data: Dict) -> Tuple[str, str]:
+    """Upcoming visit; data carries reason, visit_date, visit_time (empty = all day),
+    optional practitioner_name and location, and is_test.
+    """
+    reason = data.get("reason") or "your visit"
+    visit_date = data.get("visit_date", "")
+    visit_time = data.get("visit_time")
+    when = f"{visit_date} at {visit_time}" if visit_time else f"{visit_date} (all day)"
+
+    if data.get("is_test"):
+        title = f"Test Reminder: {reason}"
+        body = (
+            f"This is a test reminder for your visit on {when}.\n"
+            "If you received this, your notification channel is working."
+        )
+    else:
+        title = f"Upcoming Visit: {reason}"
+        body = f"Your visit is on {when}."
+
+    details = [
+        f"{label}: {value}"
+        for label, value in (
+            ("With", data.get("practitioner_name")),
+            ("Location", data.get("location")),
+        )
+        if value
+    ]
+    if details:
+        body += "\n" + "\n".join(details)
+    return (title, body)
+
+
 def password_changed_template(data: Dict) -> Tuple[str, str]:
     """
     Template for password change notification.
@@ -254,6 +286,7 @@ NOTIFICATION_TEMPLATES = {
     "sessions_revoked": sessions_revoked_template,
     "two_factor_failures": two_factor_failures_template,
     "medication_reminder_due": medication_reminder_due_template,
+    "visit_reminder_due": visit_reminder_due_template,
 }
 
 

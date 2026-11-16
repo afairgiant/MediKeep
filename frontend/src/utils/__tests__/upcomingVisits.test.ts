@@ -75,6 +75,20 @@ describe('upcomingVisits', () => {
       ]);
     });
 
+    it('orders same-day visits by start time, all-day first', () => {
+      const sameDay = [
+        { date: '2026-11-20', visit_time: '14:00:00' },
+        { date: '2026-11-20', visit_time: null },
+        { date: '2026-11-20', visit_time: '08:30:00' },
+      ];
+      const times = (order: 'asc' | 'desc') =>
+        [...sameDay]
+          .sort((a, b) => compareVisitsByDate(a, b, order))
+          .map(v => v.visit_time);
+      expect(times('asc')).toEqual([null, '08:30:00', '14:00:00']);
+      expect(times('desc')).toEqual([null, '08:30:00', '14:00:00']);
+    });
+
     it('ascending is plain chronological', () => {
       expect(sortedBy('asc')).toEqual([
         '2025-01-01',

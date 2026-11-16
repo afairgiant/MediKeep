@@ -21,6 +21,7 @@ from app.services.notification_templates import (
     share_revoked_template,
     two_factor_disabled_template,
     two_factor_failures_template,
+    visit_reminder_due_template,
 )
 
 
@@ -133,6 +134,15 @@ def register_all_events() -> None:
         description="Notification when it is time to take a scheduled medication",
         category="medical",
         template_fn=medication_reminder_due_template,
+        is_implemented=True,
+    )
+
+    registry.register(
+        event_type="visit_reminder_due",
+        label="Visit Reminder",
+        description="Notification ahead of an upcoming visit",
+        category="medical",
+        template_fn=visit_reminder_due_template,
         is_implemented=True,
     )
 

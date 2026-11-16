@@ -1726,6 +1726,10 @@
           "label": "Data da Consulta",
           "placeholder": "Selecione a data da consulta"
         },
+        "visitTime": {
+          "description": "Deixe em branco para uma consulta de dia inteiro",
+          "label": "Hora de início"
+        },
         "visitType": {
           "description": "Tipo de consulta médica",
           "placeholder": "Selecione o tipo de consulta"
@@ -1756,6 +1760,55 @@
     },
     "relatedCondition": {
       "label": "Condição Relacionada (Opcional)"
+    },
+    "reminders": {
+      "allDayNote": "Sem hora de início, por isso é uma consulta de dia inteiro: os lembretes são enviados às {{time}}. Adicione uma hora de início no separador Informações da consulta para usar lembretes em horas ou minutos.",
+      "custom": {
+        "add": "Adicionar",
+        "label": "Tempo personalizado antes da consulta",
+        "unit": "Unidade"
+      },
+      "enabled": {
+        "description": "Envia uma notificação pelos seus canais de notificação.",
+        "label": "Lembrar-me desta consulta"
+      },
+      "includeDetails": {
+        "description": "Por padrão, um lembrete mostra apenas o motivo e a hora da consulta.",
+        "label": "Incluir profissional e local"
+      },
+      "noChannelsTitle": "Nenhum canal de notificação ativado",
+      "noChannelsWarning": "Nenhum canal de notificação está ativado para lembretes de consultas. Abra as configurações de notificação para ativar um.",
+      "noneSelected": "Escolha pelo menos um lembrete.",
+      "off": "Desativados",
+      "offsets": {
+        "dayOf": "No dia da consulta",
+        "daysBefore_one": "{{count}} dia antes",
+        "daysBefore_other": "{{count}} dias antes",
+        "hoursBefore_one": "{{count}} hora antes",
+        "hoursBefore_other": "{{count}} horas antes",
+        "minutesBefore_one": "{{count}} minuto antes",
+        "minutesBefore_other": "{{count}} minutos antes"
+      },
+      "openSettings": "Abrir configurações de notificação",
+      "pastVisit": "A data desta consulta já passou, por isso os lembretes não serão enviados.",
+      "problems": {
+        "duplicate": "Esse lembrete já está definido.",
+        "needsTime": "Lembretes em horas ou minutos precisam de uma hora de início.",
+        "tooFar": "Os lembretes podem ser no máximo 30 dias antes da consulta.",
+        "tooMany": "Pode definir até {{max}} lembretes."
+      },
+      "saveBeforeTest": "Guarde primeiro a consulta para enviar um lembrete de teste.",
+      "tabLabel": "Lembretes",
+      "testButton": "Enviar lembrete de teste agora",
+      "testError": "Falha ao enviar o lembrete de teste",
+      "testSuccess": "Lembrete de teste enviado",
+      "timedNote": "Os lembretes em dias são enviados às {{time}}; os lembretes em horas ou minutos contam a partir da hora de início.",
+      "units": {
+        "days": "Dias",
+        "hours": "Horas",
+        "minutes": "Minutos"
+      },
+      "when": "Quando"
     },
     "table": {
       "visitType": "Tipo de Consulta"

@@ -9,6 +9,7 @@ from app.api.v1.endpoints.record_lab_result_links import (
     register_record_lab_result_routes,
 )
 from app.api.v1.endpoints.utils import (
+    ensure_reminder_can_send,
     handle_create_with_logging,
     handle_delete_with_logging,
     handle_not_found,
@@ -17,9 +18,7 @@ from app.api.v1.endpoints.utils import (
 )
 from app.core.events.bus import get_event_bus
 from app.core.http.error_handling import (
-    BusinessLogicException,
     NotFoundException,
-    ValidationException,
     handle_database_errors,
 )
 from app.core.logging.config import get_logger
@@ -36,7 +35,6 @@ from app.schemas.medication import (
     MedicationUpdate,
 )
 from app.schemas.treatment import MedicationTreatmentResponse
-from app.services.notification_service import NotificationService
 
 router = APIRouter()
 
@@ -334,23 +332,9 @@ async def send_test_reminder(
             current_user=current_user,
         )
 
-        if not medication_obj.reminder_enabled:
-            raise BusinessLogicException(
-                message="Reminders are not enabled for this medication."
-            )
-
-        owner_user_id = medication_obj.patient.owner_user_id
-
-        if not NotificationService(db).has_enabled_route(
-            owner_user_id, "medication_reminder_due"
-        ):
-            raise ValidationException(
-                message=(
-                    "No notification channel is enabled for medication "
-                    "reminders. Open Notification Settings to enable a "
-                    "channel."
-                ),
-            )
+        owner_user_id = ensure_reminder_can_send(
+            db, medication_obj, "medication_reminder_due", "medication"
+        )
 
         event = MedicationReminderDueEvent(
             user_id=owner_user_id,
