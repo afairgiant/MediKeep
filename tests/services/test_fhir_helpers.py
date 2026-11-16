@@ -5,6 +5,8 @@ Tests for the small FHIR helpers shared by the mappers.
 import time
 from datetime import date
 
+import pytest
+
 from app.services.importers.mappers import _fhir as f
 
 
@@ -82,7 +84,6 @@ class TestAmbiguousReferences:
     ID_FORMS = (
         "Medication/m1",
         "urn:uuid:m1",
-        "#m1",
         "https://x.example/Medication/m1",
     )
 
@@ -333,13 +334,197 @@ class TestVersionedReferences:
             ("//_history/2", None),
             ("/_history/", None),
             ("_history", "_history"),
-            ("#_history", "_history"),
+            ("#_history", None),
+            ("urn:uuid:#m1", "#m1"),
             ("///", None),
         ):
             reference = {"reference": form}
             assert f.ref_id(reference) == expected, form
             index = f.BundleIndex(_entries(_named("_history", "Odd")))
             index.target("Medication", reference)
+
+    MISMATCHED = (
+        "Medication/m1/_history/2",
+        " Medication/m1/_history/2 ",
+        "https://x.example/fhir/Medication/m1/_history/2",
+    )
+
+    @staticmethod
+    def _versioned(version, name="Lisinopril"):
+        return _medication(name, meta={"versionId": version})
+
+    def test_other_version_does_not_resolve(self):
+        """Test that the entry of the id is not the target when its versionId is another one."""
+        for version in ("3", "02", "2 ", ""):
+            bundle = _entries(self._versioned(version))
+            for form in self.MISMATCHED:
+                reference = {"reference": form}
+                index = f.BundleIndex(bundle)
+                assert index.target("Medication", reference) == (None, False), form
+                assert f.resolve(bundle, "Medication", reference) is None
+
+    def test_same_version_resolves(self):
+        """Test that the entry of the id whose versionId is the one named is the target."""
+        held = self._versioned("2")
+        index = f.BundleIndex(_entries(held))
+        for form in self.MISMATCHED:
+            assert index.target("Medication", {"reference": form}) == (held, False)
+
+    @pytest.mark.parametrize(
+        "meta", [None, {}, {"versionId": None}, {"versionId": 3}, "3", ["3"], 3]
+    )
+    def test_entry_without_a_version_resolves(self, meta):
+        """Test that a missing or malformed meta.versionId is no version."""
+        held = _medication("Lisinopril", meta=meta)
+        index = f.BundleIndex(_entries(held))
+        for form in self.MISMATCHED:
+            assert index.target("Medication", {"reference": form}) == (held, False)
+
+    def test_unhashable_version_does_not_raise(self):
+        """Test that a list or object versionId is no version."""
+        for version in (["2"], {"value": "2"}, [], 2.5, True):
+            held = _medication("Lisinopril", meta={"versionId": version})
+            index = f.BundleIndex(_entries(held, _medication("Lisinopril")))
+            for form in self.MISMATCHED:
+                assert index.target("Medication", {"reference": form}) == (held, False)
+
+    def test_reference_without_a_version_resolves_to_any_version(self):
+        """Test that the versionId only counts for a reference that names one."""
+        held = self._versioned("3")
+        index = f.BundleIndex(_entries(held))
+        for form in ("Medication/m1", "urn:uuid:m1", "Medication/m1/_history/"):
+            assert index.target("Medication", {"reference": form}) == (held, False)
+
+    def test_other_version_at_the_full_url_does_not_resolve(self):
+        """Test that the entry at the reference's exact fullUrl is held to the version too."""
+        url = "https://x.example/fhir/Medication/m1/_history/2"
+        for version, resolves in (("3", False), ("2", True), (None, True)):
+            held = {**self._versioned(version), "id": "x1"}
+            index = f.BundleIndex(_entries(held, _medication("Other"), urls=(url,)))
+            expected = (held, False) if resolves else (None, False)
+            assert index.target("Medication", {"reference": url}) == expected
+
+    def test_copy_of_the_version_is_used_among_identical_copies(self):
+        """Test that of copies differing only in meta, the one of the version named is the target."""
+        second, third = self._versioned("2"), self._versioned("3")
+        plain = _medication("Lisinopril")
+        reference = {"reference": "Medication/m1/_history/2"}
+        for copies, expected in (
+            ((second, third), second),
+            ((third, second), second),
+            ((third, plain, second), second),
+            ((third, plain), plain),
+            ((plain, third), plain),
+            ((third, self._versioned("3")), None),
+            ((third, self._versioned("4")), None),
+        ):
+            index = f.BundleIndex(_entries(*copies))
+            found = index.target("Medication", reference)
+            assert found[0] is expected and found[1] is False
+            assert index.target("Medication", {"reference": "Medication/m1"}) == (
+                copies[0],
+                False,
+            )
+
+    def test_copy_of_the_version_is_used_at_a_full_url(self):
+        """Test that copies at one fullUrl are told apart by version as copies of an id are."""
+        url = "urn:uuid:m1/_history/2"
+        second = {**self._versioned("2"), "id": "x2"}
+        third = {**self._versioned("3"), "id": "x2"}
+        for copies in ((second, third), (third, second)):
+            index = f.BundleIndex(_entries(*copies, urls=(url, url)))
+            assert index.target("Medication", {"reference": url}) == (copies[0], False)
+        url = "https://x.example/Medication/x2/_history/2"
+        for copies in ((second, third), (third, second)):
+            index = f.BundleIndex(_entries(*copies, urls=(url, url)))
+            found = index.target("Medication", {"reference": url})
+            assert found[0] is second and found[1] is False
+        index = f.BundleIndex(_entries(third, urls=(url,)))
+        assert index.target("Medication", {"reference": url}) == (None, False)
+
+    def test_differing_copies_of_two_versions_stay_ambiguous(self):
+        """Test that copies with different content resolve to none, whatever their versions."""
+        bundle = _entries(self._versioned("2"), self._versioned("3", "Metformin"))
+        index = f.BundleIndex(bundle)
+        for form in self.MISMATCHED:
+            assert index.target("Medication", {"reference": form}) == (None, True)
+
+    def test_left_out_copy_of_the_version_does_not_resolve(self):
+        """Test that only a kept copy of the version named, or a kept one without a version, is the target."""
+        second, third = self._versioned("2"), self._versioned("3")
+        plain = _medication("Lisinopril")
+        form = "Medication/m1/_history/2"
+        for copies, kept, expected in (
+            ((second, third), (1,), None),
+            ((third, second), (0,), None),
+            ((third, second), (1,), second),
+            ((second, third), (0,), second),
+            ((second, plain), (1,), plain),
+            ((plain, second), (1,), second),
+            ((plain, third), (1,), None),
+            ((second, third), (), None),
+        ):
+            whole = _entries(*copies)
+            with f.indexed(_part(whole, *kept), whole) as index:
+                found = index.target("Medication", {"reference": form})
+            assert found[0] is expected and found[1] is False
+
+
+class TestFragmentReferences:
+    """Test "#id" references, which name a contained resource and no bundle entry."""
+
+    FRAGMENTS = ("#m1", " #m1 ", "#", "# ", "#Medication/m1", "##m1", "#m1/_history/2")
+
+    def test_fragment_is_not_looked_up(self):
+        """Test that a fragment has no id and no lookup keys."""
+        for form in self.FRAGMENTS:
+            reference = {"reference": form}
+            assert f.ref_id(reference) is None, form
+            assert f.lookup_keys("Medication", reference) is None, form
+
+    def test_fragment_does_not_resolve_to_an_entry(self):
+        """Test that no entry is the target, by id or by a fullUrl that is the fragment."""
+        for form in self.FRAGMENTS:
+            reference = {"reference": form}
+            for bundle in (
+                _entries(_medication("Lisinopril")),
+                _entries(_medication("Lisinopril"), urls=(form.strip(),)),
+                _entries(_medication("Lisinopril"), _medication("Metformin")),
+            ):
+                index = f.BundleIndex(bundle)
+                assert index.target("Medication", reference) == (None, False), form
+                assert f.resolve(bundle, "Medication", reference) is None, form
+
+    def test_hash_after_urn_uuid_is_part_of_the_id(self):
+        """Test that "urn:uuid:#m1" is looked up as id "#m1", so no entry with id m1 answers it."""
+        reference = {"reference": "urn:uuid:#m1"}
+        assert f.ref_id(reference) == "#m1"
+        assert f.lookup_keys("Medication", reference) == (
+            "urn:uuid:#m1",
+            ("Medication", "#m1"),
+        )
+        bundle = _entries(_medication("Lisinopril"))
+        assert f.BundleIndex(bundle).target("Medication", reference) == (None, False)
+        assert f.resolve(bundle, "Medication", reference) is None
+
+    def test_fragment_id(self):
+        """Test that the id is everything after the "#", and None for any other reference."""
+        for form, expected in (
+            ("#m1", "m1"),
+            (" #m1 ", "m1"),
+            ("#", ""),
+            ("# ", ""),
+            ("#a/b", "a/b"),
+            ("##m1", "#m1"),
+            ("# m1", " m1"),
+            ("Medication/m1", None),
+            ("urn:uuid:m1", None),
+            ("urn:uuid:#m1", None),
+            ("Medication/#m1", None),
+        ):
+            assert f.fragment_id({"reference": form}) == expected, form
+        for reference in (None, "#m1", {}, {"reference": 5}, {"reference": ["#m1"]}):
+            assert f.fragment_id(reference) is None
 
 
 def _named(key, name, **fields):

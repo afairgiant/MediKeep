@@ -1073,8 +1073,18 @@ class TestSharedMedication:
         "Medication/med-1",
         " Medication/med-1 ",
         "urn:uuid:med-1",
-        "#med-1",
         "https://x.example/Medication/med-1",
+    )
+    VERSIONED_FORMS = (
+        "Medication/med-1/_history/2",
+        "https://x.example/Medication/med-1/_history/2",
+    )
+    FRAGMENT_FORMS = (
+        "#med-1",
+        " #med-1 ",
+        "#2",
+        "#Medication/med-1",
+        "#urn:uuid:med-1",
     )
 
     def _referring(self, patient, birth, reference="Medication/med-1", **fields):
@@ -1166,6 +1176,25 @@ class TestSharedMedication:
         ]
         self._merged(jane, self._document(*self.ROBIN, "metformin"))
 
+    @pytest.mark.parametrize("reference", FRAGMENT_FORMS)
+    def test_fragment_reference_is_to_no_other_document(self, reference):
+        """Test that "#id" with no contained match refers to nothing a document holds."""
+        jane = self._referring(*self.JANE, reference)
+        assert list(_referred(jane["entry"][-1]["resource"])) == []
+        self._merged(jane, self._document(*self.ROBIN, "metformin"))
+
+    @pytest.mark.parametrize("reference", [*REFERENCE_FORMS, *VERSIONED_FORMS])
+    def test_reference_beside_a_contained_medication_is_checked(self, reference):
+        """Test that a contained Medication with the id does not answer a reference that is not "#id"."""
+        jane = self._referring(*self.JANE, reference)
+        statement = jane["entry"][-1]["resource"]
+        statement["contained"] = [
+            {"resourceType": "Medication", "id": "med-1", "code": {"text": "aspirin"}}
+        ]
+        assert ("Medication", "med-1") in list(_referred(statement))
+        self._refused(jane, self._document(*self.ROBIN, "metformin"))
+        self._merged(jane, self._document(*self.JANE, "metformin"))
+
     @pytest.mark.parametrize(
         "reference",
         [None, "", "Medication/", "urn:uuid:", "#", 5, ["Medication/med-1"], {}],
@@ -1180,11 +1209,6 @@ class TestSharedMedication:
             for contained in (None, "x", [5, {"id": ["med-1"]}]):
                 statement["contained"] = contained
                 self._merged(jane, robin)
-
-    VERSIONED_FORMS = (
-        "Medication/med-1/_history/2",
-        "https://x.example/Medication/med-1/_history/2",
-    )
 
     @pytest.mark.parametrize("reference", VERSIONED_FORMS)
     def test_versioned_reference_is_checked_by_its_id(self, reference):
@@ -1215,6 +1239,7 @@ class TestSharedMedication:
         [
             *REFERENCE_FORMS,
             *VERSIONED_FORMS,
+            *FRAGMENT_FORMS,
             "urn:uuid:a/b",
             "urn:uuid:Medication/med-1",
             "urn:uuid:med-1/_history/2",
@@ -1260,6 +1285,32 @@ class TestSharedMedication:
                 with pytest.raises(ImportFormatError):
                     _patient_birth_dates(documents)
         assert resolved == {key for kind, key in keys if key in ids}
+
+    @needs_library
+    @pytest.mark.parametrize("reference", VERSIONED_FORMS)
+    @pytest.mark.parametrize("version", ["2", "3", None, 2])
+    def test_resolved_version_is_among_the_keys_checked(self, reference, version):
+        """Test that a versioned reference resolves only to a key _referred gives, whatever the versionId."""
+        from healthrecord_bridge.fhir.bundle import merge_bundles
+
+        from app.services.importers.mappers._fhir import BundleIndex
+
+        jane = self._referring(*self.JANE, reference)
+        statement = jane["entry"][-1]["resource"]
+        robin = self._document(*self.ROBIN, "metformin")
+        robin["entry"][-1]["resource"]["meta"] = {"versionId": version}
+        other = {"resourceType": "Medication", "id": "2", "meta": {"versionId": "2"}}
+        robin["entry"].append({"resource": other})
+        for documents in ([jane, robin], [robin, jane]):
+            merged = merge_bundles(documents)
+            found, ambiguous = BundleIndex(merged).target(
+                "Medication", statement["medicationReference"]
+            )
+            assert not ambiguous
+            assert (found is None) is (version == "3")
+            if found is not None:
+                assert ("Medication", found["id"]) in list(_referred(statement))
+            self._refused(*documents)
 
     @staticmethod
     def _merged_once(documents, keys, robin):

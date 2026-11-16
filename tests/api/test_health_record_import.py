@@ -2490,6 +2490,210 @@ class TestSharedMedicationIds:
             "Lisinopril"
         ]
 
+    def _both(self, client, patient, headers, *entries):
+        """The preview and execute bodies for a bundle of the patient and the entries."""
+        data = _people_bundle(
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+            *entries,
+        )
+        bodies = []
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(url, files=_upload(data), headers=headers)
+            assert response.status_code == 200, response.text
+            bodies.append(response.json())
+        return bodies
+
+    def _imported(self, db_session, patient, bodies, name):
+        """Assert that preview and execute count one medication and the row has the name."""
+        preview, executed = bodies
+        assert preview["counts"]["medication"]["new"] == 1
+        assert executed["counts"]["medication"]["created"] == 1
+        for body in bodies:
+            assert not any("ms-b" in warning for warning in body["warnings"])
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            name
+        ]
+        assert len(_provenance(db_session, patient.id)) == 1
+
+    def _not_imported(self, db_session, patient, bodies):
+        """Assert that preview and execute count nothing, warn of nothing and store nothing."""
+        for body in bodies:
+            assert body["counts"] == {}
+            assert not any("ms-b" in warning for warning in body["warnings"])
+        assert _medications(db_session, patient.id) == []
+        assert _provenance(db_session, patient.id) == []
+
+    VERSIONED = (
+        "Medication/med-1/_history/2",
+        "https://x.example/fhir/Medication/med-1/_history/2",
+    )
+
+    @pytest.mark.parametrize("reference", VERSIONED)
+    def test_other_version_is_not_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        reference,
+    ):
+        """Test that a reference to version 2 does not take the drug of the Medication's version 3."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta={"versionId": "3"})},
+            {"resource": self._statement("ms-b", "b", reference=reference)},
+        )
+        self._not_imported(db_session, patient, bodies)
+
+    def test_other_version_is_imported_under_the_display(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the statement's own display names the drug when the version is another one."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta={"versionId": "3"})},
+            {
+                "resource": self._statement(
+                    "ms-b", "b", reference=self.VERSIONED[0], display="Metformin"
+                )
+            },
+        )
+        self._imported(db_session, patient, bodies, "Metformin")
+
+    @pytest.mark.parametrize("reference", VERSIONED)
+    @pytest.mark.parametrize("meta", [{"versionId": "2"}, {}, {"versionId": 3}])
+    def test_same_or_no_version_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        reference,
+        meta,
+    ):
+        """Test that the Medication of the version named, or of no version, names the drug."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta=meta)},
+            {"resource": self._statement("ms-b", "b", reference=reference)},
+        )
+        self._imported(db_session, patient, bodies, "Lisinopril")
+
+    def test_copy_of_the_version_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that identical copies of versions 3 and 2 name the drug for a reference to version 2."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta={"versionId": "3"})},
+            {"resource": self._medication("Lisinopril", meta={"versionId": "2"})},
+            {"resource": self._statement("ms-b", "b", reference=self.VERSIONED[0])},
+        )
+        self._imported(db_session, patient, bodies, "Lisinopril")
+
+    def _holding(self, reference: str, **fields) -> dict:
+        """Statement ms-b with a contained Medication med-1 named Aspirin."""
+        statement = self._statement("ms-b", "b", reference=reference, **fields)
+        statement["contained"] = [self._medication("Aspirin")]
+        return statement
+
+    @pytest.mark.parametrize(
+        "reference",
+        ["Medication/med-1", "urn:uuid:med-1", "Medication/med-1/_history/2"],
+    )
+    def test_reference_to_the_bundle_is_not_answered_by_a_contained_medication(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        reference,
+    ):
+        """Test that Medication/med-1 takes the bundle's med-1, not the contained one."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._holding(reference)},
+        )
+        self._imported(db_session, patient, bodies, "Lisinopril")
+
+    def test_fragment_reference_is_answered_by_the_contained_medication(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that #med-1 takes the contained med-1, not the bundle's."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._holding("#med-1")},
+        )
+        self._imported(db_session, patient, bodies, "Aspirin")
+
+    def test_fragment_reference_to_nothing_contained_is_not_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that #x takes neither the bundle's Medication x nor the contained med-1."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": {**self._medication("Lisinopril"), "id": "x"}},
+            {"resource": self._holding("#x")},
+        )
+        self._not_imported(db_session, patient, bodies)
+
+    def test_fragment_reference_to_nothing_contained_is_imported_under_the_display(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the statement's own display names the drug when #x is not contained."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": {**self._medication("Lisinopril"), "id": "x"}},
+            {"resource": self._holding("#x", display="Metformin")},
+        )
+        self._imported(db_session, patient, bodies, "Metformin")
+
     def test_reference_display_is_imported(
         self,
         client: TestClient,

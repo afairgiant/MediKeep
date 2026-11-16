@@ -134,19 +134,19 @@ HASH_FIELDS = (
 
 
 def _medication_reference(resource: dict) -> Tuple[Optional[dict], Optional[dict]]:
-    """(The contained Medication that medicationReference points to, else None; the reference to look up in the bundle, else None)."""
+    """(The contained resource a "#id" medicationReference points to, else None; a medicationReference of another form with an id, to look up in the bundle, else None)."""
     reference = f.obj(resource.get("medicationReference"))
-    target_id = f.ref_id(reference)
-    if target_id is None:
-        return None, None
+    fragment = f.fragment_id(reference)
+    if fragment is None:
+        return None, reference if f.ref_id(reference) is not None else None
     for contained in f.objects(resource.get("contained")):
-        if f.resource_id(contained) == target_id:
+        if f.resource_id(contained) == fragment:
             return contained, None
-    return None, reference
+    return None, None
 
 
 def _medication(resource: dict, bundle: dict) -> Tuple[dict, bool]:
-    """(The contained or bundled Medication that medicationReference points to or {}, True when the bundle's copies of it differ)."""
+    """(The contained resource or bundled Medication that medicationReference points to or {}, True when the bundle's copies of it differ)."""
     contained, reference = _medication_reference(resource)
     if reference is None:
         return contained or {}, False
@@ -329,7 +329,7 @@ class _MedicationMapper(BaseResourceMapper):
     DOSAGE_FIELD = "dosage"
 
     def bundle_references(self, resource: dict) -> List[Tuple[str, dict]]:
-        """The medicationReference, unless a contained Medication answers it."""
+        """The medicationReference, unless it is a "#id" one or has no id."""
         reference = _medication_reference(resource)[1]
         return [("Medication", reference)] if reference is not None else []
 

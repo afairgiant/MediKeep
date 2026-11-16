@@ -496,7 +496,54 @@ class TestAmbiguousMedicationReference:
             ("Medication", {"reference": reference})
         ]
         statement["contained"] = [self._medication("1", "Aspirin")]
-        assert self.mapper.bundle_references(statement) == []
+        assert self.mapper.bundle_references(statement) == [
+            ("Medication", {"reference": reference})
+        ]
+
+    VERSIONED = (
+        "Medication/med-1/_history/2",
+        "https://x.example/Medication/med-1/_history/2",
+    )
+
+    @pytest.mark.parametrize("reference", VERSIONED)
+    def test_other_version_is_a_missing_target(self, reference):
+        """Test that a Medication of another versionId does not name the drug."""
+        statement = self._statement(reference)
+        held = self._medication("314076", "Lisinopril", meta={"versionId": "3"})
+        bundle = _bundle(held, statement)
+        assert self.mapper.map(statement, bundle) is None
+        with f.indexed(bundle):
+            assert self.mapper.map(statement, bundle) is None
+        statement["medicationReference"]["display"] = "Metformin"
+        mapped = self.mapper.map(statement, bundle)
+        missing = self.mapper.map(statement, _bundle(statement))
+        assert mapped.data == missing.data
+        assert mapped.data["medication_name"] == "Metformin"
+        assert mapped.source_codes == missing.source_codes == {}
+        assert mapped.warnings == missing.warnings
+
+    @pytest.mark.parametrize("reference", VERSIONED)
+    @pytest.mark.parametrize("meta", [{"versionId": "2"}, {}, {"versionId": 3}, "3"])
+    def test_same_or_no_version_names_the_drug(self, reference, meta):
+        """Test that a Medication of the version named, or of none, names the drug."""
+        statement = self._statement(reference)
+        held = self._medication("314076", "Lisinopril", meta=meta)
+        mapped = self.mapper.map(statement, _bundle(held, statement))
+        assert mapped.data["medication_name"] == "Lisinopril"
+        assert mapped.source_codes == {"rxnorm": "314076"}
+
+    def test_copy_of_the_version_names_the_drug(self):
+        """Test that identical copies of two versions name the drug only when one is the version named."""
+        statement = self._statement("Medication/med-1/_history/2")
+        copies = [
+            self._medication("314076", "Lisinopril", meta={"versionId": version})
+            for version in ("3", "2", "4")
+        ]
+        mapped = self.mapper.map(statement, _bundle(*copies, statement))
+        assert mapped.data["medication_name"] == "Lisinopril"
+        assert (
+            self.mapper.map(statement, _bundle(copies[0], copies[2], statement)) is None
+        )
 
     def test_reference_display_names_the_drug_as_for_a_missing_target(self):
         """Test that the statement's own display is used, as when the reference is not found."""
@@ -545,6 +592,86 @@ class TestAmbiguousMedicationReference:
         assert self.mapper.map(statement, bundle) == Skipped(self.AMBIGUOUS)
 
 
+class TestContainedMedicationReference:
+    """Test which of a contained and a bundled Medication a medicationReference takes."""
+
+    mapper = MedicationStatementMapper()
+
+    @staticmethod
+    def _medication(key, name):
+        return {"resourceType": "Medication", "id": key, "code": {"text": name}}
+
+    def _statement(self, reference, *contained, display=None):
+        resource = _statement(medicationReference={"reference": reference})
+        del resource["medicationCodeableConcept"]
+        if contained:
+            resource["contained"] = list(contained)
+        if display:
+            resource["medicationReference"]["display"] = display
+        return resource
+
+    def _name(self, statement, *held):
+        mapped = self.mapper.map(statement, _bundle(*held, statement))
+        return mapped and mapped.data["medication_name"]
+
+    @pytest.mark.parametrize(
+        "reference",
+        [
+            "Medication/med-1",
+            " Medication/med-1 ",
+            "urn:uuid:med-1",
+            "https://x.example/Medication/med-1",
+            "Medication/med-1/_history/2",
+        ],
+    )
+    def test_other_reference_takes_the_bundled_medication(self, reference):
+        """Test that a contained Medication with the id does not answer a reference that is not "#id"."""
+        aspirin = self._medication("med-1", "Aspirin")
+        lisinopril = self._medication("med-1", "Lisinopril")
+        statement = self._statement(reference, aspirin)
+        assert self._name(statement, lisinopril) == "Lisinopril"
+        assert self._name(statement) is None
+
+    @pytest.mark.parametrize("reference", ["#med-1", " #med-1 "])
+    def test_fragment_takes_the_contained_medication(self, reference):
+        """Test that "#id" is answered by the contained Medication, not the bundled one."""
+        aspirin = self._medication("med-1", "Aspirin")
+        lisinopril = self._medication("med-1", "Lisinopril")
+        statement = self._statement(reference, aspirin)
+        assert self._name(statement, lisinopril) == "Aspirin"
+        assert self._name(statement) == "Aspirin"
+
+    @pytest.mark.parametrize(
+        "reference", ["#y", "#", "# ", "##x", "#Medication/x", "#a/x", "# x"]
+    )
+    def test_fragment_without_a_contained_match_is_a_missing_target(self, reference):
+        """Test that a dangling "#id" takes no bundled Medication, nor a contained one whose id is only part of it, and falls back to the display."""
+        keys = ("x", "y", "med-1", "")
+        held = [self._medication(key, "Lisinopril") for key in keys]
+        aspirin = self._medication("med-1", "Aspirin")
+        near = self._medication("x", "Warfarin")
+        for contained in ((), (aspirin, near)):
+            statement = self._statement(reference, *contained)
+            assert self._name(statement, *held) is None
+            statement = self._statement(reference, *contained, display="Metformin")
+            assert self._name(statement, *held) == "Metformin"
+
+    def test_hash_after_urn_uuid_is_a_missing_target(self):
+        """Test that "urn:uuid:#m1" takes neither the bundled nor the contained Medication m1."""
+        held = self._medication("m1", "Drug")
+        contained = self._medication("m1", "Aspirin")
+        statement = self._statement("urn:uuid:#m1", contained)
+        assert self._name(statement, held) is None
+        statement = self._statement("urn:uuid:#m1", contained, display="Metformin")
+        assert self._name(statement, held) == "Metformin"
+
+    def test_fragment_takes_the_first_contained_resource_of_the_id(self):
+        """Test that the first contained resource with the id answers, whatever its type."""
+        first = {"resourceType": "Substance", "id": "x", "code": {"text": "First"}}
+        statement = self._statement("#x", first, self._medication("x", "Second"))
+        assert self._name(statement) == "First"
+
+
 class TestBundleReferences:
     """Test what the mappers say a resource looks up in the bundle."""
 
@@ -574,6 +701,32 @@ class TestBundleReferences:
         contained = [{"resourceType": "Medication", "id": "med-1"}]
         statement = self._statement({"reference": "#med-1"}, contained=contained)
         assert resource_mapper_registry.bundle_references(statement) == []
+
+    @pytest.mark.parametrize(
+        "form",
+        [
+            "Medication/med-1",
+            "urn:uuid:med-1",
+            "https://x.example/Medication/med-1",
+            "Medication/med-1/_history/2",
+        ],
+    )
+    def test_other_reference_is_looked_up_beside_a_contained_medication(self, form):
+        """Test that only a "#id" reference is answered by a contained Medication."""
+        contained = [{"resourceType": "Medication", "id": "med-1"}]
+        reference = {"reference": form}
+        statement = self._statement(reference, contained=contained)
+        assert resource_mapper_registry.bundle_references(statement) == [
+            ("Medication", reference)
+        ]
+
+    @pytest.mark.parametrize("form", ["#med-1", "#x", "#", "# ", "#Medication/med-1"])
+    def test_fragment_is_never_looked_up(self, form):
+        """Test that a "#id" reference is left out with or without a contained match."""
+        contained = [{"resourceType": "Medication", "id": "med-1"}]
+        for fields in ({}, {"contained": contained}):
+            statement = self._statement({"reference": form}, **fields)
+            assert resource_mapper_registry.bundle_references(statement) == []
 
     def test_resource_that_reads_no_other_has_no_references(self):
         """Test that other mappers, unmapped types and malformed values give none."""
