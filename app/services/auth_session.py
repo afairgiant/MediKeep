@@ -29,6 +29,8 @@ from app.services.patient_management import PatientManagementService
 
 logger = get_logger(__name__, "app")
 
+BEARER_TOKEN_TYPE = "bearer"  # nosec B105 # OAuth token type, not a credential
+
 _TOKEN_ROLES = ("admin", "user", "guest")
 
 
@@ -326,7 +328,7 @@ def complete_login(
 
     body = {
         "access_token": access_token,
-        "token_type": "bearer",  # nosec B105 # dict key with a boolean/token-type literal, not a credential
+        "token_type": BEARER_TOKEN_TYPE,
         "session_timeout_minutes": session_timeout_minutes,
         "must_change_password": bool(user.must_change_password),
         **(extra_body or {}),

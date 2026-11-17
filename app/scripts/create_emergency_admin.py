@@ -64,6 +64,8 @@ except ImportError as e:
     sys.exit(1)
 
 
+MUST_CHANGE_PASSWORD_KEY = "must_change_password"  # nosec B105 # metadata field name
+
 logger = get_logger(__name__, "security")
 
 
@@ -286,7 +288,7 @@ def create_emergency_admin(
                 metadata={
                     "source": "emergency_admin_script",
                     "role": "admin",
-                    "must_change_password": True,  # nosec B105 # dict key with a boolean/token-type literal, not a credential
+                    MUST_CHANGE_PASSWORD_KEY: True,
                     "admin_count_before": admin_count,
                     "force": force,
                 },
@@ -467,7 +469,7 @@ def main():
     # Execute
     success = create_emergency_admin(
         username=args.username,
-        password=password if password is not None else "",
+        password=password,
         force=args.force,
         promote=args.promote,
     )

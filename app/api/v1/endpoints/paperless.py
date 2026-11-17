@@ -59,6 +59,9 @@ from app.services.paperless_service import (
 from app.services.paperless_task_status import extract_task, parse_task
 from app.services.patient_access import PatientAccessService
 
+PAPERLESS_HAS_TOKEN = "paperless_has_token"  # nosec B105 # response field name
+PAPRA_HAS_TOKEN = "papra_has_token"  # nosec B105 # response field name
+
 logger = get_logger(__name__)
 router = APIRouter()
 
@@ -690,7 +693,7 @@ async def get_paperless_settings(
             return {
                 "paperless_enabled": False,
                 "paperless_url": "",
-                "paperless_has_token": False,  # nosec B105 # dict key with a boolean/token-type literal, not a credential
+                PAPERLESS_HAS_TOKEN: False,
                 "paperless_has_credentials": False,
                 "paperless_connection_verified": False,
                 "paperless_auth_method": DEFAULT_AUTH_METHOD,
@@ -699,7 +702,7 @@ async def get_paperless_settings(
                 "paperless_sync_tags": True,
                 "papra_enabled": False,
                 "papra_url": "",
-                "papra_has_token": False,  # nosec B105 # dict key with a boolean/token-type literal, not a credential
+                PAPRA_HAS_TOKEN: False,
                 "papra_connection_verified": False,
                 "papra_organization_id": "",
             }

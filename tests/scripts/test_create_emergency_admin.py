@@ -6,6 +6,9 @@ got demoted" scenario, plus regression coverage for existing create-path
 behavior.
 """
 
+import sys
+
+import pytest
 from sqlalchemy.orm import Session
 
 from app.crud.user import user as user_crud
@@ -200,3 +203,28 @@ class TestActivityLogging:
         assert log_row.event_metadata.get("source") == "emergency_admin_script"
         assert log_row.event_metadata.get("role") == "admin"
         assert "must_change_password" in log_row.event_metadata
+
+
+def test_cli_deleted_promotion_target_does_not_create_passwordless_admin(
+    db_session, test_user, monkeypatch
+):
+    from app.scripts import create_emergency_admin as recovery
+
+    db_session.commit()
+
+    def peek_then_delete(*_args):
+        target = db_session.query(User).filter(User.id == test_user.id).one()
+        db_session.delete(target)
+        db_session.commit()
+        return recovery.PLAN_PROMOTE, 1, 0, target
+
+    monkeypatch.setattr(recovery, "peek_system_state", peek_then_delete)
+    monkeypatch.setattr(recovery, "check_database_connection", lambda: True)
+    monkeypatch.setattr(recovery, "_print_header", lambda *_args: None)
+    monkeypatch.setattr(
+        sys, "argv", ["recovery", "--username", test_user.username, "--force"]
+    )
+    with pytest.raises(SystemExit) as result:
+        recovery.main()
+    assert result.value.code == 1
+    assert db_session.query(User).count() == 0
