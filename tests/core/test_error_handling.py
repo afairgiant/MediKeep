@@ -7,7 +7,7 @@ the handler and to_response_model logic are caught.
 """
 
 import pytest
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
@@ -29,6 +29,11 @@ from app.core.http.response_models import (
     ExceptionCode,
     ExceptionCodeDefinition,
     ExceptionStatus,
+)
+from tests.utils.log_output import (
+    persisted_causes,
+    persisted_text,
+    records_with_event,
 )
 
 # --- Unit tests for APIException and to_response_model ---
@@ -157,6 +162,9 @@ class TestMedicalRecordsAPIExceptionHeaders:
 
 # --- Integration tests: exception handler returns correct JSON payload ---
 
+SENSITIVE_INPUT = "patient-entered-value"
+BODY_BUFFER_FAILED = "request_body_buffer_failed"
+
 
 def _create_test_app():
     """Create a minimal FastAPI app with error handling for testing."""
@@ -189,6 +197,21 @@ def _create_test_app():
             message="Token expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    @test_app.get("/raise-http-exception")
+    def raise_http():
+        raise HTTPException(status_code=409, detail="App conflict")
+
+    @test_app.get("/raise-chained-http-exception")
+    def raise_chained():
+        try:
+            raise ValueError(f"input_value={SENSITIVE_INPUT!r}")
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail="Validation failed") from e
+
+    @test_app.post("/upload")
+    async def upload(file: UploadFile = File(...)):
+        return {"size": len(await file.read())}
 
     return test_app
 
@@ -257,6 +280,67 @@ class TestErrorHandlerIntegration:
             "detail",
         }
         assert required_fields == set(body.keys())
+
+    def test_app_http_exception_uses_standard_format(self, error_client):
+        resp = error_client.get("/raise-http-exception")
+        assert resp.status_code == 409
+
+        body = resp.json()
+        assert body["error_code"] == "CONF-409"
+        assert body["message"] == "App conflict"
+
+    def test_framework_405_keeps_default_response_and_is_not_logged(
+        self, error_client, caplog
+    ):
+        with caplog.at_level("WARNING"):
+            resp = error_client.post("/raise-not-found")
+
+        assert resp.status_code == 405
+        assert resp.json() == {"detail": "Method Not Allowed"}
+        assert not records_with_event(caplog, "http_exception")
+
+    def test_chained_http_exception_does_not_log_cause(self, error_client, caplog):
+        with caplog.at_level("WARNING"):
+            resp = error_client.get("/raise-chained-http-exception")
+
+        assert resp.status_code == 422
+        assert not records_with_event(caplog, BODY_BUFFER_FAILED)
+        assert SENSITIVE_INPUT not in persisted_text(caplog)
+
+
+class TestUploadWithUnwritableTempDir:
+    """Regression for #1255: large multipart parts spool to the temp dir."""
+
+    def test_small_upload_stays_in_memory(self, error_client, unwritable_tempdir):
+        resp = error_client.post("/upload", files={"file": ("a.bin", b"x" * 500_000)})
+        assert resp.status_code == 200
+        assert resp.json() == {"size": 500_000}
+
+    def test_large_upload_is_server_error_with_logged_cause(
+        self, error_client, unwritable_tempdir, caplog
+    ):
+        with caplog.at_level("ERROR"):
+            resp = error_client.post(
+                "/upload", files={"file": ("a.bin", b"x" * 2_000_000)}
+            )
+
+        assert resp.status_code == 500
+        assert resp.json()["error_code"] == "ISE-500"
+
+        assert len(records_with_event(caplog, BODY_BUFFER_FAILED)) == 1
+        assert any("FileNotFoundError" in c for c in persisted_causes(caplog))
+        assert unwritable_tempdir.parent.name not in persisted_text(caplog)
+
+    def test_malformed_multipart_stays_client_error(self, error_client, caplog):
+        with caplog.at_level("ERROR"):
+            resp = error_client.post(
+                "/upload",
+                content=b"--x\r\nnot a valid part",
+                headers={"content-type": "multipart/form-data; boundary=x"},
+            )
+
+        assert 400 <= resp.status_code < 500
+        assert not records_with_event(caplog, BODY_BUFFER_FAILED)
 
 
 # --- Unit tests for handle_database_errors dialect handling ---

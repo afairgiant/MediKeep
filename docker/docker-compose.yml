@@ -36,6 +36,10 @@ services:
     #   context: ..
     #   dockerfile: docker/Dockerfile
     container_name: medikeep-app
+    # Read-only root: large uploads, backups and OCR still need a writable /tmp.
+    # read_only: true
+    # tmpfs:
+    #   - /tmp
     ports:
       - ${APP_PORT:-8005}:8000 # one port serves both the React app and the API
     environment:
