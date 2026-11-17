@@ -64,12 +64,13 @@ DB_USER = encode_url_credential(_DB_USER_RAW)
 DB_PASS = encode_url_credential(_DB_PASS_RAW)
 
 
+MIN_SECRET_KEY_LENGTH = 32
+
 _KNOWN_INSECURE_SECRETS = [
     "your_default_secret_key",
     "your-secret-key-here",
     "change-me",
     "secret",
-    "",
 ]
 
 
@@ -79,22 +80,34 @@ def _get_secret_key() -> tuple[str, bool]:
     Returns (key, whether it was generated for this process).
 
     Called once at module import time. If the configured key is missing,
-    empty, or matches a known insecure default, a random key is generated
-    for this process. JWT tokens and data/configs encrypted with keys
-    derived from SECRET_KEY will not survive restarts until a real,
-    stable SECRET_KEY is configured.
+    empty, matches a known insecure default, or is shorter than
+    MIN_SECRET_KEY_LENGTH, a random key is generated for this process.
+    JWT tokens and data/configs encrypted with keys derived from
+    SECRET_KEY will not survive restarts until a real, stable SECRET_KEY
+    is configured.
     """
     key = get_secret("SECRET_KEY", "")
-    if key in _KNOWN_INSECURE_SECRETS or len(key) < 32:
-        logger = logging.getLogger("app.core.config")
-        logger.warning(
-            "SECRET_KEY is not configured or uses an insecure default. "
-            "A random key has been generated for this process only. "
-            "Set a stable SECRET_KEY in your environment so JWT tokens "
-            "and encrypted data/configs remain valid across restarts."
+    if not key:
+        reason = "SECRET_KEY is not set."
+    elif key in _KNOWN_INSECURE_SECRETS:
+        reason = "SECRET_KEY uses a known insecure default value."
+    elif len(key) < MIN_SECRET_KEY_LENGTH:
+        reason = (
+            f"SECRET_KEY is shorter than the {MIN_SECRET_KEY_LENGTH}-character minimum."
         )
-        return secrets.token_urlsafe(64), True
-    return key, False
+    else:
+        return key, False
+
+    logger = logging.getLogger("app.core.config")
+    logger.warning(
+        "%s A random key has been generated for this process only. "
+        "Set a stable SECRET_KEY of at least %d characters in your environment "
+        "so JWT tokens and encrypted data/configs remain valid across restarts. "
+        'To generate one: python -c "import secrets; print(secrets.token_urlsafe(64))"',
+        reason,
+        MIN_SECRET_KEY_LENGTH,
+    )
+    return secrets.token_urlsafe(64), True
 
 
 _resolved_secret_key, _secret_key_is_ephemeral = _get_secret_key()
