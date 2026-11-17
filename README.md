@@ -207,7 +207,7 @@ DB_PASSWORD=your_secure_database_password_here #Change me
 # Application port
 APP_PORT=8005
 
-# Application Security Key (REQUIRED - sessions are ephemeral without this)
+# Application Security Key (REQUIRED, minimum 32 characters - sessions are ephemeral without this)
 SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
 
 TZ=America/New_York
