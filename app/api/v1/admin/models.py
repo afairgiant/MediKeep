@@ -90,6 +90,7 @@ from app.models.models import (
     User,
     Vitals,
 )
+from app.services.user_deletion_service import UserDeletionService
 from app.schemas.allergy import AllergyCreate
 from app.schemas.condition import ConditionCreate
 from app.schemas.emergency_contact import EmergencyContactCreate
@@ -1727,7 +1728,8 @@ def delete_model_record(
                 detail=f"{model_name} record with id {record_id} not found",
             )
 
-        # Special protection for users - prevent deleting the last user
+        current_user_id = getattr(current_user, "id", None)
+
         if model_name == "user":
             total_users = db.query(User).count()
             if total_users <= 1:
@@ -1736,14 +1738,12 @@ def delete_model_record(
                     detail="Cannot delete the last remaining user in the system",
                 )
 
-            # Prevent self-deletion
             if hasattr(record, "id") and record.id == current_user.id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Cannot delete your own user account",
                 )
 
-            # Also check if we're trying to delete the last admin user
             if (
                 hasattr(record, "role")
                 and record.role
@@ -1764,68 +1764,30 @@ def delete_model_record(
                         detail="Cannot delete the last remaining admin user in the system",
                     )
 
-                    # Handle cascading deletion of patient and medical data
-            # Note: SQLAlchemy cascade="all, delete-orphan" relationships automatically
-            # handle deletion of all medical data when patient is deleted
-            from app.crud.patient import patient as patient_crud
-
-            user_patient = patient_crud.get_by_user_id(db, user_id=record.id)
-            if user_patient:
-                # Get the patient ID as an integer
-                patient_id = (
-                    int(user_patient.id) if user_patient.id is not None else None
+            if current_user_id is not None:
+                safe_log_activity(
+                    db=db,
+                    action=ActionType.DELETED,
+                    entity_type=model_name,
+                    entity_obj=record,
+                    user_id=current_user_id,
+                    commit=False,
                 )
 
-                if patient_id is not None:
-                    # Preserve audit trail by nullifying patient_id in activity logs
-                    db.query(ActivityLog).filter(
-                        ActivityLog.patient_id == patient_id
-                    ).update({"patient_id": None}, synchronize_session=False)
+            UserDeletionService().delete_user_account(db, user_id=record_id)
+            db.commit()
+        else:
+            if current_user_id is not None:
+                safe_log_activity(
+                    db=db,
+                    action=ActionType.DELETED,
+                    entity_type=model_name,
+                    entity_obj=record,
+                    user_id=current_user_id,
+                    commit=False,
+                )
 
-                    # Clear active_patient_id references before deleting the patient.
-                    # users.active_patient_id has no ON DELETE action, so leaving a
-                    # reference in place makes the patient delete fail with a
-                    # foreign key violation (#1171).
-                    db.query(User).filter(User.active_patient_id == patient_id).update(
-                        {"active_patient_id": None}, synchronize_session=False
-                    )
-
-                    # Delete patient record (automatically cascades to all medical
-                    # data). commit=False: the patient delete is flushed into the
-                    # request's transaction but not committed, so the user delete
-                    # below and this delete land (or roll back) together. Without
-                    # it, a failure in the user branch leaves the patient and all
-                    # medical data permanently deleted while the user row survives
-                    # (CodeRabbit #1239).
-                    patient_crud.delete(db, id=patient_id, commit=False)
-
-        if model_name == "user" and record_id is not None:
-            # activity_logs.user_id has no ON DELETE action and the column is
-            # nullable, so the audit trail is preserved by detaching it from the
-            # user being removed. This must run for every user delete, not only
-            # those that own a patient (#1171 follow-up, CodeRabbit #1239).
-            db.query(ActivityLog).filter(ActivityLog.user_id == record_id).update(
-                {"user_id": None}, synchronize_session=False
-            )
-
-        # Log the deletion BEFORE actually deleting (to preserve record details).
-        # commit=False keeps the audit entry in the same transaction as the
-        # deletes: a committing audit write here would also commit the patient
-        # delete above, and a failed user delete would then leave the patient
-        # and its medical records gone (CodeRabbit #1239).
-        current_user_id = getattr(current_user, "id", None)
-        if current_user_id is not None:
-            safe_log_activity(
-                db=db,
-                action=ActionType.DELETED,
-                entity_type=model_name,
-                entity_obj=record,
-                user_id=current_user_id,
-                commit=False,
-            )
-
-        # Delete the record
-        crud_instance.delete(db, id=record_id)
+            crud_instance.delete(db, id=record_id)
 
         return {
             "message": f"{model_name} record {record_id} deleted successfully",

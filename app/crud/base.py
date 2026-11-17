@@ -734,13 +734,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             raise
 
     def delete(self, db: Session, *, id: int, commit: bool = True) -> ModelType:
-        """Delete a record by ID.
-
-        Pass ``commit=False`` when the delete is one step of a larger
-        operation: the row is flushed but the caller owns the transaction, so
-        a later failure in the same request rolls the whole unit of work back
-        instead of leaving a half-deleted aggregate behind.
-        """
+        """Delete and flush a record; commit only when requested."""
         record_id = str(id)
 
         self.logger.info(
@@ -802,7 +796,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             return obj
 
         except IntegrityError as e:
-            db.rollback()
+            if commit:
+                db.rollback()
             error_msg = str(e.orig)
             self.logger.error(
                 f"Integrity error deleting {self.model_name} {record_id}: {error_msg}",
@@ -822,7 +817,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 )
             raise
         except Exception as e:
-            db.rollback()
+            if commit:
+                db.rollback()
             self.logger.error(
                 f"Unexpected error deleting {self.model_name} record",
                 extra={
