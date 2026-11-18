@@ -316,6 +316,7 @@
     "clearFilter": "Filter wissen",
     "descriptions": {
       "allergy": "Patiëntallergieën en reacties",
+      "blood_donation": "Bloed-, plasma- en trombocytendonaties met keuringswaarden",
       "condition": "Medische aandoeningen en diagnoses",
       "emergency_contact": "Noodcontactinformatie voor patiënten",
       "encounter": "Patiëntbezoeken en afspraken",
@@ -346,8 +347,20 @@
       "vitals": "Bloeddruk, hartslag, temperatuur"
     },
     "displayNames": {
+      "encounter": "Consulten",
+      "entity_file": "Bijlagen",
+      "family_condition": "Familieaandoeningen",
+      "family_history_share": "Gedeelde familiegeschiedenis",
+      "family_member": "Familieleden",
+      "injury_type": "Letseltypen",
+      "invitation": "Uitnodigingen",
+      "lab_result_file": "Labbestanden",
       "medical_specialty": "Medische specialismen",
-      "practice": "Praktijken"
+      "patient": "Patiënten",
+      "patient_share": "Gedeelde patiënten",
+      "practice": "Praktijken",
+      "symptom_occurrence": "Symptoomepisodes",
+      "user": "Gebruikers"
     },
     "fallbackWarning": "Kon modellen niet laden van server. Ingebouwde modellenlijst wordt getoond.",
     "filterAriaLabel": "Datamodellen filteren",

@@ -316,6 +316,7 @@
     "clearFilter": "Effacer les filtres",
     "descriptions": {
       "allergy": "Allergies et réactions du patient",
+      "blood_donation": "Dons de sang, de plasma et de plaquettes avec valeurs de pré-examen",
       "condition": "Conditions médicales et diagnostics",
       "emergency_contact": "Informations de contact d'urgence pour les patients",
       "encounter": "Visites passées et prévues des patients",
@@ -346,8 +347,20 @@
       "vitals": "Tension artérielle, fréquence cardiaque, température"
     },
     "displayNames": {
+      "encounter": "Consultations",
+      "entity_file": "Fichiers joints",
+      "family_condition": "Affections familiales",
+      "family_history_share": "Partages d'antécédents familiaux",
+      "family_member": "Membres de la famille",
+      "injury_type": "Types de blessures",
+      "invitation": "Invitations",
+      "lab_result_file": "Fichiers de laboratoire",
       "medical_specialty": "Spécialités médicales",
-      "practice": "Etablissements"
+      "patient": "Patients",
+      "patient_share": "Partages de patients",
+      "practice": "Etablissements",
+      "symptom_occurrence": "Occurrences de symptômes",
+      "user": "Utilisateurs"
     },
     "fallbackWarning": "Impossible de charger les modèles depuis le serveur. Affichage de la liste de modèles intégrée.",
     "filterAriaLabel": "Filtrer les modèles de données",

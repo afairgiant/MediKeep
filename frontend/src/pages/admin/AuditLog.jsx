@@ -93,6 +93,7 @@ const LINKABLE_ENTITY_TYPES = new Set([
   'symptom',
   'symptom_occurrence',
   'medical_equipment',
+  'blood_donation',
   'patient_share',
   'invitation',
   'family_history_share',

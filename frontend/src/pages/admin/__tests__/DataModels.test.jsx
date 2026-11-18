@@ -82,6 +82,7 @@ vi.mock('../../../services/api/adminApi', () => ({
         verbose_name_plural: 'Symptom Occurrences',
       },
       { name: 'medical_equipment', verbose_name_plural: 'Medical Equipment' },
+      { name: 'blood_donation', verbose_name_plural: 'Blood Donations' },
     ]),
   },
 }));
@@ -95,6 +96,7 @@ vi.mock('../../../services/logger', () => ({
 // ─── Component under test (imported after mocks) ─────────────────────────────
 
 import DataModels from '../DataModels';
+import { adminApiService } from '../../../services/api/adminApi';
 
 // ─── Render helper ────────────────────────────────────────────────────────────
 
@@ -152,6 +154,24 @@ describe('DataModels', () => {
     test('renders Medications model card', async () => {
       await renderComponent();
       expect(screen.getByText('Medications')).toBeInTheDocument();
+    });
+
+    test('titles cards from model names when the API returns strings', async () => {
+      adminApiService.getAvailableModels.mockResolvedValueOnce([
+        'user',
+        'medical_equipment',
+        'blood_donation',
+      ]);
+      await renderComponent();
+      expect(screen.getByText('Medical Equipment')).toBeInTheDocument();
+      expect(screen.queryByText('blood_donation')).not.toBeInTheDocument();
+      const card = screen
+        .getByText('Blood Donations')
+        .closest('[role="button"]');
+      expect(card).toHaveTextContent('Medical Records');
+      expect(card).toHaveTextContent(
+        'Blood, plasma, and platelet donations with screening values'
+      );
     });
 
     test('renders all eight category headers', async () => {

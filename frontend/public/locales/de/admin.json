@@ -316,6 +316,7 @@
     "clearFilter": "Filter löschen",
     "descriptions": {
       "allergy": "Patientenallergien und Reaktionen",
+      "blood_donation": "Blut-, Plasma- und Thrombozytenspenden mit Voruntersuchungswerten",
       "condition": "Erkrankungen und Diagnosen",
       "emergency_contact": "Notfallkontaktinformationen für Patienten",
       "encounter": "Patientenbesuche und Termine",
@@ -346,8 +347,20 @@
       "vitals": "Blutdruck, Herzfrequenz, Temperatur"
     },
     "displayNames": {
+      "encounter": "Besuche",
+      "entity_file": "Datensatzdateien",
+      "family_condition": "Familienerkrankungen",
+      "family_history_share": "Familienanamnese-Freigaben",
+      "family_member": "Familienmitglieder",
+      "injury_type": "Verletzungsarten",
+      "invitation": "Einladungen",
+      "lab_result_file": "Labordateien",
       "medical_specialty": "Medizinische Fachgebiete",
-      "practice": "Praxen"
+      "patient": "Patienten",
+      "patient_share": "Patientenfreigaben",
+      "practice": "Praxen",
+      "symptom_occurrence": "Symptomereignisse",
+      "user": "Benutzer"
     },
     "fallbackWarning": "Modelle konnten nicht vom Server geladen werden. Integrierte Modellliste wird angezeigt.",
     "filterAriaLabel": "Datenmodelle filtern",
