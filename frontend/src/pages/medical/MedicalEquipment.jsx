@@ -296,6 +296,9 @@ const MedicalEquipment = () => {
                     accessor: 'equipment_type',
                     priority: 'high',
                     width: 160,
+                    // The mobile card layout ignores `formatters`, so it needs
+                    // its own render to show the label instead of the raw value
+                    render: formatters.equipment_type,
                   },
                   {
                     header: t('shared:fields.status', 'Status'),

@@ -35,14 +35,24 @@ vi.mock('../../../hooks/useDateFormat', () => ({
     dateParser: vi.fn(),
   }),
 }));
+const DESKTOP = {
+  breakpoint: 'xl',
+  deviceType: 'desktop',
+  isMobile: false,
+  isTablet: false,
+  isDesktop: true,
+};
+const MOBILE = {
+  breakpoint: 'xs',
+  deviceType: 'mobile',
+  isMobile: true,
+  isTablet: false,
+  isDesktop: false,
+};
+const responsiveState = vi.hoisted(() => ({ current: null }));
+
 vi.mock('../../../hooks/useResponsive', () => ({
-  useResponsive: () => ({
-    breakpoint: 'xl',
-    deviceType: 'desktop',
-    isMobile: false,
-    isTablet: false,
-    isDesktop: true,
-  }),
+  useResponsive: () => responsiveState.current,
 }));
 vi.mock('../../../services/api', () => ({ apiService: {} }));
 vi.mock('../../../services/logger', () => ({
@@ -145,6 +155,7 @@ const getBodyRowNames = () => {
 
 describe('MedicalEquipment table view', () => {
   beforeEach(() => {
+    responsiveState.current = DESKTOP;
     setStoredViewMode('table');
     mockMedicalData(EQUIPMENT);
   });
@@ -195,24 +206,46 @@ describe('MedicalEquipment table view', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('sorts the full list when a column header is clicked', () => {
+  it('sorts the full list, not just the visible page, when a column header is clicked', () => {
+    // More records than one page (default page size is 20) so a sort applied
+    // after pagination would show a different set of rows than a full-list sort.
+    const manyItems = Array.from({ length: 22 }, (_, i) => ({
+      ...EQUIPMENT[0],
+      id: i + 1,
+      equipment_name: `Device ${String(i + 1).padStart(2, '0')}`,
+    }));
+    mockMedicalData(manyItems);
+
     renderWithPatient(<MedicalEquipment />);
 
     // Default sort is equipment_name ascending
-    expect(getBodyRowNames()).toEqual([
-      'Folding Walker',
-      'Omron BP Monitor',
-      'ResMed AirSense 11',
-    ]);
+    let names = getBodyRowNames();
+    expect(names).toHaveLength(20);
+    expect(names[0]).toBe('Device 01');
+    expect(names[19]).toBe('Device 20');
 
     fireEvent.click(
       within(screen.getByRole('table')).getByText('Equipment Name')
     );
 
-    expect(getBodyRowNames()).toEqual([
-      'ResMed AirSense 11',
-      'Omron BP Monitor',
-      'Folding Walker',
-    ]);
+    names = getBodyRowNames();
+    expect(names).toHaveLength(20);
+    expect(names[0]).toBe('Device 22');
+    expect(names[19]).toBe('Device 03');
+  });
+
+  it('shows the formatted equipment type in the mobile card layout', () => {
+    responsiveState.current = MOBILE;
+
+    const { container } = renderWithPatient(<MedicalEquipment />);
+
+    const cards = container.querySelector('.medical-responsive-cards');
+    expect(cards).not.toBeNull();
+    expect(
+      within(cards).getByText('Blood Pressure Monitor')
+    ).toBeInTheDocument();
+    expect(
+      within(cards).queryByText('blood_pressure_monitor')
+    ).not.toBeInTheDocument();
   });
 });
