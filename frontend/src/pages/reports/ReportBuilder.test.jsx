@@ -226,6 +226,27 @@ describe('ReportBuilder flow', () => {
     expect(screen.queryByText('Medical Equipment')).not.toBeInTheDocument();
   });
 
+  it('translates the blood donations category tab', () => {
+    mockReports.value = buildReports({
+      dataSummary: {
+        total_records: 1,
+        categories: {
+          blood_donations: {
+            count: 1,
+            has_more: false,
+            records: [{ id: 1, title: 'Whole Blood' }],
+          },
+        },
+      },
+    });
+    render(<ReportBuilder />);
+
+    expect(
+      screen.getAllByText('shared:categories.blood_donations').length
+    ).toBeGreaterThan(0);
+    expect(screen.queryByText('blood_donations')).not.toBeInTheDocument();
+  });
+
   it('styles the view toggle as two distinct options', () => {
     render(<ReportBuilder />);
 

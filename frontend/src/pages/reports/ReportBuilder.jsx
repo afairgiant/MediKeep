@@ -189,6 +189,7 @@ const ReportBuilder = () => {
     injuries: t('shared:categories.injuries'),
     insurance: t('shared:categories.insurance'),
     medical_equipment: t('shared:categories.medical_equipment'),
+    blood_donations: t('shared:categories.blood_donations'),
   };
 
   // Snapshot the builder's current state into a payload the templates API

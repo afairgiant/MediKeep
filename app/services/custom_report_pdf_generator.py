@@ -39,6 +39,12 @@ from app.core.utils.datetime_utils import (
     get_facility_today,
     is_future_date,
 )
+from app.services.blood_donation_units import (
+    DEFAULT_HEMOGLOBIN_UNIT,
+    format_blood_pressure,
+    format_hemoglobin,
+    resolve_hemoglobin_unit,
+)
 from app.services.export_service import UnitConverter
 from app.services.report_fonts import (
     CJK_BOLD_FONT_PATHS,
@@ -142,6 +148,7 @@ class CustomReportPDFGenerator:
         # Default translator and preferences (overridden per-report in generate_pdf)
         self.translator = get_translator("en", "mdy")
         self.unit_system = "imperial"
+        self.hemoglobin_unit = DEFAULT_HEMOGLOBIN_UNIT
 
     def _try_register_font(self, font_name: str, font_paths: List[str]) -> bool:
         """
@@ -548,6 +555,9 @@ class CustomReportPDFGenerator:
         language = report_data.get("language", "en")
         date_format = report_data.get("date_format", "mdy")
         self.unit_system = report_data.get("unit_system", "imperial")
+        self.hemoglobin_unit = resolve_hemoglobin_unit(
+            report_data.get("hemoglobin_unit")
+        )
         self.translator = get_translator(language, date_format)
 
         # Rebuild styles per request so font selection is always correct
@@ -988,6 +998,8 @@ class CustomReportPDFGenerator:
             "symptoms": "[SX]",
             "injuries": "[INJ]",
             "insurance": "[INS]",
+            "medical_equipment": "[EQUIP]",
+            "blood_donations": "[DON]",
         }
         return icons.get(category, "[INFO]")
 
@@ -1490,6 +1502,8 @@ class CustomReportPDFGenerator:
             story.extend(self._format_insurance(records))
         elif category == "medical_equipment":
             story.extend(self._format_medical_equipment(records))
+        elif category == "blood_donations":
+            story.extend(self._format_blood_donations(records))
         elif category == "vitals":
             story.extend(self._format_vitals(records))
         else:
@@ -1551,13 +1565,8 @@ class CustomReportPDFGenerator:
             # Temperature (convert if metric)
             temp = record.get("temperature")
             if temp is not None:
-                if self.unit_system == "metric":
-                    temp = UnitConverter.fahrenheit_to_celsius(temp)
                 details.append(
-                    [
-                        f"{t.field('temperature')}:",
-                        f"{temp} {unit_labels['temperature']}",
-                    ]
+                    [f"{t.field('temperature')}:", self._temperature_text(temp)]
                 )
 
             # Weight (convert if metric)
@@ -3103,6 +3112,56 @@ class CustomReportPDFGenerator:
 
                 story.extend(self._detail_table(rows))
                 story.append(Spacer(1, 0.08 * inch))
+
+        return story
+
+    def _temperature_text(self, fahrenheit: float) -> str:
+        """A stored Fahrenheit value in the report's unit system, with its label."""
+        value = fahrenheit
+        if self.unit_system == "metric":
+            value = UnitConverter.fahrenheit_to_celsius(fahrenheit)
+        return f"{value} {UnitConverter.get_unit_labels(self.unit_system)['temperature']}"
+
+    def _format_blood_donations(self, records: List[Dict[str, Any]]) -> List:
+        """Format blood donations; records hold stored units (Fahrenheit, g/dL)."""
+        story = []
+        t = self.translator
+        for record in self._sort_records(records, "donation_date"):
+            header_parts = [f"<b>{self._format_date(record.get('donation_date'))}</b>"]
+            if record.get("donation_type"):
+                header_parts.append(f"({t.value(record['donation_type'])})")
+            story.append(
+                Paragraph(" ".join(header_parts), self.styles["SubsectionHeader"])
+            )
+
+            rows = []
+            if record.get("location"):
+                rows.append((t.field("location"), record["location"]))
+            bp = format_blood_pressure(
+                record.get("systolic_bp"), record.get("diastolic_bp")
+            )
+            if bp:
+                rows.append((t.field("blood_pressure"), f"{bp} mmHg"))
+            if record.get("temperature") is not None:
+                rows.append(
+                    (
+                        t.field("temperature"),
+                        self._temperature_text(record["temperature"]),
+                    )
+                )
+            hemoglobin = format_hemoglobin(
+                record.get("hemoglobin"), self.hemoglobin_unit
+            )
+            if hemoglobin:
+                rows.append((t.field("hemoglobin"), hemoglobin))
+            if record.get("notes"):
+                # Plain-text notes, already escaped; Paragraph would fold newlines
+                notes = record["notes"].replace("\r\n", "\n").replace("\n", "<br/>")
+                rows.append((t.field("notes"), notes))
+            rows.append((t.field("tags"), self._tags_text(record)))
+
+            story.extend(self._detail_table(rows))
+            story.append(Spacer(1, 0.08 * inch))
 
         return story
 

@@ -40,6 +40,7 @@ from app.models.models import (
     Treatment,
     Vitals,
 )
+from app.models.clinical import BloodDonation
 from app.models.procedures import MedicalEquipment
 from app.schemas.custom_reports import (
     CategorySummary,
@@ -55,6 +56,10 @@ from app.schemas.custom_reports import (
 )
 from app.schemas.trend_charts import TrendChartSelection
 from app.crud.user_preferences import user_preferences as user_preferences_crud
+from app.services.blood_donation_units import (
+    format_blood_pressure,
+    format_hemoglobin,
+)
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.export_service import ExportService, UnitConverter
 from app.services.patient_management import get_active_patient_for_user
@@ -96,6 +101,7 @@ class CustomReportService:
         "injuries": Injury,
         "insurance": Insurance,
         "medical_equipment": MedicalEquipment,
+        "blood_donations": BloodDonation,
     }
 
     def __init__(self, db: Session):
@@ -108,6 +114,7 @@ class CustomReportService:
         self._cache_timeout = 300
         # Default unit system, updated per-request when user prefs are loaded
         self._user_unit_system = "imperial"
+        self._hemoglobin_unit = None
         logger.debug("CustomReportService initialized")
 
     async def get_data_summary_for_selection(
@@ -125,6 +132,7 @@ class CustomReportService:
         # Load user preferences for unit display in summaries
         user_prefs = user_preferences_crud.get_by_user_id(self.db, user_id=user_id)
         self._user_unit_system = (user_prefs and user_prefs.unit_system) or "imperial"
+        self._hemoglobin_unit = user_prefs and user_prefs.hemoglobin_unit
         language = (user_prefs and user_prefs.language) or "en"
         self._translator = get_translator(
             language, (user_prefs and user_prefs.date_format) or "mdy"
@@ -335,6 +343,9 @@ class CustomReportService:
 
     def _get_title_field(self, item: Any, category: str) -> Optional[str]:
         """Get the appropriate title field for the category"""
+        if category == "blood_donations":
+            return self._translator.value(getattr(item, "donation_type", None)) or None
+
         # Map categories to their specific name fields and fallback fields
         category_field_map = {
             "medications": {
@@ -455,6 +466,7 @@ class CustomReportService:
         "injuries": "date_of_injury",
         "insurance": "effective_date",
         "medical_equipment": "prescribed_date",
+        "blood_donations": "donation_date",
     }
 
     # Categories without a patient_id column (shared across patients)
@@ -647,6 +659,16 @@ class CustomReportService:
                 if get("status"):
                     parts.append(labeled("status", get("status"), True))
 
+            elif category == "blood_donations":
+                if get("location"):
+                    parts.append(labeled("location", get("location")))
+                bp = format_blood_pressure(get("systolic_bp"), get("diastolic_bp"))
+                if bp:
+                    parts.append(labeled("blood_pressure", bp))
+                hemoglobin = format_hemoglobin(get("hemoglobin"), self._hemoglobin_unit)
+                if hemoglobin:
+                    parts.append(labeled("hemoglobin", hemoglobin))
+
             else:
                 return f"{category.replace('_', ' ').title()} record"
 
@@ -797,6 +819,7 @@ class CustomReportService:
             unit_system = (user_prefs and user_prefs.unit_system) or "imperial"
             language = (user_prefs and user_prefs.language) or "en"
             date_format = (user_prefs and user_prefs.date_format) or "mdy"
+            hemoglobin_unit = user_prefs and user_prefs.hemoglobin_unit
             self._user_unit_system = unit_system
 
             # Collect selected data
@@ -855,6 +878,7 @@ class CustomReportService:
                 unit_system=unit_system,
                 language=language,
                 date_format=date_format,
+                hemoglobin_unit=hemoglobin_unit,
             )
 
             # Log successful generation
@@ -1428,6 +1452,7 @@ class CustomReportService:
         unit_system: str = "imperial",
         language: str = "en",
         date_format: str = "mdy",
+        hemoglobin_unit: Optional[str] = None,
     ) -> bytes:
         """Generate PDF report using the custom PDF generator with user preferences"""
         # Prepare data for PDF generator
@@ -1451,6 +1476,7 @@ class CustomReportService:
             "unit_system": unit_system,
             "language": language,
             "date_format": date_format,
+            "hemoglobin_unit": hemoglobin_unit,
         }
 
         # Use new PDF generator
