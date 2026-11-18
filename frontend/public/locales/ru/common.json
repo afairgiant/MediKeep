@@ -983,6 +983,7 @@
     "columnType": "Тип записи",
     "dateLabels": {
       "diagnosed": "Диагностировано",
+      "donated": "Сдано",
       "given": "Введено",
       "identified": "Обнаружено",
       "injured": "Получена",
@@ -999,6 +1000,7 @@
     "expandFilters": "Развернуть фильтры",
     "fallbacks": {
       "allergy": "Аллергия",
+      "donation": "Донация",
       "encounter": "Визит",
       "equipment": "Оборудование",
       "immunization": "Прививка",

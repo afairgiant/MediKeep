@@ -32,6 +32,11 @@ def contains_ignore_case(column: ColumnElement, term: str) -> ColumnElement:
     return func.lower(column).contains(term.lower(), autoescape=True)
 
 
+def contains_code_ignore_case(column: ColumnElement, term: str) -> ColumnElement:
+    """`contains_ignore_case` for snake_case code columns: a space in `term` matches `_`."""
+    return contains_ignore_case(column, term.replace(" ", "_"))
+
+
 def create_text_search_condition(
     column: ColumnElement, search_term: str
 ) -> ColumnElement:

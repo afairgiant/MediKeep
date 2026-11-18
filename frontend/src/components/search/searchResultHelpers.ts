@@ -1,24 +1,14 @@
-/**
- * searchResultHelpers
- * Shared constants, types, and utility functions used by SearchResults,
- * SearchResultCard, SearchPreviewPanel, and SearchResultsHeader.
- */
+/** Display text and rows for Advanced Search and dashboard quick search results. */
 
 import React from 'react';
+import { IconSearch } from '@tabler/icons-react';
+
+import { getDonationTypeLabel } from '../../constants/bloodDonationConstants';
+import { notesToPlainText } from '../../utils/notesMarkdown';
 import {
-  IconAlertTriangle,
-  IconBandage,
-  IconStethoscope,
-  IconPill,
-  IconThermometer,
-  IconVaccine,
-  IconMedicalCross,
-  IconHeartbeat,
-  IconCalendarEvent,
-  IconFlask,
-  IconHeartRateMonitor,
-  IconSearch,
-} from '@tabler/icons-react';
+  RECORD_TYPE_BY_ITEM_TYPE,
+  getRecordRoute,
+} from '../../constants/searchRecordTypes';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,145 +35,46 @@ export interface SearchResultRow {
   _source?: string;
 }
 
-interface EntityConfig {
-  icon: React.ComponentType<{ size?: string | number }>;
-  color: string;
-  labelKey: string;
-  route: string;
+interface SearchItemText {
+  title: string;
+  subtitle: string;
+  date: string | undefined;
+  dateLabel: string;
 }
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Entity config for tag search results (keyed by singular backend response keys). */
-export const TAG_ENTITY_CONFIG: Record<string, EntityConfig> = {
-  lab_result: {
-    icon: IconFlask,
-    color: 'indigo',
-    labelKey: 'shared:categories.lab_results',
-    route: '/lab-results',
-  },
-  medication: {
-    icon: IconPill,
-    color: 'green',
-    labelKey: 'shared:categories.medications',
-    route: '/medications',
-  },
-  condition: {
-    icon: IconStethoscope,
-    color: 'blue',
-    labelKey: 'shared:categories.conditions',
-    route: '/conditions',
-  },
-  procedure: {
-    icon: IconMedicalCross,
-    color: 'violet',
-    labelKey: 'shared:categories.procedures',
-    route: '/procedures',
-  },
-  immunization: {
-    icon: IconVaccine,
-    color: 'orange',
-    labelKey: 'shared:categories.immunizations',
-    route: '/immunizations',
-  },
-  treatment: {
-    icon: IconHeartbeat,
-    color: 'pink',
-    labelKey: 'shared:categories.treatments',
-    route: '/treatments',
-  },
-  encounter: {
-    icon: IconCalendarEvent,
-    color: 'teal',
-    labelKey: 'search.types.encounters',
-    route: '/encounters',
-  },
-  allergy: {
-    icon: IconAlertTriangle,
-    color: 'red',
-    labelKey: 'shared:categories.allergies',
-    route: '/allergies',
-  },
-  injury: {
-    icon: IconBandage,
-    color: 'lime',
-    labelKey: 'shared:categories.injuries',
-    route: '/injuries',
-  },
-  symptom: {
-    icon: IconThermometer,
-    color: 'grape',
-    labelKey: 'shared:categories.symptoms',
-    route: '/symptoms',
-  },
-  medical_equipment: {
-    icon: IconHeartRateMonitor,
-    color: 'yellow',
-    labelKey: 'shared:categories.medical_equipment',
-    route: '/medical-equipment',
-  },
-};
-
-/** Map sidebar record type values (plural) to tag entity keys (singular). */
-export const RECORD_TYPE_TO_TAG_ENTITY: Record<string, string> = {
-  lab_results: 'lab_result',
-  medications: 'medication',
-  conditions: 'condition',
-  procedures: 'procedure',
-  immunizations: 'immunization',
-  treatments: 'treatment',
-  encounters: 'encounter',
-  allergies: 'allergy',
-  injuries: 'injury',
-  symptoms: 'symptom',
-  medical_equipment: 'medical_equipment',
-  // vitals omitted — no tag support
-};
-
-/** Icon mapping for text search result icon strings from backend. */
-export const ICON_MAP: Record<
-  string,
-  React.ComponentType<{ size?: string | number }>
-> = {
-  IconAlertTriangle,
-  IconBandage,
-  IconStethoscope,
-  IconPill,
-  IconThermometer,
-  IconVaccine,
-  IconMedicalCross,
-  IconHeartbeat,
-  IconCalendarEvent,
-  IconFlask,
-  IconHeartRateMonitor,
-};
-
-/** Fallback icon when the backend icon name is unknown. */
+/** Icon for a record type the registry does not know. */
 export const FALLBACK_ICON = IconSearch;
 
-/** Mapping from singular type key to i18n translation key. */
-export const TYPE_LABEL_KEY_MAP: Record<string, string> = {
-  medication: 'shared:categories.medications',
-  condition: 'shared:categories.conditions',
-  lab_result: 'shared:categories.lab_results',
-  procedure: 'shared:categories.procedures',
-  immunization: 'shared:categories.immunizations',
-  treatment: 'shared:categories.treatments',
-  encounter: 'search.types.encounters',
-  allergy: 'shared:categories.allergies',
-  injury: 'shared:categories.injuries',
-  symptom: 'shared:categories.symptoms',
-  medical_equipment: 'shared:categories.medical_equipment',
-  vital: 'shared:categories.vitals',
-};
-
-/** Resolve a type key to a translated label. */
+/** Resolve an item type to its translated record type label. */
 export function getTypeLabel(t: TFunc, typeKey: string): string {
-  const translationKey = TYPE_LABEL_KEY_MAP[typeKey];
-  if (translationKey) return t(translationKey);
+  const recordType = RECORD_TYPE_BY_ITEM_TYPE[typeKey];
+  if (recordType) return t(recordType.labelKey);
   return typeKey.replace('_', ' ');
+}
+
+export function getTypeIcon(
+  typeKey: string
+): React.ComponentType<{ size?: string | number }> {
+  return RECORD_TYPE_BY_ITEM_TYPE[typeKey]?.icon || FALLBACK_ICON;
+}
+
+export function getTypeColor(typeKey: string): string {
+  return RECORD_TYPE_BY_ITEM_TYPE[typeKey]?.color || 'gray';
+}
+
+function formatVitalSigns(item: Record<string, unknown>): string {
+  const signs: string[] = [];
+  if (item.systolic_bp && item.diastolic_bp) {
+    signs.push(`BP: ${item.systolic_bp}/${item.diastolic_bp}`);
+  }
+  if (item.heart_rate) signs.push(`HR: ${item.heart_rate}`);
+  if (item.temperature) signs.push(`Temp: ${item.temperature}°F`);
+  if (item.weight) signs.push(`Weight: ${item.weight} lbs`);
+  return signs.join(', ');
 }
 
 // ---------------------------------------------------------------------------
@@ -235,6 +126,13 @@ export function getItemTitle(
       return (item.symptom_name as string) || t('search.fallbacks.symptom');
     case 'medical_equipment':
       return (item.equipment_name as string) || t('search.fallbacks.equipment');
+    case 'blood_donation':
+      return (
+        getDonationTypeLabel(item.donation_type as string, t) ||
+        t('search.fallbacks.donation')
+      );
+    case 'vital':
+      return formatVitalSigns(item) || t('shared:categories.vitals');
     default:
       return t('search.fallbacks.record');
   }
@@ -272,6 +170,8 @@ export function getItemSubtitle(
       return [item.category, item.status].filter(Boolean).join(' - ');
     case 'medical_equipment':
       return [item.equipment_type, item.status].filter(Boolean).join(' - ');
+    case 'blood_donation':
+      return (item.location as string) || '';
     default:
       return (item.status as string) || '';
   }
@@ -341,6 +241,11 @@ export function getItemDateWithLabel(
         label: t('search.dateLabels.prescribed'),
         value: item.prescribed_date as string | undefined,
       };
+    case 'blood_donation':
+      return {
+        label: t('search.dateLabels.donated'),
+        value: item.donation_date as string | undefined,
+      };
     case 'vital':
       return {
         label: t('search.dateLabels.recorded'),
@@ -352,37 +257,65 @@ export function getItemDateWithLabel(
 }
 
 /**
- * Flatten tag search results (grouped by entity type) into the same flat format
- * as text search results, for unified display.
+ * Display text for one search item, translated with `t`. Works on both text
+ * search items and tag search rows; notes Markdown comes back as plain text.
  */
+export function describeSearchItem(
+  itemType: string,
+  item: Record<string, unknown>,
+  t: TFunc
+): SearchItemText {
+  const { label, value } = getItemDateWithLabel(itemType, item, t);
+  return {
+    title: getItemTitle(itemType, item, t),
+    subtitle: notesToPlainText(getItemSubtitle(itemType, item, t)),
+    date: value || undefined,
+    dateLabel: label,
+  };
+}
+
+/** The item's description as plain text, or '' when it repeats `subtitle`. */
+export function getItemDescription(
+  item: Record<string, unknown>,
+  subtitle: string
+): string {
+  if (typeof item.description !== 'string') return '';
+  const description = notesToPlainText(item.description);
+  return description === subtitle ? '' : description;
+}
+
+export function toSearchRow(
+  itemType: string,
+  item: Record<string, unknown>,
+  t: TFunc,
+  source: 'text' | 'tag'
+): SearchResultRow {
+  return {
+    ...describeSearchItem(itemType, item, t),
+    type: itemType,
+    id: item.id as number,
+    icon: getTypeIcon(itemType),
+    color: getTypeColor(itemType),
+    typeLabel: getTypeLabel(t, itemType),
+    tags: (item.tags as string[]) || [],
+    route: getRecordRoute(itemType, item.id as number),
+    _source: source,
+  };
+}
+
+/** Flatten tag search results (grouped by entity type) into display rows. */
 export function flattenTagResults(
   tagResults: Record<string, unknown[]> | null,
   t: TFunc
 ): SearchResultRow[] {
   if (!tagResults) return [];
-  const flat: SearchResultRow[] = [];
-  Object.entries(tagResults).forEach(([entityType, items]) => {
-    const config = TAG_ENTITY_CONFIG[entityType];
-    if (!config || !Array.isArray(items)) return;
-    items.forEach((item: Record<string, unknown>) => {
-      const dateInfo = getItemDateWithLabel(entityType, item, t);
-      flat.push({
-        type: entityType,
-        id: item.id as number,
-        title: getItemTitle(entityType, item, t),
-        subtitle: getItemSubtitle(entityType, item, t),
-        date: dateInfo.value,
-        dateLabel: dateInfo.label,
-        icon: config.icon,
-        color: config.color,
-        typeLabel: t(config.labelKey),
-        tags: (item.tags as string[]) || [],
-        route: `${config.route}?view=${item.id}`,
-        _source: 'tag',
-      });
-    });
-  });
-  return flat;
+  return Object.entries(tagResults).flatMap(([entityType, items]) =>
+    RECORD_TYPE_BY_ITEM_TYPE[entityType]?.taggable && Array.isArray(items)
+      ? items.map(item =>
+          toSearchRow(entityType, item as Record<string, unknown>, t, 'tag')
+        )
+      : []
+  );
 }
 
 /** Convert a Date to YYYY-MM-DD for the API, or return null. */

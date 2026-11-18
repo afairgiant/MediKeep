@@ -354,6 +354,27 @@ class TestSearchMedicalEquipment:
             assert response.status_code == 200, term
             assert response.json()["results"]["medical_equipment"]["count"] == 1, term
 
+    def test_search_equipment_type_code_with_spaces(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        _make_equipment(
+            db_session,
+            user_with_patient["patient"].id,
+            equipment_name="Home cuff",
+            equipment_type="blood_pressure_monitor",
+        )
+
+        response = client.get(
+            "/api/v1/search/?q=Blood Pressure&types=medical_equipment",
+            headers=authenticated_headers,
+        )
+
+        assert response.json()["results"]["medical_equipment"]["count"] == 1
+
     def test_search_equipment_item_uses_model_field_names(
         self,
         client: TestClient,

@@ -983,6 +983,7 @@
     "columnType": "Typ rekordu",
     "dateLabels": {
       "diagnosed": "Zdiagnozowano",
+      "donated": "Oddano",
       "given": "Podano",
       "identified": "Zidentyfikowano",
       "injured": "Uraz z dnia",
@@ -999,6 +1000,7 @@
     "expandFilters": "Rozwiń filtry",
     "fallbacks": {
       "allergy": "Alergia",
+      "donation": "Donacja",
       "encounter": "Wizyta",
       "equipment": "Sprzęt",
       "immunization": "Szczepienie",

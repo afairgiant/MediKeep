@@ -982,6 +982,7 @@
     "columnType": "记录类型",
     "dateLabels": {
       "diagnosed": "诊断",
+      "donated": "献血日期",
       "given": "接种",
       "identified": "识别",
       "injured": "受伤日期",
@@ -998,6 +999,7 @@
     "expandFilters": "展开筛选",
     "fallbacks": {
       "allergy": "过敏",
+      "donation": "献血",
       "encounter": "就诊",
       "equipment": "设备",
       "immunization": "疫苗",

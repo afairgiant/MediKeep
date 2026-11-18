@@ -983,6 +983,7 @@
     "columnType": "Record Type",
     "dateLabels": {
       "diagnosed": "Diagnosed",
+      "donated": "Donated",
       "given": "Given",
       "identified": "Identified",
       "injured": "Injured",
@@ -999,6 +1000,7 @@
     "expandFilters": "Expand filters",
     "fallbacks": {
       "allergy": "Allergy",
+      "donation": "Donation",
       "encounter": "Encounter",
       "equipment": "Equipment",
       "immunization": "Immunization",

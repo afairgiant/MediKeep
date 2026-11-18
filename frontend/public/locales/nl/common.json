@@ -983,6 +983,7 @@
     "columnType": "Dossiertype",
     "dateLabels": {
       "diagnosed": "Gediagnosticeerd",
+      "donated": "Gedoneerd",
       "given": "Toegediend",
       "identified": "Geïdentificeerd",
       "injured": "Gewond",
@@ -999,6 +1000,7 @@
     "expandFilters": "Filters uitklappen",
     "fallbacks": {
       "allergy": "Allergie",
+      "donation": "Donatie",
       "encounter": "Consult",
       "equipment": "Apparatuur",
       "immunization": "Vaccinatie",

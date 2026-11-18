@@ -6,18 +6,17 @@
 
 import { apiService } from './api';
 import logger from './logger';
-import { notesToPlainText } from '../utils/notesMarkdown';
+import { RECORD_TYPE_BY_VALUE } from '../constants/searchRecordTypes';
 
 class SearchService {
   /**
-   * Format backend search results to frontend format
-   * @param {Object} results - Backend search results grouped by type
-   * @returns {Array} Formatted results array
+   * Flatten backend search results (grouped by record type) into rows.
+   * @param {Object} results - Backend `results`, keyed by record type group
+   * @returns {Array} `{type, id, tags, data}` rows; groups of unknown record types are skipped
    */
   formatSearchResults(results) {
     const matchedResults = [];
 
-    // Process each record type
     Object.entries(results).forEach(([recordType, typeResults]) => {
       if (!typeResults.items || typeResults.items.length === 0) {
         return;
@@ -26,12 +25,7 @@ class SearchService {
       typeResults.items.forEach(item => {
         const formattedItem = this.formatResultItem(recordType, item);
         if (formattedItem) {
-          // Descriptions and subtitles are often Markdown notes; results show them as plain text.
-          matchedResults.push({
-            ...formattedItem,
-            subtitle: notesToPlainText(formattedItem.subtitle),
-            description: notesToPlainText(formattedItem.description),
-          });
+          matchedResults.push(formattedItem);
         }
       });
     });
@@ -40,221 +34,31 @@ class SearchService {
   }
 
   /**
-   * Format individual result item based on type
-   * @param {string} recordType - Type of record
-   * @param {Object} item - Individual result item
-   * @returns {Object} Formatted result item
+   * Wrap one backend search item; display text is built where it is rendered.
+   * @param {string} recordType - Backend group key, e.g. `blood_donations`
+   * @param {Object} item - Item from that group
+   * @returns {Object|null} `{type, id, tags, data}`, or null for an unknown group
    */
   formatResultItem(recordType, item) {
-    const baseItem = {
-      type: item.type,
+    const config = RECORD_TYPE_BY_VALUE[recordType];
+    if (!config) {
+      logger.warn(
+        'unknown_record_type',
+        'Unknown record type in search results',
+        {
+          component: 'SearchService',
+          recordType,
+        }
+      );
+      return null;
+    }
+
+    return {
+      type: config.itemType,
       id: item.id,
       tags: item.tags || [],
       data: item,
     };
-
-    switch (recordType) {
-      case 'medications':
-        return {
-          ...baseItem,
-          title: item.medication_name,
-          subtitle: item.dosage
-            ? `${item.dosage} - ${item.status}`
-            : item.status,
-          description: item.notes || '',
-          date: item.start_date || item.created_at,
-          icon: 'IconPill',
-          color: 'green',
-        };
-
-      case 'conditions':
-        return {
-          ...baseItem,
-          title: item.condition_name || item.diagnosis,
-          subtitle: item.status,
-          description: item.diagnosis || item.notes || '',
-          date: item.diagnosed_date || item.created_at,
-          icon: 'IconStethoscope',
-          color: 'blue',
-        };
-
-      case 'lab_results':
-        return {
-          ...baseItem,
-          title: item.test_name,
-          subtitle: item.result ? `Result: ${item.result}` : item.status,
-          description: item.notes || '',
-          date: item.test_date || item.created_at,
-          icon: 'IconFlask',
-          color: 'indigo',
-        };
-
-      case 'procedures':
-        return {
-          ...baseItem,
-          title: item.name,
-          subtitle: item.status,
-          description: item.description || item.notes || '',
-          date: item.procedure_date || item.created_at,
-          icon: 'IconMedicalCross',
-          color: 'violet',
-        };
-
-      case 'immunizations':
-        return {
-          ...baseItem,
-          title: item.vaccine_name,
-          subtitle: item.dose_number
-            ? `Dose ${item.dose_number} - ${item.status}`
-            : item.status,
-          description: item.notes || '',
-          date: item.administered_date || item.created_at,
-          icon: 'IconVaccine',
-          color: 'orange',
-        };
-
-      case 'treatments':
-        return {
-          ...baseItem,
-          title: item.treatment_name,
-          subtitle: item.treatment_type
-            ? `${item.treatment_type} - ${item.status}`
-            : item.status,
-          description: item.description || item.notes || '',
-          date: item.start_date || item.created_at,
-          icon: 'IconHeartbeat',
-          color: 'pink',
-        };
-
-      case 'encounters':
-        return {
-          ...baseItem,
-          title: item.visit_type || item.reason,
-          subtitle: item.reason,
-          description: item.chief_complaint || item.notes || '',
-          date: item.encounter_date || item.created_at,
-          icon: 'IconCalendarEvent',
-          color: 'teal',
-        };
-
-      case 'allergies':
-        return {
-          ...baseItem,
-          title: item.allergen,
-          subtitle: `${item.severity} - ${item.reaction}`,
-          description: item.notes || '',
-          date: item.identified_date || item.created_at,
-          icon: 'IconAlertTriangle',
-          color: 'red',
-        };
-
-      case 'injuries':
-        return {
-          ...baseItem,
-          title: item.injury_name,
-          subtitle: [item.body_part, item.status].filter(Boolean).join(' - '),
-          description: item.notes || '',
-          date: item.date_of_injury || item.created_at,
-          icon: 'IconBandage',
-          color: 'lime',
-        };
-
-      case 'symptoms':
-        return {
-          ...baseItem,
-          title: item.symptom_name,
-          subtitle: [item.category, item.status].filter(Boolean).join(' - '),
-          description: item.general_notes || '',
-          date: item.first_occurrence_date || item.created_at,
-          icon: 'IconThermometer',
-          color: 'grape',
-        };
-
-      case 'medical_equipment':
-        return {
-          ...baseItem,
-          title: item.equipment_name,
-          subtitle: [item.equipment_type, item.status]
-            .filter(Boolean)
-            .join(' - '),
-          description: item.notes || '',
-          date: item.prescribed_date || item.created_at,
-          icon: 'IconHeartRateMonitor',
-          color: 'yellow',
-        };
-
-      case 'vitals':
-        return {
-          ...baseItem,
-          title: this.formatVitalSigns(item),
-          subtitle: item.notes || '',
-          description: item.notes || '',
-          date: item.recorded_date || item.created_at,
-          icon: 'IconHeartbeat',
-          color: 'cyan',
-        };
-
-      default:
-        logger.warn(
-          'unknown_record_type',
-          'Unknown record type in search results',
-          {
-            component: 'SearchService',
-            recordType,
-            item,
-          }
-        );
-        return null;
-    }
-  }
-
-  /**
-   * Format vital signs for display
-   * @param {Object} vital - Vital signs data
-   * @returns {string} Formatted vital signs string
-   */
-  formatVitalSigns(vital) {
-    const signs = [];
-
-    if (vital.systolic_bp && vital.diastolic_bp) {
-      signs.push(`BP: ${vital.systolic_bp}/${vital.diastolic_bp}`);
-    }
-    if (vital.heart_rate) {
-      signs.push(`HR: ${vital.heart_rate}`);
-    }
-    if (vital.temperature) {
-      signs.push(`Temp: ${vital.temperature}°F`);
-    }
-    if (vital.weight) {
-      signs.push(`Weight: ${vital.weight} lbs`);
-    }
-
-    return signs.length > 0 ? signs.join(', ') : 'Vital Signs';
-  }
-
-  /**
-   * Get route for opening a specific record
-   * @param {string} type - Record type
-   * @param {number} id - Record ID
-   * @returns {string} Route URL
-   */
-  getRecordRoute(type, id) {
-    const routeMap = {
-      allergy: `/allergies?view=${id}`,
-      condition: `/conditions?view=${id}`,
-      medication: `/medications?view=${id}`,
-      immunization: `/immunizations?view=${id}`,
-      procedure: `/procedures?view=${id}`,
-      treatment: `/treatments?view=${id}`,
-      vital: `/vitals?view=${id}`,
-      encounter: `/visits?view=${id}`,
-      lab_result: `/lab-results?view=${id}`,
-      injury: `/injuries?view=${id}`,
-      symptom: `/symptoms?view=${id}`,
-      medical_equipment: `/medical-equipment?view=${id}`,
-    };
-
-    return routeMap[type] || `/dashboard`;
   }
 
   /**

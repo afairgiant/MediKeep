@@ -983,6 +983,7 @@
     "columnType": "Posttyp",
     "dateLabels": {
       "diagnosed": "Diagnostiserad",
+      "donated": "Donerat",
       "given": "Givet",
       "identified": "Identifierad",
       "injured": "Skadad",
@@ -999,6 +1000,7 @@
     "expandFilters": "Visa filter",
     "fallbacks": {
       "allergy": "Allergi",
+      "donation": "Blodgivning",
       "encounter": "Besök",
       "equipment": "Utrustning",
       "immunization": "Vaccination",

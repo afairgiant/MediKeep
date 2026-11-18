@@ -978,6 +978,7 @@
     "columnType": "ประเภทบันทึก",
     "dateLabels": {
       "diagnosed": "วินิจฉัย",
+      "donated": "บริจาคเมื่อ",
       "given": "ให้",
       "identified": "ระบุ",
       "injured": "บาดเจ็บเมื่อ",
@@ -994,6 +995,7 @@
     "expandFilters": "ขยายฟิลเตอร์",
     "fallbacks": {
       "allergy": "แพ้",
+      "donation": "การบริจาค",
       "encounter": "การพบแพทย์",
       "equipment": "อุปกรณ์",
       "immunization": "การฉีดวัคซีน",

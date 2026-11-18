@@ -983,6 +983,7 @@
     "columnType": "Τύπος Εγγραφής",
     "dateLabels": {
       "diagnosed": "Διαγνώστηκε",
+      "donated": "Δωρήθηκε",
       "given": "Χορηγήθηκε",
       "identified": "Εντοπίστηκε",
       "injured": "Τραυματισμός",
@@ -999,6 +1000,7 @@
     "expandFilters": "Ανάπτυξη φίλτρων",
     "fallbacks": {
       "allergy": "Αλλεργία",
+      "donation": "Δωρεά",
       "encounter": "Επίσκεψη",
       "equipment": "Εξοπλισμός",
       "immunization": "Εμβολιασμός",

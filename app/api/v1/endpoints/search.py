@@ -7,11 +7,16 @@ from sqlalchemy import exists, func, or_
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.database.utils import contains_ignore_case, json_array_elements
+from app.core.database.utils import (
+    contains_code_ignore_case,
+    contains_ignore_case,
+    json_array_elements,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_data_access, log_endpoint_access
 from app.models.models import (
     Allergy,
+    BloodDonation,
     Condition,
     Encounter,
     Immunization,
@@ -31,6 +36,23 @@ router = APIRouter()
 
 # Constants
 DEFAULT_SEARCH_SCORE = 0.9
+
+# Group key -> model for every searchable record type; each taggable model must be here
+SEARCH_TYPE_MODELS = {
+    "medications": Medication,
+    "conditions": Condition,
+    "lab_results": LabResult,
+    "procedures": Procedure,
+    "immunizations": Immunization,
+    "treatments": Treatment,
+    "encounters": Encounter,
+    "allergies": Allergy,
+    "injuries": Injury,
+    "symptoms": Symptom,
+    "medical_equipment": MedicalEquipment,
+    "blood_donations": BloodDonation,
+    "vitals": Vitals,
+}
 
 # Sort normalization: frontend values -> internal handling
 SORT_ALIASES = {
@@ -192,6 +214,12 @@ class MedicalEquipmentSearchItem(SearchItemBase):
     prescribed_date: Optional[str]
 
 
+class BloodDonationSearchItem(SearchItemBase):
+    donation_type: str
+    location: Optional[str]
+    donation_date: Optional[str]
+
+
 class VitalSearchItem(SearchItemBase):
     systolic_bp: Optional[int]
     diastolic_bp: Optional[int]
@@ -271,23 +299,7 @@ def search_patient_records(
     results = {}
     total_count = 0
 
-    # Define record types to search
-    all_types = [
-        "medications",
-        "conditions",
-        "lab_results",
-        "procedures",
-        "immunizations",
-        "treatments",
-        "encounters",
-        "allergies",
-        "injuries",
-        "symptoms",
-        "medical_equipment",
-        "vitals",
-    ]
-
-    search_types = types if types else all_types
+    search_types = types if types else list(SEARCH_TYPE_MODELS)
 
     # Search medications
     if "medications" in search_types:
@@ -804,7 +816,9 @@ def search_patient_records(
             equipment_query = equipment_query.filter(
                 or_(
                     contains_ignore_case(MedicalEquipment.equipment_name, query_lower),
-                    contains_ignore_case(MedicalEquipment.equipment_type, query_lower),
+                    contains_code_ignore_case(
+                        MedicalEquipment.equipment_type, query_lower
+                    ),
                     contains_ignore_case(MedicalEquipment.manufacturer, query_lower),
                     contains_ignore_case(MedicalEquipment.model_number, query_lower),
                     contains_ignore_case(MedicalEquipment.supplier, query_lower),
@@ -854,6 +868,59 @@ def search_patient_records(
             ],
         )
         total_count += equipment_count
+
+    if "blood_donations" in search_types:
+        donations_query = db.query(BloodDonation).filter(
+            BloodDonation.patient_id == target_patient_id
+        )
+        if query_lower:
+            donations_query = donations_query.filter(
+                or_(
+                    contains_code_ignore_case(BloodDonation.donation_type, query_lower),
+                    contains_ignore_case(BloodDonation.location, query_lower),
+                    contains_ignore_case(BloodDonation.notes, query_lower),
+                    _tag_text_filter(db, BloodDonation.tags, query_lower),
+                )
+            )
+
+        donations_query = _apply_date_filter(
+            donations_query,
+            BloodDonation.donation_date,
+            parsed_date_from,
+            parsed_date_to,
+        )
+        donations_query = _apply_sort(
+            donations_query,
+            sort,
+            BloodDonation.donation_date,
+            title_col=BloodDonation.donation_type,
+        )
+
+        donations, donation_count = _windowed_query(
+            donations_query, BloodDonation.id, skip, limit
+        )
+
+        results["blood_donations"] = SearchResultGroup(
+            count=donation_count,
+            items=[
+                BloodDonationSearchItem(
+                    id=donation.id,
+                    type="blood_donation",
+                    donation_type=donation.donation_type,
+                    location=donation.location,
+                    donation_date=(
+                        donation.donation_date.isoformat()
+                        if donation.donation_date
+                        else None
+                    ),
+                    tags=donation.tags or [],
+                    highlight=donation.donation_type,
+                    score=DEFAULT_SEARCH_SCORE,
+                ).model_dump()
+                for donation in donations
+            ],
+        )
+        total_count += donation_count
 
     # Search vitals (no tags column, no title sort)
     if "vitals" in search_types:
