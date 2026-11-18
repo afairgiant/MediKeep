@@ -15,7 +15,7 @@ click==8.5.0
 colorama==0.4.6
 cryptography==50.0.1
 databases==0.9.0
-dnspython==2.9.0
+dnspython==2.9.2
 email_validator==2.3.0
 fastapi==0.141.1
 frozenlist==1.8.0
