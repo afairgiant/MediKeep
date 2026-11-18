@@ -11,33 +11,87 @@ import os
 import shutil
 import subprocess
 import zipfile
+from contextlib import contextmanager
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, FrozenSet, List, Tuple
+from pathlib import Path, PurePosixPath
+from typing import Any, Dict, FrozenSet, Iterator, List, Tuple
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.database.database import engine
 from app.core.database.postgres_tools import psql_binary
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
 from app.services.backup_service import (
-    RESTORE_WORK_DIR_PREFIX,
     BackupService,
     backup_excluded_paths,
     is_excluded_from_backup,
 )
-from app.utils.archive_validator import validate_path_safety
 
 logger = get_logger(__name__, "app")
 
 _UPLOADS_PREFIX = "uploads/"
 _DB_MEMBER = "database.sql"
+RESTORE_WORK_DIR_PREFIX = ".restore-"
 _STAGING_PREFIX = f"{RESTORE_WORK_DIR_PREFIX}staging-"
 _PREVIOUS_PREFIX = f"{RESTORE_WORK_DIR_PREFIX}previous-"
+# Arbitrary app-wide key; any process restoring into this database must use the same one.
+_RESTORE_LOCK_KEY = 0x4D4B5253
+
+
+class RestoreInProgressError(Exception):
+    """Another restore holds the restore lock."""
+
+
+@contextmanager
+def _restore_lock() -> Iterator[None]:
+    """Hold a database-wide lock for one restore, across every process using this database.
+
+    Raises RestoreInProgressError at once if another restore holds it. A no-op on
+    databases without advisory locks.
+    """
+    if engine.dialect.name != "postgresql":
+        yield
+        return
+    with engine.connect() as conn:
+        acquired = conn.execute(
+            text("SELECT pg_try_advisory_lock(:key)"), {"key": _RESTORE_LOCK_KEY}
+        ).scalar()
+        if not acquired:
+            raise RestoreInProgressError("Another restore is already in progress")
+        try:
+            yield
+        finally:
+            try:
+                conn.execute(
+                    text("SELECT pg_advisory_unlock(:key)"), {"key": _RESTORE_LOCK_KEY}
+                )
+            except Exception:
+                # Closing the connection releases a session-level lock.
+                conn.invalidate()
+                raise
+
+
+def _safe_member_path(name: str) -> PurePosixPath:
+    """Normalized relative path for an archive member name.
+
+    Raises ValueError for an empty, absolute, drive-qualified or backslash path, or
+    one with a parent ('..') component.
+    """
+    path = PurePosixPath(name)
+    if (
+        "\\" in name
+        or path.is_absolute()
+        or not path.parts
+        or ".." in path.parts
+        or ":" in path.parts[0]
+    ):
+        raise ValueError(f"Unsafe path in backup archive: {name}")
+    return path
 
 
 def _move_contents(source: Path, destination: Path, keep: FrozenSet[Path]) -> None:
@@ -330,7 +384,16 @@ class RestoreService:
 
         Returns:
             Dictionary containing restore results
+
+        Raises:
+            RestoreInProgressError: another restore, in any process, is running.
         """
+        with _restore_lock():
+            return await self._execute_restore_locked(backup_id, confirmation_token)
+
+    async def _execute_restore_locked(
+        self, backup_id: int, confirmation_token: str
+    ) -> Dict[str, Any]:
         safety_backup_id = None
         self._data_changed = False
         try:
@@ -809,25 +872,31 @@ class RestoreService:
     ) -> List[Tuple[zipfile.ZipInfo, str]]:
         """Archive files to restore, as (member, path relative to the uploads directory).
 
-        Raises ValueError for a path that escapes the uploads directory. Paths that
-        backups exclude are left out.
+        Raises ValueError for an unsafe path, or a file where the trash directory or
+        one of its parents must stay a directory. Paths backups exclude and restore
+        work directories are left out.
         """
         excluded = backup_excluded_paths(self.upload_dir)
         members = []
         for member in zipf.infolist():
             if member.is_dir():
                 continue
-            if member.filename.startswith(_UPLOADS_PREFIX):
-                relative = member.filename[len(_UPLOADS_PREFIX) :]
+            name = member.filename
+            if name.startswith(_UPLOADS_PREFIX):
+                name = name[len(_UPLOADS_PREFIX) :]
             elif prefix_required:
                 continue
-            else:
-                relative = member.filename
-            if not relative or not validate_path_safety(relative, str(self.upload_dir)):
-                raise ValueError(f"Unsafe path in backup archive: {member.filename}")
-            if is_excluded_from_backup(Path(relative), excluded):
+            relative = Path(_safe_member_path(name))
+            if relative.parts[0].startswith(RESTORE_WORK_DIR_PREFIX):
                 continue
-            members.append((member, relative))
+            if is_excluded_from_backup(relative, excluded):
+                continue
+            if any(path.is_relative_to(relative) for path in excluded):
+                raise ValueError(
+                    f"Backup archive file {member.filename} would replace a directory "
+                    "that holds the trash"
+                )
+            members.append((member, relative.as_posix()))
         return members
 
     def _stage_uploads(
@@ -844,11 +913,16 @@ class RestoreService:
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         staging = self.upload_dir / f"{_STAGING_PREFIX}{stamp}"
         staging.mkdir()
+        staging_root = staging.resolve()
         extracted_files = 0
         total_size = 0
         try:
             for member, relative in members:
                 target_path = staging / relative
+                if not target_path.resolve().is_relative_to(staging_root):
+                    raise ValueError(
+                        f"Unsafe path in backup archive: {member.filename}"
+                    )
                 target_path.parent.mkdir(parents=True, exist_ok=True)
                 with zipf.open(member) as source, open(target_path, "wb") as target:
                     shutil.copyfileobj(source, target)
@@ -869,8 +943,21 @@ class RestoreService:
             _PREVIOUS_PREFIX + staging.name[len(_STAGING_PREFIX) :]
         )
         previous.mkdir()
+        # Earlier restores' work directories can hold the only copy of files; leave them.
+        earlier_work_dirs = {
+            p
+            for p in self.upload_dir.iterdir()
+            if p.name.startswith(RESTORE_WORK_DIR_PREFIX)
+            and p not in (staging, previous)
+        }
+        if earlier_work_dirs:
+            names = ", ".join(sorted(p.name for p in earlier_work_dirs))
+            logger.warning(
+                f"Leaving earlier restore work directories in place: {names}"
+            )
         keep = frozenset(
             {staging, previous}
+            | earlier_work_dirs
             | {self.upload_dir / p for p in backup_excluded_paths(self.upload_dir)}
         )
 

@@ -1672,7 +1672,9 @@ docker exec medikeep-app restore restore 123 123_1430
 
 - The restored files are written to a staging folder inside the uploads directory first, so the uploads volume needs free space for them during the restore. A corrupt or unreadable backup fails at this step, before the database or any existing file is changed.
 - Existing files are only removed once every restored file is written. If moving them into place fails, the error names the `.restore-previous-*` folder inside the uploads directory that still holds them.
+- Later restores leave any earlier `.restore-*` folders in place, and backups include them. Delete them yourself once you have recovered what you need.
 - If the error log contains a `restore_incomplete` entry, the restore changed data before failing; restore the safety backup it names to roll back.
+- Only one restore runs at a time across the web app and the `restore` command. A second one is refused (HTTP 409 in the API) until the first finishes.
 
 ### Automated Backup Schedule
 

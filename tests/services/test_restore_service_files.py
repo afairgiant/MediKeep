@@ -172,6 +172,73 @@ class TestRestoreReplacesUploadsInPlace:
         assert not (uploads.parent / "escaped.txt").exists()
         service._restore_database.assert_not_awaited()
 
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "photos/../../outside-uploads.txt",
+            "../uploads/inside-uploads-outside-staging.txt",
+            "/etc/absolute.txt",
+            "C:/drive.txt",
+            "photos\\..\\..\\backslash.txt",
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_unsafe_member_names_are_rejected_before_anything_changes(
+        self, service, uploads, tmp_path, kind, name
+    ):
+        backup = _backup(tmp_path, kind, {name: "x"})
+
+        with pytest.raises(Exception, match="Unsafe path"):
+            await _restore(service, kind, backup)
+
+        _assert_untouched(uploads)
+        service._restore_database.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_dot_segments_cannot_bypass_the_trash_exclusion(
+        self, service, uploads, tmp_path, kind
+    ):
+        backup = _backup(tmp_path, kind, {"./trash/sneaky.pdf": "x", "ok.pdf": "y"})
+
+        await _restore(service, kind, backup)
+
+        contents = _contents(uploads)
+        assert "trash/sneaky.pdf" not in contents
+        assert contents[TRASH_FILE] == b"soft-deleted"
+
+    @pytest.mark.asyncio
+    async def test_file_in_place_of_a_trash_parent_is_rejected_before_anything_changes(
+        self, service, uploads, tmp_path, kind, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "TRASH_DIR", uploads / "photos" / "trash")
+        backup = _backup(tmp_path, kind, {"photos": "a file, not a folder"})
+
+        with pytest.raises(Exception, match="holds the trash"):
+            await _restore(service, kind, backup)
+
+        _assert_untouched(uploads)
+        service._restore_database.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_earlier_restore_work_directories_are_left_alone(
+        self, service, uploads, tmp_path, kind
+    ):
+        held = uploads / ".restore-previous-earlier" / "only-copy.pdf"
+        held.parent.mkdir()
+        held.write_bytes(b"from a failed restore")
+        backup = _backup(
+            tmp_path, kind, {"restored.pdf": "new", ".restore-staging-x/a.pdf": "z"}
+        )
+
+        await _restore(service, kind, backup)
+
+        contents = _contents(uploads)
+        assert contents[".restore-previous-earlier/only-copy.pdf"] == (
+            b"from a failed restore"
+        )
+        assert ".restore-staging-x/a.pdf" not in contents
+        assert contents["restored.pdf"] == b"new"
+
     @pytest.mark.asyncio
     async def test_corrupt_archive_is_rejected_before_anything_changes(
         self, service, uploads, tmp_path, kind
@@ -316,18 +383,19 @@ class TestBackupExclusionRule:
         assert await files_backup(upload_dir) == ["uploads/kept.pdf"]
 
     @pytest.mark.asyncio
-    async def test_only_the_configured_trash_and_restore_work_dirs_are_skipped(
-        self, tmp_path, files_backup
-    ):
+    async def test_only_the_configured_trash_is_skipped(self, tmp_path, files_backup):
         upload_dir = tmp_path / "uploads"
         self._seed(
             upload_dir,
             "photos/trash/user.jpg",
             "trash/deleted.pdf",
-            ".restore-staging-1/leftover.pdf",
+            ".restore-previous-1/held.pdf",
         )
 
-        assert await files_backup(upload_dir) == ["uploads/photos/trash/user.jpg"]
+        assert await files_backup(upload_dir) == [
+            "uploads/.restore-previous-1/held.pdf",
+            "uploads/photos/trash/user.jpg",
+        ]
 
 
 class TestExecuteRestore:
@@ -356,6 +424,39 @@ class TestExecuteRestore:
     @pytest.fixture
     def good_safety_backup(self, tmp_path):
         return _zip(tmp_path / "safety.zip", {"database.sql": "-- dump"})
+
+    @pytest.fixture
+    def postgres_lock(self, monkeypatch):
+        """A Postgres engine whose advisory lock is held or free as the test sets."""
+        fake_engine = MagicMock()
+        fake_engine.dialect.name = "postgresql"
+        conn = fake_engine.connect.return_value.__enter__.return_value
+        monkeypatch.setattr(restore_module, "engine", fake_engine)
+        return conn
+
+    @pytest.mark.asyncio
+    async def test_restore_is_rejected_while_another_holds_the_lock(
+        self, service, uploads, run_execute, good_safety_backup, postgres_lock
+    ):
+        postgres_lock.execute.return_value.scalar.return_value = False
+
+        with pytest.raises(restore_module.RestoreInProgressError):
+            await run_execute(good_safety_backup)
+
+        _assert_untouched(uploads)
+        service._restore_database.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_lock_is_released_after_restore(
+        self, run_execute, good_safety_backup, postgres_lock
+    ):
+        postgres_lock.execute.return_value.scalar.return_value = True
+
+        await run_execute(good_safety_backup)
+
+        statements = [str(c.args[0]) for c in postgres_lock.execute.call_args_list]
+        assert statements[0].startswith("SELECT pg_try_advisory_lock")
+        assert statements[-1].startswith("SELECT pg_advisory_unlock")
 
     @pytest.mark.asyncio
     async def test_truncated_safety_backup_aborts_restore(

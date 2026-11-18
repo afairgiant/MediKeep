@@ -28,8 +28,6 @@ from app.services.file_management_service import file_management_service
 
 logger = get_logger(__name__, "app")
 
-RESTORE_WORK_DIR_PREFIX = ".restore-"
-
 
 def backup_excluded_paths(upload_dir: Path) -> List[Path]:
     """Paths relative to upload_dir that backups leave out and restores leave in place."""
@@ -45,8 +43,6 @@ def is_excluded_from_backup(relative: Path, excluded: List[Path]) -> bool:
 
     excluded is the result of backup_excluded_paths for that uploads directory.
     """
-    if relative.parts and relative.parts[0].startswith(RESTORE_WORK_DIR_PREFIX):
-        return True
     return any(relative.is_relative_to(path) for path in excluded)
 
 
