@@ -52,6 +52,11 @@ def is_excluded_from_backup(relative: Path, excluded: List[Path]) -> bool:
     return any(relative.is_relative_to(path) for path in excluded)
 
 
+def _raise_scan_error(error: OSError) -> None:
+    """os.walk onerror hook: an unreadable directory fails the backup, not skips it."""
+    raise error
+
+
 def _record_failure(errors: List[str], message: str, error: Exception) -> None:
     """Log a failed clean-up step and add a line without the cause to `errors`.
 
@@ -298,7 +303,9 @@ class BackupService:
             with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                 # Walk through the uploads directory and add all files
                 excluded = backup_excluded_paths(uploads_dir)
-                for root, dirs, files in os.walk(uploads_dir):
+                for root, dirs, files in os.walk(
+                    uploads_dir, onerror=_raise_scan_error
+                ):
                     relative_root = Path(root).relative_to(uploads_dir)
                     dirs[:] = [
                         d
@@ -862,7 +869,9 @@ class BackupService:
                     uploads_dir = settings.UPLOAD_DIR
                     if uploads_dir.exists():
                         excluded = backup_excluded_paths(uploads_dir)
-                        for root, dirs, files in os.walk(uploads_dir):
+                        for root, dirs, files in os.walk(
+                            uploads_dir, onerror=_raise_scan_error
+                        ):
                             relative_root = Path(root).relative_to(uploads_dir)
                             dirs[:] = [
                                 d

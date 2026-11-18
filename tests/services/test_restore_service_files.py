@@ -97,9 +97,7 @@ def _working_dirs(upload_dir: Path) -> list:
 
 
 def _assert_untouched(upload_dir: Path):
-    contents = _contents(upload_dir)
-    for relative, content in {**OLD_FILES, TRASH_FILE: b"soft-deleted"}.items():
-        assert contents[relative] == content
+    assert _contents(upload_dir) == {**OLD_FILES, TRASH_FILE: b"soft-deleted"}
     assert not _working_dirs(upload_dir)
 
 
@@ -271,6 +269,32 @@ class TestRestoreReplacesUploadsInPlace:
         service._restore_database.assert_not_awaited()
 
     @pytest.mark.asyncio
+    async def test_cancelled_extraction_removes_its_staging_directory(
+        self, service, uploads, tmp_path, kind
+    ):
+        extracted, resume = threading.Event(), threading.Event()
+        real_stage = service._stage_uploads
+
+        def pause_after_extracting(*args):
+            result = real_stage(*args)
+            extracted.set()
+            resume.wait(timeout=10)
+            return result
+
+        backup = _backup(tmp_path, kind, {"restored.pdf": "new"})
+        with patch.object(service, "_stage_uploads", pause_after_extracting):
+            task = asyncio.create_task(_restore(service, kind, backup))
+            assert await asyncio.to_thread(extracted.wait, 10)
+            task.cancel()
+            await asyncio.sleep(0)
+            resume.set()
+            with pytest.raises(asyncio.CancelledError):
+                await task
+
+        _assert_untouched(uploads)
+        service._restore_database.assert_not_awaited()
+
+    @pytest.mark.asyncio
     async def test_failed_swap_keeps_previous_files(
         self, service, uploads, tmp_path, kind
     ):
@@ -352,10 +376,44 @@ class TestFullRestore:
         _assert_untouched(uploads)
 
     @pytest.mark.asyncio
-    async def test_temporary_dump_is_removed(self, service, tmp_path):
+    async def test_dump_is_restored_from_a_removed_subdirectory(
+        self, service, tmp_path
+    ):
         await service._restore_full_backup(_backup(tmp_path, "full", {}))
 
-        assert not list(service.backup_dir.glob("temp_restore_*.sql"))
+        (dump,) = service._restore_database.await_args.args
+        assert dump.parent.parent == service.backup_dir
+        assert not list(service.backup_dir.iterdir())
+
+
+class TestFullRestorePreview:
+    @pytest.fixture(autouse=True)
+    def _no_database(self, service):
+        service._get_database_stats = AsyncMock(return_value={})
+
+    @pytest.mark.asyncio
+    async def test_manifest_listing_files_with_no_files_previews_their_removal(
+        self, service, tmp_path
+    ):
+        manifest = json.dumps({"components": {"database": "x", "files": "uploads/"}})
+        backup = _zip(
+            tmp_path / "full.zip",
+            {"database.sql": "-- dump", "backup_manifest.json": manifest},
+        )
+
+        preview = await service._preview_full_restore(backup)
+
+        assert "Files" in preview["affected_data"]["backup_components"]
+        assert any("removes the current uploads" in w for w in preview["warnings"])
+
+    @pytest.mark.asyncio
+    async def test_backup_without_files_component_previews_no_files(
+        self, service, tmp_path
+    ):
+        preview = await service._preview_full_restore(_backup(tmp_path, "full", {}))
+
+        assert preview["affected_data"]["backup_components"] == ["Database"]
+        assert not any("removes the current uploads" in w for w in preview["warnings"])
 
 
 class TestFilesRestore:
@@ -450,6 +508,33 @@ class TestBackupExclusionRule:
             names = await files_backup(upload_dir)
 
         assert names == ["uploads/.restore-previous-1/held.pdf", "uploads/kept.pdf"]
+
+    @pytest.mark.asyncio
+    async def test_unreadable_directory_fails_the_backup(
+        self, tmp_path, files_backup, monkeypatch
+    ):
+        upload_dir = tmp_path / "uploads"
+        self._seed(upload_dir, "kept.pdf", "locked/a.pdf")
+        real_scandir = os.scandir
+
+        def scandir(path="."):
+            if Path(path).name == "locked":
+                raise PermissionError(errno.EACCES, "Permission denied", str(path))
+            return real_scandir(path)
+
+        monkeypatch.setattr(os, "scandir", scandir)
+
+        with pytest.raises(Exception, match="Permission denied"):
+            await files_backup(upload_dir)
+
+    @pytest.mark.asyncio
+    async def test_empty_uploads_directory_is_an_empty_backup(
+        self, tmp_path, files_backup
+    ):
+        upload_dir = tmp_path / "uploads"
+        upload_dir.mkdir()
+
+        assert await files_backup(upload_dir) == []
 
 
 class _FakeAdvisoryLock:
@@ -560,7 +645,7 @@ class TestExecuteRestore:
 
     @pytest.mark.asyncio
     async def test_cancelled_restore_holds_the_lock_until_the_swap_stops(
-        self, uploads, run_execute, good_safety_backup, postgres_lock
+        self, uploads, run_execute, good_safety_backup, postgres_lock, caplog
     ):
         moved, resume = threading.Event(), threading.Event()
         real_move = restore_module._move_contents
@@ -571,7 +656,9 @@ class TestExecuteRestore:
                 moved.set()
                 resume.wait(timeout=10)
 
-        with patch.object(restore_module, "_move_contents", pause_after_first_move):
+        with patch.object(
+            restore_module, "_move_contents", pause_after_first_move
+        ), caplog.at_level("ERROR"):
             first = asyncio.create_task(run_execute(good_safety_backup))
             assert await asyncio.to_thread(moved.wait, 10)
             first.cancel()
@@ -587,6 +674,33 @@ class TestExecuteRestore:
 
         assert not postgres_lock.held
         assert _contents(uploads)["restored.pdf"] == b"new"
+        assert not records_with_event(caplog, "restore_incomplete")
+
+    @pytest.mark.asyncio
+    async def test_swap_failing_after_cancellation_names_the_safety_backup(
+        self, service, run_execute, good_safety_backup, caplog
+    ):
+        started, resume = threading.Event(), threading.Event()
+
+        def fail_after_cancellation(_staging):
+            service._data_changed = True
+            started.set()
+            resume.wait(timeout=10)
+            raise RuntimeError("swap failed")
+
+        with patch.object(
+            service, "_swap_in_staged_uploads", side_effect=fail_after_cancellation
+        ), caplog.at_level("ERROR"):
+            task = asyncio.create_task(run_execute(good_safety_backup))
+            assert await asyncio.to_thread(started.wait, 10)
+            task.cancel()
+            await asyncio.sleep(0)
+            resume.set()
+            with pytest.raises(asyncio.CancelledError):
+                await task
+
+        (hint,) = records_with_event(caplog, "restore_incomplete")
+        assert "safety backup 7" in hint.getMessage()
 
     @pytest.mark.asyncio
     async def test_truncated_safety_backup_aborts_restore(

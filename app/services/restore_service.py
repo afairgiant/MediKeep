@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import zipfile
 import zlib
 from contextlib import contextmanager
@@ -94,19 +95,20 @@ async def _run_to_completion(func: Callable[..., _T], *args: Any) -> _T:
     """Run func in a worker thread.
 
     If the caller is cancelled, waits for the worker to finish before re-raising
-    the cancellation, so locks held by the caller outlive the work.
+    the cancellation, so locks held by the caller outlive the work. A worker error
+    raised meanwhile is attached to the cancellation as restore_step_error.
     """
     task = asyncio.ensure_future(asyncio.to_thread(func, *args))
     try:
         return await asyncio.shield(task)
-    except asyncio.CancelledError:
+    except asyncio.CancelledError as cancel:
         while not task.done():
             try:
                 await asyncio.wait({task})
             except asyncio.CancelledError:
                 continue
         if not task.cancelled() and task.exception() is not None:
-            logger.error(f"Restore step failed after cancellation: {task.exception()}")
+            cancel.restore_step_error = task.exception()
         raise
 
 
@@ -143,6 +145,12 @@ def _move_contents(source: Path, destination: Path, keep: FrozenSet[Path]) -> No
             _move_contents(child, target, keep)
         else:
             child.rename(target)
+
+
+def _manifest_lists_files(manifest: Any) -> bool:
+    """True if a full backup's manifest declares a files component, even an empty one."""
+    components = manifest.get("components") if isinstance(manifest, dict) else None
+    return isinstance(components, dict) and "files" in components
 
 
 def _check_backup_readable(path: Path, backup_type: str) -> None:
@@ -361,7 +369,7 @@ class RestoreService:
                         info = zipf.getinfo(filename)
                         total_size += info.file_size
 
-                if has_files:
+                if has_files or _manifest_lists_files(manifest_data):
                     components.append("Files")
 
             # Get current system stats
@@ -386,6 +394,12 @@ class RestoreService:
 
             if current_files > 0:
                 warnings.append(f"Current uploads directory has {current_files} files")
+
+            if "Files" in components and not has_files:
+                warnings.append(
+                    "The backup holds no files; restoring it removes the current "
+                    "uploads, except the trash"
+                )
 
             return {
                 "warnings": warnings,
@@ -521,26 +535,37 @@ class RestoreService:
             )
             return result
 
+        except asyncio.CancelledError as cancel:
+            step_error = getattr(cancel, "restore_step_error", None)
+            if step_error is not None:
+                self._report_restore_failure(backup_id, safety_backup_id, step_error)
+            raise
         except Exception as e:
-            # Rollback any pending transaction to prevent transaction abort errors
-            try:
-                self.db.rollback()
-                logger.debug("Rolled back transaction after restore failure")
-            except Exception as rollback_error:
-                logger.warning(f"Could not rollback transaction: {str(rollback_error)}")
-
-            logger.error(f"Failed to execute restore for backup {backup_id}: {str(e)}")
-            if self._data_changed and safety_backup_id is not None:
-                logger.error(
-                    f"Restore of backup {backup_id} left data partly changed; restore "
-                    f"safety backup {safety_backup_id} to roll back",
-                    extra={
-                        LogFields.CATEGORY: "app",
-                        LogFields.EVENT: "restore_incomplete",
-                        LogFields.RECORD_ID: backup_id,
-                    },
-                )
+            self._report_restore_failure(backup_id, safety_backup_id, e)
             raise Exception(f"Failed to execute restore: {str(e)}")
+
+    def _report_restore_failure(
+        self, backup_id: int, safety_backup_id: Any, error: BaseException
+    ) -> None:
+        """Roll back the session and log the failure, naming the safety backup if data changed."""
+        # Rollback any pending transaction to prevent transaction abort errors
+        try:
+            self.db.rollback()
+            logger.debug("Rolled back transaction after restore failure")
+        except Exception as rollback_error:
+            logger.warning(f"Could not rollback transaction: {str(rollback_error)}")
+
+        logger.error(f"Failed to execute restore for backup {backup_id}: {str(error)}")
+        if self._data_changed and safety_backup_id is not None:
+            logger.error(
+                f"Restore of backup {backup_id} left data partly changed; restore "
+                f"safety backup {safety_backup_id} to roll back",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "restore_incomplete",
+                    LogFields.RECORD_ID: backup_id,
+                },
+            )
 
     async def _create_safety_backup(self, backup_type: str) -> int:
         """Create a safety backup before restore operation."""
@@ -558,7 +583,9 @@ class RestoreService:
                 raise ValueError(f"Unknown backup type: {backup_type}")
 
             # The restore replaces current data, so the copy it falls back on must be readable.
-            _check_backup_readable(Path(result["file_path"]), backup_type)
+            await _run_to_completion(
+                _check_backup_readable, Path(result["file_path"]), backup_type
+            )
 
             logger.info(f"Created and checked safety backup with ID: {result['id']}")
             return result["id"]
@@ -816,9 +843,14 @@ class RestoreService:
         try:
             with zipfile.ZipFile(backup_path, "r") as zipf:
                 members = self._upload_members(zipf, prefix_required=False)
-                staging, extracted_files, total_size = await _run_to_completion(
-                    self._stage_uploads, zipf, members
-                )
+                staging = self._new_staging_dir()
+                try:
+                    extracted_files, total_size = await _run_to_completion(
+                        self._stage_uploads, zipf, members, staging
+                    )
+                except BaseException:
+                    shutil.rmtree(staging, ignore_errors=True)
+                    raise
             await _run_to_completion(self._swap_in_staged_uploads, staging)
 
             logger.info(f"Restored {extracted_files} files ({total_size} bytes)")
@@ -852,23 +884,15 @@ class RestoreService:
                     manifest_data = json.loads(zipf.read("backup_manifest.json"))
                     logger.info(f"Restoring full backup with manifest: {manifest_data}")
 
-                # A manifest listing a files component makes an empty uploads/ a snapshot to restore.
-                components = (
-                    manifest_data.get("components")
-                    if isinstance(manifest_data, dict)
-                    else None
-                )
-                has_files = bool(members) or (
-                    isinstance(components, dict) and "files" in components
-                )
+                if members or _manifest_lists_files(manifest_data):
+                    staging = self._new_staging_dir()
 
                 # Staged before the database restore, so an unreadable archive changes nothing.
-                if has_files:
-                    staging, files_restored, files_size = await _run_to_completion(
-                        self._stage_uploads, zipf, members
-                    )
-
                 try:
+                    if staging is not None:
+                        files_restored, files_size = await _run_to_completion(
+                            self._stage_uploads, zipf, members, staging
+                        )
                     db_result = await self._restore_database_member(zipf)
                 except BaseException:
                     if staging is not None:
@@ -897,22 +921,16 @@ class RestoreService:
 
     async def _restore_database_member(self, zipf: zipfile.ZipFile) -> Dict[str, Any]:
         """Restore the database from the archive's dump, removing the temporary copy."""
-        # Copied under backup_dir because _restore_database only accepts paths there.
-        safe_db_backup_path = (
-            self.backup_dir
-            / f"temp_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
-        )
-        try:
-            with zipf.open(_DB_MEMBER) as source, open(
-                safe_db_backup_path, "wb"
-            ) as target:
+        self.backup_dir.mkdir(parents=True, exist_ok=True)
+        # Under backup_dir, the only place _restore_database accepts; nested so orphan cleanup skips it.
+        with tempfile.TemporaryDirectory(
+            dir=self.backup_dir, prefix="restore-work-"
+        ) as work_dir:
+            dump = Path(work_dir) / _DB_MEMBER
+            with zipf.open(_DB_MEMBER) as source, open(dump, "wb") as target:
                 shutil.copyfileobj(source, target)
             logger.info("Restoring database from full backup...")
-            return await self._restore_database(safe_db_backup_path)
-        finally:
-            if safe_db_backup_path.exists():
-                safe_db_backup_path.unlink()
-                logger.debug(f"Cleaned up temporary file: {safe_db_backup_path}")
+            return await self._restore_database(dump)
 
     def _upload_members(
         self, zipf: zipfile.ZipFile, prefix_required: bool
@@ -946,39 +964,37 @@ class RestoreService:
             members.append((member, relative.as_posix()))
         return members
 
-    def _stage_uploads(
-        self,
-        zipf: zipfile.ZipFile,
-        members: List[Tuple[zipfile.ZipInfo, str]],
-    ) -> Tuple[Path, int, int]:
-        """Extract members into a new staging directory inside the uploads directory.
-
-        Returns (staging directory, files, bytes). If any member fails to extract,
-        the staging directory is removed and the error re-raised.
-        """
+    def _new_staging_dir(self) -> Path:
+        """Create an empty staging directory inside the uploads directory."""
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         staging = self.upload_dir / f"{_STAGING_PREFIX}{stamp}"
         staging.mkdir()
+        return staging
+
+    def _stage_uploads(
+        self,
+        zipf: zipfile.ZipFile,
+        members: List[Tuple[zipfile.ZipInfo, str]],
+        staging: Path,
+    ) -> Tuple[int, int]:
+        """Extract members into staging and return (files, bytes).
+
+        On failure staging is left partly written; the caller removes it.
+        """
         staging_root = staging.resolve()
         extracted_files = 0
         total_size = 0
-        try:
-            for member, relative in members:
-                target_path = staging / relative
-                if not target_path.resolve().is_relative_to(staging_root):
-                    raise ValueError(
-                        f"Unsafe path in backup archive: {member.filename}"
-                    )
-                target_path.parent.mkdir(parents=True, exist_ok=True)
-                with zipf.open(member) as source, open(target_path, "wb") as target:
-                    shutil.copyfileobj(source, target)
-                extracted_files += 1
-                total_size += member.file_size
-        except Exception:
-            shutil.rmtree(staging, ignore_errors=True)
-            raise
-        return staging, extracted_files, total_size
+        for member, relative in members:
+            target_path = staging / relative
+            if not target_path.resolve().is_relative_to(staging_root):
+                raise ValueError(f"Unsafe path in backup archive: {member.filename}")
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            with zipf.open(member) as source, open(target_path, "wb") as target:
+                shutil.copyfileobj(source, target)
+            extracted_files += 1
+            total_size += member.file_size
+        return extracted_files, total_size
 
     def _swap_in_staged_uploads(self, staging: Path) -> None:
         """Replace the uploads directory's contents with staging's, keeping excluded paths.
