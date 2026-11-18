@@ -29,6 +29,7 @@ from app.models.models import (
     Insurance,
     LabResult,
     LabResultFile,
+    MedicalEquipment,
     Medication,
     Procedure,
     Symptom,
@@ -133,6 +134,13 @@ ATTACHMENT_SOURCES: Tuple[AttachmentSource, ...] = (
         ("company_name", "insurance_type"),
         ("effective_date",),
         filter_attr="effective_date",
+    ),
+    AttachmentSource(
+        "medical_equipment",
+        MedicalEquipment,
+        ("medical-equipment",),
+        ("equipment_name",),
+        ("prescribed_date",),
     ),
 )
 

@@ -14,6 +14,8 @@ import MantineSymptomForm from '../../medical/MantineSymptomForm';
 import SymptomViewModal from '../../medical/symptoms/SymptomViewModal';
 import MantineVisitForm from '../../medical/MantineVisitForm';
 import VisitViewModal from '../../medical/visits/VisitViewModal';
+import EquipmentFormWrapper from '../../medical/equipment/EquipmentFormWrapper';
+import EquipmentViewModal from '../../medical/equipment/EquipmentViewModal';
 import { apiService } from '../../../services/api';
 
 vi.mock('../../medical/practitioners/PractitionerSelectWithCreate', () => ({
@@ -50,6 +52,8 @@ const SymptomForm = loose(MantineSymptomForm);
 const SymptomView = loose(SymptomViewModal);
 const VisitForm = loose(MantineVisitForm);
 const VisitView = loose(VisitViewModal);
+const EquipmentForm = loose(EquipmentFormWrapper);
+const EquipmentView = loose(EquipmentViewModal);
 
 const formBase = {
   isOpen: true,
@@ -143,6 +147,19 @@ const cases: Case[] = [
       />
     ),
     form: () => <VisitForm {...formBase} editingVisit={{ id: 1 }} />,
+  },
+  {
+    name: 'medical equipment',
+    viewTab: 'dates',
+    editTab: 'dates',
+    view: onEdit => (
+      <EquipmentView
+        {...viewBase}
+        onEdit={onEdit}
+        equipment={{ id: 1, equipment_name: 'CPAP', tags: [] }}
+      />
+    ),
+    form: () => <EquipmentForm {...formBase} editingEquipment={{ id: 1 }} />,
   },
 ];
 

@@ -15,6 +15,7 @@
 export type EditTabEntity =
   | 'allergies'
   | 'conditions'
+  | 'equipment'
   | 'immunizations'
   | 'injuries'
   | 'insurance'
@@ -46,6 +47,7 @@ const VIEW_TO_EDIT_TAB: Record<EditTabEntity, TabMap> = {
       'documents'
     ),
   },
+  equipment: sameTabs('basic', 'device', 'dates', 'documents', 'notes'),
   immunizations: {
     overview: 'basic',
     ...sameTabs('administration', 'notes', 'documents'),

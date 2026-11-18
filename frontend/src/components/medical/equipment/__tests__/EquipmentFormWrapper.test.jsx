@@ -73,20 +73,18 @@ vi.mock('../../../../hooks/useFormHandlers', () => ({
   }),
 }));
 
-// Mock TagInput
+// Mock TagInput. Like the real one it has no label of its own: the form
+// labels it through the id
 vi.mock('../../../common/TagInput', () => ({
-  TagInput: ({ label, value, onChange, placeholder }) => (
-    <div>
-      <label htmlFor="tag-input">{label}</label>
-      <input
-        id="tag-input"
-        type="text"
-        placeholder={placeholder}
-        value={value?.join(', ') || ''}
-        onChange={e => onChange(e.target.value.split(', ').filter(Boolean))}
-        data-testid="tag-input"
-      />
-    </div>
+  TagInput: ({ id, value, onChange, placeholder }) => (
+    <input
+      id={id}
+      type="text"
+      placeholder={placeholder}
+      value={value?.join(', ') || ''}
+      onChange={e => onChange(e.target.value.split(', ').filter(Boolean))}
+      data-testid="tag-input"
+    />
   ),
 }));
 
@@ -108,6 +106,15 @@ vi.mock('../../../shared/SubmitButton', () => ({
       {children}
     </button>
   ),
+}));
+
+// Stand-in for the document manager that records the props it was given
+const documentManagerProps = vi.hoisted(() => ({ current: null }));
+vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
+  default: props => {
+    documentManagerProps.current = props;
+    return <div data-testid="document-manager" />;
+  },
 }));
 
 // Mock scrollIntoView for Mantine Combobox
@@ -190,7 +197,9 @@ describe('EquipmentFormWrapper', () => {
       expect(
         screen.getByRole('textbox', { name: /^Notes/i })
       ).toBeInTheDocument();
-      expect(screen.getByLabelText(/Tags/i)).toBeInTheDocument();
+      expect(screen.getByLabelText('Tags')).toBe(
+        screen.getByTestId('tag-input')
+      );
     });
 
     test('renders date fields', async () => {
@@ -566,6 +575,47 @@ describe('EquipmentFormWrapper', () => {
       expect(() => {
         render(<EquipmentFormWrapper {...propsWithNoPractitioners} />);
       }).not.toThrow();
+    });
+  });
+
+  describe('Documents tab', () => {
+    test('holds files for upload until new equipment is saved', async () => {
+      const user = userEvent.setup();
+      const onDocumentManagerRef = vi.fn();
+      render(
+        <EquipmentFormWrapper
+          {...defaultProps}
+          onDocumentManagerRef={onDocumentManagerRef}
+        />
+      );
+
+      await user.click(screen.getByRole('tab', { name: /Add Files/i }));
+
+      expect(screen.getByTestId('document-manager')).toBeInTheDocument();
+      expect(documentManagerProps.current).toMatchObject({
+        entityType: 'medical-equipment',
+        entityId: null,
+        mode: 'create',
+        onUploadPendingFiles: onDocumentManagerRef,
+      });
+    });
+
+    test('manages the files of the equipment being edited', async () => {
+      const user = userEvent.setup();
+      render(
+        <EquipmentFormWrapper
+          {...defaultProps}
+          editingEquipment={{ id: 5, equipment_name: 'CPAP' }}
+        />
+      );
+
+      await user.click(screen.getByRole('tab', { name: /Documents/i }));
+
+      expect(documentManagerProps.current).toMatchObject({
+        entityType: 'medical-equipment',
+        entityId: 5,
+        mode: 'edit',
+      });
     });
   });
 

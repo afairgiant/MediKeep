@@ -29,6 +29,7 @@ from app.models.models import (
     Insurance,
     LabResult,
     LabResultFile,
+    MedicalEquipment,
     Medication,
     Procedure,
     Symptom,
@@ -135,6 +136,17 @@ RECORDS = {
             member_id="M1",
             effective_date=day,
             status="active",
+        ),
+    ),
+    "medical_equipment": (
+        "medical-equipment",
+        "CPAP",
+        lambda pid, day: MedicalEquipment(
+            patient_id=pid,
+            equipment_name="CPAP",
+            equipment_type="cpap",
+            status="active",
+            prescribed_date=day,
         ),
     ),
 }

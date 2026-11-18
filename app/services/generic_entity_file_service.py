@@ -15,7 +15,18 @@ from app.core.config import settings
 from app.core.http.integration_errors import raise_if_integration_failure
 from app.core.logging.config import get_logger
 from app.core.utils.stored_files import resolve_stored_file
-from app.models.models import EntityFile, User, UserPreferences, get_utc_now
+from app.models.models import (
+    Encounter,
+    EntityFile,
+    Insurance,
+    LabResult,
+    MedicalEquipment,
+    Patient,
+    Procedure,
+    User,
+    UserPreferences,
+    get_utc_now,
+)
 from app.schemas.entity_file import (
     EntityFileCreate,
     EntityFileResponse,
@@ -46,6 +57,49 @@ from app.services.paperless_service import (
 from app.services.paperless_task_status import extract_task, parse_task
 
 logger = get_logger(__name__, "app")
+
+# (entity type, model) pairs each remote check looks at. Files are found through the
+# model's patient, so a check only sees the current user's files. Most file-capable
+# types are not covered yet (#1267).
+PAPERLESS_ORPHAN_CHECK_SOURCES = (
+    ("lab-result", LabResult),
+    ("procedure", Procedure),
+    ("medical-equipment", MedicalEquipment),
+)
+PAPERLESS_SYNC_CHECK_SOURCES = (
+    ("lab-result", LabResult),
+    ("procedure", Procedure),
+    ("insurance", Insurance),
+    ("visit", Encounter),
+    ("medical-equipment", MedicalEquipment),
+)
+PAPRA_SYNC_CHECK_SOURCES = (
+    ("lab-result", LabResult),
+    ("procedure", Procedure),
+    ("insurance", Insurance),
+    ("encounter", Encounter),
+    ("medical-equipment", MedicalEquipment),
+)
+
+
+def _user_entity_files(
+    db: Session, user_id: int, sources, *conditions
+) -> List[EntityFile]:
+    """Files matching ``conditions`` on the ``sources`` records of the user's patients."""
+    files: List[EntityFile] = []
+    for entity_type, model in sources:
+        files.extend(
+            db.query(EntityFile)
+            .join(
+                model,
+                (EntityFile.entity_type == entity_type)
+                & (EntityFile.entity_id == model.id),
+            )
+            .join(Patient, model.patient_id == Patient.id)
+            .filter(Patient.user_id == user_id, *conditions)
+            .all()
+        )
+    return files
 
 
 class GenericEntityFileService:
@@ -1504,52 +1558,18 @@ class GenericEntityFileService:
             current_user_id: User ID to check orphaned records for
         """
         try:
-            from app.models.models import LabResult, Procedure
-
             logger.info(
                 f"🔍 ORPHAN CHECK - Checking orphaned paperless records for user {current_user_id}"
             )
 
             # Find all paperless files WITHOUT document IDs (orphaned records)
-            orphaned_files = []
-
-            # Lab result orphaned files (need to join through Patient)
-            from app.models.models import Patient
-
-            lab_orphans = (
-                db.query(EntityFile)
-                .join(
-                    LabResult,
-                    (EntityFile.entity_type == "lab-result")
-                    & (EntityFile.entity_id == LabResult.id),
-                )
-                .join(Patient, LabResult.patient_id == Patient.id)
-                .filter(
-                    Patient.user_id == current_user_id,
-                    EntityFile.storage_backend == "paperless",
-                    EntityFile.paperless_document_id.is_(None),  # NO document ID
-                )
-                .all()
+            orphaned_files = _user_entity_files(
+                db,
+                current_user_id,
+                PAPERLESS_ORPHAN_CHECK_SOURCES,
+                EntityFile.storage_backend == "paperless",
+                EntityFile.paperless_document_id.is_(None),  # NO document ID
             )
-            orphaned_files.extend(lab_orphans)
-
-            # Procedure orphaned files (need to join through Patient)
-            procedure_orphans = (
-                db.query(EntityFile)
-                .join(
-                    Procedure,
-                    (EntityFile.entity_type == "procedure")
-                    & (EntityFile.entity_id == Procedure.id),
-                )
-                .join(Patient, Procedure.patient_id == Patient.id)
-                .filter(
-                    Patient.user_id == current_user_id,
-                    EntityFile.storage_backend == "paperless",
-                    EntityFile.paperless_document_id.is_(None),  # NO document ID
-                )
-                .all()
-            )
-            orphaned_files.extend(procedure_orphans)
 
             if orphaned_files:
                 logger.warning(
@@ -1609,9 +1629,6 @@ class GenericEntityFileService:
         await self._handle_orphaned_paperless_records(db, current_user_id)
 
         try:
-            # Get all paperless files for the user by joining with entity tables
-            from app.models.models import LabResult, Procedure
-
             # First, let's see what entity types actually exist for paperless files
             all_paperless_files = (
                 db.query(EntityFile)
@@ -1628,95 +1645,14 @@ class GenericEntityFileService:
                     f"File {f.id}: entity_type='{f.entity_type}', entity_id={f.entity_id}, document_id={f.paperless_document_id}"
                 )
 
-            # Build a union query to find paperless files across all entity types for this user
-            paperless_files = []
-
-            # Query lab result files (need to join through Patient to get user_id)
-            logger.debug(f"Querying lab result files for user {current_user_id}")
-            from app.models.models import Patient
-
-            lab_files = (
-                db.query(EntityFile)
-                .join(
-                    LabResult,
-                    (EntityFile.entity_type == "lab-result")
-                    & (EntityFile.entity_id == LabResult.id),
-                )
-                .join(Patient, LabResult.patient_id == Patient.id)
-                .filter(
-                    Patient.user_id == current_user_id,
-                    EntityFile.storage_backend == "paperless",
-                )
-                .all()
+            paperless_files = _user_entity_files(
+                db,
+                current_user_id,
+                PAPERLESS_SYNC_CHECK_SOURCES,
+                EntityFile.storage_backend == "paperless",
             )
-            logger.debug(f"Found {len(lab_files)} lab result files")
-            paperless_files.extend(lab_files)
-
-            # Query procedure files (need to join through Patient to get user_id)
-            logger.debug(f"Querying procedure files for user {current_user_id}")
-            procedure_files = (
-                db.query(EntityFile)
-                .join(
-                    Procedure,
-                    (EntityFile.entity_type == "procedure")
-                    & (EntityFile.entity_id == Procedure.id),
-                )
-                .join(Patient, Procedure.patient_id == Patient.id)
-                .filter(
-                    Patient.user_id == current_user_id,
-                    EntityFile.storage_backend == "paperless",
-                )
-                .all()
-            )
-            logger.debug(f"Found {len(procedure_files)} procedure files")
-            paperless_files.extend(procedure_files)
-
-            # Query insurance files (need to join through Patient to get user_id)
-            logger.debug(f"Querying insurance files for user {current_user_id}")
-            from app.models.models import Insurance
-
-            insurance_files = (
-                db.query(EntityFile)
-                .join(
-                    Insurance,
-                    (EntityFile.entity_type == "insurance")
-                    & (EntityFile.entity_id == Insurance.id),
-                )
-                .join(Patient, Insurance.patient_id == Patient.id)
-                .filter(
-                    Patient.user_id == current_user_id,
-                    EntityFile.storage_backend == "paperless",
-                )
-                .all()
-            )
-            logger.debug(f"Found {len(insurance_files)} insurance files")
-            paperless_files.extend(insurance_files)
-
-            # Query visit files (need to join through Patient to get user_id)
-            logger.debug(f"Querying visit files for user {current_user_id}")
-            from app.models.models import Encounter
-
-            visit_files = (
-                db.query(EntityFile)
-                .join(
-                    Encounter,
-                    (EntityFile.entity_type == "visit")
-                    & (EntityFile.entity_id == Encounter.id),
-                )
-                .join(Patient, Encounter.patient_id == Patient.id)
-                .filter(
-                    Patient.user_id == current_user_id,
-                    EntityFile.storage_backend == "paperless",
-                )
-                .all()
-            )
-            logger.debug(f"Found {len(visit_files)} visit files")
-            paperless_files.extend(visit_files)
-
             logger.info(
-                f"Found {len(paperless_files)} paperless files for user {current_user_id}: "
-                f"{len(lab_files)} lab results, {len(procedure_files)} procedures, "
-                f"{len(insurance_files)} insurance, {len(visit_files)} visits"
+                f"Found {len(paperless_files)} paperless files for user {current_user_id}"
             )
 
             if not paperless_files:
@@ -2068,41 +2004,15 @@ class GenericEntityFileService:
             (True = exists, False = missing, None = error)
         """
         try:
-            from app.models.models import (
-                Encounter,
-                Insurance,
-                LabResult,
-                Patient,
-                Procedure,
-            )
             from app.services.papra_client import create_papra_client
 
-            # Scope query to current user by joining through entity -> Patient -> User
-            papra_files = []
-            entity_joins = [
-                ("lab-result", LabResult),
-                ("procedure", Procedure),
-                ("insurance", Insurance),
-                ("encounter", Encounter),
-            ]
-
-            for entity_type_str, entity_model in entity_joins:
-                files = (
-                    db.query(EntityFile)
-                    .join(
-                        entity_model,
-                        (EntityFile.entity_type == entity_type_str)
-                        & (EntityFile.entity_id == entity_model.id),
-                    )
-                    .join(Patient, entity_model.patient_id == Patient.id)
-                    .filter(
-                        Patient.user_id == current_user_id,
-                        EntityFile.storage_backend == "papra",
-                        EntityFile.papra_document_id.isnot(None),
-                    )
-                    .all()
-                )
-                papra_files.extend(files)
+            papra_files = _user_entity_files(
+                db,
+                current_user_id,
+                PAPRA_SYNC_CHECK_SOURCES,
+                EntityFile.storage_backend == "papra",
+                EntityFile.papra_document_id.isnot(None),
+            )
 
             if not papra_files:
                 logger.info(

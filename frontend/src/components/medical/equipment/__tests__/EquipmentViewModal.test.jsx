@@ -24,6 +24,11 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+// The document manager makes its own API calls; its contents are not under test
+vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
+  default: () => <div data-testid="document-manager" />,
+}));
+
 // Wrapper component with Mantine provider
 const MantineWrapper = ({ children }) => (
   <MantineProvider>{children}</MantineProvider>
@@ -132,6 +137,42 @@ describe('EquipmentViewModal', () => {
 
       // StatusBadge renders "Active" for active status (appears in header + details)
       expect(screen.getAllByText('Active').length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('Tabs', () => {
+    test('has the same tabs as the Edit form, opening on Basic Info', () => {
+      render(
+        <MantineWrapper>
+          <EquipmentViewModal {...defaultProps} />
+        </MantineWrapper>
+      );
+
+      const tabs = screen.getAllByRole('tab');
+      expect(tabs.map(tab => tab.textContent)).toEqual([
+        'Basic Info',
+        'Device Details',
+        'Service & Dates',
+        'Documents',
+        'Notes',
+      ]);
+      expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    test('shows the fields of the selected tab', async () => {
+      const user = userEvent.setup();
+      render(
+        <MantineWrapper>
+          <EquipmentViewModal {...defaultProps} />
+        </MantineWrapper>
+      );
+
+      expect(screen.getByText('SN-12345-CPAP')).not.toBeVisible();
+
+      await user.click(screen.getByRole('tab', { name: 'Device Details' }));
+
+      expect(screen.getByText('SN-12345-CPAP')).toBeVisible();
+      expect(screen.getByText('Basic Information')).not.toBeVisible();
     });
   });
 
@@ -339,14 +380,17 @@ describe('EquipmentViewModal', () => {
   });
 
   describe('Notes Section', () => {
-    test('displays notes when available', () => {
+    test('displays notes when available', async () => {
+      const user = userEvent.setup();
       render(
         <MantineWrapper>
           <EquipmentViewModal {...defaultProps} />
         </MantineWrapper>
       );
 
-      expect(screen.getByText('Notes')).toBeInTheDocument();
+      await user.click(screen.getByRole('tab', { name: 'Notes' }));
+
+      expect(screen.getByRole('heading', { name: 'Notes' })).toBeVisible();
       expect(
         screen.getByText(
           'Patient uses nasal pillow mask. Pressure setting: 10-15 cmH2O'
@@ -354,7 +398,7 @@ describe('EquipmentViewModal', () => {
       ).toBeInTheDocument();
     });
 
-    test('hides notes section when not available', () => {
+    test('says there are no notes when there are none', () => {
       const noNotesEquipment = {
         ...defaultEquipment,
         notes: null,
@@ -366,9 +410,7 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      // Notes header should not appear (as a section title)
-      screen.queryAllByText('Notes');
-      // May appear in form context but not as a data display section
+      expect(screen.getByText('No notes available')).toBeInTheDocument();
     });
   });
 

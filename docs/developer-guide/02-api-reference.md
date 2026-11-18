@@ -4652,7 +4652,9 @@ Base path: `/api/v1/notifications`
 
 Base path: `/api/v1/entity-files`
 
-The shared Entity Files subsystem handles attachments across most medical entity types (lab results, medications, conditions, procedures, encounters, treatments, immunizations, vitals, allergies, injuries, etc.). Files can be stored locally or linked to external document backends (Paperless-ngx, Papra).
+The shared Entity Files subsystem handles attachments across most medical entity types. Files can be stored locally or linked to external document backends (Paperless-ngx, Papra).
+
+Supported `{entity_type}` path values: `lab-result`, `medication`, `condition`, `allergy`, `immunization`, `procedure`, `treatment`, `encounter` (or its alias `visit`), `symptom`, `injury`, `insurance` and `medical-equipment`. Any other value returns `400 Bad Request`.
 
 ### Access Control
 

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Modal,
@@ -9,7 +10,15 @@ import {
   SimpleGrid,
   Title,
   Paper,
+  Tabs,
 } from '@mantine/core';
+import {
+  IconInfoCircle,
+  IconTool,
+  IconCalendar,
+  IconFileText,
+  IconNotes,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -17,8 +26,11 @@ import {
   getEquipmentTypeLabel,
   getEquipmentStatusColor,
 } from '../../../constants/equipmentConstants';
+import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import ViewModalFooter from '../../shared/ViewModalFooter';
 import NotesView from '../../shared/NotesView';
+import logger from '../../../services/logger';
+import { rememberEditTab } from '../../../utils/editTabHandoff';
 
 const EquipmentViewModal = ({
   isOpen,
@@ -29,12 +41,22 @@ const EquipmentViewModal = ({
   disableEdit = false,
   disableEditTooltip,
 }) => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['common', 'medical', 'shared']);
   const { formatDate } = useDateFormat();
+  const [activeTab, setActiveTab] = useState('basic');
+
+  // Start on the first tab each time the modal opens or shows other equipment
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('basic');
+    }
+  }, [isOpen, equipment?.id]);
 
   if (!isOpen || !equipment) return null;
 
   const handleEdit = () => {
+    // The Edit form opens on the tab that is open here
+    rememberEditTab('equipment', activeTab);
     onEdit(equipment);
     onClose();
   };
@@ -52,7 +74,7 @@ const EquipmentViewModal = ({
       opened={isOpen}
       onClose={onClose}
       title={t('equipment.viewModal.title', 'Equipment Details')}
-      size="lg"
+      size="xl"
       centered
       zIndex={2000}
     >
@@ -88,11 +110,32 @@ const EquipmentViewModal = ({
           </Group>
         </Paper>
 
-        {/* Equipment Details */}
-        <Box>
-          <Stack gap="lg">
-            {/* Basic Information */}
-            <div>
+        {/* Same tabs, in the same order, as the Edit form */}
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs.List>
+            <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              {t('shared:tabs.basicInfo', 'Basic Info')}
+            </Tabs.Tab>
+            <Tabs.Tab value="device" leftSection={<IconTool size={16} />}>
+              {t('medical:equipment.tabs.deviceDetails', 'Device Details')}
+            </Tabs.Tab>
+            <Tabs.Tab value="dates" leftSection={<IconCalendar size={16} />}>
+              {t('medical:equipment.tabs.serviceDates', 'Service & Dates')}
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="documents"
+              leftSection={<IconFileText size={16} />}
+            >
+              {t('shared:tabs.documents', 'Documents')}
+            </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+              {t('shared:tabs.notes', 'Notes')}
+            </Tabs.Tab>
+          </Tabs.List>
+
+          {/* Basic Info Tab */}
+          <Tabs.Panel value="basic">
+            <Box mt="md">
               <Title order={4} mb="sm">
                 {t('shared:labels.basicInformation', 'Basic Information')}
               </Title>
@@ -140,10 +183,12 @@ const EquipmentViewModal = ({
                   </Text>
                 </Stack>
               </SimpleGrid>
-            </div>
+            </Box>
+          </Tabs.Panel>
 
-            {/* Manufacturer Details */}
-            <div>
+          {/* Device Details Tab */}
+          <Tabs.Panel value="device">
+            <Box mt="md">
               <Title order={4} mb="sm">
                 {t(
                   'equipment.viewModal.manufacturerDetails',
@@ -197,102 +242,137 @@ const EquipmentViewModal = ({
                   </Text>
                 </Stack>
               </SimpleGrid>
-            </div>
+            </Box>
+          </Tabs.Panel>
 
-            {/* Dates */}
-            <div>
-              <Title order={4} mb="sm">
-                {t('equipment.viewModal.dates', 'Important Dates')}
-              </Title>
-              <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    {t('equipment.viewModal.prescribedDate', 'Prescribed Date')}
-                  </Text>
-                  <Text
-                    size="sm"
-                    c={equipment.prescribed_date ? 'inherit' : 'dimmed'}
-                  >
-                    {equipment.prescribed_date
-                      ? formatDate(equipment.prescribed_date)
-                      : t('shared:labels.notSpecified', 'Not specified')}
-                  </Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    {t('equipment.viewModal.lastService', 'Last Service')}
-                  </Text>
-                  <Text
-                    size="sm"
-                    c={equipment.last_service_date ? 'inherit' : 'dimmed'}
-                  >
-                    {equipment.last_service_date
-                      ? formatDate(equipment.last_service_date)
-                      : t('shared:labels.notSpecified', 'Not specified')}
-                  </Text>
-                </Stack>
-                <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">
-                    {t('equipment.viewModal.nextService', 'Next Service')}
-                  </Text>
-                  <Text
-                    size="sm"
-                    c={equipment.next_service_date ? 'inherit' : 'dimmed'}
-                  >
-                    {equipment.next_service_date
-                      ? formatDate(equipment.next_service_date)
-                      : t('shared:labels.notSpecified', 'Not specified')}
-                  </Text>
-                </Stack>
-              </SimpleGrid>
-            </div>
+          {/* Service & Dates Tab */}
+          <Tabs.Panel value="dates">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">
+                    {t('equipment.viewModal.dates', 'Important Dates')}
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t(
+                          'equipment.viewModal.prescribedDate',
+                          'Prescribed Date'
+                        )}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={equipment.prescribed_date ? 'inherit' : 'dimmed'}
+                      >
+                        {equipment.prescribed_date
+                          ? formatDate(equipment.prescribed_date)
+                          : t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('equipment.viewModal.lastService', 'Last Service')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={equipment.last_service_date ? 'inherit' : 'dimmed'}
+                      >
+                        {equipment.last_service_date
+                          ? formatDate(equipment.last_service_date)
+                          : t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('equipment.viewModal.nextService', 'Next Service')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={equipment.next_service_date ? 'inherit' : 'dimmed'}
+                      >
+                        {equipment.next_service_date
+                          ? formatDate(equipment.next_service_date)
+                          : t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
 
-            {/* Usage Instructions */}
-            {equipment.usage_instructions && (
-              <div>
-                <Title order={4} mb="sm">
-                  {t(
-                    'equipment.viewModal.usageInstructions',
-                    'Usage Instructions'
-                  )}
-                </Title>
-                <NotesView value={equipment.usage_instructions} />
-              </div>
-            )}
+                {equipment.usage_instructions && (
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t(
+                        'equipment.viewModal.usageInstructions',
+                        'Usage Instructions'
+                      )}
+                    </Title>
+                    <NotesView value={equipment.usage_instructions} />
+                  </div>
+                )}
+              </Stack>
+            </Box>
+          </Tabs.Panel>
 
-            {/* Notes */}
-            {equipment.notes && (
-              <div>
-                <Title order={4} mb="sm">
-                  {t('shared:tabs.notes', 'Notes')}
-                </Title>
-                <NotesView value={equipment.notes} />
-              </div>
-            )}
+          {/* Documents Tab */}
+          <Tabs.Panel value="documents">
+            <Box mt="md">
+              <DocumentManagerWithProgress
+                entityType="medical-equipment"
+                entityId={equipment.id}
+                onError={error => {
+                  logger.error('equipment_view_document_error', {
+                    message: 'Document manager error in equipment view',
+                    equipmentId: equipment.id,
+                    error,
+                    component: 'EquipmentViewModal',
+                  });
+                }}
+              />
+            </Box>
+          </Tabs.Panel>
 
-            {/* Tags */}
-            {equipment.tags && equipment.tags.length > 0 && (
-              <div>
-                <Title order={4} mb="sm">
-                  {t('shared:labels.tags', 'Tags')}
-                </Title>
-                <Group gap="xs">
-                  {equipment.tags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="light"
-                      color="blue"
-                      size="sm"
-                      radius="md"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </Group>
-              </div>
-            )}
-          </Stack>
-        </Box>
+          {/* Notes Tab */}
+          <Tabs.Panel value="notes">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">
+                    {t('shared:tabs.notes', 'Notes')}
+                  </Title>
+                  <NotesView
+                    value={equipment.notes}
+                    emptyText={t(
+                      'shared:labels.noNotesAvailable',
+                      'No notes available'
+                    )}
+                  />
+                </div>
+
+                {equipment.tags && equipment.tags.length > 0 && (
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:labels.tags', 'Tags')}
+                    </Title>
+                    <Group gap="xs">
+                      {equipment.tags.map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="light"
+                          color="blue"
+                          size="sm"
+                          radius="md"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Group>
+                  </div>
+                )}
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+        </Tabs>
 
         <ViewModalFooter
           onClose={onClose}
