@@ -983,6 +983,7 @@
     "columnType": "Eintragstyp",
     "dateLabels": {
       "diagnosed": "Diagnostiziert",
+      "donated": "Gespendet am",
       "given": "Verabreicht",
       "identified": "Festgestellt",
       "injured": "Verletzt am",
@@ -999,6 +1000,7 @@
     "expandFilters": "Filter ausklappen",
     "fallbacks": {
       "allergy": "Allergie",
+      "donation": "Spende",
       "encounter": "Termin",
       "equipment": "Ausrüstung",
       "immunization": "Impfung",

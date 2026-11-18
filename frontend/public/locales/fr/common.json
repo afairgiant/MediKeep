@@ -983,6 +983,7 @@
     "columnType": "Type de données",
     "dateLabels": {
       "diagnosed": "Diagnostiqué(e)",
+      "donated": "Donné le",
       "given": "Donné(e)",
       "identified": "Identifié(e)",
 	  "injured": "Blessé(e)",
@@ -999,6 +1000,7 @@
     "expandFilters": "Développer les filtres",
     "fallbacks": {
       "allergy": "Allergie",
+      "donation": "Don",
       "encounter": "Visite",
 	  "equipment": "Équipement",
       "immunization": "Immunisation",

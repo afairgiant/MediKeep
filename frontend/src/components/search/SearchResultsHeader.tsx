@@ -24,7 +24,7 @@ import {
   IconTable,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { RECORD_TYPES } from './SearchFilterSidebar';
+import { RECORD_TYPE_BY_VALUE } from '../../constants/searchRecordTypes';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -82,7 +82,7 @@ export function SearchResultsHeader({
             {t('search.activeFilters')}:
           </Text>
           {selectedTypes.map(type => {
-            const typeConfig = RECORD_TYPES.find(rt => rt.value === type);
+            const typeConfig = RECORD_TYPE_BY_VALUE[type];
             return (
               <Badge
                 key={type}

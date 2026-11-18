@@ -18,17 +18,6 @@ import {
   Button,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconBandage,
-  IconStethoscope,
-  IconPill,
-  IconThermometer,
-  IconVaccine,
-  IconMedicalCross,
-  IconHeartbeat,
-  IconCalendarEvent,
-  IconFlask,
-  IconHeartRateMonitor,
   IconSearch,
   IconX,
   IconChevronRight,
@@ -36,8 +25,14 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { searchService } from '../../services/searchService';
-import { getTypeLabel } from '../search/searchResultHelpers';
+import { getRecordRoute } from '../../constants/searchRecordTypes';
+import {
+  describeSearchItem,
+  getItemDescription,
+  getTypeColor,
+  getTypeIcon,
+  getTypeLabel,
+} from '../search/searchResultHelpers';
 
 const SearchResults = ({
   results = [],
@@ -50,23 +45,8 @@ const SearchResults = ({
   const navigate = useNavigate();
   const { formatDateTime } = useDateFormat();
 
-  // Icon mapping
-  const iconMap = {
-    IconAlertTriangle,
-    IconBandage,
-    IconStethoscope,
-    IconPill,
-    IconThermometer,
-    IconVaccine,
-    IconMedicalCross,
-    IconHeartbeat,
-    IconCalendarEvent,
-    IconFlask,
-    IconHeartRateMonitor,
-  };
-
   const handleResultClick = result => {
-    const route = searchService.getRecordRoute(result.type, result.id);
+    const route = getRecordRoute(result.type, result.id);
     // Navigate to the record page with view query parameter to open the modal
     navigate(route);
     if (onClose) onClose();
@@ -146,7 +126,14 @@ const SearchResults = ({
         ) : (
           <Stack gap={0}>
             {results.map((result, index) => {
-              const IconComponent = iconMap[result.icon] || IconSearch;
+              const IconComponent = getTypeIcon(result.type);
+              const color = getTypeColor(result.type);
+              const { title, subtitle, date } = describeSearchItem(
+                result.type,
+                result.data,
+                t
+              );
+              const description = getItemDescription(result.data, subtitle);
 
               return (
                 <Paper
@@ -168,7 +155,7 @@ const SearchResults = ({
                 >
                   <Group gap="md">
                     {/* Icon */}
-                    <Avatar color={result.color} variant="light" size="md">
+                    <Avatar color={color} variant="light" size="md">
                       <IconComponent size="1.2rem" />
                     </Avatar>
 
@@ -176,27 +163,27 @@ const SearchResults = ({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <Group gap="xs" mb={4}>
                         <Text fw={500} size="sm" truncate>
-                          {result.title}
+                          {title}
                         </Text>
-                        <Badge size="xs" color={result.color} variant="light">
+                        <Badge size="xs" color={color} variant="light">
                           {getTypeLabel(t, result.type)}
                         </Badge>
                       </Group>
 
-                      {result.subtitle && (
+                      {subtitle && (
                         <Text size="xs" c="dimmed" mb={2} truncate>
-                          {result.subtitle}
+                          {subtitle}
                         </Text>
                       )}
 
-                      {result.description && (
+                      {description && (
                         <Text size="xs" c="dimmed" lineClamp={1}>
-                          {result.description}
+                          {description}
                         </Text>
                       )}
 
                       <Text size="xs" c="dimmed" mt={4}>
-                        {formatDateTime(result.date)}
+                        {formatDateTime(date)}
                       </Text>
                     </div>
 

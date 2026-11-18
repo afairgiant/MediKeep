@@ -85,10 +85,10 @@ export const buildNavigationUrl = (
  * Generate a URL for navigating to a specific entity
  * @param {string} entityType - The entity type
  * @param {string|number} entityId - The entity ID
- * @param {Object} options - Navigation options
- * @param {boolean} options.autoOpen - Whether to auto-open the entity
- * @param {Object} options.filters - Filter parameters
- * @param {Object} options.queryParams - Additional query parameters
+ * @param {Object} [options] - Navigation options
+ * @param {boolean} [options.autoOpen] - Whether to auto-open the entity
+ * @param {Object} [options.filters] - Filter parameters
+ * @param {Object} [options.queryParams] - Additional query parameters
  * @returns {string} The navigation URL
  */
 export const buildEntityUrl = (entityType, entityId, options = {}) => {

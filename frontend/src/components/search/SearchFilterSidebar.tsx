@@ -27,112 +27,30 @@ import { DatePickerInput } from '@mantine/dates';
 import {
   IconFilter,
   IconTag,
-  IconAlertTriangle,
-  IconBandage,
-  IconStethoscope,
-  IconPill,
-  IconThermometer,
-  IconVaccine,
-  IconMedicalCross,
-  IconHeartbeat,
-  IconCalendarEvent,
-  IconFlask,
-  IconHeartRateMonitor,
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { usePersistedToggle } from '../../hooks/usePersistedToggle.js';
 import { ClickableTagBadge } from '../common/ClickableTagBadge';
+import {
+  SEARCH_RECORD_TYPES,
+  type SearchRecordType,
+} from '../../constants/searchRecordTypes';
 
 // ---------------------------------------------------------------------------
-// Constants
+// Helpers
 // ---------------------------------------------------------------------------
-
-export const RECORD_TYPES = [
-  {
-    value: 'medications',
-    labelKey: 'shared:categories.medications',
-    icon: IconPill,
-    color: 'green',
-  },
-  {
-    value: 'conditions',
-    labelKey: 'shared:categories.conditions',
-    icon: IconStethoscope,
-    color: 'blue',
-  },
-  {
-    value: 'lab_results',
-    labelKey: 'shared:categories.lab_results',
-    icon: IconFlask,
-    color: 'indigo',
-  },
-  {
-    value: 'procedures',
-    labelKey: 'shared:categories.procedures',
-    icon: IconMedicalCross,
-    color: 'violet',
-  },
-  {
-    value: 'immunizations',
-    labelKey: 'shared:categories.immunizations',
-    icon: IconVaccine,
-    color: 'orange',
-  },
-  {
-    value: 'treatments',
-    labelKey: 'shared:categories.treatments',
-    icon: IconHeartbeat,
-    color: 'pink',
-  },
-  {
-    value: 'encounters',
-    labelKey: 'search.types.encounters',
-    icon: IconCalendarEvent,
-    color: 'teal',
-  },
-  {
-    value: 'allergies',
-    labelKey: 'shared:categories.allergies',
-    icon: IconAlertTriangle,
-    color: 'red',
-  },
-  {
-    value: 'injuries',
-    labelKey: 'shared:categories.injuries',
-    icon: IconBandage,
-    color: 'lime',
-  },
-  {
-    value: 'symptoms',
-    labelKey: 'shared:categories.symptoms',
-    icon: IconThermometer,
-    color: 'grape',
-  },
-  {
-    value: 'medical_equipment',
-    labelKey: 'shared:categories.medical_equipment',
-    icon: IconHeartRateMonitor,
-    color: 'yellow',
-  },
-  {
-    value: 'vitals',
-    labelKey: 'shared:categories.vitals',
-    icon: IconHeartbeat,
-    color: 'cyan',
-  },
-] as const;
 
 /**
  * Return record types ordered alphabetically by their translated label, using
  * the user's locale so non-Latin and accented labels sort correctly.
  */
-export function sortRecordTypesByLabel(
-  recordTypes: readonly RecordTypeOption[],
-  getLabel: (_labelKey: RecordTypeOption['labelKey']) => string,
+export function sortRecordTypesByLabel<T extends SearchRecordType>(
+  recordTypes: readonly T[],
+  getLabel: (_labelKey: T['labelKey']) => string,
   language: string
-): RecordTypeOption[] {
+): T[] {
   let collator: Intl.Collator;
   try {
     collator = new Intl.Collator(language, { sensitivity: 'base' });
@@ -147,8 +65,6 @@ export function sortRecordTypesByLabel(
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-export type RecordTypeOption = (typeof RECORD_TYPES)[number];
 
 export interface PopularTag {
   tag: string;
@@ -223,7 +139,8 @@ export function SearchFilterSidebar({
 }: SearchFilterSidebarProps) {
   const { t, i18n } = useTranslation(['common', 'shared']);
   const sortedRecordTypes = useMemo(
-    () => sortRecordTypesByLabel(RECORD_TYPES, key => t(key), i18n.language),
+    () =>
+      sortRecordTypesByLabel(SEARCH_RECORD_TYPES, key => t(key), i18n.language),
     [t, i18n.language]
   );
   const [collapsed, setCollapsed] = usePersistedToggle(

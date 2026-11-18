@@ -7,7 +7,7 @@ abstracting away database-specific operations.
 
 from typing import Any, Dict, List
 
-from sqlalchemy import JSON, and_, case, cast, func, literal, true
+from sqlalchemy import JSON, and_, case, cast, func, literal, or_, true
 from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import ColumnElement
@@ -30,6 +30,14 @@ def get_database_type(db: Session) -> str:
 def contains_ignore_case(column: ColumnElement, term: str) -> ColumnElement:
     """Case-insensitive substring match; `%` and `_` in the term match literally."""
     return func.lower(column).contains(term.lower(), autoescape=True)
+
+
+def contains_code_ignore_case(column: ColumnElement, term: str) -> ColumnElement:
+    """`contains_ignore_case` that also matches snake_case codes: `term` as typed, or with `_` for spaces."""
+    return or_(
+        contains_ignore_case(column, term),
+        contains_ignore_case(column, term.replace(" ", "_")),
+    )
 
 
 def create_text_search_condition(

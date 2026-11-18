@@ -5061,7 +5061,7 @@ Base path: `/api/v1/search`
 - **Purpose**: Search the active (or specified) patient's records in one request. Results are grouped by record type.
 - **Query Parameters**:
   - `q` (string, optional): Search text, matched case-insensitively as a substring of each record type's searchable text fields (such as name, notes and description) and its tags; `%` and `_` match literally. Omit it to list records.
-  - `types` (array, optional): Record types to search; repeat the parameter for several. Default: all of `medications`, `conditions`, `lab_results`, `procedures`, `immunizations`, `treatments`, `encounters`, `allergies`, `injuries`, `symptoms`, `medical_equipment`, `vitals`
+  - `types` (array, optional): Record types to search; repeat the parameter for several. Default: all of `medications`, `conditions`, `lab_results`, `procedures`, `immunizations`, `treatments`, `encounters`, `allergies`, `injuries`, `symptoms`, `medical_equipment`, `blood_donations`, `vitals`
   - `patient_id` (integer, optional): Patient to search (must be accessible to the caller)
   - `sort` (string, default: `relevance`): `relevance`, `date_desc`, `date_asc`, `title`
   - `date_from`, `date_to` (ISO date, optional): Restrict to records dated within the range
@@ -5096,6 +5096,10 @@ Base path: `/api/v1/search`
 ```
 
 Only the groups for the requested `types` appear in `results`. Injuries without a `date_of_injury` and equipment without a `prescribed_date` sort after dated records in both date directions.
+
+Blood donation items (`type: "blood_donation"`) carry `donation_type` (the raw enum value, e.g. `whole_blood`), `location` and `donation_date`; `q` matches the donation type, location, notes and tags. `highlight` is the donation type code.
+
+Code columns stored in snake_case (blood donation `donation_type`, equipment `equipment_type`) also match `q` with spaces in place of underscores, so `whole blood` finds `whole_blood`.
 
 ### 11.2 Tags
 

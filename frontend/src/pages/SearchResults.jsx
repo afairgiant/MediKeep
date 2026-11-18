@@ -42,14 +42,11 @@ import {
   SearchResultCard,
   SearchPreviewPanel,
   SearchResultsHeader,
-  ICON_MAP,
-  FALLBACK_ICON,
-  getTypeLabel,
-  RECORD_TYPE_TO_TAG_ENTITY,
-  getItemDateWithLabel,
+  toSearchRow,
   flattenTagResults,
   toISODateStr,
 } from '../components/search';
+import { RECORD_TYPE_TO_TAG_ENTITY } from '../constants/searchRecordTypes';
 import AnimatedCardGrid from '../components/shared/AnimatedCardGrid';
 import EmptyState from '../components/shared/EmptyState';
 import { useTagColors } from '../hooks/useTagColors';
@@ -480,32 +477,18 @@ const SearchResults = () => {
 
   // All results are paginated client-side. The backend returns per-type batches
   // (not a single global page), so we combine everything and slice here.
-  const allFilteredResults = useMemo(() => {
-    const textRows = results.map(result => {
-      const IconComponent = ICON_MAP[result.icon] || FALLBACK_ICON;
-      const dateInfo = getItemDateWithLabel(
-        result.type,
-        result.data || result,
-        t
-      );
-      return {
-        type: result.type,
-        id: result.id,
-        title: result.title,
-        subtitle: result.subtitle,
-        date: result.date,
-        dateLabel: dateInfo.label,
-        icon: IconComponent,
-        color: result.color || 'gray',
-        typeLabel: getTypeLabel(t, result.type),
-        tags: result.tags || [],
-        route: searchService.getRecordRoute(result.type, result.id),
-        _source: 'text',
-      };
-    });
+  // Built from the raw items so translated text follows a language change
+  const textRows = useMemo(
+    () => results.map(r => toSearchRow(r.type, r.data, t, 'text')),
+    [results, t]
+  );
+  const tagRows = useMemo(
+    () => flattenTagResults(tagResults, t),
+    [tagResults, t]
+  );
 
+  const allFilteredResults = useMemo(() => {
     const hasTagFilter = selectedTags.length > 0;
-    const tagRows = flattenTagResults(tagResults, t);
 
     // No tag filter active: show text results only
     let merged;
@@ -573,13 +556,12 @@ const SearchResults = () => {
 
     return sorted;
   }, [
-    results,
-    tagResults,
+    textRows,
+    tagRows,
     selectedTags,
     query,
     sortBy,
     dateRange,
-    t,
     i18n.language,
   ]);
 

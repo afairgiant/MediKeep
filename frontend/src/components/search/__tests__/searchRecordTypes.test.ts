@@ -1,25 +1,41 @@
 import { describe, it, expect } from 'vitest';
 
 import searchService from '../../../services/searchService';
-import { RECORD_TYPES, sortRecordTypesByLabel } from '../SearchFilterSidebar';
+import { sortRecordTypesByLabel } from '../SearchFilterSidebar';
 import {
-  ICON_MAP,
   RECORD_TYPE_TO_TAG_ENTITY,
-  TAG_ENTITY_CONFIG,
-  TYPE_LABEL_KEY_MAP,
+  SEARCH_RECORD_TYPES,
+  getRecordRoute,
+} from '../../../constants/searchRecordTypes';
+import {
+  FALLBACK_ICON,
+  describeSearchItem,
   flattenTagResults,
+  getItemDescription,
   getItemDateWithLabel,
   getItemSubtitle,
   getItemTitle,
+  getTypeIcon,
   getTypeLabel,
+  toSearchRow,
   type TFunc,
 } from '../searchResultHelpers';
 
 // Echo the key so assertions can tell a translated label from a raw fallback.
 const t: TFunc = key => key;
 
-// Backend group key (plural, as in RECORD_TYPES) -> item `type` (singular)
-const GROUP_TO_ITEM_TYPE: Record<string, string> = {
+// Like i18next with no locale loaded: the default value wins when one is given
+const tWithFallback: TFunc = (key, fallback) =>
+  typeof fallback === 'string' ? fallback : key;
+
+// A text search result as the search page renders it
+function textRow(groupKey: string, item: Record<string, unknown>) {
+  const raw = searchService.formatResultItem(groupKey, item);
+  return toSearchRow(raw.type, raw.data, tWithFallback, 'text');
+}
+
+// Backend group key -> item `type`, as returned by GET /search/
+const BACKEND_GROUP_TO_ITEM_TYPE: Record<string, string> = {
   medications: 'medication',
   conditions: 'condition',
   lab_results: 'lab_result',
@@ -31,20 +47,20 @@ const GROUP_TO_ITEM_TYPE: Record<string, string> = {
   injuries: 'injury',
   symptoms: 'symptom',
   medical_equipment: 'medical_equipment',
+  blood_donations: 'blood_donation',
   vitals: 'vital',
 };
 
-describe('search record types stay in sync', () => {
-  it('knows the item type of every sidebar record type', () => {
-    RECORD_TYPES.forEach(rt => {
-      expect(GROUP_TO_ITEM_TYPE[rt.value], rt.value).toBeDefined();
-    });
+describe('search record type registry', () => {
+  it('covers exactly the record types the backend returns', () => {
+    expect(
+      Object.fromEntries(SEARCH_RECORD_TYPES.map(rt => [rt.value, rt.itemType]))
+    ).toEqual(BACKEND_GROUP_TO_ITEM_TYPE);
   });
 
-  it.each(RECORD_TYPES.map(rt => rt.value))(
-    'renders backend results for %s',
-    groupKey => {
-      const itemType = GROUP_TO_ITEM_TYPE[groupKey];
+  it.each(SEARCH_RECORD_TYPES.map(rt => [rt.value, rt.itemType]))(
+    'formats and links backend results for %s',
+    (groupKey, itemType) => {
       const row = searchService.formatResultItem(groupKey, {
         id: 7,
         type: itemType,
@@ -52,24 +68,85 @@ describe('search record types stay in sync', () => {
 
       expect(row).not.toBeNull();
       expect(row.type).toBe(itemType);
-      expect(ICON_MAP[row.icon]).toBeDefined();
-      expect(TYPE_LABEL_KEY_MAP[itemType]).toBeDefined();
-      expect(searchService.getRecordRoute(itemType, 7)).not.toBe('/dashboard');
+      expect(getTypeIcon(itemType)).not.toBe(FALLBACK_ICON);
+      expect(getRecordRoute(itemType, 7)).toMatch(/^\/[a-z-]+\?view=7$/);
+      expect(getItemTitle(itemType, {}, t)).not.toBe('search.fallbacks.record');
+      expect(getItemDateWithLabel(itemType, {}, t).label).not.toBe('');
     }
   );
 
-  it.each(Object.entries(RECORD_TYPE_TO_TAG_ENTITY))(
-    'has tag search config for %s',
-    (_recordType, entity) => {
-      expect(TAG_ENTITY_CONFIG[entity], entity).toBeDefined();
-      expect(TYPE_LABEL_KEY_MAP[entity], entity).toBeDefined();
-    }
-  );
+  it('skips a group the registry does not know', () => {
+    expect(searchService.formatResultItem('unknown_things', { id: 1 })).toBe(
+      null
+    );
+    expect(getRecordRoute('unknown_thing', 1)).toBe('/dashboard');
+  });
 
-  it('offers a tag entity for every sidebar type except vitals', () => {
-    RECORD_TYPES.filter(rt => rt.value !== 'vitals').forEach(rt => {
-      expect(RECORD_TYPE_TO_TAG_ENTITY[rt.value], rt.value).toBeDefined();
-    });
+  it('offers a tag entity for every record type except vitals', () => {
+    const untaggable = SEARCH_RECORD_TYPES.filter(
+      rt => !RECORD_TYPE_TO_TAG_ENTITY[rt.value]
+    ).map(rt => rt.value);
+
+    expect(untaggable).toEqual(['vitals']);
+  });
+
+  it('links text and tag search results for the same record to the same page', () => {
+    const tagRows = flattenTagResults({ encounter: [{ id: 2 }] }, t);
+
+    expect(tagRows[0].route).toBe('/visits?view=2');
+    expect(getRecordRoute('encounter', 2)).toBe('/visits?view=2');
+  });
+
+  it('drops tag rows for a type without tags', () => {
+    expect(flattenTagResults({ vital: [{ id: 1 }] }, t)).toEqual([]);
+  });
+});
+
+describe('describeSearchItem', () => {
+  it('translates with the t it is given', () => {
+    const french: TFunc = key =>
+      key === 'medical:bloodDonations.types.plasma' ? 'Plasma (fr)' : key;
+
+    expect(
+      describeSearchItem('blood_donation', { donation_type: 'plasma' }, french)
+        .title
+    ).toBe('Plasma (fr)');
+  });
+
+  it('returns Markdown as plain text; a description equal to the subtitle is dropped', () => {
+    const text = describeSearchItem(
+      'procedure',
+      { name: 'Biopsy', description: '**Left** arm' },
+      t
+    );
+
+    expect(text.subtitle).toBe('Left arm');
+    expect(
+      getItemDescription({ description: '**Left** arm' }, text.subtitle)
+    ).toBe('');
+  });
+
+  it('keeps a description that differs from the subtitle', () => {
+    const text = describeSearchItem(
+      'treatment',
+      { treatment_name: 'PT', status: 'active', description: 'Twice weekly' },
+      t
+    );
+
+    expect(text.subtitle).toBe('active');
+    expect(
+      getItemDescription({ description: 'Twice weekly' }, text.subtitle)
+    ).toBe('Twice weekly');
+  });
+
+  it('titles vitals from the readings', () => {
+    expect(
+      describeSearchItem('vital', { systolic_bp: 120, diastolic_bp: 80 }, t)
+        .title
+    ).toBe('BP: 120/80');
+    expect(describeSearchItem('vital', {}, t).title).toBe(
+      'shared:categories.vitals'
+    );
   });
 });
 
@@ -101,7 +178,7 @@ describe('injury search results', () => {
   };
 
   it('formats text search results from the injury item fields', () => {
-    const row = searchService.formatResultItem('injuries', {
+    const row = textRow('injuries', {
       ...textItem,
       tags: ['sports'],
     });
@@ -117,7 +194,7 @@ describe('injury search results', () => {
   });
 
   it('has no date for an undated injury', () => {
-    const row = searchService.formatResultItem('injuries', {
+    const row = textRow('injuries', {
       ...textItem,
       date_of_injury: null,
     });
@@ -140,14 +217,14 @@ describe('injury search results', () => {
   });
 
   it('only references search.types keys that exist in the locale files', () => {
-    const searchTypeKeys = Object.values(TYPE_LABEL_KEY_MAP).filter(key =>
-      key.startsWith('search.types.')
+    const searchTypeKeys = SEARCH_RECORD_TYPES.map(rt => rt.labelKey).filter(
+      key => key.startsWith('search.types.')
     );
     expect(searchTypeKeys.sort()).toEqual(['search.types.encounters']);
   });
 
   it('links to the injuries page', () => {
-    expect(searchService.getRecordRoute('injury', 3)).toBe('/injuries?view=3');
+    expect(getRecordRoute('injury', 3)).toBe('/injuries?view=3');
     expect(getTypeLabel(t, 'injury')).toBe('shared:categories.injuries');
   });
 
@@ -188,7 +265,7 @@ describe('medical equipment search results', () => {
   };
 
   it('formats text search results from the equipment item fields', () => {
-    const row = searchService.formatResultItem('medical_equipment', textItem);
+    const row = textRow('medical_equipment', textItem);
 
     expect(row).toMatchObject({
       type: 'medical_equipment',
@@ -200,7 +277,7 @@ describe('medical equipment search results', () => {
   });
 
   it('has no date when there is no prescribed date', () => {
-    const row = searchService.formatResultItem('medical_equipment', {
+    const row = textRow('medical_equipment', {
       ...textItem,
       prescribed_date: null,
     });
@@ -223,7 +300,7 @@ describe('medical equipment search results', () => {
   });
 
   it('links to the medical equipment page', () => {
-    expect(searchService.getRecordRoute('medical_equipment', 5)).toBe(
+    expect(getRecordRoute('medical_equipment', 5)).toBe(
       '/medical-equipment?view=5'
     );
     expect(getTypeLabel(t, 'medical_equipment')).toBe(
@@ -266,7 +343,7 @@ describe('symptom search results', () => {
   };
 
   it('formats text search results from the symptom item fields', () => {
-    const row = searchService.formatResultItem('symptoms', textItem);
+    const row = textRow('symptoms', textItem);
 
     expect(row).toMatchObject({
       type: 'symptom',
@@ -278,7 +355,7 @@ describe('symptom search results', () => {
   });
 
   it('omits missing subtitle parts without stray separators', () => {
-    const row = searchService.formatResultItem('symptoms', {
+    const row = textRow('symptoms', {
       ...textItem,
       category: null,
     });
@@ -293,18 +370,98 @@ describe('symptom search results', () => {
   });
 
   it('links to the symptoms page', () => {
-    expect(searchService.getRecordRoute('symptom', 9)).toBe('/symptoms?view=9');
+    expect(getRecordRoute('symptom', 9)).toBe('/symptoms?view=9');
+  });
+});
+
+describe('blood donation search results', () => {
+  const textItem = {
+    ...textItemBase,
+    id: 4,
+    type: 'blood_donation',
+    donation_type: 'platelets',
+    location: 'City Hospital',
+    donation_date: '2026-10-01',
+  };
+  const tagRow = {
+    id: 4,
+    donation_type: 'platelets',
+    location: 'City Hospital',
+    donation_date: '2026-10-01',
+    created_at: '2026-10-02T00:00:00',
+    notes: 'Felt fine',
+    tags: ['regular'],
+  };
+
+  it('titles text search results with the translated donation type', () => {
+    const row = textRow('blood_donations', textItem);
+
+    expect(row).toMatchObject({
+      type: 'blood_donation',
+      id: 4,
+      title: 'Platelets',
+      subtitle: 'City Hospital',
+      date: '2026-10-01',
+    });
+  });
+
+  it('has an empty subtitle without a location', () => {
+    const row = textRow('blood_donations', {
+      ...textItem,
+      location: null,
+    });
+
+    expect(row.subtitle).toBe('');
+  });
+
+  it('reads tag search rows (raw table columns) the same way', () => {
+    expect(getItemTitle('blood_donation', tagRow, t)).toBe(
+      'medical:bloodDonations.types.platelets'
+    );
+    expect(getItemSubtitle('blood_donation', tagRow, t)).toBe('City Hospital');
+    expect(getItemDateWithLabel('blood_donation', tagRow, t)).toEqual({
+      label: 'search.dateLabels.donated',
+      value: '2026-10-01',
+    });
+    expect(getItemTitle('blood_donation', {}, t)).toBe(
+      'search.fallbacks.donation'
+    );
+  });
+
+  it('shows an unknown donation type as-is', () => {
+    expect(
+      getItemTitle('blood_donation', { donation_type: 'granulocytes' }, t)
+    ).toBe('granulocytes');
+  });
+
+  it('links to the blood donations page', () => {
+    expect(getRecordRoute('blood_donation', 4)).toBe('/blood-donations?view=4');
+    expect(getTypeLabel(t, 'blood_donation')).toBe(
+      'shared:categories.blood_donations'
+    );
+  });
+
+  it('includes blood donations in flattened tag results', () => {
+    const rows = flattenTagResults({ blood_donation: [tagRow] }, t);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      type: 'blood_donation',
+      id: 4,
+      route: '/blood-donations?view=4',
+      _source: 'tag',
+    });
   });
 });
 
 describe('sortRecordTypesByLabel', () => {
   const labels: Record<string, string> = Object.fromEntries(
-    RECORD_TYPES.map(rt => [rt.labelKey, rt.value])
+    SEARCH_RECORD_TYPES.map(rt => [rt.labelKey, rt.value])
   );
   const labelOf = (key: string) => labels[key];
 
   it('orders record types alphabetically by translated label', () => {
-    const sorted = sortRecordTypesByLabel(RECORD_TYPES, labelOf, 'en');
+    const sorted = sortRecordTypesByLabel(SEARCH_RECORD_TYPES, labelOf, 'en');
     const names = sorted.map(rt => labelOf(rt.labelKey));
 
     expect(names).toEqual(
@@ -312,7 +469,7 @@ describe('sortRecordTypesByLabel', () => {
         a.localeCompare(b, 'en', { sensitivity: 'base' })
       )
     );
-    expect(names).not.toEqual(RECORD_TYPES.map(rt => rt.value));
+    expect(names).not.toEqual(SEARCH_RECORD_TYPES.map(rt => rt.value));
   });
 
   it('sorts by the translated text, not the record type value', () => {
@@ -320,7 +477,7 @@ describe('sortRecordTypesByLabel', () => {
       'shared:categories.allergies': 'Zebra',
       'shared:categories.medications': 'Apple',
     };
-    const subset = RECORD_TYPES.filter(rt => rt.labelKey in translated);
+    const subset = SEARCH_RECORD_TYPES.filter(rt => rt.labelKey in translated);
 
     const sorted = sortRecordTypesByLabel(subset, k => translated[k], 'en');
 
@@ -334,7 +491,7 @@ describe('sortRecordTypesByLabel', () => {
       'shared:categories.medications': 'Étude',
       'shared:categories.conditions': 'Arbre',
     };
-    const subset = RECORD_TYPES.filter(rt => rt.labelKey in translated);
+    const subset = SEARCH_RECORD_TYPES.filter(rt => rt.labelKey in translated);
 
     const sorted = sortRecordTypesByLabel(subset, k => translated[k], 'fr');
 
@@ -346,18 +503,18 @@ describe('sortRecordTypesByLabel', () => {
   });
 
   it('keeps every record type and does not mutate the source list', () => {
-    const before = RECORD_TYPES.map(rt => rt.value);
+    const before = SEARCH_RECORD_TYPES.map(rt => rt.value);
 
-    const sorted = sortRecordTypesByLabel(RECORD_TYPES, labelOf, 'en');
+    const sorted = sortRecordTypesByLabel(SEARCH_RECORD_TYPES, labelOf, 'en');
 
-    expect(sorted).toHaveLength(RECORD_TYPES.length);
+    expect(sorted).toHaveLength(SEARCH_RECORD_TYPES.length);
     expect(sorted.map(rt => rt.value).sort()).toEqual([...before].sort());
-    expect(RECORD_TYPES.map(rt => rt.value)).toEqual(before);
+    expect(SEARCH_RECORD_TYPES.map(rt => rt.value)).toEqual(before);
   });
 
   it('falls back instead of throwing on a malformed language tag', () => {
     expect(() =>
-      sortRecordTypesByLabel(RECORD_TYPES, labelOf, 'en_US')
+      sortRecordTypesByLabel(SEARCH_RECORD_TYPES, labelOf, 'en_US')
     ).not.toThrow();
   });
 });

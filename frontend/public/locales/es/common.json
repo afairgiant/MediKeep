@@ -983,6 +983,7 @@
     "columnType": "Tipo de registro",
     "dateLabels": {
       "diagnosed": "Diagnosticado",
+      "donated": "Donado",
       "given": "Administrado",
       "identified": "Identificado",
       "injured": "Lesionado",
@@ -999,6 +1000,7 @@
     "expandFilters": "Expandir filtros",
     "fallbacks": {
       "allergy": "Alergia",
+      "donation": "Donación",
       "encounter": "Consulta",
       "equipment": "Equipo",
       "immunization": "Inmunización",
