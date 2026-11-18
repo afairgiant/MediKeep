@@ -28,6 +28,34 @@ from app.services.file_management_service import file_management_service
 
 logger = get_logger(__name__, "app")
 
+# A restore's in-progress extraction, removed when it ends; a backup walking it can fail.
+RESTORE_STAGING_PREFIX = ".restore-staging-"
+
+
+def backup_excluded_paths(upload_dir: Path) -> List[Path]:
+    """Paths relative to upload_dir that backups leave out and restores leave in place."""
+    try:
+        trash = settings.TRASH_DIR.resolve().relative_to(upload_dir.resolve())
+    except ValueError:
+        return []
+    return [trash] if trash.parts else []
+
+
+def is_excluded_from_backup(relative: Path, excluded: List[Path]) -> bool:
+    """True if relative (a path under the uploads directory) is left out of backups.
+
+    excluded is the result of backup_excluded_paths for that uploads directory.
+    Restore staging directories are always excluded.
+    """
+    if relative.parts and relative.parts[0].startswith(RESTORE_STAGING_PREFIX):
+        return True
+    return any(relative.is_relative_to(path) for path in excluded)
+
+
+def _raise_scan_error(error: OSError) -> None:
+    """os.walk onerror hook: an unreadable directory fails the backup, not skips it."""
+    raise error
+
 
 def _record_failure(errors: List[str], message: str, error: Exception) -> None:
     """Log a failed clean-up step and add a line without the cause to `errors`.
@@ -274,11 +302,16 @@ class BackupService:
             # Create ZIP archive
             with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                 # Walk through the uploads directory and add all files
-                for root, dirs, files in os.walk(uploads_dir):
-                    # Skip trash directory
-                    root_path = Path(root)
-                    if "trash" in root_path.parts:
-                        continue
+                excluded = backup_excluded_paths(uploads_dir)
+                for root, dirs, files in os.walk(
+                    uploads_dir, onerror=_raise_scan_error
+                ):
+                    relative_root = Path(root).relative_to(uploads_dir)
+                    dirs[:] = [
+                        d
+                        for d in dirs
+                        if not is_excluded_from_backup(relative_root / d, excluded)
+                    ]
 
                     for file in files:
                         file_path = Path(root) / file
@@ -835,11 +868,18 @@ class BackupService:
                     # Add files from uploads directory
                     uploads_dir = settings.UPLOAD_DIR
                     if uploads_dir.exists():
-                        for root, dirs, files in os.walk(uploads_dir):
-                            # Skip trash directory
-                            root_path = Path(root)
-                            if "trash" in root_path.parts:
-                                continue
+                        excluded = backup_excluded_paths(uploads_dir)
+                        for root, dirs, files in os.walk(
+                            uploads_dir, onerror=_raise_scan_error
+                        ):
+                            relative_root = Path(root).relative_to(uploads_dir)
+                            dirs[:] = [
+                                d
+                                for d in dirs
+                                if not is_excluded_from_backup(
+                                    relative_root / d, excluded
+                                )
+                            ]
 
                             for file in files:
                                 file_path = Path(root) / file

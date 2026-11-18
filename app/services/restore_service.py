@@ -5,27 +5,168 @@ This service handles the restoration of database and file backups.
 Simplified version using centralized security validation and native PostgreSQL tools.
 """
 
+import asyncio
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
 import zipfile
+import zlib
+from contextlib import contextmanager
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict
+from pathlib import Path, PurePosixPath
+from typing import Any, Callable, Dict, FrozenSet, Iterator, List, Tuple, TypeVar
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.database.database import engine
 from app.core.database.postgres_tools import psql_binary
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
-from app.services.backup_service import BackupService
+from app.services.backup_service import (
+    RESTORE_STAGING_PREFIX,
+    BackupService,
+    backup_excluded_paths,
+    is_excluded_from_backup,
+)
 
 logger = get_logger(__name__, "app")
+
+_UPLOADS_PREFIX = "uploads/"
+_DB_MEMBER = "database.sql"
+RESTORE_WORK_DIR_PREFIX = ".restore-"
+_STAGING_PREFIX = RESTORE_STAGING_PREFIX
+_PREVIOUS_PREFIX = f"{RESTORE_WORK_DIR_PREFIX}previous-"
+# Arbitrary app-wide key; any process restoring into this database must use the same one.
+_RESTORE_LOCK_KEY = 0x4D4B5253
+_DRIVE_PREFIX = re.compile(r"[A-Za-z]:")
+
+_T = TypeVar("_T")
+
+
+class RestoreInProgressError(Exception):
+    """Another restore holds the restore lock."""
+
+
+@contextmanager
+def _restore_lock() -> Iterator[None]:
+    """Hold a database-wide lock for one restore, across every process using this database.
+
+    Raises RestoreInProgressError at once if another restore holds it. A no-op on
+    databases without advisory locks.
+    """
+    if engine.dialect.name != "postgresql":
+        yield
+        return
+    with engine.connect() as conn:
+        # Without autocommit the session sits idle in a transaction for the whole restore.
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        acquired = conn.execute(
+            text("SELECT pg_try_advisory_lock(:key)"), {"key": _RESTORE_LOCK_KEY}
+        ).scalar()
+        if not acquired:
+            raise RestoreInProgressError("Another restore is already in progress")
+        try:
+            yield
+        finally:
+            try:
+                conn.execute(
+                    text("SELECT pg_advisory_unlock(:key)"), {"key": _RESTORE_LOCK_KEY}
+                )
+            except Exception as e:
+                # Closing the connection releases a session-level lock.
+                logger.error(
+                    f"Could not release the restore lock: {e}",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "restore_lock_release_failed",
+                    },
+                )
+                conn.invalidate()
+
+
+async def _run_to_completion(func: Callable[..., _T], *args: Any) -> _T:
+    """Run func in a worker thread.
+
+    If the caller is cancelled, waits for the worker to finish before re-raising
+    the cancellation, so locks held by the caller outlive the work. A worker error
+    raised meanwhile is attached to the cancellation as restore_step_error.
+    """
+    task = asyncio.ensure_future(asyncio.to_thread(func, *args))
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError as cancel:
+        while not task.done():
+            try:
+                await asyncio.wait({task})
+            except asyncio.CancelledError:
+                continue
+        if not task.cancelled() and task.exception() is not None:
+            cancel.restore_step_error = task.exception()
+        raise
+
+
+def _safe_member_path(name: str) -> PurePosixPath:
+    """Normalized relative path for an archive member name.
+
+    Raises ValueError for an empty, absolute, drive-qualified or backslash path, or
+    one with a parent ('..') component.
+    """
+    path = PurePosixPath(name)
+    if (
+        "\\" in name
+        or path.is_absolute()
+        or not path.parts
+        or ".." in path.parts
+        or _DRIVE_PREFIX.match(name)
+    ):
+        raise ValueError(f"Unsafe path in backup archive: {name}")
+    return path
+
+
+def _move_contents(source: Path, destination: Path, keep: FrozenSet[Path]) -> None:
+    """Move every entry of source into destination, merging into existing directories.
+
+    Paths in keep stay in source; directories above them are walked into, not moved.
+    """
+    for child in list(source.iterdir()):
+        if child in keep:
+            continue
+        target = destination / child.name
+        is_real_dir = child.is_dir() and not child.is_symlink()
+        if is_real_dir and (target.is_dir() or any(child in k.parents for k in keep)):
+            target.mkdir(exist_ok=True)
+            _move_contents(child, target, keep)
+        else:
+            child.rename(target)
+
+
+def _manifest_lists_files(manifest: Any) -> bool:
+    """True if a full backup's manifest declares a files component, even an empty one."""
+    components = manifest.get("components") if isinstance(manifest, dict) else None
+    return isinstance(components, dict) and "files" in components
+
+
+def _check_backup_readable(path: Path, backup_type: str) -> None:
+    """Raise ValueError unless a ZIP backup reads intact and has what its type needs."""
+    if backup_type == "database":
+        return
+    try:
+        with zipfile.ZipFile(path, "r") as zipf:
+            names = zipf.namelist()
+            damaged = zipf.testzip()
+    except (zipfile.BadZipFile, zlib.error, EOFError) as e:
+        raise ValueError(f"Backup archive cannot be opened: {e}") from e
+    if damaged is not None:
+        raise ValueError(f"Backup archive member {damaged} is damaged")
+    if backup_type == "full" and _DB_MEMBER not in names:
+        raise ValueError(f"Backup archive has no {_DB_MEMBER}")
 
 
 class RestoreService:
@@ -35,6 +176,8 @@ class RestoreService:
         self.db = db
         self.backup_dir = settings.BACKUP_DIR
         self.upload_dir = settings.UPLOAD_DIR
+        # Set once tables are dropped or uploads are moved; earlier failures change nothing.
+        self._data_changed = False
 
     def _debug_print(self, message: str):
         """Print debug message only if DEBUG mode is enabled."""
@@ -213,18 +356,20 @@ class RestoreService:
                         manifest_data = json.loads(f.read().decode("utf-8"))
 
                 # Check components
-                if "database.sql" in file_list:
+                if _DB_MEMBER in file_list:
                     components.append("Database")
 
                 # Count files in uploads directory
                 for filename in file_list:
-                    if filename.startswith("uploads/") and not filename.endswith("/"):
+                    if filename.startswith(_UPLOADS_PREFIX) and not filename.endswith(
+                        "/"
+                    ):
                         has_files = True
                         total_files += 1
                         info = zipf.getinfo(filename)
                         total_size += info.file_size
 
-                if has_files:
+                if has_files or _manifest_lists_files(manifest_data):
                     components.append("Files")
 
             # Get current system stats
@@ -249,6 +394,12 @@ class RestoreService:
 
             if current_files > 0:
                 warnings.append(f"Current uploads directory has {current_files} files")
+
+            if "Files" in components and not has_files:
+                warnings.append(
+                    "The backup holds no files; restoring it removes the current "
+                    "uploads, except the trash"
+                )
 
             return {
                 "warnings": warnings,
@@ -284,7 +435,18 @@ class RestoreService:
 
         Returns:
             Dictionary containing restore results
+
+        Raises:
+            RestoreInProgressError: another restore, in any process, is running.
         """
+        with _restore_lock():
+            return await self._execute_restore_locked(backup_id, confirmation_token)
+
+    async def _execute_restore_locked(
+        self, backup_id: int, confirmation_token: str
+    ) -> Dict[str, Any]:
+        safety_backup_id = None
+        self._data_changed = False
         try:
             self._debug_print(
                 f"🔐 RESTORE DEBUG: Starting restore execution for backup ID: {backup_id}"
@@ -373,16 +535,37 @@ class RestoreService:
             )
             return result
 
+        except asyncio.CancelledError as cancel:
+            step_error = getattr(cancel, "restore_step_error", None)
+            if step_error is not None:
+                self._report_restore_failure(backup_id, safety_backup_id, step_error)
+            raise
         except Exception as e:
-            # Rollback any pending transaction to prevent transaction abort errors
-            try:
-                self.db.rollback()
-                logger.debug("Rolled back transaction after restore failure")
-            except Exception as rollback_error:
-                logger.warning(f"Could not rollback transaction: {str(rollback_error)}")
-
-            logger.error(f"Failed to execute restore for backup {backup_id}: {str(e)}")
+            self._report_restore_failure(backup_id, safety_backup_id, e)
             raise Exception(f"Failed to execute restore: {str(e)}")
+
+    def _report_restore_failure(
+        self, backup_id: int, safety_backup_id: Any, error: BaseException
+    ) -> None:
+        """Roll back the session and log the failure, naming the safety backup if data changed."""
+        # Rollback any pending transaction to prevent transaction abort errors
+        try:
+            self.db.rollback()
+            logger.debug("Rolled back transaction after restore failure")
+        except Exception as rollback_error:
+            logger.warning(f"Could not rollback transaction: {str(rollback_error)}")
+
+        logger.error(f"Failed to execute restore for backup {backup_id}: {str(error)}")
+        if self._data_changed and safety_backup_id is not None:
+            logger.error(
+                f"Restore of backup {backup_id} left data partly changed; restore "
+                f"safety backup {safety_backup_id} to roll back",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "restore_incomplete",
+                    LogFields.RECORD_ID: backup_id,
+                },
+            )
 
     async def _create_safety_backup(self, backup_type: str) -> int:
         """Create a safety backup before restore operation."""
@@ -399,7 +582,12 @@ class RestoreService:
             else:
                 raise ValueError(f"Unknown backup type: {backup_type}")
 
-            logger.info(f"Created safety backup with ID: {result['id']}")
+            # The restore replaces current data, so the copy it falls back on must be readable.
+            await _run_to_completion(
+                _check_backup_readable, Path(result["file_path"]), backup_type
+            )
+
+            logger.info(f"Created and checked safety backup with ID: {result['id']}")
             return result["id"]
 
         except Exception as e:
@@ -430,6 +618,7 @@ class RestoreService:
             # Step 1: Drop existing tables to allow restore to recreate them
             self._debug_print("RESTORE DEBUG: Step 1 - Dropping tables with CASCADE...")
             logger.info("Step 1: Dropping tables with CASCADE...")
+            self._data_changed = True
             await self._drop_all_tables()
 
             # Use native psql from within container
@@ -650,45 +839,19 @@ class RestoreService:
             raise Exception(f"Database restore failed: {error_details}")
 
     async def _restore_files(self, backup_path: Path) -> Dict[str, Any]:
-        """Restore files from ZIP archive."""
+        """Replace the contents of the uploads directory with a files backup."""
         try:
-            # Create backup of current uploads directory
-            if self.upload_dir.exists():
-                backup_dir = (
-                    self.upload_dir.parent
-                    / f"uploads_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                )
-                shutil.copytree(self.upload_dir, backup_dir)
-                logger.info(f"Created backup of current uploads at: {backup_dir}")
-
-            # Clear current uploads directory
-            if self.upload_dir.exists():
-                shutil.rmtree(self.upload_dir)
-            self.upload_dir.mkdir(parents=True, exist_ok=True)
-
-            # Extract files from backup
-            extracted_files = 0
-            total_size = 0
-
             with zipfile.ZipFile(backup_path, "r") as zipf:
-                for member in zipf.infolist():
-                    if not member.is_dir():
-                        # Remove 'uploads/' prefix from archive path
-                        target_path = Path(member.filename)
-                        if target_path.parts[0] == "uploads":
-                            target_path = Path(*target_path.parts[1:])
-
-                        full_target_path = self.upload_dir / target_path
-                        full_target_path.parent.mkdir(parents=True, exist_ok=True)
-
-                        # Extract file
-                        with zipf.open(member) as source, open(
-                            full_target_path, "wb"
-                        ) as target:
-                            shutil.copyfileobj(source, target)
-
-                        extracted_files += 1
-                        total_size += member.file_size
+                members = self._upload_members(zipf, prefix_required=False)
+                staging = self._new_staging_dir()
+                try:
+                    extracted_files, total_size = await _run_to_completion(
+                        self._stage_uploads, zipf, members, staging
+                    )
+                except BaseException:
+                    shutil.rmtree(staging, ignore_errors=True)
+                    raise
+            await _run_to_completion(self._swap_in_staged_uploads, staging)
 
             logger.info(f"Restored {extracted_files} files ({total_size} bytes)")
 
@@ -707,142 +870,175 @@ class RestoreService:
     async def _restore_full_backup(self, backup_path: Path) -> Dict[str, Any]:
         """Restore full backup (database + files) from ZIP archive."""
         try:
-            # Extract the backup to a temporary directory
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_path = Path(temp_dir)
-
-                # Extract the full backup with path validation
-                with zipfile.ZipFile(backup_path, "r") as zipf:
-                    for member in zipf.infolist():
-                        # Validate each file path to prevent path traversal
-                        if member.filename.startswith("/") or ".." in member.filename:
-                            logger.warning(
-                                f"Skipping potentially unsafe path: {member.filename}"
-                            )
-                            continue
-                        # Extract safely
-                        zipf.extract(member, temp_path)
-
-                # Check for required components
-                db_backup_path = temp_path / "database.sql"
-                manifest_path = temp_path / "backup_manifest.json"
-
-                if not db_backup_path.exists():
+            staging = None
+            files_restored = 0
+            files_size = 0
+            with zipfile.ZipFile(backup_path, "r") as zipf:
+                members = self._upload_members(zipf, prefix_required=True)
+                names = set(zipf.namelist())
+                if _DB_MEMBER not in names:
                     raise Exception("Database backup not found in full backup archive")
 
-                # Read manifest if available
                 manifest_data = None
-                if manifest_path.exists():
-                    with open(manifest_path, "r") as f:
-                        manifest_data = json.load(f)
+                if "backup_manifest.json" in names:
+                    manifest_data = json.loads(zipf.read("backup_manifest.json"))
                     logger.info(f"Restoring full backup with manifest: {manifest_data}")
 
-                # Copy database backup to safe location for security validation
-                safe_db_backup_path = (
-                    self.backup_dir
-                    / f"temp_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
-                )
-                shutil.copy2(db_backup_path, safe_db_backup_path)
+                if members or _manifest_lists_files(manifest_data):
+                    staging = self._new_staging_dir()
 
+                # Staged before the database restore, so an unreadable archive changes nothing.
                 try:
-                    # Restore database first
-                    logger.info("Restoring database from full backup...")
-                    db_result = await self._restore_database(safe_db_backup_path)
-                finally:
-                    # Clean up temporary file
-                    if safe_db_backup_path.exists():
-                        safe_db_backup_path.unlink()
-                        logger.debug(
-                            f"Cleaned up temporary file: {safe_db_backup_path}"
+                    if staging is not None:
+                        files_restored, files_size = await _run_to_completion(
+                            self._stage_uploads, zipf, members, staging
                         )
+                    db_result = await self._restore_database_member(zipf)
+                except BaseException:
+                    if staging is not None:
+                        shutil.rmtree(staging, ignore_errors=True)
+                    raise
 
-                # Restore files if they exist
-                files_restored = 0
-                files_size = 0
-                uploads_backup_path = temp_path / "uploads"
+            if staging is not None:
+                logger.info("Restoring files from full backup...")
+                await _run_to_completion(self._swap_in_staged_uploads, staging)
+                logger.info(f"Restored {files_restored} files ({files_size} bytes)")
 
-                if uploads_backup_path.exists():
-                    logger.info("Restoring files from full backup...")
-
-                    # Create backup of current uploads directory with retry logic
-                    if self.upload_dir.exists():
-                        backup_dir = (
-                            self.upload_dir.parent
-                            / f"uploads_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                        )
-                        try:
-                            shutil.copytree(self.upload_dir, backup_dir)
-                            logger.info(
-                                f"Created backup of current uploads at: {backup_dir}"
-                            )
-                        except Exception as e:
-                            logger.warning(
-                                f"Could not backup uploads directory: {str(e)}"
-                            )
-
-                    # Clear current uploads directory with retry logic
-                    directory_cleared = False
-                    if self.upload_dir.exists():
-                        max_retries = 3
-                        for attempt in range(max_retries):
-                            try:
-                                shutil.rmtree(self.upload_dir)
-                                directory_cleared = True
-                                break
-                            except OSError as e:
-                                if attempt == max_retries - 1:
-                                    logger.warning(
-                                        f"Could not remove uploads directory after {max_retries} attempts: {str(e)}"
-                                    )
-                                    logger.info(
-                                        "Skipping file restore due to directory lock"
-                                    )
-                                    files_restored = 0
-                                    files_size = 0
-                                    directory_cleared = False
-                                else:
-                                    logger.debug(
-                                        f"Retry {attempt + 1}/{max_retries} to remove uploads directory"
-                                    )
-                                    import asyncio
-
-                                    await asyncio.sleep(1)
-                    else:
-                        directory_cleared = True
-
-                    # Only proceed with file restore if directory was successfully cleared
-                    if directory_cleared:
-                        self.upload_dir.mkdir(parents=True, exist_ok=True)
-
-                        # Copy files from backup
-                        for item in uploads_backup_path.rglob("*"):
-                            if item.is_file():
-                                relative_path = item.relative_to(uploads_backup_path)
-                                target_path = self.upload_dir / relative_path
-                                target_path.parent.mkdir(parents=True, exist_ok=True)
-                                shutil.copy2(item, target_path)
-                                files_restored += 1
-                                files_size += item.stat().st_size
-
-                    logger.info(f"Restored {files_restored} files ({files_size} bytes)")
-
-                return {
-                    "success": True,
-                    "message": "Full backup restored successfully",
-                    "database_restored": True,
-                    "files_restored": files_restored,
-                    "total_restored_size": db_result.get("restored_size", 0)
-                    + files_size,
-                    "manifest": manifest_data,
-                    "warnings": db_result.get(
-                        "warnings"
-                    ),  # Pass through database warnings
-                }
+            return {
+                "success": True,
+                "message": "Full backup restored successfully",
+                "database_restored": True,
+                "files_restored": files_restored,
+                "total_restored_size": db_result.get("restored_size", 0) + files_size,
+                "manifest": manifest_data,
+                "warnings": db_result.get("warnings"),  # Pass through database warnings
+            }
 
         except Exception as e:
             error_msg = f"Full backup restore failed: {str(e)}"
             logger.error(error_msg)
             raise Exception(error_msg)
+
+    async def _restore_database_member(self, zipf: zipfile.ZipFile) -> Dict[str, Any]:
+        """Restore the database from the archive's dump, removing the temporary copy."""
+        self.backup_dir.mkdir(parents=True, exist_ok=True)
+        # Under backup_dir, the only place _restore_database accepts; nested so orphan cleanup skips it.
+        with tempfile.TemporaryDirectory(
+            dir=self.backup_dir, prefix="restore-work-"
+        ) as work_dir:
+            dump = Path(work_dir) / _DB_MEMBER
+            with zipf.open(_DB_MEMBER) as source, open(dump, "wb") as target:
+                shutil.copyfileobj(source, target)
+            logger.info("Restoring database from full backup...")
+            return await self._restore_database(dump)
+
+    def _upload_members(
+        self, zipf: zipfile.ZipFile, prefix_required: bool
+    ) -> List[Tuple[zipfile.ZipInfo, str]]:
+        """Archive files to restore, as (member, path relative to the uploads directory).
+
+        Raises ValueError for an unsafe path, or a file where the trash directory or
+        one of its parents must stay a directory. Paths backups exclude and restore
+        work directories are left out.
+        """
+        excluded = backup_excluded_paths(self.upload_dir)
+        members = []
+        for member in zipf.infolist():
+            if member.is_dir():
+                continue
+            name = member.filename
+            if name.startswith(_UPLOADS_PREFIX):
+                name = name[len(_UPLOADS_PREFIX) :]
+            elif prefix_required:
+                continue
+            relative = Path(_safe_member_path(name))
+            if relative.parts[0].startswith(RESTORE_WORK_DIR_PREFIX):
+                continue
+            if is_excluded_from_backup(relative, excluded):
+                continue
+            if any(path.is_relative_to(relative) for path in excluded):
+                raise ValueError(
+                    f"Backup archive file {member.filename} would replace a directory "
+                    "that holds the trash"
+                )
+            members.append((member, relative.as_posix()))
+        return members
+
+    def _new_staging_dir(self) -> Path:
+        """Create an empty staging directory inside the uploads directory."""
+        self.upload_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        staging = self.upload_dir / f"{_STAGING_PREFIX}{stamp}"
+        staging.mkdir()
+        return staging
+
+    def _stage_uploads(
+        self,
+        zipf: zipfile.ZipFile,
+        members: List[Tuple[zipfile.ZipInfo, str]],
+        staging: Path,
+    ) -> Tuple[int, int]:
+        """Extract members into staging and return (files, bytes).
+
+        On failure staging is left partly written; the caller removes it.
+        """
+        staging_root = staging.resolve()
+        extracted_files = 0
+        total_size = 0
+        for member, relative in members:
+            target_path = staging / relative
+            if not target_path.resolve().is_relative_to(staging_root):
+                raise ValueError(f"Unsafe path in backup archive: {member.filename}")
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            with zipf.open(member) as source, open(target_path, "wb") as target:
+                shutil.copyfileobj(source, target)
+            extracted_files += 1
+            total_size += member.file_size
+        return extracted_files, total_size
+
+    def _swap_in_staged_uploads(self, staging: Path) -> None:
+        """Replace the uploads directory's contents with staging's, keeping excluded paths.
+
+        The uploads directory itself is never removed. If the swap fails, the previous
+        contents are left in a holding directory named in the error, not deleted.
+        """
+        previous = self.upload_dir / (
+            _PREVIOUS_PREFIX + staging.name[len(_STAGING_PREFIX) :]
+        )
+        previous.mkdir()
+        # Earlier restores' work directories can hold the only copy of files; leave them.
+        earlier_work_dirs = {
+            p
+            for p in self.upload_dir.iterdir()
+            if p.name.startswith(RESTORE_WORK_DIR_PREFIX)
+            and p not in (staging, previous)
+        }
+        if earlier_work_dirs:
+            names = ", ".join(sorted(p.name for p in earlier_work_dirs))
+            logger.warning(
+                f"Leaving earlier restore work directories in place: {names}"
+            )
+        keep = frozenset(
+            {staging, previous}
+            | earlier_work_dirs
+            | {self.upload_dir / p for p in backup_excluded_paths(self.upload_dir)}
+        )
+
+        self._data_changed = True
+        try:
+            _move_contents(self.upload_dir, previous, keep)
+            _move_contents(staging, self.upload_dir, frozenset())
+        except Exception as e:
+            raise RuntimeError(
+                f"Could not move restored files into place; the previous files are "
+                f"in {previous}: {e}"
+            ) from e
+
+        for leftover in (previous, staging):
+            try:
+                shutil.rmtree(leftover)
+            except OSError as e:
+                logger.warning(f"Could not remove {leftover} after restore: {e}")
 
     async def _get_database_stats(self) -> Dict[str, Any]:
         """Get current database statistics."""
@@ -984,11 +1180,13 @@ class RestoreService:
                     file_list = zipf.namelist()
 
                     # Check for full backup indicators
-                    has_database = any(name == "database.sql" for name in file_list)
+                    has_database = _DB_MEMBER in file_list
                     has_manifest = any(
                         name == "backup_manifest.json" for name in file_list
                     )
-                    has_uploads = any(name.startswith("uploads/") for name in file_list)
+                    has_uploads = any(
+                        name.startswith(_UPLOADS_PREFIX) for name in file_list
+                    )
 
                     if has_database and (has_manifest or has_uploads):
                         return "full"
