@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from app.core import auth_mode
 from app.core.config import settings
@@ -71,6 +72,24 @@ def _log_client_ip_resolution():
     )
 
 
+def _warn_if_temp_dir_unwritable():
+    """Log a warning when the temp directory cannot be written. Never raises."""
+    try:
+        with tempfile.TemporaryFile():
+            pass
+    except OSError as e:
+        logger.warning(
+            "Temporary directory is not writable: large uploads, backups, "
+            "restores and OCR will fail. Mount a writable tmpfs or volume at /tmp "
+            "(or set TMPDIR to a writable path).",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "temp_dir_unwritable",
+                LogFields.ERROR: f"{type(e).__name__}: {e}",
+            },
+        )
+
+
 def _log_effective_auth_mode():
     """Log the authentication configuration the instance actually came up with.
 
@@ -127,6 +146,8 @@ async def startup_event():
             },
         )
         raise RuntimeError(str(e)) from e
+
+    _warn_if_temp_dir_unwritable()
 
     # Initialize the event system (event registry and bus)
     event_bus = setup_event_system()

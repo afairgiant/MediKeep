@@ -329,6 +329,48 @@ environment:
 
 See [BIND_MOUNT_PERMISSIONS.md](../BIND_MOUNT_PERMISSIONS.md) for detailed troubleshooting.
 
+### Read-Only Root Filesystem
+
+MediKeep can run with a read-only root filesystem, but `/tmp` must stay writable. Uploads larger than about 1 MB are buffered there before they are saved, and backups and OCR also use it. Without it, large uploads fail with a 500 error, the app logs `request_body_buffer_failed`, and it logs a `temp_dir_unwritable` warning at startup.
+
+> **Restores are not supported on a read-only root.** Restore writes a safety copy of the uploads next to `/app/uploads`, which is on the read-only root. A files restore fails, and a full restore can report success without restoring any files. Switch the container back to a writable root before restoring, then re-enable `read_only` afterwards.
+
+Docker Compose:
+
+```yaml
+medikeep-app:
+  read_only: true
+  tmpfs:
+    - /tmp
+  volumes:
+    - app_uploads:/app/uploads
+    - app_logs:/app/logs
+    - app_backups:/app/backups
+```
+
+Kubernetes:
+
+```yaml
+# in the pod spec
+volumes:
+  - name: tmp
+    emptyDir: {}
+# in the container spec
+securityContext:
+  readOnlyRootFilesystem: true
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+```
+
+Notes:
+
+- `/app/uploads`, `/app/logs` and `/app/backups` still need writable volumes.
+- If you set a size limit on the tmpfs or `emptyDir`, leave room for the database dump, which is staged there while a backup is built. A full restore (on a writable root) unpacks the whole archive there, so it needs space for the backup's uncompressed contents plus any temporary files in use at the same time, such as an uploaded backup. Compressed backups can expand well beyond twice their size.
+- A Docker tmpfs and a `medium: Memory` `emptyDir` live in RAM and count against the container's memory limit. A plain `emptyDir` uses node disk.
+- `PUID`/`PGID` cannot be used with a read-only root: the entrypoint changes the container user by editing `/etc/passwd`. Use Docker volumes, or set ownership on the host instead.
+- To use a different writable path instead of `/tmp`, set `TMPDIR` to it.
+
 ### Building from Source
 
 To build your own image instead of using the pre-built one:

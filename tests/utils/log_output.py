@@ -23,6 +23,11 @@ def persisted_causes(caplog) -> List[str]:
     return [entry["error"] for entry in persisted_entries(caplog) if "error" in entry]
 
 
+def records_with_event(caplog, event: str) -> list:
+    """Captured records whose `event` extra matches."""
+    return [r for r in caplog.records if getattr(r, "event", None) == event]
+
+
 def persisted_text(caplog) -> str:
     """Everything persisted for the captured records, for "this must not appear" checks."""
     return "\n".join(json.dumps(entry) for entry in persisted_entries(caplog))

@@ -10,6 +10,9 @@ from contextlib import contextmanager
 from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exception_handlers import (
+    http_exception_handler as default_http_exception_handler,
+)
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import (
@@ -18,6 +21,7 @@ from sqlalchemy.exc import (
     OperationalError,
     SQLAlchemyError,
 )
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
@@ -608,6 +612,46 @@ _HTTP_STATUS_TO_CODE = {
 }
 
 
+_BODY_PARSE_FAILURE_DETAIL = "There was an error parsing the body"
+
+
+def _is_server_side_body_read_failure(exc: StarletteHTTPException) -> bool:
+    """True when FastAPI's generic body-parse 400 wraps an OS error, e.g. an unwritable temp dir."""
+    return (
+        exc.status_code == HTTP_400_BAD_REQUEST
+        and exc.detail == _BODY_PARSE_FAILURE_DETAIL
+        and isinstance(exc.__cause__, OSError)
+    )
+
+
+def _body_read_failure_response(request: Request, cause: OSError) -> JSONResponse:
+    # errno and strerror only: the OS message can embed a file path.
+    reason = f"{type(cause).__name__} [Errno {cause.errno}] {cause.strerror}"
+    logger.error(
+        f"Request body could not be buffered on {request.method} {request.url.path}; "
+        "check that the temp directory is writable",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "request_body_buffer_failed",
+            LogFields.IP: get_client_ip(request),
+            LogFields.ERROR: reason,
+            "url_path": str(request.url.path),
+            "method": request.method,
+        },
+    )
+    api_exception = MedicalRecordsAPIException(
+        error_code=ExceptionCode.INTERNAL_SERVER_ERROR,
+        http_status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+        status=ExceptionStatus.FAIL,
+        message="The server could not process the uploaded data",
+        request=request,
+    )
+    return JSONResponse(
+        status_code=api_exception.http_status_code,
+        content=api_exception.to_response_model().model_dump(exclude_none=False),
+    )
+
+
 def setup_error_handling(app: FastAPI):
     """
     Setup comprehensive error handling for the FastAPI application.
@@ -635,9 +679,18 @@ def setup_error_handling(app: FastAPI):
     # Add fallback handler for any unhandled exceptions
     app.add_exception_handler(Exception, create_fallback_exception_handler())
 
-    @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException):
-        """Convert standard FastAPI HTTPExceptions to our standardized response format."""
+    # Starlette's base class, so the body-read failure FastAPI raises reaches us.
+    @app.exception_handler(StarletteHTTPException)
+    async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+        """Convert app-raised HTTPExceptions to our standardized response format.
+
+        Framework-raised ones (router 404/405, static files) keep FastAPI's default response.
+        """
+        if _is_server_side_body_read_failure(exc):
+            return _body_read_failure_response(request, exc.__cause__)
+        if not isinstance(exc, HTTPException):
+            return await default_http_exception_handler(request, exc)
+
         # A raiser that knows which rule fired says so in X-Error-Code; the status
         # alone cannot distinguish the several failures that share one code.
         declared_code = (exc.headers or {}).get("X-Error-Code")
