@@ -1,7 +1,10 @@
 """Tests for how files and full restores replace the uploads directory (#1259)."""
 
+import asyncio
 import errno
+import json
 import os
+import threading
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -179,6 +182,7 @@ class TestRestoreReplacesUploadsInPlace:
             "../uploads/inside-uploads-outside-staging.txt",
             "/etc/absolute.txt",
             "C:/drive.txt",
+            "c:drive-relative.txt",
             "photos\\..\\..\\backslash.txt",
         ],
     )
@@ -292,6 +296,11 @@ class TestRestoreReplacesUploadsInPlace:
             assert held[relative] == content
 
 
+@pytest.mark.parametrize("name", ["notes:2024/a.pdf", "a/b:c.pdf"])
+def test_colon_outside_a_drive_prefix_is_a_safe_member_name(name):
+    assert restore_module._safe_member_path(name).as_posix() == name
+
+
 class TestFullRestore:
     @pytest.mark.asyncio
     async def test_backup_without_uploads_leaves_files_alone(
@@ -302,6 +311,21 @@ class TestFullRestore:
         assert result["files_restored"] == 0
         _assert_untouched(uploads)
         service._restore_database.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_manifest_listing_files_with_no_files_empties_uploads(
+        self, service, uploads, tmp_path
+    ):
+        manifest = json.dumps({"components": {"database": "x", "files": "uploads/"}})
+        backup = _zip(
+            tmp_path / "full.zip",
+            {"database.sql": "-- dump", "backup_manifest.json": manifest},
+        )
+
+        result = await service._restore_full_backup(backup)
+
+        assert result["files_restored"] == 0
+        assert _contents(uploads) == {TRASH_FILE: b"soft-deleted"}
 
     @pytest.mark.asyncio
     async def test_missing_database_dump_changes_nothing(
@@ -345,6 +369,13 @@ class TestFilesRestore:
 
         assert result["restored_files"] == 1
         assert _contents(uploads)["restored.pdf"] == b"new"
+
+    @pytest.mark.asyncio
+    async def test_empty_files_backup_empties_uploads(self, service, uploads, tmp_path):
+        result = await service._restore_files(_zip(tmp_path / "files.zip", {}))
+
+        assert result["restored_files"] == 0
+        assert _contents(uploads) == {TRASH_FILE: b"soft-deleted"}
 
 
 class TestBackupExclusionRule:
@@ -397,6 +428,51 @@ class TestBackupExclusionRule:
             "uploads/photos/trash/user.jpg",
         ]
 
+    @pytest.mark.asyncio
+    async def test_restore_staging_is_skipped_while_a_failed_extraction_removes_it(
+        self, tmp_path, files_backup
+    ):
+        upload_dir = tmp_path / "uploads"
+        self._seed(
+            upload_dir,
+            "kept.pdf",
+            ".restore-staging-1/partial.pdf",
+            ".restore-previous-1/held.pdf",
+        )
+        real_write = zipfile.ZipFile.write
+
+        def write_racing_cleanup(zipf, filename, *args, **kwargs):
+            if ".restore-staging-" in str(filename):
+                raise FileNotFoundError(filename)
+            return real_write(zipf, filename, *args, **kwargs)
+
+        with patch.object(zipfile.ZipFile, "write", write_racing_cleanup):
+            names = await files_backup(upload_dir)
+
+        assert names == ["uploads/.restore-previous-1/held.pdf", "uploads/kept.pdf"]
+
+
+class _FakeAdvisoryLock:
+    """Advisory lock state of a fake Postgres engine, shared by all its connections."""
+
+    def __init__(self):
+        self.held = False
+        self.fail_unlock = False
+        self.conn = MagicMock()
+        self.conn.execute.side_effect = self._execute
+
+    def _execute(self, statement, params=None):
+        sql = str(statement)
+        result = MagicMock()
+        if "pg_try_advisory_lock" in sql:
+            result.scalar.return_value = not self.held
+            self.held = True
+        elif "pg_advisory_unlock" in sql:
+            if self.fail_unlock:
+                raise RuntimeError("connection lost")
+            self.held = False
+        return result
+
 
 class TestExecuteRestore:
     BACKUP_ID = 42
@@ -427,18 +503,18 @@ class TestExecuteRestore:
 
     @pytest.fixture
     def postgres_lock(self, monkeypatch):
-        """A Postgres engine whose advisory lock is held or free as the test sets."""
+        lock = _FakeAdvisoryLock()
         fake_engine = MagicMock()
         fake_engine.dialect.name = "postgresql"
-        conn = fake_engine.connect.return_value.__enter__.return_value
+        fake_engine.connect.return_value.__enter__.return_value = lock.conn
         monkeypatch.setattr(restore_module, "engine", fake_engine)
-        return conn
+        return lock
 
     @pytest.mark.asyncio
     async def test_restore_is_rejected_while_another_holds_the_lock(
         self, service, uploads, run_execute, good_safety_backup, postgres_lock
     ):
-        postgres_lock.execute.return_value.scalar.return_value = False
+        postgres_lock.held = True
 
         with pytest.raises(restore_module.RestoreInProgressError):
             await run_execute(good_safety_backup)
@@ -450,13 +526,67 @@ class TestExecuteRestore:
     async def test_lock_is_released_after_restore(
         self, run_execute, good_safety_backup, postgres_lock
     ):
-        postgres_lock.execute.return_value.scalar.return_value = True
-
         await run_execute(good_safety_backup)
 
-        statements = [str(c.args[0]) for c in postgres_lock.execute.call_args_list]
+        conn = postgres_lock.conn
+        conn.execution_options.assert_called_once_with(isolation_level="AUTOCOMMIT")
+        statements = [str(c.args[0]) for c in conn.execute.call_args_list]
         assert statements[0].startswith("SELECT pg_try_advisory_lock")
         assert statements[-1].startswith("SELECT pg_advisory_unlock")
+        assert not postgres_lock.held
+
+    @pytest.mark.asyncio
+    async def test_failed_unlock_keeps_the_restore_result(
+        self, run_execute, good_safety_backup, postgres_lock, caplog
+    ):
+        postgres_lock.fail_unlock = True
+
+        with caplog.at_level("ERROR"):
+            result = await run_execute(good_safety_backup)
+
+        assert result["safety_backup_id"] == 7
+        postgres_lock.conn.invalidate.assert_called_once()
+        assert records_with_event(caplog, "restore_lock_release_failed")
+
+    @pytest.mark.asyncio
+    async def test_failed_unlock_keeps_the_restore_error(
+        self, service, run_execute, good_safety_backup, postgres_lock
+    ):
+        postgres_lock.fail_unlock = True
+        service._restore_database.side_effect = Exception("psql failed")
+
+        with pytest.raises(Exception, match="psql failed"):
+            await run_execute(good_safety_backup)
+
+    @pytest.mark.asyncio
+    async def test_cancelled_restore_holds_the_lock_until_the_swap_stops(
+        self, uploads, run_execute, good_safety_backup, postgres_lock
+    ):
+        moved, resume = threading.Event(), threading.Event()
+        real_move = restore_module._move_contents
+
+        def pause_after_first_move(*args):
+            real_move(*args)
+            if not moved.is_set():
+                moved.set()
+                resume.wait(timeout=10)
+
+        with patch.object(restore_module, "_move_contents", pause_after_first_move):
+            first = asyncio.create_task(run_execute(good_safety_backup))
+            assert await asyncio.to_thread(moved.wait, 10)
+            first.cancel()
+            await asyncio.sleep(0)
+
+            with pytest.raises(restore_module.RestoreInProgressError):
+                await run_execute(good_safety_backup)
+            assert postgres_lock.held
+
+            resume.set()
+            with pytest.raises(asyncio.CancelledError):
+                await first
+
+        assert not postgres_lock.held
+        assert _contents(uploads)["restored.pdf"] == b"new"
 
     @pytest.mark.asyncio
     async def test_truncated_safety_backup_aborts_restore(
@@ -466,6 +596,20 @@ class TestExecuteRestore:
 
         with pytest.raises(Exception, match="cannot be opened"):
             await run_execute(good_safety_backup)
+
+        _assert_untouched(uploads)
+        service._restore_database.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_safety_backup_with_damaged_dump_aborts_restore(
+        self, service, uploads, tmp_path, run_execute
+    ):
+        safety = _corrupted_zip(
+            tmp_path / "safety.zip", {"database.sql": "intact-content"}
+        )
+
+        with pytest.raises(Exception, match="database.sql is damaged"):
+            await run_execute(safety)
 
         _assert_untouched(uploads)
         service._restore_database.assert_not_awaited()

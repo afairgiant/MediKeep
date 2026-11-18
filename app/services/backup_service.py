@@ -28,6 +28,9 @@ from app.services.file_management_service import file_management_service
 
 logger = get_logger(__name__, "app")
 
+# A restore's in-progress extraction, removed when it ends; a backup walking it can fail.
+RESTORE_STAGING_PREFIX = ".restore-staging-"
+
 
 def backup_excluded_paths(upload_dir: Path) -> List[Path]:
     """Paths relative to upload_dir that backups leave out and restores leave in place."""
@@ -42,7 +45,10 @@ def is_excluded_from_backup(relative: Path, excluded: List[Path]) -> bool:
     """True if relative (a path under the uploads directory) is left out of backups.
 
     excluded is the result of backup_excluded_paths for that uploads directory.
+    Restore staging directories are always excluded.
     """
+    if relative.parts and relative.parts[0].startswith(RESTORE_STAGING_PREFIX):
+        return True
     return any(relative.is_relative_to(path) for path in excluded)
 
 

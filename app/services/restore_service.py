@@ -8,13 +8,15 @@ Simplified version using centralized security validation and native PostgreSQL t
 import asyncio
 import json
 import os
+import re
 import shutil
 import subprocess
 import zipfile
+import zlib
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, FrozenSet, Iterator, List, Tuple
+from typing import Any, Callable, Dict, FrozenSet, Iterator, List, Tuple, TypeVar
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -27,6 +29,7 @@ from app.core.logging.constants import LogFields
 from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
 from app.services.backup_service import (
+    RESTORE_STAGING_PREFIX,
     BackupService,
     backup_excluded_paths,
     is_excluded_from_backup,
@@ -37,10 +40,13 @@ logger = get_logger(__name__, "app")
 _UPLOADS_PREFIX = "uploads/"
 _DB_MEMBER = "database.sql"
 RESTORE_WORK_DIR_PREFIX = ".restore-"
-_STAGING_PREFIX = f"{RESTORE_WORK_DIR_PREFIX}staging-"
+_STAGING_PREFIX = RESTORE_STAGING_PREFIX
 _PREVIOUS_PREFIX = f"{RESTORE_WORK_DIR_PREFIX}previous-"
 # Arbitrary app-wide key; any process restoring into this database must use the same one.
 _RESTORE_LOCK_KEY = 0x4D4B5253
+_DRIVE_PREFIX = re.compile(r"[A-Za-z]:")
+
+_T = TypeVar("_T")
 
 
 class RestoreInProgressError(Exception):
@@ -58,6 +64,8 @@ def _restore_lock() -> Iterator[None]:
         yield
         return
     with engine.connect() as conn:
+        # Without autocommit the session sits idle in a transaction for the whole restore.
+        conn.execution_options(isolation_level="AUTOCOMMIT")
         acquired = conn.execute(
             text("SELECT pg_try_advisory_lock(:key)"), {"key": _RESTORE_LOCK_KEY}
         ).scalar()
@@ -70,10 +78,36 @@ def _restore_lock() -> Iterator[None]:
                 conn.execute(
                     text("SELECT pg_advisory_unlock(:key)"), {"key": _RESTORE_LOCK_KEY}
                 )
-            except Exception:
+            except Exception as e:
                 # Closing the connection releases a session-level lock.
+                logger.error(
+                    f"Could not release the restore lock: {e}",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "restore_lock_release_failed",
+                    },
+                )
                 conn.invalidate()
-                raise
+
+
+async def _run_to_completion(func: Callable[..., _T], *args: Any) -> _T:
+    """Run func in a worker thread.
+
+    If the caller is cancelled, waits for the worker to finish before re-raising
+    the cancellation, so locks held by the caller outlive the work.
+    """
+    task = asyncio.ensure_future(asyncio.to_thread(func, *args))
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError:
+        while not task.done():
+            try:
+                await asyncio.wait({task})
+            except asyncio.CancelledError:
+                continue
+        if not task.cancelled() and task.exception() is not None:
+            logger.error(f"Restore step failed after cancellation: {task.exception()}")
+        raise
 
 
 def _safe_member_path(name: str) -> PurePosixPath:
@@ -88,7 +122,7 @@ def _safe_member_path(name: str) -> PurePosixPath:
         or path.is_absolute()
         or not path.parts
         or ".." in path.parts
-        or ":" in path.parts[0]
+        or _DRIVE_PREFIX.match(name)
     ):
         raise ValueError(f"Unsafe path in backup archive: {name}")
     return path
@@ -112,14 +146,17 @@ def _move_contents(source: Path, destination: Path, keep: FrozenSet[Path]) -> No
 
 
 def _check_backup_readable(path: Path, backup_type: str) -> None:
-    """Raise ValueError unless a ZIP backup opens and holds what its type requires."""
+    """Raise ValueError unless a ZIP backup reads intact and has what its type needs."""
     if backup_type == "database":
         return
     try:
         with zipfile.ZipFile(path, "r") as zipf:
             names = zipf.namelist()
-    except zipfile.BadZipFile as e:
+            damaged = zipf.testzip()
+    except (zipfile.BadZipFile, zlib.error, EOFError) as e:
         raise ValueError(f"Backup archive cannot be opened: {e}") from e
+    if damaged is not None:
+        raise ValueError(f"Backup archive member {damaged} is damaged")
     if backup_type == "full" and _DB_MEMBER not in names:
         raise ValueError(f"Backup archive has no {_DB_MEMBER}")
 
@@ -779,10 +816,10 @@ class RestoreService:
         try:
             with zipfile.ZipFile(backup_path, "r") as zipf:
                 members = self._upload_members(zipf, prefix_required=False)
-                staging, extracted_files, total_size = await asyncio.to_thread(
+                staging, extracted_files, total_size = await _run_to_completion(
                     self._stage_uploads, zipf, members
                 )
-            await asyncio.to_thread(self._swap_in_staged_uploads, staging)
+            await _run_to_completion(self._swap_in_staged_uploads, staging)
 
             logger.info(f"Restored {extracted_files} files ({total_size} bytes)")
 
@@ -815,22 +852,32 @@ class RestoreService:
                     manifest_data = json.loads(zipf.read("backup_manifest.json"))
                     logger.info(f"Restoring full backup with manifest: {manifest_data}")
 
+                # A manifest listing a files component makes an empty uploads/ a snapshot to restore.
+                components = (
+                    manifest_data.get("components")
+                    if isinstance(manifest_data, dict)
+                    else None
+                )
+                has_files = bool(members) or (
+                    isinstance(components, dict) and "files" in components
+                )
+
                 # Staged before the database restore, so an unreadable archive changes nothing.
-                if members:
-                    staging, files_restored, files_size = await asyncio.to_thread(
+                if has_files:
+                    staging, files_restored, files_size = await _run_to_completion(
                         self._stage_uploads, zipf, members
                     )
 
                 try:
                     db_result = await self._restore_database_member(zipf)
-                except Exception:
+                except BaseException:
                     if staging is not None:
                         shutil.rmtree(staging, ignore_errors=True)
                     raise
 
             if staging is not None:
                 logger.info("Restoring files from full backup...")
-                await asyncio.to_thread(self._swap_in_staged_uploads, staging)
+                await _run_to_completion(self._swap_in_staged_uploads, staging)
                 logger.info(f"Restored {files_restored} files ({files_size} bytes)")
 
             return {
