@@ -331,9 +331,7 @@ See [BIND_MOUNT_PERMISSIONS.md](../BIND_MOUNT_PERMISSIONS.md) for detailed troub
 
 ### Read-Only Root Filesystem
 
-MediKeep can run with a read-only root filesystem, but `/tmp` must stay writable. Uploads larger than about 1 MB are buffered there before they are saved, and backups and OCR also use it. Without it, large uploads fail with a 500 error, the app logs `request_body_buffer_failed`, and it logs a `temp_dir_unwritable` warning at startup.
-
-> **Restores are not supported on a read-only root.** Restore writes a safety copy of the uploads next to `/app/uploads`, which is on the read-only root. A files restore fails, and a full restore can report success without restoring any files. Switch the container back to a writable root before restoring, then re-enable `read_only` afterwards.
+MediKeep can run with a read-only root filesystem, but `/tmp` must stay writable. Uploads larger than about 1 MB (including uploaded backup files) are buffered there before they are saved, and backups and OCR also use it. Without it, large uploads fail with a 500 error, the app logs `request_body_buffer_failed`, and it logs a `temp_dir_unwritable` warning at startup.
 
 Docker Compose:
 
@@ -366,7 +364,8 @@ volumeMounts:
 Notes:
 
 - `/app/uploads`, `/app/logs` and `/app/backups` still need writable volumes.
-- If you set a size limit on the tmpfs or `emptyDir`, leave room for the database dump, which is staged there while a backup is built. A full restore (on a writable root) unpacks the whole archive there, so it needs space for the backup's uncompressed contents plus any temporary files in use at the same time, such as an uploaded backup. Compressed backups can expand well beyond twice their size.
+- If you set a size limit on the tmpfs or `emptyDir`, leave room for the database dump, which is staged there while a backup is built, and for twice the size of the largest backup file you upload for restore: the upload is held there twice while it is saved to `/app/backups`. Restoring a backup does not use `/tmp`.
+- Restores work on a read-only root. They replace the contents of `/app/uploads` in place, leaving the trash directory (`TRASH_DIR`) alone.
 - A Docker tmpfs and a `medium: Memory` `emptyDir` live in RAM and count against the container's memory limit. A plain `emptyDir` uses node disk.
 - `PUID`/`PGID` cannot be used with a read-only root: the entrypoint changes the container user by editing `/etc/passwd`. Use Docker volumes, or set ownership on the host instead.
 - To use a different writable path instead of `/tmp`, set `TMPDIR` to it.
@@ -1669,7 +1668,11 @@ docker exec medikeep-app restore preview 123
 docker exec medikeep-app restore restore 123 123_1430
 ```
 
-**Important**: The restore process automatically creates a safety backup before restoring.
+**Important**: The restore process automatically creates a safety backup before restoring, and stops if that backup cannot be opened. A files or full restore replaces the contents of the uploads directory, except the trash directory (`TRASH_DIR`), which backups do not include:
+
+- The restored files are written to a staging folder inside the uploads directory first, so the uploads volume needs free space for them during the restore. A corrupt or unreadable backup fails at this step, before the database or any existing file is changed.
+- Existing files are only removed once every restored file is written. If moving them into place fails, the error names the `.restore-previous-*` folder inside the uploads directory that still holds them.
+- If the error log contains a `restore_incomplete` entry, the restore changed data before failing; restore the safety backup it names to roll back.
 
 ### Automated Backup Schedule
 
