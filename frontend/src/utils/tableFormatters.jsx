@@ -1,5 +1,6 @@
 import { createEntityLinkProps } from './linkNavigation';
 import { MEDICATION_TYPE_LABELS } from '../constants/medicationTypes';
+import { getEquipmentTypeLabel } from '../constants/equipmentConstants';
 import { formatDateWithPreference } from './dateFormatUtils';
 import { timezoneService } from '../services/timezoneService';
 import { notesToPlainText } from './notesMarkdown';
@@ -339,6 +340,19 @@ export const getEntityFormatters = (
         reason: value => formatters.text(value, 50),
         diagnosis: formatters.notes,
         notes: formatters.notes,
+      };
+
+    case 'equipment':
+      return {
+        ...baseFormatters,
+        equipment_name: formatters.primaryName,
+        equipment_type: value => getEquipmentTypeLabel(value) || '-',
+        manufacturer: formatters.simple,
+        model_number: formatters.simple,
+        serial_number: formatters.simple,
+        supplier: formatters.simple,
+        prescribed_date: formatters.date,
+        next_service_date: formatters.date,
       };
 
     case 'vitals':

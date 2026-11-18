@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { useDataManagement } from '../../hooks/useDataManagement';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { useResponsive } from '../../hooks/useResponsive';
+import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
 import logger from '../../services/logger';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
@@ -19,12 +25,8 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import EquipmentCard from '../../components/medical/equipment/EquipmentCard';
 import EquipmentViewModal from '../../components/medical/equipment/EquipmentViewModal';
 import EquipmentFormWrapper from '../../components/medical/equipment/EquipmentFormWrapper';
-import {
-  EQUIPMENT_TYPE_OPTIONS,
-  EQUIPMENT_STATUS_OPTIONS,
-} from '../../constants/equipmentConstants';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
-import { Button, Stack, Container } from '@mantine/core';
+import { Button, Stack, Container, Paper } from '@mantine/core';
 import {
   INITIAL_EQUIPMENT_FORM_DATA,
   buildEquipmentPayload,
@@ -33,78 +35,10 @@ import {
 
 const EMPTY_FORM_DATA = INITIAL_EQUIPMENT_FORM_DATA;
 
-// Simple filter/search configuration for equipment
-const equipmentConfig = {
-  searchFields: [
-    'equipment_name',
-    'manufacturer',
-    'model_number',
-    'serial_number',
-    'supplier',
-  ],
-  filterConfigs: [
-    {
-      field: 'status',
-      label: 'Status',
-      type: 'select',
-      options: EQUIPMENT_STATUS_OPTIONS,
-    },
-    {
-      field: 'equipment_type',
-      label: 'Type',
-      type: 'select',
-      options: EQUIPMENT_TYPE_OPTIONS,
-    },
-  ],
-};
-
-// Simple data management hook for filtering
-const useSimpleDataManagement = (data, config) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({});
-
-  const filteredData = React.useMemo(() => {
-    let result = [...(data || [])];
-
-    // Apply search
-    if (searchTerm && config.searchFields) {
-      const lowerSearch = searchTerm.toLowerCase();
-      result = result.filter(item =>
-        config.searchFields.some(field => {
-          const value = item[field];
-          return value && String(value).toLowerCase().includes(lowerSearch);
-        })
-      );
-    }
-
-    // Apply filters
-    Object.entries(filters).forEach(([field, value]) => {
-      if (value) {
-        result = result.filter(item => item[field] === value);
-      }
-    });
-
-    return result;
-  }, [data, searchTerm, filters, config.searchFields]);
-
-  const hasActiveFilters = searchTerm || Object.values(filters).some(v => v);
-
-  return {
-    data: filteredData,
-    searchTerm,
-    setSearchTerm,
-    filters,
-    setFilters,
-    hasActiveFilters,
-    clearFilters: () => {
-      setSearchTerm('');
-      setFilters({});
-    },
-  };
-};
-
 const MedicalEquipment = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { formatDate } = useDateFormat();
+  const responsive = useResponsive();
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const [viewMode, setViewMode] = usePersistedViewMode('medical-equipment');
   const {
@@ -151,8 +85,17 @@ const MedicalEquipment = () => {
     requiresPatient: true,
   });
 
-  // Data management for filtering
-  const dataManagement = useSimpleDataManagement(equipment, equipmentConfig);
+  // Standardized filtering and sorting, shared by the filter bar and table headers
+  const config = getMedicalPageConfig('equipment');
+  const dataManagement = useDataManagement(equipment, config);
+
+  const formatters = getEntityFormatters(
+    'equipment',
+    [],
+    null,
+    null,
+    formatDate
+  );
 
   // View modal navigation
   const {
@@ -287,10 +230,7 @@ const MedicalEquipment = () => {
           />
 
           {/* Search and Filter */}
-          <MedicalPageFilters
-            dataManagement={dataManagement}
-            config={equipmentConfig}
-          />
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
           {filteredEquipment.length === 0 ? (
             <EmptyState
@@ -311,39 +251,122 @@ const MedicalEquipment = () => {
                 </Button>
               }
             />
+          ) : viewMode === 'cards' ? (
+            <AnimatedCardGrid
+              items={paginatedEquipment}
+              columns={{ base: 12, sm: 6, lg: 4 }}
+              renderCard={equip => (
+                <EquipmentCard
+                  equipment={equip}
+                  onEdit={handleEditEquipment}
+                  onDelete={handleDeleteEquipment}
+                  onView={handleViewEquipment}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
+                  onError={error => {
+                    logger.error('EquipmentCard error', {
+                      equipmentId: equip.id,
+                      error: error.message,
+                      page: 'MedicalEquipment',
+                    });
+                  }}
+                />
+              )}
+            />
           ) : (
-            <>
-              <AnimatedCardGrid
-                items={paginatedEquipment}
-                columns={{ base: 12, sm: 6, lg: 4 }}
-                renderCard={equip => (
-                  <EquipmentCard
-                    equipment={equip}
-                    onEdit={handleEditEquipment}
-                    onDelete={handleDeleteEquipment}
-                    onView={handleViewEquipment}
-                    disableActions={isViewOnly}
-                    disableActionsTooltip={viewOnlyTooltip}
-                    onError={error => {
-                      logger.error('EquipmentCard error', {
-                        equipmentId: equip.id,
-                        error: error.message,
-                        page: 'MedicalEquipment',
-                      });
-                    }}
-                  />
+            <Paper shadow="sm" radius="md" withBorder>
+              <ResponsiveTable
+                data={paginatedEquipment}
+                pagination={false}
+                sortBy={dataManagement.sortBy}
+                sortDirection={dataManagement.sortOrder}
+                onSort={dataManagement.handleSortChange}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
+                columns={[
+                  {
+                    header: t('shared:labels.equipmentName', 'Equipment Name'),
+                    accessor: 'equipment_name',
+                    priority: 'high',
+                    width: 200,
+                  },
+                  {
+                    header: t('equipment.form.type', 'Equipment Type'),
+                    accessor: 'equipment_type',
+                    priority: 'high',
+                    width: 160,
+                    // The mobile card layout ignores `formatters`, so it needs
+                    // its own render to show the label instead of the raw value
+                    render: formatters.equipment_type,
+                  },
+                  {
+                    header: t('shared:fields.status', 'Status'),
+                    accessor: 'status',
+                    priority: 'high',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:fields.manufacturer', 'Manufacturer'),
+                    accessor: 'manufacturer',
+                    priority: 'medium',
+                    width: 150,
+                  },
+                  {
+                    header: t('equipment.fields.prescribedDate', 'Prescribed'),
+                    accessor: 'prescribed_date',
+                    priority: 'medium',
+                    width: 120,
+                  },
+                  {
+                    header: t('equipment.fields.nextService', 'Next Service'),
+                    accessor: 'next_service_date',
+                    priority: 'medium',
+                    width: 120,
+                  },
+                  {
+                    header: t('equipment.fields.modelNumber', 'Model'),
+                    accessor: 'model_number',
+                    priority: 'low',
+                    width: 130,
+                  },
+                  {
+                    header: t('equipment.fields.serialNumber', 'Serial #'),
+                    accessor: 'serial_number',
+                    priority: 'low',
+                    width: 130,
+                  },
+                  {
+                    header: t('shared:labels.supplier', 'Supplier'),
+                    accessor: 'supplier',
+                    priority: 'low',
+                    width: 150,
+                  },
+                ]}
+                patientData={currentPatient}
+                tableName={t(
+                  'shared:categories.medical_equipment',
+                  'Medical Equipment'
                 )}
+                onView={handleViewEquipment}
+                onEdit={handleEditEquipment}
+                onDelete={handleDeleteEquipment}
+                formatters={formatters}
+                dataType="medical"
+                responsive={responsive}
               />
-              <PaginationControls
-                page={page}
-                totalPages={totalPages(filteredEquipment.length)}
-                pageSize={pageSize}
-                totalRecords={filteredEquipment.length}
-                onPageChange={setPage}
-                onPageSizeChange={handlePageSizeChange}
-                pageSizeOptions={PAGE_SIZE_OPTIONS}
-              />
-            </>
+            </Paper>
+          )}
+          {filteredEquipment.length > 0 && (
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredEquipment.length)}
+              pageSize={pageSize}
+              totalRecords={filteredEquipment.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </Stack>
       </Container>

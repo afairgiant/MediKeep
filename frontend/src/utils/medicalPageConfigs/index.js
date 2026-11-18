@@ -27,6 +27,7 @@ export { labresultsPageConfig } from './labResults.js';
 export { vitalsPageConfig } from './vitals.js';
 export { emergencyContactsPageConfig } from './emergencyContacts.js';
 export { familyMembersPageConfig } from './familyMembers.js';
+export { equipmentPageConfig } from './equipment.js';
 
 // Combined config object and accessor function
 export {
