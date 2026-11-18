@@ -1,4 +1,4 @@
-"""Hemoglobin unit conversion. Values are stored in g/dL."""
+"""Hemoglobin unit conversion and display of blood donation readings. Hemoglobin is stored in g/dL."""
 
 from typing import Optional
 
@@ -33,4 +33,29 @@ def convert_hemoglobin_from_g_dl(
     if value is None:
         return None
     unit = resolve_hemoglobin_unit(unit)
-    return round(value * _FROM_G_DL[unit], 1 if unit != HemoglobinUnit.G_L.value else 0)
+    return round(value * _FROM_G_DL[unit], _decimals(unit))
+
+
+def format_hemoglobin(value: Optional[float], unit: Optional[str]) -> Optional[str]:
+    """Display text for a stored g/dL value in the given unit, e.g. '140 g/L'."""
+    if value is None:
+        return None
+    unit = resolve_hemoglobin_unit(unit)
+    return (
+        f"{value * _FROM_G_DL[unit]:.{_decimals(unit)}f} {HEMOGLOBIN_UNIT_LABELS[unit]}"
+    )
+
+
+def format_blood_pressure(
+    systolic: Optional[int], diastolic: Optional[int]
+) -> Optional[str]:
+    """'120/80' with '?' for a missing side; None when neither is recorded."""
+    if systolic is None and diastolic is None:
+        return None
+    systolic_text = "?" if systolic is None else systolic
+    diastolic_text = "?" if diastolic is None else diastolic
+    return f"{systolic_text}/{diastolic_text}"
+
+
+def _decimals(unit: str) -> int:
+    return 0 if unit == HemoglobinUnit.G_L.value else 1
