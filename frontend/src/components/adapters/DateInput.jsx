@@ -1,6 +1,7 @@
 import { DateInput as MantineDateInput } from '@mantine/dates';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { createDateParser } from '../../utils/dateUtils';
+import { useKeyboardAwarePopoverProps } from '../../hooks/useKeyboardAwarePopover';
 
 /**
  * Shared date input that defaults `valueFormat` and `dateParser` from the
@@ -21,9 +22,13 @@ export const DateInput = ({
   const { dateInputFormat } = useDateFormat();
   const effectiveFormat = valueFormat || dateInputFormat;
 
+  const { popoverProps, ...rest } = props;
+  const keyboardAwarePopoverProps = useKeyboardAwarePopoverProps(popoverProps);
+
   return (
     <MantineDateInput
-      {...props}
+      {...rest}
+      popoverProps={{ ...popoverProps, ...keyboardAwarePopoverProps }}
       valueFormat={effectiveFormat}
       dateParser={dateParser || createDateParser(effectiveFormat)}
       placeholder={placeholder || effectiveFormat}
