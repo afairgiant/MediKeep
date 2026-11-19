@@ -1,6 +1,6 @@
 {
-  "version": "1.8.3",
-  "lastUpdated": "2026-11-09",
+  "version": "1.8.4",
+  "lastUpdated": "2026-11-19",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -552,6 +552,7 @@
         "HDL",
         "HDL-C",
         "Good Cholesterol",
+        "Cholesterol in HDL",
         "HDL CHOLESTEROL"
       ],
       "is_common": true,
@@ -732,6 +733,7 @@
         "LDL",
         "LDL-C",
         "Bad Cholesterol",
+        "Cholesterol in LDL",
         "LDL-CHOLESTEROL",
         "LDL Calculated",
         "LDL Chol Calc"

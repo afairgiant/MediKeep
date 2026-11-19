@@ -77,11 +77,16 @@ export function searchTests(
     else if (test.abbreviation?.toLowerCase().includes(searchTerm)) {
       score = 150;
     }
-    // Match common names
+    // Match common names exactly only, so long panel aliases cannot capture
+    // queries meant for a different test. Prefix matches stay available, but
+    // they rank below any test-name hit.
+    else if (test.common_names?.some(name => name.toLowerCase() === searchTerm)) {
+      score = 400;
+    }
     else if (
-      test.common_names?.some(name => name.toLowerCase().includes(searchTerm))
+      test.common_names?.some(name => name.toLowerCase().startsWith(searchTerm))
     ) {
-      score = 100;
+      score = 120;
     }
 
     // Boost score for common tests
