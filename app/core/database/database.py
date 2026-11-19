@@ -184,7 +184,7 @@ def create_default_user():
     when no admin users exist but users are present.
 
     Fresh install (zero users) → creates the default 'admin' account with the
-    default password and must_change_password=True (unchanged behavior).
+    configured password and must_change_password=True. Refuses an unset password.
 
     No admins but users exist → logs a loud WARNING-level security event with
     the recovery command. Does NOT auto-promote any existing user, because the
@@ -215,8 +215,12 @@ def create_default_user():
         total_users = user.get_total_count(db)
 
         if total_users == 0:
-            # Fresh install - create default admin (unchanged behavior).
+            # Fresh installs require an explicitly configured admin password.
             default_password = settings.ADMIN_DEFAULT_PASSWORD
+            if not default_password or not default_password.strip():
+                raise ValueError(
+                    "Set ADMIN_DEFAULT_PASSWORD before creating the initial admin"
+                )
             # must_change_password=True is set atomically in the same commit as the
             # user row inside create_user — no second commit needed.
             AuthService.create_user(

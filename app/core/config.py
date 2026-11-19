@@ -396,7 +396,7 @@ class Settings:  # App Info
     )
 
     # Default Admin Password Configuration
-    ADMIN_DEFAULT_PASSWORD: str = get_secret("ADMIN_DEFAULT_PASSWORD", "admin123")
+    ADMIN_DEFAULT_PASSWORD: str = get_secret("ADMIN_DEFAULT_PASSWORD", "")
 
     # SSO Configuration (Simple and Right-Sized)
     #
