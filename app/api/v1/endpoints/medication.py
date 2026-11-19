@@ -264,6 +264,7 @@ def delete_medication(
         request=request,
         current_user=current_user,
         current_user_patient_id=current_user_patient_id,
+        file_entity_types=("medication",),
     )
 
 

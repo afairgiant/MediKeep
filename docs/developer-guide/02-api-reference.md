@@ -4726,6 +4726,16 @@ A caller with no access to the patient — or with only `view` access attempting
 - **Permission**: `edit` on the owning patient
 - **Success Response** (200): File operation result
 
+### Deleting the Parent Record
+
+Deleting a record of any supported type through its own `DELETE` endpoint (for example `DELETE /medications/{medication_id}`) also removes its attachments, after the record itself is deleted:
+
+- Locally stored files move to trash (`TRASH_DIR`).
+- Paperless-ngx and Papra documents stay in those services; only the link to the record is removed.
+- The `entity_files` rows are deleted. Deleting an encounter removes files attached as either `encounter` or `visit`.
+
+The record's response does not change, except `DELETE /lab-results/{lab_result_id}`, which also reports `files_deleted` and `files_preserved`.
+
 ### Batch File Counts
 
 `POST /entity-files/files/batch-counts`

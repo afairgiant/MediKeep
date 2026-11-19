@@ -2620,7 +2620,7 @@ class GenericEntityFileService:
                 return {"files_deleted": 0, "files_preserved": 0, "errors": 0}
 
             deleted_local_files = 0
-            preserved_paperless_files = 0
+            preserved_remote_files = 0
             errors = 0
 
             for file_record in entity_files:
@@ -2629,12 +2629,12 @@ class GenericEntityFileService:
                         # Delete local files (move to trash)
                         file_path = resolve_stored_file(file_record)
                         if file_path:
-                            trash_result = self.file_management_service.move_to_trash(
+                            self.file_management_service.move_to_trash(
                                 str(file_path),
                                 reason=f"{entity_type} {entity_id} deletion",
                             )
                             logger.info(
-                                f"Moved local file to trash: {file_record.file_name} -> {trash_result}"
+                                f"Moved local file to trash: file {file_record.id}"
                             )
                             deleted_local_files += 1
                         else:
@@ -2646,22 +2646,26 @@ class GenericEntityFileService:
                         if preserve_paperless:
                             # Preserve Paperless files - just log for audit
                             logger.info(
-                                f"Preserving Paperless document: {file_record.file_name} (ID: {file_record.paperless_document_id})"
+                                f"Preserving Paperless document: file {file_record.id} (ID: {file_record.paperless_document_id})"
                             )
-                            preserved_paperless_files += 1
+                            preserved_remote_files += 1
                         else:
                             # This path could be used if we ever want to delete from Paperless
                             logger.info(
-                                f"Would delete Paperless document: {file_record.file_name} (preserve_paperless=False)"
+                                f"Would delete Paperless document: file {file_record.id} (preserve_paperless=False)"
                             )
                             # TODO: Implement Paperless deletion if needed
+
+                    elif file_record.storage_backend == "papra":
+                        # Papra documents always stay in Papra
+                        preserved_remote_files += 1
 
                     # Always remove database record
                     db.delete(file_record)
 
                 except Exception as file_error:
                     logger.error(
-                        f"Error processing file {file_record.file_name}: {str(file_error)}"
+                        f"Error processing file {file_record.id}: {str(file_error)}"
                     )
                     errors += 1
                     # Continue with other files
@@ -2672,13 +2676,13 @@ class GenericEntityFileService:
             logger.info(
                 f"EntityFile cleanup completed for {entity_type} {entity_id}: "
                 f"{deleted_local_files} local files deleted, "
-                f"{preserved_paperless_files} Paperless files preserved, "
+                f"{preserved_remote_files} Paperless/Papra files preserved, "
                 f"{errors} errors"
             )
 
             return {
                 "files_deleted": deleted_local_files,
-                "files_preserved": preserved_paperless_files,
+                "files_preserved": preserved_remote_files,
                 "errors": errors,
             }
 

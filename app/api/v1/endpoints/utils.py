@@ -19,6 +19,7 @@ from app.core.http.error_handling import (
 from app.core.logging.config import get_logger
 from app.core.utils.client_ip import get_client_ip
 from app.core.utils.datetime_utils import get_timezone_info
+from app.services.generic_entity_file_service import GenericEntityFileService
 
 logger = get_logger(__name__, "app")
 
@@ -349,6 +350,7 @@ def handle_delete_with_logging(
     current_user_patient_id: int = None,
     current_user: Any = None,
     permission: str = "edit",
+    file_entity_types: tuple[str, ...] = (),
 ) -> dict[str, str]:
     """
     Handle entity deletion with standardized logging and ownership verification.
@@ -364,6 +366,9 @@ def handle_delete_with_logging(
         current_user_patient_id: Current user's patient ID (for ownership verification)
         current_user: Current user object (for multi-patient access verification)
         permission: Required permission level (default: 'edit')
+        file_entity_types: EntityFile entity types whose attachments are cleaned up
+            once the entity is deleted. Local files move to trash; Paperless and Papra
+            documents stay in those services. Empty for types without attachments.
 
     Returns:
         Success response dict
@@ -401,6 +406,18 @@ def handle_delete_with_logging(
         )
 
         crud_obj.delete(db=db, id=entity_id)
+
+        # After the delete, so a failed delete leaves the attachments in place.
+        # EntityFile.entity_id has no foreign key, so nothing cascades.
+        if file_entity_types:
+            file_service = GenericEntityFileService()
+            for file_entity_type in file_entity_types:
+                file_service.cleanup_entity_files_on_deletion(
+                    db=db,
+                    entity_type=file_entity_type,
+                    entity_id=entity_id,
+                    preserve_paperless=True,
+                )
 
         # Log successful deletion
         handle_entity_operation_logging(
