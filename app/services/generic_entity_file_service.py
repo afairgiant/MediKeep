@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, UploadFile
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -1548,10 +1549,13 @@ class GenericEntityFileService:
     ) -> None:
         """
         Handle orphaned Paperless records - files marked as paperless storage
-        but with no document ID (indicating failed/incomplete uploads).
+        with no document ID and no Paperless task still in progress (failed or
+        incomplete uploads).
 
         These records need special handling because they can't be checked against
-        Paperless since they don't have a valid document ID to query.
+        Paperless since they don't have a valid document ID to query. A record
+        whose task is still pending or processing is not an orphan: its task is
+        resolved later in the sync check, or by update_processing_files.
 
         Args:
             db: Database session
@@ -1562,13 +1566,18 @@ class GenericEntityFileService:
                 f"🔍 ORPHAN CHECK - Checking orphaned paperless records for user {current_user_id}"
             )
 
-            # Find all paperless files WITHOUT document IDs (orphaned records)
+            # Find paperless files WITHOUT document IDs whose task is not still in
+            # progress (orphaned records). A failed task still counts as orphaned.
             orphaned_files = _user_entity_files(
                 db,
                 current_user_id,
                 PAPERLESS_ORPHAN_CHECK_SOURCES,
                 EntityFile.storage_backend == "paperless",
                 EntityFile.paperless_document_id.is_(None),  # NO document ID
+                or_(
+                    EntityFile.paperless_task_uuid.is_(None),
+                    EntityFile.sync_status.not_in(("pending", "processing")),
+                ),
             )
 
             if orphaned_files:
@@ -1586,7 +1595,7 @@ class GenericEntityFileService:
                     logger.warning(
                         f"ORPHANED RECORD: {file_record.file_name} "
                         f"(id: {file_record.id}, entity_type: {file_record.entity_type}, "
-                        f"status: {old_status} -> missing) - NO DOCUMENT ID, upload likely failed"
+                        f"status: {old_status} -> missing) - no document ID and no task in progress"
                     )
 
                 # Commit the changes

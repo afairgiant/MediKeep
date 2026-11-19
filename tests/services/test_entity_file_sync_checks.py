@@ -61,7 +61,14 @@ def _equipment(db_session, patient_id):
     return record
 
 
-def _remote_file(db_session, equipment, backend, document_id):
+def _remote_file(
+    db_session,
+    equipment,
+    backend,
+    document_id,
+    sync_status="synced",
+    task_uuid=None,
+):
     record = EntityFile(
         entity_type="medical-equipment",
         entity_id=equipment.id,
@@ -71,13 +78,40 @@ def _remote_file(db_session, equipment, backend, document_id):
         file_size=1024,
         uploaded_at=get_utc_now(),
         storage_backend=backend,
-        sync_status="synced",
+        sync_status=sync_status,
         paperless_document_id=document_id if backend == "paperless" else None,
+        paperless_task_uuid=task_uuid,
         papra_document_id=document_id if backend == "papra" else None,
     )
     db_session.add(record)
     db_session.commit()
     return record
+
+
+async def _run_paperless_sync_check(db_session, user_id, remote):
+    """Run the Paperless sync check against ``remote``; task resolution leaves every task pending."""
+    with (
+        patch(
+            "app.services.generic_entity_file_service.has_usable_credentials",
+            return_value=True,
+        ),
+        patch(
+            "app.services.generic_entity_file_service.credential_kwargs",
+            return_value={},
+        ),
+        patch(
+            "app.services.paperless_service.create_paperless_service",
+            return_value=remote,
+        ),
+        patch.object(
+            GenericEntityFileService,
+            "_resolve_task_uuids_to_document_ids",
+            new=AsyncMock(),
+        ),
+    ):
+        return await GenericEntityFileService().check_paperless_sync_status(
+            db_session, user_id
+        )
 
 
 @pytest.fixture
@@ -130,6 +164,49 @@ class TestPaperlessChecks:
         assert mine.sync_status == "missing"
         assert theirs.sync_status == "synced"
 
+    async def test_file_whose_task_failed_is_marked_missing(
+        self, db_session, test_user, test_patient
+    ):
+        # _resolve_task_uuids_to_document_ids marks a failed task "failed" but
+        # keeps its task UUID, so a task UUID alone must not shield a record.
+        failed = _remote_file(
+            db_session,
+            _equipment(db_session, test_patient.id),
+            "paperless",
+            None,
+            sync_status="failed",
+            task_uuid="task-failed",
+        )
+
+        await GenericEntityFileService()._handle_orphaned_paperless_records(
+            db_session, test_user.id
+        )
+
+        db_session.refresh(failed)
+        assert failed.sync_status == "missing"
+
+    async def test_upload_still_processing_is_not_marked_missing(
+        self, db_session, test_user, test_patient, remote
+    ):
+        # Regression for #1273: the orphan check ran before task resolution and
+        # marked uploads Paperless was still processing as missing.
+        processing = _remote_file(
+            db_session,
+            _equipment(db_session, test_patient.id),
+            "paperless",
+            None,
+            sync_status="processing",
+            task_uuid="task-in-progress",
+        )
+
+        result = await _run_paperless_sync_check(db_session, test_user.id, remote)
+
+        assert result == {processing.id: True}
+        assert remote.checked == []
+        db_session.refresh(processing)
+        assert processing.sync_status == "processing"
+        assert processing.paperless_task_uuid == "task-in-progress"
+
     async def test_deleted_equipment_document_is_marked_missing(
         self, db_session, test_user, test_patient, other_users_equipment, remote
     ):
@@ -138,28 +215,7 @@ class TestPaperlessChecks:
         )
         theirs = _remote_file(db_session, other_users_equipment, "paperless", "202")
 
-        with (
-            patch(
-                "app.services.generic_entity_file_service.has_usable_credentials",
-                return_value=True,
-            ),
-            patch(
-                "app.services.generic_entity_file_service.credential_kwargs",
-                return_value={},
-            ),
-            patch(
-                "app.services.paperless_service.create_paperless_service",
-                return_value=remote,
-            ),
-            patch.object(
-                GenericEntityFileService,
-                "_resolve_task_uuids_to_document_ids",
-                new=AsyncMock(),
-            ),
-        ):
-            result = await GenericEntityFileService().check_paperless_sync_status(
-                db_session, test_user.id
-            )
+        result = await _run_paperless_sync_check(db_session, test_user.id, remote)
 
         assert result == {mine.id: False}
         assert remote.checked == ["101"]
