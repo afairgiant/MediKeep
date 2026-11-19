@@ -320,6 +320,7 @@
     "clearFilter": "Wyczyść filtr",
     "descriptions": {
       "allergy": "Alergie i reakcje uczuleniowe pacjentów",
+      "blood_donation": "Donacje krwi, osocza i płytek krwi z wynikami badań wstępnych",
       "condition": "Schorzenia medyczne i diagnozy",
       "emergency_contact": "Informacje kontaktowe w sytuacjach awaryjnych dla pacjentów",
       "encounter": "Wizyty i spotkania z pacjentami",
@@ -350,8 +351,20 @@
       "vitals": "Ciśnienie krwi, tętno, temperatura"
     },
     "displayNames": {
+      "encounter": "Wizyty",
+      "entity_file": "Załączniki",
+      "family_condition": "Choroby w rodzinie",
+      "family_history_share": "Udostępnienia historii rodzinnej",
+      "family_member": "Członkowie rodziny",
+      "injury_type": "Rodzaje urazów",
+      "invitation": "Zaproszenia",
+      "lab_result_file": "Pliki laboratoryjne",
       "medical_specialty": "Specjalizacje medyczne",
-      "practice": "Praktyki"
+      "patient": "Pacjenci",
+      "patient_share": "Udostępnienia pacjentów",
+      "practice": "Praktyki",
+      "symptom_occurrence": "Wystąpienia objawów",
+      "user": "Użytkownicy"
     },
     "fallbackWarning": "Nie można załadować modeli z serwera. Wyświetlanie wbudowanej listy modeli.",
     "filterAriaLabel": "Filtruj modele danych",

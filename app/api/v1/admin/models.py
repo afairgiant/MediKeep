@@ -51,6 +51,7 @@ from app.crud import (
     vitals,
 )
 from app.crud.base import CRUDBase
+from app.crud.blood_donation import blood_donation
 from app.crud.emergency_contact import emergency_contact
 from app.crud.practice import practice
 from app.crud.injury import injury
@@ -58,9 +59,11 @@ from app.crud.injury_type import injury_type
 from app.crud.medical_equipment import medical_equipment
 from app.crud.symptom import symptom_occurrence, symptom_parent
 from app.models.activity_log import ActionType, ActivityLog, EntityType
+from app.models.enums import get_all_donation_types
 from app.models.labs import LabTestComponent
 from app.models.models import (
     Allergy,
+    BloodDonation,
     Condition,
     EmergencyContact,
     Encounter,
@@ -91,6 +94,7 @@ from app.models.models import (
     Vitals,
 )
 from app.schemas.allergy import AllergyCreate
+from app.schemas.blood_donation import BloodDonationCreate, BloodDonationUpdate
 from app.schemas.condition import ConditionCreate
 from app.schemas.emergency_contact import EmergencyContactCreate
 from app.schemas.encounter import EncounterCreate
@@ -157,6 +161,7 @@ DATETIME_FIELD_MAP = {
     "symptom": ["created_at", "updated_at"],
     "symptom_occurrence": ["created_at", "updated_at"],
     "medical_equipment": ["created_at", "updated_at"],
+    "blood_donation": ["created_at", "updated_at"],
     "medical_specialty": ["created_at", "updated_at"],
 }
 
@@ -176,6 +181,7 @@ DATE_FIELD_MAP = {
     "symptom": ["first_occurrence_date", "last_occurrence_date", "resolved_date"],
     "symptom_occurrence": ["occurrence_date", "resolved_date"],
     "medical_equipment": ["prescribed_date", "last_service_date", "next_service_date"],
+    "blood_donation": ["donation_date"],
 }
 
 # Field display configuration - controls which fields are shown and their order
@@ -962,6 +968,31 @@ FIELD_DISPLAY_CONFIG = {
             "supplier",
         ],
     },
+    "blood_donation": {
+        "list_fields": [
+            "id",
+            "patient_id",
+            "donation_date",
+            "donation_type",
+            "location",
+        ],
+        "detail_fields": [
+            "id",
+            "patient_id",
+            "donation_date",
+            "donation_type",
+            "location",
+            "systolic_bp",
+            "diastolic_bp",
+            "temperature",
+            "hemoglobin",
+            "notes",
+            "tags",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["location", "donation_type"],
+    },
     "medical_specialty": {
         "list_fields": [
             "id",
@@ -1173,6 +1204,12 @@ MODEL_REGISTRY = {
         "crud": medical_equipment,
         "create_schema": MedicalEquipmentCreate,
     },
+    "blood_donation": {
+        "model": BloodDonation,
+        "crud": blood_donation,
+        "create_schema": BloodDonationCreate,
+        "update_schema": BloodDonationUpdate,
+    },
     "medical_specialty": {
         "model": MedicalSpecialty,
         "crud": medical_specialty,
@@ -1303,6 +1340,8 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
             choices = ["auto_link", "create_separate", "always_ask"]
         elif column.name == "glucose_context":
             choices = sorted(VALID_GLUCOSE_CONTEXTS)
+        elif column.name == "donation_type":
+            choices = get_all_donation_types()
 
         fields.append(
             ModelField(
@@ -1985,6 +2024,24 @@ def _enforce_user_update_guards(
         )
 
 
+def _validate_update_fields(
+    model_info: Dict[str, Any], update_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Run the entry's update_schema over the fields it declares; other fields pass through.
+
+    Raises:
+        ValidationError: a declared field fails the schema.
+    """
+    update_schema = model_info.get("update_schema")
+    if update_schema is None:
+        return update_data
+    validated = update_schema(**update_data)
+    return {
+        **update_data,
+        **validated.model_dump(include=validated.model_fields_set),
+    }
+
+
 @router.put("/{model_name}/{record_id}")
 def update_model_record(
     model_name: str,
@@ -2042,6 +2099,7 @@ def update_model_record(
 
         # Process date and datetime fields using centralized mapping
         update_data = process_field_mappings(update_data, model_name)
+        update_data = _validate_update_fields(model_info, update_data)
 
         # Update the record using CRUD update method
         updated_record = crud_instance.update(
@@ -2059,8 +2117,13 @@ def update_model_record(
 
         return record_to_dict(updated_record, model_info["model"])
 
-    except HTTPException:
+    except (HTTPException, APIException):
         raise
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=e.errors(),
+        ) from e
     except Exception as e:
         log_endpoint_error(
             logger,

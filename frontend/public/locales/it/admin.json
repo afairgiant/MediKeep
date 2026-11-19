@@ -316,6 +316,7 @@
     "clearFilter": "Cancella filtro",
     "descriptions": {
       "allergy": "Allergie e reazioni dei pazienti",
+      "blood_donation": "Donazioni di sangue, plasma e piastrine con valori di screening",
       "condition": "Condizioni mediche e diagnosi",
       "emergency_contact": "Contatti di emergenza dei pazienti",
       "encounter": "Visite e appuntamenti dei pazienti",
@@ -346,8 +347,20 @@
       "vitals": "Pressione sanguigna, frequenza cardiaca, temperatura"
     },
     "displayNames": {
+      "encounter": "Visite",
+      "entity_file": "File allegati",
+      "family_condition": "Patologie familiari",
+      "family_history_share": "Condivisioni anamnesi familiare",
+      "family_member": "Familiari",
+      "injury_type": "Tipi di lesione",
+      "invitation": "Inviti",
+      "lab_result_file": "File di laboratorio",
       "medical_specialty": "Specialità mediche",
-      "practice": "Studi medici"
+      "patient": "Pazienti",
+      "patient_share": "Condivisioni pazienti",
+      "practice": "Studi medici",
+      "symptom_occurrence": "Episodi di sintomi",
+      "user": "Utenti"
     },
     "fallbackWarning": "Impossibile caricare i modelli dal server. Viene mostrato l'elenco dei modelli predefinito.",
     "filterAriaLabel": "Filtra modelli dati",

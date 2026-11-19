@@ -35,6 +35,7 @@ import {
   IconCategory,
   IconMoodSick,
   IconDeviceDesktop,
+  IconDroplet,
   IconSearch,
   IconX,
   IconAlertCircle,
@@ -295,6 +296,15 @@ const getModelEnrichment = t => ({
       'Medical devices and equipment prescribed to patients'
     ),
   },
+  blood_donation: {
+    icon: IconDroplet,
+    color: 'red',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.blood_donation',
+      'Blood, plasma, and platelet donations with screening values'
+    ),
+  },
   medical_specialty: {
     icon: IconStethoscope,
     color: 'teal',
@@ -341,48 +351,49 @@ const getCategories = t => [
 ];
 
 const getDisplayNames = t => ({
-  user: t('dataModels.descriptions.user', 'Users'),
-  patient: t('dataModels.descriptions.patient', 'Patients'),
-  practitioner: t('dataModels.descriptions.practitioner', 'Practitioners'),
-  pharmacy: t('dataModels.descriptions.pharmacy', 'Pharmacies'),
-  medication: t('dataModels.descriptions.medication', 'Medications'),
-  lab_result: t('dataModels.descriptions.lab_result', 'Lab Results'),
-  lab_result_file: t('dataModels.descriptions.lab_result_file', 'Lab Files'),
-  vitals: t('dataModels.descriptions.vitals', 'Vital Signs'),
-  condition: t('dataModels.descriptions.condition', 'Conditions'),
-  allergy: t('dataModels.descriptions.allergy', 'Allergies'),
-  immunization: t('dataModels.descriptions.immunization', 'Immunizations'),
-  procedure: t('dataModels.descriptions.procedure', 'Procedures'),
-  treatment: t('dataModels.descriptions.treatment', 'Treatments'),
-  encounter: t('dataModels.descriptions.encounter', 'Encounters'),
-  patient_share: t('dataModels.descriptions.patient_share', 'Patient Shares'),
-  invitation: t('dataModels.descriptions.invitation', 'Invitations'),
+  user: t('dataModels.displayNames.user', 'Users'),
+  patient: t('dataModels.displayNames.patient', 'Patients'),
+  practitioner: t('shared:categories.practitioners', 'Practitioners'),
+  pharmacy: t('shared:categories.pharmacies', 'Pharmacies'),
+  medication: t('shared:categories.medications', 'Medications'),
+  lab_result: t('shared:categories.lab_results', 'Lab Results'),
+  lab_result_file: t('dataModels.displayNames.lab_result_file', 'Lab Files'),
+  vitals: t('shared:categories.vital_signs', 'Vital Signs'),
+  condition: t('shared:categories.conditions', 'Conditions'),
+  allergy: t('shared:categories.allergies', 'Allergies'),
+  immunization: t('shared:categories.immunizations', 'Immunizations'),
+  procedure: t('shared:categories.procedures', 'Procedures'),
+  treatment: t('shared:categories.treatments', 'Treatments'),
+  encounter: t('dataModels.displayNames.encounter', 'Encounters'),
+  patient_share: t('dataModels.displayNames.patient_share', 'Patient Shares'),
+  invitation: t('dataModels.displayNames.invitation', 'Invitations'),
   family_history_share: t(
-    'dataModels.descriptions.family_history_share',
+    'dataModels.displayNames.family_history_share',
     'Family History Shares'
   ),
   emergency_contact: t(
-    'dataModels.descriptions.emergency_contact',
+    'shared:categories.emergency_contacts',
     'Emergency Contacts'
   ),
-  insurance: t('dataModels.descriptions.insurance', 'Insurance'),
-  family_member: t('dataModels.descriptions.family_member', 'Family Members'),
+  insurance: t('shared:categories.insurance', 'Insurance'),
+  family_member: t('dataModels.displayNames.family_member', 'Family Members'),
   family_condition: t(
-    'dataModels.descriptions.family_condition',
+    'dataModels.displayNames.family_condition',
     'Family Conditions'
   ),
-  entity_file: t('dataModels.descriptions.entity_file', 'Entity Files'),
-  injury: t('dataModels.descriptions.injury', 'Injuries'),
-  injury_type: t('dataModels.descriptions.injury_type', 'Injury Types'),
-  symptom: t('dataModels.descriptions.symptom', 'Symptoms'),
+  entity_file: t('dataModels.displayNames.entity_file', 'Entity Files'),
+  injury: t('shared:categories.injuries', 'Injuries'),
+  injury_type: t('dataModels.displayNames.injury_type', 'Injury Types'),
+  symptom: t('shared:categories.symptoms', 'Symptoms'),
   symptom_occurrence: t(
-    'dataModels.descriptions.symptom_occurrence',
+    'dataModels.displayNames.symptom_occurrence',
     'Symptom Occurrences'
   ),
   medical_equipment: t(
-    'dataModels.descriptions.medical_equipment',
+    'shared:categories.medical_equipment',
     'Medical Equipment'
   ),
+  blood_donation: t('shared:categories.blood_donations', 'Blood Donations'),
   medical_specialty: t(
     'dataModels.displayNames.medical_specialty',
     'Medical Specialties'
@@ -419,7 +430,10 @@ const DataModels = () => {
         const merged = apiModels.map(apiModel => {
           const name = apiModel.name || apiModel;
           const displayName =
-            apiModel.display_name || apiModel.verbose_name_plural || name;
+            DISPLAY_NAMES[name] ||
+            apiModel.display_name ||
+            apiModel.verbose_name_plural ||
+            name;
           const enrichment = MODEL_ENRICHMENT[name] || DEFAULT_ENRICHMENT;
 
           return {

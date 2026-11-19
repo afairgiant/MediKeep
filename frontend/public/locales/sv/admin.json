@@ -316,6 +316,7 @@
     "clearFilter": "Rensa filter",
     "descriptions": {
       "allergy": "Patientallergier och reaktioner",
+      "blood_donation": "Blod-, plasma- och trombocytdonationer med kontrollvärden",
       "condition": "Medicinska tillstånd och diagnoser",
       "emergency_contact": "Kontaktuppgifter vid nödsituation för patienter",
       "encounter": "Patientbesök och bokningar",
@@ -346,8 +347,20 @@
       "vitals": "Blodtryck, hjärtfrekvens, temperatur"
     },
     "displayNames": {
+      "encounter": "Besök",
+      "entity_file": "Bifogade filer",
+      "family_condition": "Familjesjukdomar",
+      "family_history_share": "Delad familjehistorik",
+      "family_member": "Familjemedlemmar",
+      "injury_type": "Skadetyper",
+      "invitation": "Inbjudningar",
+      "lab_result_file": "Labbfiler",
       "medical_specialty": "Medicinska specialiteter",
-      "practice": "Mottagningar"
+      "patient": "Patienter",
+      "patient_share": "Delade patienter",
+      "practice": "Mottagningar",
+      "symptom_occurrence": "Symtomtillfällen",
+      "user": "Användare"
     },
     "fallbackWarning": "Kunde inte ladda modeller från servern. Visar inbyggd modellista.",
     "filterAriaLabel": "Filtrera datamodeller",

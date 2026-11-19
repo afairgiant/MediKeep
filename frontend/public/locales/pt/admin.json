@@ -316,6 +316,7 @@
     "clearFilter": "Limpar filtro",
     "descriptions": {
       "allergy": "Alergias e reações do paciente",
+      "blood_donation": "Doações de sangue, plasma e plaquetas com valores de triagem",
       "condition": "Condições médicas e diagnósticos",
       "emergency_contact": "Informações de contato de emergência dos pacientes",
       "encounter": "Consultas e atendimentos do paciente",
@@ -346,8 +347,20 @@
       "vitals": "Pressão arterial, frequência cardíaca, temperatura"
     },
     "displayNames": {
+      "encounter": "Consultas",
+      "entity_file": "Arquivos anexos",
+      "family_condition": "Condições familiares",
+      "family_history_share": "Compartilhamentos de histórico familiar",
+      "family_member": "Familiares",
+      "injury_type": "Tipos de lesão",
+      "invitation": "Convites",
+      "lab_result_file": "Arquivos de laboratório",
       "medical_specialty": "Especialidades médicas",
-      "practice": "Consultórios"
+      "patient": "Pacientes",
+      "patient_share": "Compartilhamentos de pacientes",
+      "practice": "Consultórios",
+      "symptom_occurrence": "Ocorrências de sintomas",
+      "user": "Usuários"
     },
     "fallbackWarning": "Não foi possível carregar modelos do servidor. Exibindo lista de modelos integrada.",
     "filterAriaLabel": "Filtrar modelos de dados",

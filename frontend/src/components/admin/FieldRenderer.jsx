@@ -327,7 +327,7 @@ const FieldRenderer = ({
             {field.choices.map(choice => (
               <option key={choice} value={choice}>
                 {choice.charAt(0).toUpperCase() +
-                  choice.slice(1).replace('-', ' ')}
+                  choice.slice(1).replace(/[-_]/g, ' ')}
               </option>
             ))}
           </select>

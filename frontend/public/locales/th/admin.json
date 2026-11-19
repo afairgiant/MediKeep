@@ -316,6 +316,7 @@
     "clearFilter": "ล้างตัวกรอง",
     "descriptions": {
       "allergy": "ภูมิแพ้และปฏิกิริยาของผู้ป่วย",
+      "blood_donation": "การบริจาคโลหิต พลาสมา และเกล็ดเลือด พร้อมค่าการคัดกรอง",
       "condition": "สภาวะทางการแพทย์และการวินิจฉัย",
       "emergency_contact": "ข้อมูลติดต่อฉุกเฉินสำหรับผู้ป่วย",
       "encounter": "การเข้ารับการรักษาและการนัดหมาย",
@@ -351,8 +352,20 @@
     "noMatchFilter": "ไม่มีโมเดลที่ตรงกับ \"{{query}}\"",
     "subtitle": "จัดการและดูตารางฐานข้อมูลและเวชระเบียนทั้งหมด",
     "displayNames": {
+      "encounter": "การเข้ารับบริการ",
+      "entity_file": "ไฟล์แนบ",
+      "family_condition": "โรคในครอบครัว",
+      "family_history_share": "การแชร์ประวัติครอบครัว",
+      "family_member": "สมาชิกในครอบครัว",
+      "injury_type": "ประเภทการบาดเจ็บ",
+      "invitation": "คำเชิญ",
+      "lab_result_file": "ไฟล์ผลแล็บ",
       "medical_specialty": "ความเชี่ยวชาญทางการแพทย์",
-      "practice": "คลินิก"
+      "patient": "ผู้ป่วย",
+      "patient_share": "การแชร์ผู้ป่วย",
+      "practice": "คลินิก",
+      "symptom_occurrence": "การเกิดอาการ",
+      "user": "ผู้ใช้"
     }
   },
   "directoryCard": {

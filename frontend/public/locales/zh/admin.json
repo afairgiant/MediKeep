@@ -316,6 +316,7 @@
     "clearFilter": "清除筛选",
     "descriptions": {
       "allergy": "患者过敏史和反应记录",
+      "blood_donation": "献血、血浆和血小板捐献记录及筛查数值",
       "condition": "疾病状况和诊断",
       "emergency_contact": "患者紧急联系人信息",
       "encounter": "患者就诊和预约记录",
@@ -346,8 +347,20 @@
       "vitals": "血压、心率、体温"
     },
     "displayNames": {
+      "encounter": "就诊记录",
+      "entity_file": "附件",
+      "family_condition": "家族疾病",
+      "family_history_share": "家族史共享",
+      "family_member": "家庭成员",
+      "injury_type": "损伤类型",
+      "invitation": "邀请",
+      "lab_result_file": "化验文件",
       "medical_specialty": "专科",
-      "practice": "诊所"
+      "patient": "患者",
+      "patient_share": "患者共享",
+      "practice": "诊所",
+      "symptom_occurrence": "症状发作记录",
+      "user": "用户"
     },
     "fallbackWarning": "无法从服务器加载模型。显示内置模型列表。",
     "filterAriaLabel": "筛选数据模型",

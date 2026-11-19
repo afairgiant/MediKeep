@@ -316,6 +316,7 @@
     "clearFilter": "Clear filter",
     "descriptions": {
       "allergy": "Patient allergies and reactions",
+      "blood_donation": "Blood, plasma, and platelet donations with screening values",
       "condition": "Medical conditions and diagnoses",
       "emergency_contact": "Emergency contact information for patients",
       "encounter": "Patient visits and appointments",
@@ -346,8 +347,20 @@
       "vitals": "Blood pressure, heart rate, temperature"
     },
     "displayNames": {
+      "encounter": "Encounters",
+      "entity_file": "Entity Files",
+      "family_condition": "Family Conditions",
+      "family_history_share": "Family History Shares",
+      "family_member": "Family Members",
+      "injury_type": "Injury Types",
+      "invitation": "Invitations",
+      "lab_result_file": "Lab Files",
       "medical_specialty": "Medical Specialties",
-      "practice": "Practices"
+      "patient": "Patients",
+      "patient_share": "Patient Shares",
+      "practice": "Practices",
+      "symptom_occurrence": "Symptom Occurrences",
+      "user": "Users"
     },
     "fallbackWarning": "Could not load models from server. Showing built-in model list.",
     "filterAriaLabel": "Filter data models",
