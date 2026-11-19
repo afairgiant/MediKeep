@@ -5,6 +5,7 @@ Tests for Entity File API endpoints.
 import io
 import pytest
 from datetime import date
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -12,7 +13,12 @@ from sqlalchemy.orm import Session
 from app.api.v1.endpoints import entity_file as entity_file_endpoint
 from app.crud.patient import patient as patient_crud
 from app.crud.lab_result import lab_result as lab_result_crud
-from app.models.models import EntityFile, PatientShare, UserPreferences
+from app.models.models import (
+    EntityFile,
+    MedicalEquipment,
+    PatientShare,
+    UserPreferences,
+)
 from app.schemas.patient import PatientCreate
 from app.schemas.lab_result import LabResultCreate
 from tests.utils.user import create_random_user, create_user_token_headers
@@ -1071,3 +1077,133 @@ class TestEntityFileSupportedTypes:
             headers=authenticated_headers,
         )
         assert response_visit.status_code == 200
+
+
+class TestEntityFileMedicalEquipment:
+    """Files attached to medical equipment."""
+
+    @pytest.fixture
+    def equipment(self, db_session: Session, user_with_patient):
+        record = MedicalEquipment(
+            patient_id=user_with_patient["patient"].id,
+            equipment_name="CPAP",
+            equipment_type="cpap",
+            status="active",
+        )
+        db_session.add(record)
+        db_session.commit()
+        db_session.refresh(record)
+        return record
+
+    @staticmethod
+    def _files_url(equipment_id):
+        return f"/api/v1/entity-files/medical-equipment/{equipment_id}/files"
+
+    def _upload(self, client, headers, equipment_id, content=b"CPAP manual"):
+        files = {"file": ("manual.txt", io.BytesIO(content), "text/plain")}
+        return client.post(self._files_url(equipment_id), headers=headers, files=files)
+
+    @staticmethod
+    def _other_user_headers(db_session):
+        other = create_random_user(db_session)
+        patient = patient_crud.create_for_user(
+            db_session,
+            user_id=other["user"].id,
+            patient_data=PatientCreate(
+                first_name="Other",
+                last_name="User",
+                birth_date=date(1990, 1, 1),
+                gender="F",
+            ),
+        )
+        other["user"].active_patient_id = patient.id
+        db_session.commit()
+        return create_user_token_headers(other["user"].username)
+
+    def test_upload_list_download_and_delete(
+        self, client: TestClient, authenticated_headers, equipment
+    ):
+        content = b"CPAP manual"
+        upload = self._upload(client, authenticated_headers, equipment.id, content)
+
+        assert upload.status_code == 201
+        uploaded = upload.json()
+        assert uploaded["entity_type"] == "medical-equipment"
+        assert uploaded["entity_id"] == equipment.id
+        assert Path(uploaded["file_path"]).parent.name == "medical-equipment"
+
+        listed = client.get(
+            self._files_url(equipment.id), headers=authenticated_headers
+        )
+        assert listed.status_code == 200
+        assert [f["id"] for f in listed.json()] == [uploaded["id"]]
+
+        download = client.get(
+            f"/api/v1/entity-files/files/{uploaded['id']}/download",
+            headers=authenticated_headers,
+        )
+        assert download.status_code == 200
+        assert download.content == content
+
+        deleted = client.delete(
+            f"/api/v1/entity-files/files/{uploaded['id']}",
+            headers=authenticated_headers,
+        )
+        assert deleted.status_code == 200
+        listed = client.get(
+            self._files_url(equipment.id), headers=authenticated_headers
+        )
+        assert listed.json() == []
+
+    def test_upload_to_nonexistent_equipment_is_rejected(
+        self, client: TestClient, authenticated_headers
+    ):
+        response = self._upload(client, authenticated_headers, 999999)
+
+        assert response.status_code == 404
+
+    def test_other_user_cannot_reach_the_files(
+        self, client: TestClient, db_session: Session, authenticated_headers, equipment
+    ):
+        file_id = self._upload(client, authenticated_headers, equipment.id).json()["id"]
+        other_headers = self._other_user_headers(db_session)
+
+        upload = self._upload(client, other_headers, equipment.id, b"not yours")
+        assert upload.status_code == 403
+        listed = client.get(self._files_url(equipment.id), headers=other_headers)
+        assert listed.status_code == 200
+        assert listed.json() == []
+        download = client.get(
+            f"/api/v1/entity-files/files/{file_id}/download", headers=other_headers
+        )
+        # Denied, but as a 500 for every entity type: the endpoint's catch-all
+        # turns the access error into one (see test_file_patient_isolation)
+        assert download.status_code in (403, 404, 500)
+        assert download.content != b"CPAP manual"
+        delete = client.delete(
+            f"/api/v1/entity-files/files/{file_id}", headers=other_headers
+        )
+        assert delete.status_code == 403
+        # the owner's file is untouched
+        listed = client.get(
+            self._files_url(equipment.id), headers=authenticated_headers
+        )
+        assert [f["id"] for f in listed.json()] == [file_id]
+
+    def test_equipment_files_count_towards_storage_stats(
+        self, client: TestClient, db_session: Session, authenticated_headers, equipment
+    ):
+        content = b"CPAP manual"
+        self._upload(client, authenticated_headers, equipment.id, content)
+
+        mine = client.get(
+            "/api/v1/paperless/storage-stats", headers=authenticated_headers
+        )
+        theirs = client.get(
+            "/api/v1/paperless/storage-stats",
+            headers=self._other_user_headers(db_session),
+        )
+
+        assert mine.status_code == 200
+        assert mine.json()["local"] == {"count": 1, "size": len(content)}
+        assert theirs.json()["local"] == {"count": 0, "size": 0}

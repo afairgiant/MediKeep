@@ -588,13 +588,20 @@ async def get_storage_usage_stats(
         # Build a subquery for entity files belonging to the user's patients
         # EntityFile links to entities via entity_type + entity_id
         # All entities have patient_id, so we join through each entity type
-        from app.models.models import Encounter, Insurance, LabResult, Procedure
+        from app.models.models import (
+            Encounter,
+            Insurance,
+            LabResult,
+            MedicalEquipment,
+            Procedure,
+        )
 
         entity_models = {
             "lab-result": LabResult,
             "procedure": Procedure,
             "insurance": Insurance,
             "encounter": Encounter,
+            "medical-equipment": MedicalEquipment,
         }
 
         # Collect all file IDs belonging to the user across entity types

@@ -21,6 +21,7 @@ class EntityType(str, Enum):
     TREATMENT = "treatment"
     SYMPTOM = "symptom"
     INJURY = "injury"
+    MEDICAL_EQUIPMENT = "medical-equipment"
 
 
 class EntityFileBase(BaseModel):

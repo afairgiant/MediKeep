@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import PropTypes from 'prop-types';
 import {
   Modal,
@@ -11,18 +11,21 @@ import {
   Tabs,
   Box,
   Alert,
+  Input,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconTool,
   IconCalendar,
+  IconFileText,
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
+import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import {
   parseDateInput,
@@ -35,6 +38,7 @@ import {
 } from '../../../constants/equipmentConstants';
 import logger from '../../../services/logger';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
+import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
 
 const EquipmentFormWrapper = ({
@@ -50,6 +54,9 @@ const EquipmentFormWrapper = ({
   isLoading = false,
   statusMessage,
   formError = undefined,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   const { t } = useTranslation(['common', 'medical', 'shared']);
   const subDialog = useSubDialog();
@@ -57,18 +64,53 @@ const EquipmentFormWrapper = ({
 
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const tagsInputId = useId();
 
-  // Reset tab when modal opens/closes
+  // Open on the tab the View dialog had open, if it handed over to this form
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('basic');
+      setActiveTab(
+        subDialog ? 'basic' : getRememberedEditTab('equipment', 'basic')
+      );
     }
     if (!isOpen) {
       setIsSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, subDialog]);
 
   const { handleTextInputChange } = useFormHandlers(onInputChange);
+
+  const handleDocumentError = error => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in equipment ${editingEquipment ? 'edit' : 'create'}`,
+      equipmentId: editingEquipment?.id,
+      error,
+      component: 'EquipmentFormWrapper',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
+    logger.info('equipment_upload_completed', {
+      message: 'File upload completed in equipment form',
+      equipmentId: editingEquipment?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'EquipmentFormWrapper',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -125,6 +167,14 @@ const EquipmentFormWrapper = ({
               </Tabs.Tab>
               <Tabs.Tab value="dates" leftSection={<IconCalendar size={16} />}>
                 {t('medical:equipment.tabs.serviceDates', 'Service & Dates')}
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
+                {editingEquipment
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
@@ -356,7 +406,22 @@ const EquipmentFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Tab 4 - Notes */}
+            {/* Tab 4 - Documents */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="medical-equipment"
+                  entityId={editingEquipment?.id || null}
+                  mode={editingEquipment ? 'edit' : 'create'}
+                  onUploadPendingFiles={onDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
+
+            {/* Tab 5 - Notes */}
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Grid>
@@ -373,16 +438,30 @@ const EquipmentFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <TagInput
-                      value={formData.tags || []}
-                      onChange={tags => {
-                        onInputChange({
-                          target: { name: 'tags', value: tags },
-                        });
-                      }}
+                    {/* TagInput has no label of its own. The theme's label
+                        styles skip Input.Wrapper, so match them here
+                        (as LabResultTagsField does) */}
+                    <Input.Wrapper
+                      id={tagsInputId}
                       label={t('shared:labels.tags', 'Tags')}
-                      placeholder={t('shared:fields.addTags', 'Add tags...')}
-                    />
+                      styles={{
+                        label: {
+                          color: 'var(--color-text-primary)',
+                          fontWeight: 600,
+                        },
+                      }}
+                    >
+                      <TagInput
+                        id={tagsInputId}
+                        value={formData.tags || []}
+                        onChange={tags => {
+                          onInputChange({
+                            target: { name: 'tags', value: tags },
+                          });
+                        }}
+                        placeholder={t('shared:fields.addTags', 'Add tags...')}
+                      />
+                    </Input.Wrapper>
                   </Grid.Col>
                 </Grid>
               </Box>
@@ -475,6 +554,9 @@ EquipmentFormWrapper.propTypes = {
     message: PropTypes.string,
     type: PropTypes.string,
   }),
+  onDocumentManagerRef: PropTypes.func,
+  onFileUploadComplete: PropTypes.func,
+  onError: PropTypes.func,
 };
 
 export default EquipmentFormWrapper;

@@ -52,6 +52,7 @@ from app.crud import (
     symptom_parent,
     treatment,
 )
+from app.crud.medical_equipment import medical_equipment
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
@@ -114,6 +115,7 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
         "treatment": treatment.get,
         "symptom": symptom_parent.get,
         "injury": injury.get,
+        "medical-equipment": medical_equipment.get,
     }
     crud_func = entity_map.get(entity_type)
     if not crud_func:

@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
@@ -97,6 +99,10 @@ const MedicalEquipment = () => {
     formatDate
   );
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('medical-equipment', equipment);
+
   // View modal navigation
   const {
     isOpen: showViewModal,
@@ -106,6 +112,12 @@ const MedicalEquipment = () => {
   } = useViewModalNavigation({
     items: equipment,
     loading,
+    // Files can be added or deleted from the view modal
+    onClose: equip => {
+      if (equip) {
+        refreshFileCount(equip.id);
+      }
+    },
   });
 
   // Form state
@@ -113,13 +125,64 @@ const MedicalEquipment = () => {
   const [editingEquipment, setEditingEquipment] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM_DATA);
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  // Refresh only once pending files are uploaded: refreshing shows the page
+  // loader, which would unmount the form and its document manager
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
+  const {
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'medical-equipment',
+    onSuccess: () => {
+      setShowModal(false);
+      setEditingEquipment(null);
+
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: error => {
+      logger.error('equipment_form_error', {
+        message: 'Form submission error in medical equipment',
+        error,
+        component: 'MedicalEquipment',
+      });
+    },
+    component: 'MedicalEquipment',
+  });
+
+  // Closing after a save whose upload failed still shows the saved record
+  const handleCloseForm = () => {
+    if (isBlocking) return;
+    setShowModal(false);
+    if (needsRefreshAfterSubmissionRef.current) {
+      needsRefreshAfterSubmissionRef.current = false;
+      refreshData();
+    }
+  };
+
   const handleAddEquipment = () => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     setEditingEquipment(null);
     setFormData(EMPTY_FORM_DATA);
     setShowModal(true);
   };
 
   const handleEditEquipment = equip => {
+    resetSubmission();
     setEditingEquipment(equip);
     setFormData({
       equipment_name: equip.equipment_name || '',
@@ -145,6 +208,7 @@ const MedicalEquipment = () => {
   const handleDeleteEquipment = async equipmentId => {
     const success = await deleteItem(equipmentId);
     if (success) {
+      cleanupFileCount(equipmentId);
       await refreshData();
     }
   };
@@ -158,18 +222,74 @@ const MedicalEquipment = () => {
       return;
     }
 
-    const equipmentData = buildEquipmentPayload(formData, currentPatient.id);
-
-    let success;
-    if (editingEquipment) {
-      success = await updateItem(editingEquipment.id, equipmentData);
-    } else {
-      success = await createItem(equipmentData);
+    // A save or upload is still running
+    if (!canSubmit) {
+      return;
     }
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
+    startSubmission();
+
+    const equipmentData = buildEquipmentPayload(formData, currentPatient.id);
+
+    try {
+      let success;
+      let resultId;
+
+      if (editingEquipment) {
+        success = await updateItem(editingEquipment.id, equipmentData);
+        resultId = editingEquipment.id;
+      } else {
+        const result = await createItem(equipmentData);
+        success = !!result;
+        resultId = result?.id;
+      }
+      if (success) {
+        needsRefreshAfterSubmissionRef.current = true;
+      }
+
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+        if (hasPendingFiles) {
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
+          logger.info('equipment_starting_file_upload', {
+            message: 'Starting file upload process',
+            equipmentId: resultId,
+            pendingFilesCount: pendingCount,
+            component: 'MedicalEquipment',
+          });
+
+          startFileUpload();
+
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            completeFileUpload(true, pendingCount, 0);
+          } catch (uploadError) {
+            logger.error('equipment_file_upload_error', {
+              message: 'File upload failed',
+              equipmentId: resultId,
+              error: uploadError.message,
+              component: 'MedicalEquipment',
+            });
+            completeFileUpload(false, 0, pendingCount);
+          }
+          refreshFileCount(resultId);
+        } else {
+          completeFileUpload(true, 0, 0);
+        }
+      } else {
+        handleSubmissionFailure(new Error('Form submission failed'), 'form');
+      }
+    } catch (error) {
+      logger.error('equipment_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'MedicalEquipment',
+      });
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -261,6 +381,8 @@ const MedicalEquipment = () => {
                   onEdit={handleEditEquipment}
                   onDelete={handleDeleteEquipment}
                   onView={handleViewEquipment}
+                  fileCount={fileCounts[equip.id] || 0}
+                  fileCountLoading={fileCountsLoading[equip.id] || false}
                   disableActions={isViewOnly}
                   disableActionsTooltip={viewOnlyTooltip}
                   onError={error => {
@@ -373,7 +495,7 @@ const MedicalEquipment = () => {
 
       <EquipmentFormWrapper
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={handleCloseForm}
         title={
           editingEquipment
             ? t('equipment.editEquipment', 'Edit Equipment')
@@ -385,7 +507,9 @@ const MedicalEquipment = () => {
         onSubmit={handleSubmit}
         practitionersOptions={practitioners}
         practitionersLoading={false}
-        isLoading={false}
+        isLoading={isBlocking}
+        statusMessage={statusMessage}
+        onDocumentManagerRef={setDocumentManagerMethods}
       />
 
       <EquipmentViewModal

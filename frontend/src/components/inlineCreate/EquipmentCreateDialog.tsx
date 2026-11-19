@@ -46,6 +46,7 @@ const EquipmentCreateDialog = (props: InlineCreateDialogProps) => {
       practitionersOptions={practitioners}
       isLoading={flow.busy}
       formError={flow.error}
+      onDocumentManagerRef={flow.setDocumentManager}
     />
   );
 };

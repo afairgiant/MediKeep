@@ -122,7 +122,7 @@ const EquipmentCard = ({
         badges={badges}
         fields={fields}
         notes={equipment.notes}
-        entityType="medical_equipment"
+        entityType="medical-equipment"
         fileCount={fileCount}
         fileCountLoading={fileCountLoading}
         onView={() => onView(equipment)}
