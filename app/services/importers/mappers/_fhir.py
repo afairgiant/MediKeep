@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import date
 from decimal import Context, Decimal
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple
 
 SNOMED = "http://snomed.info/sct"
 ICD10CM = "http://hl7.org/fhir/sid/icd-10-cm"
@@ -182,22 +182,66 @@ def notes_text(resource: dict) -> Optional[str]:
     return joined or None
 
 
-def ref_id(reference: Optional[dict]) -> Optional[str]:
-    """Resource id from a Reference, accepting "Type/id", "#id" and "urn:uuid:id"."""
+def fragment_id(reference: Optional[dict]) -> Optional[str]:
+    """The id after the "#" of a Reference to a contained resource, "" for a bare "#"; None for any other Reference."""
     ref = text(obj(reference).get("reference"))
-    if ref is None:
+    if ref is None or not ref.strip().startswith("#"):
         return None
-    ref = ref.strip().replace("urn:uuid:", "").lstrip("#")
-    return ref.rsplit("/", 1)[-1] or None
+    return ref.strip()[1:]
+
+
+def _id_and_version(reference: Optional[dict]) -> Tuple[Optional[str], Optional[str]]:
+    """(Resource id, version) from a Reference: the id from "Type/id" or "urn:uuid:id", the version from a "/_history/version" after "Type/id"; each None when not given, both for a "#id" Reference."""
+    ref = text(obj(reference).get("reference"))
+    if ref is None or fragment_id(reference) is not None:
+        return None, None
+    parts = ref.strip().replace("urn:uuid:", "").split("/")
+    version = None
+    if len(parts) >= 4 and parts[-2] == "_history":
+        version = parts[-1] or None
+        parts = parts[:-2]
+    return parts[-1] or None, version
+
+
+def ref_id(reference: Optional[dict]) -> Optional[str]:
+    """Resource id from a Reference, accepting "Type/id" and "urn:uuid:id", without a trailing "/_history/version" after "Type/id"; None for "#id"."""
+    return _id_and_version(reference)[0]
+
+
+def lookup_keys(
+    resource_type: str, reference: Optional[dict]
+) -> Optional[Tuple[str, Tuple[str, Optional[str]]]]:
+    """(fullUrl, (type, id)) a Reference is looked up by, in that order; None when it has no reference string or is a "#id" one."""
+    ref = text(obj(reference).get("reference"))
+    if ref is None or fragment_id(reference) is not None:
+        return None
+    return ref.strip(), (resource_type, ref_id(reference))
 
 
 class BundleIndex:
-    """Resources of one bundle keyed by (type, id) and by fullUrl."""
+    """First resource of one bundle for each (type, id) and each (fullUrl, type).
 
-    def __init__(self, bundle: dict):
-        """Walk the bundle once."""
+    Given the part of the bundle that is kept, a resource outside it is never a target.
+    """
+
+    def __init__(self, bundle: dict, kept: Optional[dict] = None):
+        """Walk the bundle once, and the kept part once."""
+        # id() of each resource of the kept part; None when the whole bundle is kept
+        self.kept: Optional[Set[int]] = None
+        if kept is not None:
+            self.kept = {
+                id(entry.get("resource"))
+                for entry in kept.get("entry") or []
+                if isinstance(entry, dict)
+            }
         self.resources: Dict[Tuple[str, str], dict] = {}
-        self.by_url: Dict[str, dict] = {}
+        self.by_url: Dict[Tuple[str, str], dict] = {}
+        # Keys of each dict with a later copy that differs from the first, meta aside
+        self.ambiguous: Set[Tuple[str, str]] = set()
+        self.ambiguous_urls: Set[Tuple[str, str]] = set()
+        # First kept copy for each key and meta.versionId, None for a copy without one
+        self.versions: Dict[Tuple[Any, Optional[str]], dict] = {}
+        self.url_versions: Dict[Tuple[Any, Optional[str]], dict] = {}
         for entry in bundle.get("entry") or []:
             resource = entry.get("resource") if isinstance(entry, dict) else None
             if not isinstance(resource, dict):
@@ -206,18 +250,82 @@ class BundleIndex:
             if not isinstance(resource_type, str):
                 continue
             if resource_id(resource) is not None:
-                self.resources.setdefault(
-                    (resource_type, resource_id(resource)), resource
-                )
+                key = (resource_type, resource_id(resource))
+                self._add(self.resources, self.ambiguous, self.versions, key, resource)
             full_url = entry.get("fullUrl")
             if isinstance(full_url, str) and full_url:
-                self.by_url.setdefault(full_url, resource)
+                key = (full_url, resource_type)
+                self._add(
+                    self.by_url, self.ambiguous_urls, self.url_versions, key, resource
+                )
 
-    def get(self, resource_type: str, resource_id: Any) -> Optional[dict]:
-        """A resource by type and id, or None."""
-        if resource_id is None:
-            return None
-        return self.resources.get((resource_type, str(resource_id)))
+    def _add(
+        self, known: dict, ambiguous: set, versions: dict, key: Any, resource: dict
+    ) -> None:
+        """Keep the first resource for key, or the first kept one of its identical copies, and the first kept one of each version; add the key to ambiguous when this copy differs."""
+        first = known.setdefault(key, resource)
+        if key in ambiguous:
+            return
+        if first is not resource:
+            try:
+                differs = _without_meta(first) != _without_meta(resource)
+            except RecursionError:
+                # Copies nested too deeply to compare count as differing
+                differs = True
+            if differs:
+                ambiguous.add(key)
+                return
+            if self._left_out(first) and not self._left_out(resource):
+                known[key] = resource
+        if not self._left_out(resource):
+            versions.setdefault((key, _version_id(resource)), resource)
+
+    def _left_out(self, resource: dict) -> bool:
+        """True when the resource is outside the kept part."""
+        return self.kept is not None and id(resource) not in self.kept
+
+    def target(
+        self, resource_type: str, reference: Optional[dict]
+    ) -> Tuple[Optional[dict], bool]:
+        """(The kept entry a Reference points to, True when it is ambiguous): the entry of the type at its exact fullUrl first, then type and id.
+
+        For a Reference that names a version, the entry is the kept copy with that
+        meta.versionId, else a kept copy without one, else None.
+        """
+        keys = lookup_keys(resource_type, reference)
+        if keys is None:
+            return None, False
+        url, key = keys
+        if (url, resource_type) in self.by_url:
+            key = (url, resource_type)
+            known, ambiguous, versions = (
+                self.by_url,
+                self.ambiguous_urls,
+                self.url_versions,
+            )
+        else:
+            known, ambiguous, versions = self.resources, self.ambiguous, self.versions
+        if key in ambiguous:
+            return None, True
+        version = _id_and_version(reference)[1]
+        if version is None:
+            found = known.get(key)
+        else:
+            found = versions.get((key, version)) or versions.get((key, None))
+        if found is None or self._left_out(found):
+            return None, False
+        return found, False
+
+
+def _without_meta(resource: dict) -> dict:
+    """The resource without its meta."""
+    return {key: value for key, value in resource.items() if key != "meta"}
+
+
+def _version_id(resource: dict) -> Optional[str]:
+    """The resource's meta.versionId when it is a string, else None."""
+    version = obj(resource.get("meta")).get("versionId")
+    return version if isinstance(version, str) else None
 
 
 # The index of the bundle being planned; set only inside indexed(), so nothing
@@ -228,9 +336,15 @@ _CURRENT: ContextVar[Optional[Tuple[dict, BundleIndex]]] = ContextVar(
 
 
 @contextmanager
-def indexed(bundle: dict) -> Iterator[BundleIndex]:
-    """Share one BundleIndex across every mapper call made for this bundle."""
-    index = BundleIndex(bundle)
+def indexed(bundle: dict, whole: Optional[dict] = None) -> Iterator[BundleIndex]:
+    """Share one BundleIndex across every mapper call made for this bundle.
+
+    When bundle is part of whole, references resolve in whole and only to resources of bundle.
+    """
+    if whole is None or whole is bundle:
+        index = BundleIndex(bundle)
+    else:
+        index = BundleIndex(whole, bundle)
     token = _CURRENT.set((bundle, index))
     try:
         yield index
@@ -249,15 +363,8 @@ def bundle_index(bundle: dict) -> BundleIndex:
 def resolve(
     bundle: dict, resource_type: str, reference: Optional[dict]
 ) -> Optional[dict]:
-    """The bundle entry a Reference points to: its exact fullUrl first, then type and id."""
-    ref = text(obj(reference).get("reference"))
-    if ref is None:
-        return None
-    index = bundle_index(bundle)
-    by_url = index.by_url.get(ref.strip())
-    if by_url is not None:
-        return by_url if by_url.get("resourceType") == resource_type else None
-    return index.get(resource_type, ref_id(reference))
+    """The bundle entry a Reference points to, or None when absent or ambiguous."""
+    return bundle_index(bundle).target(resource_type, reference)[0]
 
 
 def fit(

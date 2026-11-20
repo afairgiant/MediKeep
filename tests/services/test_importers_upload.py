@@ -17,7 +17,7 @@ from app.services.importers import (
     health_record_importer_registry,
     upload,
 )
-from app.services.importers.provenance import content_hash
+from app.services.importers.provenance import _normalize, content_hash
 
 
 def _zip(members: dict) -> bytes:
@@ -41,7 +41,7 @@ class TestZipMembers:
     def test_rejects_path_traversal(self):
         """Test that a member path with .. is rejected before anything is read."""
         data = _zip({"../escape.xml": "<a/>"})
-        with pytest.raises(ImportFormatError, match="Unsafe path"):
+        with pytest.raises(ImportFormatError, match="^Unsafe path in archive$"):
             list(upload.iter_zip_members(data, (".xml",)))
 
     def test_rejects_absolute_and_drive_paths(self):
@@ -61,7 +61,10 @@ class TestZipMembers:
         """Test that a member over the size cap is rejected from its header."""
         monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 10)
         data = _zip({"big.xml": "x" * 11})
-        with pytest.raises(ImportFormatError, match="over the"):
+        with pytest.raises(
+            ImportFormatError,
+            match="^An archive entry is 11 bytes, over the 10 byte limit$",
+        ):
             list(upload.iter_zip_members(data, (".xml",)))
 
     def test_rejects_total_over_cap(self, monkeypatch):
@@ -71,6 +74,81 @@ class TestZipMembers:
         with pytest.raises(ImportFormatError, match="expands past"):
             list(upload.iter_zip_members(data, (".xml",)))
 
+    def test_every_header_is_checked_before_a_member_is_yielded(self, monkeypatch):
+        """Test that a later member's header refuses the zip before the first member is returned."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 10)
+        monkeypatch.setattr(upload, "MAX_ZIP_TOTAL_BYTES", 15)
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "<a/>")
+            zf.writestr("b.xml", "<b/>", compress_type=zipfile.ZIP_BZIP2)
+        cases = {
+            "Unsafe path": _zip({"a.xml": "<a/>", "../b.txt": "x"}),
+            "over the 10 byte limit": _zip({"a.xml": "<a/>", "b.xml": "x" * 11}),
+            "expands past": _zip({"a.xml": "x" * 8, "b.xml": "x" * 8}),
+            "unsupported format": buf.getvalue(),
+        }
+        for message, data in cases.items():
+            members = upload.iter_zip_members(data, (".xml",))
+            with pytest.raises(ImportFormatError, match=message):
+                next(members)
+
+    def test_first_refused_header_in_archive_order_is_the_error(self, monkeypatch):
+        """Test that the checks keep their order within a member and across members."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 10)
+        monkeypatch.setattr(upload, "MAX_ZIP_TOTAL_BYTES", 15)
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "x" * 8, compress_type=zipfile.ZIP_BZIP2)
+            zf.writestr("b.xml", "x" * 11, compress_type=zipfile.ZIP_BZIP2)
+            zf.writestr("../c.xml", "x")
+        with pytest.raises(ImportFormatError, match="unsupported format"):
+            list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "x" * 8)
+            zf.writestr("b.xml", "x" * 11, compress_type=zipfile.ZIP_BZIP2)
+            zf.writestr("../c.xml", "x")
+        with pytest.raises(ImportFormatError, match="over the 10 byte limit"):
+            list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("a.xml", "x" * 8)
+            zf.writestr("b.xml", "x" * 8, compress_type=zipfile.ZIP_BZIP2)
+        with pytest.raises(ImportFormatError, match="expands past"):
+            list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+
+    def test_method_of_a_member_that_is_not_read_is_not_checked(self):
+        """Test that a bzip2 member with another suffix does not refuse the zip."""
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as zf:
+            zf.writestr("a.xml", "<a/>")
+            zf.writestr("scan.pdf", "x" * 50, compress_type=zipfile.ZIP_BZIP2)
+        members = list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+        assert members == [("a.xml", b"<a/>")]
+
+    def test_zip_may_expand_past_the_upload_limit(self):
+        """Test that the documents of a zip may add up to more than one upload, up to 250 MB."""
+        megabyte = 1024 * 1024
+        assert upload.MAX_IMPORT_FILE_SIZE == 50 * megabyte
+        assert upload.MAX_ZIP_MEMBER_BYTES == 50 * megabyte
+        assert upload.MAX_ZIP_TOTAL_BYTES == 250 * megabyte
+        assert upload.MAX_ZIP_MEMBERS == 500
+        data = _zip(
+            {"a.xml": b"\0" * (30 * megabyte), "b.xml": b"\0" * (30 * megabyte)}
+        )
+        assert len(data) < megabyte
+        sizes = [
+            len(content) for _, content in upload.iter_zip_members(data, (".xml",))
+        ]
+        assert sizes == [30 * megabyte, 30 * megabyte]
+
+    def test_total_cap_counts_only_the_members_read(self, monkeypatch):
+        """Test that members with another suffix do not count toward the total."""
+        monkeypatch.setattr(upload, "MAX_ZIP_TOTAL_BYTES", 15)
+        data = _zip({"a.xml": "x" * 10, "b.pdf": "x" * 10, "c.xml": "x" * 5})
+        assert len(list(upload.iter_zip_members(data, (".xml",)))) == 2
+
     def test_catches_header_that_understates_size(self, monkeypatch):
         """Test that a member larger than its header claims is rejected on read."""
         monkeypatch.setattr(upload, "MAX_ZIP_MEMBER_BYTES", 10)
@@ -78,7 +156,106 @@ class TestZipMembers:
         # Overwrite the uncompressed size in the central directory with a small value
         cd = data.rfind(b"PK\x01\x02")
         data[cd + 24 : cd + 28] = (5).to_bytes(4, "little")
-        with pytest.raises(ImportFormatError, match="corrupt"):
+        with pytest.raises(
+            ImportFormatError,
+            match="^An archive entry is corrupt or larger than its header claims$",
+        ):
+            list(upload.iter_zip_members(bytes(data), (".xml",)))
+
+    def test_rejects_compression_methods_other_than_deflate(self):
+        """Test that bzip2, LZMA and Zstandard members are refused before being read.
+
+        zipfile expands a whole bzip2 or LZMA chunk at once, so a small member of
+        those kinds can cost gigabytes; MyChart zips use deflate.
+        """
+        methods = [zipfile.ZIP_BZIP2, zipfile.ZIP_LZMA]
+        if hasattr(zipfile, "ZIP_ZSTANDARD"):  # Python 3.14+
+            methods.append(zipfile.ZIP_ZSTANDARD)
+        for method in methods:
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", method) as zf:
+                zf.writestr("DOC0001.XML", "<a/>" * 50)
+            with pytest.raises(
+                ImportFormatError,
+                match="^An archive entry is encrypted or uses an unsupported format$",
+            ):
+                list(upload.iter_zip_members(buf.getvalue(), (".xml",)))
+
+    def test_understated_header_does_not_expand_the_whole_stream(self):
+        """Test that a member is read in bounded pieces, not expanded in full first.
+
+        The caps compare the header's file_size, which the uploader writes. With
+        the size understated, zipfile truncates to it, so the read must stop there
+        instead of inflating the whole stream and then cutting it.
+        """
+        import tracemalloc
+        import zlib
+
+        payload = b"\0" * (64 * 1024 * 1024)
+        claimed = 100
+        data = bytearray(_zip({"DOC0001.XML": payload}))
+        # Say the member is 100 bytes, with the CRC those 100 bytes would have, in
+        # both the local header and the central directory
+        crc = zlib.crc32(payload[:claimed])
+        for offset in (data.find(b"PK\x03\x04") + 14, data.rfind(b"PK\x01\x02") + 16):
+            data[offset : offset + 4] = crc.to_bytes(4, "little")
+            data[offset + 8 : offset + 12] = claimed.to_bytes(4, "little")
+        tracemalloc.start()
+        try:
+            members = list(upload.iter_zip_members(bytes(data), (".xml",)))
+            _, peak = tracemalloc.get_traced_memory()
+        finally:
+            tracemalloc.stop()
+        assert members == [("DOC0001.XML", payload[:claimed])]
+        assert peak < 8 * 1024 * 1024, f"peak {peak // 1048576} MB"
+
+    def test_rejects_encrypted_member(self):
+        """Test that an encrypted member is rejected without naming it."""
+        data = bytearray(_zip({"Smith_John/DOC0001.XML": "<a/>"}))
+        # Set the encryption flag in the local and central headers
+        data[6] |= 1
+        cd = data.rfind(b"PK\x01\x02")
+        data[cd + 8] |= 1
+        with pytest.raises(
+            ImportFormatError,
+            match="^An archive entry is encrypted or uses an unsupported format$",
+        ):
+            list(upload.iter_zip_members(bytes(data), (".xml",)))
+
+    def test_rejects_unsupported_compression(self):
+        """Test that a compression method zipfile cannot read is rejected."""
+        data = bytearray(_zip({"DOC0001.XML": "<a/>"}))
+        # Method 9 is Deflate64, which zipfile does not implement
+        data[8] = 9
+        cd = data.rfind(b"PK\x01\x02")
+        data[cd + 10] = 9
+        with pytest.raises(
+            ImportFormatError,
+            match="^An archive entry is encrypted or uses an unsupported format$",
+        ):
+            list(upload.iter_zip_members(bytes(data), (".xml",)))
+
+    def test_rejects_zip_needing_a_newer_version(self):
+        """Test that a zip needing a newer version than zipfile reads is rejected."""
+        data = bytearray(_zip({"DOC0001.XML": "<a/>"}))
+        cd = data.rfind(b"PK\x01\x02")
+        data[cd + 6] = 0xFF
+        with pytest.raises(
+            ImportFormatError,
+            match="^The zip file uses a format that is not supported$",
+        ):
+            list(upload.iter_zip_members(bytes(data), (".xml",)))
+
+    def test_rejects_undecodable_member_name(self):
+        """Test that a central directory zipfile cannot parse is not a valid zip."""
+        data = bytearray(_zip({"a.xml": "<a/>"}))
+        # Flag the name as UTF-8 and make it invalid UTF-8
+        cd = data.rfind(b"PK\x01\x02")
+        data[cd + 9] |= 0x08
+        data[cd + 46] = 0xFF
+        with pytest.raises(
+            ImportFormatError, match="^File is not a valid zip archive$"
+        ):
             list(upload.iter_zip_members(bytes(data), (".xml",)))
 
     def test_rejects_non_zip(self):
@@ -130,6 +307,18 @@ class TestContentHash:
             assert content_hash([value]) == content_hash([str(value).lower()])
         assert content_hash(["1e1000000"]) != content_hash(["1e1000001"])
 
+    def test_extreme_exponents_are_not_written_out(self):
+        """Test that 1e-999990 is hashed by value in a short form, not as a million digits."""
+        same = ["1e-999990", "0.1e-999989", Decimal("1e-999990"), "10e-999991"]
+        assert len({content_hash([value]) for value in same}) == 1
+        assert content_hash(["1e-999990"]) != content_hash(["1e-999991"])
+        assert content_hash(["1e60"]) != content_hash(["1e61"])
+        for value in ("1e-999990", "1e60", "-2.5e-70"):
+            assert len(_normalize(value)) < 20, value
+        # Numbers in the everyday range keep the plain form
+        assert _normalize("1.2e2") == "120"
+        assert _normalize("1e-50") == "0." + "0" * 49 + "1"
+
 
 class TestFhirBundleImporter:
     """Test the FHIR bundle importer."""
@@ -139,7 +328,8 @@ class TestFhirBundleImporter:
         data = json.dumps({"resourceType": "Bundle", "entry": []}).encode()
         importer = FhirBundleImporter()
         assert importer.validate_format(data, "export.json")
-        assert importer.to_bundle(data, "export.json")["entry"] == []
+        bundle, notes = importer.to_bundle(data, "export.json")
+        assert (bundle["entry"], notes) == ([], [])
 
     def test_rejects_wrong_resource_type(self):
         """Test that a non-Bundle resource is rejected."""

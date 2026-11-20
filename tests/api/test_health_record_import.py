@@ -1,10 +1,15 @@
 """
-Test the health record import API endpoints with a hand-written FHIR bundle.
+Test the health record import API endpoints with a hand-written FHIR bundle, a
+MyChart-style C-CDA and a synthetic export in Epic's real layout.
 """
 
 import io
 import json
+import re
+import time
+import zipfile
 from datetime import date
+from itertools import permutations
 from pathlib import Path
 from typing import Optional
 from unittest.mock import patch
@@ -26,15 +31,25 @@ from app.models.models import (
     PatientShare,
 )
 from app.schemas.patient import PatientCreate
-from app.services.importers import upload
+from app.services.importers import ccda_available, ccda_importer, upload
+from app.services.importers.ccda_importer import (
+    PATIENT_ID_BIRTH_DATES_MESSAGE,
+    SHARED_RECORD_IDS_MESSAGE,
+)
 from app.services.importers.mappers import _fhir as f
 from app.services.importers.mappers import resource_mapper_registry
+from app.services.importers.patient_match import (
+    NO_MATCHING_PATIENT_MESSAGE,
+    NOTHING_TO_COMPARE_MESSAGE,
+)
 from app.services.importers.service import HealthRecordImportService
 from tests.utils.user import create_random_user, create_user_token_headers
 
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "health_record_import"
 FIXTURE = FIXTURES / "fhir_bundle_minimal.json"
 MAPPER_FIXTURE = FIXTURES / "fhir_bundle_mapper.json"
+MYCHART_CCD = FIXTURES / "mychart_like_ccd.xml"
+EPIC_CCD = FIXTURES / "mychart_epic_synthetic.xml"
 FORMATS_URL = "/api/v1/health-records/import/formats"
 
 
@@ -51,6 +66,76 @@ def _upload(data: Optional[bytes] = None, name: str = "bundle.json"):
     return {
         "file": (name, io.BytesIO(data or FIXTURE.read_bytes()), "application/json")
     }
+
+
+def _xdm_zip(xml: bytes, members: int = 1) -> bytes:
+    """Wrap a C-CDA in the folder layout MyChart's download produces."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for i in range(members):
+            zf.writestr(
+                f"MachineReadable_XDMFormat/IHE_XDM/SUBSET{i:02d}/DOC0001.XML", xml
+            )
+        zf.writestr("MachineReadable_XDMFormat/IHE_XDM/SUBSET00/METADATA.XML", "<x/>")
+        zf.writestr("MachineReadable_XDMFormat/INDEX.HTM", "<html></html>")
+    return buf.getvalue()
+
+
+def _other_person(
+    xml: bytes, given: bytes, birth: Optional[bytes], mark: bytes
+) -> bytes:
+    """The C-CDA fixture as a different person: own name, ids and entry ids.
+
+    The birth date is replaced too unless birth is None.
+    """
+    other = (
+        xml.replace(b"<given>Jane</given>", b"<given>" + given + b"</given>")
+        .replace(b'extension="E1234567"', b'extension="E' + mark + b'"')
+        .replace(b'extension="MRN00042"', b'extension="MRN' + mark + b'"')
+        .replace(b'extension="CCD-2024-000042"', b'extension="CCD-' + mark + b'"')
+    )
+    if birth is not None:
+        other = other.replace(
+            b'<birthTime value="19840722"/>', b'<birthTime value="' + birth + b'"/>'
+        )
+    other, changed = re.subn(
+        rb'extension="([A-Z]+-\d+(?:-[A-Z0-9]+)?)"',
+        rb'extension="' + mark + rb'-\1"',
+        other,
+    )
+    assert changed > 10
+    return other
+
+
+# Part of every name that _with_own_content gives a record
+OWN_CONTENT = "Robin-only"
+
+
+def _with_own_content(xml: bytes) -> bytes:
+    """The C-CDA fixture with a problem, the drug allergy and a medication under other names.
+
+    A copy of the fixture under other ids maps to rows with the fixture's own
+    content, which an import of both stores once. These names make the rows
+    of the copy differ, so a stored row shows which document it came from.
+    """
+    names = (
+        (b"Acute bronchitis", b"Robin-only problem"),
+        (b"Penicillin G", b"Robin-only allergen"),
+        (b"atorvastatin", b"Robin-only drug"),
+    )
+    for old, new in names:
+        assert old in xml
+        xml = xml.replace(old, new)
+    return xml
+
+
+def _zip_of(*documents: bytes) -> bytes:
+    """A zip with each document in its own XDM subset folder."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for i, document in enumerate(documents, 1):
+            zf.writestr(f"IHE_XDM/SUBSET{i:02d}/DOC0001.XML", document)
+    return buf.getvalue()
 
 
 def _bundle_with_diagnosis(diagnosis: str) -> bytes:
@@ -71,6 +156,36 @@ def _unsupported_only() -> bytes:
     return json.dumps(bundle).encode()
 
 
+def _person_entry(key: str, given: str, birth: Optional[str]) -> dict:
+    """A Patient entry named <given> Sampleton, with a birth date when one is given."""
+    resource = {
+        "resourceType": "Patient",
+        "id": key,
+        "name": [{"given": [given], "family": "Sampleton"}],
+    }
+    if birth:
+        resource["birthDate"] = birth
+    return {"resource": resource}
+
+
+def _condition_entry(key: str, owner: Optional[str]) -> dict:
+    """A Condition entry "Diagnosis <key>", with a subject when an owner is given."""
+    resource = {
+        "resourceType": "Condition",
+        "id": key,
+        "code": {"text": f"Diagnosis {key}"},
+    }
+    if owner:
+        resource["subject"] = {"reference": f"Patient/{owner}"}
+    return {"resource": resource}
+
+
+def _people_bundle(*entries: dict) -> bytes:
+    return json.dumps(
+        {"resourceType": "Bundle", "type": "collection", "entry": list(entries)}
+    ).encode()
+
+
 def _conditions(db: Session, patient_id: int):
     return db.query(Condition).filter(Condition.patient_id == patient_id).all()
 
@@ -81,6 +196,26 @@ def _allergies(db: Session, patient_id: int):
 
 def _medications(db: Session, patient_id: int):
     return db.query(Medication).filter(Medication.patient_id == patient_id).all()
+
+
+def _stored_names(db: Session, patient_id: int):
+    """(record type, name) of each condition, allergy and medication row, sorted."""
+    return sorted(
+        [
+            *(("condition", c.diagnosis) for c in _conditions(db, patient_id)),
+            *(("allergy", a.allergen) for a in _allergies(db, patient_id)),
+            *(("medication", m.medication_name) for m in _medications(db, patient_id)),
+        ]
+    )
+
+
+def _assert_only_stored(db: Session, patient_id: int, alone: dict):
+    """Check that the stored rows are those of the preview `alone` and none has a name from _with_own_content."""
+    names = _stored_names(db, patient_id)
+    assert not [name for _, name in names if OWN_CONTENT in name]
+    for record_type in ("condition", "allergy", "medication"):
+        stored = [name for kind, name in names if kind == record_type]
+        assert len(stored) == alone["counts"][record_type]["new"] > 0
 
 
 def _provenance(db: Session, patient_id: int):
@@ -162,11 +297,12 @@ class TestFormats:
     """Test the formats endpoint."""
 
     def test_lists_formats_and_limit(self, client: TestClient, authenticated_headers):
-        """Test that the formats endpoint lists the FHIR bundle format and the size limit."""
+        """Test that the formats endpoint lists the available formats and the size limit."""
         response = client.get(FORMATS_URL, headers=authenticated_headers)
         assert response.status_code == 200
         body = response.json()
-        assert {f["key"] for f in body["formats"]} == {"fhir_bundle"}
+        expected = {"fhir_bundle", "ccda"} if ccda_available() else {"fhir_bundle"}
+        assert {f["key"] for f in body["formats"]} == expected
         assert body["max_file_size_bytes"] == upload.MAX_IMPORT_FILE_SIZE
 
     def test_requires_auth(self, client: TestClient):
@@ -238,7 +374,7 @@ class TestPreview:
         patient_id = user_with_patient["patient"].id
         response = client.post(
             _preview_url(patient_id),
-            files=_upload(b"<x/>", "export.xml"),
+            files=_upload(b"<x/>", "export.csv"),
             headers=authenticated_headers,
         )
         assert response.status_code == 422
@@ -764,7 +900,7 @@ class TestExecute:
         user_with_patient,
         authenticated_headers,
     ):
-        """Test that non-string Patient fields give no summary and still import with a log entry."""
+        """Test that non-string Patient fields give no summary, a warning, and still import."""
         patient_id = user_with_patient["patient"].id
         bundle = json.loads(FIXTURE.read_text())
         bundle["entry"][0]["resource"].update(
@@ -777,7 +913,7 @@ class TestExecute:
         )
         assert preview.status_code == 200, preview.text
         assert preview.json()["patient"] is None
-        assert preview.json()["warnings"] == []
+        assert preview.json()["warnings"] == [NOTHING_TO_COMPARE_MESSAGE]
 
         response = client.post(
             _execute_url(patient_id), files=_upload(data), headers=authenticated_headers
@@ -811,6 +947,248 @@ class TestExecute:
         assert [w for w in body["warnings"] if w.startswith("Skipped")] == [
             "Skipped entry 5: resourceType missing or not a string",
             "Skipped entry 6: resourceType missing or not a string",
+        ]
+
+    def test_skipped_entry_is_numbered_by_its_place_in_the_upload(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the entry number in a warning counts the entries of people left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+
+        def person(key, given, birth):
+            return {
+                "resource": {
+                    "resourceType": "Patient",
+                    "id": key,
+                    "name": [{"given": [given], "family": "Sampleton"}],
+                    "birthDate": birth,
+                }
+            }
+
+        def condition(key, owner):
+            return {
+                "resource": {
+                    "resourceType": "Condition",
+                    "id": key,
+                    "subject": {"reference": f"Patient/{owner}"},
+                    "code": {"text": f"Diagnosis {key}"},
+                }
+            }
+
+        bundle = {
+            "resourceType": "Bundle",
+            "type": "collection",
+            "entry": [
+                person("r", "Robin", "1975-01-01"),
+                condition("r1", "r"),
+                condition("r2", "r"),
+                person("j", "Jane", "1980-04-12"),
+                # No subject, so it is kept as a shared record and reaches the plan
+                {"resource": {"id": "bad"}},
+                condition("j1", "j"),
+            ],
+        }
+        data = json.dumps(bundle).encode()
+
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert body["unsupported"] == {"invalid": 1}
+            assert [w for w in body["warnings"] if w.startswith("Skipped")] == [
+                "Skipped entry 4: resourceType missing or not a string"
+            ]
+            assert any(w.startswith("Left out 2 records") for w in body["warnings"])
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
+        ]
+
+    def test_record_naming_no_patient_is_left_out_with_another_person_in_the_file(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a condition without a subject is not stored once someone is left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _person_entry("r", "Robin", "1975-01-01"),
+            _condition_entry("r1", "r"),
+            _condition_entry("whose", None),
+            {"resource": {"resourceType": "Organization", "id": "org"}},
+        )
+        expected = [
+            "Left out 1 record whose patient could not be identified in the file.",
+            "Left out 1 record for Robin Sampleton, whose birth date 1975-01-01 "
+            "differs from the selected patient's 1980-04-12.",
+        ]
+
+        preview = client.post(
+            _preview_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert preview.status_code == 200, preview.text
+        body = preview.json()
+        assert body["warnings"] == expected
+        assert body["total_resources"] == 2
+        assert body["counts"] == {
+            "condition": {"new": 1, "duplicate": 0, "changed": 0, "edited": 0}
+        }
+        assert body["unsupported"] == {"Organization": 1}
+        assert _conditions(db_session, patient.id) == []
+
+        response = client.post(
+            _execute_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["warnings"] == expected
+        assert response.json()["counts"]["condition"]["created"] == 1
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
+        ]
+
+    def test_person_left_out_without_records_is_not_named(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a person in the file who owns no record adds no warning to preview or execute."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _person_entry("r", "Robin", "1975-01-01"),
+        )
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["warnings"] == []
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
+        ]
+
+    def test_record_naming_no_patient_is_imported_when_nobody_is_left_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a file about one person still imports a condition without a subject."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _condition_entry("whose", None),
+        )
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["warnings"] == []
+        assert sorted(c.diagnosis for c in _conditions(db_session, patient.id)) == [
+            "Diagnosis j1",
+            "Diagnosis whose",
+        ]
+
+    def test_patient_without_a_birth_date_is_imported_with_a_warning(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a matching name alone imports, and both steps say only the name was checked."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", None), _condition_entry("j1", "j")
+        )
+        expected = [
+            "The file has no usable birth date for Jane Sampleton, so only the "
+            "name could be checked against the selected patient."
+        ]
+
+        preview = client.post(
+            _preview_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert preview.status_code == 200, preview.text
+        assert preview.json()["warnings"] == expected
+        assert preview.json()["patient"]["full_name"] == "Jane Sampleton"
+        assert preview.json()["counts"]["condition"]["new"] == 1
+        assert _conditions(db_session, patient.id) == []
+
+        response = client.post(
+            _execute_url(patient.id), files=_upload(data), headers=authenticated_headers
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["warnings"] == expected
+        assert [c.diagnosis for c in _conditions(db_session, patient.id)] == [
+            "Diagnosis j1"
+        ]
+
+    def test_patient_without_a_birth_date_next_to_a_person_left_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a person known by name only is kept and reported after the person left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1980, 4, 12)
+        db_session.commit()
+        data = _people_bundle(
+            _person_entry("j", "Jane", "1980-04-12"),
+            _condition_entry("j1", "j"),
+            _person_entry("x", "Jane", None),
+            _condition_entry("x1", "x"),
+            _person_entry("r", "Robin", "1975-01-01"),
+            _condition_entry("r1", "r"),
+        )
+        expected = [
+            "Left out 1 record for Robin Sampleton, whose birth date 1975-01-01 "
+            "differs from the selected patient's 1980-04-12.",
+            "The file has no usable birth date for Jane Sampleton, so only the "
+            "name could be checked against the selected patient.",
+        ]
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()["warnings"] == expected
+        assert sorted(c.diagnosis for c in _conditions(db_session, patient.id)) == [
+            "Diagnosis j1",
+            "Diagnosis x1",
         ]
 
     def test_mapper_error_is_reported_without_detail(
@@ -1676,8 +2054,722 @@ class TestHashOfValidatedData:
         }
 
 
+def _snomed(code: str) -> dict:
+    return {"coding": [{"system": f.SNOMED, "code": code}]}
+
+
+def _status_concept(code: str) -> dict:
+    return {"coding": [{"code": code}]}
+
+
+class TestSkipWarnings:
+    """Each resource a mapper skips gives its warning, or none, through the service."""
+
+    NO_KNOWN_ALLERGIES = "Allergies: file states no known allergies"
+    NO_KNOWN_MEDICATIONS = "Medications: file states no known medications"
+    PEANUT = {"text": "Peanut"}
+
+    def _warnings(self, db_session, user_with_patient, *resources):
+        result = HealthRecordImportService(db_session).preview(
+            json.loads(_medication_bundle(*resources)),
+            user_with_patient["patient"],
+            "fhir_bundle",
+            "fhir_bundle",
+        )
+        assert result.counts == {}
+        assert result.total_resources == len(resources)
+        return result.warnings
+
+    def _allergy(self, code, verification=None, clinical=None, **fields):
+        resource = {"resourceType": "AllergyIntolerance", "id": "a1", **fields}
+        if code is not None:
+            resource["code"] = code
+        if verification:
+            resource["verificationStatus"] = _status_concept(verification)
+        if clinical:
+            resource["clinicalStatus"] = _status_concept(clinical)
+        return resource
+
+    def _statement(self, status, concept=None, **fields):
+        resource = {"resourceType": "MedicationStatement", "id": "ms1", **fields}
+        if status is not None:
+            resource["status"] = status
+        if concept is not None:
+            resource["medicationCodeableConcept"] = concept
+        return resource
+
+    def test_allergy_skips_that_warn(self, db_session: Session, user_with_patient):
+        """Test the warning of each no-allergy statement that is still current."""
+        cases = [
+            (self._allergy(_snomed("716186003")), self.NO_KNOWN_ALLERGIES),
+            (
+                self._allergy(_snomed("429625007"), "confirmed", "active"),
+                "Allergies: file states no known food allergies",
+            ),
+            (self._allergy(_snomed("419199007"), "refuted"), self.NO_KNOWN_ALLERGIES),
+            (
+                self._allergy(_snomed("416098002"), "refuted", "active"),
+                "Allergies: file states no known drug allergies",
+            ),
+        ]
+        for resource, warning in cases:
+            assert self._warnings(db_session, user_with_patient, resource) == [
+                warning
+            ], resource
+
+    def test_allergy_skips_that_are_silent(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that withdrawn, refuted, outdated and unnamed allergies give no warning."""
+        cases = [
+            self._allergy(self.PEANUT, "entered-in-error"),
+            self._allergy(_snomed("716186003"), "entered-in-error"),
+            self._allergy(_snomed("419199007"), "entered-in-error"),
+            self._allergy(self.PEANUT, "refuted"),
+            self._allergy(None, "refuted"),
+            self._allergy(_snomed("716186003"), "refuted"),
+            self._allergy(_snomed("419199007"), "refuted", "inactive"),
+            self._allergy(_snomed("419199007"), "refuted", "resolved"),
+            self._allergy(_snomed("716186003"), None, "inactive"),
+            self._allergy(_snomed("716186003"), "confirmed", "resolved"),
+            self._allergy(None),
+            self._allergy({"coding": [{"system": f.SNOMED}]}, "confirmed", "active"),
+        ]
+        for resource in cases:
+            assert (
+                self._warnings(db_session, user_with_patient, resource) == []
+            ), resource
+
+    def test_medication_skips_that_warn(self, db_session: Session, user_with_patient):
+        """Test the warning of a do-not-give order and of each no-medication statement."""
+        not_to_give = "Skipped {}: an order not to give the medication"
+        referenced = self._statement(
+            "not-taken", medicationReference={"reference": "Medication/m1"}
+        )
+        medication = {
+            "resourceType": "Medication",
+            "id": "m1",
+            "code": _snomed("410942007"),
+        }
+        cases = [
+            (
+                [
+                    {
+                        "resourceType": "MedicationRequest",
+                        "id": "mr1",
+                        "status": "active",
+                        "doNotPerform": True,
+                        "medicationCodeableConcept": {"text": "Aspirin"},
+                    }
+                ],
+                not_to_give.format("MedicationRequest/mr1"),
+            ),
+            (
+                [{"resourceType": "MedicationStatement", "doNotPerform": True}],
+                not_to_give.format("MedicationStatement/?"),
+            ),
+            (
+                [self._statement("not-taken", _snomed("410942007"), doNotPerform=True)],
+                not_to_give.format("MedicationStatement/ms1"),
+            ),
+            (
+                [self._statement("not-taken", _snomed("410942007"))],
+                self.NO_KNOWN_MEDICATIONS,
+            ),
+            ([referenced, medication], self.NO_KNOWN_MEDICATIONS),
+            (
+                [self._statement("active", _snomed("787481004"))],
+                self.NO_KNOWN_MEDICATIONS,
+            ),
+            (
+                [self._statement(None, _snomed("787481004"))],
+                self.NO_KNOWN_MEDICATIONS,
+            ),
+        ]
+        for resources, warning in cases:
+            assert self._warnings(db_session, user_with_patient, *resources) == [
+                warning
+            ], resources
+
+    def test_medication_skips_that_are_silent(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that withdrawn, double-negative and unnamed medications give no warning."""
+        cases = [
+            self._statement("entered-in-error", {"text": "Aspirin"}),
+            self._statement("cancelled", {"text": "Aspirin"}, doNotPerform=True),
+            self._statement("entered-in-error", _snomed("410942007")),
+            self._statement("cancelled", _snomed("787481004")),
+            self._statement("not-taken", _snomed("787481004")),
+            self._statement("active"),
+            self._statement(
+                "active", medicationReference={"reference": "Medication/absent"}
+            ),
+            {
+                "resourceType": "MedicationRequest",
+                "id": "mr1",
+                "status": "cancelled",
+                "doNotPerform": True,
+                "medicationCodeableConcept": _snomed("410942007"),
+            },
+        ]
+        for resource in cases:
+            assert (
+                self._warnings(db_session, user_with_patient, resource) == []
+            ), resource
+
+    def test_condition_skips_are_silent(self, db_session: Session, user_with_patient):
+        """Test that refuted, withdrawn and unnamed conditions give no warning."""
+        cases = [
+            {
+                "resourceType": "Condition",
+                "id": "c1",
+                "code": {"text": "Asthma"},
+                "verificationStatus": _status_concept(verification),
+            }
+            for verification in ("refuted", "entered-in-error")
+        ]
+        cases.append({"resourceType": "Condition", "id": "c2"})
+        for resource in cases:
+            assert (
+                self._warnings(db_session, user_with_patient, resource) == []
+            ), resource
+
+    def test_each_skip_warning_is_given_once_in_file_order(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that repeated reasons give one line each, where the first one stood."""
+        warnings = self._warnings(
+            db_session,
+            user_with_patient,
+            self._statement("not-taken", _snomed("410942007")),
+            self._allergy(_snomed("716186003")),
+            self._allergy(_snomed("419199007"), "refuted", id="a2"),
+            self._allergy(_snomed("409137002"), id="a3"),
+            self._statement("active", _snomed("787481004"), id="ms2"),
+            self._statement("active", {"text": "Aspirin"}, doNotPerform=True, id="x"),
+            self._statement("active", {"text": "Aspirin"}, doNotPerform=True, id="x"),
+        )
+        assert warnings == [
+            self.NO_KNOWN_MEDICATIONS,
+            self.NO_KNOWN_ALLERGIES,
+            "Allergies: file states no known drug allergies",
+            "Skipped MedicationStatement/x: an order not to give the medication",
+        ]
+
+
+class TestSharedMedicationIds:
+    """A Medication id with differing copies in one bundle names no drug."""
+
+    AMBIGUOUS = (
+        "Skipped MedicationStatement/ms-b: the file has more than one Medication "
+        "for its reference, with different content"
+    )
+
+    @staticmethod
+    def _medication(name: str, **fields) -> dict:
+        return {
+            "resourceType": "Medication",
+            "id": "med-1",
+            "code": {"text": name},
+            **fields,
+        }
+
+    @staticmethod
+    def _statement(key: str, owner: str, **reference) -> dict:
+        return {
+            "resourceType": "MedicationStatement",
+            "id": key,
+            "status": "active",
+            "subject": {"reference": f"Patient/{owner}"},
+            "medicationReference": {"reference": "Medication/med-1", **reference},
+        }
+
+    def _execute(self, client, patient_id, headers, *entries):
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(_people_bundle(*entries)),
+            headers=headers,
+        )
+        assert response.status_code == 200, response.text
+        return response.json()
+
+    def _people(self, patient):
+        return [
+            _person_entry("a", "Alex", "1960-02-02"),
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+        ]
+
+    def test_other_persons_drug_is_not_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the selected patient's statement does not take the first copy of the id."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            *self._people(patient),
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._statement("ms-a", "a")},
+            {"resource": self._medication("Metformin")},
+            {"resource": self._statement("ms-b", "b")},
+        )
+        assert body["counts"] == {}
+        assert self.AMBIGUOUS in body["warnings"]
+        assert _medications(db_session, patient.id) == []
+
+    @pytest.mark.parametrize("subject", ["Patient/zz", "Patient/a"])
+    def test_copy_left_out_with_another_person_still_counts(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        subject,
+    ):
+        """Test that a differing copy the patient filter drops keeps the id ambiguous."""
+        patient = user_with_patient["patient"]
+        data = _people_bundle(
+            *self._people(patient),
+            {"resource": self._medication("Metformin")},
+            {
+                "resource": self._medication(
+                    "Lisinopril", subject={"reference": subject}
+                )
+            },
+            {"resource": self._statement("ms-a", "a")},
+            {"resource": self._statement("ms-b", "b")},
+        )
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert body["counts"] == {}
+            assert self.AMBIGUOUS in body["warnings"]
+            assert any(w.startswith("Left out ") for w in body["warnings"])
+        assert _medications(db_session, patient.id) == []
+        assert _provenance(db_session, patient.id) == []
+
+    def _at_url(self, patient, owner: str, *names: str) -> bytes:
+        """A bundle whose statement ms-b refers to a fullUrl held only by the owner's Medications."""
+        url = "urn:uuid:med-1"
+        other = {"reference": f"Patient/{owner}"}
+        return _people_bundle(
+            *self._people(patient),
+            *(
+                {
+                    "fullUrl": url,
+                    "resource": {
+                        **self._medication(name, subject=other),
+                        "id": f"x{place}",
+                    },
+                }
+                for place, name in enumerate(names)
+            ),
+            {"resource": self._medication("Third drug")},
+            {"resource": self._statement("ms-b", "b", reference=url)},
+        )
+
+    @pytest.mark.parametrize(
+        "names, warned",
+        [(("Lisinopril", "Metformin"), True), (("Lisinopril",), False)],
+    )
+    def test_full_url_left_out_is_not_tried_by_id(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        names,
+        warned,
+    ):
+        """Test that a reference to a fullUrl of entries left out does not take the Medication with that id."""
+        patient = user_with_patient["patient"]
+        data = self._at_url(patient, "a", *names)
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert body["counts"] == {}
+            assert (self.AMBIGUOUS in body["warnings"]) is warned
+            assert [w for w in body["warnings"] if "ms-b" in w] == (
+                [self.AMBIGUOUS] if warned else []
+            )
+            assert any(w.startswith("Left out ") for w in body["warnings"])
+        assert _medications(db_session, patient.id) == []
+        assert _provenance(db_session, patient.id) == []
+
+    def test_full_url_kept_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the same file names the drug when the Medication at the fullUrl is the patient's."""
+        patient = user_with_patient["patient"]
+        data = self._at_url(patient, "b", "Lisinopril")
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                url, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            counts = response.json()["counts"]["medication"]
+            assert counts.get("new") == 1 or counts.get("created") == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Lisinopril"
+        ]
+
+    @pytest.mark.parametrize("medication_first", [True, False])
+    def test_full_url_shared_with_another_type_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        medication_first,
+    ):
+        """Test that an Organization at the fullUrl of the file's one Medication does not stop the import."""
+        patient = user_with_patient["patient"]
+        url = "urn:uuid:x"
+        shared = [
+            {"fullUrl": url, "resource": {**self._medication("DRUG"), "id": "x"}},
+            {"fullUrl": url, "resource": {"resourceType": "Organization", "id": "x"}},
+        ]
+        data = _people_bundle(
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+            *(shared if medication_first else reversed(shared)),
+            {"resource": self._statement("ms-b", "b", reference=url)},
+        )
+        for target in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(
+                target, files=_upload(data), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            body = response.json()
+            assert not any("ms-b" in warning for warning in body["warnings"])
+            counts = body["counts"]["medication"]
+            assert counts.get("new") == 1 or counts.get("created") == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "DRUG"
+        ]
+
+    def test_versioned_reference_is_imported_by_its_id(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that Medication/med-1/_history/2 does not take the drug of the Medication with id 2."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+            {"resource": {**self._medication("Metformin"), "id": "2"}},
+            {"resource": self._medication("Lisinopril")},
+            {
+                "resource": self._statement(
+                    "ms-b", "b", reference="Medication/med-1/_history/2"
+                )
+            },
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Lisinopril"
+        ]
+
+    def _both(self, client, patient, headers, *entries):
+        """The preview and execute bodies for a bundle of the patient and the entries."""
+        data = _people_bundle(
+            _person_entry("b", patient.first_name, patient.birth_date.isoformat()),
+            *entries,
+        )
+        bodies = []
+        for url in (_preview_url(patient.id), _execute_url(patient.id)):
+            response = client.post(url, files=_upload(data), headers=headers)
+            assert response.status_code == 200, response.text
+            bodies.append(response.json())
+        return bodies
+
+    def _imported(self, db_session, patient, bodies, name):
+        """Assert that preview and execute count one medication and the row has the name."""
+        preview, executed = bodies
+        assert preview["counts"]["medication"]["new"] == 1
+        assert executed["counts"]["medication"]["created"] == 1
+        for body in bodies:
+            assert not any("ms-b" in warning for warning in body["warnings"])
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            name
+        ]
+        assert len(_provenance(db_session, patient.id)) == 1
+
+    def _not_imported(self, db_session, patient, bodies):
+        """Assert that preview and execute count nothing, warn of nothing and store nothing."""
+        for body in bodies:
+            assert body["counts"] == {}
+            assert not any("ms-b" in warning for warning in body["warnings"])
+        assert _medications(db_session, patient.id) == []
+        assert _provenance(db_session, patient.id) == []
+
+    VERSIONED = (
+        "Medication/med-1/_history/2",
+        "https://x.example/fhir/Medication/med-1/_history/2",
+    )
+
+    @pytest.mark.parametrize("reference", VERSIONED)
+    def test_other_version_is_not_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        reference,
+    ):
+        """Test that a reference to version 2 does not take the drug of the Medication's version 3."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta={"versionId": "3"})},
+            {"resource": self._statement("ms-b", "b", reference=reference)},
+        )
+        self._not_imported(db_session, patient, bodies)
+
+    def test_other_version_is_imported_under_the_display(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the statement's own display names the drug when the version is another one."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta={"versionId": "3"})},
+            {
+                "resource": self._statement(
+                    "ms-b", "b", reference=self.VERSIONED[0], display="Metformin"
+                )
+            },
+        )
+        self._imported(db_session, patient, bodies, "Metformin")
+
+    @pytest.mark.parametrize("reference", VERSIONED)
+    @pytest.mark.parametrize("meta", [{"versionId": "2"}, {}, {"versionId": 3}])
+    def test_same_or_no_version_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        reference,
+        meta,
+    ):
+        """Test that the Medication of the version named, or of no version, names the drug."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta=meta)},
+            {"resource": self._statement("ms-b", "b", reference=reference)},
+        )
+        self._imported(db_session, patient, bodies, "Lisinopril")
+
+    def test_copy_of_the_version_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that identical copies of versions 3 and 2 name the drug for a reference to version 2."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril", meta={"versionId": "3"})},
+            {"resource": self._medication("Lisinopril", meta={"versionId": "2"})},
+            {"resource": self._statement("ms-b", "b", reference=self.VERSIONED[0])},
+        )
+        self._imported(db_session, patient, bodies, "Lisinopril")
+
+    def _holding(self, reference: str, **fields) -> dict:
+        """Statement ms-b with a contained Medication med-1 named Aspirin."""
+        statement = self._statement("ms-b", "b", reference=reference, **fields)
+        statement["contained"] = [self._medication("Aspirin")]
+        return statement
+
+    @pytest.mark.parametrize(
+        "reference",
+        ["Medication/med-1", "urn:uuid:med-1", "Medication/med-1/_history/2"],
+    )
+    def test_reference_to_the_bundle_is_not_answered_by_a_contained_medication(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        reference,
+    ):
+        """Test that Medication/med-1 takes the bundle's med-1, not the contained one."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._holding(reference)},
+        )
+        self._imported(db_session, patient, bodies, "Lisinopril")
+
+    def test_fragment_reference_is_answered_by_the_contained_medication(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that #med-1 takes the contained med-1, not the bundle's."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._holding("#med-1")},
+        )
+        self._imported(db_session, patient, bodies, "Aspirin")
+
+    def test_fragment_reference_to_nothing_contained_is_not_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that #x takes neither the bundle's Medication x nor the contained med-1."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": {**self._medication("Lisinopril"), "id": "x"}},
+            {"resource": self._holding("#x")},
+        )
+        self._not_imported(db_session, patient, bodies)
+
+    def test_fragment_reference_to_nothing_contained_is_imported_under_the_display(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the statement's own display names the drug when #x is not contained."""
+        patient = user_with_patient["patient"]
+        bodies = self._both(
+            client,
+            patient,
+            authenticated_headers,
+            {"resource": {**self._medication("Lisinopril"), "id": "x"}},
+            {"resource": self._holding("#x", display="Metformin")},
+        )
+        self._imported(db_session, patient, bodies, "Metformin")
+
+    def test_reference_display_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that the statement's own display names the drug when the copies differ."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            *self._people(patient),
+            {"resource": self._medication("Lisinopril")},
+            {"resource": self._medication("Metformin")},
+            {"resource": self._statement("ms-b", "b", display="Metformin 500 mg")},
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert not any("ms-b" in warning for warning in body["warnings"])
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Metformin 500 mg"
+        ]
+
+    def test_identical_copies_are_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a Medication repeated with the same content still names the drug."""
+        patient = user_with_patient["patient"]
+        body = self._execute(
+            client,
+            patient.id,
+            authenticated_headers,
+            *self._people(patient),
+            {"resource": self._medication("Metformin", meta={"source": "a"})},
+            {"resource": self._medication("Metformin", meta={"source": "b"})},
+            {"resource": self._statement("ms-b", "b")},
+        )
+        assert body["counts"]["medication"]["created"] == 1
+        assert [m.medication_name for m in _medications(db_session, patient.id)] == [
+            "Metformin"
+        ]
+
+
 class TestMalformedResources:
     """One badly formed resource never takes the rest of the file with it."""
+
+    def test_many_skip_reasons_plan_in_linear_time(
+        self, db_session: Session, user_with_patient
+    ):
+        """Test that skip warnings are deduplicated without rescanning the list."""
+        count = 40000
+        bundle = {
+            "resourceType": "Bundle",
+            "entry": [
+                {
+                    "resource": {
+                        "resourceType": "MedicationRequest",
+                        "id": f"r{i}",
+                        "doNotPerform": True,
+                    }
+                }
+                for i in range(count)
+            ],
+        }
+        started = time.monotonic()
+        result = HealthRecordImportService(db_session).preview(
+            bundle, user_with_patient["patient"], "fhir_bundle", "fhir_bundle"
+        )
+        # Linear takes a fraction of a second; a scan per reason took about 7 s
+        assert time.monotonic() - started < 10
+        assert result.warnings[-1] == f"{count - 50} more warnings not shown"
 
     def test_unhashable_id_does_not_fail_the_import(
         self,
@@ -1734,3 +2826,642 @@ class TestMalformedResources:
         ).json()
         assert body["counts"]["medication"]["new"] == 1
         assert not any("MedicationRequest" in w for w in body["warnings"])
+
+
+# The C-CDA fixtures need the optional library; without it these tests are skipped
+needs_library = pytest.mark.skipif(
+    not ccda_available(), reason="healthrecord-bridge is not installed"
+)
+
+
+@needs_library
+class TestCcdaFixture:
+    """Test preview and execute on the MyChart-style C-CDA, as XML and as a zip."""
+
+    # Resources the converter produces besides the Patient; the three mapped
+    # types give 2 conditions, 1 allergy (the "no known food allergy" entry
+    # maps to nothing) and 2 medications
+    TOTAL_RESOURCES = 25
+    EXPECTED_NEW = {"condition": 2, "allergy": 1, "medication": 2}
+
+    def test_preview_xml(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test counts, the file's patient and the converter's notes for the XML."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(MYCHART_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert (body["source"], body["format_key"]) == ("ccda", "ccda")
+        assert body["total_resources"] == self.TOTAL_RESOURCES
+        assert {k: v["new"] for k, v in body["counts"].items()} == self.EXPECTED_NEW
+        assert body["unsupported"]["Observation"] == 9
+        assert body["patient"] == {
+            "full_name": "Ms. Jane Quinn Sampleton",
+            "birth_date": "1984-07-22",
+            "gender": "female",
+        }
+        assert any("Plan of Treatment" in w for w in body["warnings"])
+        assert any("selected patient" in w for w in body["warnings"])
+        assert "Allergies: file states no known food allergies" in body["warnings"]
+        assert "Allergies: file states no known allergies" not in body["warnings"]
+
+    def test_preview_zip_matches_xml(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that the MyChart zip previews the same as its XML."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["format_key"] == "ccda"
+        assert body["total_resources"] == self.TOTAL_RESOURCES
+        assert {k: v["new"] for k, v in body["counts"].items()} == self.EXPECTED_NEW
+
+    def test_execute_then_reimport(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test rows and provenance from the zip, then duplicates from the XML."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == self.EXPECTED_NEW
+
+        diagnoses = {c.diagnosis for c in _conditions(db_session, patient_id)}
+        assert "Essential hypertension" in diagnoses
+        assert {a.allergen for a in _allergies(db_session, patient_id)} == {
+            "Penicillin G"
+        }
+        assert len(_medications(db_session, patient_id)) == 2
+        provenance = _provenance(db_session, patient_id)
+        assert len(provenance) == 5
+        assert {p.source for p in provenance} == {"ccda"}
+        assert len(_import_logs(db_session, patient_id)) == 1
+
+        # The same document as bare XML carries the same ids, so nothing is created twice
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(MYCHART_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == {
+            "condition": 0,
+            "allergy": 0,
+            "medication": 0,
+        }
+        assert {
+            k: v["skipped_duplicate"] for k, v in counts.items()
+        } == self.EXPECTED_NEW
+
+    def test_zip_with_two_patients_warns_for_each(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that documents for different patients in one zip each get a warning."""
+        patient_id = user_with_patient["patient"].id
+        jane = MYCHART_CCD.read_bytes()
+        # The same birth date, so neither is left out
+        robin = _other_person(jane, b"Robin", None, b"7654321")
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(_zip_of(jane, robin), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        mismatches = [w for w in response.json()["warnings"] if "The file is for" in w]
+        assert len(mismatches) == 2
+        assert any("Robin" in w for w in mismatches)
+
+    def test_zip_of_two_people_with_the_same_record_ids_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that documents of different people that reuse entry ids are refused, not merged."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Only the person differs; the entry ids are the fixture's own
+        robin = (
+            jane.replace(b"<given>Jane</given>", b"<given>Robin</given>")
+            .replace(b'<birthTime value="19840722"/>', b'<birthTime value="19750101"/>')
+            .replace(b'extension="E1234567"', b'extension="E7654321"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00043"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        )
+        for documents in ((jane, robin), (robin, jane)):
+            for url in (_preview_url(patient.id), _execute_url(patient.id)):
+                response = client.post(
+                    url,
+                    files=_upload(_zip_of(*documents), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400, response.text
+                assert SHARED_RECORD_IDS_MESSAGE in response.text
+        assert _conditions(db_session, patient.id) == []
+        assert _import_logs(db_session, patient.id) == []
+
+    @pytest.mark.parametrize(
+        "birth", [b'<birthTime value="1984"/>', b'<birthTime nullFlavor="UNK"/>']
+    )
+    def test_zip_reusing_record_ids_of_a_patient_without_a_full_birth_date_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+        birth,
+    ):
+        """Test that another person's document cannot replace the records of a document that gives only the birth year, or none."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # The selected patient under another Patient id, with the fixture's entry ids
+        partial = (
+            jane.replace(b'<birthTime value="19840722"/>', birth)
+            .replace(b'extension="E1234567"', b'extension="E1111111"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00041"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000041"')
+        )
+        assert partial.count(birth) == 1
+        # Born in the same year, so the year alone does not tell her from Jane
+        robin = _with_own_content(
+            jane.replace(b"<given>Jane</given>", b"<given>Robin</given>")
+            .replace(b'<birthTime value="19840722"/>', b'<birthTime value="19840801"/>')
+            .replace(b'extension="E1234567"', b'extension="E7654321"')
+            .replace(b'extension="MRN00042"', b'extension="MRN00043"')
+            .replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        )
+        # Jane in full, so Robin would be left out after the merge
+        full = _other_person(jane, b"Jane", None, b"2222222")
+        for documents in permutations((partial, robin, full)):
+            for url in (_preview_url(patient.id), _execute_url(patient.id)):
+                response = client.post(
+                    url,
+                    files=_upload(_zip_of(*documents), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400, response.text
+                assert SHARED_RECORD_IDS_MESSAGE in response.text
+        assert _stored_names(db_session, patient.id) == []
+        assert _import_logs(db_session, patient.id) == []
+
+    def test_zip_with_another_person_imports_only_the_selected_patient(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a second person's document in a zip is left out of preview and execute."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Her rows differ from Jane's, or the stored rows could not show whose they are
+        robin = _with_own_content(
+            _other_person(jane, b"Robin", b"19750101", b"7654321")
+        )
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        assert alone["counts"]["condition"]["new"] > 0
+        assert not any(w.startswith("Left out") for w in alone["warnings"])
+        for documents in ((robin, jane), (jane, robin)):
+            both = post(_preview_url(patient.id), _zip_of(*documents))
+            assert both["counts"] == alone["counts"]
+            assert both["unsupported"] == alone["unsupported"]
+            assert both["total_resources"] == alone["total_resources"]
+            assert both["patient"] == alone["patient"]
+            left_out = [w for w in both["warnings"] if w.startswith("Left out")]
+            # Every record of Robin's but the organization, which both documents share
+            assert left_out == [
+                f"Left out {alone['total_resources'] - 1} records for Ms. Robin Quinn "
+                "Sampleton, whose birth date 1975-01-01 differs from the selected "
+                "patient's 1984-07-22."
+            ]
+            assert not any("The file is for" in w for w in both["warnings"])
+
+        done = post(_execute_url(patient.id), _zip_of(robin, jane))
+        assert [w for w in done["warnings"] if w.startswith("Left out")] == left_out
+        _assert_only_stored(db_session, patient.id, alone)
+        assert {k: v["created"] for k, v in done["counts"].items()} == {
+            k: v["new"] for k, v in alone["counts"].items()
+        }
+
+    def test_zip_with_a_person_known_only_by_birth_year_leaves_them_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a second person whose document gives only a birth year is left out."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Her rows differ from Jane's, or the stored rows could not show whose they are
+        robin = _with_own_content(_other_person(jane, b"Robin", b"1975", b"7654321"))
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        expected = [
+            f"Left out {alone['total_resources'] - 1} records for Ms. Robin Quinn "
+            "Sampleton, whose birth date 1975 differs from the selected patient's "
+            "1984-07-22."
+        ]
+        for documents in ((robin, jane), (jane, robin)):
+            both = post(_preview_url(patient.id), _zip_of(*documents))
+            assert both["counts"] == alone["counts"]
+            assert both["patient"] == alone["patient"]
+            assert [w for w in both["warnings"] if w.startswith("Left out")] == expected
+            assert not any("The file is for" in w for w in both["warnings"])
+
+        done = post(_execute_url(patient.id), _zip_of(robin, jane))
+        assert [w for w in done["warnings"] if w.startswith("Left out")] == expected
+        _assert_only_stored(db_session, patient.id, alone)
+        assert {k: v["created"] for k, v in done["counts"].items()} == {
+            k: v["new"] for k, v in alone["counts"].items()
+        }
+
+    def test_zip_with_a_less_exact_copy_of_the_patient_still_leaves_the_other_person_out(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a later document giving only the selected patient's birth year does not let a second person in."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # The same Patient id in another document; later in the zip, so its copy is the one merged
+        year_only = jane.replace(
+            b'<birthTime value="19840722"/>', b'<birthTime value="1984"/>'
+        ).replace(b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"')
+        assert year_only.count(b'<birthTime value="1984"/>') == 1
+        robin = _with_own_content(
+            _other_person(jane, b"Robin", b"19750101", b"7654321")
+        )
+        data = _zip_of(jane, year_only, robin)
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        expected = [
+            f"Left out {alone['total_resources'] - 1} records for Ms. Robin Quinn "
+            "Sampleton, whose birth date 1975-01-01 differs from the selected "
+            "patient's 1984-07-22."
+        ]
+        both = post(_preview_url(patient.id), data)
+        assert both["counts"] == alone["counts"]
+        assert both["patient"] == alone["patient"]
+        assert [w for w in both["warnings"] if w.startswith("Left out")] == expected
+        assert not any(w.startswith("The file") for w in both["warnings"])
+
+        done = post(_execute_url(patient.id), data)
+        assert [w for w in done["warnings"] if w.startswith("Left out")] == expected
+        _assert_only_stored(db_session, patient.id, alone)
+        assert {k: v["created"] for k, v in done["counts"].items()} == {
+            k: v["new"] for k, v in alone["counts"].items()
+        }
+
+    def test_zip_of_one_person_under_two_patient_ids_is_imported(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that one person's documents that give the Patient different ids import as one file."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Swapping the two patientRole ids changes the Patient id the converter derives
+        ids = (
+            b'      <id root="1.2.840.114350.1.13.999.2.7.5.737384.14" extension="E1234567"/>\n',
+            b'      <id root="1.2.840.114350.1.13.999.2.7.3.688884.100" extension="MRN00042"/>\n',
+        )
+        assert ids[0] + ids[1] in jane
+        again = jane.replace(ids[0] + ids[1], ids[1] + ids[0]).replace(
+            b'extension="CCD-2024-000042"', b'extension="CCD-2024-000043"'
+        )
+
+        def post(url, data):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 200, response.text
+            return response.json()
+
+        alone = post(_preview_url(patient.id), _zip_of(jane))
+        both = post(_preview_url(patient.id), _zip_of(jane, again))
+        assert both["counts"] == alone["counts"]
+        assert both["patient"] == alone["patient"]
+        assert not any(w.startswith(("Left out", "The file")) for w in both["warnings"])
+        post(_execute_url(patient.id), _zip_of(jane, again))
+        assert (
+            len(_conditions(db_session, patient.id))
+            == alone["counts"]["condition"]["new"]
+        )
+
+    def test_zip_with_two_people_under_one_patient_id_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that documents giving one Patient id two birth dates are refused, not merged."""
+        patient = user_with_patient["patient"]
+        patient.first_name, patient.last_name = "Jane", "Sampleton"
+        patient.birth_date = date(1984, 7, 22)
+        db_session.commit()
+        jane = MYCHART_CCD.read_bytes()
+        # Another person with her own entry ids and the fixture's patientRole ids
+        robin = (
+            _other_person(jane, b"Robin", b"19750101", b"7654321")
+            .replace(b'extension="E7654321"', b'extension="E1234567"')
+            .replace(b'extension="MRN7654321"', b'extension="MRN00042"')
+        )
+        for documents in ((jane, robin), (robin, jane)):
+            for url in (_preview_url(patient.id), _execute_url(patient.id)):
+                response = client.post(
+                    url,
+                    files=_upload(_zip_of(*documents), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400, response.text
+                assert PATIENT_ID_BIRTH_DATES_MESSAGE in response.text
+        assert _conditions(db_session, patient.id) == []
+        assert _import_logs(db_session, patient.id) == []
+
+    def test_zip_of_other_people_only_is_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test that a zip of several people, none born on the selected patient's day, is refused."""
+        patient_id = user_with_patient["patient"].id
+        jane = MYCHART_CCD.read_bytes()
+        data = _zip_of(jane, _other_person(jane, b"Robin", b"19750101", b"7654321"))
+        for url in (_preview_url(patient_id), _execute_url(patient_id)):
+            response = client.post(
+                url, files=_upload(data, "MyChart.zip"), headers=authenticated_headers
+            )
+            assert response.status_code == 400, response.text
+            assert NO_MATCHING_PATIENT_MESSAGE in response.text
+        assert _conditions(db_session, patient_id) == []
+        assert _import_logs(db_session, patient_id) == []
+
+    def test_zip_over_member_cap(
+        self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch
+    ):
+        """Test that a zip with too many entries is rejected."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBERS", 2)
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            data={"format_key": "ccda"},
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes(), members=3), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 400
+        assert "entries" in response.text
+
+    def test_zip_over_member_cap_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch
+    ):
+        """Test that auto-detection reports the cap, not an unrecognized format."""
+        monkeypatch.setattr(upload, "MAX_ZIP_MEMBERS", 2)
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes(), members=3), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 400
+        assert "over the 2 limit" in response.text
+        assert "Could not recognize" not in response.text
+
+    def test_zip_without_documents_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that auto-detection says the zip holds no C-CDA, not that the format is unknown."""
+        patient_id = user_with_patient["patient"].id
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("IHE_XDM/SUBSET01/METADATA.XML", "<x/>")
+            zf.writestr("README.TXT", "stub")
+        for url in (_preview_url(patient_id), _execute_url(patient_id)):
+            for form in ({}, {"format_key": "ccda"}):
+                response = client.post(
+                    url,
+                    data=form,
+                    files=_upload(buf.getvalue(), "MyChart.zip"),
+                    headers=authenticated_headers,
+                )
+                assert response.status_code == 400
+                assert "The zip file contains no C-CDA documents" in response.text
+                assert "Could not recognize" not in response.text
+
+    def test_damaged_zip_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test that auto-detection says a damaged zip is not a valid archive."""
+        patient_id = user_with_patient["patient"].id
+        whole = _xdm_zip(MYCHART_CCD.read_bytes())
+        for data in (b"not a zip", b"PK\x03\x04 not really", whole[: len(whole) // 2]):
+            response = client.post(
+                _preview_url(patient_id),
+                files=_upload(data, "MyChart.zip"),
+                headers=authenticated_headers,
+            )
+            assert response.status_code == 400
+            assert "File is not a valid zip archive" in response.text
+
+    def test_zip_is_read_once_without_format_key(
+        self, client: TestClient, user_with_patient, authenticated_headers, monkeypatch
+    ):
+        """Test that auto-detection does not inflate the archive a second time."""
+        reads = []
+        read = ccda_importer.iter_zip_members
+
+        def counted(data, suffixes):
+            reads.append(len(data))
+            return read(data, suffixes)
+
+        monkeypatch.setattr(ccda_importer, "iter_zip_members", counted)
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(_xdm_zip(MYCHART_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["format_key"] == "ccda"
+        assert len(reads) == 1
+
+
+@needs_library
+class TestEpicFixture:
+    """Test preview and execute on the synthetic export in Epic's real layout."""
+
+    # Resources the converter produces besides the Patient. The allergies
+    # section holds one "no known allergies" entry, which the converter marks
+    # refuted and the mapper drops with a warning, so there is no allergy section
+    TOTAL_RESOURCES = 180
+    EXPECTED_NEW = {"condition": 4, "medication": 5}
+
+    def test_preview_xml(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        """Test counts, the file's patient, unsupported types and converter notes."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _preview_url(patient_id),
+            files=_upload(EPIC_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert (body["source"], body["format_key"]) == ("ccda", "ccda")
+        assert body["total_resources"] == self.TOTAL_RESOURCES
+        assert {k: v["new"] for k, v in body["counts"].items()} == self.EXPECTED_NEW
+        assert "allergy" not in body["counts"]
+        # Labs, vitals and social history are Observations; lab panels are DiagnosticReports
+        assert body["unsupported"]["Observation"] == 151
+        assert body["unsupported"]["DiagnosticReport"] == 11
+        assert body["patient"] == {
+            "full_name": "Alex Testperson",
+            "birth_date": "1964-01-01",
+            "gender": "other",
+        }
+        warnings = body["warnings"]
+        assert (
+            "The file's birth date 1964-01-01 differs from the selected "
+            "patient's 1990-01-01."
+        ) in warnings
+        assert "Allergies: file states no known allergies" in warnings
+        assert "Section 'Care Teams' is not converted yet (1 entry)" in warnings
+        assert not [w for w in warnings if "(0 entries)" in w]
+        assert "Results: 2 skipped (organizer has no codable observations)" in warnings
+
+    def test_execute_then_reimport_as_zip(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        """Test rows and provenance from the XML, then duplicates from the zip."""
+        patient_id = user_with_patient["patient"].id
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(EPIC_CCD.read_bytes(), "DOC0001.XML"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == self.EXPECTED_NEW
+        assert (
+            "Allergies: file states no known allergies" in response.json()["warnings"]
+        )
+
+        conditions = {c.icd10_code: c for c in _conditions(db_session, patient_id)}
+        assert set(conditions) == {"N18.1", "J32.9", "J18.9", "J11.1"}
+        assert conditions["N18.1"].diagnosis == "Chronic kidney disease stage 1"
+        assert conditions["N18.1"].snomed_code == "431855005"
+        assert conditions["N18.1"].onset_date == date(2024, 1, 17)
+        assert _allergies(db_session, patient_id) == []
+        medications = {
+            m.medication_name: m for m in _medications(db_session, patient_id)
+        }
+        assert len(medications) == 5
+        losartan = medications["losartan potassium 50 MG Oral Tablet"]
+        assert (losartan.dosage, losartan.frequency, losartan.route) == (
+            "50 mg",
+            "daily",
+            "oral",
+        )
+        assert losartan.effective_period_start == date(2025, 3, 7)
+        # Epic writes twice daily as period 0.5 d
+        sertraline = medications["sertraline 50 MG Oral Tablet"]
+        assert sertraline.frequency == "2 times per day"
+        assert sertraline.notes == "Sig: Take 1 tablet by mouth twice daily."
+        # No timing bounds; authoredOn is the order date, not the start of therapy
+        levothyroxine = medications["levothyroxine sodium 0.1 MG Oral Tablet"]
+        assert levothyroxine.effective_period_start is None
+        assert (
+            medications["atorvastatin 80 MG Oral Tablet"].effective_period_start is None
+        )
+        provenance = _provenance(db_session, patient_id)
+        assert len(provenance) == 9
+        assert {p.source for p in provenance} == {"ccda"}
+        assert len(_import_logs(db_session, patient_id)) == 1
+
+        # The same document inside a MyChart zip carries the same ids
+        response = client.post(
+            _execute_url(patient_id),
+            files=_upload(_xdm_zip(EPIC_CCD.read_bytes()), "MyChart.zip"),
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 200, response.text
+        counts = response.json()["counts"]
+        assert {k: v["created"] for k, v in counts.items()} == {
+            "condition": 0,
+            "medication": 0,
+        }
+        assert {
+            k: v["skipped_duplicate"] for k, v in counts.items()
+        } == self.EXPECTED_NEW
+        assert len(_provenance(db_session, patient_id)) == 9

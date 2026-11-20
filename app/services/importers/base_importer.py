@@ -5,7 +5,7 @@ into a FHIR R4 Bundle dict for the resource mappers.
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import List, Tuple
 
 
 class ImportFormatError(ValueError):
@@ -25,5 +25,5 @@ class BaseHealthRecordImporter(ABC):
         """Check whether the upload looks like this importer's format."""
 
     @abstractmethod
-    def to_bundle(self, data: bytes, filename: str) -> dict:
-        """Convert the upload into a FHIR R4 Bundle dict, or raise ImportFormatError."""
+    def to_bundle(self, data: bytes, filename: str) -> Tuple[dict, List[str]]:
+        """Convert the upload into a FHIR R4 Bundle dict and a list of conversion notes for the warnings, or raise ImportFormatError."""
