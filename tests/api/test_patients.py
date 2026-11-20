@@ -2,10 +2,13 @@
 Test patient endpoints.
 """
 
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.models.activity_log import ActivityLog
 from app.models.models import User, Patient
 from tests.utils.user import create_random_user
 
@@ -231,6 +234,39 @@ class TestPatientEndpoints:
             assert "action" in activity
             assert "description" in activity
             assert "timestamp" in activity
+
+    def test_patient_recent_activity_timestamps_are_utc(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        test_user: User,
+        test_patient: Patient,
+    ):
+        """Activity timestamps must tell the browser they are UTC.
+
+        The database stores naive UTC datetimes. Without the trailing ``Z`` the
+        browser parses them as local wall-clock time and the dashboard shifts
+        every entry by the viewer's UTC offset.
+        """
+        occurred_at = datetime(2026, 9, 21, 12, 30, 0)
+        db_session.add(
+            ActivityLog(
+                user_id=test_user.id,
+                patient_id=test_patient.id,
+                action="updated",
+                entity_type="patient",
+                entity_id=test_patient.id,
+                description="Updated Patient Information",
+                timestamp=occurred_at,
+            )
+        )
+        db_session.commit()
+
+        response = authenticated_client.get("/api/v1/patients/recent-activity/")
+
+        assert response.status_code == 200
+        timestamps = [activity["timestamp"] for activity in response.json()]
+        assert "2026-09-21T12:30:00Z" in timestamps
 
     def test_patient_data_privacy(self, client: TestClient, db_session: Session):
         """Test that users can only access their own patient data."""

@@ -12,7 +12,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from sqlalchemy import desc
 from sqlalchemy.orm import Session, joinedload
 
@@ -25,6 +25,7 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
 )
+from app.core.utils.datetime_utils import serialize_datetime_utc
 from app.crud.patient import patient
 from app.crud.practitioner import practitioner
 from app.models.activity_log import ActivityLog
@@ -51,6 +52,11 @@ class UserRecentActivity(BaseModel):
     action: str = Field(..., description="The action performed")
     description: str = Field(..., description="Description of the activity")
     timestamp: datetime = Field(..., description="When the activity occurred")
+
+    @field_serializer("timestamp")
+    @classmethod
+    def serialize_timestamp_as_utc(cls, value: datetime) -> Optional[str]:
+        return serialize_datetime_utc(value)
 
 
 class PatientDashboardStats(BaseModel):
