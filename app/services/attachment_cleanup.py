@@ -20,21 +20,23 @@ only the link is removed.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence
+from typing import Any, Callable, Dict, Iterable, List, Sequence, Tuple
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.stored_files import resolve_stored_file
-from app.models.models import EntityFile, LabResultFile, Patient
-from app.services.export_attachments import ATTACHMENT_SOURCES, AttachmentSource
+from app.models.models import EntityFile, LabResult, LabResultFile, Patient
 from app.services.file_management_service import file_management_service
-from app.services.generic_entity_file_service import GenericEntityFileService
+from app.services.generic_entity_file_service import (
+    FILE_ENTITY_SOURCES,
+    GenericEntityFileService,
+    entity_files_of_records,
+)
 
 logger = get_logger(__name__, "app")
-
-_SOURCES_BY_MODEL = {source.model: source for source in ATTACHMENT_SOURCES}
 
 
 @dataclass
@@ -49,10 +51,6 @@ class PendingAttachments:
 
     entity_file_ids: List[int] = field(default_factory=list)
     local_paths: List[Path] = field(default_factory=list)
-
-    def extend(self, other: "PendingAttachments") -> None:
-        self.entity_file_ids.extend(other.entity_file_ids)
-        self.local_paths.extend(other.local_paths)
 
 
 def _local_paths(file_records: Iterable[Any]) -> List[Path]:
@@ -82,26 +80,26 @@ def _unshared_local_paths(
 
 
 def _source_attachments(
-    db: Session, source: AttachmentSource, record_condition: Any
+    db: Session,
+    sources: Sequence[Tuple[str, type]],
+    record_condition: Callable[[type], Any],
 ) -> PendingAttachments:
-    """Attachments of the ``source`` records matching ``record_condition``."""
-    model = source.model
-    file_ids = (
-        db.query(EntityFile.id)
-        .join(
-            model,
-            (EntityFile.entity_id == model.id)
-            & EntityFile.entity_type.in_(source.entity_types),
-        )
-        .filter(record_condition)
-        .all()
-    )
-    pending = PendingAttachments(entity_file_ids=[file_id for (file_id,) in file_ids])
-    if source.has_legacy_files:
+    """Attachments of the ``sources`` records that ``record_condition`` selects."""
+    pending = PendingAttachments()
+    if not sources:
+        return pending
+    pending.entity_file_ids = [
+        file_record.id
+        for file_record in entity_files_of_records(db, sources, record_condition)
+    ]
+    if any(model is LabResult for _, model in sources):
         legacy_files = (
             db.query(LabResultFile)
-            .join(model, LabResultFile.lab_result_id == model.id)
-            .filter(record_condition)
+            .filter(
+                LabResultFile.lab_result_id.in_(
+                    select(LabResult.id).where(record_condition(LabResult))
+                )
+            )
             .all()
         )
         pending.local_paths = _local_paths(legacy_files)
@@ -112,14 +110,11 @@ def find_patient_attachments(
     db: Session, patient_ids: Sequence[int]
 ) -> PendingAttachments:
     """Attachments of every record of the patients, for a patient delete."""
-    pending = PendingAttachments()
     if not patient_ids:
-        return pending
-    for source in ATTACHMENT_SOURCES:
-        pending.extend(
-            _source_attachments(db, source, source.model.patient_id.in_(patient_ids))
-        )
-    return pending
+        return PendingAttachments()
+    return _source_attachments(
+        db, FILE_ENTITY_SOURCES, lambda model: model.patient_id.in_(patient_ids)
+    )
 
 
 def find_record_attachments(
@@ -142,10 +137,14 @@ def find_record_attachments(
         return PendingAttachments(
             local_paths=_unshared_local_paths(db, model, query.all())
         )
-    source = _SOURCES_BY_MODEL.get(model)
-    if source is None:
-        return PendingAttachments()
-    return _source_attachments(db, source, model.id.in_(record_ids))
+    sources = [
+        (entity_type, source_model)
+        for entity_type, source_model in FILE_ENTITY_SOURCES
+        if source_model is model
+    ]
+    return _source_attachments(
+        db, sources, lambda source_model: source_model.id.in_(record_ids)
+    )
 
 
 def cleanup_attachments(

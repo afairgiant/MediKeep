@@ -7,7 +7,7 @@ import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy import and_, or_, select
@@ -19,20 +19,13 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
-    Allergy,
-    Condition,
     Encounter,
     EntityFile,
-    Immunization,
-    Injury,
     Insurance,
     LabResult,
     MedicalEquipment,
-    Medication,
     Patient,
     Procedure,
-    Symptom,
-    Treatment,
     User,
     UserPreferences,
     get_utc_now,
@@ -43,6 +36,7 @@ from app.schemas.entity_file import (
     EntityType,
     FileOperationResult,
 )
+from app.services.export_attachments import ATTACHMENT_SOURCES
 from app.services.file_management_service import FileManagementService
 from app.services.paperless_auth_methods import (
     credential_kwargs,
@@ -93,22 +87,13 @@ PAPRA_SYNC_CHECK_SOURCES = (
 )
 
 
-# Every (entity type, model) pair a file can be attached to. Must match the
-# entity types get_entity_by_type_and_id in the entity file endpoints accepts.
-FILE_ENTITY_SOURCES = (
-    ("lab-result", LabResult),
-    ("procedure", Procedure),
-    ("insurance", Insurance),
-    ("encounter", Encounter),
-    ("visit", Encounter),
-    ("medication", Medication),
-    ("immunization", Immunization),
-    ("allergy", Allergy),
-    ("condition", Condition),
-    ("treatment", Treatment),
-    ("symptom", Symptom),
-    ("injury", Injury),
-    ("medical-equipment", MedicalEquipment),
+# Every (entity type, model) pair a file can be attached to, taken from the export's
+# attachment sources so the two cannot drift apart. Must match the entity types
+# get_entity_by_type_and_id in the entity file endpoints accepts.
+FILE_ENTITY_SOURCES = tuple(
+    (entity_type, source.model)
+    for source in ATTACHMENT_SOURCES
+    for entity_type in source.entity_types
 )
 
 
@@ -144,18 +129,29 @@ def _as_naive_utc(value: datetime) -> datetime:
     return value
 
 
-def _entity_files(db: Session, sources, patient_ids, *conditions) -> List[EntityFile]:
-    """Files matching ``conditions`` on the ``sources`` records of the patients ``patient_ids`` selects."""
-    attached_to_patients = [
+def entity_files_of_records(
+    db: Session, sources, record_condition: Callable[[type], Any], *conditions
+) -> List[EntityFile]:
+    """Files matching ``conditions`` on the ``sources`` records that ``record_condition`` selects.
+
+    ``sources`` is a non-empty iterable of (entity type, model) pairs, and
+    ``record_condition(model)`` returns the filter on that model's records.
+    """
+    attached_to_records = [
         and_(
             EntityFile.entity_type == entity_type,
-            EntityFile.entity_id.in_(
-                select(model.id).where(model.patient_id.in_(patient_ids))
-            ),
+            EntityFile.entity_id.in_(select(model.id).where(record_condition(model))),
         )
         for entity_type, model in sources
     ]
-    return db.query(EntityFile).filter(or_(*attached_to_patients), *conditions).all()
+    return db.query(EntityFile).filter(or_(*attached_to_records), *conditions).all()
+
+
+def _entity_files(db: Session, sources, patient_ids, *conditions) -> List[EntityFile]:
+    """Files matching ``conditions`` on the ``sources`` records of the patients ``patient_ids`` selects."""
+    return entity_files_of_records(
+        db, sources, lambda model: model.patient_id.in_(patient_ids), *conditions
+    )
 
 
 def _user_entity_files(
