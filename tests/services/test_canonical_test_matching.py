@@ -289,8 +289,22 @@ class TestCanonicalTestMatchingService:
         result = matching_service.find_canonical_match("BUN/Cr")
         assert result == "BUN/Creatinine Ratio"
 
+        # The two ratio panels must resolve to different canonical tests
+        # (covered individually by the parametrized alias tests above).
+        ldl_ratio = matching_service.find_canonical_match("LDL/HDL Ratio")
+        chol_hdl_ratio = matching_service.find_canonical_match("Cholesterol/HDL Ratio")
+        assert ldl_ratio != chol_hdl_ratio
+
     @pytest.mark.parametrize(
-        "name", ["LDL/HDL Ratio", "LDL/HDL", "LDL/HDL Index", "LDL/HDL Quotient"]
+        "name",
+        [
+            "LDL/HDL Ratio",
+            "LDL/HDL",
+            "LDL/HDL Cholesterol Ratio",
+            "Cholesterol in LDL/Cholesterol in HDL",
+            "LDL/HDL Index",
+            "LDL/HDL Quotient",
+        ],
     )
     def test_ldl_hdl_ratio_aliases(self, matching_service, name):
         assert matching_service.find_canonical_match(name) == "LDL/HDL Ratio"

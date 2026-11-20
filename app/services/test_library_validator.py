@@ -69,6 +69,7 @@ def validate_test_library(tests: List[Dict[str, Any]]) -> List[CollisionResult]:
     abbrev_owners: Dict[str, List[str]] = defaultdict(list)
     common_name_owners: Dict[str, List[str]] = defaultdict(list)
     test_code_owners: Dict[str, List[str]] = defaultdict(list)
+    display_order_owners: Dict[Any, List[str]] = defaultdict(list)
 
     for idx, entry in enumerate(tests):
         if not isinstance(entry, dict):
@@ -129,6 +130,14 @@ def validate_test_library(tests: List[Dict[str, Any]]) -> List[CollisionResult]:
             if tc_key:
                 test_code_owners[tc_key].append(canonical)
 
+        do = entry.get("display_order")
+        if do is not None:
+            if not isinstance(do, int) or isinstance(do, bool):
+                raise ValueError(
+                    f"Entry at index {idx}: 'display_order' must be an int, got {do!r}"
+                )
+            display_order_owners[do].append(canonical)
+
     results: List[CollisionResult] = []
 
     def _emit_duplicates(
@@ -154,6 +163,24 @@ def validate_test_library(tests: List[Dict[str, Any]]) -> List[CollisionResult]:
     _emit_duplicates(abbrev_owners, "duplicate_abbreviation", "abbreviation")
     _emit_duplicates(common_name_owners, "duplicate_common_name", "common_name")
     _emit_duplicates(test_code_owners, "duplicate_test_code", "test_code")
+
+    # Duplicate display_order breaks the deterministic ordering of search
+    # results, so it is treated as an error like the other duplicate keys.
+    for key, names in display_order_owners.items():
+        if len(names) > 1:
+            unique_names = tuple(sorted(set(names)))
+            results.append(
+                CollisionResult(
+                    severity=Severity.ERROR,
+                    collision_type="duplicate_display_order",
+                    key=str(key),
+                    conflicting_tests=unique_names,
+                    message=(
+                        f"display_order {key} is shared by "
+                        f"{len(unique_names)} tests: {', '.join(unique_names)}"
+                    ),
+                )
+            )
 
     # Cross-field warnings: abbreviation of test A matches test_name or common_name
     # of a *different* test B.
