@@ -22,12 +22,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Sequence, Tuple
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.utils.stored_files import resolve_stored_file
+from app.core.utils.stored_files import resolve_storage_path, resolve_stored_file
 from app.models.models import EntityFile, LabResult, LabResultFile, Patient
 from app.services.file_management_service import file_management_service
 from app.services.generic_entity_file_service import (
@@ -46,7 +46,8 @@ class PendingAttachments:
     entity_file_ids: EntityFile rows the delete leaves behind, to remove afterwards.
     local_paths: stored files whose rows the delete itself removes (legacy lab
         result files cascade with their lab result, and file records deleted
-        directly), so only the file on disk is left to trash.
+        directly), so only the file on disk is left to trash. Files that a
+        surviving file row still uses are left out.
     """
 
     entity_file_ids: List[int] = field(default_factory=list)
@@ -59,24 +60,34 @@ def _local_paths(file_records: Iterable[Any]) -> List[Path]:
 
 
 def _unshared_local_paths(
-    db: Session, model: type, file_records: List[Any]
+    db: Session, file_records: List[Any], deleted_ids: Dict[type, Sequence[int]]
 ) -> List[Path]:
-    """Stored files of the ``model`` file records that no other file row points to.
+    """Stored files of ``file_records`` that no file row outside ``deleted_ids`` uses.
 
-    A legacy lab result file copied to an EntityFile shares its stored file with
-    that row, so deleting only one of the two must leave the file in place.
+    Two file rows can share a stored file: a legacy lab result file copied to an
+    EntityFile, or a row an admin pointed at another row's file. Deleting some of
+    them must leave the file in place for the others. Paths are compared once
+    resolved, so a relative and an absolute path to the same file match.
     """
-    file_paths = [record.file_path for record in file_records]
-    record_ids = [record.id for record in file_records]
+    paths = _local_paths(file_records)
+    if not paths:
+        return []
+    names = {path.name for path in paths}
     still_used = set()
     for file_model in (EntityFile, LabResultFile):
         query = db.query(file_model.file_path).filter(
-            file_model.file_path.in_(file_paths)
+            or_(
+                *(
+                    file_model.file_path.endswith(name, autoescape=True)
+                    for name in names
+                )
+            )
         )
-        if file_model is model:
-            query = query.filter(file_model.id.notin_(record_ids))
-        still_used.update(path for (path,) in query)
-    return _local_paths(r for r in file_records if r.file_path not in still_used)
+        excluded = deleted_ids.get(file_model)
+        if excluded:
+            query = query.filter(file_model.id.notin_(excluded))
+        still_used.update(resolve_storage_path(path) for (path,) in query)
+    return [path for path in paths if path not in still_used]
 
 
 def _source_attachments(
@@ -102,7 +113,14 @@ def _source_attachments(
             )
             .all()
         )
-        pending.local_paths = _local_paths(legacy_files)
+        pending.local_paths = _unshared_local_paths(
+            db,
+            legacy_files,
+            {
+                LabResultFile: [legacy_file.id for legacy_file in legacy_files],
+                EntityFile: pending.entity_file_ids,
+            },
+        )
     return pending
 
 
@@ -134,8 +152,11 @@ def find_record_attachments(
         query = db.query(model).filter(model.id.in_(record_ids))
         if model is EntityFile:
             query = query.filter(EntityFile.storage_backend == "local")
+        file_records = query.all()
         return PendingAttachments(
-            local_paths=_unshared_local_paths(db, model, query.all())
+            local_paths=_unshared_local_paths(
+                db, file_records, {model: [record.id for record in file_records]}
+            )
         )
     sources = [
         (entity_type, source_model)

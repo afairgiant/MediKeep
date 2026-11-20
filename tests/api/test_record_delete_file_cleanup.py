@@ -10,6 +10,7 @@ Papra documents stay in those services; only the link is removed.
 """
 
 import io
+import os
 from datetime import date, datetime
 
 import pytest
@@ -490,6 +491,35 @@ class TestAdminDeleteFileCleanup:
         assert resp.status_code == 200
         db_session.expire_all()
         assert _stored_path(db_session, file_id).read_bytes() == b"lab"
+        assert _trashed_contents(trash) == []
+
+    def test_record_delete_keeps_a_legacy_file_another_record_uses(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        admin_token_headers,
+        trash,
+    ):
+        # An admin can point a file row at another record's stored file, and may
+        # write the path differently (relative here, absolute on the legacy row)
+        patient_id = user_with_patient["patient"].id
+        doomed = _create_lab_result(db_session, patient_id)
+        stored = _legacy_lab_file(db_session, trash, doomed.id, b"shared")
+        kept = _create_medication(db_session, patient_id)
+        kept_file = _upload(client, authenticated_headers, "medication", kept.id, b"")
+        db_session.get(EntityFile, kept_file).file_path = os.path.relpath(stored)
+        db_session.commit()
+
+        resp = client.delete(
+            f"/api/v1/admin/models/lab_result/{doomed.id}", headers=admin_token_headers
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert db_session.get(LabResult, doomed.id) is None
+        assert stored.read_bytes() == b"shared"
         assert _trashed_contents(trash) == []
 
     def test_bulk_delete_cleans_up_files_of_every_record(

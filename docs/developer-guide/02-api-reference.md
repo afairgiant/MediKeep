@@ -4740,10 +4740,12 @@ The record's response does not change, except `DELETE /lab-results/{lab_result_i
 
 Deletes that remove records without going through their own endpoint clean up the same way:
 
-- `DELETE /patient-management/{patient_id}` and `DELETE /users/me`: the attachments of every record of the deleted patient.
+- `DELETE /patient-management/{patient_id}` and `DELETE /users/me`: the attachments of every record of the deleted patient. For `DELETE /users/me`, that is every patient the user owns.
 - `DELETE /admin/models/{model_name}/{record_id}` and `POST /admin/bulk/delete`: the attachments of each deleted record. Deleting a `patient` covers all of its records. Deleting a `user` through `DELETE /admin/models/user/{record_id}` covers the records of every patient deleted with them. Deleting an `entity_file` or `lab_result_file` record moves its stored file to trash.
 
 Lab results also have older attachments in `lab_result_files`. Those rows are deleted along with the lab result, and their locally stored files move to trash.
+
+In the deletes listed above, a stored file from `lab_result_files`, or from an `entity_file` or `lab_result_file` record deleted directly, stays in place while another file record still points to it.
 
 The cleanup runs only after the delete has been committed, so if the delete fails the attachments stay in place. A failure during cleanup is logged and does not change the response.
 
