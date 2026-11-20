@@ -37,6 +37,7 @@ from app.services.attachment_cleanup import (
     find_patient_attachments,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
+from app.services.user_deletion_service import UserDeletionService
 from tests.utils.user import create_random_user, create_user_token_headers
 
 
@@ -355,6 +356,44 @@ class TestAccountDeleteFileCleanup:
         db_session.expire_all()
         assert all(db_session.get(EntityFile, i) is None for i in file_ids)
         assert _trashed_contents(trash) == [b"family", b"med"]
+
+    def test_account_delete_keeps_files_of_a_patient_transferred_away_meanwhile(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        test_admin_user,
+        trash,
+        monkeypatch,
+    ):
+        family = _create_owned_patient(db_session, user_with_patient["user"].id)
+        family_med = _create_medication(db_session, family.id)
+        file_id = _upload(
+            client, authenticated_headers, "medication", family_med.id, b"family"
+        )
+        new_owner_id = create_random_user(db_session)["user"].id
+        validate = UserDeletionService._validate_deletion_allowed
+
+        def transfer_then_validate(self, db, user_id):
+            # An admin transfer that commits while the account delete is starting
+            db.query(Patient).filter(Patient.id == family.id).update(
+                {"user_id": new_owner_id, "owner_user_id": new_owner_id}
+            )
+            db.commit()
+            return validate(self, db, user_id)
+
+        monkeypatch.setattr(
+            UserDeletionService, "_validate_deletion_allowed", transfer_then_validate
+        )
+
+        resp = client.delete("/api/v1/users/me", headers=authenticated_headers)
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert db_session.get(Patient, family.id) is not None
+        assert _stored_path(db_session, file_id).read_bytes() == b"family"
+        assert _trashed_contents(trash) == []
 
 
 class TestAdminDeleteFileCleanup:

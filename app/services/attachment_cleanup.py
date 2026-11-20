@@ -53,6 +53,10 @@ class PendingAttachments:
     entity_file_ids: List[int] = field(default_factory=list)
     local_paths: List[Path] = field(default_factory=list)
 
+    def extend(self, other: "PendingAttachments") -> None:
+        self.entity_file_ids.extend(other.entity_file_ids)
+        self.local_paths.extend(other.local_paths)
+
 
 def _local_paths(file_records: Iterable[Any]) -> List[Path]:
     """Stored files of the records; remote placeholders and missing files are skipped."""

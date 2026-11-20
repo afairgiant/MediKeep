@@ -122,6 +122,7 @@ from app.schemas.treatment import TreatmentCreate
 from app.schemas.user import UserCreate
 from app.schemas.vitals import VALID_GLUCOSE_CONTEXTS, VitalsCreate
 from app.services.attachment_cleanup import (
+    PendingAttachments,
     cleanup_attachments,
     find_record_attachments,
 )
@@ -1817,10 +1818,10 @@ def delete_model_record(
                     commit=False,
                 )
 
-            deletion_service = UserDeletionService()
-            # Found before the delete, while the records still link the files
-            record_files = deletion_service.find_attachments(db, record_id)
-            deletion_service.delete_user_account(db, user_id=record_id)
+            record_files = PendingAttachments()
+            UserDeletionService().delete_user_account(
+                db, user_id=record_id, attachments=record_files
+            )
             db.commit()
         else:
             if current_user_id is not None:
