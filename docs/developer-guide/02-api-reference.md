@@ -4745,6 +4745,16 @@ The record's response does not change, except `DELETE /lab-results/{lab_result_i
 - **Request Body**: Array of `{entity_type, entity_id}` pairs
 - **Success Response** (200): Array of `{entity_type, entity_id, file_count}` objects
 
+### Update Processing Files
+
+`POST /entity-files/processing/update`
+
+- **Purpose**: Finish Paperless-ngx uploads that are still `processing` by reading their task from Paperless
+- **Authentication**: Yes
+- **Scope**: Only files on patients the caller can edit (own patients, and patients shared with `edit` or `full`), checked through the caller's own Paperless connection
+- **Behaviour**: Only the task whose `task_id` matches the file's task is used. If Paperless can't be reached or answers with an error, the file stays `processing` and is checked again on the next call. Returns an empty object when Paperless is not enabled for the caller
+- **Success Response** (200): Object mapping each checked file ID to its new status (`synced`, `processing`, `duplicate` or `failed`)
+
 ---
 
 ## 10. Sharing & Collaboration

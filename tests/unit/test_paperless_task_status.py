@@ -8,6 +8,8 @@ from app.services.paperless_task_status import (
     parse_task,
 )
 
+TASK_UUID = "4a8e8eee-bc89-4290-a7a5-5d01cb08d54d"
+
 
 def v9_success(document_id: int = 2677) -> dict:
     """Task payload as paperless-ngx returns it for API version 9."""
@@ -37,28 +39,54 @@ def v10_success(document_id: int = 2677) -> dict:
     }
 
 
+class TestExtractTaskByUuid:
+    """Only the requested task is returned when its UUID is given."""
+
+    def test_picks_the_matching_task_from_several(self):
+        other = {**v10_success(1), "task_id": "other"}
+        assert extract_task([other, v10_success()], TASK_UUID) == v10_success()
+
+    def test_no_matching_task_is_none(self):
+        other = {**v10_success(1), "task_id": "other"}
+        assert extract_task({"results": [other]}, TASK_UUID) is None
+
+    def test_lone_task_without_task_id_is_accepted(self):
+        task = {"status": "SUCCESS", "related_document": 3}
+        assert extract_task([task], TASK_UUID) == task
+
+    def test_several_tasks_without_task_id_are_rejected(self):
+        task = {"status": "SUCCESS", "related_document": 3}
+        assert extract_task([task, task], TASK_UUID) is None
+
+    def test_empty_response_is_none(self):
+        assert extract_task({"results": []}, TASK_UUID) is None
+
+
 class TestExtractTask:
     """Response envelope handling."""
 
     def test_paginated_response(self):
-        assert extract_task({"count": 1, "results": [v10_success()]}) == v10_success()
+        assert (
+            extract_task({"count": 1, "results": [v10_success()]}, TASK_UUID)
+            == v10_success()
+        )
 
     def test_bare_list_response(self):
-        assert extract_task([v9_success()]) == v9_success()
+        assert extract_task([v9_success()], TASK_UUID) == v9_success()
 
     def test_single_task_object(self):
-        assert extract_task(v10_success()) == v10_success()
+        assert extract_task(v10_success(), TASK_UUID) == v10_success()
 
     def test_empty_results(self):
-        assert extract_task({"count": 0, "results": []}) is None
+        assert extract_task({"count": 0, "results": []}, TASK_UUID) is None
 
     def test_empty_list(self):
-        assert extract_task([]) is None
+        assert extract_task([], TASK_UUID) is None
 
     def test_unexpected_payload(self):
-        assert extract_task("not a task") is None
-        assert extract_task(None) is None
-        assert extract_task({"detail": "Not found"}) is None
+        assert extract_task("not a task", TASK_UUID) is None
+        assert extract_task(None, TASK_UUID) is None
+        assert extract_task({"detail": "Not found"}, TASK_UUID) is None
 
 
 class TestParseSuccess:
