@@ -4752,7 +4752,7 @@ The record's response does not change, except `DELETE /lab-results/{lab_result_i
 - **Purpose**: Finish Paperless-ngx uploads that are still `processing` by reading their task from Paperless
 - **Authentication**: Yes
 - **Scope**: Only files on patients the caller can edit (own patients, and patients shared with `edit` or `full`), checked through the caller's own Paperless connection
-- **Behaviour**: Only the task whose `task_id` matches the file's task is used. If Paperless can't be reached or answers with an error, the file stays `processing` and is checked again on the next call. Returns an empty object when Paperless is not enabled for the caller
+- **Behaviour**: Only the task whose `task_id` matches the file's task is used. If the task status request fails (Paperless can't be reached or answers with an error), the file stays `processing` with its task kept and is checked again on the next call. If no matching task is returned, the file also stays `processing` and is left out of the response. If the task succeeded but gave no usable document ID, the document is looked up by file name and upload time; when that finds nothing, including when the lookup itself fails, the file is marked `duplicate` and its task is cleared. Returns an empty object when Paperless is not enabled for the caller
 - **Success Response** (200): Object mapping each checked file ID to its new status (`synced`, `processing`, `duplicate` or `failed`)
 
 ---
