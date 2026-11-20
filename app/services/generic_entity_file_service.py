@@ -3,27 +3,36 @@ Generic Entity File Service for handling file operations across all entity types
 Supports lab-results, insurance, visits, procedures, and future entity types.
 """
 
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, UploadFile
-from sqlalchemy import or_
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.http.integration_errors import raise_if_integration_failure
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
+    Allergy,
+    Condition,
     Encounter,
     EntityFile,
+    Immunization,
+    Injury,
     Insurance,
     LabResult,
     MedicalEquipment,
+    Medication,
     Patient,
     Procedure,
+    Symptom,
+    Treatment,
     User,
     UserPreferences,
     get_utc_now,
@@ -56,6 +65,7 @@ from app.services.paperless_service import (
     create_paperless_service,
 )
 from app.services.paperless_task_status import extract_task, parse_task
+from app.services.patient_access import PatientAccessService
 
 logger = get_logger(__name__, "app")
 
@@ -83,6 +93,47 @@ PAPRA_SYNC_CHECK_SOURCES = (
 )
 
 
+# Every (entity type, model) pair a file can be attached to. Must match the
+# entity types get_entity_by_type_and_id in the entity file endpoints accepts.
+FILE_ENTITY_SOURCES = (
+    ("lab-result", LabResult),
+    ("procedure", Procedure),
+    ("insurance", Insurance),
+    ("encounter", Encounter),
+    ("visit", Encounter),
+    ("medication", Medication),
+    ("immunization", Immunization),
+    ("allergy", Allergy),
+    ("condition", Condition),
+    ("treatment", Treatment),
+    ("symptom", Symptom),
+    ("injury", Injury),
+    ("medical-equipment", MedicalEquipment),
+)
+
+
+def _log_file_event(
+    level: int,
+    event: str,
+    message: str,
+    file_record: EntityFile,
+    *,
+    task_uuid: Optional[str] = None,
+    error: Optional[str] = None,
+) -> None:
+    """Log ``event`` for one file, identified by its ID and never by its name."""
+    extra = {
+        LogFields.CATEGORY: "app",
+        LogFields.EVENT: event,
+        LogFields.RECORD_ID: file_record.id,
+    }
+    if task_uuid:
+        extra["task_uuid"] = task_uuid
+    if error:
+        extra[LogFields.ERROR] = error
+    logger.log(level, message, extra=extra)
+
+
 def _as_naive_utc(value: datetime) -> datetime:
     """``value`` as a naive UTC datetime, so naive and aware timestamps can be compared.
 
@@ -93,24 +144,39 @@ def _as_naive_utc(value: datetime) -> datetime:
     return value
 
 
+def _entity_files(db: Session, sources, patient_ids, *conditions) -> List[EntityFile]:
+    """Files matching ``conditions`` on the ``sources`` records of the patients ``patient_ids`` selects."""
+    attached_to_patients = [
+        and_(
+            EntityFile.entity_type == entity_type,
+            EntityFile.entity_id.in_(
+                select(model.id).where(model.patient_id.in_(patient_ids))
+            ),
+        )
+        for entity_type, model in sources
+    ]
+    return db.query(EntityFile).filter(or_(*attached_to_patients), *conditions).all()
+
+
 def _user_entity_files(
     db: Session, user_id: int, sources, *conditions
 ) -> List[EntityFile]:
     """Files matching ``conditions`` on the ``sources`` records of the user's patients."""
-    files: List[EntityFile] = []
-    for entity_type, model in sources:
-        files.extend(
-            db.query(EntityFile)
-            .join(
-                model,
-                (EntityFile.entity_type == entity_type)
-                & (EntityFile.entity_id == model.id),
-            )
-            .join(Patient, model.patient_id == Patient.id)
-            .filter(Patient.user_id == user_id, *conditions)
-            .all()
-        )
-    return files
+    return _entity_files(
+        db, sources, select(Patient.id).where(Patient.user_id == user_id), *conditions
+    )
+
+
+def _editable_entity_files(
+    db: Session, user_id: int, sources, *conditions
+) -> List[EntityFile]:
+    """Files matching ``conditions`` on the ``sources`` records of patients the user can edit."""
+    return _entity_files(
+        db,
+        sources,
+        PatientAccessService.accessible_patient_ids(user_id, "edit"),
+        *conditions,
+    )
 
 
 class GenericEntityFileService:
@@ -2136,8 +2202,12 @@ class GenericEntityFileService:
             for file_record in files_with_tasks:
                 try:
                     task_uuid = file_record.paperless_task_uuid
-                    logger.info(
-                        f"Attempting to resolve task UUID {task_uuid} for file {file_record.file_name}"
+                    _log_file_event(
+                        logging.INFO,
+                        "paperless_task_resolution_started",
+                        "Resolving Paperless task",
+                        file_record,
+                        task_uuid=task_uuid,
                     )
 
                     # Check task status to get document ID
@@ -2145,7 +2215,7 @@ class GenericEntityFileService:
                         "GET", f"/api/tasks/?task_id={task_uuid}"
                     ) as response:
                         if response.status == 200:
-                            task_data = extract_task(await response.json())
+                            task_data = extract_task(await response.json(), task_uuid)
 
                             if task_data is None:
                                 logger.info(
@@ -2171,22 +2241,29 @@ class GenericEntityFileService:
 
                                 if validated_doc_id:
                                     # Successfully validated or found via fallback
-                                    old_id = file_record.paperless_document_id
                                     file_record.paperless_document_id = validated_doc_id
                                     file_record.paperless_task_uuid = (
                                         None  # Clear task UUID
                                     )
                                     file_record.sync_status = "synced"
                                     file_record.last_sync_at = get_utc_now()
-                                    logger.info(
-                                        f"Resolved task UUID {old_id} to document ID {validated_doc_id} for file {file_record.file_name}"
+                                    _log_file_event(
+                                        logging.INFO,
+                                        "paperless_task_resolved",
+                                        f"Paperless task resolved to document {validated_doc_id}",
+                                        file_record,
+                                        task_uuid=task_uuid,
                                     )
                                 else:
                                     # Validation and fallback both failed
                                     file_record.sync_status = "failed"
                                     file_record.last_sync_at = get_utc_now()
-                                    logger.error(
-                                        f"Task {task_uuid} failed validation and fallback for file {file_record.file_name}"
+                                    _log_file_event(
+                                        logging.ERROR,
+                                        "paperless_task_document_not_found",
+                                        "Paperless task succeeded but no document could be linked",
+                                        file_record,
+                                        task_uuid=task_uuid,
                                     )
 
                             elif parsed.is_failure:
@@ -2194,15 +2271,25 @@ class GenericEntityFileService:
                                 error_info = parsed.error_message or "Unknown error"
                                 file_record.sync_status = "failed"
                                 file_record.last_sync_at = get_utc_now()
-                                logger.warning(
-                                    f"Task {task_uuid} failed for file {file_record.file_name}: {error_info}"
+                                _log_file_event(
+                                    logging.WARNING,
+                                    "paperless_task_failed",
+                                    "Paperless task failed",
+                                    file_record,
+                                    task_uuid=task_uuid,
+                                    error=error_info,
                                 )
 
                             # If task is still pending/processing, leave as-is
 
                 except Exception as task_error:
-                    logger.error(
-                        f"Error resolving task UUID {file_record.paperless_document_id} for file {file_record.file_name}: {str(task_error)}"
+                    _log_file_event(
+                        logging.ERROR,
+                        "paperless_task_resolution_error",
+                        "Error resolving Paperless task",
+                        file_record,
+                        task_uuid=file_record.paperless_task_uuid,
+                        error=str(task_error),
                     )
                     continue
 
@@ -2239,32 +2326,15 @@ class GenericEntityFileService:
         self, db: Session, current_user_id: int
     ) -> Dict[str, str]:
         """
-        Update files with 'processing' status by checking their task completion.
+        Resolve the Paperless tasks of the user's processing uploads.
 
-        Args:
-            db: Database session
-            current_user_id: User ID for paperless service
+        Only files on patients the user can edit are checked, through the user's
+        own Paperless.
 
         Returns:
             Dictionary mapping file_id to new status
         """
         try:
-            # Get all processing files - use paperless_task_uuid field for processing files
-            processing_files = (
-                db.query(EntityFile)
-                .filter(
-                    EntityFile.storage_backend == "paperless",
-                    EntityFile.sync_status == "processing",
-                    EntityFile.paperless_task_uuid.isnot(None),
-                )
-                .all()
-            )
-
-            if not processing_files:
-                logger.info(f"No processing files found for user {current_user_id}")
-                return {}
-
-            # Get user's paperless configuration
             user_prefs = (
                 db.query(UserPreferences)
                 .filter(UserPreferences.user_id == current_user_id)
@@ -2272,9 +2342,27 @@ class GenericEntityFileService:
             )
 
             if not user_prefs or not user_prefs.paperless_enabled:
-                logger.warning(
-                    "Cannot update processing files: user preferences not found or disabled"
+                logger.debug(
+                    "Skipping processing files: Paperless is not enabled",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "paperless_processing_poll_skipped",
+                        LogFields.USER_ID: current_user_id,
+                    },
                 )
+                return {}
+
+            processing_files = _editable_entity_files(
+                db,
+                current_user_id,
+                FILE_ENTITY_SOURCES,
+                EntityFile.storage_backend == "paperless",
+                EntityFile.sync_status == "processing",
+                EntityFile.paperless_task_uuid.isnot(None),
+            )
+
+            if not processing_files:
+                logger.info(f"No processing files found for user {current_user_id}")
                 return {}
 
             # Create paperless service
@@ -2309,7 +2397,9 @@ class GenericEntityFileService:
                                 "GET", f"/api/tasks/?task_id={task_uuid}"
                             ) as response:
                                 if response.status == 200:
-                                    task_data = extract_task(await response.json())
+                                    task_data = extract_task(
+                                        await response.json(), task_uuid
+                                    )
 
                                     if task_data is None:
                                         logger.warning(
@@ -2343,8 +2433,12 @@ class GenericEntityFileService:
                                                 "synced"
                                             )
 
-                                            logger.info(
-                                                f"Task {task_uuid} completed successfully: {file_record.file_name} -> document_id: {validated_doc_id}"
+                                            _log_file_event(
+                                                logging.INFO,
+                                                "paperless_task_resolved",
+                                                f"Paperless task resolved to document {validated_doc_id}",
+                                                file_record,
+                                                task_uuid=task_uuid,
                                             )
                                         else:
                                             # Validation and fallback both failed - might be a duplicate or invalid
@@ -2357,8 +2451,12 @@ class GenericEntityFileService:
                                                 "duplicate"
                                             )
 
-                                            logger.info(
-                                                f"Task {task_uuid} completed but document ID validation failed for {file_record.file_name} - likely duplicate or invalid"
+                                            _log_file_event(
+                                                logging.INFO,
+                                                "paperless_task_document_not_found",
+                                                "Paperless task succeeded but no document could be linked; likely a duplicate",
+                                                file_record,
+                                                task_uuid=task_uuid,
                                             )
 
                                     elif parsed.is_failure:
@@ -2376,16 +2474,26 @@ class GenericEntityFileService:
                                             status_updates[str(file_record.id)] = (
                                                 "duplicate"
                                             )
-                                            logger.info(
-                                                f"Task {task_uuid} failed with duplicate for {file_record.file_name}: {error_info}"
+                                            _log_file_event(
+                                                logging.INFO,
+                                                "paperless_task_duplicate",
+                                                "Paperless rejected the upload as a duplicate",
+                                                file_record,
+                                                task_uuid=task_uuid,
+                                                error=error_info,
                                             )
                                         else:
                                             file_record.sync_status = "failed"
                                             status_updates[str(file_record.id)] = (
                                                 "failed"
                                             )
-                                            logger.error(
-                                                f"Task {task_uuid} failed for {file_record.file_name}: {error_info}"
+                                            _log_file_event(
+                                                logging.ERROR,
+                                                "paperless_task_failed",
+                                                "Paperless task failed",
+                                                file_record,
+                                                task_uuid=task_uuid,
+                                                error=error_info,
                                             )
 
                                         file_record.last_sync_at = get_utc_now()
@@ -2395,8 +2503,12 @@ class GenericEntityFileService:
                                         status_updates[str(file_record.id)] = (
                                             "processing"
                                         )
-                                        logger.debug(
-                                            f"Task {task_uuid} still processing for {file_record.file_name}"
+                                        _log_file_event(
+                                            logging.DEBUG,
+                                            "paperless_task_in_progress",
+                                            "Paperless task still processing",
+                                            file_record,
+                                            task_uuid=task_uuid,
                                         )
 
                                     else:
@@ -2461,7 +2573,6 @@ class GenericEntityFileService:
         Returns:
             Valid document ID as string, or None if invalid and fallback failed
         """
-        # Check if document_id is valid
         if document_id and str(document_id).lower() not in [
             "unknown",
             "none",
@@ -2469,41 +2580,52 @@ class GenericEntityFileService:
             "",
         ]:
             try:
-                # Ensure it's a valid numeric document ID
                 doc_id_int = int(document_id)
                 if doc_id_int > 0:
                     return str(doc_id_int)
-                logger.warning(
-                    f"Document ID {document_id} is not a positive integer for file {file_record.file_name}"
-                )
             except (ValueError, TypeError):
-                logger.warning(
-                    f"Document ID '{document_id}' is not numeric for file {file_record.file_name}"
-                )
+                pass
+            _log_file_event(
+                logging.WARNING,
+                "paperless_task_document_id_invalid",
+                "Paperless task returned an invalid document ID",
+                file_record,
+            )
 
-        # Document ID is invalid - try fallback search
-        logger.info(
-            f"Attempting fallback search for file {file_record.file_name} due to invalid document ID '{document_id}'"
+        _log_file_event(
+            logging.INFO,
+            "paperless_document_fallback_search_started",
+            "Looking up Paperless document by file name and upload time",
+            file_record,
         )
 
         try:
-            # Use direct await since this method is now async
             fallback_doc_id = await self._search_document_by_filename_and_time(
                 file_record.file_name, file_record.uploaded_at, paperless_service
             )
             if fallback_doc_id:
-                logger.info(
-                    f"Fallback search found document ID {fallback_doc_id} for file {file_record.file_name}"
+                _log_file_event(
+                    logging.INFO,
+                    "paperless_document_fallback_search_found",
+                    f"Fallback search found Paperless document {fallback_doc_id}",
+                    file_record,
                 )
                 return str(fallback_doc_id)
-            logger.error(
-                f"Fallback search failed to find document for file {file_record.file_name}"
+            _log_file_event(
+                logging.WARNING,
+                "paperless_document_fallback_search_empty",
+                "Fallback search found no Paperless document",
+                file_record,
             )
             return None
 
         except Exception as e:
-            logger.error(
-                f"Error in fallback document search for {file_record.file_name}: {str(e)}"
+            _log_file_event(
+                logging.ERROR,
+                "paperless_document_fallback_search_failed",
+                "Fallback search for Paperless document failed",
+                file_record,
+                error=str(e),
             )
             return None
 
@@ -2556,7 +2678,11 @@ class GenericEntityFileService:
             search_end = upload_time + timedelta(minutes=30)
 
             logger.info(
-                f"Searching for document with filename '{filename}' uploaded between {search_start} and {search_end}"
+                f"Searching for document by file name uploaded between {search_start} and {search_end}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "paperless_document_search_started",
+                },
             )
 
             # Call the async search method directly
@@ -2566,7 +2692,14 @@ class GenericEntityFileService:
             return result
 
         except Exception as e:
-            logger.error(f"Error in fallback document search for {filename}: {str(e)}")
+            logger.error(
+                "Error in fallback document search",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "paperless_document_search_failed",
+                    LogFields.ERROR: str(e),
+                },
+            )
             return None
 
     async def _async_search_document(
@@ -2598,7 +2731,11 @@ class GenericEntityFileService:
                             if search_start <= doc_time <= search_end:
                                 doc_id = doc.get("id")
                                 logger.info(
-                                    f"Found matching document ID {doc_id} for filename '{filename}' created at {doc_created}"
+                                    f"Found matching document ID {doc_id} by file name, created at {doc_created}",
+                                    extra={
+                                        LogFields.CATEGORY: "app",
+                                        LogFields.EVENT: "paperless_document_search_matched",
+                                    },
                                 )
                                 return doc_id
 
@@ -2630,17 +2767,32 @@ class GenericEntityFileService:
                             doc_id = doc.get("id")
                             doc_created = doc.get("created")
                             logger.info(
-                                f"Found potential matching document ID {doc_id} for filename '{filename}' with title '{doc.get('title')}' created at {doc_created}"
+                                f"Found potential matching document ID {doc_id} by file name, created at {doc_created}",
+                                extra={
+                                    LogFields.CATEGORY: "app",
+                                    LogFields.EVENT: "paperless_document_search_matched",
+                                },
                             )
                             return doc_id
 
             logger.warning(
-                f"No document found for filename '{filename}' in time range {search_start} to {search_end}"
+                f"No document found by file name in time range {search_start} to {search_end}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "paperless_document_search_empty",
+                },
             )
             return None
 
         except Exception as e:
-            logger.error(f"Error in async document search for {filename}: {str(e)}")
+            logger.error(
+                "Error in async document search",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "paperless_document_search_failed",
+                    LogFields.ERROR: str(e),
+                },
+            )
             return None
 
     def cleanup_entity_files_on_deletion(

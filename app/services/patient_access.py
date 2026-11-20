@@ -4,6 +4,7 @@ Patient Access Service - Unified access control logic for all phases
 
 from typing import List
 
+from sqlalchemy import Select, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
@@ -11,6 +12,8 @@ from app.core.utils.datetime_utils import get_utc_now
 from app.models.models import Patient, PatientShare, User
 
 logger = get_logger(__name__, "app")
+
+PERMISSION_LEVELS = {"view": 1, "edit": 2, "full": 3}
 
 
 class PatientAccessService:
@@ -200,11 +203,33 @@ class PatientAccessService:
             return False
 
         # Check permission level
-        permission_hierarchy = {"view": 1, "edit": 2, "full": 3}
-        user_level = permission_hierarchy.get(share.permission_level, 0)
-        required_level = permission_hierarchy.get(permission, 0)
+        user_level = PERMISSION_LEVELS.get(share.permission_level, 0)
+        required_level = PERMISSION_LEVELS.get(permission, 0)
 
         return user_level >= required_level
+
+    @staticmethod
+    def accessible_patient_ids(user_id: int, permission: str = "view") -> Select:
+        """IDs of the patients ``can_access_patient`` allows the user, as one subquery."""
+        required_level = PERMISSION_LEVELS.get(permission, 0)
+        allowed_levels = [
+            level for level, rank in PERMISSION_LEVELS.items() if rank >= required_level
+        ]
+        shared = (
+            select(PatientShare.patient_id)
+            .join(Patient, Patient.id == PatientShare.patient_id)
+            .where(
+                PatientShare.shared_with_user_id == user_id,
+                PatientShare.is_active.is_(True),
+                or_(
+                    PatientShare.expires_at.is_(None),
+                    PatientShare.expires_at >= get_utc_now().replace(tzinfo=None),
+                ),
+                PatientShare.permission_level.in_(allowed_levels),
+                Patient.privacy_level != "private",
+            )
+        )
+        return select(Patient.id).where(Patient.owner_user_id == user_id).union(shared)
 
     def get_user_patient_count(self, user: User) -> dict:
         """

@@ -1234,7 +1234,7 @@ async def get_paperless_task_status(
                     if response.status == 200:
                         tasks = await response.json()
 
-                        task = extract_task(tasks)
+                        task = extract_task(tasks, task_uuid)
                         if task is None:
                             raise HTTPException(
                                 status_code=status.HTTP_404_NOT_FOUND,

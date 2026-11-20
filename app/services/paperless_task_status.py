@@ -48,22 +48,42 @@ class ParsedTask:
         return self.status in IN_PROGRESS_STATUSES
 
 
-def extract_task(payload: Any) -> Optional[Dict[str, Any]]:
-    """Pull the first task object out of a /api/tasks/ response body.
+def extract_task(payload: Any, task_uuid: Any) -> Optional[Dict[str, Any]]:
+    """Pull the task with ``task_uuid`` out of a /api/tasks/ response body.
 
     Accepts the bare list, the paginated envelope, and a single task object.
+    A lone task with no ``task_id`` field is accepted as the requested one.
     """
+    tasks = _task_list(payload)
+    if not tasks:
+        return None
+
+    wanted = str(task_uuid)
+    if any(isinstance(task, dict) and "task_id" in task for task in tasks):
+        return next(
+            (
+                task
+                for task in tasks
+                if isinstance(task, dict) and str(task.get("task_id")) == wanted
+            ),
+            None,
+        )
+
+    return tasks[0] if len(tasks) == 1 else None
+
+
+def _task_list(payload: Any) -> list:
     if isinstance(payload, list):
-        return payload[0] if payload else None
+        return payload
 
     if isinstance(payload, dict):
         results = payload.get("results")
         if isinstance(results, list):
-            return results[0] if results else None
+            return results
         if "status" in payload:
-            return payload
+            return [payload]
 
-    return None
+    return []
 
 
 def parse_task(task: Dict[str, Any]) -> ParsedTask:
