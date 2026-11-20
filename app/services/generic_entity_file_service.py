@@ -4,7 +4,7 @@ Supports lab-results, insurance, visits, procedures, and future entity types.
 """
 
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -81,6 +81,16 @@ PAPRA_SYNC_CHECK_SOURCES = (
     ("encounter", Encounter),
     ("medical-equipment", MedicalEquipment),
 )
+
+
+def _as_naive_utc(value: datetime) -> datetime:
+    """``value`` as a naive UTC datetime, so naive and aware timestamps can be compared.
+
+    Stored timestamps come back naive (UTC); Paperless timestamps may carry an offset.
+    """
+    if value.tzinfo is not None:
+        return value.astimezone(timezone.utc).replace(tzinfo=None)
+    return value
 
 
 def _user_entity_files(
@@ -2539,6 +2549,7 @@ class GenericEntityFileService:
             # Convert upload_time to datetime if needed
             if isinstance(upload_time, str):
                 upload_time = datetime.fromisoformat(upload_time.replace("Z", "+00:00"))
+            upload_time = _as_naive_utc(upload_time)
 
             # Search window: 30 minutes before and after upload time
             search_start = upload_time - timedelta(minutes=30)
@@ -2579,8 +2590,10 @@ class GenericEntityFileService:
                     for doc in documents:
                         doc_created = doc.get("created")
                         if doc_created:
-                            doc_time = datetime.fromisoformat(
-                                doc_created.replace("Z", "+00:00")
+                            doc_time = _as_naive_utc(
+                                datetime.fromisoformat(
+                                    doc_created.replace("Z", "+00:00")
+                                )
                             )
                             if search_start <= doc_time <= search_end:
                                 doc_id = doc.get("id")
@@ -2607,10 +2620,12 @@ class GenericEntityFileService:
                         doc_title = (doc.get("title") or "").lower()
                         doc_original = (doc.get("original_file_name") or "").lower()
 
+                        # An empty title is a substring of every file name, so it
+                        # must not count as a match.
                         if (
                             base_filename in doc_title
                             or base_filename in doc_original
-                            or doc_title in base_filename
+                            or (doc_title and doc_title in base_filename)
                         ):
                             doc_id = doc.get("id")
                             doc_created = doc.get("created")

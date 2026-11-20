@@ -7,7 +7,7 @@ Another user's files must never be checked or changed.
 """
 
 from contextlib import asynccontextmanager
-from datetime import date
+from datetime import date, datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
@@ -51,17 +51,16 @@ class _RemoteWhereEveryDocumentIsGone:
         return None
 
 
-class _PaperlessTaskApi:
-    """Answers Paperless /api/tasks/?task_id=... lookups from {task UUID: response body}."""
+class _FakePaperlessApi:
+    """Answers each Paperless API request with HTTP 200 and the body ``respond(endpoint)`` returns."""
 
-    def __init__(self, bodies):
-        self.bodies = bodies
+    def __init__(self, respond):
+        self.respond = respond
 
     @asynccontextmanager
     async def _make_request(self, method, endpoint):
-        task_uuid = endpoint.split("task_id=", 1)[1]
         yield SimpleNamespace(
-            status=200, json=AsyncMock(return_value=self.bodies[task_uuid])
+            status=200, json=AsyncMock(return_value=self.respond(endpoint))
         )
 
 
@@ -246,19 +245,20 @@ class TestPaperlessChecks:
             sync_status="processing",
             task_uuid="task-running",
         )
-        paperless = _PaperlessTaskApi(
-            {
-                "task-lost": {"results": []},
-                "task-running": {
-                    "results": [
-                        {
-                            "task_id": "task-running",
-                            "status": "STARTED",
-                            "related_document": None,
-                        }
-                    ]
-                },
-            }
+        task_bodies = {
+            "task-lost": {"results": []},
+            "task-running": {
+                "results": [
+                    {
+                        "task_id": "task-running",
+                        "status": "STARTED",
+                        "related_document": None,
+                    }
+                ]
+            },
+        }
+        paperless = _FakePaperlessApi(
+            lambda endpoint: task_bodies[endpoint.split("task_id=", 1)[1]]
         )
         service = GenericEntityFileService()
 
@@ -297,6 +297,62 @@ class TestPaperlessChecks:
         db_session.refresh(theirs)
         assert mine.sync_status == "missing"
         assert theirs.sync_status == "synced"
+
+
+@pytest.mark.parametrize(
+    "title_matches, same_day, expected",
+    [
+        # Stored upload times are naive UTC; Paperless timestamps can carry "Z".
+        (
+            [{"id": 7, "title": "manual", "created": "2026-11-19T12:05:00Z"}],
+            [],
+            7,
+        ),
+        (
+            [],
+            [
+                {
+                    "id": 9,
+                    "title": "",
+                    "original_file_name": "scan-0042.pdf",
+                    "created": "2026-11-19",
+                }
+            ],
+            None,
+        ),
+        (
+            [],
+            [
+                {
+                    "id": 11,
+                    "title": "",
+                    "original_file_name": "manual.pdf",
+                    "created": "2026-11-19",
+                }
+            ],
+            11,
+        ),
+    ],
+    ids=[
+        "naive_upload_time_vs_utc_timestamp",
+        "unrelated_document_with_empty_title",
+        "empty_title_but_same_original_file_name",
+    ],
+)
+async def test_file_name_fallback_search(title_matches, same_day, expected):
+    # The first request searches by title; the second lists documents created
+    # around the upload date.
+    paperless = _FakePaperlessApi(
+        lambda endpoint: {
+            "results": title_matches if "query=" in endpoint else same_day
+        }
+    )
+
+    found = await GenericEntityFileService()._search_document_by_filename_and_time(
+        "manual.pdf", datetime(2026, 11, 19, 12, 0), paperless
+    )
+
+    assert found == expected
 
 
 class TestPapraCheck:
