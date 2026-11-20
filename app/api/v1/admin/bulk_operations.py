@@ -14,6 +14,10 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.api.v1.admin.models import MODEL_REGISTRY
 from app.models.models import User
+from app.services.attachment_cleanup import (
+    cleanup_attachments,
+    find_record_attachments,
+)
 
 router = APIRouter()
 
@@ -67,7 +71,16 @@ def bulk_delete_records(
             # Check if record exists
             record = crud_instance.get(db, id=record_id)
             if record:
+                # Attachments are cleaned up once the delete has committed
+                record_files = find_record_attachments(
+                    db, model_info["model"], [record_id]
+                )
                 crud_instance.delete(db, id=record_id)
+                cleanup_attachments(
+                    db,
+                    record_files,
+                    reason=f"{request.model_name} {record_id} deletion",
+                )
                 success_count += 1
             else:
                 failed_records.append(record_id)

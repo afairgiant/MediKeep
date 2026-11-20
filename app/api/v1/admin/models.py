@@ -120,6 +120,11 @@ from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
 from app.schemas.treatment import TreatmentCreate
 from app.schemas.user import UserCreate
 from app.schemas.vitals import VALID_GLUCOSE_CONTEXTS, VitalsCreate
+from app.services.attachment_cleanup import (
+    cleanup_attachments,
+    find_patient_attachments,
+    find_record_attachments,
+)
 from app.services.auth_session import reissue_session
 
 router = APIRouter()
@@ -1822,7 +1827,12 @@ def delete_model_record(
                     ).update({"patient_id": None}, synchronize_session=False)
 
                     # Delete patient record (automatically cascades to all medical data)
+                    patient_files = find_patient_attachments(db, [patient_id])
                     patient_crud.delete(db, id=patient_id)
+                    # The patient delete has committed even if the user delete fails
+                    cleanup_attachments(
+                        db, patient_files, reason=f"patient {patient_id} deletion"
+                    )
 
         # Log the deletion BEFORE actually deleting (to preserve record details)
         current_user_id = getattr(current_user, "id", None)
@@ -1835,8 +1845,12 @@ def delete_model_record(
                 user_id=current_user_id,
             )
 
-        # Delete the record
+        # Delete the record, then its attachments, which nothing cascades to
+        record_files = find_record_attachments(db, model_info["model"], [record_id])
         crud_instance.delete(db, id=record_id)
+        cleanup_attachments(
+            db, record_files, reason=f"{model_name} {record_id} deletion"
+        )
 
         return {
             "message": f"{model_name} record {record_id} deleted successfully",

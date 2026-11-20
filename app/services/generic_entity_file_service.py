@@ -2619,75 +2619,104 @@ class GenericEntityFileService:
                 logger.info(f"No EntityFiles found for {entity_type} {entity_id}")
                 return {"files_deleted": 0, "files_preserved": 0, "errors": 0}
 
-            deleted_local_files = 0
-            preserved_remote_files = 0
-            errors = 0
-
-            for file_record in entity_files:
-                try:
-                    if file_record.storage_backend == "local":
-                        # Delete local files (move to trash)
-                        file_path = resolve_stored_file(file_record)
-                        if file_path:
-                            self.file_management_service.move_to_trash(
-                                str(file_path),
-                                reason=f"{entity_type} {entity_id} deletion",
-                            )
-                            logger.info(
-                                f"Moved local file to trash: file {file_record.id}"
-                            )
-                            deleted_local_files += 1
-                        else:
-                            logger.warning(
-                                f"Local file not found for deletion: file {file_record.id}"
-                            )
-
-                    elif file_record.storage_backend == "paperless":
-                        if preserve_paperless:
-                            # Preserve Paperless files - just log for audit
-                            logger.info(
-                                f"Preserving Paperless document: file {file_record.id} (ID: {file_record.paperless_document_id})"
-                            )
-                            preserved_remote_files += 1
-                        else:
-                            # This path could be used if we ever want to delete from Paperless
-                            logger.info(
-                                f"Would delete Paperless document: file {file_record.id} (preserve_paperless=False)"
-                            )
-                            # TODO: Implement Paperless deletion if needed
-
-                    elif file_record.storage_backend == "papra":
-                        # Papra documents always stay in Papra
-                        preserved_remote_files += 1
-
-                    # Always remove database record
-                    db.delete(file_record)
-
-                except Exception as file_error:
-                    logger.error(
-                        f"Error processing file {file_record.id}: {str(file_error)}"
-                    )
-                    errors += 1
-                    # Continue with other files
-
-            # Commit all file record deletions
-            db.commit()
+            stats = self.remove_entity_files(
+                db,
+                entity_files,
+                reason=f"{entity_type} {entity_id} deletion",
+                preserve_paperless=preserve_paperless,
+            )
 
             logger.info(
                 f"EntityFile cleanup completed for {entity_type} {entity_id}: "
-                f"{deleted_local_files} local files deleted, "
-                f"{preserved_remote_files} Paperless/Papra files preserved, "
-                f"{errors} errors"
+                f"{stats['files_deleted']} local files deleted, "
+                f"{stats['files_preserved']} Paperless/Papra files preserved, "
+                f"{stats['errors']} errors"
             )
 
-            return {
-                "files_deleted": deleted_local_files,
-                "files_preserved": preserved_remote_files,
-                "errors": errors,
-            }
+            return stats
 
         except Exception as e:
             logger.error(
                 f"Error during entity file cleanup for {entity_type} {entity_id}: {str(e)}"
             )
             return {"files_deleted": 0, "files_preserved": 0, "errors": 1}
+
+    def remove_entity_files(
+        self,
+        db: Session,
+        entity_files: List[EntityFile],
+        reason: str,
+        preserve_paperless: bool = True,
+    ) -> Dict[str, int]:
+        """
+        Remove EntityFile rows whose records were deleted, and commit.
+
+        Local files move to trash. Paperless and Papra documents stay in those
+        services; only the link is removed. A file that fails keeps its row and is
+        counted in "errors"; the others are still removed.
+
+        Args:
+            db: Database session
+            entity_files: EntityFile rows to remove
+            reason: Trash reason recorded for the local files
+            preserve_paperless: If True, preserve Paperless documents (default: True)
+
+        Returns:
+            Dictionary with cleanup statistics
+        """
+        deleted_local_files = 0
+        preserved_remote_files = 0
+        errors = 0
+
+        for file_record in entity_files:
+            try:
+                if file_record.storage_backend == "local":
+                    # Delete local files (move to trash)
+                    file_path = resolve_stored_file(file_record)
+                    if file_path:
+                        self.file_management_service.move_to_trash(
+                            str(file_path), reason=reason
+                        )
+                        logger.info(f"Moved local file to trash: file {file_record.id}")
+                        deleted_local_files += 1
+                    else:
+                        logger.warning(
+                            f"Local file not found for deletion: file {file_record.id}"
+                        )
+
+                elif file_record.storage_backend == "paperless":
+                    if preserve_paperless:
+                        # Preserve Paperless files - just log for audit
+                        logger.info(
+                            f"Preserving Paperless document: file {file_record.id} (ID: {file_record.paperless_document_id})"
+                        )
+                        preserved_remote_files += 1
+                    else:
+                        # This path could be used if we ever want to delete from Paperless
+                        logger.info(
+                            f"Would delete Paperless document: file {file_record.id} (preserve_paperless=False)"
+                        )
+                        # TODO: Implement Paperless deletion if needed
+
+                elif file_record.storage_backend == "papra":
+                    # Papra documents always stay in Papra
+                    preserved_remote_files += 1
+
+                # Always remove database record
+                db.delete(file_record)
+
+            except Exception as file_error:
+                logger.error(
+                    f"Error processing file {file_record.id}: {str(file_error)}"
+                )
+                errors += 1
+                # Continue with other files
+
+        # Commit all file record deletions
+        db.commit()
+
+        return {
+            "files_deleted": deleted_local_files,
+            "files_preserved": preserved_remote_files,
+            "errors": errors,
+        }

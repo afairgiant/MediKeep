@@ -20,6 +20,7 @@ from app.schemas.user_preferences import (
     UserPreferencesResponse,
     UserPreferencesUpdate,
 )
+from app.services.attachment_cleanup import cleanup_attachments
 from app.services.auth_session import end_other_sessions, record_account_change
 from app.services.paperless_auth_methods import resolve_auth_method
 from app.services.user_deletion_service import UserDeletionService
@@ -125,6 +126,9 @@ def delete_current_user_account(
             "event": "account_self_deletion",
         }
 
+        # Found before the delete, while the records still link the files
+        user_files = deletion_service.find_attachments(db, user_id)
+
         # Use the deletion service to handle all the complex deletion logic
         deletion_result = deletion_service.delete_user_account(
             db=db, user_id=user_id, request_metadata=request_metadata
@@ -132,6 +136,9 @@ def delete_current_user_account(
 
         # Commit all changes atomically
         db.commit()
+
+        # Nothing cascades to the attachments; cleaned up only once the delete held
+        cleanup_attachments(db, user_files, reason=f"user {user_id} deletion")
 
         # Log successful account deletion
         log_security_event(

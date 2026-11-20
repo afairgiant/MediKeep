@@ -598,6 +598,7 @@ Base path: `/api/v1/users`
 - **Purpose**: Permanently delete user account and ALL associated data
 - **Authentication**: Yes
 - **Warning**: Deletes user, patient record, and all medical data (medications, lab results, etc.)
+- **Note**: Also removes the attachments of those records (see [Deleting the Parent Record](#deleting-the-parent-record))
 - **Success Response** (200):
 
 ```json
@@ -1096,6 +1097,7 @@ Base path: `/api/v1/patient-management`
 
 - **Purpose**: Delete a patient record
 - **Note**: Cannot delete if it's the last remaining patient
+- **Note**: Also removes the attachments of the patient's records (see [Deleting the Parent Record](#deleting-the-parent-record))
 - **Success Response** (200): `{"message": "Patient deleted successfully"}`
 
 #### List Owned Patients
@@ -4736,6 +4738,15 @@ Deleting a record of any supported type through its own `DELETE` endpoint (for e
 
 The record's response does not change, except `DELETE /lab-results/{lab_result_id}`, which also reports `files_deleted` and `files_preserved`.
 
+Deletes that remove records without going through their own endpoint clean up the same way:
+
+- `DELETE /patient-management/{patient_id}` and `DELETE /users/me`: the attachments of every record of the deleted patient.
+- `DELETE /admin/models/{model_name}/{record_id}` and `POST /admin/bulk/delete`: the attachments of each deleted record. Deleting a `patient` covers all of its records; deleting a `user` covers the records of the patient deleted with them. Deleting an `entity_file` or `lab_result_file` record moves its stored file to trash.
+
+Lab results also have older attachments in `lab_result_files`. Those rows are deleted along with the lab result, and their locally stored files move to trash.
+
+The cleanup runs only after the delete has been committed, so if the delete fails the attachments stay in place. A failure during cleanup is logged and does not change the response.
+
 ### Batch File Counts
 
 `POST /entity-files/files/batch-counts`
@@ -6275,6 +6286,7 @@ Base path: `/api/v1/admin/models`
 
 - **Purpose**: Delete a record
 - **Note**: Protects against deleting last user or last admin
+- **Note**: Also removes the record's attachments (see [Deleting the Parent Record](#deleting-the-parent-record))
 - **Success Response** (200):
 
 ```json
@@ -6619,6 +6631,7 @@ Base path: `/api/v1/admin/bulk`
 `POST /admin/bulk/delete`
 
 - **Purpose**: Delete multiple records at once
+- **Note**: Also removes the attachments of each deleted record (see [Deleting the Parent Record](#deleting-the-parent-record))
 - **Request Body**:
 
 ```json

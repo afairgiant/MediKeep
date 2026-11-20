@@ -22,6 +22,10 @@ from app.models.models import (
     UserPreferences,
     UserTotp,
 )
+from app.services.attachment_cleanup import (
+    PendingAttachments,
+    find_patient_attachments,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -177,7 +181,7 @@ class UserDeletionService:
             )
 
         # 5. Handle circular dependency with active_patient_id
-        patient_record = db.query(Patient).filter(Patient.user_id == user_id).first()
+        patient_record = self._get_user_patient(db, user_id)
 
         patient_id = None
         if patient_record:
@@ -239,6 +243,23 @@ class UserDeletionService:
         )
 
         return deletion_stats
+
+    def find_attachments(self, db: Session, user_id: int) -> PendingAttachments:
+        """
+        Attachments of the patient that delete_user_account removes.
+
+        Call before the delete, while the records still link the files to the
+        patient, and pass the result to cleanup_attachments once the caller has
+        committed. Nothing cascades to the files.
+        """
+        patient_record = self._get_user_patient(db, user_id)
+        return find_patient_attachments(
+            db, [patient_record.id] if patient_record else []
+        )
+
+    @staticmethod
+    def _get_user_patient(db: Session, user_id: int) -> Optional[Patient]:
+        return db.query(Patient).filter(Patient.user_id == user_id).first()
 
     def _validate_deletion_allowed(self, db: Session, user_id: int) -> User:
         """
