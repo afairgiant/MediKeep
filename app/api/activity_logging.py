@@ -220,6 +220,7 @@ def log_crud_activity(
     description: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None,
     request: Optional[Request] = None,
+    commit: bool = True,
 ) -> bool:
     """
     Log a CRUD activity for an entity object.
@@ -233,6 +234,8 @@ def log_crud_activity(
         description: Optional custom description (auto-generated if not provided)
         metadata: Optional additional metadata
         request: Optional FastAPI request object for IP/user agent
+        commit: False adds the entry to the caller's transaction (flushed,
+            not committed), so it lands or rolls back with the caller's work
 
     Returns:
         True if logging succeeded, False otherwise
@@ -260,23 +263,35 @@ def log_crud_activity(
                 safe_value = _sanitize_entity_value(key, value)
                 safe_metadata[safe_key] = safe_value
 
-        # Log the activity using the CRUD method
-        activity_log.log_activity(
-            db=db,
-            action=action,
-            entity_type=entity_type,
-            description=description,
-            user_id=user_id,
-            patient_id=patient_id,
-            entity_id=entity_id,
-            metadata=safe_metadata,
-            ip_address=ip_address,
-            user_agent=user_agent,
-        )
+        log_kwargs = {
+            "db": db,
+            "action": action,
+            "entity_type": entity_type,
+            "description": description,
+            "user_id": user_id,
+            "patient_id": patient_id,
+            "entity_id": entity_id,
+            "metadata": safe_metadata,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+        }
+
+        if commit:
+            activity_log.log_activity(**log_kwargs, commit=True)
+        else:
+            connection = db.connection()
+            if connection.dialect.name == "sqlite":
+                # Legacy SQLite mode needs BEGIN before SAVEPOINT to preserve rollback.
+                if not connection.connection.driver_connection.in_transaction:
+                    connection.exec_driver_sql("BEGIN")
+            with db.begin_nested():
+                activity_log.log_activity(**log_kwargs, commit=False)
 
         return True
 
     except Exception as e:
+        if commit:
+            db.rollback()
         # Sanitize error message to prevent sensitive data exposure
         safe_error_msg = sanitize_log_input(str(e))
         sanitized_entity_type = (
@@ -303,6 +318,7 @@ def safe_log_activity(
     description: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None,
     request: Optional[Request] = None,
+    commit: bool = True,
 ) -> None:
     """
     Safely log an activity without raising exceptions.
@@ -319,6 +335,7 @@ def safe_log_activity(
         description: Optional custom description (auto-generated if not provided)
         metadata: Optional additional metadata
         request: Optional FastAPI request object for IP/user agent
+        commit: Passed through to log_crud_activity
     """
     try:
         log_crud_activity(
@@ -330,8 +347,14 @@ def safe_log_activity(
             description=description,
             metadata=metadata,
             request=request,
+            commit=commit,
         )
     except Exception as e:
+        if commit:
+            try:
+                db.rollback()
+            except Exception:
+                pass
         # Sanitize error message to prevent sensitive data exposure in logs
         safe_error_msg = sanitize_log_input(str(e))
         sanitized_entity_type = (
@@ -346,11 +369,6 @@ def safe_log_activity(
                 "error": safe_error_msg,
             },
         )
-        # Rollback any partial transaction that might have been started
-        try:
-            db.rollback()
-        except Exception:
-            pass
 
 
 def activity_logger(

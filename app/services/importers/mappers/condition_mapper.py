@@ -49,6 +49,7 @@ class ConditionMapper(BaseResourceMapper):
     RECORD_TYPE = "condition"
     MODEL = Condition
     CREATE_SCHEMA = ConditionCreate
+    PATIENT_REFERENCE_FIELD = "subject"
     # condition_name is the user's own label for the diagnosis; the source sets it once
     preserve_on_update = ("notes", "tags", "condition_name")
 

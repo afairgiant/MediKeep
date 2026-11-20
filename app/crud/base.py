@@ -733,8 +733,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             )
             raise
 
-    def delete(self, db: Session, *, id: int) -> ModelType:
-        """Delete a record by ID."""
+    def delete(self, db: Session, *, id: int, commit: bool = True) -> ModelType:
+        """Delete and flush a record; commit only when requested."""
         record_id = str(id)
 
         self.logger.info(
@@ -778,7 +778,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             )
 
             db.delete(obj)
-            db.commit()
+            if commit:
+                db.commit()
+            else:
+                db.flush()
 
             self.logger.info(
                 f"Successfully deleted {self.model_name} record",
@@ -793,7 +796,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             return obj
 
         except IntegrityError as e:
-            db.rollback()
+            if commit:
+                db.rollback()
             error_msg = str(e.orig)
             self.logger.error(
                 f"Integrity error deleting {self.model_name} {record_id}: {error_msg}",
@@ -813,7 +817,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 )
             raise
         except Exception as e:
-            db.rollback()
+            if commit:
+                db.rollback()
             self.logger.error(
                 f"Unexpected error deleting {self.model_name} record",
                 extra={

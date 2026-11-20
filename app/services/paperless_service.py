@@ -630,7 +630,7 @@ class PaperlessServiceBase(ABC):
                         await asyncio.sleep(poll_interval)
                         continue
 
-                    task_data = extract_task(await response.json())
+                    task_data = extract_task(await response.json(), task_uuid)
 
                     if task_data is None:
                         logger.warning(f"No task found with UUID {task_uuid}")

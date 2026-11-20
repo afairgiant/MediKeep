@@ -62,7 +62,13 @@ class User(Base):
     )
 
     # V1: Current patient context - which patient they're managing
-    active_patient_id = Column(Integer, ForeignKey("patients.id"), nullable=True)
+    active_patient_id = Column(
+        Integer,
+        ForeignKey(
+            "patients.id", name="fk_users_active_patient_id", ondelete="SET NULL"
+        ),
+        nullable=True,
+    )
 
     # Original relationship (specify foreign key to avoid ambiguity)
     patient = orm_relationship(

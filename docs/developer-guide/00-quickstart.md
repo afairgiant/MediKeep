@@ -76,6 +76,7 @@ source .venv/bin/activate
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
+pip install -r requirements-import.txt  # optional: C-CDA / MyChart import
 ```
 
 #### 2.3 Configure Environment

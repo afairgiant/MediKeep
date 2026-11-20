@@ -21,7 +21,6 @@ from app.core.utils.stored_files import resolve_stored_file
 from app.crud.encounter import encounter as encounter_crud
 from app.crud.medication import medication as medication_crud
 from app.crud.patient import patient as patient_crud
-from app.models.activity_log import ActivityLog
 from app.models.models import (
     EntityFile,
     LabResult,
@@ -330,7 +329,7 @@ class TestPatientDeleteFileCleanup:
 
 
 class TestAccountDeleteFileCleanup:
-    def test_account_delete_cleans_up_patient_files(
+    def test_account_delete_cleans_up_files_of_every_owned_patient(
         self,
         client: TestClient,
         db_session: Session,
@@ -340,14 +339,21 @@ class TestAccountDeleteFileCleanup:
         trash,
     ):
         med = _create_medication(db_session, user_with_patient["patient"].id)
-        file_id = _upload(client, authenticated_headers, "medication", med.id, b"med")
+        family = _create_owned_patient(db_session, user_with_patient["user"].id)
+        family_med = _create_medication(db_session, family.id)
+        file_ids = [
+            _upload(client, authenticated_headers, "medication", med.id, b"med"),
+            _upload(
+                client, authenticated_headers, "medication", family_med.id, b"family"
+            ),
+        ]
 
         resp = client.delete("/api/v1/users/me", headers=authenticated_headers)
 
         assert resp.status_code == 200
         db_session.expire_all()
-        assert db_session.get(EntityFile, file_id) is None
-        assert _trashed_contents(trash) == [b"med"]
+        assert all(db_session.get(EntityFile, i) is None for i in file_ids)
+        assert _trashed_contents(trash) == [b"family", b"med"]
 
 
 class TestAdminDeleteFileCleanup:
@@ -416,14 +422,16 @@ class TestAdminDeleteFileCleanup:
         admin_token_headers,
         trash,
     ):
-        med = _create_medication(db_session, user_with_patient["patient"].id)
-        file_id = _upload(client, authenticated_headers, "medication", med.id, b"med")
-        # This delete still fails for a user with an active patient or activity
-        # log rows (it clears neither), so start from a user it can delete
         user = user_with_patient["user"]
-        user.active_patient_id = None
-        db_session.query(ActivityLog).filter(ActivityLog.user_id == user.id).delete()
-        db_session.commit()
+        med = _create_medication(db_session, user_with_patient["patient"].id)
+        family = _create_owned_patient(db_session, user.id)
+        family_med = _create_medication(db_session, family.id)
+        file_ids = [
+            _upload(client, authenticated_headers, "medication", med.id, b"med"),
+            _upload(
+                client, authenticated_headers, "medication", family_med.id, b"family"
+            ),
+        ]
 
         resp = client.delete(
             f"/api/v1/admin/models/user/{user.id}", headers=admin_token_headers
@@ -431,8 +439,8 @@ class TestAdminDeleteFileCleanup:
 
         assert resp.status_code == 200
         db_session.expire_all()
-        assert db_session.get(EntityFile, file_id) is None
-        assert _trashed_contents(trash) == [b"med"]
+        assert all(db_session.get(EntityFile, i) is None for i in file_ids)
+        assert _trashed_contents(trash) == [b"family", b"med"]
 
     def test_file_record_delete_trashes_its_stored_file(
         self,

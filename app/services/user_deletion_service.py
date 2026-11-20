@@ -20,6 +20,7 @@ from app.models.models import (
     User,
     UserBackupCode,
     UserPreferences,
+    UserTag,
     UserTotp,
 )
 from app.services.attachment_cleanup import (
@@ -180,39 +181,39 @@ class UserDeletionService:
                 },
             )
 
-        # 5. Handle circular dependency with active_patient_id
-        patient_record = self._get_user_patient(db, user_id)
+        # 5. Delete every patient the user owns
+        patients = db.query(Patient).filter(Patient.user_id == user_id).all()
 
-        patient_id = None
-        if patient_record:
+        patient_ids = []
+        for patient_record in patients:
             patient_id = patient_record.id
+            patient_ids.append(patient_id)
 
-            # First, nullify any active_patient_id references to this patient
-            # This prevents circular dependency issues during deletion
-            db.query(User).filter(User.active_patient_id == patient_id).update(
-                {"active_patient_id": None}, synchronize_session=False
-            )
-
-            # Nullify patient references in activity logs
+            # Detach the audit trail; activity_logs.patient_id has no ON DELETE action
             db.query(ActivityLog).filter(ActivityLog.patient_id == patient_id).update(
                 {"patient_id": None}, synchronize_session=False
             )
 
-            # Now we can safely delete the patient record (cascades to medical data)
             db.delete(patient_record)
-
-            # Flush changes to database to handle the circular dependency properly
             db.flush()
-
-            deletion_stats["deleted_records"]["patient"] = 1
-            deletion_stats["patient_id"] = patient_id
 
             logger.info(
                 f"Deleted patient record {patient_id} for {username}",
                 extra={"user_id": user_id, "patient_id": patient_id},
             )
 
-        # 6. Nullify user references in activity logs
+        deletion_stats["deleted_records"]["patient"] = len(patient_ids)
+        if patient_ids:
+            deletion_stats["patient_id"] = patient_ids[0]
+
+        # 6. Delete the user's tags
+        deletion_stats["deleted_records"]["user_tags"] = (
+            db.query(UserTag)
+            .filter(UserTag.user_id == user_id)
+            .delete(synchronize_session=False)
+        )
+
+        # 7. Nullify user references in activity logs
         updated_logs = (
             db.query(ActivityLog)
             .filter(ActivityLog.user_id == user_id)
@@ -221,14 +222,11 @@ class UserDeletionService:
 
         deletion_stats["deleted_records"]["activity_logs_updated"] = updated_logs
 
-        # 7. Nullify the user's own active_patient_id before deletion
+        # 8. Delete the user
         user_obj = db.query(User).filter(User.id == user_id).first()
         if user_obj:
-            if user_obj.active_patient_id:
-                user_obj.active_patient_id = None
-                db.flush()  # Ensure the change is flushed before deletion
-
-            # Finally, delete the user
+            # Bulk deletes must not leave stale relationship collections for ORM cleanup.
+            db.expire(user_obj)
             db.delete(user_obj)
             deletion_stats["deleted_records"]["user"] = 1
 
@@ -246,20 +244,17 @@ class UserDeletionService:
 
     def find_attachments(self, db: Session, user_id: int) -> PendingAttachments:
         """
-        Attachments of the patient that delete_user_account removes.
+        Attachments of every patient that delete_user_account removes.
 
         Call before the delete, while the records still link the files to the
-        patient, and pass the result to cleanup_attachments once the caller has
+        patients, and pass the result to cleanup_attachments once the caller has
         committed. Nothing cascades to the files.
         """
-        patient_record = self._get_user_patient(db, user_id)
-        return find_patient_attachments(
-            db, [patient_record.id] if patient_record else []
-        )
-
-    @staticmethod
-    def _get_user_patient(db: Session, user_id: int) -> Optional[Patient]:
-        return db.query(Patient).filter(Patient.user_id == user_id).first()
+        patient_ids = [
+            patient_id
+            for (patient_id,) in db.query(Patient.id).filter(Patient.user_id == user_id)
+        ]
+        return find_patient_attachments(db, patient_ids)
 
     def _validate_deletion_allowed(self, db: Session, user_id: int) -> User:
         """

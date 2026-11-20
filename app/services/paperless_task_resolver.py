@@ -84,7 +84,7 @@ class PaperlessTaskResolver:
                         logger.debug(f"Task status request failed: {response.status}")
                         return None
 
-                    return extract_task(await response.json())
+                    return extract_task(await response.json(), task_uuid)
 
         except Exception as e:
             logger.debug(f"Error fetching task status for {task_uuid}: {e}")
