@@ -4,11 +4,12 @@ Supports lab-results, insurance, visits, procedures, and future entity types.
 """
 
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, UploadFile
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -80,6 +81,16 @@ PAPRA_SYNC_CHECK_SOURCES = (
     ("encounter", Encounter),
     ("medical-equipment", MedicalEquipment),
 )
+
+
+def _as_naive_utc(value: datetime) -> datetime:
+    """``value`` as a naive UTC datetime, so naive and aware timestamps can be compared.
+
+    Stored timestamps come back naive (UTC); Paperless timestamps may carry an offset.
+    """
+    if value.tzinfo is not None:
+        return value.astimezone(timezone.utc).replace(tzinfo=None)
+    return value
 
 
 def _user_entity_files(
@@ -1548,10 +1559,13 @@ class GenericEntityFileService:
     ) -> None:
         """
         Handle orphaned Paperless records - files marked as paperless storage
-        but with no document ID (indicating failed/incomplete uploads).
+        with no document ID and no Paperless task still in progress (failed or
+        incomplete uploads).
 
         These records need special handling because they can't be checked against
-        Paperless since they don't have a valid document ID to query.
+        Paperless since they don't have a valid document ID to query. A record
+        whose task is still pending or processing is not an orphan: its task is
+        resolved later in the sync check, or by update_processing_files.
 
         Args:
             db: Database session
@@ -1562,13 +1576,18 @@ class GenericEntityFileService:
                 f"🔍 ORPHAN CHECK - Checking orphaned paperless records for user {current_user_id}"
             )
 
-            # Find all paperless files WITHOUT document IDs (orphaned records)
+            # Find paperless files WITHOUT document IDs whose task is not still in
+            # progress (orphaned records). A failed task still counts as orphaned.
             orphaned_files = _user_entity_files(
                 db,
                 current_user_id,
                 PAPERLESS_ORPHAN_CHECK_SOURCES,
                 EntityFile.storage_backend == "paperless",
                 EntityFile.paperless_document_id.is_(None),  # NO document ID
+                or_(
+                    EntityFile.paperless_task_uuid.is_(None),
+                    EntityFile.sync_status.not_in(("pending", "processing")),
+                ),
             )
 
             if orphaned_files:
@@ -1586,7 +1605,7 @@ class GenericEntityFileService:
                     logger.warning(
                         f"ORPHANED RECORD: {file_record.file_name} "
                         f"(id: {file_record.id}, entity_type: {file_record.entity_type}, "
-                        f"status: {old_status} -> missing) - NO DOCUMENT ID, upload likely failed"
+                        f"status: {old_status} -> missing) - no document ID and no task in progress"
                     )
 
                 # Commit the changes
@@ -1732,30 +1751,17 @@ class GenericEntityFileService:
                                 )
 
                                 # Try fallback search for document by filename and upload timestamp
-                                fallback_doc_id = (
-                                    await self._search_document_by_filename_and_time(
-                                        file_record.file_name,
-                                        file_record.uploaded_at,
-                                        paperless_service,
-                                    )
+                                fallback_doc_id = await self._link_document_found_by_filename_and_time(
+                                    file_record, paperless_service
                                 )
 
                                 if fallback_doc_id:
-                                    # Found the document using fallback search
-                                    file_record.paperless_document_id = str(
-                                        fallback_doc_id
-                                    )
-                                    file_record.paperless_task_uuid = (
-                                        None  # Clear task UUID
-                                    )
-                                    file_record.sync_status = "synced"
-                                    file_record.last_sync_at = get_utc_now()
                                     sync_status[file_record.id] = True  # Mark as found
                                     logger.info(
                                         f"🔍 SYNC CHECK - Fallback search found document ID {fallback_doc_id} for file {file_record.file_name}"
                                     )
                                     # Continue with document existence check now that we have an ID
-                                    document_id = str(fallback_doc_id)
+                                    document_id = fallback_doc_id
                                 else:
                                     # Fallback failed - keep as missing
                                     logger.error(
@@ -2122,6 +2128,11 @@ class GenericEntityFileService:
                 f"Found {len(files_with_tasks)} files with task UUIDs to resolve during sync check"
             )
 
+            # Records whose task Paperless no longer knows (for example, after its
+            # task history was cleared). The task can't say which document it
+            # made, so these are looked up by file name and upload time below.
+            unknown_task_files = []
+
             for file_record in files_with_tasks:
                 try:
                     task_uuid = file_record.paperless_task_uuid
@@ -2140,6 +2151,10 @@ class GenericEntityFileService:
                                 logger.info(
                                     f"Task {task_uuid} not found in API response"
                                 )
+                                # A record already marked missing gets the same
+                                # search later in the sync check.
+                                if file_record.sync_status != "missing":
+                                    unknown_task_files.append(file_record)
                                 continue
 
                             parsed = parse_task(task_data)
@@ -2190,6 +2205,21 @@ class GenericEntityFileService:
                         f"Error resolving task UUID {file_record.paperless_document_id} for file {file_record.file_name}: {str(task_error)}"
                     )
                     continue
+
+            for file_record in unknown_task_files:
+                linked_id = await self._link_document_found_by_filename_and_time(
+                    file_record, paperless_service
+                )
+                if linked_id:
+                    logger.info(
+                        f"Linked file {file_record.id} to Paperless document {linked_id} "
+                        "found by file name and upload time (task not found)"
+                    )
+                else:
+                    logger.info(
+                        f"No Paperless document found by file name and upload time "
+                        f"for file {file_record.id} (task not found)"
+                    )
 
             # Commit any document ID updates
             try:
@@ -2477,6 +2507,29 @@ class GenericEntityFileService:
             )
             return None
 
+    async def _link_document_found_by_filename_and_time(
+        self, file_record: EntityFile, paperless_service
+    ) -> Optional[str]:
+        """
+        Find a record's Paperless document by file name and upload time and, if
+        found, link the record to it: store the document ID, clear the task UUID
+        and mark the record synced. The caller commits.
+
+        Returns:
+            The linked document ID, or None if no document was found
+        """
+        document_id = await self._search_document_by_filename_and_time(
+            file_record.file_name, file_record.uploaded_at, paperless_service
+        )
+        if not document_id:
+            return None
+
+        file_record.paperless_document_id = str(document_id)
+        file_record.paperless_task_uuid = None
+        file_record.sync_status = "synced"
+        file_record.last_sync_at = get_utc_now()
+        return file_record.paperless_document_id
+
     async def _search_document_by_filename_and_time(
         self, filename: str, upload_time, paperless_service
     ) -> Optional[int]:
@@ -2496,6 +2549,7 @@ class GenericEntityFileService:
             # Convert upload_time to datetime if needed
             if isinstance(upload_time, str):
                 upload_time = datetime.fromisoformat(upload_time.replace("Z", "+00:00"))
+            upload_time = _as_naive_utc(upload_time)
 
             # Search window: 30 minutes before and after upload time
             search_start = upload_time - timedelta(minutes=30)
@@ -2536,8 +2590,10 @@ class GenericEntityFileService:
                     for doc in documents:
                         doc_created = doc.get("created")
                         if doc_created:
-                            doc_time = datetime.fromisoformat(
-                                doc_created.replace("Z", "+00:00")
+                            doc_time = _as_naive_utc(
+                                datetime.fromisoformat(
+                                    doc_created.replace("Z", "+00:00")
+                                )
                             )
                             if search_start <= doc_time <= search_end:
                                 doc_id = doc.get("id")
@@ -2564,10 +2620,12 @@ class GenericEntityFileService:
                         doc_title = (doc.get("title") or "").lower()
                         doc_original = (doc.get("original_file_name") or "").lower()
 
+                        # An empty title is a substring of every file name, so it
+                        # must not count as a match.
                         if (
                             base_filename in doc_title
                             or base_filename in doc_original
-                            or doc_title in base_filename
+                            or (doc_title and doc_title in base_filename)
                         ):
                             doc_id = doc.get("id")
                             doc_created = doc.get("created")
