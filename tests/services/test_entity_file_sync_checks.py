@@ -6,7 +6,9 @@ so equipment files are only checked once equipment is one of those record types.
 Another user's files must never be checked or changed.
 """
 
+from contextlib import asynccontextmanager
 from datetime import date
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -47,6 +49,20 @@ class _RemoteWhereEveryDocumentIsGone:
     async def get_document_info(self, document_id):
         self.checked.append(document_id)
         return None
+
+
+class _PaperlessTaskApi:
+    """Answers Paperless /api/tasks/?task_id=... lookups from {task UUID: response body}."""
+
+    def __init__(self, bodies):
+        self.bodies = bodies
+
+    @asynccontextmanager
+    async def _make_request(self, method, endpoint):
+        task_uuid = endpoint.split("task_id=", 1)[1]
+        yield SimpleNamespace(
+            status=200, json=AsyncMock(return_value=self.bodies[task_uuid])
+        )
 
 
 def _equipment(db_session, patient_id):
@@ -206,6 +222,64 @@ class TestPaperlessChecks:
         db_session.refresh(processing)
         assert processing.sync_status == "processing"
         assert processing.paperless_task_uuid == "task-in-progress"
+
+    async def test_upload_whose_task_paperless_lost_is_found_by_file_name(
+        self, db_session, test_patient
+    ):
+        # Paperless no longer knows the first upload's task, so its document is
+        # looked up by file name and upload time. The second upload's task is
+        # still running, so it is left alone.
+        equipment = _equipment(db_session, test_patient.id)
+        lost = _remote_file(
+            db_session,
+            equipment,
+            "paperless",
+            None,
+            sync_status="processing",
+            task_uuid="task-lost",
+        )
+        running = _remote_file(
+            db_session,
+            equipment,
+            "paperless",
+            None,
+            sync_status="processing",
+            task_uuid="task-running",
+        )
+        paperless = _PaperlessTaskApi(
+            {
+                "task-lost": {"results": []},
+                "task-running": {
+                    "results": [
+                        {
+                            "task_id": "task-running",
+                            "status": "STARTED",
+                            "related_document": None,
+                        }
+                    ]
+                },
+            }
+        )
+        service = GenericEntityFileService()
+
+        with patch.object(
+            service,
+            "_search_document_by_filename_and_time",
+            new=AsyncMock(return_value=555),
+        ) as search:
+            await service._resolve_task_uuids_to_document_ids(
+                db_session, paperless, [lost, running]
+            )
+
+        search.assert_awaited_once()
+        db_session.refresh(lost)
+        db_session.refresh(running)
+        assert lost.sync_status == "synced"
+        assert lost.paperless_document_id == "555"
+        assert lost.paperless_task_uuid is None
+        assert running.sync_status == "processing"
+        assert running.paperless_document_id is None
+        assert running.paperless_task_uuid == "task-running"
 
     async def test_deleted_equipment_document_is_marked_missing(
         self, db_session, test_user, test_patient, other_users_equipment, remote

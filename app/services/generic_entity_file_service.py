@@ -1741,30 +1741,17 @@ class GenericEntityFileService:
                                 )
 
                                 # Try fallback search for document by filename and upload timestamp
-                                fallback_doc_id = (
-                                    await self._search_document_by_filename_and_time(
-                                        file_record.file_name,
-                                        file_record.uploaded_at,
-                                        paperless_service,
-                                    )
+                                fallback_doc_id = await self._link_document_found_by_filename_and_time(
+                                    file_record, paperless_service
                                 )
 
                                 if fallback_doc_id:
-                                    # Found the document using fallback search
-                                    file_record.paperless_document_id = str(
-                                        fallback_doc_id
-                                    )
-                                    file_record.paperless_task_uuid = (
-                                        None  # Clear task UUID
-                                    )
-                                    file_record.sync_status = "synced"
-                                    file_record.last_sync_at = get_utc_now()
                                     sync_status[file_record.id] = True  # Mark as found
                                     logger.info(
                                         f"🔍 SYNC CHECK - Fallback search found document ID {fallback_doc_id} for file {file_record.file_name}"
                                     )
                                     # Continue with document existence check now that we have an ID
-                                    document_id = str(fallback_doc_id)
+                                    document_id = fallback_doc_id
                                 else:
                                     # Fallback failed - keep as missing
                                     logger.error(
@@ -2131,6 +2118,11 @@ class GenericEntityFileService:
                 f"Found {len(files_with_tasks)} files with task UUIDs to resolve during sync check"
             )
 
+            # Records whose task Paperless no longer knows (for example, after its
+            # task history was cleared). The task can't say which document it
+            # made, so these are looked up by file name and upload time below.
+            unknown_task_files = []
+
             for file_record in files_with_tasks:
                 try:
                     task_uuid = file_record.paperless_task_uuid
@@ -2149,6 +2141,10 @@ class GenericEntityFileService:
                                 logger.info(
                                     f"Task {task_uuid} not found in API response"
                                 )
+                                # A record already marked missing gets the same
+                                # search later in the sync check.
+                                if file_record.sync_status != "missing":
+                                    unknown_task_files.append(file_record)
                                 continue
 
                             parsed = parse_task(task_data)
@@ -2199,6 +2195,21 @@ class GenericEntityFileService:
                         f"Error resolving task UUID {file_record.paperless_document_id} for file {file_record.file_name}: {str(task_error)}"
                     )
                     continue
+
+            for file_record in unknown_task_files:
+                linked_id = await self._link_document_found_by_filename_and_time(
+                    file_record, paperless_service
+                )
+                if linked_id:
+                    logger.info(
+                        f"Linked file {file_record.id} to Paperless document {linked_id} "
+                        "found by file name and upload time (task not found)"
+                    )
+                else:
+                    logger.info(
+                        f"No Paperless document found by file name and upload time "
+                        f"for file {file_record.id} (task not found)"
+                    )
 
             # Commit any document ID updates
             try:
@@ -2485,6 +2496,29 @@ class GenericEntityFileService:
                 f"Error in fallback document search for {file_record.file_name}: {str(e)}"
             )
             return None
+
+    async def _link_document_found_by_filename_and_time(
+        self, file_record: EntityFile, paperless_service
+    ) -> Optional[str]:
+        """
+        Find a record's Paperless document by file name and upload time and, if
+        found, link the record to it: store the document ID, clear the task UUID
+        and mark the record synced. The caller commits.
+
+        Returns:
+            The linked document ID, or None if no document was found
+        """
+        document_id = await self._search_document_by_filename_and_time(
+            file_record.file_name, file_record.uploaded_at, paperless_service
+        )
+        if not document_id:
+            return None
+
+        file_record.paperless_document_id = str(document_id)
+        file_record.paperless_task_uuid = None
+        file_record.sync_status = "synced"
+        file_record.last_sync_at = get_utc_now()
+        return file_record.paperless_document_id
 
     async def _search_document_by_filename_and_time(
         self, filename: str, upload_time, paperless_service
