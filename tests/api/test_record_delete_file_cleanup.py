@@ -35,6 +35,7 @@ from app.schemas.patient import PatientCreate
 from app.services.attachment_cleanup import (
     cleanup_attachments,
     find_patient_attachments,
+    find_record_attachments,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
 from app.services.user_deletion_service import UserDeletionService
@@ -613,3 +614,45 @@ class TestCleanupAttachments:
 
         assert stats == {"files_deleted": 1, "files_preserved": 0, "errors": 0}
         assert _trashed_contents(trash) == [b"lab"]
+
+    def test_shared_file_check_handles_more_names_than_one_sqlite_query_allows(
+        self, db_session: Session, user_with_patient, trash
+    ):
+        # SQLite rejects an OR of about 1000 file name matches in one query
+        patient_id = user_with_patient["patient"].id
+        lab = _create_lab_result(db_session, patient_id)
+        folder = trash.parent / "lab_result_files"
+        folder.mkdir()
+        stored = []
+        for i in range(1000):
+            path = folder / f"legacy_{i:04}.txt"
+            path.write_bytes(b"")
+            stored.append(path)
+        db_session.add_all(
+            LabResultFile(
+                lab_result_id=lab.id,
+                file_name=path.name,
+                file_path=str(path),
+                file_type="text/plain",
+                uploaded_at=datetime.now(),
+            )
+            for path in stored
+        )
+        # Another record's row uses the last name, which falls in the last batch
+        db_session.add(
+            EntityFile(
+                entity_type="medication",
+                entity_id=_create_medication(db_session, patient_id).id,
+                file_name="shared.txt",
+                file_path=str(stored[-1]),
+                file_type="text/plain",
+                file_size=0,
+                uploaded_at=get_utc_now(),
+                storage_backend="local",
+            )
+        )
+        db_session.commit()
+
+        pending = find_record_attachments(db_session, LabResult, [lab.id])
+
+        assert sorted(pending.local_paths) == stored[:-1]

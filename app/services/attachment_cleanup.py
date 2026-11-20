@@ -38,6 +38,10 @@ from app.services.generic_entity_file_service import (
 
 logger = get_logger(__name__, "app")
 
+# File names matched per query. Each name adds a level to the query's OR, and
+# SQLite rejects expressions deeper than 1000 by default.
+_NAME_BATCH_SIZE = 500
+
 
 @dataclass
 class PendingAttachments:
@@ -76,21 +80,23 @@ def _unshared_local_paths(
     paths = _local_paths(file_records)
     if not paths:
         return []
-    names = {path.name for path in paths}
+    names = sorted({path.name for path in paths})
     still_used = set()
     for file_model in (EntityFile, LabResultFile):
-        query = db.query(file_model.file_path).filter(
-            or_(
-                *(
-                    file_model.file_path.endswith(name, autoescape=True)
-                    for name in names
+        excluded = deleted_ids.get(file_model)
+        for start in range(0, len(names), _NAME_BATCH_SIZE):
+            batch = names[start : start + _NAME_BATCH_SIZE]
+            query = db.query(file_model.file_path).filter(
+                or_(
+                    *(
+                        file_model.file_path.endswith(name, autoescape=True)
+                        for name in batch
+                    )
                 )
             )
-        )
-        excluded = deleted_ids.get(file_model)
-        if excluded:
-            query = query.filter(file_model.id.notin_(excluded))
-        still_used.update(resolve_storage_path(path) for (path,) in query)
+            if excluded:
+                query = query.filter(file_model.id.notin_(excluded))
+            still_used.update(resolve_storage_path(path) for (path,) in query)
     return [path for path in paths if path not in still_used]
 
 
