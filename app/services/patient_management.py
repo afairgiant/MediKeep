@@ -13,6 +13,10 @@ from app.core.logging.constants import LogFields
 from app.core.utils.activity_tracker import activity_tracking_disabled_var
 from app.models.models import Patient, PatientShare, User
 from app.models.practice import Practitioner
+from app.services.attachment_cleanup import (
+    cleanup_attachments,
+    find_patient_attachments,
+)
 from app.services.patient_access import PatientAccessService
 
 security_logger = get_logger(__name__, "security")
@@ -307,6 +311,8 @@ class PatientManagementService:
             logger.info(
                 f"Deleting patient {patient_id} and all associated medical records"
             )
+            # Found now, while the records still link the files to this patient
+            patient_files = find_patient_attachments(self.db, [patient_id])
             self.db.delete(patient)
 
             # Commit all changes
@@ -317,6 +323,11 @@ class PatientManagementService:
 
             logger.info(
                 f"Successfully deleted patient {patient.id} and cleared all references"
+            )
+
+            # Step 5: Clean up the records' attachments, which nothing cascades to
+            cleanup_attachments(
+                self.db, patient_files, reason=f"patient {patient_id} deletion"
             )
             return True
 

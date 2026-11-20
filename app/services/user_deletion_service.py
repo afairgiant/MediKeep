@@ -23,6 +23,10 @@ from app.models.models import (
     UserTag,
     UserTotp,
 )
+from app.services.attachment_cleanup import (
+    PendingAttachments,
+    find_patient_attachments,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -38,6 +42,8 @@ class UserDeletionService:
         db: Session,
         user_id: int,
         request_metadata: Optional[Dict[str, Any]] = None,
+        *,
+        attachments: Optional[PendingAttachments] = None,
     ) -> Dict[str, Any]:
         """
         Delete user and all associated data in a single transaction.
@@ -46,6 +52,9 @@ class UserDeletionService:
             db: Database session (transaction should be managed by caller)
             user_id: User ID to delete
             request_metadata: Optional request context (IP, user agent, etc.)
+            attachments: If given, filled with the attachments of the patients this
+                deletes, for cleanup_attachments once the caller has committed.
+                Nothing cascades to the files.
 
         Returns:
             Dictionary with deletion results
@@ -179,6 +188,12 @@ class UserDeletionService:
 
         # 5. Delete every patient the user owns
         patients = db.query(Patient).filter(Patient.user_id == user_id).all()
+        if attachments is not None:
+            # Taken from the patients deleted here, after the account lock, so the
+            # cleanup matches this delete even if a patient was transferred meanwhile
+            attachments.extend(
+                find_patient_attachments(db, [patient.id for patient in patients])
+            )
 
         patient_ids = []
         for patient_record in patients:

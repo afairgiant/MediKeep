@@ -121,6 +121,11 @@ from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
 from app.schemas.treatment import TreatmentCreate
 from app.schemas.user import UserCreate
 from app.schemas.vitals import VALID_GLUCOSE_CONTEXTS, VitalsCreate
+from app.services.attachment_cleanup import (
+    PendingAttachments,
+    cleanup_attachments,
+    find_record_attachments,
+)
 from app.services.auth_session import reissue_session
 
 router = APIRouter()
@@ -1813,7 +1818,10 @@ def delete_model_record(
                     commit=False,
                 )
 
-            UserDeletionService().delete_user_account(db, user_id=record_id)
+            record_files = PendingAttachments()
+            UserDeletionService().delete_user_account(
+                db, user_id=record_id, attachments=record_files
+            )
             db.commit()
         else:
             if current_user_id is not None:
@@ -1826,7 +1834,13 @@ def delete_model_record(
                     commit=False,
                 )
 
+            record_files = find_record_attachments(db, model_info["model"], [record_id])
             crud_instance.delete(db, id=record_id)
+
+        # Nothing cascades to the attachments; cleaned up only once the delete held
+        cleanup_attachments(
+            db, record_files, reason=f"{model_name} {record_id} deletion"
+        )
 
         return {
             "message": f"{model_name} record {record_id} deleted successfully",
