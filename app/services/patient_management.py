@@ -277,15 +277,6 @@ class PatientManagementService:
         try:
             # Temporarily disable activity tracking to prevent new logs during deletion
             activity_tracking_disabled_var.set(True)
-            # Step 1: Clear active_patient_id for any users who have this patient as active
-            users_with_active_patient = (
-                self.db.query(User).filter(User.active_patient_id == patient_id).all()
-            )
-
-            for active_user in users_with_active_patient:
-                logger.info(f"Clearing active_patient_id for user {active_user.id}")
-                active_user.active_patient_id = None
-
             # Step 2: Remove patient sharing relationships
             sharing_records = (
                 self.db.query(PatientShare)
