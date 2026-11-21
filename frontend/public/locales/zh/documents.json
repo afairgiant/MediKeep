@@ -38,10 +38,10 @@
     "statusMissing": "缺失",
     "statusProcessing": "处理中",
     "viewUnavailable": {
-      "missing": "在存储服务中找不到此文档，可能已在那里被删除。您可以将其从此列表中移除。",
+      "missing": "在存储服务中找不到此文档，可能已在那里被删除。您可以在该记录的编辑表单中将其移除。",
       "processing": "Paperless 仍在处理此文档，暂时无法打开。请稍后重试。",
       "title": "文档不可用",
-      "unavailable": "此文档未能成功保存，无法打开。您可以将其移除后重新上传。"
+      "unavailable": "此文档未能成功保存，无法打开。您可以在该记录的编辑表单中将其移除后重新上传。"
     }
   },
   "fileUpload": {

@@ -116,11 +116,6 @@ const Insurance = () => {
   } = useViewModalNavigation({
     items: insurances,
     loading,
-    onClose: insurance => {
-      if (insurance) {
-        refreshFileCount(insurance.id);
-      }
-    },
   });
 
   // Track if we need to refresh after form submission (but not after uploads)
@@ -699,6 +694,9 @@ const Insurance = () => {
         isOpen={isFormOpen}
         onClose={() => {
           if (!isBlocking) {
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingInsurance) refreshFileCount(editingInsurance.id);
             resetSubmission();
             setIsFormOpen(false);
             setEditingInsurance(null);
@@ -743,11 +741,6 @@ const Insurance = () => {
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
         onSetPrimary={handleSetPrimary}
-        onFileUploadComplete={success => {
-          if (success && viewingInsurance) {
-            refreshFileCount(viewingInsurance.id);
-          }
-        }}
         practitioners={practitioners}
       />
     </Container>

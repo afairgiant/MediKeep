@@ -38,10 +38,10 @@
     "statusMissing": "Saknas",
     "statusProcessing": "Bearbetar",
     "viewUnavailable": {
-      "missing": "Dokumentet hittades inte i lagringstjänsten. Det kan ha tagits bort där. Du kan ta bort det från den här listan.",
+      "missing": "Dokumentet hittades inte i lagringstjänsten. Det kan ha tagits bort där. Du kan ta bort det i postens redigeringsformulär.",
       "processing": "Dokumentet bearbetas fortfarande av Paperless och kan inte öppnas ännu. Försök igen om en stund.",
       "title": "Dokumentet är inte tillgängligt",
-      "unavailable": "Dokumentet sparades inte korrekt och kan inte öppnas. Du kan ta bort det och ladda upp det igen."
+      "unavailable": "Dokumentet sparades inte korrekt och kan inte öppnas. Du kan ta bort det i postens redigeringsformulär och ladda upp det igen."
     }
   },
   "fileUpload": {

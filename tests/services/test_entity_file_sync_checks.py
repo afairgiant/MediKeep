@@ -1,9 +1,9 @@
 """
-Paperless-ngx and Papra sync checks on medical equipment files.
+Paperless-ngx and Papra sync checks.
 
-Each check finds the user's remote files through the record they are attached to,
-so equipment files are only checked once equipment is one of those record types.
-Another user's files must never be checked or changed.
+Each check finds the user's remote files through the record they are attached to, so
+it must look at every record type files can be attached to (#1267). Another user's
+files must never be checked or changed.
 """
 
 from contextlib import asynccontextmanager
@@ -23,6 +23,7 @@ from app.models.models import (
 )
 from app.schemas.patient import PatientCreate
 from app.services.generic_entity_file_service import GenericEntityFileService
+from tests.utils.attachment_records import add_record_for_every_file_entity_type
 from tests.utils.user import create_random_user
 
 pytestmark = pytest.mark.asyncio
@@ -79,15 +80,16 @@ def _equipment(db_session, patient_id):
 
 def _remote_file(
     db_session,
-    equipment,
+    record,
     backend,
     document_id,
     sync_status="synced",
     task_uuid=None,
+    entity_type="medical-equipment",
 ):
-    record = EntityFile(
-        entity_type="medical-equipment",
-        entity_id=equipment.id,
+    entity_file = EntityFile(
+        entity_type=entity_type,
+        entity_id=record.id,
         file_name="manual.pdf",
         file_path=f"{backend}://",
         file_type="application/pdf",
@@ -99,9 +101,31 @@ def _remote_file(
         paperless_task_uuid=task_uuid,
         papra_document_id=document_id if backend == "papra" else None,
     )
-    db_session.add(record)
+    db_session.add(entity_file)
     db_session.commit()
-    return record
+    return entity_file
+
+
+def _remote_file_on_every_type(db_session, patient_id, backend, with_document_id):
+    """One remote file under every entity type files can be attached to, keyed by that type."""
+    files = {}
+    for entity_type, record in add_record_for_every_file_entity_type(
+        db_session, patient_id, date(2026, 1, 1)
+    ):
+        document_id = str(len(files) + 1) if with_document_id else None
+        files[entity_type] = _remote_file(
+            db_session, record, backend, document_id, entity_type=entity_type
+        )
+    return files
+
+
+def _sync_statuses(db_session, files):
+    for entity_file in files.values():
+        db_session.refresh(entity_file)
+    return {
+        entity_type: entity_file.sync_status
+        for entity_type, entity_file in files.items()
+    }
 
 
 async def _run_paperless_sync_check(db_session, user_id, remote):
@@ -179,6 +203,19 @@ class TestPaperlessChecks:
         db_session.refresh(theirs)
         assert mine.sync_status == "missing"
         assert theirs.sync_status == "synced"
+
+    async def test_orphaned_files_on_every_record_type_are_marked_missing(
+        self, db_session, test_user, test_patient
+    ):
+        files = _remote_file_on_every_type(
+            db_session, test_patient.id, "paperless", with_document_id=False
+        )
+
+        await GenericEntityFileService()._handle_orphaned_paperless_records(
+            db_session, test_user.id
+        )
+
+        assert _sync_statuses(db_session, files) == dict.fromkeys(files, "missing")
 
     async def test_file_whose_task_failed_is_marked_missing(
         self, db_session, test_user, test_patient
@@ -333,6 +370,18 @@ class TestPaperlessChecks:
         db_session.refresh(theirs)
         assert mine.sync_status == "missing"
         assert theirs.sync_status == "synced"
+
+    async def test_deleted_documents_on_every_record_type_are_marked_missing(
+        self, db_session, test_user, test_patient, remote
+    ):
+        files = _remote_file_on_every_type(
+            db_session, test_patient.id, "paperless", with_document_id=True
+        )
+
+        result = await _run_paperless_sync_check(db_session, test_user.id, remote)
+
+        assert _sync_statuses(db_session, files) == dict.fromkeys(files, "missing")
+        assert result == {f.id: False for f in files.values()}
 
 
 @pytest.mark.parametrize(
@@ -504,10 +553,16 @@ async def test_title_search_result_with_another_name_is_not_used():
     assert found is None
 
 
+async def _run_papra_sync_check(db_session, user_id, remote):
+    with patch("app.services.papra_client.create_papra_client", return_value=remote):
+        return await GenericEntityFileService().check_papra_sync_status(
+            db_session, user_id
+        )
+
+
 class TestPapraCheck:
-    async def test_deleted_equipment_document_is_marked_missing(
-        self, db_session, test_user, test_patient, other_users_equipment, remote
-    ):
+    @pytest.fixture(autouse=True)
+    def papra_enabled(self, db_session, test_user):
         db_session.add(
             UserPreferences(
                 user_id=test_user.id,
@@ -517,17 +572,16 @@ class TestPapraCheck:
             )
         )
         db_session.commit()
+
+    async def test_deleted_equipment_document_is_marked_missing(
+        self, db_session, test_user, test_patient, other_users_equipment, remote
+    ):
         mine = _remote_file(
             db_session, _equipment(db_session, test_patient.id), "papra", "doc-1"
         )
         theirs = _remote_file(db_session, other_users_equipment, "papra", "doc-2")
 
-        with patch(
-            "app.services.papra_client.create_papra_client", return_value=remote
-        ):
-            result = await GenericEntityFileService().check_papra_sync_status(
-                db_session, test_user.id
-            )
+        result = await _run_papra_sync_check(db_session, test_user.id, remote)
 
         assert result == {mine.id: False}
         assert remote.checked == ["doc-1"]
@@ -535,3 +589,15 @@ class TestPapraCheck:
         db_session.refresh(theirs)
         assert mine.sync_status == "missing"
         assert theirs.sync_status == "synced"
+
+    async def test_deleted_documents_on_every_record_type_are_marked_missing(
+        self, db_session, test_user, test_patient, remote
+    ):
+        files = _remote_file_on_every_type(
+            db_session, test_patient.id, "papra", with_document_id=True
+        )
+
+        result = await _run_papra_sync_check(db_session, test_user.id, remote)
+
+        assert _sync_statuses(db_session, files) == dict.fromkeys(files, "missing")
+        assert result == {f.id: False for f in files.values()}

@@ -43,7 +43,6 @@ const MedicationViewModal = ({
   onEdit,
   navigate,
   onError,
-  onFileUploadComplete,
   practitioners = [],
   disableEdit = false,
   disableEditTooltip,
@@ -646,15 +645,6 @@ const MedicationViewModal = ({
                   entityType="medication"
                   entityId={medication.id}
                   mode="view"
-                  onUploadComplete={(success, completedCount, failedCount) => {
-                    if (onFileUploadComplete) {
-                      onFileUploadComplete(
-                        success,
-                        completedCount,
-                        failedCount
-                      );
-                    }
-                  }}
                   onError={error => {
                     logger.error(
                       'Document manager error in medication view:',
@@ -664,7 +654,6 @@ const MedicationViewModal = ({
                       onError(error);
                     }
                   }}
-                  showProgressModal={true}
                 />
               </Stack>
             </Box>

@@ -38,10 +38,10 @@
     "statusMissing": "Brak",
     "statusProcessing": "Przetwarzanie",
     "viewUnavailable": {
-      "missing": "Nie znaleziono tego dokumentu w usłudze przechowywania. Mógł zostać tam usunięty. Możesz usunąć go z tej listy.",
+      "missing": "Nie znaleziono tego dokumentu w usłudze przechowywania. Mógł zostać tam usunięty. Możesz go usunąć w formularzu edycji rekordu.",
       "processing": "Ten dokument jest nadal przetwarzany przez Paperless i nie można go jeszcze otworzyć. Spróbuj ponownie za chwilę.",
       "title": "Dokument niedostępny",
-      "unavailable": "Ten dokument nie został poprawnie zapisany i nie można go otworzyć. Możesz go usunąć i przesłać ponownie."
+      "unavailable": "Ten dokument nie został poprawnie zapisany i nie można go otworzyć. Możesz go usunąć w formularzu edycji rekordu i przesłać ponownie."
     }
   },
   "fileUpload": {

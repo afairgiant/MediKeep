@@ -44,7 +44,6 @@ const InsuranceViewModal = ({
   insurance,
   onEdit,
   onSetPrimary: _onSetPrimary,
-  onFileUploadComplete,
   disableEdit = false,
   disableEditTooltip,
   practitioners = [],
@@ -367,18 +366,12 @@ const InsuranceViewModal = ({
                   entityType="insurance"
                   entityId={insurance.id}
                   mode="view"
-                  onUploadComplete={(success, _completedCount, _failedCount) => {
-                    if (onFileUploadComplete) {
-                      onFileUploadComplete(success);
-                    }
-                  }}
                   onError={error => {
                     logger.error(
                       'Document manager error in insurance view:',
                       error
                     );
                   }}
-                  showProgressModal={true}
                 />
               </Stack>
             </Box>

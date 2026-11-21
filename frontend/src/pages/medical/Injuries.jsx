@@ -411,7 +411,13 @@ const Injuries = () => {
           isOpen={showAddForm}
           patientId={currentPatient?.id}
           navigate={navigate}
-          onClose={() => !isBlocking && resetForm()}
+          onClose={() => {
+            if (isBlocking) return;
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingInjury) refreshFileCount(editingInjury.id);
+            resetForm();
+          }}
           title={
             editingInjury
               ? t('injuries.editTitle', 'Edit Injury')

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
+import { notifications } from '@mantine/notifications';
 
 // Mock dependencies BEFORE importing the hook so the module captures the mocks.
 vi.mock('../../services/api', () => ({
@@ -238,77 +239,214 @@ describe('useDocumentManagerCore — pending link queue (issue #852)', () => {
   });
 });
 
-describe('useDocumentManagerCore — deleting an unfinished Paperless upload (issue #1243)', () => {
-  const WARNING_KEY = 'fileList.deleteUnfinishedPaperlessWarning';
-
-  const paperlessFile = overrides => ({
-    id: 7,
-    entity_type: 'lab-result',
+describe('useDocumentManagerCore — deleting files marked in the Edit form (issue #1274)', () => {
+  const storedFile = (id, fileName) => ({
+    id,
+    entity_type: 'procedure',
     entity_id: 3,
-    file_name: 'report.pdf',
-    file_path: 'paperless://',
-    storage_backend: 'paperless',
-    sync_status: 'synced',
-    paperless_document_id: '42',
-    paperless_task_uuid: null,
-    ...overrides,
+    file_name: fileName,
+    file_path: `uploads/files/${fileName}`,
+    storage_backend: 'local',
   });
 
-  const confirmMessageFor = async file => {
-    apiService.getEntityFiles.mockResolvedValue([file]);
-    const { result } = renderHook(() =>
+  const renderEditMode = async (overrides = {}) => {
+    const hook = renderHook(() =>
       useDocumentManagerCore(
-        baseProps({ entityType: 'lab-result', entityId: 3, mode: 'view' })
+        baseProps({
+          entityType: 'procedure',
+          entityId: 3,
+          mode: 'edit',
+          showProgressModal: true,
+          ...overrides,
+        })
       )
     );
-    await waitFor(() => expect(result.current.files).toHaveLength(1));
-
-    await act(async () => {
-      await result.current.handleImmediateDelete(file.id);
-    });
-
-    return window.confirm.mock.calls[0][0];
+    await waitFor(() => expect(hook.result.current.files).toHaveLength(2));
+    return hook;
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Cancel at the confirm step so no delete request is made
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    apiService.getEntityFiles.mockResolvedValue([
+      storedFile(7, 'report.pdf'),
+      storedFile(8, 'scan.png'),
+    ]);
+    apiService.deleteEntityFile.mockResolvedValue({});
+    vi.spyOn(window, 'confirm');
+    vi.spyOn(notifications, 'show');
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('warns that the document may remain in Paperless while the upload is still processing', async () => {
-    const message = await confirmMessageFor(
-      paperlessFile({
-        sync_status: 'processing',
-        paperless_document_id: null,
-        paperless_task_uuid: '3f1c7a52-9e0b-4d0e-8c1a-0b6f5d2a7e11',
-      })
-    );
+  it('deletes a marked file on Save even when no files are queued for upload', async () => {
+    const onUploadComplete = vi.fn();
+    const { result } = await renderEditMode({ onUploadComplete });
+    // Pages keep the methods they were handed earlier, so the methods must
+    // see marks made after they were handed out.
+    const { hasPendingFiles, getPendingFilesCount, uploadPendingFiles } =
+      result.current;
 
-    expect(message).toContain(WARNING_KEY);
+    act(() => {
+      result.current.handleMarkFileForDeletion(7);
+      result.current.handleMarkFileForDeletion(7);
+    });
+
+    expect(hasPendingFiles()).toBe(true);
+    expect(getPendingFilesCount()).toBe(0);
+
+    await act(async () => {
+      await uploadPendingFiles(3);
+    });
+
+    expect(apiService.deleteEntityFile).toHaveBeenCalledTimes(1);
+    expect(apiService.deleteEntityFile).toHaveBeenCalledWith(7);
+    expect(window.confirm).not.toHaveBeenCalled();
+    expect(
+      apiService.uploadEntityFileWithTaskMonitoring
+    ).not.toHaveBeenCalled();
+    expect(result.current.filesToDelete).toEqual([]);
+    expect(hasPendingFiles()).toBe(false);
+    // Pages refresh the record's file count from this callback
+    expect(onUploadComplete).toHaveBeenCalledWith(true, 0, 0);
+  });
+
+  it('does not delete a file that was marked and then restored', async () => {
+    const { result } = await renderEditMode();
+
+    act(() => {
+      result.current.handleMarkFileForDeletion(7);
+    });
+    act(() => {
+      result.current.handleUnmarkFileForDeletion(7);
+    });
+
+    expect(result.current.hasPendingFiles()).toBe(false);
+
+    await act(async () => {
+      await result.current.uploadPendingFiles(3);
+    });
+
     expect(apiService.deleteEntityFile).not.toHaveBeenCalled();
   });
 
-  it('does not warn for a Paperless document that has finished uploading', async () => {
-    const message = await confirmMessageFor(paperlessFile());
+  it('keeps a file marked when its delete fails, and leaves queued uploads for the next Save', async () => {
+    apiService.deleteEntityFile.mockImplementation(fileId =>
+      fileId === 8
+        ? Promise.reject(new Error('Network Error'))
+        : Promise.resolve({})
+    );
+    const { result } = await renderEditMode();
 
-    expect(message).not.toContain(WARNING_KEY);
+    act(() => {
+      result.current.handleMarkFileForDeletion(7);
+      result.current.handleMarkFileForDeletion(8);
+      result.current.handleAddPendingFile(
+        new File(['x'], 'new.pdf', { type: 'application/pdf' })
+      );
+    });
+
+    let saveError;
+    await act(async () => {
+      saveError = await result.current.uploadPendingFiles(3).catch(err => err);
+    });
+
+    expect(saveError).toBeInstanceOf(Error);
+    expect(apiService.deleteEntityFile).toHaveBeenCalledTimes(2);
+    expect(result.current.filesToDelete).toEqual([8]);
+    expect(
+      apiService.uploadEntityFileWithTaskMonitoring
+    ).not.toHaveBeenCalled();
+    expect(result.current.pendingFiles).toHaveLength(1);
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({ color: 'red' })
+    );
   });
 
-  it('does not warn when the upload failed and no task is left to complete', async () => {
-    const message = await confirmMessageFor(
-      paperlessFile({
-        sync_status: 'failed',
-        paperless_document_id: null,
-        paperless_task_uuid: null,
-      })
-    );
+  it('treats a marked file that is already gone (404) as deleted', async () => {
+    apiService.deleteEntityFile.mockImplementation(fileId => {
+      if (fileId !== 8) return Promise.resolve({});
+      const notFound = new Error('File not found');
+      notFound.status = 404;
+      return Promise.reject(notFound);
+    });
+    const { result } = await renderEditMode();
 
-    expect(message).not.toContain(WARNING_KEY);
+    act(() => {
+      result.current.handleMarkFileForDeletion(7);
+      result.current.handleMarkFileForDeletion(8);
+    });
+
+    await act(async () => {
+      await result.current.uploadPendingFiles(3);
+    });
+
+    expect(apiService.deleteEntityFile).toHaveBeenCalledTimes(2);
+    expect(result.current.filesToDelete).toEqual([]);
+    expect(notifications.show).not.toHaveBeenCalled();
+  });
+
+  describe('files uploaded or linked straight away in the Edit form (issue #1269)', () => {
+    it('reports an immediate upload on Save so the page refreshes the file count', async () => {
+      apiService.uploadEntityFileWithTaskMonitoring.mockResolvedValue({
+        taskMonitored: false,
+      });
+      const onUploadComplete = vi.fn();
+      const { result } = await renderEditMode({ onUploadComplete });
+      const { hasPendingFiles, getPendingFilesCount, uploadPendingFiles } =
+        result.current;
+
+      expect(hasPendingFiles()).toBe(false);
+
+      await act(async () => {
+        await result.current.handleImmediateUpload(
+          new File(['x'], 'new.pdf', { type: 'application/pdf' })
+        );
+      });
+
+      expect(hasPendingFiles()).toBe(true);
+      expect(getPendingFilesCount()).toBe(0);
+
+      await act(async () => {
+        await uploadPendingFiles(3);
+      });
+
+      expect(onUploadComplete).toHaveBeenCalledTimes(1);
+      expect(onUploadComplete).toHaveBeenCalledWith(true, 0, 0);
+      expect(hasPendingFiles()).toBe(false);
+    });
+
+    it('reports a change noted by the immediate link handler', async () => {
+      const onUploadComplete = vi.fn();
+      const { result } = await renderEditMode({ onUploadComplete });
+
+      act(() => {
+        result.current.noteFilesChanged();
+      });
+
+      expect(result.current.hasPendingFiles()).toBe(true);
+
+      await act(async () => {
+        await result.current.uploadPendingFiles(3);
+      });
+
+      expect(onUploadComplete).toHaveBeenCalledWith(true, 0, 0);
+    });
+  });
+
+  it('clearPendingFiles also clears files marked for deletion', async () => {
+    const { result } = await renderEditMode();
+
+    act(() => {
+      result.current.handleMarkFileForDeletion(7);
+    });
+    act(() => {
+      result.current.clearPendingFiles();
+    });
+
+    expect(result.current.filesToDelete).toEqual([]);
+    expect(result.current.hasPendingFiles()).toBe(false);
   });
 });
 

@@ -440,10 +440,7 @@ const LabResults = () => {
   } = useViewModalNavigation({
     items: labResults,
     loading,
-    onClose: labResult => {
-      if (labResult) {
-        refreshFileCount(labResult.id);
-      }
+    onClose: () => {
       setInitialViewTab('overview');
     },
   });
@@ -999,6 +996,9 @@ const LabResults = () => {
       return;
     }
 
+    // Files added in the Edit form are attached straight away, so refresh
+    // the card's count even when the form closes without saving
+    if (editingLabResult) refreshFileCount(editingLabResult.id);
     resetSubmission(); // Reset submission state
     setShowModal(false);
     setEditingLabResult(null);
@@ -1009,7 +1009,13 @@ const LabResults = () => {
     // Sync the components table — tests may have been added via TestComponentsTab
     refreshPatientComponents();
     setFormData(EMPTY_FORM_DATA);
-  }, [isBlocking, resetSubmission, refreshPatientComponents]);
+  }, [
+    isBlocking,
+    editingLabResult,
+    refreshFileCount,
+    resetSubmission,
+    refreshPatientComponents,
+  ]);
 
   // Shared by handleAdvancedModeToggle and handleSwitchToQuickImport: whether the
   // advanced create form has anything a user would lose by abandoning it.
@@ -1423,11 +1429,6 @@ const LabResults = () => {
         isBlocking={isBlocking}
         initialTab={initialViewTab}
         isGroupedResult={!!(viewingLabResult && (viewingLabResult.is_panel || parentIdsWithComponents.has(viewingLabResult.id)))}
-        onFileUploadComplete={success => {
-          if (success && viewingLabResult) {
-            refreshFileCount(viewingLabResult.id);
-          }
-        }}
         onLabResultUpdated={handleLabResultUpdated}
         labResultMedications={labResultMedications}
         fetchLabResultMedications={fetchLabResultMedications}

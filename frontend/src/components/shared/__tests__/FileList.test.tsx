@@ -106,3 +106,54 @@ describe('FileList view button', () => {
     );
   });
 });
+
+describe('FileList unfinished Paperless upload warning (issue #1243)', () => {
+  const WARNING_KEY = 'fileList.deleteUnfinishedPaperlessWarning';
+
+  const unfinishedUpload = {
+    ...baseFile,
+    sync_status: 'processing',
+    paperless_document_id: null,
+    paperless_task_uuid: '3f1c7a52-9e0b-4d0e-8c1a-0b6f5d2a7e11',
+  };
+
+  function renderWithMarks(
+    file: Record<string, unknown>,
+    filesToDelete: unknown[]
+  ) {
+    render(
+      <MantineProvider>
+        <FileList files={[file]} filesToDelete={filesToDelete} />
+      </MantineProvider>
+    );
+  }
+
+  it('warns when a Paperless upload that is still processing is marked for deletion', () => {
+    renderWithMarks(unfinishedUpload, [unfinishedUpload.id]);
+
+    expect(screen.getByText(WARNING_KEY)).toBeInTheDocument();
+  });
+
+  it('does not warn before the file is marked', () => {
+    renderWithMarks(unfinishedUpload, []);
+
+    expect(screen.queryByText(WARNING_KEY)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['a Paperless document that has finished uploading', baseFile],
+    [
+      'an upload that failed with no task left to complete',
+      {
+        ...baseFile,
+        sync_status: 'failed',
+        paperless_document_id: null,
+        paperless_task_uuid: null,
+      },
+    ],
+  ])('does not warn for %s', (_label, file) => {
+    renderWithMarks(file, [file.id]);
+
+    expect(screen.queryByText(WARNING_KEY)).not.toBeInTheDocument();
+  });
+});

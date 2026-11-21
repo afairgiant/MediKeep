@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { renderWithPatient } from '../../../test-utils/render';
 import MedicalEquipment from '../MedicalEquipment';
 import { useMedicalData } from '../../../hooks/useMedicalData';
@@ -233,6 +233,31 @@ describe('MedicalEquipment documents', () => {
       ).not.toBeInTheDocument()
     );
     expect(data.refreshData).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshes the card file count when the edit form closes without saving', async () => {
+    mockMedicalData();
+    renderWithPatient(<MedicalEquipment />);
+    await waitFor(() =>
+      expect(apiService.getEntityFiles).toHaveBeenCalledWith(
+        'medical-equipment',
+        1
+      )
+    );
+
+    // A file uploaded in the Edit form is attached straight away
+    apiService.getEntityFiles.mockImplementation((entityType, id) =>
+      Promise.resolve(id === 1 ? [{ id: 7 }] : [])
+    );
+    const card = screen
+      .getByText('ResMed AirSense 11')
+      .closest('.mantine-Card-root');
+    fireEvent.click(
+      within(card).getByRole('button', { name: 'shared:labels.edit' })
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(await within(card).findByText('1 attached')).toBeInTheDocument();
   });
 
   it('shows the number of attached files on each card', async () => {

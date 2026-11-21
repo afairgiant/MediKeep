@@ -38,10 +38,10 @@
     "statusMissing": "Fehlend",
     "statusProcessing": "Wird verarbeitet",
     "viewUnavailable": {
-      "missing": "Dieses Dokument wurde im Speicherdienst nicht gefunden. Möglicherweise wurde es dort gelöscht. Sie können es aus dieser Liste entfernen.",
+      "missing": "Dieses Dokument wurde im Speicherdienst nicht gefunden. Möglicherweise wurde es dort gelöscht. Sie können es im Bearbeitungsformular des Eintrags entfernen.",
       "processing": "Dieses Dokument wird noch von Paperless verarbeitet und kann noch nicht geöffnet werden. Bitte versuchen Sie es gleich noch einmal.",
       "title": "Dokument nicht verfügbar",
-      "unavailable": "Dieses Dokument wurde nicht erfolgreich gespeichert und kann nicht geöffnet werden. Sie können es entfernen und erneut hochladen."
+      "unavailable": "Dieses Dokument wurde nicht erfolgreich gespeichert und kann nicht geöffnet werden. Sie können es im Bearbeitungsformular des Eintrags entfernen und erneut hochladen."
     }
   },
   "fileUpload": {
