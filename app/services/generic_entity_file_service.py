@@ -130,8 +130,9 @@ def _document_linked_elsewhere(file_record: EntityFile, document_id: str) -> boo
     )
 
 
-# Enough for a day's uploads; the lookup reads one page only
 _DOCUMENT_SEARCH_PAGE_SIZE = 100
+# Bounds the requests one lookup can make
+_DOCUMENT_SEARCH_MAX_PAGES = 5
 
 
 def _added_within(document: Dict[str, Any], start: datetime, end: datetime) -> bool:
@@ -147,16 +148,19 @@ def _added_within(document: Dict[str, Any], start: datetime, end: datetime) -> b
     return start <= added_at <= end
 
 
+def _normalized(name: Any) -> str:
+    return str(name or "").strip().casefold()
+
+
 def _file_name_matches(document: Dict[str, Any], filename: str) -> bool:
-    """Whether a Paperless document's title or original file name matches ``filename``."""
-    base_filename = filename.lower()
-    doc_title = (document.get("title") or "").lower()
-    doc_original = (document.get("original_file_name") or "").lower()
-    # An empty title is a substring of every file name, so it must not count as a match
-    return (
-        base_filename in doc_title
-        or base_filename in doc_original
-        or bool(doc_title and doc_title in base_filename)
+    """Whether the document's original file name is ``filename``, or its title is the name or its stem."""
+    name = _normalized(filename)
+    if not name:
+        return False
+    title = _normalized(document.get("title"))
+    return _normalized(document.get("original_file_name")) == name or title in (
+        name,
+        _normalized(Path(filename).stem),
     )
 
 
@@ -1677,6 +1681,7 @@ class GenericEntityFileService:
                 FILE_ENTITY_SOURCES,
                 EntityFile.storage_backend == "paperless",
                 EntityFile.paperless_document_id.is_(None),  # NO document ID
+                EntityFile.sync_status != "duplicate",  # A final state, not an orphan
                 or_(
                     EntityFile.paperless_task_uuid.is_(None),
                     EntityFile.sync_status.not_in(("pending", "processing")),
@@ -1874,6 +1879,10 @@ class GenericEntityFileService:
                                     False  # Mark as missing in sync status
                                 )
                                 missing_count += 1
+                                continue
+                            elif file_record.sync_status == "duplicate":
+                                # Paperless kept the earlier upload; nothing more to find
+                                sync_status[file_record.id] = True
                                 continue
                             else:
                                 # Mark as processing if not already marked as missing
@@ -2800,12 +2809,14 @@ class GenericEntityFileService:
             }
 
             for params in (title_search, recent_documents):
-                async with paperless_service._make_request(
-                    "GET", f"/api/documents/?{urlencode(params)}"
-                ) as response:
-                    if response.status != 200:
-                        continue
-                    for doc in (await response.json()).get("results", []):
+                for page in range(1, _DOCUMENT_SEARCH_MAX_PAGES + 1):
+                    async with paperless_service._make_request(
+                        "GET", f"/api/documents/?{urlencode({**params, 'page': page})}"
+                    ) as response:
+                        if response.status != 200:
+                            break
+                        data = await response.json()
+                    for doc in data.get("results", []):
                         if _file_name_matches(doc, filename) and _added_within(
                             doc, search_start, search_end
                         ):
@@ -2817,6 +2828,8 @@ class GenericEntityFileService:
                                 },
                             )
                             return doc.get("id")
+                    if not data.get("next"):
+                        break
 
             logger.warning(
                 f"No document found by file name in time range {search_start} to {search_end}",

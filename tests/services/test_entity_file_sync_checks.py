@@ -22,7 +22,10 @@ from app.models.models import (
     get_utc_now,
 )
 from app.schemas.patient import PatientCreate
-from app.services.generic_entity_file_service import GenericEntityFileService
+from app.services.generic_entity_file_service import (
+    GenericEntityFileService,
+    _file_name_matches,
+)
 from tests.utils.attachment_records import add_record_for_every_file_entity_type
 from tests.utils.user import create_random_user
 
@@ -237,6 +240,26 @@ class TestPaperlessChecks:
 
         db_session.refresh(failed)
         assert failed.sync_status == "missing"
+
+    async def test_duplicate_upload_stays_duplicate(
+        self, db_session, test_user, test_patient, remote
+    ):
+        duplicate = _remote_file(
+            db_session,
+            _equipment(db_session, test_patient.id),
+            "paperless",
+            None,
+            sync_status="duplicate",
+        )
+
+        await GenericEntityFileService()._handle_orphaned_paperless_records(
+            db_session, test_user.id
+        )
+        result = await _run_paperless_sync_check(db_session, test_user.id, remote)
+
+        assert result == {duplicate.id: True}
+        db_session.refresh(duplicate)
+        assert duplicate.sync_status == "duplicate"
 
     async def test_upload_still_processing_is_not_marked_missing(
         self, db_session, test_user, test_patient, remote
@@ -499,6 +522,7 @@ async def test_file_name_fallback_lists_documents_by_upload_date():
     )
 
     title_search, listing = requests
+    assert "page=1" in listing
     # A day either side: Paperless compares dates in its own time zone
     assert "added__date__gte=2026-11-18" in listing
     assert "added__date__lte=2026-11-20" in listing
@@ -523,7 +547,7 @@ async def test_file_name_is_escaped_and_encoded_in_the_title_search():
     query_string = title_search.split("?", 1)[1]
     assert "#" not in title_search
     assert " " not in title_search
-    assert set(parse_qs(query_string)) == {"query", "page_size"}
+    assert set(parse_qs(query_string)) == {"query", "page_size", "page"}
     assert parse_qs(query_string)["query"] == [
         "title:*Lab* AND title:*Results* AND title:*#2* AND title:*&* AND title:*CBC*"
     ]
@@ -551,6 +575,53 @@ async def test_title_search_result_with_another_name_is_not_used():
     )
 
     assert found is None
+
+
+@pytest.mark.parametrize(
+    "document, matches",
+    [
+        ({"title": "manual"}, True),
+        ({"title": "Manual.PDF"}, True),
+        ({"title": "", "original_file_name": "manual.pdf"}, True),
+        ({"title": "man"}, False),
+        ({"title": "my manual"}, False),
+        ({"title": "", "original_file_name": "old-manual.pdf"}, False),
+    ],
+    ids=[
+        "stem",
+        "full_name_any_case",
+        "original_name",
+        "prefix",
+        "longer_title",
+        "other_original",
+    ],
+)
+def test_file_name_match_is_exact(document, matches):
+    assert _file_name_matches(document, "manual.pdf") is matches
+
+
+async def test_fallback_search_reads_further_pages():
+    pages = {
+        1: {
+            "results": [{"id": 1, "title": "other", "added": "2026-11-19T12:05:00Z"}],
+            "next": "https://paperless.invalid/api/documents/?page=2",
+        },
+        2: {
+            "results": [{"id": 2, "title": "manual", "added": "2026-11-19T12:05:00Z"}],
+            "next": None,
+        },
+    }
+
+    def respond(endpoint):
+        if "query=" in endpoint:
+            return {"results": []}
+        return pages[int(parse_qs(endpoint.split("?", 1)[1])["page"][0])]
+
+    found = await GenericEntityFileService()._search_document_by_filename_and_time(
+        "manual.pdf", datetime(2026, 11, 19, 12, 0), _FakePaperlessApi(respond)
+    )
+
+    assert found == 2
 
 
 async def _run_papra_sync_check(db_session, user_id, remote):

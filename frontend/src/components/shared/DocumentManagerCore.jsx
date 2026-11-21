@@ -625,10 +625,17 @@ const useDocumentManagerCore = ({
   );
 
   const lookupFollowUpTimersRef = useRef([]);
+  // Bumped by every new schedule and by a change of record, so stale follow-ups stand down
+  const lookupFollowUpGenerationRef = useRef(0);
   useEffect(() => {
     const timers = lookupFollowUpTimersRef.current;
-    return () => timers.forEach(clearTimeout);
-  }, []);
+    const generation = lookupFollowUpGenerationRef;
+    return () => {
+      timers.forEach(clearTimeout);
+      timers.length = 0;
+      generation.current += 1;
+    };
+  }, [entityType, entityId]);
   // One schedule covers every file in a batch, so a new upload restarts it
   const scheduleLookupFollowUps = useCallback(
     taskResult => {
@@ -636,11 +643,14 @@ const useDocumentManagerCore = ({
       const timers = lookupFollowUpTimersRef.current;
       timers.forEach(clearTimeout);
       timers.length = 0;
+      lookupFollowUpGenerationRef.current += 1;
+      const generation = lookupFollowUpGenerationRef.current;
       const followUp = async () => {
         try {
           const updates = await apiService.updateProcessingFiles(null, {
             background: true,
           });
+          if (generation !== lookupFollowUpGenerationRef.current) return;
           // Nothing left to find, so the later check would be wasted
           if (!Object.values(updates || {}).includes('processing')) {
             timers.forEach(clearTimeout);

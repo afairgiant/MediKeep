@@ -19,7 +19,7 @@ Before configuring the integration, you need:
 
 ### Required Paperless Permissions
 
-The Paperless-ngx account MediKeep uses needs to add, view and delete documents, and to **view PaperlessTask**. MediKeep reads the upload task to learn which document an upload became. Staff and superuser accounts already have it; for other accounts, open **Settings > Users & Groups** in Paperless, edit the user, and tick **View** on **PaperlessTask** under **Permissions**. **Test Connection** warns when this permission is missing.
+The Paperless-ngx account MediKeep uses needs to add, view and delete documents, and to **view PaperlessTask**. MediKeep reads the upload task to learn which document an upload became. Only superusers have every permission automatically; any other account, including a staff account, may lack this one. To grant it, open **Settings > Users & Groups** in Paperless, edit the user, and tick **View** on **PaperlessTask** under **Permissions**. **Test Connection** warns when this permission is missing.
 
 ### Getting an API Token
 

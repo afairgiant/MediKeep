@@ -475,7 +475,10 @@ describe('useDocumentManagerCore - upload whose task Paperless will not show (#1
       taskMonitored: true,
       taskResult,
     });
-    const { result } = renderHook(() => useDocumentManagerCore(baseProps()));
+    const hook = renderHook(props => useDocumentManagerCore(props), {
+      initialProps: baseProps({ entityId: 5, mode: 'edit' }),
+    });
+    const { result } = hook;
     await waitFor(() =>
       expect(result.current.selectedStorageBackend).toBe('paperless')
     );
@@ -489,6 +492,7 @@ describe('useDocumentManagerCore - upload whose task Paperless will not show (#1
       await result.current.uploadPendingFiles(7);
     });
     apiService.updateProcessingFiles.mockClear();
+    return hook;
   };
 
   it('checks the upload again once Paperless has had time to store it', async () => {
@@ -518,6 +522,52 @@ describe('useDocumentManagerCore - upload whose task Paperless will not show (#1
     });
 
     expect(apiService.updateProcessingFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops pending checks when the panel moves to another record', async () => {
+    const { rerender } = await uploadOne({
+      status: 'PROCESSING_BACKGROUND',
+      task_uuid: 'task',
+      taskPermissionDenied: true,
+    });
+
+    rerender(baseProps({ entityId: 99, mode: 'edit' }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(130000);
+    });
+
+    expect(apiService.updateProcessingFiles).not.toHaveBeenCalled();
+  });
+
+  it('a check already running for the previous record does not reload its files', async () => {
+    const { rerender } = await uploadOne({
+      status: 'PROCESSING_BACKGROUND',
+      task_uuid: 'task',
+      taskPermissionDenied: true,
+    });
+    let finishUpdate;
+    apiService.updateProcessingFiles.mockImplementationOnce(
+      () => new Promise(resolve => (finishUpdate = resolve))
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30000);
+    });
+    rerender(baseProps({ entityId: 99, mode: 'edit' }));
+    await waitFor(() =>
+      expect(apiService.getEntityFiles).toHaveBeenCalledWith(
+        'insurance',
+        99,
+        null,
+        expect.anything()
+      )
+    );
+    apiService.getEntityFiles.mockClear();
+    await act(async () => {
+      finishUpdate({ 1: 'synced' });
+    });
+
+    expect(apiService.getEntityFiles).not.toHaveBeenCalled();
   });
 
   it('does not schedule a check for an ordinary background upload', async () => {
