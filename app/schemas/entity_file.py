@@ -156,6 +156,7 @@ class EntityFileCreate(EntityFileBase):
     paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
     papra_document_id: Optional[str] = None
     papra_organization_id: Optional[str] = None
+    uploaded_by_user_id: Optional[int] = None
 
     @field_validator("entity_id")
     @classmethod
@@ -163,6 +164,13 @@ class EntityFileCreate(EntityFileBase):
         """Validate entity ID"""
         if v <= 0:
             raise ValueError("Entity ID must be a positive integer")
+        return v
+
+    @field_validator("uploaded_by_user_id")
+    @classmethod
+    def validate_uploaded_by_user_id(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("Uploader ID must be a positive integer")
         return v
 
 

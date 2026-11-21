@@ -1417,6 +1417,7 @@ JUNCTION TABLES (Many-to-Many)
 | storage_backend | String(20) | NOT NULL, DEFAULT 'local' | local or paperless |
 | paperless_document_id | String(255) | | Paperless-ngx document ID |
 | paperless_task_uuid | String(255) | | Paperless-ngx task UUID |
+| uploaded_by_user_id | Integer | FK users.id, ON DELETE SET NULL | User who uploaded or linked the file, so whose Paperless or Papra holds it. NULL when the uploader is unknown (older files with no activity-log entry) or their account was deleted |
 | sync_status | String(20) | NOT NULL, DEFAULT 'synced' | Sync status |
 | last_sync_at | DateTime | | Last sync timestamp |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
@@ -1444,10 +1445,13 @@ JUNCTION TABLES (Many-to-Many)
 - `idx_storage_backend` on storage_backend
 - `idx_paperless_document_id` on paperless_document_id
 - `idx_sync_status` on sync_status
+- `idx_entity_files_uploaded_by_user_id` on uploaded_by_user_id
 
 **Business Rules**:
 - Supports multiple files per entity
 - Paperless-ngx integration for DMS sync
+- A processing Paperless upload is resolved only by its uploader, or by a user whose saved Paperless URL is the same as the uploader's; either must still be able to edit the patient. A file with no recorded uploader can be resolved by anyone who can edit the patient
+- The migration that added `uploaded_by_user_id` filled it from the newest activity-log `created` entry for the file; files with no entry stay NULL
 - Composite index on (entity_type, entity_id) for efficient queries
 
 ### patient_photos

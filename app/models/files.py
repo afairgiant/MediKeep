@@ -2,6 +2,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    ForeignKey,
     Index,
     Integer,
     String,
@@ -51,6 +52,11 @@ class EntityFile(Base):
         String(255), nullable=True
     )  # Organization ID in Papra system
 
+    # Whose Paperless or Papra holds the document; NULL when the uploader is unknown or deleted
+    uploaded_by_user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+
     sync_status = Column(
         String(20), default="synced", nullable=False
     )  # 'synced', 'pending', 'processing', 'failed', 'missing'
@@ -71,6 +77,7 @@ class EntityFile(Base):
         Index("idx_paperless_document_id", "paperless_document_id"),
         Index("idx_papra_document_id", "papra_document_id"),
         Index("idx_sync_status", "sync_status"),
+        Index("idx_entity_files_uploaded_by_user_id", "uploaded_by_user_id"),
     )
 
 

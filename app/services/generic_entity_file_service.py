@@ -18,6 +18,7 @@ from app.core.config import settings
 from app.core.http.integration_errors import raise_if_integration_failure
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
+from app.core.utils.integration_verification import normalize_integration_url
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
     EntityFile,
@@ -105,6 +106,38 @@ def _as_naive_utc(value: datetime) -> datetime:
     if value.tzinfo is not None:
         return value.astimezone(timezone.utc).replace(tzinfo=None)
     return value
+
+
+def same_paperless_user_ids(db: Session, user_id: int) -> set:
+    """``user_id`` plus every user whose saved Paperless URL matches theirs."""
+    rows = (
+        db.query(UserPreferences.user_id, UserPreferences.paperless_url)
+        .filter(UserPreferences.paperless_enabled.is_(True))
+        .all()
+    )
+    urls = {uid: normalize_integration_url(url) for uid, url in rows}
+    own_url = urls.get(user_id)
+    if not own_url:
+        return {user_id}
+    return {uid for uid, url in urls.items() if url == own_url} | {user_id}
+
+
+def may_resolve(file_record: EntityFile, resolver_ids: set) -> bool:
+    """Python form of ``resolvable_uploads`` for ``resolver_ids`` from ``same_paperless_user_ids``."""
+    uploader = file_record.uploaded_by_user_id
+    return uploader is None or uploader in resolver_ids
+
+
+def resolvable_uploads(db: Session, user_id: int):
+    """Filter for files whose Paperless upload ``user_id`` may resolve.
+
+    That is files uploaded by a user in ``same_paperless_user_ids``, and files
+    with no recorded uploader. Callers still check edit access to the patient.
+    """
+    return or_(
+        EntityFile.uploaded_by_user_id.in_(same_paperless_user_ids(db, user_id)),
+        EntityFile.uploaded_by_user_id.is_(None),
+    )
 
 
 def _mark_duplicate(file_record: EntityFile) -> None:
@@ -438,6 +471,7 @@ class GenericEntityFileService:
                     file_size,
                     description,
                     category,
+                    current_user_id,
                 )
                 logger.info(f"Local upload completed: file_id={result.id}")
                 return result
@@ -971,6 +1005,7 @@ class GenericEntityFileService:
         file_size: int,
         description: Optional[str] = None,
         category: Optional[str] = None,
+        current_user_id: Optional[int] = None,
     ) -> EntityFileResponse:
         """
         Upload file to local storage.
@@ -984,6 +1019,7 @@ class GenericEntityFileService:
             file_size: Size of file in bytes
             description: Optional description
             category: Optional category
+            current_user_id: ID of the user uploading the file
 
         Returns:
             EntityFileResponse with file details
@@ -1013,6 +1049,7 @@ class GenericEntityFileService:
                 category=category,
                 storage_backend="local",
                 uploaded_at=get_utc_now(),
+                uploaded_by_user_id=current_user_id,
             )
 
             # Create database record from validated schema
@@ -1197,6 +1234,7 @@ class GenericEntityFileService:
                 last_sync_at=last_sync,
                 paperless_document_id=paperless_id,  # Only set when document is processed
                 paperless_task_uuid=paperless_task_uuid,  # Task UUID for Paperless processing
+                uploaded_by_user_id=current_user_id,
             )
 
             # Create database record from validated schema
@@ -1294,6 +1332,7 @@ class GenericEntityFileService:
                 last_sync_at=get_utc_now(),
                 papra_document_id=document_id,
                 papra_organization_id=user_prefs.papra_organization_id,
+                uploaded_by_user_id=current_user_id,
             )
 
             entity_file = EntityFile(**file_create.model_dump())
@@ -1826,9 +1865,14 @@ class GenericEntityFileService:
                 f"Sync check using auth method: {paperless_service.get_auth_type()}"
             )
 
+            # Another user's upload is only in their Paperless, unless they use this one
+            resolver_ids = same_paperless_user_ids(db, current_user_id)
+
             # First pass: resolve any task UUIDs to document IDs if possible
             await self._resolve_task_uuids_to_document_ids(
-                db, paperless_service, paperless_files
+                db,
+                paperless_service,
+                [f for f in paperless_files if may_resolve(f, resolver_ids)],
             )
 
             # Check each document
@@ -1843,6 +1887,7 @@ class GenericEntityFileService:
                             if (
                                 file_record.sync_status == "missing"
                                 and file_record.paperless_task_uuid
+                                and may_resolve(file_record, resolver_ids)
                             ):
                                 logger.info(
                                     f"🔍 SYNC CHECK - File {file_record.file_name} (id: {file_record.id}) marked as missing but has task UUID - attempting fallback search"
@@ -2376,8 +2421,8 @@ class GenericEntityFileService:
         """
         Resolve the Paperless tasks of the user's processing uploads.
 
-        Only files on patients the user can edit are checked, through the user's
-        own Paperless.
+        Only the user's own uploads, plus uploads with no recorded uploader, on
+        patients the user can edit are checked, through the user's own Paperless.
 
         Returns:
             Dictionary mapping file_id to new status
@@ -2407,6 +2452,7 @@ class GenericEntityFileService:
                 EntityFile.storage_backend == "paperless",
                 EntityFile.sync_status == "processing",
                 EntityFile.paperless_task_uuid.isnot(None),
+                resolvable_uploads(db, current_user_id),
             )
 
             if not processing_files:

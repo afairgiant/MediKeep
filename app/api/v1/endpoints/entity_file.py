@@ -533,6 +533,7 @@ async def link_paperless_document(
                 category=link_request.category,
                 storage_backend="paperless",
                 paperless_document_id=link_request.paperless_document_id,
+                uploaded_by_user_id=current_user_id,
                 sync_status="synced",  # Already in Paperless
                 uploaded_at=get_utc_now(),
                 created_at=get_utc_now(),
@@ -783,6 +784,7 @@ async def link_papra_document(
                 storage_backend="papra",
                 papra_document_id=doc_id,
                 papra_organization_id=org_id,
+                uploaded_by_user_id=current_user_id,
                 sync_status="synced",
                 uploaded_at=get_utc_now(),
                 created_at=get_utc_now(),
