@@ -40,6 +40,10 @@ from app.crud.user_preferences import user_preferences
 from app.models.models import Patient, User
 from app.schemas.user_preferences import PaperlessConnectionData
 from app.services.credential_encryption import SecurityError, credential_encryption
+from app.services.generic_entity_file_service import (
+    FILE_ENTITY_SOURCES,
+    entity_files_of_records,
+)
 from app.services.paperless_auth_methods import (
     DEFAULT_AUTH_METHOD,
     credential_kwargs,
@@ -561,10 +565,6 @@ async def get_storage_usage_stats(
         request = MockRequest()
     try:
         # Query file statistics scoped to the current user's patients
-        from sqlalchemy import and_
-
-        from app.models.models import EntityFile, Patient
-
         # Get patient IDs belonging to the current user
         user_patient_ids = [
             p.id
@@ -585,47 +585,11 @@ async def get_storage_usage_stats(
 
         all_patient_ids = list(set(user_patient_ids + shared_patient_ids))
 
-        # Build a subquery for entity files belonging to the user's patients
-        # EntityFile links to entities via entity_type + entity_id
-        # All entities have patient_id, so we join through each entity type
-        from app.models.models import (
-            Encounter,
-            Insurance,
-            LabResult,
-            MedicalEquipment,
-            Procedure,
-        )
-
-        entity_models = {
-            "lab-result": LabResult,
-            "procedure": Procedure,
-            "insurance": Insurance,
-            "encounter": Encounter,
-            "medical-equipment": MedicalEquipment,
-        }
-
-        # Collect all file IDs belonging to the user across entity types
-        user_file_ids = set()
-        for entity_type_str, model in entity_models.items():
-            file_ids = (
-                db.query(EntityFile.id)
-                .join(
-                    model,
-                    and_(
-                        EntityFile.entity_type == entity_type_str,
-                        EntityFile.entity_id == model.id,
-                    ),
-                )
-                .filter(model.patient_id.in_(all_patient_ids))
-                .all()
-            )
-            user_file_ids.update(fid for (fid,) in file_ids)
-
-        # Now compute stats only for the user's files
-        user_files = (
-            (db.query(EntityFile).filter(EntityFile.id.in_(user_file_ids)).all())
-            if user_file_ids
-            else []
+        # Files on every record type of those patients
+        user_files = entity_files_of_records(
+            db,
+            FILE_ENTITY_SOURCES,
+            lambda model: model.patient_id.in_(all_patient_ids),
         )
 
         def compute_stats(files_list, backend):

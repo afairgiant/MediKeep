@@ -19,13 +19,8 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
-    Encounter,
     EntityFile,
-    Insurance,
-    LabResult,
-    MedicalEquipment,
     Patient,
-    Procedure,
     User,
     UserPreferences,
     get_utc_now,
@@ -63,33 +58,11 @@ from app.services.patient_access import PatientAccessService
 
 logger = get_logger(__name__, "app")
 
-# (entity type, model) pairs each remote check looks at. Files are found through the
-# model's patient, so a check only sees the current user's files. Most file-capable
-# types are not covered yet (#1267).
-PAPERLESS_ORPHAN_CHECK_SOURCES = (
-    ("lab-result", LabResult),
-    ("procedure", Procedure),
-    ("medical-equipment", MedicalEquipment),
-)
-PAPERLESS_SYNC_CHECK_SOURCES = (
-    ("lab-result", LabResult),
-    ("procedure", Procedure),
-    ("insurance", Insurance),
-    ("visit", Encounter),
-    ("medical-equipment", MedicalEquipment),
-)
-PAPRA_SYNC_CHECK_SOURCES = (
-    ("lab-result", LabResult),
-    ("procedure", Procedure),
-    ("insurance", Insurance),
-    ("encounter", Encounter),
-    ("medical-equipment", MedicalEquipment),
-)
-
-
 # Every (entity type, model) pair a file can be attached to, taken from the export's
 # attachment sources so the two cannot drift apart. Must match the entity types
-# get_entity_by_type_and_id in the entity file endpoints accepts.
+# get_entity_by_type_and_id in the entity file endpoints accepts. The Paperless and
+# Papra checks find files through these models' patients, so a check only sees the
+# current user's files.
 FILE_ENTITY_SOURCES = tuple(
     (entity_type, source.model)
     for source in ATTACHMENT_SOURCES
@@ -1643,7 +1616,7 @@ class GenericEntityFileService:
             orphaned_files = _user_entity_files(
                 db,
                 current_user_id,
-                PAPERLESS_ORPHAN_CHECK_SOURCES,
+                FILE_ENTITY_SOURCES,
                 EntityFile.storage_backend == "paperless",
                 EntityFile.paperless_document_id.is_(None),  # NO document ID
                 or_(
@@ -1729,7 +1702,7 @@ class GenericEntityFileService:
             paperless_files = _user_entity_files(
                 db,
                 current_user_id,
-                PAPERLESS_SYNC_CHECK_SOURCES,
+                FILE_ENTITY_SOURCES,
                 EntityFile.storage_backend == "paperless",
             )
             logger.info(
@@ -2077,7 +2050,7 @@ class GenericEntityFileService:
             papra_files = _user_entity_files(
                 db,
                 current_user_id,
-                PAPRA_SYNC_CHECK_SOURCES,
+                FILE_ENTITY_SOURCES,
                 EntityFile.storage_backend == "papra",
                 EntityFile.papra_document_id.isnot(None),
             )

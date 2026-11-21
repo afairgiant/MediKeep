@@ -18,9 +18,11 @@ from app.models.models import (
     MedicalEquipment,
     PatientShare,
     UserPreferences,
+    get_utc_now,
 )
 from app.schemas.patient import PatientCreate
 from app.schemas.lab_result import LabResultCreate
+from tests.utils.attachment_records import add_record_for_every_file_entity_type
 from tests.utils.user import create_random_user, create_user_token_headers
 
 NON_LATIN1_FILENAME = "ВитаминD.txt"
@@ -1077,6 +1079,43 @@ class TestEntityFileSupportedTypes:
             headers=authenticated_headers,
         )
         assert response_visit.status_code == 200
+
+    def test_files_on_every_type_count_towards_storage_stats(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+    ):
+        # Regression for #1267: only five types were counted.
+        pairs = add_record_for_every_file_entity_type(
+            db_session, user_with_patient["patient"].id, date(2026, 1, 1)
+        )
+        for entity_type, record in pairs:
+            db_session.add(
+                EntityFile(
+                    entity_type=entity_type,
+                    entity_id=record.id,
+                    file_name="doc.pdf",
+                    file_path="paperless://",
+                    file_type="application/pdf",
+                    file_size=100,
+                    uploaded_at=get_utc_now(),
+                    storage_backend="paperless",
+                    paperless_document_id=entity_type,
+                )
+            )
+        db_session.commit()
+
+        response = client.get(
+            "/api/v1/paperless/storage-stats", headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        assert response.json()["paperless"] == {
+            "count": len(pairs),
+            "size": 100 * len(pairs),
+        }
 
 
 class TestEntityFileMedicalEquipment:
