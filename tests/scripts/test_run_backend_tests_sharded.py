@@ -65,6 +65,53 @@ def test_partition_rejects_zero_shards():
         sharded.partition([("tests/test_a.py", 1)], 0)
 
 
+def test_partition_leaves_no_shard_empty_when_files_weigh_nothing():
+    # An empty shard would run pytest with no paths, i.e. the whole suite.
+    shards = sharded.partition([("tests/test_a.py", 0), ("tests/test_b.py", 0)], 2)
+
+    assert shards == [["tests/test_a.py"], ["tests/test_b.py"]]
+
+
+class _RunningProcess:
+    """Stands in for a Popen object whose pytest run has not finished."""
+
+    def __init__(self):
+        self.terminated = False
+
+    def poll(self):
+        return -15 if self.terminated else None
+
+    def terminate(self):
+        self.terminated = True
+
+    def wait(self, timeout=None):
+        return -15
+
+
+def test_run_shards_stops_started_shards_when_a_later_shard_cannot_start(
+    tmp_path, monkeypatch
+):
+    started = _RunningProcess()
+    outcomes = iter([started, OSError("cannot start pytest")])
+
+    def fake_popen(*args, **kwargs):
+        outcome = next(outcomes)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+    monkeypatch.setattr(sharded.subprocess, "Popen", fake_popen)
+    log_dir = tmp_path / "logs"
+    log_dir.mkdir()
+
+    with pytest.raises(OSError):
+        sharded.run_shards(
+            [["tests/test_a.py"], ["tests/test_b.py"]], tmp_path, log_dir, []
+        )
+
+    assert started.terminated
+
+
 def test_discover_matches_pytest_patterns_and_skips_other_files(tmp_path):
     for name in (
         "tests/test_a.py",

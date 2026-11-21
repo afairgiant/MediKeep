@@ -96,15 +96,19 @@ def partition(weighted_files, shard_count):
     """Split ``(path, weight)`` pairs into ``shard_count`` balanced shards.
 
     Greedy longest-first packing: each file, heaviest first, goes to the shard
-    with the lowest total weight so far. Files inside a shard are sorted so they
-    run in the same relative order as in a serial run.
+    with the lowest total weight so far, and among equal weights to the shard
+    with the fewest files. That tie-break means no shard is left empty while
+    there are at least as many files as shards, even if files weigh nothing; an
+    empty shard would run pytest with no paths, which collects everything.
+    Files inside a shard are sorted so they run in the same relative order as in
+    a serial run.
     """
     if shard_count < 1:
         raise ValueError("shard_count must be at least 1")
     shards = [[] for _ in range(shard_count)]
     loads = [0] * shard_count
     for path, weight in sorted(weighted_files, key=lambda item: (-item[1], item[0])):
-        lightest = min(range(shard_count), key=lambda i: (loads[i], i))
+        lightest = min(range(shard_count), key=lambda i: (loads[i], len(shards[i]), i))
         shards[lightest].append(path)
         loads[lightest] += weight
     return [sorted(shard) for shard in shards]
@@ -263,9 +267,12 @@ def run_shards(shards, work_dir, log_dir, pytest_args):
         return return_codes
     except KeyboardInterrupt:
         print("\nInterrupted; stopping shards...", flush=True)
-        terminate_all(processes)
         raise
     finally:
+        # Does nothing once every shard has finished. On any exception (Ctrl-C,
+        # or Popen failing for a later shard) it stops the shards still running
+        # before main() deletes their directories.
+        terminate_all(processes)
         for handle in log_handles:
             handle.close()
 

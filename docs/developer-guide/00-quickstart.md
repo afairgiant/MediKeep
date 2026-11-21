@@ -338,7 +338,7 @@ pytest --cov=app --cov-report=html
 pytest tests/api/test_medications.py -v
 
 # Full suite in 6 parallel shards (a few minutes instead of 10+)
-python3 scripts/run_backend_tests_sharded.py
+python scripts/run_backend_tests_sharded.py
 ```
 
 See [Development Guide - Backend Tests](05-contributing.md#backend-tests) for the sharded runner's options.
@@ -492,7 +492,7 @@ python run.py                            # Start backend with auto-reload
 alembic revision --autogenerate -m ""    # Create migration
 alembic upgrade head                     # Apply migrations
 pytest -v                                # Run tests (verbose)
-python3 scripts/run_backend_tests_sharded.py  # Full suite in parallel shards
+python scripts/run_backend_tests_sharded.py   # Full suite in parallel shards
 
 # Frontend (Vite + Vitest)
 npm start                                # Start dev server (Vite)
