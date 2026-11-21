@@ -24,7 +24,7 @@ import {
   parseDateInput,
   formatDateInputChange,
 } from '../../../utils/dateUtils';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import { unitLabels, validationRanges } from '../../../utils/unitConversion';
 import {
   getDonationTypeOptions,
@@ -175,6 +175,13 @@ const BloodDonationFormWrapper = ({
                       )}
                     />
                   </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => setField('tags', tags)}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
+                    />
+                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
@@ -246,14 +253,6 @@ const BloodDonationFormWrapper = ({
                       )}
                       autosize
                       minRows={2}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={12}>
-                    <TagInput
-                      value={formData.tags || []}
-                      onChange={tags => setField('tags', tags)}
-                      label={t('shared:labels.tags', 'Tags')}
-                      placeholder={t('shared:fields.addTags', 'Add tags...')}
                     />
                   </Grid.Col>
                 </Grid>

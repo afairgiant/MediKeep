@@ -34,6 +34,7 @@ import {
 } from '../../utils/dateUtils';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
+import TagsField from '../shared/TagsField';
 import logger from '../../services/logger';
 import RecordVisitsTab from '../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
@@ -293,6 +294,18 @@ const MantineSymptomForm = ({
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t('common:fields.tags.description')}
+                      placeholder={t('common:fields.tags.placeholder')}
+                    />
+                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
@@ -414,25 +427,6 @@ const MantineSymptomForm = ({
                       )}
                       maxLength={2000}
                     />
-                  </Grid.Col>
-                  <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t('common:fields.tags.description')}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('common:fields.tags.placeholder')}
-                      />
-                    </Box>
                   </Grid.Col>
                 </Grid>
               </Box>

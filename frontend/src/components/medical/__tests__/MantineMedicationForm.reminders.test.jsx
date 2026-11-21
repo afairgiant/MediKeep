@@ -473,3 +473,13 @@ describe('MantineMedicationForm — Reminders tab', () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe('MantineMedicationForm — Tags field', () => {
+  test('shows a labelled Tags field on the Basic Info tab', () => {
+    setupForm();
+    // Inactive tab panels stay mounted but hidden, so visibility proves the
+    // field is on the default Basic Info tab
+    expect(screen.getByText('shared:labels.tags')).toBeVisible();
+    expect(screen.getByTestId('tag-input')).toBeVisible();
+  });
+});

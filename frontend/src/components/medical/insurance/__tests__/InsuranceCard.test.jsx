@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MantineProvider } from '@mantine/core';
+import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import InsuranceCard from '../InsuranceCard';
 
@@ -9,6 +10,10 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
     formatLongDate: date => (date ? `formatted:${date}` : null),
   }),
+}));
+
+vi.mock('../../../../hooks/useTagColors', () => ({
+  useTagColors: () => ({ getTagColor: () => 'blue' }),
 }));
 
 vi.mock('react-i18next', () => ({
@@ -52,6 +57,22 @@ describe('InsuranceCard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  test('shows tags as badges on the card', () => {
+    render(
+      <MemoryRouter>
+        <MantineWrapper>
+          <InsuranceCard
+            {...defaultProps}
+            insurance={{ ...baseInsurance, tags: ['employer', 'family'] }}
+          />
+        </MantineWrapper>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('employer')).toBeInTheDocument();
+    expect(screen.getByText('family')).toBeInTheDocument();
   });
 
   test('renders a Print button on the same row as View/Edit/Delete', () => {

@@ -120,6 +120,7 @@ const EquipmentCard = ({
             : null
         }
         badges={badges}
+        tags={equipment.tags || []}
         fields={fields}
         notes={equipment.notes}
         entityType="medical-equipment"
@@ -152,6 +153,7 @@ EquipmentCard.propTypes = {
     supplier: PropTypes.string,
     status: PropTypes.string,
     notes: PropTypes.string,
+    tags: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,

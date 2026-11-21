@@ -67,7 +67,6 @@ const VIEW_TO_EDIT_TAB: Record<EditTabEntity, TabMap> = {
   labResults: {
     overview: 'basic',
     'test-components': 'results',
-    tags: 'basic',
     files: 'documents',
     ...sameTabs(
       'rel-conditions',

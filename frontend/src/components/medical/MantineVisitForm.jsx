@@ -13,7 +13,6 @@ import {
   Select,
   Textarea,
   NumberInput,
-  Text,
 } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
 import { DateInput } from '../adapters/DateInput';
@@ -36,7 +35,7 @@ import {
   VisitLinkTabButtons,
   VisitLinkTabPanels,
 } from './visits/VisitLinkTabs';
-import { TagInput } from '../common/TagInput';
+import TagsField from '../shared/TagsField';
 import logger from '../../services/logger';
 import NotesField from '../shared/NotesField';
 import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
@@ -254,29 +253,19 @@ const MantineVisitForm = ({
       case 'custom':
         if (translatedField.component === 'TagInput') {
           return (
-            <Box key={translatedField.name}>
-              <Text size="sm" fw={500} mb="xs">
-                {translatedField.label}
-                {translatedField.required && (
-                  <span style={{ color: 'red' }}> *</span>
-                )}
-              </Text>
-              {translatedField.description && (
-                <Text size="xs" c="dimmed" mb="xs">
-                  {translatedField.description}
-                </Text>
-              )}
-              <TagInput
-                value={formData[translatedField.name] || []}
-                onChange={tags => {
-                  onInputChange({
-                    target: { name: translatedField.name, value: tags },
-                  });
-                }}
-                placeholder={translatedField.placeholder}
-                maxTags={translatedField.maxTags}
-              />
-            </Box>
+            <TagsField
+              key={translatedField.name}
+              value={formData[translatedField.name] || []}
+              onChange={tags => {
+                onInputChange({
+                  target: { name: translatedField.name, value: tags },
+                });
+              }}
+              label={translatedField.label}
+              description={translatedField.description}
+              placeholder={translatedField.placeholder}
+              maxTags={translatedField.maxTags}
+            />
           );
         }
         return null;

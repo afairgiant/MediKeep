@@ -36,7 +36,7 @@ import {
   formatDateInputChange,
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
 import TreatmentPlanSetup from './TreatmentPlanSetup';
 import { apiService } from '../../../services/api';
@@ -783,26 +783,19 @@ const TreatmentFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags', 'Tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t(
-                          'treatments.form.tagsDesc',
-                          'Add tags to categorize and organize treatments'
-                        )}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('shared:fields.addTags', 'Add tags...')}
-                      />
-                    </Box>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t(
+                        'treatments.form.tagsDesc',
+                        'Add tags to categorize and organize treatments'
+                      )}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
+                    />
                   </Grid.Col>
                 </Grid>
 

@@ -21,6 +21,7 @@ const BASIC_FIELD_NAMES = [
   'plan_name',
   'employer_group',
   'group_number',
+  'tags',
 ];
 
 const MEMBER_FIELD_NAMES = [
@@ -83,9 +84,7 @@ export const getInsuranceFieldsBySection = insuranceType => {
     CONTACT_FIELD_NAMES.includes(f.name)
   );
 
-  const notesField = filteredFields.filter(
-    f => f.name === 'notes' || f.name === 'tags'
-  );
+  const notesField = filteredFields.filter(f => f.name === 'notes');
 
   return {
     basicFields,

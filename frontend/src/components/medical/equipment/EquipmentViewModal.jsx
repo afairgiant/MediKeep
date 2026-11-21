@@ -183,6 +183,26 @@ const EquipmentViewModal = ({
                   </Text>
                 </Stack>
               </SimpleGrid>
+              {equipment.tags && equipment.tags.length > 0 && (
+                <Box mt="lg">
+                  <Title order={4} mb="sm">
+                    {t('shared:labels.tags', 'Tags')}
+                  </Title>
+                  <Group gap="xs">
+                    {equipment.tags.map((tag, index) => (
+                      <Badge
+                        key={index}
+                        variant="light"
+                        color="blue"
+                        size="sm"
+                        radius="md"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </Group>
+                </Box>
+              )}
             </Box>
           </Tabs.Panel>
 
@@ -348,27 +368,6 @@ const EquipmentViewModal = ({
                     )}
                   />
                 </div>
-
-                {equipment.tags && equipment.tags.length > 0 && (
-                  <div>
-                    <Title order={4} mb="sm">
-                      {t('shared:labels.tags', 'Tags')}
-                    </Title>
-                    <Group gap="xs">
-                      {equipment.tags.map((tag, index) => (
-                        <Badge
-                          key={index}
-                          variant="light"
-                          color="blue"
-                          size="sm"
-                          radius="md"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </Group>
-                  </div>
-                )}
               </Stack>
             </Box>
           </Tabs.Panel>

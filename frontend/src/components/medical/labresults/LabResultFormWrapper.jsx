@@ -41,7 +41,7 @@ import {
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
-import LabResultTagsField from './LabResultTagsField';
+import TagsField from '../../shared/TagsField';
 import RecordVisitsCard from '../../shared/RecordVisitsCard';
 import LabResultLinkTabButtons from './LabResultLinkTabs';
 import LabResultRecordLinksCard from './LabResultRecordLinksCard';
@@ -733,7 +733,7 @@ const LabResultFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <LabResultTagsField
+                    <TagsField
                       value={formData.tags || []}
                       onChange={tags => {
                         onInputChange({

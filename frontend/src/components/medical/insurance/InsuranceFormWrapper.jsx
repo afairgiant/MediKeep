@@ -41,7 +41,7 @@ import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import logger from '../../../services/logger';
 import NotesField from '../../shared/NotesField';
 import { useTranslation } from 'react-i18next';
@@ -386,25 +386,17 @@ const InsuranceFormWrapper = ({
       case 'custom':
         if (field.component === 'TagInput') {
           return (
-            <Box key={field.name}>
-              <Text size="sm" fw={500} mb="xs">
-                {translatedField.label}
-                {field.required && <span style={{ color: 'red' }}> *</span>}
-              </Text>
-              {translatedField.description && (
-                <Text size="xs" c="dimmed" mb="xs">
-                  {translatedField.description}
-                </Text>
-              )}
-              <TagInput
-                value={formData[field.name] || []}
-                onChange={tags => {
-                  onInputChange({ target: { name: field.name, value: tags } });
-                }}
-                placeholder={translatedField.placeholder}
-                maxTags={field.maxTags}
-              />
-            </Box>
+            <TagsField
+              key={field.name}
+              value={formData[field.name] || []}
+              onChange={tags => {
+                onInputChange({ target: { name: field.name, value: tags } });
+              }}
+              label={translatedField.label}
+              description={translatedField.description}
+              placeholder={translatedField.placeholder}
+              maxTags={field.maxTags}
+            />
           );
         }
         return null;

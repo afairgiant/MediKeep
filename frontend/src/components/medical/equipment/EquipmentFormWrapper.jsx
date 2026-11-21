@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Modal,
@@ -11,7 +11,6 @@ import {
   Tabs,
   Box,
   Alert,
-  Input,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -31,7 +30,7 @@ import {
   parseDateInput,
   formatDateInputChange,
 } from '../../../utils/dateUtils';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import {
   EQUIPMENT_TYPE_OPTIONS,
   EQUIPMENT_STATUS_OPTIONS,
@@ -64,7 +63,6 @@ const EquipmentFormWrapper = ({
 
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const tagsInputId = useId();
 
   // Open on the tab the View dialog had open, if it handed over to this form
   useEffect(() => {
@@ -255,6 +253,17 @@ const EquipmentFormWrapper = ({
                       disabled={practitionersLoading}
                     />
                   </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
+                    />
+                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
@@ -436,32 +445,6 @@ const EquipmentFormWrapper = ({
                         'Additional notes about this equipment'
                       )}
                     />
-                  </Grid.Col>
-                  <Grid.Col span={12}>
-                    {/* TagInput has no label of its own. The theme's label
-                        styles skip Input.Wrapper, so match them here
-                        (as LabResultTagsField does) */}
-                    <Input.Wrapper
-                      id={tagsInputId}
-                      label={t('shared:labels.tags', 'Tags')}
-                      styles={{
-                        label: {
-                          color: 'var(--color-text-primary)',
-                          fontWeight: 600,
-                        },
-                      }}
-                    >
-                      <TagInput
-                        id={tagsInputId}
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('shared:fields.addTags', 'Add tags...')}
-                      />
-                    </Input.Wrapper>
                   </Grid.Col>
                 </Grid>
               </Box>
