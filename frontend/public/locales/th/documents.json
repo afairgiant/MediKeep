@@ -104,7 +104,9 @@
     "duplicateHint": "หากต้องการอัปโหลดเวอร์ชันใหม่ กรุณาแก้ไขเอกสารก่อน",
     "processingDocument": "เอกสารกำลังถูกประมวลผลโดย Paperless...",
     "syncFailed": "การซิงค์ล้มเหลว",
-    "syncing": "กำลังซิงค์..."
+    "syncing": "กำลังซิงค์...",
+    "taskPermissionDenied": "ส่งไฟล์ของคุณไปยัง Paperless แล้ว แต่บัญชี Paperless นี้ไม่สามารถอ่านงานอัปโหลดได้ MediKeep จะค้นหาเอกสารจากชื่อไฟล์แทน หากต้องการแก้ไข ให้สิทธิ์ดูสำหรับ PaperlessTask แก่บัญชีใน Paperless (การตั้งค่า > ผู้ใช้และกลุ่ม)",
+    "taskPermissionDeniedTitle": "Paperless ไม่สามารถยืนยันการอัปโหลดได้"
   },
   "renderMode": {
     "compactView": "มุมมองแบบกะทัดรัด",

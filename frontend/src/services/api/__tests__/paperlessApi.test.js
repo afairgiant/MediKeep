@@ -159,3 +159,40 @@ describe('pollPaperlessTaskStatus', () => {
     expect(apiService.get).toHaveBeenCalledTimes(3);
   });
 });
+
+const taskPermissionDenied = () =>
+  Object.assign(
+    new Error('Paperless did not let this account read upload tasks'),
+    {
+      errorCode: 'integration_task_permission_denied',
+    }
+  );
+
+describe('task permission denied (#1280)', () => {
+  const taskUuid = '3f1c7a52-9e0b-4d0e-8c1a-0b6f5d2a7e11';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('stops polling at once and leaves the upload to the background', async () => {
+    apiService.get.mockRejectedValue(taskPermissionDenied());
+    const onBackground = vi.fn();
+
+    const promise = pollPaperlessTaskStatus(taskUuid, 300, 1000, onBackground);
+    await vi.runAllTimersAsync();
+
+    await expect(promise).resolves.toMatchObject({
+      status: 'PROCESSING_BACKGROUND',
+      task_uuid: taskUuid,
+      taskPermissionDenied: true,
+    });
+    expect(apiService.get).toHaveBeenCalledTimes(1);
+    expect(onBackground).not.toHaveBeenCalled();
+  });
+});

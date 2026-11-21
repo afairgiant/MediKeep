@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Alert,
   Radio,
   Group,
   TextInput,
@@ -11,6 +12,7 @@ import {
 import IntegrationSettingsCard from './IntegrationSettingsCard';
 import {
   PAPERLESS_AUTH_METHODS,
+  PAPERLESS_TASK_PERMISSION_MISSING_WARNING,
   hasPaperlessCredentials,
   resolvePaperlessAuthMethod,
 } from '../../constants/paperlessSettings';
@@ -49,6 +51,7 @@ const PaperlessSettings = ({
   const { t } = useTranslation('settings');
   const [connectionStatus, setConnectionStatus] = useState(null);
   const [connectionMessage, setConnectionMessage] = useState('');
+  const [taskPermissionMissing, setTaskPermissionMissing] = useState(false);
   const [testingConnection, setTestingConnection] = useState(false);
   const authMethod = resolvePaperlessAuthMethod(
     preferences?.paperless_auth_method
@@ -103,6 +106,7 @@ const PaperlessSettings = ({
       setTestingConnection(true);
       setConnectionStatus(null);
       setConnectionMessage('');
+      setTaskPermissionMissing(false);
 
       const token =
         authMethod === 'token' ? preferences.paperless_api_token : '';
@@ -156,6 +160,11 @@ const PaperlessSettings = ({
 
       if (result.status === 'connected') {
         setConnectionStatus('success');
+        setTaskPermissionMissing(
+          (result.warnings || []).includes(
+            PAPERLESS_TASK_PERMISSION_MISSING_WARNING
+          )
+        );
         setConnectionMessage(
           t('paperlessConnection.connected', 'Connected to Paperless-ngx')
         );
@@ -285,6 +294,14 @@ const PaperlessSettings = ({
       renderExtras={({ connectionStatus: status }) =>
         (status === 'success' || isVerified) && (
           <>
+            {taskPermissionMissing && (
+              <Alert color="yellow" variant="light">
+                {t(
+                  'paperlessConnection.taskPermissionMissing',
+                  'Connected, but this Paperless account cannot read upload tasks, so MediKeep has to look new uploads up by file name. In Paperless, give the account the View permission on PaperlessTask (Settings > Users & Groups > edit the user > Permissions).'
+                )}
+              </Alert>
+            )}
             <Switch
               label={t(
                 'paperlessConnection.autoSyncLabel',

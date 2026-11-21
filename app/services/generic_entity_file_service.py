@@ -5,13 +5,14 @@ Supports lab-results, insurance, visits, procedures, and future entity types.
 
 import logging
 import uuid
+from urllib.parse import urlencode
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy import and_, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from app.core.config import settings
 from app.core.http.integration_errors import raise_if_integration_failure
@@ -47,6 +48,10 @@ from app.services.paperless_client import (
 )
 from app.services.paperless_client import (
     create_paperless_client,
+)
+from app.services.paperless_service import (
+    _build_title_fallback_query,
+    log_task_permission_denied,
 )
 from app.services.paperless_service import (
     PaperlessAuthenticationError,
@@ -100,6 +105,63 @@ def _as_naive_utc(value: datetime) -> datetime:
     if value.tzinfo is not None:
         return value.astimezone(timezone.utc).replace(tzinfo=None)
     return value
+
+
+def _mark_duplicate(file_record: EntityFile) -> None:
+    file_record.paperless_task_uuid = None
+    file_record.sync_status = "duplicate"
+    file_record.last_sync_at = get_utc_now()
+
+
+def _document_linked_elsewhere(file_record: EntityFile, document_id: str) -> bool:
+    """Whether another file record already points at this Paperless document."""
+    db = object_session(file_record)
+    if db is None:
+        return False
+    return (
+        db.query(EntityFile.id)
+        .filter(
+            EntityFile.id != file_record.id,
+            EntityFile.storage_backend == "paperless",
+            EntityFile.paperless_document_id == document_id,
+        )
+        .first()
+        is not None
+    )
+
+
+_DOCUMENT_SEARCH_PAGE_SIZE = 100
+# Bounds the requests one lookup can make
+_DOCUMENT_SEARCH_MAX_PAGES = 5
+
+
+def _added_within(document: Dict[str, Any], start: datetime, end: datetime) -> bool:
+    """Whether a Paperless document was added between naive-UTC ``start`` and ``end``."""
+    # "added" is when Paperless stored it; "created" is the date read from its content
+    added = document.get("added")
+    if not isinstance(added, str):
+        return False
+    try:
+        added_at = _as_naive_utc(datetime.fromisoformat(added.replace("Z", "+00:00")))
+    except ValueError:
+        return False
+    return start <= added_at <= end
+
+
+def _normalized(name: Any) -> str:
+    return str(name or "").strip().casefold()
+
+
+def _file_name_matches(document: Dict[str, Any], filename: str) -> bool:
+    """Whether the document's original file name is ``filename``, or its title is the name or its stem."""
+    name = _normalized(filename)
+    if not name:
+        return False
+    title = _normalized(document.get("title"))
+    return _normalized(document.get("original_file_name")) == name or title in (
+        name,
+        _normalized(Path(filename).stem),
+    )
 
 
 def entity_files_of_records(
@@ -1619,6 +1681,7 @@ class GenericEntityFileService:
                 FILE_ENTITY_SOURCES,
                 EntityFile.storage_backend == "paperless",
                 EntityFile.paperless_document_id.is_(None),  # NO document ID
+                EntityFile.sync_status != "duplicate",  # A final state, not an orphan
                 or_(
                     EntityFile.paperless_task_uuid.is_(None),
                     EntityFile.sync_status.not_in(("pending", "processing")),
@@ -1816,6 +1879,10 @@ class GenericEntityFileService:
                                     False  # Mark as missing in sync status
                                 )
                                 missing_count += 1
+                                continue
+                            elif file_record.sync_status == "duplicate":
+                                # Paperless kept the earlier upload; nothing more to find
+                                sync_status[file_record.id] = True
                                 continue
                             else:
                                 # Mark as processing if not already marked as missing
@@ -2167,10 +2234,19 @@ class GenericEntityFileService:
             # task history was cleared). The task can't say which document it
             # made, so these are looked up by file name and upload time below.
             unknown_task_files = []
+            tasks_forbidden = False
+
+            def defer_to_lookup(record):
+                # A record already marked missing gets the same search later in the sync check
+                if record.sync_status != "missing":
+                    unknown_task_files.append(record)
 
             for file_record in files_with_tasks:
                 try:
                     task_uuid = file_record.paperless_task_uuid
+                    if tasks_forbidden:
+                        defer_to_lookup(file_record)
+                        continue
                     _log_file_event(
                         logging.INFO,
                         "paperless_task_resolution_started",
@@ -2190,10 +2266,7 @@ class GenericEntityFileService:
                                 logger.info(
                                     f"Task {task_uuid} not found in API response"
                                 )
-                                # A record already marked missing gets the same
-                                # search later in the sync check.
-                                if file_record.sync_status != "missing":
-                                    unknown_task_files.append(file_record)
+                                defer_to_lookup(file_record)
                                 continue
 
                             parsed = parse_task(task_data)
@@ -2251,6 +2324,12 @@ class GenericEntityFileService:
 
                             # If task is still pending/processing, leave as-is
 
+                        elif response.status == 403:
+                            # The account cannot read tasks; same lookup as an unknown task
+                            tasks_forbidden = True
+                            log_task_permission_denied(paperless_service.user_id)
+                            defer_to_lookup(file_record)
+
                 except Exception as task_error:
                     _log_file_event(
                         logging.ERROR,
@@ -2269,12 +2348,12 @@ class GenericEntityFileService:
                 if linked_id:
                     logger.info(
                         f"Linked file {file_record.id} to Paperless document {linked_id} "
-                        "found by file name and upload time (task not found)"
+                        "found by file name and upload time (task not found or not readable)"
                     )
                 else:
                     logger.info(
                         f"No Paperless document found by file name and upload time "
-                        f"for file {file_record.id} (task not found)"
+                        f"for file {file_record.id} (task not found or not readable)"
                     )
 
             # Commit any document ID updates
@@ -2347,6 +2426,9 @@ class GenericEntityFileService:
                 f"Checking {len(processing_files)} processing files for task completion"
             )
 
+            # Set on the first 403: the same account will be refused for every task
+            tasks_forbidden = False
+
             # Check each processing file
             async with paperless_service:
                 for file_record in processing_files:
@@ -2356,6 +2438,14 @@ class GenericEntityFileService:
                         if not task_uuid:
                             logger.warning(
                                 f"File {file_record.id} has processing status but no task UUID"
+                            )
+                            continue
+
+                        if tasks_forbidden:
+                            status_updates[str(file_record.id)] = (
+                                await self._resolve_without_task(
+                                    file_record, paperless_service
+                                )
                             )
                             continue
 
@@ -2411,11 +2501,7 @@ class GenericEntityFileService:
                                             )
                                         else:
                                             # Validation and fallback both failed - might be a duplicate or invalid
-                                            file_record.paperless_task_uuid = (
-                                                None  # Clear task UUID
-                                            )
-                                            file_record.sync_status = "duplicate"
-                                            file_record.last_sync_at = get_utc_now()
+                                            _mark_duplicate(file_record)
                                             status_updates[str(file_record.id)] = (
                                                 "duplicate"
                                             )
@@ -2487,6 +2573,14 @@ class GenericEntityFileService:
                                         status_updates[str(file_record.id)] = (
                                             "processing"  # Keep checking
                                         )
+                                elif response.status == 403:
+                                    tasks_forbidden = True
+                                    log_task_permission_denied(current_user_id)
+                                    status_updates[str(file_record.id)] = (
+                                        await self._resolve_without_task(
+                                            file_record, paperless_service
+                                        )
+                                    )
                                 else:
                                     logger.warning(
                                         f"Failed to check task status: HTTP {response.status}"
@@ -2598,6 +2692,20 @@ class GenericEntityFileService:
             )
             return None
 
+    async def _resolve_without_task(self, file_record, paperless_service) -> str:
+        """Link a processing upload whose task cannot be read; returns its new status. The caller commits."""
+        _log_file_event(
+            logging.DEBUG,
+            "paperless_document_lookup_without_task",
+            "Looking the document up by file name and upload time",
+            file_record,
+            task_uuid=file_record.paperless_task_uuid,
+        )
+        await self._link_document_found_by_filename_and_time(
+            file_record, paperless_service
+        )
+        return file_record.sync_status
+
     async def _link_document_found_by_filename_and_time(
         self, file_record: EntityFile, paperless_service
     ) -> Optional[str]:
@@ -2607,12 +2715,18 @@ class GenericEntityFileService:
         and mark the record synced. The caller commits.
 
         Returns:
-            The linked document ID, or None if no document was found
+            The linked document ID, or None if nothing was linked. When the match is
+            already another record's document, the record is marked duplicate instead.
         """
         document_id = await self._search_document_by_filename_and_time(
             file_record.file_name, file_record.uploaded_at, paperless_service
         )
         if not document_id:
+            return None
+
+        # Paperless rejects a re-upload of the same file; the match is the earlier upload's document
+        if _document_linked_elsewhere(file_record, str(document_id)):
+            _mark_duplicate(file_record)
             return None
 
         file_record.paperless_document_id = str(document_id)
@@ -2626,7 +2740,7 @@ class GenericEntityFileService:
     ) -> Optional[int]:
         """
         Fallback method to search for a document by filename and upload timestamp.
-        Used when task resolution returns invalid document IDs.
+        Used when the task gives no usable document ID or cannot be read.
 
         Args:
             filename: Original filename to search for
@@ -2678,71 +2792,44 @@ class GenericEntityFileService:
         Async helper to search for document by filename and time range.
         """
         try:
-            # First try searching by original filename
-            search_query = f"title:{filename}"
+            title_search = {
+                "query": _build_title_fallback_query(Path(filename).stem),
+                "page_size": _DOCUMENT_SEARCH_PAGE_SIZE,
+            }
+            # Paperless compares __date in its own time zone; _added_within does the exact check
+            recent_documents = {
+                "added__date__gte": (search_start - timedelta(days=1)).strftime(
+                    "%Y-%m-%d"
+                ),
+                "added__date__lte": (search_end + timedelta(days=1)).strftime(
+                    "%Y-%m-%d"
+                ),
+                "ordering": "-added",
+                "page_size": _DOCUMENT_SEARCH_PAGE_SIZE,
+            }
 
-            async with paperless_service._make_request(
-                "GET", f"/api/documents/?query={search_query}"
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    documents = data.get("results", [])
-
-                    # Check each document's created date
-                    for doc in documents:
-                        doc_created = doc.get("created")
-                        if doc_created:
-                            doc_time = _as_naive_utc(
-                                datetime.fromisoformat(
-                                    doc_created.replace("Z", "+00:00")
-                                )
-                            )
-                            if search_start <= doc_time <= search_end:
-                                doc_id = doc.get("id")
-                                logger.info(
-                                    f"Found matching document ID {doc_id} by file name, created at {doc_created}",
-                                    extra={
-                                        LogFields.CATEGORY: "app",
-                                        LogFields.EVENT: "paperless_document_search_matched",
-                                    },
-                                )
-                                return doc_id
-
-            # If filename search failed, try searching recent documents
-            formatted_start = search_start.strftime("%Y-%m-%d")
-            formatted_end = search_end.strftime("%Y-%m-%d")
-
-            async with paperless_service._make_request(
-                "GET",
-                f"/api/documents/?created__date__gte={formatted_start}&created__date__lte={formatted_end}&ordering=-created",
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    documents = data.get("results", [])
-
-                    # Look for documents with matching filename in title or original_file_name
-                    base_filename = filename.lower()
-                    for doc in documents:
-                        doc_title = (doc.get("title") or "").lower()
-                        doc_original = (doc.get("original_file_name") or "").lower()
-
-                        # An empty title is a substring of every file name, so it
-                        # must not count as a match.
-                        if (
-                            base_filename in doc_title
-                            or base_filename in doc_original
-                            or (doc_title and doc_title in base_filename)
+            for params in (title_search, recent_documents):
+                for page in range(1, _DOCUMENT_SEARCH_MAX_PAGES + 1):
+                    async with paperless_service._make_request(
+                        "GET", f"/api/documents/?{urlencode({**params, 'page': page})}"
+                    ) as response:
+                        if response.status != 200:
+                            break
+                        data = await response.json()
+                    for doc in data.get("results", []):
+                        if _file_name_matches(doc, filename) and _added_within(
+                            doc, search_start, search_end
                         ):
-                            doc_id = doc.get("id")
-                            doc_created = doc.get("created")
                             logger.info(
-                                f"Found potential matching document ID {doc_id} by file name, created at {doc_created}",
+                                f"Found matching document ID {doc.get('id')} by file name, added at {doc.get('added')}",
                                 extra={
                                     LogFields.CATEGORY: "app",
                                     LogFields.EVENT: "paperless_document_search_matched",
                                 },
                             )
-                            return doc_id
+                            return doc.get("id")
+                    if not data.get("next"):
+                        break
 
             logger.warning(
                 f"No document found by file name in time range {search_start} to {search_end}",

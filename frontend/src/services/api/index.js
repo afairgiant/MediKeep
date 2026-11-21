@@ -737,33 +737,49 @@ class ApiService {
           sync_status: 'processing',
         });
 
-        // Start background resolution immediately (don't await - let it run in background)
-        const { resolveBackgroundTask } = await import('./paperlessApi.jsx');
-        resolveBackgroundTask(
-          taskResult.task_uuid,
-          entityType,
-          entityId,
-          file.name
-        ).catch(error => {
-          logger.error(
-            'api_upload_background_resolution_error',
-            'Background task resolution failed',
-            {
-              entityType,
-              entityId,
-              fileName: file.name,
-              taskUuid: taskResult.task_uuid,
-              error: error.message,
-              component: 'ApiService',
-            }
+        let progressMessage =
+          'Document processing in background, you will be notified when complete';
+        if (taskResult.taskPermissionDenied) {
+          // The task cannot be read, so a background poll would only fail; the server-side lookup links it
+          const [{ notifyWarning }, { default: i18n }] = await Promise.all([
+            import('../../utils/notifyTranslated'),
+            import('../../i18n/config'),
+          ]);
+          notifyWarning('documents:paperlessStatus.taskPermissionDenied', {
+            title: 'documents:paperlessStatus.taskPermissionDeniedTitle',
+            autoClose: false,
+          });
+          progressMessage = i18n.t(
+            'documents:paperlessStatus.taskPermissionDeniedTitle'
           );
-        });
+        } else {
+          // Start background resolution immediately (don't await - let it run in background)
+          const { resolveBackgroundTask } = await import('./paperlessApi.jsx');
+          resolveBackgroundTask(
+            taskResult.task_uuid,
+            entityType,
+            entityId,
+            file.name
+          ).catch(error => {
+            logger.error(
+              'api_upload_background_resolution_error',
+              'Background task resolution failed',
+              {
+                entityType,
+                entityId,
+                fileName: file.name,
+                taskUuid: taskResult.task_uuid,
+                error: error.message,
+                component: 'ApiService',
+              }
+            );
+          });
+        }
 
         if (onProgress) {
           onProgress({
             status: 'processing',
-            message:
-              'Document processing in background, you will be notified when complete',
+            message: progressMessage,
             isBackground: true,
           });
         }

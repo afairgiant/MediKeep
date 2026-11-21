@@ -76,7 +76,8 @@
     "syncTagsLabel": "Sincronizar etiquetas y categorías de documentos",
     "syncTagsDescription": "Mantener los metadatos de los documentos sincronizados con Paperless (Próximamente)",
     "loadingSettings": "Cargando configuración...",
-    "credentialsIncomplete": "Introduzca el nombre de usuario y la contraseña para probar la conexión."
+    "credentialsIncomplete": "Introduzca el nombre de usuario y la contraseña para probar la conexión.",
+    "taskPermissionMissing": "Conectado, pero esta cuenta de Paperless no puede leer las tareas de subida, por lo que MediKeep tiene que buscar las nuevas subidas por nombre de archivo. En Paperless, otorgue a la cuenta el permiso Ver sobre PaperlessTask (Configuración > Usuarios y grupos > editar el usuario > Permisos)."
   },
   "papra": {
     "privateUrlNote": "Las direcciones privadas e internas (localhost, 192.168.x.x, 10.x.x.x) son compatibles con las instalaciones autoalojadas. Las direcciones de metadatos de nube y link-local (169.254.x.x) siempre se bloquean por seguridad. Si su administrador ha restringido las integraciones a direcciones públicas, las URL privadas serán rechazadas.",

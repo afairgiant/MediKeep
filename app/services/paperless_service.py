@@ -23,6 +23,7 @@ from app.core.http.integration_errors import (
     IntegrationFailureInfo,
 )
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.utils.integration_http import (
     UnsafeRedirectError,
     build_integration_session,
@@ -32,6 +33,21 @@ from app.services.credential_encryption import credential_encryption
 from app.services.paperless_task_status import extract_task, parse_task
 
 logger = get_logger(__name__)
+
+# Matches no task, so the read answers with the permission check alone
+_NO_SUCH_TASK_ID = "00000000-0000-0000-0000-000000000000"
+
+
+def log_task_permission_denied(user_id: Optional[int]) -> None:
+    """Log that Paperless refused this account's task read (it lacks View on PaperlessTask)."""
+    logger.warning(
+        "Paperless refused to show upload tasks to this account",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "paperless_task_permission_denied",
+            LogFields.USER_ID: user_id,
+        },
+    )
 
 
 # Lucene/Whoosh special characters that must be escaped inside a query term.
@@ -515,6 +531,29 @@ class PaperlessServiceBase(ABC):
                 extra={"user_id": self.user_id, "error": str(e)},
             )
             raise PaperlessConnectionError(f"Connection test failed: {str(e)}")
+
+    async def can_view_tasks(self) -> Optional[bool]:
+        """Whether this account may read upload tasks: False on a 403, None when the check could not tell."""
+        try:
+            async with self._make_request(
+                "GET", f"/api/tasks/?task_id={_NO_SUCH_TASK_ID}"
+            ) as response:
+                if response.status == 200:
+                    return True
+                if response.status == 403:
+                    return False
+                return None
+        except Exception as e:
+            logger.warning(
+                "Could not check Paperless task permission",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "paperless_task_permission_check_failed",
+                    LogFields.USER_ID: self.user_id,
+                    LogFields.ERROR: str(e),
+                },
+            )
+            return None
 
     async def get_task_status(self, task_id: str) -> Dict[str, Any]:
         """

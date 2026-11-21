@@ -104,7 +104,9 @@
     "duplicateHint": "Si vous avez besoin de téléverser une nouvelle version, veuillez d'abord modifier le document.",
     "processingDocument": "Document en cours de traitement par Paperless...",
     "syncFailed": "Echec de la synchronisation",
-    "syncing": "Synchronisation en cours..."
+    "syncing": "Synchronisation en cours...",
+    "taskPermissionDenied": "Votre fichier a été envoyé à Paperless, mais ce compte Paperless ne peut pas lire les tâches d'envoi. MediKeep recherchera le document par nom de fichier à la place. Pour corriger cela, accordez au compte l'autorisation Afficher sur PaperlessTask dans Paperless (Paramètres > Utilisateurs et groupes).",
+    "taskPermissionDeniedTitle": "Paperless ne peut pas confirmer les envois"
   },
   "renderMode": {
     "compactView": "Vue compacte",

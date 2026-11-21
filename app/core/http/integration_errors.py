@@ -60,6 +60,7 @@ class IntegrationErrorCode:
     UNSUPPORTED_FORMAT = "integration_unsupported_format"
     FILE_TOO_LARGE = "integration_file_too_large"
     PERMISSION_DENIED = "integration_permission_denied"
+    TASK_PERMISSION_DENIED = "integration_task_permission_denied"
     STORAGE_FULL = "integration_storage_full"
     PROCESSING_FAILED = "integration_processing_failed"
     NETWORK_ERROR = "integration_network_error"
@@ -71,6 +72,11 @@ class IntegrationErrorCode:
 
 PAPERLESS_AUTH_FAILED_MESSAGE = (
     "Paperless authentication failed. Please check your credentials and permissions."
+)
+PAPERLESS_TASK_PERMISSION_MESSAGE = (
+    "Paperless did not let this account read upload tasks, so MediKeep cannot "
+    "confirm uploads. In Paperless, give the account the View permission on "
+    "PaperlessTask (Settings > Users & Groups > edit the user > Permissions)."
 )
 PAPERLESS_CREDENTIALS_UNUSABLE_MESSAGE = (
     "The saved Paperless credentials could not be read. "

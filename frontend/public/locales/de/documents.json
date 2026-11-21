@@ -104,7 +104,9 @@
     "duplicateHint": "Wenn Sie eine neue Version hochladen möchten, ändern Sie bitte zuerst das Dokument.",
     "processingDocument": "Dokument wird von Paperless verarbeitet...",
     "syncFailed": "Synchronisation fehlgeschlagen",
-    "syncing": "Synchronisiere..."
+    "syncing": "Synchronisiere...",
+    "taskPermissionDenied": "Ihre Datei wurde an Paperless gesendet, aber dieses Paperless-Konto kann keine Upload-Aufgaben lesen. MediKeep sucht das Dokument stattdessen anhand des Dateinamens. Um das zu beheben, erteilen Sie dem Konto in Paperless die Berechtigung Anzeigen für PaperlessTask (Einstellungen > Benutzer & Gruppen).",
+    "taskPermissionDeniedTitle": "Paperless kann Uploads nicht bestätigen"
   },
   "renderMode": {
     "compactView": "Kompakte Ansicht",

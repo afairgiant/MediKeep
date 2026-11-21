@@ -76,7 +76,8 @@
     "syncTagsLabel": "同步文档标签和分类",
     "syncTagsDescription": "保持文档元数据与 Paperless 同步（即将推出）",
     "loadingSettings": "正在加载设置...",
-    "credentialsIncomplete": "请输入用户名和密码以测试连接。"
+    "credentialsIncomplete": "请输入用户名和密码以测试连接。",
+    "taskPermissionMissing": "已连接，但此 Paperless 帐户无法读取上传任务，因此 MediKeep 只能按文件名查找新上传的文件。请在 Paperless 中为该帐户授予 PaperlessTask 的查看权限（设置 > 用户和组 > 编辑用户 > 权限）。"
   },
   "papra": {
     "privateUrlNote": "私有和内部地址（localhost、192.168.x.x、10.x.x.x）支持自托管部署。出于安全考虑，云元数据和链路本地地址（169.254.x.x）始终被阻止。如果管理员已将集成限制为公共地址，则私有 URL 将被拒绝。",

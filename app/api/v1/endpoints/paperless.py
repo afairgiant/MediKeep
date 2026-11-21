@@ -18,6 +18,8 @@ from app.api.deps import get_current_user
 from app.api.v1.endpoints.entity_file import get_entity_by_type_and_id
 from app.core.database.database import get_db
 from app.core.http.integration_errors import (
+    PAPERLESS_TASK_PERMISSION_MESSAGE,
+    IntegrationErrorCode,
     IntegrationFailure,
     integration_http_exception,
     upstream_status_failure,
@@ -59,12 +61,16 @@ from app.services.paperless_service import (
     PaperlessRedirectError,
     _build_title_fallback_query,
     create_paperless_service,
+    log_task_permission_denied,
 )
 from app.services.paperless_task_status import extract_task, parse_task
 from app.services.patient_access import PatientAccessService
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+# Stable value the frontend matches on
+TASK_PERMISSION_MISSING_WARNING = "task_permission_missing"
 
 
 class MockRequest:
@@ -406,6 +412,10 @@ async def test_paperless_connection(
             logger.debug("About to call test_connection()")
             result = await paperless_service.test_connection()
             logger.debug(f"test_connection() completed with result: {result}")
+
+            # Uploads still work without it, so this warns instead of failing the test
+            if await paperless_service.can_view_tasks() is False:
+                result["warnings"] = [TASK_PERMISSION_MISSING_WARNING]
 
             # Add authentication method to result
             result["auth_method"] = paperless_service.get_auth_type()
@@ -1287,12 +1297,13 @@ async def get_paperless_task_status(
                             "timestamp": datetime.utcnow().isoformat(),
                         }
                     if response.status == 403:
-                        logger.warning(
-                            f"Permission denied checking task {task_uuid} - auth may have failed"
-                        )
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"Permission denied accessing task status",
+                        log_task_permission_denied(current_user.id)
+                        # Not a 403: the MediKeep session is fine, the Paperless account lacks a permission
+                        raise integration_http_exception(
+                            IntegrationFailure(
+                                IntegrationErrorCode.TASK_PERMISSION_DENIED,
+                                PAPERLESS_TASK_PERMISSION_MESSAGE,
+                            )
                         )
                     response_text = await response.text()
                     logger.warning(

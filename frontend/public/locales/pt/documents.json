@@ -104,7 +104,9 @@
     "duplicateHint": "Se precisar de carregar uma nova versão, modifique primeiro o documento.",
     "processingDocument": "O documento está a ser processado pelo Paperless...",
     "syncFailed": "Sincronização falhada",
-    "syncing": "A sincronizar..."
+    "syncing": "A sincronizar...",
+    "taskPermissionDenied": "O seu ficheiro foi enviado para o Paperless, mas esta conta do Paperless não consegue ler as tarefas de envio. O MediKeep vai procurar o documento pelo nome do ficheiro. Para corrigir, conceda à conta a permissão Ver em PaperlessTask no Paperless (Definições > Utilizadores e grupos).",
+    "taskPermissionDeniedTitle": "O Paperless não consegue confirmar os envios"
   },
   "renderMode": {
     "compactView": "Vista compacta",

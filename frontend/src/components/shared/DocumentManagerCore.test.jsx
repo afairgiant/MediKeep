@@ -42,7 +42,10 @@ vi.mock('../../services/logger', () => ({
 }));
 
 import useDocumentManagerCore from './DocumentManagerCore';
-import { linkPaperlessDocument } from '../../services/api/paperlessApi.jsx';
+import {
+  getPaperlessSettings,
+  linkPaperlessDocument,
+} from '../../services/api/paperlessApi.jsx';
 import { linkPapraDocument } from '../../services/api/papraApi.jsx';
 import { apiService } from '../../services/api';
 
@@ -444,5 +447,136 @@ describe('useDocumentManagerCore — deleting files marked in the Edit form (iss
 
     expect(result.current.filesToDelete).toEqual([]);
     expect(result.current.hasPendingFiles()).toBe(false);
+  });
+});
+
+describe('useDocumentManagerCore - upload whose task Paperless will not show (#1280)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    getPaperlessSettings.mockResolvedValue({
+      paperless_enabled: true,
+      paperless_url: 'https://paperless.example.com',
+      paperless_has_credentials: true,
+      paperless_auto_sync: false,
+      default_storage_backend: 'paperless',
+    });
+    apiService.getEntityFiles.mockResolvedValue([
+      { id: 1, storage_backend: 'paperless', sync_status: 'processing' },
+    ]);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const uploadOne = async taskResult => {
+    apiService.uploadEntityFileWithTaskMonitoring.mockResolvedValue({
+      taskMonitored: true,
+      taskResult,
+    });
+    const hook = renderHook(props => useDocumentManagerCore(props), {
+      initialProps: baseProps({ entityId: 5, mode: 'edit' }),
+    });
+    const { result } = hook;
+    await waitFor(() =>
+      expect(result.current.selectedStorageBackend).toBe('paperless')
+    );
+    act(() => {
+      result.current.handleAddPendingFile(
+        new File(['x'], 'scan.pdf', { type: 'application/pdf' }),
+        ''
+      );
+    });
+    await act(async () => {
+      await result.current.uploadPendingFiles(7);
+    });
+    apiService.updateProcessingFiles.mockClear();
+    return hook;
+  };
+
+  it('checks the upload again once Paperless has had time to store it', async () => {
+    await uploadOne({
+      status: 'PROCESSING_BACKGROUND',
+      task_uuid: 'task',
+      taskPermissionDenied: true,
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30000);
+    });
+
+    expect(apiService.updateProcessingFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the later check once nothing is left processing', async () => {
+    await uploadOne({
+      status: 'PROCESSING_BACKGROUND',
+      task_uuid: 'task',
+      taskPermissionDenied: true,
+    });
+    apiService.updateProcessingFiles.mockResolvedValue({ 1: 'synced' });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(130000);
+    });
+
+    expect(apiService.updateProcessingFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('drops pending checks when the panel moves to another record', async () => {
+    const { rerender } = await uploadOne({
+      status: 'PROCESSING_BACKGROUND',
+      task_uuid: 'task',
+      taskPermissionDenied: true,
+    });
+
+    rerender(baseProps({ entityId: 99, mode: 'edit' }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(130000);
+    });
+
+    expect(apiService.updateProcessingFiles).not.toHaveBeenCalled();
+  });
+
+  it('a check already running for the previous record does not reload its files', async () => {
+    const { rerender } = await uploadOne({
+      status: 'PROCESSING_BACKGROUND',
+      task_uuid: 'task',
+      taskPermissionDenied: true,
+    });
+    let finishUpdate;
+    apiService.updateProcessingFiles.mockImplementationOnce(
+      () => new Promise(resolve => (finishUpdate = resolve))
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30000);
+    });
+    rerender(baseProps({ entityId: 99, mode: 'edit' }));
+    await waitFor(() =>
+      expect(apiService.getEntityFiles).toHaveBeenCalledWith(
+        'insurance',
+        99,
+        null,
+        expect.anything()
+      )
+    );
+    apiService.getEntityFiles.mockClear();
+    await act(async () => {
+      finishUpdate({ 1: 'synced' });
+    });
+
+    expect(apiService.getEntityFiles).not.toHaveBeenCalled();
+  });
+
+  it('does not schedule a check for an ordinary background upload', async () => {
+    await uploadOne({ status: 'PROCESSING_BACKGROUND', task_uuid: 'task' });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(130000);
+    });
+
+    expect(apiService.updateProcessingFiles).not.toHaveBeenCalled();
   });
 });

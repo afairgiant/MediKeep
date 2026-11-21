@@ -76,7 +76,8 @@
     "syncTagsLabel": "Synchroniser les étiquettes et catégories des documents",
     "syncTagsDescription": "Garder les métadonnées des documents synchronisées avec Paperless (bientôt disponible)",
     "loadingSettings": "Chargement des paramètres...",
-    "credentialsIncomplete": "Saisissez votre nom d'utilisateur et votre mot de passe pour tester la connexion."
+    "credentialsIncomplete": "Saisissez votre nom d'utilisateur et votre mot de passe pour tester la connexion.",
+    "taskPermissionMissing": "Connecté, mais ce compte Paperless ne peut pas lire les tâches d'envoi : MediKeep doit donc rechercher les nouveaux envois par nom de fichier. Dans Paperless, accordez au compte l'autorisation Afficher sur PaperlessTask (Paramètres > Utilisateurs et groupes > modifier l'utilisateur > Autorisations)."
   },
   "papra": {
     "apiTokenPlaceholder": "Saisissez votre jeton d'API Papra",

@@ -207,3 +207,21 @@ describe('PaperlessSettings test connection', () => {
     );
   });
 });
+
+describe('PaperlessSettings task permission warning (#1280)', () => {
+  it.each([
+    [['task_permission_missing'], true],
+    [undefined, false],
+  ])('with warnings %j shows the warning: %s', async (warnings, shown) => {
+    vi.mocked(testPaperlessConnection).mockResolvedValue({
+      status: 'connected',
+      warnings,
+    });
+    renderSettings({ paperless_api_token: 'a-valid-token-value' });
+    fireEvent.click(screen.getByRole('button', { name: /test connection/i }));
+    await waitFor(() =>
+      expect(screen.getByText('Connected to Paperless-ngx')).toBeInTheDocument()
+    );
+    expect(Boolean(screen.queryByText(/PaperlessTask/))).toBe(shown);
+  });
+});
