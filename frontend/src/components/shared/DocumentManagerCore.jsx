@@ -233,6 +233,7 @@ const useDocumentManagerCore = ({
   const filesRef = useRef(files);
   const pendingFilesRef = useRef(pendingFiles);
   const pendingLinksRef = useRef(pendingLinks);
+  const filesToDeleteRef = useRef(filesToDelete);
   const selectedStorageBackendRef = useRef(selectedStorageBackend);
   const paperlessSettingsRef = useRef(paperlessSettings);
   const paperlessAutoSyncRef = useRef(paperlessSettings?.paperless_auto_sync);
@@ -245,6 +246,7 @@ const useDocumentManagerCore = ({
     filesRef.current = files;
     pendingFilesRef.current = pendingFiles;
     pendingLinksRef.current = pendingLinks;
+    filesToDeleteRef.current = filesToDelete;
     selectedStorageBackendRef.current = selectedStorageBackend;
     paperlessSettingsRef.current = paperlessSettings;
     paperlessAutoSyncRef.current = paperlessSettings?.paperless_auto_sync;
@@ -252,6 +254,7 @@ const useDocumentManagerCore = ({
     files,
     pendingFiles,
     pendingLinks,
+    filesToDelete,
     selectedStorageBackend,
     paperlessSettings,
   ]);
@@ -815,7 +818,9 @@ const useDocumentManagerCore = ({
 
   // Mark file for deletion
   const handleMarkFileForDeletion = useCallback(fileId => {
-    setFilesToDelete(prev => [...prev, fileId]);
+    setFilesToDelete(prev =>
+      prev.includes(fileId) ? prev : [...prev, fileId]
+    );
   }, []);
 
   // Unmark file for deletion
@@ -1105,12 +1110,73 @@ const useDocumentManagerCore = ({
     ]
   );
 
-  // Batch upload pending files with progress tracking. Also flushes any
-  // pending "link existing remote document" operations queued in create mode.
+  // Deletes the files marked in the Edit form. Files that are deleted are
+  // unmarked and any that fail stay marked. Throws if any delete failed.
+  const deleteMarkedFiles = useCallback(
+    async fileIds => {
+      const results = await Promise.allSettled(
+        fileIds.map(fileId => apiService.deleteEntityFile(fileId))
+      );
+      // A 404 means the file is already gone (for example deleted in another
+      // tab), which is what the user asked for.
+      const isDeleted = result =>
+        result.status === 'fulfilled' || result.reason?.status === 404;
+      const deletedIds = fileIds.filter((_, index) =>
+        isDeleted(results[index])
+      );
+      const failures = results.filter(result => !isDeleted(result));
+
+      setFilesToDelete(prev => prev.filter(id => !deletedIds.includes(id)));
+      await loadFiles();
+
+      if (failures.length === 0) {
+        logger.info('document_manager_marked_files_deleted', {
+          message: 'Files marked for deletion were deleted',
+          entityType,
+          entityId,
+          deletedCount: deletedIds.length,
+          component: 'DocumentManagerCore',
+        });
+        return;
+      }
+
+      const errorMessage = getUserFriendlyError(failures[0].reason, 'delete');
+      setError(errorMessage);
+      if (onError) {
+        onError(errorMessage);
+      }
+      notifications.show({
+        title: t('errors:file.deleteFailed'),
+        message: errorMessage,
+        color: 'red',
+        icon: <IconX size={16} />,
+      });
+
+      logger.error('document_manager_marked_files_delete_error', {
+        message: 'Some files marked for deletion could not be deleted',
+        entityType,
+        entityId,
+        deletedCount: deletedIds.length,
+        failedCount: failures.length,
+        error: failures[0].reason?.message,
+        component: 'DocumentManagerCore',
+      });
+
+      throw new Error(errorMessage);
+    },
+    [entityType, entityId, loadFiles, onError, t]
+  );
+
+  // Applies the document changes queued before Save: deletes the files marked
+  // in the Edit form, then uploads pending files and flushes pending "link
+  // existing remote document" operations (both queued in create mode) with
+  // progress tracking. If a delete fails, uploads and links are not attempted
+  // and stay queued.
   const uploadPendingFiles = useCallback(
     async targetEntityId => {
       const currentPendingFiles = pendingFilesRef.current;
       const currentPendingLinks = pendingLinksRef.current;
+      const currentFilesToDelete = filesToDeleteRef.current;
 
       logger.info('document_manager_batch_upload_start', {
         message: 'Starting batch upload with progress tracking',
@@ -1118,13 +1184,22 @@ const useDocumentManagerCore = ({
         targetEntityId,
         pendingFilesCount: currentPendingFiles.length,
         pendingLinksCount: currentPendingLinks.length,
+        filesToDeleteCount: currentFilesToDelete.length,
         component: 'DocumentManagerCore',
       });
+
+      if (currentFilesToDelete.length > 0) {
+        await deleteMarkedFiles(currentFilesToDelete);
+      }
 
       if (
         currentPendingFiles.length === 0 &&
         currentPendingLinks.length === 0
       ) {
+        // Lets the page refresh the record's file count after the deletes
+        if (currentFilesToDelete.length > 0 && onUploadComplete) {
+          onUploadComplete(true, 0, 0);
+        }
         return true;
       }
 
@@ -1550,6 +1625,7 @@ const useDocumentManagerCore = ({
       debouncedUpdateProgress,
       monitoredSetPendingFiles,
       monitoredSetPendingLinks,
+      deleteMarkedFiles,
     ]
   );
 
@@ -1790,16 +1866,20 @@ const useDocumentManagerCore = ({
       loadFiles,
       checkSyncStatus,
 
-      // API: counts and presence checks include both files and queued links so
-      // existing callers (12 medical entity pages) Just Work without per-page changes.
+      // API: hasPendingFiles also covers queued links and files marked for
+      // deletion, so the 12 medical entity pages call uploadPendingFiles after
+      // Save without per-page changes. The count leaves out marked deletions
+      // because pages report it as the number of files uploaded.
       getPendingFilesCount: () =>
         pendingFilesRef.current.length + pendingLinksRef.current.length,
       hasPendingFiles: () =>
         pendingFilesRef.current.length > 0 ||
-        pendingLinksRef.current.length > 0,
+        pendingLinksRef.current.length > 0 ||
+        filesToDeleteRef.current.length > 0,
       clearPendingFiles: () => {
         monitoredSetPendingFiles([]);
         monitoredSetPendingLinks([]);
+        setFilesToDelete([]);
       },
     }),
     [
