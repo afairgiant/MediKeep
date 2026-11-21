@@ -71,7 +71,7 @@ vi.mock('../../../utils/dateUtils', async importOriginal => ({
 }));
 
 vi.mock('../../common/TagInput', () => ({
-  TagInput: () => <div data-testid="tag-input" />,
+  TagInput: ({ id }) => <input id={id} />,
 }));
 
 vi.mock('../../shared/FormLoadingOverlay', () => ({
@@ -478,8 +478,7 @@ describe('MantineMedicationForm — Tags field', () => {
   test('shows a labelled Tags field on the Basic Info tab', () => {
     setupForm();
     // Inactive tab panels stay mounted but hidden, so visibility proves the
-    // field is on the default Basic Info tab
-    expect(screen.getByText('shared:labels.tags')).toBeVisible();
-    expect(screen.getByTestId('tag-input')).toBeVisible();
+    // labelled field is on the default Basic Info tab
+    expect(screen.getByLabelText('shared:labels.tags')).toBeVisible();
   });
 });
