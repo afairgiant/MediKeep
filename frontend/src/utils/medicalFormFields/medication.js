@@ -239,5 +239,5 @@ export const medicationFormFields = [
     descriptionKey: 'medical:medications.sideEffects.description',
     gridColumn: 12,
   },
-  { ...tagsFieldConfig, section: 'details' },
+  { ...tagsFieldConfig, section: 'basic' },
 ];

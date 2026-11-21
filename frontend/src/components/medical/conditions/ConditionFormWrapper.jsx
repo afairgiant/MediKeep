@@ -13,7 +13,6 @@ import {
   Grid,
   TextInput,
   Select,
-  Text,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -27,7 +26,7 @@ import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import RecordLinkCard from '../../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import logger from '../../../services/logger';
@@ -374,26 +373,19 @@ const ConditionFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags', 'Tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t(
-                          'conditions.form.descriptions.tags',
-                          'Add tags to categorize and organize conditions'
-                        )}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('shared:fields.addTags', 'Add tags...')}
-                      />
-                    </Box>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t(
+                        'conditions.form.descriptions.tags',
+                        'Add tags to categorize and organize conditions'
+                      )}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
+                    />
                   </Grid.Col>
                 </Grid>
               </Box>

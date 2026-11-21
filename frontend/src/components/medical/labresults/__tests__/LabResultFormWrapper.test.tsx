@@ -290,9 +290,9 @@ describe('LabResultFormWrapper', () => {
 
     test('shows Tags field on the Basic Info tab', () => {
       render(<LabResultFormWrapper {...defaultProps} />);
-      // Use getAllByText since "tags" may appear in multiple places (e.g. navigation)
-      const tagLabels = screen.getAllByText('shared:labels.tags');
-      expect(tagLabels.length).toBeGreaterThan(0);
+      // Inactive tab panels stay mounted but hidden, so visibility proves
+      // the labelled field is on the default Basic Info tab
+      expect(screen.getByLabelText('Tags')).toBeVisible();
     });
 
     test('reports a newly entered tag through onInputChange', async () => {
@@ -301,7 +301,7 @@ describe('LabResultFormWrapper', () => {
         <LabResultFormWrapper {...defaultProps} onInputChange={onInputChange} />
       );
       const input = screen.getByPlaceholderText(
-        'common:fields.tags.placeholder'
+        'Add tags to organize and find this record'
       );
       await userEvent.type(input, 'fasting{Enter}');
       expect(onInputChange).toHaveBeenCalledWith({

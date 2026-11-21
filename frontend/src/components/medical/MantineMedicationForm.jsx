@@ -41,7 +41,7 @@ import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
-import { TagInput } from '../common/TagInput';
+import TagsField from '../shared/TagsField';
 import logger from '../../services/logger';
 import NotesField from '../shared/NotesField';
 import { apiService } from '../../services/api';
@@ -491,25 +491,17 @@ const MantineMedicationForm = ({
       case 'custom':
         if (field.component === 'TagInput') {
           return (
-            <Box key={field.name}>
-              <Text size="sm" fw={500} mb="xs">
-                {field.label}
-                {field.required && <span style={{ color: 'red' }}> *</span>}
-              </Text>
-              {field.description && (
-                <Text size="xs" c="dimmed" mb="xs">
-                  {field.description}
-                </Text>
-              )}
-              <TagInput
-                value={formData[field.name] || []}
-                onChange={tags => {
-                  onInputChange({ target: { name: field.name, value: tags } });
-                }}
-                placeholder={field.placeholder}
-                maxTags={field.maxTags}
-              />
-            </Box>
+            <TagsField
+              key={field.name}
+              value={formData[field.name] || []}
+              onChange={tags => {
+                onInputChange({ target: { name: field.name, value: tags } });
+              }}
+              label={commonProps.label}
+              description={commonProps.description}
+              placeholder={commonProps.placeholder}
+              maxTags={field.maxTags}
+            />
           );
         }
         return null;

@@ -422,9 +422,10 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getByText('Tags')).toBeInTheDocument();
-      expect(screen.getByText('sleep apnea')).toBeInTheDocument();
-      expect(screen.getByText('nightly use')).toBeInTheDocument();
+      // On the default Basic Info tab (inactive panels are hidden)
+      expect(screen.getByText('Tags')).toBeVisible();
+      expect(screen.getByText('sleep apnea')).toBeVisible();
+      expect(screen.getByText('nightly use')).toBeVisible();
     });
 
     test('hides tags section when not available', () => {

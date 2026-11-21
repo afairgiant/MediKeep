@@ -10,11 +10,13 @@ import {
 } from '@mantine/core';
 import { IconStarFilled } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
 import { createCardClickHandler } from '../../../utils/helpers';
 import { resolveInsurancePcpDisplay } from '../../../utils/insurancePcpUtils';
 import { formatCurrencyDisplay } from '../../../utils/currency';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
+import CardTagBadges from '../../shared/CardTagBadges';
 import PrintButton from '../../shared/PrintButton';
 import { useTranslation } from 'react-i18next';
 import '../../../styles/shared/MedicalPageShared.css';
@@ -34,6 +36,7 @@ const InsuranceCard = ({
 }) => {
   const { t, i18n } = useTranslation(['common', 'shared', 'medical']);
   const { formatLongDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
 
   const pcpDisplay = resolveInsurancePcpDisplay(insurance, practitioners);
 
@@ -187,6 +190,7 @@ const InsuranceCard = ({
                     {t('insurance.card.primary', 'Primary')}
                   </Badge>
                 )}
+              <CardTagBadges tags={insurance.tags} getTagColor={getTagColor} />
               <FileCountBadge
                 count={fileCount}
                 entityType="insurance"

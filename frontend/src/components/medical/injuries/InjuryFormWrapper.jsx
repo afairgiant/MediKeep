@@ -27,7 +27,7 @@ import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import InjuryTypeSelect from './InjuryTypeSelect';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import logger from '../../../services/logger';
@@ -449,6 +449,24 @@ const InjuryFormWrapper = ({
                       onPractitionerCreated={onPractitionerCreated}
                     />
                   </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t(
+                        'common:fields.tags.description',
+                        'Add tags to help organize and search'
+                      )}
+                      placeholder={t(
+                        'common:fields.tags.placeholder',
+                        'Add tags to organize...'
+                      )}
+                    />
+                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
@@ -574,26 +592,6 @@ const InjuryFormWrapper = ({
                         'injuries.notes.description',
                         'General notes or additional details'
                       )}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={12}>
-                    <TagInput
-                      label={t('shared:labels.tags', 'Tags')}
-                      value={formData.tags || []}
-                      onChange={tags => {
-                        onInputChange({
-                          target: { name: 'tags', value: tags },
-                        });
-                      }}
-                      placeholder={t(
-                        'common:fields.tags.placeholder',
-                        'Add tags to organize...'
-                      )}
-                      description={t(
-                        'common:fields.tags.description',
-                        'Add tags to help organize and search'
-                      )}
-                      maxTags={15}
                     />
                   </Grid.Col>
                 </Grid>

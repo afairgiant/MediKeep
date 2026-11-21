@@ -138,15 +138,6 @@ const InjuryCard = ({
       });
     }
 
-    // Add tags as badges
-    if (injury.tags && injury.tags.length > 0) {
-      badges.push({
-        label: `${injury.tags[0]}${injury.tags.length > 1 ? ` +${injury.tags.length - 1}` : ''}`,
-        color: 'gray',
-        variant: 'outline',
-      });
-    }
-
     // Generate dynamic fields
     const fields = [
       {
@@ -213,6 +204,7 @@ const InjuryCard = ({
         status={injury.status}
         statusColor={getStatusColor(injury.status)}
         badges={badges}
+        tags={injury.tags || []}
         fields={fields}
         notes={injury.notes}
         entityType="injury"

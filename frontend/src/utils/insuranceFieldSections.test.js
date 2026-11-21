@@ -105,10 +105,10 @@ describe('getInsuranceFieldsBySection', () => {
     expect(medicalContact).not.toContain('pharmacy_network_info');
   });
 
-  test('groups notes and tags into the notes section', () => {
-    const { notesField } = getInsuranceFieldsBySection('medical');
-    expect(notesField.map(f => f.name)).toEqual(
-      expect.arrayContaining(['notes', 'tags'])
-    );
+  test('puts tags last on the basic tab and leaves only notes on the notes tab', () => {
+    const { basicFields, notesField } = getInsuranceFieldsBySection('medical');
+    const basicNames = basicFields.map(f => f.name);
+    expect(basicNames[basicNames.length - 1]).toBe('tags');
+    expect(notesField.map(f => f.name)).toEqual(['notes']);
   });
 });

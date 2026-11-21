@@ -59,6 +59,13 @@ describe('BloodDonationFormWrapper', () => {
     ).toBeInTheDocument();
   });
 
+  test('shows a labelled Tags field on the donation tab', () => {
+    renderForm();
+    // Inactive tab panels stay mounted but hidden, so visibility proves the
+    // field is on the default donation tab
+    expect(screen.getByLabelText('Tags')).toBeVisible();
+  });
+
   test('screening tab shows temperature in the user unit', async () => {
     renderForm();
     await userEvent.click(
