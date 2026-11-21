@@ -104,7 +104,9 @@
     "duplicateHint": "Als u een nieuwe versie wilt uploaden, wijzig dan eerst het document.",
     "processingDocument": "Document wordt verwerkt door Paperless...",
     "syncFailed": "Synchronisatie mislukt",
-    "syncing": "Synchroniseren..."
+    "syncing": "Synchroniseren...",
+    "taskPermissionDenied": "Uw bestand is naar Paperless verzonden, maar dit Paperless-account kan geen uploadtaken lezen. MediKeep zoekt het document in plaats daarvan op bestandsnaam. Geef het account in Paperless de machtiging Bekijken voor PaperlessTask om dit op te lossen (Instellingen > Gebruikers & groepen).",
+    "taskPermissionDeniedTitle": "Paperless kan uploads niet bevestigen"
   },
   "renderMode": {
     "compactView": "Compacte weergave",

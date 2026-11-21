@@ -4765,7 +4765,7 @@ The cleanup runs only after the delete has been committed, so if the delete fail
 - **Purpose**: Finish Paperless-ngx uploads that are still `processing` by reading their task from Paperless
 - **Authentication**: Yes
 - **Scope**: Only files on patients the caller can edit (own patients, and patients shared with `edit` or `full`), checked through the caller's own Paperless connection
-- **Behaviour**: Only the task whose `task_id` matches the file's task is used. If the task status request fails (Paperless can't be reached or answers with an error), the file stays `processing` with its task kept and is checked again on the next call. If no matching task is returned, the file also stays `processing` and is left out of the response. If the task succeeded but gave no usable document ID, the document is looked up by file name and upload time; when that finds nothing, including when the lookup itself fails, the file is marked `duplicate` and its task is cleared. Returns an empty object when Paperless is not enabled for the caller
+- **Behaviour**: Only the task whose `task_id` matches the file's task is used. If the task status request fails (Paperless can't be reached or answers with an error), the file stays `processing` with its task kept and is checked again on the next call. If Paperless refuses the task read with `403` (the account lacks the View permission on PaperlessTask), the document is looked up by file name and upload time instead: when found, the file is `synced`, or `duplicate` if another file already holds that document; otherwise it stays `processing` with its task kept. If no matching task is returned, the file also stays `processing` and is left out of the response. If the task succeeded but gave no usable document ID, the document is looked up by file name and upload time; when that finds nothing, including when the lookup itself fails, the file is marked `duplicate` and its task is cleared. Returns an empty object when Paperless is not enabled for the caller
 - **Success Response** (200): Object mapping each checked file ID to its new status (`synced`, `processing`, `duplicate` or `failed`)
 
 ---
@@ -5556,6 +5556,10 @@ Base path: `/api/v1/paperless`
   with no saved credentials returns `400`.
 - **Errors**: `400` with `X-Error-Code: integration_credentials_unusable` when the saved
   credentials cannot be decrypted (see the error table in 13.2).
+- **Warnings**: when the account can connect but Paperless refuses to let it read upload
+  tasks, the test still succeeds and the response adds
+  `"warnings": ["task_permission_missing"]`. Without that permission MediKeep cannot read
+  an upload's result and has to find the document by file name.
 
 ### 13.2 Integration Error Responses (Paperless-ngx and Papra)
 
@@ -5610,6 +5614,7 @@ wrong and an `error_code` that identifies it:
 | `integration_unsupported_format` | Upload rejected: file type not supported |
 | `integration_file_too_large` | Upload rejected: file too large |
 | `integration_permission_denied` | Upload rejected: no permission |
+| `integration_task_permission_denied` | `GET /paperless/tasks/{task_uuid}/status`: the Paperless account may not read upload tasks (it needs the View permission on PaperlessTask) |
 | `integration_storage_full` | Upload rejected: the integration is out of storage |
 | `integration_processing_failed` | Upload accepted but processing failed |
 | `integration_network_error` | Upload failed on the network |

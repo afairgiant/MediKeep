@@ -76,7 +76,8 @@
     "syncTagsLabel": "Synchronizuj tagi i kategorie dokumentów",
     "syncTagsDescription": "Utrzymuj synchronizację metadanych dokumentów z Paperless (Już wkrótce)",
     "loadingSettings": "Ładowanie ustawień...",
-    "credentialsIncomplete": "Wprowadź nazwę użytkownika i hasło, aby przetestować połączenie."
+    "credentialsIncomplete": "Wprowadź nazwę użytkownika i hasło, aby przetestować połączenie.",
+    "taskPermissionMissing": "Połączono, ale to konto Paperless nie może odczytywać zadań przesyłania, więc MediKeep musi wyszukiwać nowe pliki według nazwy. W Paperless nadaj kontu uprawnienie Wyświetlanie dla PaperlessTask (Ustawienia > Użytkownicy i grupy > edytuj użytkownika > Uprawnienia)."
   },
   "papra": {
     "privateUrlNote": "Adresy prywatne i wewnętrzne (localhost, 192.168.x.x, 10.x.x.x) są obsługiwane w instalacjach samodzielnie hostowanych. Adresy metadanych chmury i link-local (169.254.x.x) są zawsze blokowane ze względów bezpieczeństwa. Jeśli administrator ograniczył integracje do adresów publicznych, prywatne adresy URL zostaną odrzucone.",

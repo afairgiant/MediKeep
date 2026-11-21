@@ -7,7 +7,7 @@ anywhere, and only the task that was asked for may decide a record.
 """
 
 from contextlib import asynccontextmanager
-from datetime import date
+from datetime import date, datetime, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
@@ -332,6 +332,116 @@ class TestTaskMatching:
         assert await _poll(db_session, test_user.id, paperless) == {
             str(upload.id): "synced"
         }
+
+
+class TestTaskPermissionDenied:
+    """Regression for #1280: the account can upload but Paperless refuses its task reads."""
+
+    async def test_document_found_by_file_name_is_linked(
+        self, db_session, test_user, test_patient
+    ):
+        upload = _processing_upload(db_session, test_patient.id, "task")
+        added = datetime.now(timezone.utc).isoformat()
+        paperless = _RecordingPaperless(
+            {
+                "/api/tasks/": (403, {}),
+                "/api/documents/?": (
+                    200,
+                    {
+                        "results": [
+                            {"id": 55, "title": "blood-panel-results", "added": added}
+                        ]
+                    },
+                ),
+            }
+        )
+
+        result = await _poll(db_session, test_user.id, paperless)
+
+        assert result == {str(upload.id): "synced"}
+        db_session.refresh(upload)
+        assert upload.paperless_document_id == "55"
+        assert upload.paperless_task_uuid is None
+
+    async def test_upload_not_found_stays_processing(
+        self, db_session, test_user, test_patient
+    ):
+        upload = _processing_upload(db_session, test_patient.id, "task")
+        paperless = _RecordingPaperless(
+            {
+                "/api/tasks/": (403, {}),
+                "/api/documents/?": (200, {"results": []}),
+            }
+        )
+
+        result = await _poll(db_session, test_user.id, paperless)
+
+        assert result == {str(upload.id): "processing"}
+        db_session.refresh(upload)
+        assert upload.sync_status == "processing"
+        assert upload.paperless_task_uuid == "task"
+
+    async def test_document_already_linked_elsewhere_is_a_duplicate(
+        self, db_session, test_user, test_patient
+    ):
+        # Paperless rejects a re-upload of the same file, so the match is the first upload
+        first = _processing_upload(db_session, test_patient.id, "first")
+        first.paperless_task_uuid = None
+        first.sync_status = "synced"
+        first.paperless_document_id = "55"
+        db_session.commit()
+        again = _processing_upload(db_session, test_patient.id, "again")
+        added = datetime.now(timezone.utc).isoformat()
+        paperless = _RecordingPaperless(
+            {
+                "/api/tasks/": (403, {}),
+                "/api/documents/?": (
+                    200,
+                    {
+                        "results": [
+                            {"id": 55, "title": "blood-panel-results", "added": added}
+                        ]
+                    },
+                ),
+            }
+        )
+
+        result = await _poll(db_session, test_user.id, paperless)
+
+        assert result == {str(again.id): "duplicate"}
+        db_session.refresh(again)
+        assert again.paperless_document_id is None
+        assert again.paperless_task_uuid is None
+
+    async def test_tasks_are_read_once_per_run_after_a_refusal(
+        self, db_session, test_user, test_patient
+    ):
+        uploads = [
+            _processing_upload(db_session, test_patient.id, f"task-{n}")
+            for n in range(3)
+        ]
+        paperless = _RecordingPaperless(
+            {
+                "/api/tasks/": (403, {}),
+                "/api/documents/?": (200, {"results": []}),
+            }
+        )
+
+        result = await _poll(db_session, test_user.id, paperless)
+
+        assert result == {str(u.id): "processing" for u in uploads}
+        assert sum(r.startswith("/api/tasks/") for r in paperless.requests) == 1
+
+    async def test_other_task_errors_do_not_look_the_document_up(
+        self, db_session, test_user, test_patient
+    ):
+        upload = _processing_upload(db_session, test_patient.id, "task")
+        paperless = _RecordingPaperless({"/api/tasks/": (500, {})})
+
+        result = await _poll(db_session, test_user.id, paperless)
+
+        assert result == {str(upload.id): "processing"}
+        assert not any(r.startswith("/api/documents/") for r in paperless.requests)
 
 
 async def test_sources_match_the_entity_types_that_accept_files(db_session):

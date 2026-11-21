@@ -76,7 +76,8 @@
     "syncTagsLabel": "Documenttags en categorieën synchroniseren",
     "syncTagsDescription": "Documentmetadata gesynchroniseerd houden met Paperless (Binnenkort beschikbaar)",
     "loadingSettings": "Instellingen laden...",
-    "credentialsIncomplete": "Voer zowel uw gebruikersnaam als wachtwoord in om de verbinding te testen."
+    "credentialsIncomplete": "Voer zowel uw gebruikersnaam als wachtwoord in om de verbinding te testen.",
+    "taskPermissionMissing": "Verbonden, maar dit Paperless-account kan geen uploadtaken lezen, dus MediKeep moet nieuwe uploads op bestandsnaam zoeken. Geef het account in Paperless de machtiging Bekijken voor PaperlessTask (Instellingen > Gebruikers & groepen > gebruiker bewerken > Machtigingen)."
   },
   "papra": {
     "privateUrlNote": "Privé- en interne adressen (localhost, 192.168.x.x, 10.x.x.x) worden ondersteund voor zelf-gehoste installaties. Cloud-metadata- en link-local-adressen (169.254.x.x) worden om veiligheidsredenen altijd geblokkeerd. Als uw beheerder integraties heeft beperkt tot openbare adressen, worden privé-URL's geweigerd.",

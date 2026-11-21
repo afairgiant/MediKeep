@@ -8,6 +8,7 @@ Another user's files must never be checked or changed.
 
 from contextlib import asynccontextmanager
 from datetime import date, datetime
+from urllib.parse import parse_qs
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
@@ -281,6 +282,41 @@ class TestPaperlessChecks:
         assert running.paperless_document_id is None
         assert running.paperless_task_uuid == "task-running"
 
+    async def test_upload_whose_task_cannot_be_read_is_found_by_file_name(
+        self, db_session, test_patient
+    ):
+        # Regression for #1280: the account can upload but Paperless refuses its task reads.
+        upload = _remote_file(
+            db_session,
+            _equipment(db_session, test_patient.id),
+            "paperless",
+            None,
+            sync_status="processing",
+            task_uuid="task-forbidden",
+        )
+
+        class _TasksForbidden:
+            user_id = 1
+
+            @asynccontextmanager
+            async def _make_request(self, method, endpoint):
+                yield SimpleNamespace(status=403, json=AsyncMock(return_value={}))
+
+        service = GenericEntityFileService()
+        with patch.object(
+            service,
+            "_search_document_by_filename_and_time",
+            new=AsyncMock(return_value=321),
+        ):
+            await service._resolve_task_uuids_to_document_ids(
+                db_session, _TasksForbidden(), [upload]
+            )
+
+        db_session.refresh(upload)
+        assert upload.sync_status == "synced"
+        assert upload.paperless_document_id == "321"
+        assert upload.paperless_task_uuid is None
+
     async def test_deleted_equipment_document_is_marked_missing(
         self, db_session, test_user, test_patient, other_users_equipment, remote
     ):
@@ -304,9 +340,41 @@ class TestPaperlessChecks:
     [
         # Stored upload times are naive UTC; Paperless timestamps can carry "Z".
         (
-            [{"id": 7, "title": "manual", "created": "2026-11-19T12:05:00Z"}],
+            [
+                {
+                    "id": 7,
+                    "title": "manual",
+                    "created": "2026-11-19",
+                    "added": "2026-11-19T12:05:00Z",
+                }
+            ],
             [],
             7,
+        ),
+        # "created" is the date read from the document, often long before the upload
+        (
+            [
+                {
+                    "id": 8,
+                    "title": "manual",
+                    "created": "2019-03-02",
+                    "added": "2026-11-19T12:05:00+00:00",
+                }
+            ],
+            [],
+            8,
+        ),
+        (
+            [
+                {
+                    "id": 10,
+                    "title": "manual",
+                    "created": "2026-11-19",
+                    "added": "2026-11-19T15:00:00Z",
+                }
+            ],
+            [],
+            None,
         ),
         (
             [],
@@ -315,7 +383,7 @@ class TestPaperlessChecks:
                     "id": 9,
                     "title": "",
                     "original_file_name": "scan-0042.pdf",
-                    "created": "2026-11-19",
+                    "added": "2026-11-19T12:05:00Z",
                 }
             ],
             None,
@@ -327,20 +395,35 @@ class TestPaperlessChecks:
                     "id": 11,
                     "title": "",
                     "original_file_name": "manual.pdf",
-                    "created": "2026-11-19",
+                    "added": "2026-11-19T12:05:00Z",
                 }
             ],
             11,
         ),
+        (
+            [],
+            [
+                {
+                    "id": 12,
+                    "title": "",
+                    "original_file_name": "manual.pdf",
+                    "added": "2026-11-19T18:00:00Z",
+                }
+            ],
+            None,
+        ),
     ],
     ids=[
         "naive_upload_time_vs_utc_timestamp",
+        "document_dated_years_before_its_upload",
+        "title_match_added_outside_the_upload_window",
         "unrelated_document_with_empty_title",
         "empty_title_but_same_original_file_name",
+        "same_file_name_added_outside_the_upload_window",
     ],
 )
 async def test_file_name_fallback_search(title_matches, same_day, expected):
-    # The first request searches by title; the second lists documents created
+    # The first request searches by title; the second lists documents added
     # around the upload date.
     paperless = _FakePaperlessApi(
         lambda endpoint: {
@@ -353,6 +436,72 @@ async def test_file_name_fallback_search(title_matches, same_day, expected):
     )
 
     assert found == expected
+
+
+async def test_file_name_fallback_lists_documents_by_upload_date():
+    requests = []
+
+    def respond(endpoint):
+        requests.append(endpoint)
+        return {"results": []}
+
+    await GenericEntityFileService()._search_document_by_filename_and_time(
+        "manual.pdf", datetime(2026, 11, 19, 12, 0), _FakePaperlessApi(respond)
+    )
+
+    title_search, listing = requests
+    # A day either side: Paperless compares dates in its own time zone
+    assert "added__date__gte=2026-11-18" in listing
+    assert "added__date__lte=2026-11-20" in listing
+    assert "ordering=-added" in listing
+    assert "created" not in listing
+
+
+async def test_file_name_is_escaped_and_encoded_in_the_title_search():
+    requests = []
+
+    def respond(endpoint):
+        requests.append(endpoint)
+        return {"results": []}
+
+    await GenericEntityFileService()._search_document_by_filename_and_time(
+        "Lab Results #2 & CBC.pdf",
+        datetime(2026, 11, 19, 12, 0),
+        _FakePaperlessApi(respond),
+    )
+
+    title_search = requests[0]
+    query_string = title_search.split("?", 1)[1]
+    assert "#" not in title_search
+    assert " " not in title_search
+    assert set(parse_qs(query_string)) == {"query", "page_size"}
+    assert parse_qs(query_string)["query"] == [
+        "title:*Lab* AND title:*Results* AND title:*#2* AND title:*&* AND title:*CBC*"
+    ]
+
+
+async def test_title_search_result_with_another_name_is_not_used():
+    paperless = _FakePaperlessApi(
+        lambda endpoint: {
+            "results": (
+                [
+                    {
+                        "id": 5,
+                        "title": "Lab orders",
+                        "added": "2026-11-19T12:05:00Z",
+                    }
+                ]
+                if "query=" in endpoint
+                else []
+            )
+        }
+    )
+
+    found = await GenericEntityFileService()._search_document_by_filename_and_time(
+        "manual.pdf", datetime(2026, 11, 19, 12, 0), paperless
+    )
+
+    assert found is None
 
 
 class TestPapraCheck:

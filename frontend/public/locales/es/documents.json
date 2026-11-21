@@ -104,7 +104,9 @@
     "duplicateHint": "Si necesita cargar una nueva versión, por favor modifique el documento primero.",
     "processingDocument": "El documento está siendo procesado por Paperless...",
     "syncFailed": "Sincronización fallida",
-    "syncing": "Sincronizando..."
+    "syncing": "Sincronizando...",
+    "taskPermissionDenied": "Su archivo se envió a Paperless, pero esta cuenta de Paperless no puede leer las tareas de subida. MediKeep buscará el documento por nombre de archivo. Para solucionarlo, otorgue a la cuenta el permiso Ver sobre PaperlessTask en Paperless (Configuración > Usuarios y grupos).",
+    "taskPermissionDeniedTitle": "Paperless no puede confirmar las subidas"
   },
   "renderMode": {
     "compactView": "Vista compacta",

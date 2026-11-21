@@ -104,7 +104,9 @@
     "duplicateHint": "Om du behöver ladda upp en ny version, ändra först dokumentet.",
     "processingDocument": "Dokument bearbetas av Paperless...",
     "syncFailed": "Synkronisering misslyckades",
-    "syncing": "Synkroniserar..."
+    "syncing": "Synkroniserar...",
+    "taskPermissionDenied": "Filen skickades till Paperless, men det här Paperless-kontot kan inte läsa uppladdningsuppgifter. MediKeep söker i stället efter dokumentet med filnamnet. Åtgärda detta genom att ge kontot behörigheten Visa för PaperlessTask i Paperless (Inställningar > Användare och grupper).",
+    "taskPermissionDeniedTitle": "Paperless kan inte bekräfta uppladdningar"
   },
   "renderMode": {
     "compactView": "Kompakt vy",

@@ -49,6 +49,7 @@ def service_calls():
 @pytest.fixture
 def post_test_connection(authenticated_client, service_calls):
     service = MagicMock()
+    service.can_view_tasks = AsyncMock(return_value=True)
     service.test_connection = AsyncMock(
         return_value={"status": "connected", "server_version": "2.0.0"}
     )
@@ -355,6 +356,7 @@ class TestSavedCredentialCallSites:
         prefs.paperless_auth_method = "basic_auth"
 
         service = MagicMock()
+        service.can_view_tasks = AsyncMock(return_value=True)
         service.test_connection = AsyncMock(return_value={"status": "connected"})
 
         @asynccontextmanager

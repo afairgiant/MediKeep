@@ -17,6 +17,10 @@ Before configuring the integration, you need:
 1. A running **Paperless-ngx instance** accessible from your MediKeep server (2.x and 3.x are both supported)
 2. A **Paperless-ngx API token** (recommended) or username/password credentials
 
+### Required Paperless Permissions
+
+The Paperless-ngx account MediKeep uses needs to add, view and delete documents, and to **view PaperlessTask**. MediKeep reads the upload task to learn which document an upload became. Staff and superuser accounts already have it; for other accounts, open **Settings > Users & Groups** in Paperless, edit the user, and tick **View** on **PaperlessTask** under **Permissions**. **Test Connection** warns when this permission is missing.
+
 ### Getting an API Token
 
 1. Log in to your Paperless-ngx instance
@@ -84,6 +88,15 @@ Documents linked to medical records (lab results, encounter notes, etc.) can be 
 - Affected MediKeep 0.69.0 and earlier with Paperless-ngx 3.x, which reports task
   status in a new format; update MediKeep, then use **Link Existing Document** to
   attach anything uploaded while the bug was present
+
+### Uploads Stay In "Processing"
+
+- The document reaches Paperless, but the Paperless account cannot read upload tasks,
+  so MediKeep cannot tell which document the upload became
+- Give the account the View permission on PaperlessTask (see Required Paperless
+  Permissions above), then open the record's documents or run a sync check
+- Until then, MediKeep looks the document up by file name and upload time, which
+  links most uploads; affected MediKeep 0.75.0 and earlier left them processing
 
 ### Timeout Errors
 

@@ -104,7 +104,9 @@
     "duplicateHint": "如需上传新版本，请先修改文档。",
     "processingDocument": "文档正在被 Paperless 处理...",
     "syncFailed": "同步失败",
-    "syncing": "同步中..."
+    "syncing": "同步中...",
+    "taskPermissionDenied": "文件已发送到 Paperless，但此 Paperless 帐户无法读取上传任务。MediKeep 将改为按文件名查找该文档。要解决此问题，请在 Paperless 中为该帐户授予 PaperlessTask 的查看权限（设置 > 用户和组）。",
+    "taskPermissionDeniedTitle": "Paperless 无法确认上传"
   },
   "renderMode": {
     "compactView": "紧凑视图",

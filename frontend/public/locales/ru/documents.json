@@ -104,7 +104,9 @@
     "duplicateHint": "Если нужно загрузить новую версию, сначала измените документ.",
     "processingDocument": "Документ обрабатывается в Paperless...",
     "syncFailed": "Синхронизация не удалась",
-    "syncing": "Синхронизация..."
+    "syncing": "Синхронизация...",
+    "taskPermissionDenied": "Файл отправлен в Paperless, но эта учётная запись Paperless не может читать задачи загрузки. MediKeep будет искать документ по имени файла. Чтобы исправить это, выдайте учётной записи разрешение «Просмотр» для PaperlessTask в Paperless (Настройки > Пользователи и группы).",
+    "taskPermissionDeniedTitle": "Paperless не может подтвердить загрузки"
   },
   "renderMode": {
     "compactView": "Компактный вид",

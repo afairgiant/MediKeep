@@ -1,5 +1,6 @@
 import logger from '../logger';
 
+import { PAPERLESS_TASK_PERMISSION_DENIED_CODE } from '../../constants/paperlessSettings';
 import { apiService } from './index';
 
 /**
@@ -231,6 +232,15 @@ export const pollPaperlessTaskStatus = async (
         return response;
       }
     } catch (error) {
+      // Retrying cannot help until the permission is granted; the server-side lookup takes over
+      if (error.errorCode === PAPERLESS_TASK_PERMISSION_DENIED_CODE) {
+        return {
+          status: 'PROCESSING_BACKGROUND',
+          task_uuid: taskUuid,
+          taskPermissionDenied: true,
+          message: error.message,
+        };
+      }
       pollError = error;
       logger.info(
         `❌ Attempt ${attempt + 1}/${maxAttempts} failed:`,

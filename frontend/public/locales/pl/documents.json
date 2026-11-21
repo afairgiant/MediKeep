@@ -104,7 +104,9 @@
     "duplicateHint": "Jeśli potrzebujesz przesłać nową wersję, najpierw zmodyfikuj dokument.",
     "processingDocument": "Dokument jest przetwarzany przez Paperless...",
     "syncFailed": "Synchronizacja nie powiodła się",
-    "syncing": "Synchronizacja..."
+    "syncing": "Synchronizacja...",
+    "taskPermissionDenied": "Plik został wysłany do Paperless, ale to konto Paperless nie może odczytywać zadań przesyłania. MediKeep wyszuka dokument według nazwy pliku. Aby to naprawić, nadaj kontu w Paperless uprawnienie Wyświetlanie dla PaperlessTask (Ustawienia > Użytkownicy i grupy).",
+    "taskPermissionDeniedTitle": "Paperless nie może potwierdzić przesłanych plików"
   },
   "renderMode": {
     "compactView": "Widok kompaktowy",

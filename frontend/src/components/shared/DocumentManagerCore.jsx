@@ -23,6 +23,9 @@ import {
 } from '../../constants/errorMessages';
 import { generateId } from '../../utils/helpers';
 
+// When an upload's task cannot be read, check again after Paperless has had time to store it
+const TASK_PERMISSION_FOLLOW_UP_DELAYS_MS = [30000, 120000];
+
 // Import configuration from upload progress hook
 const UPLOAD_CONFIG = {
   PROGRESS_UPDATE_INTERVAL: 800,
@@ -615,6 +618,43 @@ const useDocumentManagerCore = ({
     [entityType, entityId, loadFiles, paperlessSettings]
   );
 
+  const lookupFollowUpTimersRef = useRef([]);
+  useEffect(() => {
+    const timers = lookupFollowUpTimersRef.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+  // One schedule covers every file in a batch, so a new upload restarts it
+  const scheduleLookupFollowUps = useCallback(
+    taskResult => {
+      if (!taskResult?.taskPermissionDenied) return;
+      const timers = lookupFollowUpTimersRef.current;
+      timers.forEach(clearTimeout);
+      timers.length = 0;
+      const followUp = async () => {
+        try {
+          const updates = await apiService.updateProcessingFiles(null, {
+            background: true,
+          });
+          // Nothing left to find, so the later check would be wasted
+          if (!Object.values(updates || {}).includes('processing')) {
+            timers.forEach(clearTimeout);
+            timers.length = 0;
+          }
+          await loadFiles({ background: true });
+        } catch (err) {
+          logger.warn('processing_files_follow_up_failed', {
+            error: err.message,
+            component: 'DocumentManagerCore',
+          });
+        }
+      };
+      TASK_PERMISSION_FOLLOW_UP_DELAYS_MS.forEach(delay => {
+        timers.push(setTimeout(followUp, delay));
+      });
+    },
+    [loadFiles]
+  );
+
   // Performance optimization: Split file loading effect from paperless settings
   // This prevents unnecessary file reloads when paperless settings change
   useEffect(() => {
@@ -974,6 +1014,7 @@ const useDocumentManagerCore = ({
             file.name,
             { skipNotification: showProgressModal }
           );
+          scheduleLookupFollowUps(uploadResult.taskResult);
 
           if (showProgressModal) {
             if (result.success === true) {
@@ -1102,6 +1143,7 @@ const useDocumentManagerCore = ({
       completeUpload,
       loadFiles,
       onError,
+      scheduleLookupFollowUps,
     ]
   );
 
@@ -1286,6 +1328,7 @@ const useDocumentManagerCore = ({
                   pendingFile.file.name,
                   { skipNotification: true }
                 );
+                scheduleLookupFollowUps(uploadResult.taskResult);
 
                 if (result.success) {
                   // Mark as completed
@@ -1550,6 +1593,7 @@ const useDocumentManagerCore = ({
       debouncedUpdateProgress,
       monitoredSetPendingFiles,
       monitoredSetPendingLinks,
+      scheduleLookupFollowUps,
     ]
   );
 

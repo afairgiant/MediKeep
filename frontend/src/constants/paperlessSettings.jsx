@@ -154,3 +154,11 @@ export const hasPaperlessCredentials = (prefs, method) => {
   const check = AUTH_METHOD_CREDENTIAL_CHECKS[method];
   return check ? check(prefs) : true;
 };
+
+// Backend error code: the Paperless account may upload but not read upload tasks
+export const PAPERLESS_TASK_PERMISSION_DENIED_CODE =
+  'integration_task_permission_denied';
+
+// Connection-test warning for the same missing permission
+export const PAPERLESS_TASK_PERMISSION_MISSING_WARNING =
+  'task_permission_missing';
