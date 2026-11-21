@@ -1117,10 +1117,14 @@ const useDocumentManagerCore = ({
       const results = await Promise.allSettled(
         fileIds.map(fileId => apiService.deleteEntityFile(fileId))
       );
-      const deletedIds = fileIds.filter(
-        (_, index) => results[index].status === 'fulfilled'
+      // A 404 means the file is already gone (for example deleted in another
+      // tab), which is what the user asked for.
+      const isDeleted = result =>
+        result.status === 'fulfilled' || result.reason?.status === 404;
+      const deletedIds = fileIds.filter((_, index) =>
+        isDeleted(results[index])
       );
-      const failures = results.filter(r => r.status === 'rejected');
+      const failures = results.filter(result => !isDeleted(result));
 
       setFilesToDelete(prev => prev.filter(id => !deletedIds.includes(id)));
       await loadFiles();

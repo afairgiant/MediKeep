@@ -435,6 +435,29 @@ describe('useDocumentManagerCore — deleting files marked in the Edit form (iss
     );
   });
 
+  it('treats a marked file that is already gone (404) as deleted', async () => {
+    apiService.deleteEntityFile.mockImplementation(fileId => {
+      if (fileId !== 8) return Promise.resolve({});
+      const notFound = new Error('File not found');
+      notFound.status = 404;
+      return Promise.reject(notFound);
+    });
+    const { result } = await renderEditMode();
+
+    act(() => {
+      result.current.handleMarkFileForDeletion(7);
+      result.current.handleMarkFileForDeletion(8);
+    });
+
+    await act(async () => {
+      await result.current.uploadPendingFiles(3);
+    });
+
+    expect(apiService.deleteEntityFile).toHaveBeenCalledTimes(2);
+    expect(result.current.filesToDelete).toEqual([]);
+    expect(notifications.show).not.toHaveBeenCalled();
+  });
+
   it('clearPendingFiles also clears files marked for deletion', async () => {
     const { result } = await renderEditMode();
 
