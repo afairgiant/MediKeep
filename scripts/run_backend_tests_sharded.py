@@ -51,6 +51,7 @@ BASE_PYTEST_ARGS = ("-q", "-rfE", "-p", "no:cacheprovider")
 POLL_INTERVAL_SECONDS = 0.5
 TERMINATE_TIMEOUT_SECONDS = 10
 
+PYTEST_EXIT_INTERNAL_ERROR = 3
 PYTEST_EXIT_NO_TESTS = 5
 EXIT_INTERRUPTED = 130
 
@@ -141,12 +142,13 @@ def combined_exit_code(return_codes):
     """0 if every shard passed; otherwise the highest real pytest exit code.
 
     A shard that collected no tests (exit 5, e.g. everything deselected by
-    ``-k``) counts as passing unless every shard did so.
+    ``-k``) counts as passing unless every shard did so. A shard killed by a
+    signal (negative return code on POSIX) counts as an internal error.
     """
     meaningful = [rc for rc in return_codes if rc != PYTEST_EXIT_NO_TESTS]
     if not meaningful:
         return PYTEST_EXIT_NO_TESTS
-    return max(meaningful)
+    return max(rc if rc >= 0 else PYTEST_EXIT_INTERNAL_ERROR for rc in meaningful)
 
 
 def list_snapshot_files(root):
