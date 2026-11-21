@@ -41,7 +41,6 @@ const VisitViewModal = ({
   practitioners,
   conditions,
   navigate,
-  onFileUploadComplete,
   isBlocking,
   onError,
   patientId,
@@ -77,25 +76,6 @@ const VisitViewModal = ({
 
   const handleDocumentError = error => {
     handleError(error, 'document_manager');
-  };
-
-  const handleDocumentUploadComplete = (
-    success,
-    completedCount,
-    failedCount
-  ) => {
-    logger.info('visits_view_upload_completed', {
-      message: 'File upload completed in visits view',
-      visitId: visit?.id,
-      success,
-      completedCount,
-      failedCount,
-      component: 'VisitViewModal',
-    });
-
-    if (onFileUploadComplete) {
-      onFileUploadComplete(success, completedCount, failedCount);
-    }
   };
 
   const getPractitionerDisplay = practitionerId => {
@@ -521,9 +501,7 @@ const VisitViewModal = ({
                     entityType="visit"
                     entityId={visit.id}
                     mode="view"
-                    onUploadComplete={handleDocumentUploadComplete}
                     onError={handleDocumentError}
-                    showProgressModal={true}
                   />
                 </Stack>
               </Box>
@@ -560,7 +538,6 @@ VisitViewModal.propTypes = {
   practitioners: PropTypes.array,
   conditions: PropTypes.array,
   navigate: PropTypes.func,
-  onFileUploadComplete: PropTypes.func,
   isBlocking: PropTypes.bool,
   onError: PropTypes.func,
   patientId: PropTypes.number,

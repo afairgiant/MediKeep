@@ -630,7 +630,13 @@ const Treatments = () => {
 
       <TreatmentFormWrapper
         isOpen={showModal}
-        onClose={() => !isBlocking && setShowModal(false)}
+        onClose={() => {
+          if (isBlocking) return;
+          // Files added in the Edit form are attached straight away, so refresh
+          // the card's count even when the form closes without saving
+          if (editingTreatment) refreshFileCount(editingTreatment.id);
+          setShowModal(false);
+        }}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
         editingTreatment={editingTreatment}
         patientId={currentPatient?.id}

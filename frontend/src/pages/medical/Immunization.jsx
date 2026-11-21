@@ -414,7 +414,13 @@ const Immunization = () => {
         {/* Form Modal */}
         <ImmunizationFormWrapper
           isOpen={showAddForm}
-          onClose={() => !isBlocking && resetForm()}
+          onClose={() => {
+            if (isBlocking) return;
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingImmunization) refreshFileCount(editingImmunization.id);
+            resetForm();
+          }}
           title={
             editingImmunization
               ? t('immunizations.editImmunization', 'Edit Immunization')

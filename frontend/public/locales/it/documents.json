@@ -38,10 +38,10 @@
     "statusMissing": "Mancante",
     "statusProcessing": "In elaborazione",
     "viewUnavailable": {
-      "missing": "Questo documento non è stato trovato nel servizio di archiviazione. Potrebbe essere stato eliminato lì. Puoi rimuoverlo da questo elenco.",
+      "missing": "Questo documento non è stato trovato nel servizio di archiviazione. Potrebbe essere stato eliminato lì. Puoi rimuoverlo dal modulo di modifica del record.",
       "processing": "Questo documento è ancora in elaborazione da parte di Paperless e non può essere ancora aperto. Riprova tra un momento.",
       "title": "Documento non disponibile",
-      "unavailable": "Questo documento non è stato salvato correttamente e non può essere aperto. Puoi rimuoverlo e caricarlo di nuovo."
+      "unavailable": "Questo documento non è stato salvato correttamente e non può essere aperto. Puoi rimuoverlo dal modulo di modifica del record e caricarlo di nuovo."
     }
   },
   "fileUpload": {

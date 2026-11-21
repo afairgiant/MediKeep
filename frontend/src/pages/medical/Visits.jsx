@@ -151,11 +151,6 @@ const Visits = () => {
   } = useViewModalNavigation({
     items: visits,
     loading,
-    onClose: visit => {
-      if (visit) {
-        refreshFileCount(visit.id);
-      }
-    },
   });
 
   // Get patient conditions for linking
@@ -582,7 +577,13 @@ const Visits = () => {
 
       <VisitFormWrapper
         isOpen={showModal}
-        onClose={() => !isBlocking && setShowModal(false)}
+        onClose={() => {
+          if (isBlocking) return;
+          // Files added in the Edit form are attached straight away, so refresh
+          // the card's count even when the form closes without saving
+          if (editingVisit) refreshFileCount(editingVisit.id);
+          setShowModal(false);
+        }}
         title={
           editingVisit
             ? t('visits.editVisit', 'Edit Visit')
@@ -622,11 +623,6 @@ const Visits = () => {
         isBlocking={isBlocking}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onFileUploadComplete={success => {
-          if (success && viewingVisit) {
-            refreshFileCount(viewingVisit.id);
-          }
-        }}
         patientId={currentPatient?.id}
       />
     </>

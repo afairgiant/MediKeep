@@ -112,12 +112,6 @@ const MedicalEquipment = () => {
   } = useViewModalNavigation({
     items: equipment,
     loading,
-    // Files can be added or deleted from the view modal
-    onClose: equip => {
-      if (equip) {
-        refreshFileCount(equip.id);
-      }
-    },
   });
 
   // Form state
@@ -166,6 +160,9 @@ const MedicalEquipment = () => {
   // Closing after a save whose upload failed still shows the saved record
   const handleCloseForm = () => {
     if (isBlocking) return;
+    // Files added in the Edit form are attached straight away, so refresh
+    // the card's count even when the form closes without saving
+    if (editingEquipment) refreshFileCount(editingEquipment.id);
     setShowModal(false);
     if (needsRefreshAfterSubmissionRef.current) {
       needsRefreshAfterSubmissionRef.current = false;
@@ -510,6 +507,11 @@ const MedicalEquipment = () => {
         isLoading={isBlocking}
         statusMessage={statusMessage}
         onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={success => {
+          if (success && editingEquipment?.id) {
+            refreshFileCount(editingEquipment.id);
+          }
+        }}
       />
 
       <EquipmentViewModal

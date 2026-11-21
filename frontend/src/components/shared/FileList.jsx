@@ -357,6 +357,13 @@ const FileList = ({
             // Check if file processing failed
             const isFailed = isRemoteBackend && file.sync_status === 'failed';
 
+            // Paperless is still consuming this upload (task known, no document
+            // yet). Deleting it cannot remove a document Paperless creates later.
+            const hasUnfinishedPaperlessUpload =
+              file.storage_backend === 'paperless' &&
+              !file.paperless_document_id &&
+              !!file.paperless_task_uuid;
+
             // Check if this is a linked document (not uploaded by us)
             const isLinkedDocument =
               file.file_path &&
@@ -499,6 +506,19 @@ const FileList = ({
                           </Badge>
                         )}
                       </Group>
+
+                      {isMarkedForDeletion && hasUnfinishedPaperlessUpload && (
+                        <Group gap={6} wrap="nowrap" align="flex-start">
+                          <IconAlertTriangle
+                            size={14}
+                            color="var(--mantine-color-orange-6)"
+                            style={{ flexShrink: 0, marginTop: 2 }}
+                          />
+                          <Text size="xs">
+                            {t('fileList.deleteUnfinishedPaperlessWarning')}
+                          </Text>
+                        </Group>
+                      )}
 
                       {/* Description */}
                       {showDescriptions && file.description && (

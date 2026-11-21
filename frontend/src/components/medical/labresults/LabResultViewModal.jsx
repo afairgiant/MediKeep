@@ -41,7 +41,6 @@ const LabResultViewModal = ({
   labResult,
   onEdit,
   practitioners,
-  onFileUploadComplete,
   labResultConditions = {},
   fetchLabResultConditions,
   navigate,
@@ -651,9 +650,7 @@ const LabResultViewModal = ({
                     entityType="lab-result"
                     entityId={labResult.id}
                     mode="view"
-                    onUploadComplete={onFileUploadComplete}
                     onError={handleDocumentError}
-                    showProgressModal={true}
                   />
                 </Stack>
               </Box>

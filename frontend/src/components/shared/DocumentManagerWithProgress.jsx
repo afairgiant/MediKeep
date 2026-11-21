@@ -118,7 +118,6 @@ const DocumentManagerContent = ({
           onCheckSyncStatus={coreHandlers.handleCheckSyncStatus}
           onDownloadFile={coreHandlers.handleDownloadFile}
           onViewFile={coreHandlers.handleViewFile}
-          onImmediateDelete={coreHandlers.handleImmediateDelete}
           onMarkFileForDeletion={coreHandlers.handleMarkFileForDeletion}
           onUnmarkFileForDeletion={coreHandlers.handleUnmarkFileForDeletion}
           onAddPendingFile={coreHandlers.handleAddPendingFile}
@@ -275,6 +274,7 @@ const DocumentManagerWithProgress = React.memo(
             });
 
             await linkApiFn(entityType, entityId, linkData);
+            handlersRef.current?.noteFilesChanged?.();
 
             if (handlersRef.current?.loadFiles) {
               await handlersRef.current.loadFiles();

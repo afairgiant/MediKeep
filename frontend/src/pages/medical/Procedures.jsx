@@ -139,11 +139,6 @@ const Procedures = () => {
   } = useViewModalNavigation({
     items: procedures,
     loading,
-    onClose: procedure => {
-      if (procedure) {
-        refreshFileCount(procedure.id);
-      }
-    },
   });
 
   // Form state
@@ -548,7 +543,13 @@ const Procedures = () => {
 
       <ProcedureFormWrapper
         isOpen={showModal}
-        onClose={() => !isBlocking && setShowModal(false)}
+        onClose={() => {
+          if (isBlocking) return;
+          // Files added in the Edit form are attached straight away, so refresh
+          // the card's count even when the form closes without saving
+          if (editingProcedure) refreshFileCount(editingProcedure.id);
+          setShowModal(false);
+        }}
         title={
           editingProcedure
             ? t('procedures.editProcedure', 'Edit Procedure')
@@ -590,11 +591,6 @@ const Procedures = () => {
         navigate={navigate}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onFileUploadComplete={success => {
-          if (success && viewingProcedure) {
-            refreshFileCount(viewingProcedure.id);
-          }
-        }}
       />
     </>
   );
