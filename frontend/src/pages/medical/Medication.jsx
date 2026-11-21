@@ -292,9 +292,12 @@ const Medication = () => {
 
   const handleCloseForm = useCallback(() => {
     if (isBlocking) return;
+    // Files added in the Edit form are attached straight away, so refresh
+    // the card's count even when the form closes without saving
+    if (editingMedication) refreshFileCount(editingMedication.id);
     setShowAddForm(false);
     setEditingMedication(null);
-  }, [isBlocking]);
+  }, [isBlocking, editingMedication, refreshFileCount]);
 
   const handleEditMedication = useCallback(medication => {
     resetSubmission();

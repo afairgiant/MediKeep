@@ -38,10 +38,10 @@
     "statusMissing": "Manquant",
     "statusProcessing": "Traitement en cours",
     "viewUnavailable": {
-      "missing": "Ce document est introuvable dans son service de stockage. Il a peut-être été supprimé là-bas. Vous pouvez le retirer de cette liste.",
+      "missing": "Ce document est introuvable dans son service de stockage. Il a peut-être été supprimé là-bas. Vous pouvez le retirer depuis le formulaire de modification de l'entrée.",
       "processing": "Ce document est encore en cours de traitement par Paperless et ne peut pas encore être ouvert. Réessayez dans un instant.",
       "title": "Document indisponible",
-      "unavailable": "Ce document n'a pas été enregistré correctement et ne peut pas être ouvert. Vous pouvez le retirer puis le téléverser à nouveau."
+      "unavailable": "Ce document n'a pas été enregistré correctement et ne peut pas être ouvert. Vous pouvez le retirer depuis le formulaire de modification de l'entrée, puis le téléverser à nouveau."
     }
   },
   "fileUpload": {

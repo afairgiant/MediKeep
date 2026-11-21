@@ -234,6 +234,9 @@ const useDocumentManagerCore = ({
   const pendingFilesRef = useRef(pendingFiles);
   const pendingLinksRef = useRef(pendingLinks);
   const filesToDeleteRef = useRef(filesToDelete);
+  // Set when an immediate upload or link in the Edit form changes the files,
+  // so Save can tell the page to refresh the record's file count.
+  const filesChangedRef = useRef(false);
   const selectedStorageBackendRef = useRef(selectedStorageBackend);
   const paperlessSettingsRef = useRef(paperlessSettings);
   const paperlessAutoSyncRef = useRef(paperlessSettings?.paperless_auto_sync);
@@ -1050,6 +1053,8 @@ const useDocumentManagerCore = ({
           });
         }
 
+        filesChangedRef.current = true;
+
         // Reload files to show updated state
         await loadFiles();
       } catch (err) {
@@ -1196,8 +1201,12 @@ const useDocumentManagerCore = ({
         currentPendingFiles.length === 0 &&
         currentPendingLinks.length === 0
       ) {
-        // Lets the page refresh the record's file count after the deletes
-        if (currentFilesToDelete.length > 0 && onUploadComplete) {
+        // Lets the page refresh the record's file count after files were
+        // deleted, or uploaded or linked straight away in the Edit form
+        const filesChanged =
+          currentFilesToDelete.length > 0 || filesChangedRef.current;
+        filesChangedRef.current = false;
+        if (filesChanged && onUploadComplete) {
           onUploadComplete(true, 0, 0);
         }
         return true;
@@ -1701,94 +1710,6 @@ const useDocumentManagerCore = ({
     [entityType, entityId, onError]
   );
 
-  // Performance optimization: Memoize delete handler
-  const handleImmediateDelete = useCallback(
-    async fileId => {
-      // Find the file to check if it's a linked document
-      const file = files.find(f => f.id === fileId);
-      const isLinkedPaperless =
-        file?.file_path && file.file_path.startsWith('paperless://document/');
-      const isLinkedPapra =
-        file?.file_path && file.file_path.startsWith('papra://document/');
-      const isLinkedDocument = isLinkedPaperless || isLinkedPapra;
-
-      let confirmMessage = 'Are you sure you want to delete this file?';
-      if (isLinkedPaperless) {
-        confirmMessage =
-          'Are you sure you want to unlink this document? It will remain in Paperless.';
-      } else if (isLinkedPapra) {
-        confirmMessage =
-          'Are you sure you want to unlink this document? It will remain in Papra.';
-      }
-
-      // Paperless is still consuming this upload (task known, no document yet).
-      // Deleting here cannot remove a document that Paperless creates later.
-      const hasUnfinishedPaperlessUpload =
-        file?.storage_backend === 'paperless' &&
-        !file.paperless_document_id &&
-        !!file.paperless_task_uuid;
-      if (hasUnfinishedPaperlessUpload) {
-        confirmMessage = `${confirmMessage}\n\n${t('fileList.deleteUnfinishedPaperlessWarning')}`;
-      }
-
-      if (!window.confirm(confirmMessage)) {
-        return;
-      }
-
-      // Performance optimization: Batch state updates for delete operation
-      setLoading(true);
-      setError('');
-
-      try {
-        const response = await apiService.deleteEntityFile(fileId);
-        await loadFiles();
-
-        // Use the message from backend response if available
-        const operationType = isLinkedDocument ? 'Unlinked' : 'Deleted';
-        const notificationMessage =
-          response?.message ||
-          (isLinkedDocument
-            ? 'Document unlinked successfully'
-            : SUCCESS_MESSAGES.FILE_DELETED);
-
-        notifications.show({
-          title: `File ${operationType}`,
-          message: notificationMessage,
-          color: 'green',
-          icon: <IconCheck size={16} />,
-        });
-
-        logger.info('document_manager_delete_success', {
-          message: notificationMessage,
-          entityType,
-          entityId,
-          fileId,
-          isLinkedDocument,
-          component: 'DocumentManagerCore',
-        });
-      } catch (err) {
-        const errorMessage = getUserFriendlyError(err, 'delete');
-        setError(errorMessage);
-
-        if (onError) {
-          onError(errorMessage);
-        }
-
-        logger.error('document_manager_delete_error', {
-          message: 'Failed to delete file',
-          entityType,
-          entityId,
-          fileId,
-          error: err.message,
-          component: 'DocumentManagerCore',
-        });
-      } finally {
-        setLoading(false);
-      }
-    },
-    [entityType, entityId, loadFiles, onError, files, t]
-  );
-
   // Performance optimization: Memoize pending file description change handler
   const handlePendingFileDescriptionChange = useCallback(
     (fileId, description) => {
@@ -1860,22 +1781,27 @@ const useDocumentManagerCore = ({
       uploadPendingFiles,
       handleDownloadFile,
       handleViewFile,
-      handleImmediateDelete,
       handlePendingFileDescriptionChange,
       handleCheckSyncStatus,
       loadFiles,
       checkSyncStatus,
+      // Called by the immediate link handler in DocumentManagerWithProgress
+      noteFilesChanged: () => {
+        filesChangedRef.current = true;
+      },
 
-      // API: hasPendingFiles also covers queued links and files marked for
-      // deletion, so the 12 medical entity pages call uploadPendingFiles after
-      // Save without per-page changes. The count leaves out marked deletions
-      // because pages report it as the number of files uploaded.
+      // API: hasPendingFiles also covers queued links, files marked for
+      // deletion and files changed straight away in the Edit form, so the 12
+      // medical entity pages call uploadPendingFiles after Save without
+      // per-page changes. The count leaves out deletions and changes already
+      // made because pages report it as the number of files uploaded.
       getPendingFilesCount: () =>
         pendingFilesRef.current.length + pendingLinksRef.current.length,
       hasPendingFiles: () =>
         pendingFilesRef.current.length > 0 ||
         pendingLinksRef.current.length > 0 ||
-        filesToDeleteRef.current.length > 0,
+        filesToDeleteRef.current.length > 0 ||
+        filesChangedRef.current,
       clearPendingFiles: () => {
         monitoredSetPendingFiles([]);
         monitoredSetPendingLinks([]);
@@ -1908,7 +1834,6 @@ const useDocumentManagerCore = ({
       uploadPendingFiles,
       handleDownloadFile,
       handleViewFile,
-      handleImmediateDelete,
       handlePendingFileDescriptionChange,
       handleCheckSyncStatus,
       loadFiles,

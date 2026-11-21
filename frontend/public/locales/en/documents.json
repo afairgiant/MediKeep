@@ -38,10 +38,10 @@
     "statusMissing": "Missing",
     "statusProcessing": "Processing",
     "viewUnavailable": {
-      "missing": "This document could not be found in its storage service. It may have been deleted there. You can remove it from this list.",
+      "missing": "This document could not be found in its storage service. It may have been deleted there. You can remove it in the record's Edit form.",
       "processing": "This document is still being processed by Paperless and can't be opened yet. Try again in a moment.",
       "title": "Document not available",
-      "unavailable": "This document was not stored successfully, so it can't be opened. You can remove it and upload it again."
+      "unavailable": "This document was not stored successfully, so it can't be opened. You can remove it in the record's Edit form and upload it again."
     }
   },
   "fileUpload": {

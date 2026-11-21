@@ -381,7 +381,13 @@ const Allergies = () => {
         {/* Form Modal */}
         <AllergyFormWrapper
           isOpen={showAddForm}
-          onClose={() => !isBlocking && resetForm()}
+          onClose={() => {
+            if (isBlocking) return;
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingAllergy) refreshFileCount(editingAllergy.id);
+            resetForm();
+          }}
           title={
             editingAllergy
               ? t('allergies.editTitle', 'Edit Allergy')
