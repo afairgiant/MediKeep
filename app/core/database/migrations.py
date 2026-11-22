@@ -107,6 +107,8 @@ def migrate_lab_result_files_to_entity_files():
                     category="lab-result",  # Default category for migrated files
                     storage_backend=storage_backend,
                     paperless_document_id=paperless_document_id,
+                    # Legacy lab files never recorded who uploaded them
+                    uploaded_by_user_id=None,
                     sync_status="synced" if storage_backend == "local" else None,
                     uploaded_at=lab_file.uploaded_at,
                     created_at=get_utc_now(),
