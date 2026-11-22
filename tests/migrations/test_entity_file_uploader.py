@@ -25,7 +25,9 @@ def connection(migration):
             "CREATE TABLE activity_logs (id INTEGER PRIMARY KEY, user_id INTEGER, "
             "action VARCHAR, entity_type VARCHAR, entity_id INTEGER, timestamp DATETIME)"
         )
-        conn.exec_driver_sql("CREATE TABLE entity_files (id INTEGER PRIMARY KEY)")
+        conn.exec_driver_sql(
+            "CREATE TABLE entity_files (id INTEGER PRIMARY KEY, created_at DATETIME)"
+        )
         conn.exec_driver_sql("INSERT INTO users VALUES (1), (2)")
         conn.commit()
         # The module bound `op` at import time, so the backfill tests rebind it here
@@ -34,8 +36,10 @@ def connection(migration):
     engine.dispose()
 
 
-def _add_file(conn, file_id):
-    conn.exec_driver_sql("INSERT INTO entity_files VALUES (?)", (file_id,))
+def _add_file(conn, file_id, created_at="2026-11-01 08:00:00"):
+    conn.exec_driver_sql(
+        "INSERT INTO entity_files VALUES (?, ?)", (file_id, created_at)
+    )
 
 
 def _log_created(conn, log_id, file_id, user_id, timestamp="2026-11-01 10:00:00"):
@@ -72,13 +76,15 @@ def test_backfill_rules_and_rerun(migration, connection):
     _add_file(connection, 2)  # no entry: uploader unknown
     _add_file(connection, 3)
     _log_created(connection, 2, 3, None)  # uploader was deleted
-    _add_file(connection, 4)
-    # A reused file ID: the newest entry is the current file's
+    # A reused file ID: only entries since the current row was created count
+    _add_file(connection, 4, "2026-11-01 10:00:00")
     _log_created(connection, 3, 4, 2, "2026-11-01 09:00:00")
     _log_created(connection, 4, 4, 1, "2026-11-01 11:00:00")
+    _add_file(connection, 5, "2026-11-01 10:00:00")
+    _log_created(connection, 5, 5, 2, "2026-11-01 09:00:00")  # earlier file's only
 
     _upgrade(migration, connection)
-    expected = {1: 2, 2: None, 3: None, 4: 1}
+    expected = {1: 2, 2: None, 3: None, 4: 1, 5: None}
     assert _uploaders(connection) == expected
 
     migration.backfill_uploaders(connection)

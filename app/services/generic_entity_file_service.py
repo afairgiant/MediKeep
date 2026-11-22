@@ -1801,12 +1801,18 @@ class GenericEntityFileService:
                     f"File {f.id}: entity_type='{f.entity_type}', entity_id={f.entity_id}, document_id={f.paperless_document_id}"
                 )
 
-            paperless_files = _user_entity_files(
-                db,
-                current_user_id,
-                FILE_ENTITY_SOURCES,
-                EntityFile.storage_backend == "paperless",
-            )
+            # Another user's upload is only in their Paperless, unless they use this one
+            resolver_ids = same_paperless_user_ids(db, current_user_id)
+            paperless_files = [
+                f
+                for f in _user_entity_files(
+                    db,
+                    current_user_id,
+                    FILE_ENTITY_SOURCES,
+                    EntityFile.storage_backend == "paperless",
+                )
+                if may_resolve(f, resolver_ids)
+            ]
             logger.info(
                 f"Found {len(paperless_files)} paperless files for user {current_user_id}"
             )
@@ -1865,14 +1871,9 @@ class GenericEntityFileService:
                 f"Sync check using auth method: {paperless_service.get_auth_type()}"
             )
 
-            # Another user's upload is only in their Paperless, unless they use this one
-            resolver_ids = same_paperless_user_ids(db, current_user_id)
-
             # First pass: resolve any task UUIDs to document IDs if possible
             await self._resolve_task_uuids_to_document_ids(
-                db,
-                paperless_service,
-                [f for f in paperless_files if may_resolve(f, resolver_ids)],
+                db, paperless_service, paperless_files
             )
 
             # Check each document
@@ -1887,7 +1888,6 @@ class GenericEntityFileService:
                             if (
                                 file_record.sync_status == "missing"
                                 and file_record.paperless_task_uuid
-                                and may_resolve(file_record, resolver_ids)
                             ):
                                 logger.info(
                                     f"🔍 SYNC CHECK - File {file_record.file_name} (id: {file_record.id}) marked as missing but has task UUID - attempting fallback search"

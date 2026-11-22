@@ -21,6 +21,7 @@ entity_files = sa.table(
     "entity_files",
     sa.column("id", sa.Integer),
     sa.column("uploaded_by_user_id", sa.Integer),
+    sa.column("created_at", sa.DateTime),
 )
 activity_logs = sa.table(
     "activity_logs",
@@ -36,15 +37,16 @@ activity_logs = sa.table(
 def backfill_uploaders(connection) -> None:
     """Fill NULL uploaded_by_user_id from the file's activity-log creation entry.
 
-    Files with no such entry, or whose entry has no user, stay NULL. Running it
-    again changes nothing.
+    Only entries logged since the file row was created count. Files with no such
+    entry, or whose entry has no user, stay NULL. Running it again changes nothing.
     """
     created_log = sa.and_(
         activity_logs.c.entity_type == "entity_file",
         activity_logs.c.action == "created",
         activity_logs.c.entity_id == entity_files.c.id,
+        # An entry from before the row existed belongs to an earlier file with a reused ID
+        activity_logs.c.timestamp >= entity_files.c.created_at,
     )
-    # A reused file ID has several entries; the newest belongs to the current file
     logged_uploader = (
         sa.select(activity_logs.c.user_id)
         .where(created_log)

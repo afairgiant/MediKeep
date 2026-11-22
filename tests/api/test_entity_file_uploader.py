@@ -128,39 +128,72 @@ class TestProcessingPoll:
         assert upload.sync_status == "processing"
 
 
+async def _sync_check(db_session, user_id, paperless):
+    with (
+        patch(
+            "app.services.generic_entity_file_service.has_usable_credentials",
+            return_value=True,
+        ),
+        patch(
+            "app.services.generic_entity_file_service.credential_kwargs",
+            return_value={},
+        ),
+        patch(
+            "app.services.paperless_service.create_paperless_service",
+            return_value=paperless,
+        ),
+    ):
+        return await GenericEntityFileService().check_paperless_sync_status(
+            db_session, user_id
+        )
+
+
+def _synced_upload(db_session, patient_id, uploaded_by_user_id):
+    upload = processing_upload(db_session, patient_id, None, uploaded_by_user_id)
+    upload.sync_status = "synced"
+    upload.paperless_document_id = "7"
+    db_session.commit()
+    return upload
+
+
 @pytest.mark.asyncio
 class TestSyncCheck:
     async def test_another_instances_upload_is_not_resolved_by_the_owner(
         self, db_session, owner, shared_patient, editor
     ):
         upload = processing_upload(db_session, shared_patient.id, "t-ed", editor.id)
-        service = GenericEntityFileService()
+        paperless = _tasks_succeed()
 
-        with (
-            patch.object(
-                GenericEntityFileService,
-                "_resolve_task_uuids_to_document_ids",
-                new=AsyncMock(),
-            ) as resolve,
-            patch(
-                "app.services.generic_entity_file_service.has_usable_credentials",
-                return_value=True,
-            ),
-            patch(
-                "app.services.generic_entity_file_service.credential_kwargs",
-                return_value={},
-            ),
-            patch(
-                "app.services.paperless_service.create_paperless_service",
-                return_value=_tasks_succeed(),
-            ),
-        ):
-            await service.check_paperless_sync_status(db_session, owner.id)
+        assert await _sync_check(db_session, owner.id, paperless) == {}
 
-        assert resolve.await_args.args[2] == []
+        assert paperless.requests == []
         db_session.refresh(upload)
         assert upload.sync_status == "processing"
         assert upload.paperless_task_uuid == "t-ed"
+
+    async def test_another_instances_document_is_not_marked_missing(
+        self, db_session, owner, shared_patient, editor
+    ):
+        upload = _synced_upload(db_session, shared_patient.id, editor.id)
+        paperless = _tasks_succeed()
+        paperless.check_document_exists = AsyncMock(return_value=False)
+
+        assert await _sync_check(db_session, owner.id, paperless) == {}
+
+        paperless.check_document_exists.assert_not_awaited()
+        db_session.refresh(upload)
+        assert upload.sync_status == "synced"
+
+    async def test_document_with_no_recorded_uploader_is_still_checked(
+        self, db_session, owner, shared_patient
+    ):
+        upload = _synced_upload(db_session, shared_patient.id, None)
+        paperless = _tasks_succeed()
+        paperless.check_document_exists = AsyncMock(return_value=False)
+
+        assert await _sync_check(db_session, owner.id, paperless) == {upload.id: False}
+        db_session.refresh(upload)
+        assert upload.sync_status == "missing"
 
 
 class TestUploadDialog:

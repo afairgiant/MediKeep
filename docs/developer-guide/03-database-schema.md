@@ -1450,8 +1450,8 @@ JUNCTION TABLES (Many-to-Many)
 **Business Rules**:
 - Supports multiple files per entity
 - Paperless-ngx integration for DMS sync
-- A processing Paperless upload is resolved only by its uploader, or by a user whose saved Paperless URL is the same as the uploader's; either must still be able to edit the patient. A file with no recorded uploader can be resolved by anyone who can edit the patient
-- The migration that added `uploaded_by_user_id` filled it from the newest activity-log `created` entry for the file; files with no entry stay NULL
+- A processing Paperless upload is resolved only by its uploader, or by a user whose saved Paperless URL is the same as the uploader's; either must still be able to edit the patient. A file with no recorded uploader can be resolved by anyone who can edit the patient. The Paperless sync check also skips another instance's uploads, so it never marks them missing
+- The migration that added `uploaded_by_user_id` filled it from the newest activity-log `created` entry logged since the file row was created; files with no such entry stay NULL
 - Composite index on (entity_type, entity_id) for efficient queries
 
 ### patient_photos
