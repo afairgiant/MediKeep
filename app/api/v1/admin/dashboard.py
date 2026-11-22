@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from sqlalchemy import desc, text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -20,6 +20,7 @@ from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_error
 from app.core.utils.datetime_utils import (
     get_application_uptime_string,
+    serialize_datetime_utc,
 )
 from app.models.activity_log import ActivityLog, get_utc_now
 from app.models.models import (
@@ -86,6 +87,11 @@ class RecentActivity(BaseModel):
     description: str
     timestamp: datetime
     user_info: Optional[str] = None
+
+    @field_serializer("timestamp")
+    @classmethod
+    def serialize_timestamp_as_utc(cls, value: datetime) -> Optional[str]:
+        return serialize_datetime_utc(value)
 
 
 class SystemHealth(BaseModel):
