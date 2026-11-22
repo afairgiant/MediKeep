@@ -1775,38 +1775,11 @@ def delete_model_record(
         current_user_id = getattr(current_user, "id", None)
 
         if model_name == "user":
-            total_users = db.query(User).count()
-            if total_users <= 1:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Cannot delete the last remaining user in the system",
-                )
-
             if hasattr(record, "id") and record.id == current_user.id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Cannot delete your own user account",
                 )
-
-            if (
-                hasattr(record, "role")
-                and record.role
-                and record.role.lower() in ["admin", "administrator"]
-            ):
-                admin_users = (
-                    db.query(User)
-                    .filter(
-                        User.role.in_(
-                            ["admin", "Admin", "administrator", "Administrator"]
-                        )
-                    )
-                    .count()
-                )
-                if admin_users <= 1:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Cannot delete the last remaining admin user in the system",
-                    )
 
             if current_user_id is not None:
                 safe_log_activity(
@@ -1819,9 +1792,17 @@ def delete_model_record(
                 )
 
             record_files = PendingAttachments()
-            UserDeletionService().delete_user_account(
-                db, user_id=record_id, attachments=record_files
-            )
+            try:
+                UserDeletionService().delete_user_account(
+                    db, user_id=record_id, attachments=record_files
+                )
+            except ValueError as e:
+                # Expected refusals (lock contention, user not found, last
+                # user/admin); also discards the audit entry added above
+                db.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+                )
             db.commit()
         else:
             if current_user_id is not None:
