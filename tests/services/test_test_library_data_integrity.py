@@ -52,6 +52,21 @@ def test_no_error_level_collisions_in_shipped_library(test_library_entries, caps
     )
 
 
+def test_duplicate_display_order_is_an_error():
+    """The next duplicate display_order must fail the shipped-library check."""
+    tests = [
+        {"test_name": "Test A", "display_order": 1},
+        {"test_name": "Test B", "display_order": 1},
+    ]
+    results = validate_test_library(tests)
+    dupes = [
+        r
+        for r in results
+        if r.severity == Severity.ERROR and r.collision_type == "duplicate_display_order"
+    ]
+    assert dupes and dupes[0].conflicting_tests == ("Test A", "Test B")
+
+
 def test_lipid_ratio_entries_have_loinc_codes(test_library_entries):
     """Each lipid ratio entry names the one LOINC test it stands for (#1221)."""
     missing = [
