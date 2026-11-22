@@ -74,6 +74,16 @@ def use_paperless(db_session, user_id, url=None):
     db_session.commit()
 
 
+def use_papra(db_session, user_id, url=None, org="org-1"):
+    """Enable Papra for the user; each user gets their own instance unless ``url`` is given."""
+    prefs = user_preferences.get_or_create_by_user_id(db_session, user_id=user_id)
+    prefs.papra_enabled = True
+    prefs.papra_url = url or f"https://papra-{user_id}.invalid"
+    prefs.papra_api_token_encrypted = "enc-token"
+    prefs.papra_organization_id = org
+    db_session.commit()
+
+
 def patient_for(db_session, user_id):
     return patient_crud.create_for_user(
         db_session,

@@ -1450,7 +1450,7 @@ JUNCTION TABLES (Many-to-Many)
 **Business Rules**:
 - Supports multiple files per entity
 - Paperless-ngx integration for DMS sync
-- A processing Paperless upload is resolved only by its uploader, or by a user whose saved Paperless URL is the same as the uploader's; either must still be able to edit the patient. A file with no recorded uploader can be resolved by anyone who can edit the patient. The Paperless sync check also skips another instance's uploads, so it never marks them missing
+- A processing Paperless upload is resolved only by its uploader, or by a user whose saved Paperless URL is the same as the uploader's; either must still be able to edit the patient. A file with no recorded uploader can be resolved by anyone who can edit the patient. A file another user uploaded to a Paperless or Papra the acting user's connection cannot reach (different URL, or for Papra a different organisation) is never viewed, downloaded, exported, deleted remotely or sync-checked through that connection; deleting it removes only the MediKeep row. A saved URL counts even while the integration is off. A Paperless delete is also skipped when the acting user's instance holds a document with the file's ID under another name
 - The migration that added `uploaded_by_user_id` filled it from the newest activity-log `created` entry logged since the file row was created; files with no such entry stay NULL
 - Composite index on (entity_type, entity_id) for efficient queries
 

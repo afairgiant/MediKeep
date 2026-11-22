@@ -384,6 +384,7 @@
     "exportLeftOutNotFound": "файл не найден",
     "exportLeftOutNotConfigured": "интеграция с {{service}} не включена или настроена не полностью",
     "exportLeftOutDownloadFailed": "не удалось скачать из {{service}}",
+    "exportLeftOutStoredElsewhere": "хранится в {{service}} другого участника",
     "exportLeftOutFailed": "не удалось добавить",
     "upcoming": "Предстоящий"
   },

@@ -384,6 +384,7 @@
     "exportLeftOutNotFound": "file non trovato",
     "exportLeftOutNotConfigured": "l'integrazione con {{service}} non è attivata o non è completamente configurata",
     "exportLeftOutDownloadFailed": "impossibile scaricare da {{service}}",
+    "exportLeftOutStoredElsewhere": "archiviato nel {{service}} di un altro membro",
     "exportLeftOutFailed": "impossibile aggiungere il file",
     "upcoming": "In programma"
   },

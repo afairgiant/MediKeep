@@ -23,6 +23,9 @@
     "noFiles": "Nessun file"
   },
   "fileList": {
+    "deleteFile": "Elimina file",
+    "downloadFile": "Scarica file",
+    "unlinkDocument": "Scollega documento",
     "deleteUnfinishedPaperlessWarning": "Questo caricamento non ha ancora terminato l'elaborazione in Paperless. Se Paperless lo completa più tardi, il documento potrebbe rimanere in Paperless dopo essere stato eliminato qui.",
     "fileDetails": "DETTAGLI DEL FILE",
     "loading": "Caricamento file...",
@@ -40,6 +43,7 @@
     "viewUnavailable": {
       "missing": "Questo documento non è stato trovato nel servizio di archiviazione. Potrebbe essere stato eliminato lì. Puoi rimuoverlo dal modulo di modifica del record.",
       "processing": "Questo documento è ancora in elaborazione da parte di Paperless e non può essere ancora aperto. Riprova tra un momento.",
+      "storedElsewhere": "Questo documento è archiviato nel {{service}} di un altro membro, che la tua connessione {{service}} non può raggiungere. Quel membro può aprirlo dal proprio account.",
       "title": "Documento non disponibile",
       "unavailable": "Questo documento non è stato salvato correttamente e non può essere aperto. Puoi rimuoverlo dal modulo di modifica del record e caricarlo di nuovo."
     }

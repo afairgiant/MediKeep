@@ -384,6 +384,7 @@
     "exportLeftOutNotFound": "το αρχείο δεν βρέθηκε",
     "exportLeftOutNotConfigured": "η ενσωμάτωση {{service}} δεν είναι ενεργοποιημένη ή δεν έχει ρυθμιστεί πλήρως",
     "exportLeftOutDownloadFailed": "δεν ήταν δυνατή η λήψη από το {{service}}",
+    "exportLeftOutStoredElsewhere": "αποθηκευμένο στο {{service}} άλλου μέλους",
     "exportLeftOutFailed": "δεν ήταν δυνατή η προσθήκη",
     "upcoming": "Επερχόμενη"
   },

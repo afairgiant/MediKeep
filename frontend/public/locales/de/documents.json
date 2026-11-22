@@ -23,6 +23,9 @@
     "noFiles": "Keine Dateien"
   },
   "fileList": {
+    "deleteFile": "Datei löschen",
+    "downloadFile": "Datei herunterladen",
+    "unlinkDocument": "Verknüpfung des Dokuments aufheben",
     "deleteUnfinishedPaperlessWarning": "Dieser Upload wurde in Paperless noch nicht fertig verarbeitet. Wenn Paperless ihn später abschließt, kann das Dokument in Paperless verbleiben, auch wenn es hier gelöscht wurde.",
     "fileDetails": "DATEIDETAILS",
     "loading": "Dateien werden geladen...",
@@ -40,6 +43,7 @@
     "viewUnavailable": {
       "missing": "Dieses Dokument wurde im Speicherdienst nicht gefunden. Möglicherweise wurde es dort gelöscht. Sie können es im Bearbeitungsformular des Eintrags entfernen.",
       "processing": "Dieses Dokument wird noch von Paperless verarbeitet und kann noch nicht geöffnet werden. Bitte versuchen Sie es gleich noch einmal.",
+      "storedElsewhere": "Dieses Dokument ist im {{service}} eines anderen Mitglieds gespeichert, das Ihre {{service}}-Verbindung nicht erreicht. Das Mitglied kann es über sein eigenes Konto öffnen.",
       "title": "Dokument nicht verfügbar",
       "unavailable": "Dieses Dokument wurde nicht erfolgreich gespeichert und kann nicht geöffnet werden. Sie können es im Bearbeitungsformular des Eintrags entfernen und erneut hochladen."
     }

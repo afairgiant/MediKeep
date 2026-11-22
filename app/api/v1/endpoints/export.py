@@ -18,6 +18,7 @@ from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
+from app.core.http.integration_errors import REMOTE_SERVICE_NAMES
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
@@ -30,6 +31,10 @@ from app.services.export_attachments import (
     build_left_out_manifest,
 )
 from app.services.export_service import ExportService
+from app.services.generic_entity_file_service import (
+    RemoteStorageAccess,
+    effective_papra_organization,
+)
 from app.services.paperless_auth_methods import (
     credential_kwargs,
     has_usable_credentials,
@@ -59,9 +64,6 @@ def json_serializer(obj):
 
 
 # Remote storage backend -> name shown to the user
-REMOTE_SERVICE_NAMES = {"paperless": "Paperless-ngx", "papra": "Papra"}
-
-
 class _FileLeftOut(Exception):
     """A file cannot be added to the ZIP; ``reason`` is a LeftOutFile reason."""
 
@@ -96,8 +98,8 @@ def _remote_client_factory(
             user_id=user_id,
         )
 
-    organization_id = (
-        file_info.get("papra_organization_id") or user_prefs.papra_organization_id
+    organization_id = effective_papra_organization(
+        file_info.get("papra_organization_id"), user_prefs.papra_organization_id
     )
     if not (
         user_prefs.papra_enabled
@@ -167,19 +169,32 @@ async def _write_attachments_to_zip(
     user_id: int,
     language: str,
     date_format: str,
+    access: RemoteStorageAccess,
 ) -> Tuple[int, int]:
     """Add attachments to a ZIP, with an index of what was added and a list of what
-    could not be. Returns how many files were added and how many were left out."""
+    could not be. Returns how many files were added and how many were left out.
+
+    Files ``access`` says are stored elsewhere are left out.
+    """
     included: List[dict] = []
     left_out: List[LeftOutFile] = []
 
     for attachment in attachments:
         try:
-            if attachment["storage_backend"] == "local":
+            backend = attachment["storage_backend"]
+            if backend == "local":
                 if not attachment["file_path"]:
                     raise _FileLeftOut("not_found")
                 zip_file.write(attachment["file_path"], attachment["zip_path"])
             else:
+                if access.stored_elsewhere(
+                    backend,
+                    attachment["uploaded_by_user_id"],
+                    attachment["papra_organization_id"],
+                ):
+                    raise _FileLeftOut(
+                        "stored_elsewhere", REMOTE_SERVICE_NAMES.get(backend)
+                    )
                 zip_file.writestr(
                     attachment["zip_path"],
                     await _download_remote_file(attachment, user_prefs, user_id),
@@ -401,6 +416,7 @@ async def export_patient_data(
                     current_user_id,
                     language,
                     date_format_pref,
+                    RemoteStorageAccess.for_user(db, current_user_id),
                 )
 
             zip_filename = f"medical_records_{scope.value}_with_files_{timestamp}.zip"
@@ -771,6 +787,7 @@ async def create_bulk_export(
                     current_user_id,
                     language,
                     date_format_pref,
+                    RemoteStorageAccess.for_user(db, current_user_id),
                 )
 
         if exported_count == 0:

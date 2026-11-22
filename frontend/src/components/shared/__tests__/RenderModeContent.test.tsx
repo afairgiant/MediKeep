@@ -64,11 +64,11 @@ describe('RenderModeContent view mode is read-only (issue #1269)', () => {
     renderMode('view');
 
     expect(screen.getByText('report.pdf')).toBeInTheDocument();
-    expect(screen.getAllByTitle('Download file')).toHaveLength(2);
+    expect(screen.getAllByTitle('fileList.downloadFile')).toHaveLength(2);
     expect(screen.queryByText('manager.addDocument')).not.toBeInTheDocument();
     expect(screen.queryByText('storage.backendLabel')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Delete file')).not.toBeInTheDocument();
-    expect(screen.queryByTitle('Unlink document')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('fileList.deleteFile')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('fileList.unlinkDocument')).not.toBeInTheDocument();
     // The sync check only refreshes status, so it stays
     expect(screen.getByText('manager.syncCheck')).toBeInTheDocument();
   });
@@ -78,7 +78,7 @@ describe('RenderModeContent view mode is read-only (issue #1269)', () => {
 
     expect(screen.getByText('manager.addDocument')).toBeInTheDocument();
     expect(screen.getByText('storage.backendLabel')).toBeInTheDocument();
-    expect(screen.getByTitle('Delete file')).toBeInTheDocument();
-    expect(screen.getByTitle('Unlink document')).toBeInTheDocument();
+    expect(screen.getByTitle('fileList.deleteFile')).toBeInTheDocument();
+    expect(screen.getByTitle('fileList.unlinkDocument')).toBeInTheDocument();
   });
 });
