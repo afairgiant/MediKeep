@@ -134,6 +134,26 @@ class TestWhereAFileIsStored:
         access = RemoteStorageAccess.for_user(db_session, owner.id)
         assert not access.stored_elsewhere("paperless", editor.id)
 
+    def test_scheme_host_case_and_default_port_do_not_split_an_instance(
+        self, db_session, owner, editor
+    ):
+        use_paperless(db_session, owner.id, "HTTPS://Paperless.Home:443/docs")
+        use_paperless(db_session, editor.id, "https://paperless.home/docs/")
+        access = RemoteStorageAccess.for_user(db_session, owner.id)
+        assert not access.stored_elsewhere("paperless", editor.id)
+
+    @pytest.mark.parametrize(
+        "editor_url",
+        ["https://paperless.home/Docs", "https://paperless.home:8443/docs"],
+    )
+    def test_path_case_and_other_ports_are_other_instances(
+        self, db_session, owner, editor, editor_url
+    ):
+        use_paperless(db_session, owner.id, "https://paperless.home/docs")
+        use_paperless(db_session, editor.id, editor_url)
+        access = RemoteStorageAccess.for_user(db_session, owner.id)
+        assert access.stored_elsewhere("paperless", editor.id)
+
     def test_papra_upload_needs_the_same_url_and_organisation(
         self, db_session, owner, editor
     ):

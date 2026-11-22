@@ -4671,7 +4671,7 @@ A caller with no access to the patient — or with only `view` access attempting
 
 On a shared patient, a Paperless or Papra file is reached through the caller's own connection. A file is **stored elsewhere** for the caller when another user uploaded or linked it and the caller's connection cannot reach it:
 
-- Paperless: the uploader's saved Paperless URL differs from the caller's (compared after normalising scheme, host, port, path and trailing slash). A saved URL counts even while that user's integration is turned off.
+- Paperless: the uploader's saved Paperless URL differs from the caller's (compared with scheme and host case, a default port and a trailing slash ignored; the path is case-sensitive). A saved URL counts even while that user's integration is turned off.
 - Papra: the uploader's saved Papra URL differs from the caller's, or the file's organisation is not the caller's saved organisation.
 
 A file the caller uploaded, a local file, and a file with no recorded uploader are never stored elsewhere. For a file stored elsewhere:

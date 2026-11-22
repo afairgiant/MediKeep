@@ -27,7 +27,7 @@ from app.core.http.integration_errors import (
 )
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.utils.integration_verification import normalize_integration_url
+from app.core.utils.integration_verification import integration_instance_key
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
     EntityFile,
@@ -121,7 +121,7 @@ def _same_instance_ids(saved_urls: Dict[int, Optional[str]], user_id: int) -> se
     """``user_id`` plus every user in ``saved_urls`` whose normalised URL matches theirs."""
     # Saved URLs count with the integration off: the files stay in that instance
     urls = {
-        uid: normalize_integration_url(url) for uid, url in saved_urls.items() if url
+        uid: integration_instance_key(url) for uid, url in saved_urls.items() if url
     }
     own_url = urls.get(user_id)
     if not own_url:
