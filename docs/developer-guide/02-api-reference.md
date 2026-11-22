@@ -4667,13 +4667,30 @@ All file endpoints are **patient-scoped**. The server resolves the patient that 
 
 A caller with no access to the patient — or with only `view` access attempting a write — receives `403 Forbidden`. Access covers records the user owns and records shared with them at the required level (see [Section 10 — Sharing & Collaboration](#10-sharing--collaboration)). List/search endpoints only return files whose owning patient the caller can access.
 
+### Files In Another Member's Paperless Or Papra
+
+On a shared patient, a Paperless or Papra file is reached through the caller's own connection. A file is **stored elsewhere** for the caller when another user uploaded or linked it and the caller's connection cannot reach it:
+
+- Paperless: the uploader's saved Paperless URL differs from the caller's (compared with scheme and host case, a default port and a trailing slash ignored; the path is case-sensitive). A saved URL counts even while that user's integration is turned off.
+- Papra: the uploader's saved Papra URL differs from the caller's, or the file's organisation is not the caller's saved organisation.
+
+A file the caller uploaded, a local file, and a file with no recorded uploader are never stored elsewhere. For a file stored elsewhere:
+
+- Entity file objects returned by list, get metadata and update metadata have `stored_elsewhere: true`. The value is worked out for the caller, so two users can see different values for one file.
+- View and download answer `409` with error code `integration_stored_elsewhere`, without contacting Paperless or Papra.
+- Delete removes the file from MediKeep only and answers `Document unlinked successfully`; the document stays in the other member's instance.
+
+Before deleting any other Paperless document, MediKeep reads it through the caller's connection. When that instance holds a document with the file's ID whose original file name (or title) is not the file's name, the file is also only unlinked: the uploader is unknown or their URL changed, so the ID names another document. When the document cannot be read, the delete goes ahead as before.
+- The Papra sync check (`POST /entity-files/sync/papra`) and the Paperless sync check, including its pass over uploads that never got a document, skip it, so it is never marked missing. The Papra sync check reads each file in its own organisation, falling back to the caller's.
+- A ZIP export (`GET /export/data` with `include_files=true`) leaves it out and lists it in `FILES_NOT_INCLUDED.txt` as stored in another member's Paperless-ngx or Papra.
+
 ### List Files for Entity
 
 `GET /entity-files/{entity_type}/{entity_id}/files`
 
 - **Purpose**: List files attached to an entity
 - **Authentication**: Yes
-- **Success Response** (200): Array of entity file objects
+- **Success Response** (200): Array of entity file objects, each with `stored_elsewhere` for the caller (see above)
 
 ### Upload File to Entity
 
@@ -4703,6 +4720,7 @@ A caller with no access to the patient — or with only `view` access attempting
 
 - **Purpose**: Stream file inline (e.g., PDF preview, image display)
 - **Authentication**: Yes
+- **Errors**: `409` with `integration_stored_elsewhere` for a file stored elsewhere
 
 ### Download File
 
@@ -4710,6 +4728,7 @@ A caller with no access to the patient — or with only `view` access attempting
 
 - **Purpose**: Download file with `Content-Disposition: attachment`
 - **Authentication**: Yes
+- **Errors**: `409` with `integration_stored_elsewhere` for a file stored elsewhere
 
 ### Update File Metadata
 
@@ -4726,7 +4745,7 @@ A caller with no access to the patient — or with only `view` access attempting
 
 - **Authentication**: Yes
 - **Permission**: `edit` on the owning patient
-- **Success Response** (200): File operation result
+- **Success Response** (200): File operation result. A linked document or a file stored elsewhere is only unlinked from MediKeep
 
 ### Deleting the Parent Record
 
@@ -5615,6 +5634,7 @@ wrong and an `error_code` that identifies it:
 | `integration_file_too_large` | Upload rejected: file too large |
 | `integration_permission_denied` | Upload rejected: no permission |
 | `integration_task_permission_denied` | `GET /paperless/tasks/{task_uuid}/status`: the Paperless account may not read upload tasks (it needs the View permission on PaperlessTask) |
+| `integration_stored_elsewhere` | View or download (`409`): the file is in another member's Paperless or Papra, which the caller's connection cannot reach |
 | `integration_storage_full` | Upload rejected: the integration is out of storage |
 | `integration_processing_failed` | Upload accepted but processing failed |
 | `integration_network_error` | Upload failed on the network |

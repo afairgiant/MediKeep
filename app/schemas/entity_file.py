@@ -311,6 +311,8 @@ class EntityFileResponse(EntityFileBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     last_sync_at: Optional[datetime] = None
+    # For the requesting user: in a Paperless or Papra their connection cannot reach
+    stored_elsewhere: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

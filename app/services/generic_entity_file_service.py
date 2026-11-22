@@ -5,6 +5,8 @@ Supports lab-results, insurance, visits, procedures, and future entity types.
 
 import logging
 import uuid
+from collections import defaultdict
+from dataclasses import dataclass
 from urllib.parse import urlencode
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -15,10 +17,17 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session, object_session
 
 from app.core.config import settings
-from app.core.http.integration_errors import raise_if_integration_failure
+from app.core.http.integration_errors import (
+    IntegrationErrorCode,
+    IntegrationFailure,
+    REMOTE_SERVICE_NAMES,
+    integration_http_exception,
+    raise_if_integration_failure,
+    stored_elsewhere_message,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.utils.integration_verification import normalize_integration_url
+from app.core.utils.integration_verification import integration_instance_key
 from app.core.utils.stored_files import resolve_stored_file
 from app.models.models import (
     EntityFile,
@@ -108,24 +117,158 @@ def _as_naive_utc(value: datetime) -> datetime:
     return value
 
 
-def same_paperless_user_ids(db: Session, user_id: int) -> set:
-    """``user_id`` plus every user whose saved Paperless URL matches theirs."""
-    rows = (
-        db.query(UserPreferences.user_id, UserPreferences.paperless_url)
-        .filter(UserPreferences.paperless_enabled.is_(True))
-        .all()
-    )
-    urls = {uid: normalize_integration_url(url) for uid, url in rows}
+def _same_instance_ids(saved_urls: Dict[int, Optional[str]], user_id: int) -> set:
+    """``user_id`` plus every user in ``saved_urls`` whose normalised URL matches theirs."""
+    # Saved URLs count with the integration off: the files stay in that instance
+    urls = {
+        uid: integration_instance_key(url) for uid, url in saved_urls.items() if url
+    }
     own_url = urls.get(user_id)
     if not own_url:
         return {user_id}
     return {uid for uid, url in urls.items() if url == own_url} | {user_id}
 
 
-def may_resolve(file_record: EntityFile, resolver_ids: set) -> bool:
-    """Python form of ``resolvable_uploads`` for ``resolver_ids`` from ``same_paperless_user_ids``."""
-    uploader = file_record.uploaded_by_user_id
-    return uploader is None or uploader in resolver_ids
+def same_paperless_user_ids(db: Session, user_id: int) -> set:
+    """``user_id`` plus every user whose saved Paperless URL matches theirs."""
+    rows = db.query(UserPreferences.user_id, UserPreferences.paperless_url).filter(
+        UserPreferences.paperless_url.isnot(None)
+    )
+    return _same_instance_ids(dict(rows), user_id)
+
+
+def effective_papra_organization(
+    file_organization_id: Optional[str], user_organization_id: Optional[str]
+) -> Optional[str]:
+    """The organisation Papra requests for a file go to: its own, else the user's saved one."""
+    return file_organization_id or user_organization_id
+
+
+def may_be_stored_elsewhere(
+    storage_backend: Optional[str], uploaded_by_user_id: Optional[int], user_id: int
+) -> bool:
+    """False when a file cannot be stored elsewhere for ``user_id``, so no lookup is needed."""
+    return storage_backend in ("paperless", "papra") and uploaded_by_user_id not in (
+        None,
+        user_id,
+    )
+
+
+@dataclass(frozen=True)
+class RemoteStorageAccess:
+    """Which users' Paperless and Papra uploads one user's own connections reach.
+
+    The Paperless rule is the Python form of ``resolvable_uploads``.
+    """
+
+    user_id: int
+    paperless_user_ids: frozenset
+    papra_user_ids: frozenset
+    papra_organization_id: Optional[str]
+
+    @classmethod
+    def for_user(cls, db: Session, user_id: int) -> "RemoteStorageAccess":
+        rows = db.query(
+            UserPreferences.user_id,
+            UserPreferences.paperless_url,
+            UserPreferences.papra_url,
+            UserPreferences.papra_organization_id,
+        ).all()
+        own = next((row for row in rows if row.user_id == user_id), None)
+        return cls(
+            user_id=user_id,
+            paperless_user_ids=frozenset(
+                _same_instance_ids({r.user_id: r.paperless_url for r in rows}, user_id)
+            ),
+            papra_user_ids=frozenset(
+                _same_instance_ids({r.user_id: r.papra_url for r in rows}, user_id)
+            ),
+            papra_organization_id=own.papra_organization_id if own else None,
+        )
+
+    def stored_elsewhere(
+        self,
+        storage_backend: Optional[str],
+        uploaded_by_user_id: Optional[int],
+        papra_organization_id: Optional[str] = None,
+    ) -> bool:
+        """Whether the file sits in a Paperless or Papra this user's connection cannot reach.
+
+        A file with no recorded uploader is never elsewhere.
+        """
+        if not may_be_stored_elsewhere(
+            storage_backend, uploaded_by_user_id, self.user_id
+        ):
+            return False
+        if storage_backend == "paperless":
+            return uploaded_by_user_id not in self.paperless_user_ids
+        organization_id = effective_papra_organization(
+            papra_organization_id, self.papra_organization_id
+        )
+        return (
+            uploaded_by_user_id not in self.papra_user_ids
+            or organization_id != self.papra_organization_id
+        )
+
+    def file_stored_elsewhere(self, file_record: EntityFile) -> bool:
+        """``stored_elsewhere`` for a file row."""
+        return self.stored_elsewhere(
+            file_record.storage_backend,
+            file_record.uploaded_by_user_id,
+            file_record.papra_organization_id,
+        )
+
+    def reachable(self, files: List[EntityFile]) -> List[EntityFile]:
+        """``files`` without the ones stored elsewhere."""
+        return [f for f in files if not self.file_stored_elsewhere(f)]
+
+
+def _may_be_file_stored_elsewhere(file_record: EntityFile, user_id: int) -> bool:
+    return may_be_stored_elsewhere(
+        file_record.storage_backend, file_record.uploaded_by_user_id, user_id
+    )
+
+
+def stored_elsewhere_for(db: Session, user_id: int, file_record: EntityFile) -> bool:
+    """``RemoteStorageAccess.file_stored_elsewhere``, without a lookup when it cannot be."""
+    return _may_be_file_stored_elsewhere(
+        file_record, user_id
+    ) and RemoteStorageAccess.for_user(db, user_id).file_stored_elsewhere(file_record)
+
+
+def raise_if_stored_elsewhere(
+    db: Session, file_record: EntityFile, user_id: Optional[int]
+) -> None:
+    """Raise the 409 ``integration_stored_elsewhere`` when ``user_id`` cannot reach the file."""
+    if user_id and stored_elsewhere_for(db, user_id, file_record):
+        raise integration_http_exception(
+            IntegrationFailure(
+                IntegrationErrorCode.STORED_ELSEWHERE,
+                stored_elsewhere_message(
+                    REMOTE_SERVICE_NAMES[file_record.storage_backend]
+                ),
+            ),
+            status_code=409,
+        )
+
+
+def responses_for_viewer(
+    db: Session, viewer_id: int, files: List[EntityFile]
+) -> List[EntityFileResponse]:
+    """``files`` as ``viewer_id`` sees them, with ``stored_elsewhere`` set."""
+    access = (
+        RemoteStorageAccess.for_user(db, viewer_id)
+        if any(_may_be_file_stored_elsewhere(f, viewer_id) for f in files)
+        else None
+    )
+    return [
+        EntityFileResponse.model_validate(f).model_copy(
+            update={
+                "stored_elsewhere": bool(access and access.file_stored_elsewhere(f))
+            }
+        )
+        for f in files
+    ]
 
 
 def resolvable_uploads(db: Session, user_id: int):
@@ -487,7 +630,7 @@ class GenericEntityFileService:
             raise HTTPException(status_code=500, detail="Failed to upload file")
 
     def get_entity_files(
-        self, db: Session, entity_type: str, entity_id: int
+        self, db: Session, entity_type: str, entity_id: int, viewer_id: int
     ) -> List[EntityFileResponse]:
         """
         Get all files for a specific entity.
@@ -496,6 +639,7 @@ class GenericEntityFileService:
             db: Database session
             entity_type: Type of entity
             entity_id: ID of the entity
+            viewer_id: User the ``stored_elsewhere`` flags are worked out for
 
         Returns:
             List of EntityFileResponse objects
@@ -515,7 +659,7 @@ class GenericEntityFileService:
                 .all()
             )
 
-            return [EntityFileResponse.model_validate(file) for file in files]
+            return responses_for_viewer(db, viewer_id, files)
 
         except HTTPException:
             raise
@@ -551,9 +695,13 @@ class GenericEntityFileService:
         link_prefix: str,
         delete_fn,
         current_user_id: Optional[int],
+        check_paperless_identity: bool = False,
     ) -> bool:
         """
         Handle deletion logic for remote storage backends (Paperless, Papra).
+
+        With ``check_paperless_identity``, a file whose Paperless ID names another
+        document is only unlinked.
 
         Determines whether to unlink (linked docs), skip deletion (multiple
         references or missing docs), or actually delete from the remote backend.
@@ -579,6 +727,16 @@ class GenericEntityFileService:
             logger.info(
                 f"Document {document_id} is a linked document. "
                 f"Unlinking from MediKeep only; it stays in {backend_name}."
+            )
+            return True
+
+        # The actor's connection would delete whatever has this ID in their own instance
+        if current_user_id and stored_elsewhere_for(db, current_user_id, file_record):
+            _log_file_event(
+                logging.INFO,
+                "remote_file_unlinked_from_other_instance",
+                f"File is in another member's {backend_name}; removing it from MediKeep only",
+                file_record,
             )
             return True
 
@@ -618,6 +776,20 @@ class GenericEntityFileService:
                 f"Skipping {backend_name} deletion since document is not accessible."
             )
         else:
+            if (
+                check_paperless_identity
+                and await self._paperless_id_names_another_document(
+                    db, file_record, current_user_id
+                )
+            ):
+                _log_file_event(
+                    logging.WARNING,
+                    "remote_file_id_names_another_document",
+                    f"{backend_name} document with this ID is not this file; "
+                    f"removing it from MediKeep only",
+                    file_record,
+                )
+                return True
             logger.info(
                 f"Attempting to delete uploaded document {document_id} "
                 f"from {backend_name} (sync_status: {file_record.sync_status})"
@@ -669,6 +841,7 @@ class GenericEntityFileService:
                     link_prefix="paperless://document/",
                     delete_fn=self._delete_from_paperless,
                     current_user_id=current_user_id,
+                    check_paperless_identity=True,
                 )
             elif file_record.storage_backend == "papra":
                 is_linked_document = await self._handle_remote_backend_deletion(
@@ -748,6 +921,8 @@ class GenericEntityFileService:
                     status_code=404, detail=f"File not found: {file_id}"
                 )
 
+            raise_if_stored_elsewhere(db, file_record, current_user_id)
+
             # Route to appropriate storage backend for download
             logger.debug(
                 "Routing file download request",
@@ -811,6 +986,7 @@ class GenericEntityFileService:
             file_record = db.query(EntityFile).filter(EntityFile.id == file_id).first()
             if not file_record:
                 raise HTTPException(status_code=404, detail="File not found")
+            raise_if_stored_elsewhere(db, file_record, current_user_id)
 
             logger.debug(
                 "Retrieving file for viewing",
@@ -1381,8 +1557,8 @@ class GenericEntityFileService:
                     status_code=400, detail="Papra integration is not enabled"
                 )
 
-            org_id = (
-                file_record.papra_organization_id or user_prefs.papra_organization_id
+            org_id = effective_papra_organization(
+                file_record.papra_organization_id, user_prefs.papra_organization_id
             )
 
             papra_client = create_papra_client(
@@ -1432,8 +1608,8 @@ class GenericEntityFileService:
                 logger.warning("Papra not enabled, skipping remote deletion")
                 return True
 
-            org_id = (
-                file_record.papra_organization_id or user_prefs.papra_organization_id
+            org_id = effective_papra_organization(
+                file_record.papra_organization_id, user_prefs.papra_organization_id
             )
 
             papra_client = create_papra_client(
@@ -1505,6 +1681,43 @@ class GenericEntityFileService:
             raise HTTPException(
                 status_code=500, detail="Failed to update file metadata"
             )
+
+    async def _paperless_id_names_another_document(
+        self, db: Session, file_record: EntityFile, current_user_id: Optional[int]
+    ) -> bool:
+        """Whether the user's Paperless holds a document with this file's ID under another name.
+
+        False when that cannot be told (no settings, not found, or the request fails).
+        """
+        # Integer IDs repeat across instances, and the uploader is unknown or their URL changed
+        if not current_user_id:
+            return False
+        user_prefs = (
+            db.query(UserPreferences)
+            .filter(UserPreferences.user_id == current_user_id)
+            .first()
+        )
+        if not user_prefs or not user_prefs.paperless_enabled:
+            return False
+        try:
+            async with await self._create_paperless_client(
+                user_prefs, current_user_id
+            ) as paperless_client:
+                document = await paperless_client.get_document_info(
+                    file_record.paperless_document_id
+                )
+        except Exception as e:
+            _log_file_event(
+                logging.WARNING,
+                "paperless_document_identity_check_failed",
+                "Could not read the Paperless document before deleting it",
+                file_record,
+                error=type(e).__name__,
+            )
+            return False
+        return document is not None and not _file_name_matches(
+            document, file_record.file_name
+        )
 
     async def _delete_from_paperless(
         self,
@@ -1691,7 +1904,10 @@ class GenericEntityFileService:
             )
 
     async def _handle_orphaned_paperless_records(
-        self, db: Session, current_user_id: int
+        self,
+        db: Session,
+        current_user_id: int,
+        access: Optional[RemoteStorageAccess] = None,
     ) -> None:
         """
         Handle orphaned Paperless records - files marked as paperless storage
@@ -1714,17 +1930,21 @@ class GenericEntityFileService:
 
             # Find paperless files WITHOUT document IDs whose task is not still in
             # progress (orphaned records). A failed task still counts as orphaned.
-            orphaned_files = _user_entity_files(
-                db,
-                current_user_id,
-                FILE_ENTITY_SOURCES,
-                EntityFile.storage_backend == "paperless",
-                EntityFile.paperless_document_id.is_(None),  # NO document ID
-                EntityFile.sync_status != "duplicate",  # A final state, not an orphan
-                or_(
-                    EntityFile.paperless_task_uuid.is_(None),
-                    EntityFile.sync_status.not_in(("pending", "processing")),
-                ),
+            access = access or RemoteStorageAccess.for_user(db, current_user_id)
+            orphaned_files = access.reachable(
+                _user_entity_files(
+                    db,
+                    current_user_id,
+                    FILE_ENTITY_SOURCES,
+                    EntityFile.storage_backend == "paperless",
+                    EntityFile.paperless_document_id.is_(None),  # NO document ID
+                    EntityFile.sync_status
+                    != "duplicate",  # A final state, not an orphan
+                    or_(
+                        EntityFile.paperless_task_uuid.is_(None),
+                        EntityFile.sync_status.not_in(("pending", "processing")),
+                    ),
+                )
             )
 
             if orphaned_files:
@@ -1782,7 +2002,9 @@ class GenericEntityFileService:
         )
 
         # First, check for orphaned records (no document ID)
-        await self._handle_orphaned_paperless_records(db, current_user_id)
+        # Another user's upload is only in their Paperless, unless they use this one
+        access = RemoteStorageAccess.for_user(db, current_user_id)
+        await self._handle_orphaned_paperless_records(db, current_user_id, access)
 
         try:
             # First, let's see what entity types actually exist for paperless files
@@ -1801,18 +2023,14 @@ class GenericEntityFileService:
                     f"File {f.id}: entity_type='{f.entity_type}', entity_id={f.entity_id}, document_id={f.paperless_document_id}"
                 )
 
-            # Another user's upload is only in their Paperless, unless they use this one
-            resolver_ids = same_paperless_user_ids(db, current_user_id)
-            paperless_files = [
-                f
-                for f in _user_entity_files(
+            paperless_files = access.reachable(
+                _user_entity_files(
                     db,
                     current_user_id,
                     FILE_ENTITY_SOURCES,
                     EntityFile.storage_backend == "paperless",
                 )
-                if may_resolve(f, resolver_ids)
-            ]
+            )
             logger.info(
                 f"Found {len(paperless_files)} paperless files for user {current_user_id}"
             )
@@ -2159,12 +2377,14 @@ class GenericEntityFileService:
         try:
             from app.services.papra_client import create_papra_client
 
-            papra_files = _user_entity_files(
-                db,
-                current_user_id,
-                FILE_ENTITY_SOURCES,
-                EntityFile.storage_backend == "papra",
-                EntityFile.papra_document_id.isnot(None),
+            papra_files = RemoteStorageAccess.for_user(db, current_user_id).reachable(
+                _user_entity_files(
+                    db,
+                    current_user_id,
+                    FILE_ENTITY_SOURCES,
+                    EntityFile.storage_backend == "papra",
+                    EntityFile.papra_document_id.isnot(None),
+                )
             )
 
             if not papra_files:
@@ -2199,44 +2419,56 @@ class GenericEntityFileService:
                 f"Starting Papra sync check for {len(papra_files)} documents (user: {current_user_id})"
             )
 
-            papra_client = create_papra_client(
-                url=user_prefs.papra_url,
-                encrypted_token=user_prefs.papra_api_token_encrypted,
-                organization_id=user_prefs.papra_organization_id,
-                user_id=current_user_id,
+            # Each file is read in its own organisation, as download and delete do
+            files_by_organization: Dict[Optional[str], List[EntityFile]] = defaultdict(
+                list
             )
+            for file_record in papra_files:
+                files_by_organization[
+                    effective_papra_organization(
+                        file_record.papra_organization_id,
+                        user_prefs.papra_organization_id,
+                    )
+                ].append(file_record)
 
-            async with papra_client:
-                for file_record in papra_files:
-                    try:
-                        doc_id = file_record.papra_document_id
+            for organization_id, org_files in files_by_organization.items():
+                papra_client = create_papra_client(
+                    url=user_prefs.papra_url,
+                    encrypted_token=user_prefs.papra_api_token_encrypted,
+                    organization_id=organization_id,
+                    user_id=current_user_id,
+                )
+                async with papra_client:
+                    for file_record in org_files:
+                        try:
+                            doc_id = file_record.papra_document_id
 
-                        doc_info = await papra_client.get_document_info(doc_id)
-                        exists = doc_info is not None
+                            doc_info = await papra_client.get_document_info(doc_id)
+                            exists = doc_info is not None
 
-                        sync_status[file_record.id] = exists
+                            sync_status[file_record.id] = exists
 
-                        if not exists:
-                            old_status = file_record.sync_status
-                            file_record.sync_status = "missing"
-                            file_record.last_sync_at = get_utc_now()
-                            missing_count += 1
-                            logger.warning(
-                                f"Papra document missing: {file_record.file_name} "
-                                f"(id: {file_record.id}, doc_id: {doc_id}, {old_status} -> missing)"
+                            if not exists:
+                                old_status = file_record.sync_status
+                                file_record.sync_status = "missing"
+                                file_record.last_sync_at = get_utc_now()
+                                missing_count += 1
+                                logger.warning(
+                                    f"Papra document missing: {file_record.file_name} "
+                                    f"(id: {file_record.id}, doc_id: {doc_id}, {old_status} -> missing)"
+                                )
+                            else:
+                                if file_record.sync_status in ["missing", "error"]:
+                                    file_record.sync_status = "synced"
+                                file_record.last_sync_at = get_utc_now()
+
+                        except Exception as e:
+                            logger.error(
+                                f"Error checking Papra document {file_record.papra_document_id}: {str(e)}"
                             )
-                        else:
-                            if file_record.sync_status in ["missing", "error"]:
-                                file_record.sync_status = "synced"
+                            sync_status[file_record.id] = None
+                            file_record.sync_status = "error"
                             file_record.last_sync_at = get_utc_now()
-
-                    except Exception as e:
-                        logger.error(
-                            f"Error checking Papra document {file_record.papra_document_id}: {str(e)}"
-                        )
-                        sync_status[file_record.id] = None
-                        file_record.sync_status = "error"
-                        file_record.last_sync_at = get_utc_now()
 
             db.commit()
 

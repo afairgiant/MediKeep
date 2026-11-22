@@ -64,7 +64,11 @@ from app.schemas.entity_file import (
     FileBatchCountResponse,
     FileOperationResult,
 )
-from app.services.generic_entity_file_service import GenericEntityFileService
+from app.services.generic_entity_file_service import (
+    GenericEntityFileService,
+    responses_for_viewer,
+    stored_elsewhere_for,
+)
 from app.services.paperless_auth_methods import (
     credential_kwargs,
     has_usable_credentials,
@@ -234,7 +238,9 @@ def get_entity_files(
                 # Entity exists but user doesn't have access - return empty list
                 return []
 
-        return file_service.get_entity_files(db, entity_type, entity_id)
+        return file_service.get_entity_files(
+            db, entity_type, entity_id, viewer_id=current_user.id
+        )
 
     except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
@@ -1298,7 +1304,13 @@ def update_file_metadata(
                 },
             )
 
-        return result
+        return result.model_copy(
+            update={
+                "stored_elsewhere": stored_elsewhere_for(
+                    db, current_user_id, original_file
+                )
+            }
+        )
 
     except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
@@ -1464,7 +1476,7 @@ def get_file_details(
         if entity_patient_id:
             deps.verify_patient_access(entity_patient_id, db, current_user)
 
-        return EntityFileResponse.from_orm(file_record)
+        return responses_for_viewer(db, current_user.id, [file_record])[0]
 
     except HTTPException:
         raise

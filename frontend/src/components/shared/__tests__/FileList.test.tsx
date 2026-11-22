@@ -157,3 +157,67 @@ describe('FileList unfinished Paperless upload warning (issue #1243)', () => {
     expect(screen.queryByText(WARNING_KEY)).not.toBeInTheDocument();
   });
 });
+
+describe("FileList file stored in another member's Paperless or Papra", () => {
+  const elsewhere = { ...baseFile, stored_elsewhere: true };
+
+  function renderActions(file: Record<string, unknown>) {
+    const handlers = {
+      onView: vi.fn(),
+      onDownload: vi.fn(),
+      onDelete: vi.fn(),
+    };
+    render(
+      <MantineProvider>
+        <FileList files={[file]} {...handlers} />
+      </MantineProvider>
+    );
+    return handlers;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('explains instead of opening it', () => {
+    const { onView } = renderActions(elsewhere);
+
+    fireEvent.click(screen.getByTitle('View file in new tab'));
+
+    expect(onView).not.toHaveBeenCalled();
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'fileList.viewUnavailable.storedElsewhere',
+      })
+    );
+  });
+
+  it('explains instead of downloading it', () => {
+    const { onDownload } = renderActions(elsewhere);
+
+    fireEvent.click(screen.getByTitle('fileList.downloadFile'));
+
+    expect(onDownload).not.toHaveBeenCalled();
+    expect(notifications.show).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'fileList.viewUnavailable.storedElsewhere',
+      })
+    );
+  });
+
+  it('offers to unlink it rather than delete it', () => {
+    renderActions(elsewhere);
+
+    expect(screen.getByTitle('fileList.unlinkDocument')).toBeInTheDocument();
+    expect(screen.queryByTitle('fileList.deleteFile')).not.toBeInTheDocument();
+  });
+
+  it('still downloads and deletes a file the user can reach', () => {
+    const { onDownload } = renderActions(baseFile);
+
+    fireEvent.click(screen.getByTitle('fileList.downloadFile'));
+
+    expect(onDownload).toHaveBeenCalledWith(1, 'report.pdf');
+    expect(screen.getByTitle('fileList.deleteFile')).toBeInTheDocument();
+  });
+});

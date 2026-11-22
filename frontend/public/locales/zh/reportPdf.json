@@ -384,6 +384,7 @@
     "exportLeftOutNotFound": "未找到文件",
     "exportLeftOutNotConfigured": "{{service}} 集成未启用或配置不完整",
     "exportLeftOutDownloadFailed": "无法从 {{service}} 下载",
+    "exportLeftOutStoredElsewhere": "存储在其他成员的 {{service}} 中",
     "exportLeftOutFailed": "无法添加",
     "upcoming": "即将到来"
   },
