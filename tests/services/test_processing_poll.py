@@ -81,7 +81,7 @@ class TestScope:
     ):
         shared = patient_for(db_session, other_user.id)
         share(db_session, shared, other_user.id, test_user.id, "edit")
-        upload = processing_upload(db_session, shared.id, "editor-task")
+        upload = processing_upload(db_session, shared.id, "editor-task", test_user.id)
         paperless = RecordingPaperless(
             {
                 "/api/tasks/": task_response("editor-task", 7),

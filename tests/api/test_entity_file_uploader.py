@@ -16,6 +16,7 @@ from app.api.v1.endpoints.paperless import _update_entity_file_from_task_result
 from app.models.models import EntityFile, Medication
 from app.services.generic_entity_file_service import GenericEntityFileService
 from tests.utils.paperless_uploads import (
+    member,
     RecordingPaperless,
     patient_for,
     poll,
@@ -24,7 +25,7 @@ from tests.utils.paperless_uploads import (
     task_response,
     use_paperless,
 )
-from tests.utils.user import create_random_user, create_user_token_headers
+from tests.utils.user import create_user_token_headers
 
 
 def _medication(db_session, patient_id):
@@ -38,20 +39,14 @@ def _tasks_succeed(task_uuid="t-ed"):
     return RecordingPaperless({"/api/tasks/": task_response(task_uuid, 7)})
 
 
-def _paperless_user(db_session):
-    user = create_random_user(db_session)["user"]
-    use_paperless(db_session, user.id)
-    return user
-
-
 @pytest.fixture
 def owner(db_session):
-    return _paperless_user(db_session)
+    return member(db_session)
 
 
 @pytest.fixture
 def editor(db_session):
-    return _paperless_user(db_session)
+    return member(db_session)
 
 
 @pytest.fixture
@@ -92,12 +87,13 @@ class TestProcessingPoll:
 
         assert result == {str(upload.id): "synced"}
 
-    async def test_upload_with_no_recorded_uploader_keeps_the_edit_rule(
+    async def test_upload_with_no_recorded_uploader_is_left_to_the_owner(
         self, db_session, owner, shared_patient, editor
     ):
         upload = processing_upload(db_session, shared_patient.id, "t-old", None)
 
-        assert await poll(db_session, editor.id, _tasks_succeed("t-old")) == {
+        assert await poll(db_session, editor.id, _tasks_succeed("t-old")) == {}
+        assert await poll(db_session, owner.id, _tasks_succeed("t-old")) == {
             str(upload.id): "synced"
         }
 

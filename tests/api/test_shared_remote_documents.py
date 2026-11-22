@@ -18,12 +18,13 @@ from app.services.generic_entity_file_service import (
     RemoteStorageAccess,
 )
 from tests.utils.paperless_uploads import (
+    member,
     patient_for,
     share,
     use_paperless,
     use_papra,
 )
-from tests.utils.user import create_random_user, create_user_token_headers
+from tests.utils.user import create_user_token_headers
 
 PAPRA_URL = "https://papra.home"
 PDF = (b"%PDF-1.4 test", "scan.pdf", "application/pdf")
@@ -66,22 +67,14 @@ def _async_client(**methods):
     return client
 
 
-def _member(db_session):
-    """A user with their own Paperless and Papra."""
-    user = create_random_user(db_session)["user"]
-    use_paperless(db_session, user.id)
-    use_papra(db_session, user.id)
-    return user
-
-
 @pytest.fixture
 def owner(db_session):
-    return _member(db_session)
+    return member(db_session)
 
 
 @pytest.fixture
 def editor(db_session):
-    return _member(db_session)
+    return member(db_session)
 
 
 @pytest.fixture
@@ -346,6 +339,41 @@ class TestFileResponses:
         assert single.json()["stored_elsewhere"] is True
         assert updated.status_code == 200, updated.text
         assert updated.json()["stored_elsewhere"] is True
+
+
+class TestPaperlessSyncEndpoint:
+    def test_another_users_upload_not_found_is_returned_as_null(
+        self, client: TestClient, db_session, owner, editor, shared_patient
+    ):
+        use_paperless(db_session, owner.id, "https://paperless.home")
+        use_paperless(db_session, editor.id, "https://paperless.home")
+        patient_for(
+            db_session, editor.id
+        )  # The endpoint needs the caller's own patient
+        theirs = _remote_file(db_session, shared_patient.id, "paperless", owner.id)
+        paperless = _async_client(check_document_exists=AsyncMock(return_value=False))
+        paperless.get_auth_type = lambda: "token"
+
+        with (
+            patch(
+                "app.services.generic_entity_file_service.has_usable_credentials",
+                return_value=True,
+            ),
+            patch(
+                "app.services.generic_entity_file_service.credential_kwargs",
+                return_value={},
+            ),
+            patch(
+                "app.services.paperless_service.create_paperless_service",
+                return_value=paperless,
+            ),
+        ):
+            response = client.post(
+                "/api/v1/entity-files/sync/paperless", headers=_headers(editor)
+            )
+
+        assert response.status_code == 200, response.text
+        assert response.json() == {str(theirs.id): None}
 
 
 @pytest.mark.asyncio

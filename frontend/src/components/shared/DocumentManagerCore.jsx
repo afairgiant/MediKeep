@@ -542,11 +542,15 @@ const useDocumentManagerCore = ({
         const status = { ...paperlessStatus, ...papraStatus };
         setSyncStatus(status);
 
-        // Count missing files for logging and user notification
-        const missingCount = Object.values(status).filter(
-          exists => !exists
+        // The checks cover every editable patient; count only this record's files.
+        // null is a failed or unconfirmed check, not a missing document.
+        const shownResults = currentFiles
+          .map(f => status[f.id])
+          .filter(result => result !== undefined);
+        const missingCount = shownResults.filter(
+          result => result === false
         ).length;
-        const totalChecked = Object.keys(status).length;
+        const totalChecked = shownResults.length;
 
         logger.info('Remote sync status check completed', {
           entityType,

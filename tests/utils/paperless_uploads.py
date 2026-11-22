@@ -10,6 +10,7 @@ from app.crud.user_preferences import user_preferences
 from app.models.models import EntityFile, Medication, PatientShare, get_utc_now
 from app.schemas.patient import PatientCreate
 from app.services.generic_entity_file_service import GenericEntityFileService
+from tests.utils.user import create_random_user
 
 FILE_NAME = "blood-panel-results.pdf"
 
@@ -82,6 +83,14 @@ def use_papra(db_session, user_id, url=None, org="org-1"):
     prefs.papra_api_token_encrypted = "enc-token"
     prefs.papra_organization_id = org
     db_session.commit()
+
+
+def member(db_session, paperless_url=None, papra_url=None):
+    """A new user with Paperless and Papra enabled, on their own instances unless URLs are given."""
+    user = create_random_user(db_session)["user"]
+    use_paperless(db_session, user.id, paperless_url)
+    use_papra(db_session, user.id, papra_url)
+    return user
 
 
 def patient_for(db_session, user_id):
