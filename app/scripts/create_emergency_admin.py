@@ -64,6 +64,8 @@ except ImportError as e:
     sys.exit(1)
 
 
+MUST_CHANGE_PASSWORD_KEY = "must_change_password"  # nosec B105 # metadata field name
+
 logger = get_logger(__name__, "security")
 
 
@@ -130,7 +132,7 @@ def peek_system_state(username, promote, force):
 
 def create_emergency_admin(
     username: str = "admin",
-    password: str = "admin123",
+    password: str | None = None,
     force: bool = False,
     promote: bool = False,
 ):
@@ -140,7 +142,8 @@ def create_emergency_admin(
 
     Args:
         username: Username for the target user.
-        password: Password for a newly created user. Ignored when promoting.
+        password: Password for a newly created user. Required to create a
+            user; ignored when promoting. There is no default password.
         force: If True, allow creating an additional admin even when admin
             users already exist.
         promote: If True, require promotion of an existing user with this
@@ -242,6 +245,10 @@ def create_emergency_admin(
             print("Re-run with --force to create an additional admin user anyway.")
             return False
 
+        if not password:
+            print("A password is required to create a new admin user.")
+            return False
+
         # must_change_password=True is set atomically in the same commit as
         # the user row inside create_user -- no second commit needed.
         new_user = AuthService.create_user(
@@ -281,7 +288,7 @@ def create_emergency_admin(
                 metadata={
                     "source": "emergency_admin_script",
                     "role": "admin",
-                    "must_change_password": True,
+                    MUST_CHANGE_PASSWORD_KEY: True,
                     "admin_count_before": admin_count,
                     "force": force,
                 },
@@ -462,7 +469,7 @@ def main():
     # Execute
     success = create_emergency_admin(
         username=args.username,
-        password=password if password is not None else "",
+        password=password,
         force=args.force,
         promote=args.promote,
     )
