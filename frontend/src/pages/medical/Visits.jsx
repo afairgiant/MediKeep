@@ -73,6 +73,7 @@ const Visits = () => {
     items: visits,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -300,6 +301,7 @@ const Visits = () => {
     try {
       let success;
       let resultId;
+      let createdVisit = null;
 
       // Submit form data
       if (editingVisit) {
@@ -312,6 +314,7 @@ const Visits = () => {
         resultId = result?.id;
         // Set flag to refresh after new visit creation (but only after form submission, not uploads)
         if (success) {
+          createdVisit = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -378,6 +381,8 @@ const Visits = () => {
 
             // File upload failed
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdVisit) setEditingVisit(createdVisit);
           }
         } else {
           // No files to upload, complete immediately
@@ -405,7 +410,7 @@ const Visits = () => {
     clampPage(filteredVisits.length);
   }, [filteredVisits.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('visits.loadingVisits', 'Loading visits...')}
@@ -583,6 +588,11 @@ const Visits = () => {
           // the card's count even when the form closes without saving
           if (editingVisit) refreshFileCount(editingVisit.id);
           setShowModal(false);
+          // A new record whose upload failed is saved but not listed yet
+          if (needsRefreshAfterSubmissionRef.current) {
+            needsRefreshAfterSubmissionRef.current = false;
+            refreshData();
+          }
         }}
         title={
           editingVisit

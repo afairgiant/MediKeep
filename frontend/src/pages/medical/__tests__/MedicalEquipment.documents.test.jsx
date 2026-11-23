@@ -78,6 +78,7 @@ vi.mock(
       onSubmit,
       onInputChange,
       onDocumentManagerRef,
+      editingEquipment,
     }) => {
       useEffect(() => {
         if (isOpen) onDocumentManagerRef(documentManager.current);
@@ -89,6 +90,7 @@ vi.mock(
       };
       return (
         <form aria-label="equipment form" onSubmit={onSubmit}>
+          {editingEquipment && <p>Editing {editingEquipment.id}</p>}
           <button type="button" onClick={fill}>
             Fill
           </button>
@@ -169,6 +171,9 @@ describe('MedicalEquipment documents', () => {
     };
     const data = mockMedicalData({
       createItem: vi.fn().mockResolvedValue({ id: 42 }),
+      // loading also covers a save; only listLoading may replace the form
+      loading: true,
+      listLoading: false,
     });
 
     renderWithPatient(<MedicalEquipment />);
@@ -232,6 +237,49 @@ describe('MedicalEquipment documents', () => {
         screen.queryByRole('form', { name: 'equipment form' })
       ).not.toBeInTheDocument()
     );
+    expect(data.refreshData).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves again to the same equipment after its upload fails', async () => {
+    documentManager.current = {
+      hasPendingFiles: () => true,
+      getPendingFilesCount: () => 1,
+      uploadPendingFiles: vi
+        .fn()
+        .mockRejectedValueOnce(new Error('offline'))
+        .mockResolvedValueOnce(true),
+    };
+    const data = mockMedicalData({
+      createItem: vi
+        .fn()
+        .mockResolvedValue({ id: 42, equipment_name: 'CPAP', tags: [] }),
+      updateItem: vi.fn().mockResolvedValue({ id: 42 }),
+    });
+
+    renderWithPatient(<MedicalEquipment />);
+    fireEvent.click(screen.getByRole('button', { name: /add equipment/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Fill' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    // The form moves on to the saved equipment, keeping the queued files
+    expect(await screen.findByText('Editing 42')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('form', { name: 'equipment form' })
+      ).not.toBeInTheDocument()
+    );
+    expect(data.createItem).toHaveBeenCalledTimes(1);
+    expect(data.updateItem).toHaveBeenCalledWith(
+      42,
+      expect.objectContaining({ equipment_name: 'CPAP' })
+    );
+    expect(documentManager.current.uploadPendingFiles.mock.calls).toEqual([
+      [42],
+      [42],
+    ]);
     expect(data.refreshData).toHaveBeenCalledTimes(1);
   });
 

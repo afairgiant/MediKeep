@@ -125,6 +125,7 @@ const Medication = () => {
     items: medications,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -297,7 +298,12 @@ const Medication = () => {
     if (editingMedication) refreshFileCount(editingMedication.id);
     setShowAddForm(false);
     setEditingMedication(null);
-  }, [isBlocking, editingMedication, refreshFileCount]);
+    // A new record whose upload failed is saved but not listed yet
+    if (needsRefreshAfterSubmissionRef.current) {
+      needsRefreshAfterSubmissionRef.current = false;
+      refreshData();
+    }
+  }, [isBlocking, editingMedication, refreshFileCount, refreshData]);
 
   const handleEditMedication = useCallback(medication => {
     resetSubmission();
@@ -369,6 +375,7 @@ const Medication = () => {
       try {
         let success;
         let resultId;
+        let createdMedication = null;
 
         if (editingMedication) {
           success = await updateItem(editingMedication.id, medicationData);
@@ -378,6 +385,7 @@ const Medication = () => {
           success = !!result;
           resultId = result?.id;
           if (success) {
+            createdMedication = result;
             needsRefreshAfterSubmissionRef.current = true;
           }
         }
@@ -443,6 +451,8 @@ const Medication = () => {
                 component: 'Medication',
               });
               completeFileUpload(false, 0, pendingCount);
+              // Saved now, so Save again updates it instead of adding a copy
+              if (createdMedication) setEditingMedication(createdMedication);
             }
           } else {
             completeFileUpload(true, 0, 0);
@@ -505,7 +515,7 @@ const Medication = () => {
     clampPage(processedMedications.length);
   }, [processedMedications.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('medications.loading', 'Loading medications...')}

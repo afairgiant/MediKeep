@@ -117,7 +117,7 @@ const LabResults = () => {
   const {
     items: labResults,
     currentPatient,
-    loading: labResultsLoading,
+    listLoading: labResultsListLoading,
     error,
     successMessage,
     createItem,
@@ -409,7 +409,7 @@ const LabResults = () => {
   // Combined loading state — include component fetch when in results-table view to avoid content flash.
   // For the components table specifically, only block on initial load (empty array); subsequent refreshes must not
   // unmount the table or the expanded-row state (local useState) is destroyed.
-  const loading = labResultsLoading || practitionersLoading || (viewMode === 'components' && tableLayout && patientComponentsLoading && patientComponents.length === 0);
+  const loading = labResultsListLoading || practitionersLoading || (viewMode === 'components' && tableLayout && patientComponentsLoading && patientComponents.length === 0);
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -910,6 +910,15 @@ const LabResults = () => {
                 0,
                 documentManagerMethods.getPendingFilesCount()
               );
+              // Saved now, so Save again updates it instead of adding a copy.
+              // onSuccess makes the same switch after a full save.
+              const createdLabResult = newlyCreatedResultRef.current;
+              if (createdLabResult) {
+                newlyCreatedResultRef.current = null;
+                setEditingLabResult(createdLabResult);
+                setFormData(labResultToFormData(createdLabResult));
+                setPostCreateMode(true);
+              }
             }
           } else {
             // No files to upload, complete immediately
@@ -1009,12 +1018,18 @@ const LabResults = () => {
     // Sync the components table — tests may have been added via TestComponentsTab
     refreshPatientComponents();
     setFormData(EMPTY_FORM_DATA);
+    // A new record whose upload failed is saved but not listed yet
+    if (needsRefreshAfterSubmissionRef.current) {
+      needsRefreshAfterSubmissionRef.current = false;
+      refreshData();
+    }
   }, [
     isBlocking,
     editingLabResult,
     refreshFileCount,
     resetSubmission,
     refreshPatientComponents,
+    refreshData,
   ]);
 
   // Shared by handleAdvancedModeToggle and handleSwitchToQuickImport: whether the

@@ -499,6 +499,7 @@ describe('Medication Page Integration Tests', () => {
         ...defaultMedicalData,
         items: [],
         loading: true,
+        listLoading: true,
       });
 
       renderWithPatient(<Medication />);

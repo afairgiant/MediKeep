@@ -1017,6 +1017,7 @@ describe('Procedures Page Integration Tests', () => {
         items: [],
         currentPatient: { id: 1 },
         loading: true,
+        listLoading: true,
         error: null,
         successMessage: null,
         createItem: mockCreateItem,
