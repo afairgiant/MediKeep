@@ -84,6 +84,7 @@ const Procedures = () => {
     items: procedures,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -256,6 +257,7 @@ const Procedures = () => {
     try {
       let success;
       let resultId;
+      let createdProcedure = null;
 
       // Submit form data
       if (editingProcedure) {
@@ -268,6 +270,7 @@ const Procedures = () => {
         resultId = result?.id;
         // Set flag to refresh after new procedure creation (but only after form submission, not uploads)
         if (success) {
+          createdProcedure = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -327,6 +330,8 @@ const Procedures = () => {
 
             // File upload failed
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdProcedure) setEditingProcedure(createdProcedure);
           }
         } else {
           // No files to upload, complete immediately
@@ -360,7 +365,7 @@ const Procedures = () => {
     clampPage(filteredProcedures.length);
   }, [filteredProcedures.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('procedures.loadingProcedures', 'Loading procedures...')}
@@ -549,6 +554,11 @@ const Procedures = () => {
           // the card's count even when the form closes without saving
           if (editingProcedure) refreshFileCount(editingProcedure.id);
           setShowModal(false);
+          // A new record whose upload failed is saved but not listed yet
+          if (needsRefreshAfterSubmissionRef.current) {
+            needsRefreshAfterSubmissionRef.current = false;
+            refreshData();
+          }
         }}
         title={
           editingProcedure

@@ -64,6 +64,7 @@ const Injuries = () => {
     items: injuries,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -280,6 +281,7 @@ const Injuries = () => {
     try {
       let success;
       let resultId;
+      let createdInjury = null;
 
       if (editingInjury) {
         success = await updateItem(editingInjury.id, injuryData);
@@ -289,6 +291,7 @@ const Injuries = () => {
         success = !!result;
         resultId = result?.id;
         if (success) {
+          createdInjury = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -330,6 +333,8 @@ const Injuries = () => {
               component: 'Injuries',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdInjury) setEditingInjury(createdInjury);
           }
         } else {
           completeFileUpload(true, 0, 0);
@@ -366,7 +371,7 @@ const Injuries = () => {
     clampPage(processedInjuries.length);
   }, [processedInjuries.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('injuries.messages.loading', 'Loading injuries...')}
@@ -417,6 +422,11 @@ const Injuries = () => {
             // the card's count even when the form closes without saving
             if (editingInjury) refreshFileCount(editingInjury.id);
             resetForm();
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
           }}
           title={
             editingInjury

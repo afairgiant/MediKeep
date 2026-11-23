@@ -75,6 +75,7 @@ const Insurance = () => {
     items: insurances = [],
     currentPatient,
     loading = false,
+    listLoading,
     error,
     successMessage,
     clearError,
@@ -301,6 +302,7 @@ const Insurance = () => {
 
       let success;
       let resultId;
+      let createdInsurance = null;
 
       // Submit form data
       if (editingInsurance) {
@@ -322,6 +324,7 @@ const Insurance = () => {
         resultId = result?.id;
         // Set flag to refresh after new insurance creation (but only after form submission, not uploads)
         if (success) {
+          createdInsurance = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -371,6 +374,8 @@ const Insurance = () => {
               0,
               documentManagerMethods.getPendingFilesCount()
             );
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdInsurance) setEditingInsurance(createdInsurance);
           }
         } else {
           // No files to upload, complete immediately
@@ -509,7 +514,7 @@ const Insurance = () => {
   };
 
   // Loading state
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('insurance.loading', 'Loading insurance records...')}
@@ -702,6 +707,11 @@ const Insurance = () => {
             setEditingInsurance(null);
             setDocumentManagerMethods(null);
             setFormData(initializeFormData());
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
           }
         }}
         title={

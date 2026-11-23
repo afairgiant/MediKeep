@@ -27,6 +27,9 @@ export const useMedicalData = config => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const currentPatientRef = useRef(currentPatient);
   const { loading, error, execute, clearError, setError, cleanup } = useApi();
+  // Counts refreshes in flight. `loading` from useApi is also true while a
+  // record saves; this is not, so a page can keep its open form mounted.
+  const [refreshesInFlight, setRefreshesInFlight] = useState(0);
 
   // Refresh data function that uses execute wrapper
   const refreshData = useCallback(async () => {
@@ -44,80 +47,84 @@ export const useMedicalData = config => {
     }
 
     const config = configRef.current;
-    const result = await execute(
-      async signal => {
-        let data = [];
-        if (config.requiresPatient && currentPatientRef.current?.id) {
-          data = await config.apiMethodsConfig.getByPatient(
-            currentPatientRef.current.id,
-            signal
-          );
-        } else if (!config.requiresPatient) {
-          data = await config.apiMethodsConfig.getAll(signal);
-        }
+    setRefreshesInFlight(count => count + 1);
+    try {
+      return await execute(
+        async signal => {
+          let data = [];
+          if (config.requiresPatient && currentPatientRef.current?.id) {
+            data = await config.apiMethodsConfig.getByPatient(
+              currentPatientRef.current.id,
+              signal
+            );
+          } else if (!config.requiresPatient) {
+            data = await config.apiMethodsConfig.getAll(signal);
+          }
 
-        if (data) {
-          // Extract data array from API response if it's wrapped in a response object
-          const extractedData = data?.data || data;
-          logger.debug(
-            'medical_data_processing',
-            'Processing API response data',
-            {
+          if (data) {
+            // Extract data array from API response if it's wrapped in a response object
+            const extractedData = data?.data || data;
+            logger.debug(
+              'medical_data_processing',
+              'Processing API response data',
+              {
+                entityName: config.entityName,
+                hasRawData: !!data,
+                isArray: Array.isArray(extractedData),
+                itemCount: extractedData?.length || 0,
+                operation: 'refresh',
+              }
+            );
+            logger.debug('medical_data_refresh', 'Setting items for entity', {
               entityName: config.entityName,
               hasRawData: !!data,
               isArray: Array.isArray(extractedData),
               itemCount: extractedData?.length || 0,
-              operation: 'refresh',
-            }
-          );
-          logger.debug('medical_data_refresh', 'Setting items for entity', {
-            entityName: config.entityName,
-            hasRawData: !!data,
-            isArray: Array.isArray(extractedData),
-            itemCount: extractedData?.length || 0,
-          });
-          setItems(Array.isArray(extractedData) ? extractedData : []);
+            });
+            setItems(Array.isArray(extractedData) ? extractedData : []);
 
-          if (
-            config.loadFilesCounts &&
-            extractedData.length <= 20 &&
-            config.apiMethodsConfig.getFiles
-          ) {
-            const counts = {};
-            for (const item of extractedData) {
-              try {
-                const files = await config.apiMethodsConfig.getFiles(
-                  item.id,
-                  signal
-                );
-                counts[item.id] = files?.length || 0;
-              } catch (error) {
-                if (error.name !== 'AbortError') {
-                  logger.warn(
-                    'medical_data_warning',
-                    'Failed to load file count during refresh',
-                    {
-                      entityName: config.entityName,
-                      itemId: item.id,
-                      operation: 'refresh_file_count',
-                      error: error.message,
-                    }
+            if (
+              config.loadFilesCounts &&
+              extractedData.length <= 20 &&
+              config.apiMethodsConfig.getFiles
+            ) {
+              const counts = {};
+              for (const item of extractedData) {
+                try {
+                  const files = await config.apiMethodsConfig.getFiles(
+                    item.id,
+                    signal
                   );
+                  counts[item.id] = files?.length || 0;
+                } catch (error) {
+                  if (error.name !== 'AbortError') {
+                    logger.warn(
+                      'medical_data_warning',
+                      'Failed to load file count during refresh',
+                      {
+                        entityName: config.entityName,
+                        itemId: item.id,
+                        operation: 'refresh_file_count',
+                        error: error.message,
+                      }
+                    );
+                  }
+                  counts[item.id] = 0;
                 }
-                counts[item.id] = 0;
+                await new Promise(resolve => setTimeout(resolve, 100));
               }
-              await new Promise(resolve => setTimeout(resolve, 100));
+
+              setFilesCounts(counts);
             }
-
-            setFilesCounts(counts);
           }
-        }
 
-        return [];
-      },
-      { errorMessage: `Failed to refresh ${config.entityName} data` }
-    );
-    return result;
+          return [];
+        },
+        { errorMessage: `Failed to refresh ${config.entityName} data` }
+      );
+    } finally {
+      setRefreshesInFlight(count => count - 1);
+    }
   }, [execute, isAuthenticated, entityName]);
 
   // Keep ref in sync with global patient state and force refresh when patient changes
@@ -482,6 +489,10 @@ export const useMedicalData = config => {
 
     // State
     loading: loading || patientLoading || authLoading, // Combine API loading, patient loading, and auth loading
+    // Like `loading`, but stays false while a record is created, updated or
+    // deleted. Gate a full-page loader on this so an open form, and the files
+    // queued in it, are not unmounted by a save.
+    listLoading: refreshesInFlight > 0 || patientLoading || authLoading,
     error,
     successMessage,
 

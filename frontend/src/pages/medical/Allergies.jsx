@@ -58,6 +58,7 @@ const Allergies = () => {
     items: allergies,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -262,6 +263,7 @@ const Allergies = () => {
     try {
       let success;
       let resultId;
+      let createdAllergy = null;
 
       if (editingAllergy) {
         success = await updateItem(editingAllergy.id, allergyData);
@@ -271,6 +273,7 @@ const Allergies = () => {
         success = !!result;
         resultId = result?.id;
         if (success) {
+          createdAllergy = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -303,6 +306,8 @@ const Allergies = () => {
               component: 'Allergies',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdAllergy) setEditingAllergy(createdAllergy);
           }
         } else {
           completeFileUpload(true, 0, 0);
@@ -341,7 +346,7 @@ const Allergies = () => {
     clampPage(processedAllergies.length);
   }, [processedAllergies.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('allergies.messages.loading', 'Loading allergies...')}
@@ -387,6 +392,11 @@ const Allergies = () => {
             // the card's count even when the form closes without saving
             if (editingAllergy) refreshFileCount(editingAllergy.id);
             resetForm();
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
           }}
           title={
             editingAllergy

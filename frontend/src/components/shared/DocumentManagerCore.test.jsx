@@ -584,6 +584,84 @@ describe('useDocumentManagerCore - upload whose task Paperless will not show (#1
   });
 });
 
+describe('useDocumentManagerCore - Save again after some uploads failed (#1275)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('keeps only the failed uploads queued, so a retry does not attach the others twice', async () => {
+    let finishCardUpload;
+    apiService.uploadEntityFileWithTaskMonitoring.mockImplementation(
+      (_type, _id, file) =>
+        file.name === 'scan.pdf'
+          ? Promise.reject(new Error('offline'))
+          : new Promise(resolve => {
+              finishCardUpload = () => resolve({ taskMonitored: false });
+            })
+    );
+    const onUploadComplete = vi.fn();
+    const { result } = renderHook(() =>
+      useDocumentManagerCore(baseProps({ onUploadComplete }))
+    );
+
+    act(() => {
+      result.current.handleAddPendingFile(
+        new File(['a'], 'card.pdf', { type: 'application/pdf' }),
+        ''
+      );
+      result.current.handleAddPendingFile(
+        new File(['b'], 'scan.pdf', { type: 'application/pdf' }),
+        ''
+      );
+      result.current.handleAddPendingLink({ paperless_document_id: '262' });
+    });
+
+    let saving;
+    act(() => {
+      saving = result.current.uploadPendingFiles(42).catch(err => err);
+    });
+    // A description edited while the batch runs replaces the queued object
+    const card = result.current.pendingFiles.find(
+      f => f.file.name === 'card.pdf'
+    );
+    act(() => {
+      result.current.handlePendingFileDescriptionChange(card.id, 'Front');
+    });
+
+    let saveError;
+    await act(async () => {
+      finishCardUpload();
+      saveError = await saving;
+    });
+
+    expect(saveError).toBeInstanceOf(Error);
+    expect(onUploadComplete).toHaveBeenCalledWith(false, 2, 1);
+    expect(result.current.pendingFiles.map(f => f.file.name)).toEqual([
+      'scan.pdf',
+    ]);
+    expect(result.current.pendingLinks).toHaveLength(0);
+
+    apiService.uploadEntityFileWithTaskMonitoring.mockClear();
+    linkPaperlessDocument.mockClear();
+    apiService.uploadEntityFileWithTaskMonitoring.mockResolvedValue({
+      taskMonitored: false,
+    });
+
+    await act(async () => {
+      await result.current.uploadPendingFiles(42);
+    });
+
+    expect(apiService.uploadEntityFileWithTaskMonitoring).toHaveBeenCalledTimes(
+      1
+    );
+    expect(
+      apiService.uploadEntityFileWithTaskMonitoring.mock.calls[0][2].name
+    ).toBe('scan.pdf');
+    expect(linkPaperlessDocument).not.toHaveBeenCalled();
+    expect(result.current.pendingFiles).toHaveLength(0);
+  });
+});
+
 describe('useDocumentManagerCore — manual sync check summary', () => {
   const paperlessFile = id => ({
     id,

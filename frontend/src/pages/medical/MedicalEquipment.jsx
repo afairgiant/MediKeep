@@ -64,6 +64,7 @@ const MedicalEquipment = () => {
     items: equipment,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -231,6 +232,7 @@ const MedicalEquipment = () => {
     try {
       let success;
       let resultId;
+      let createdEquipment = null;
 
       if (editingEquipment) {
         success = await updateItem(editingEquipment.id, equipmentData);
@@ -239,6 +241,7 @@ const MedicalEquipment = () => {
         const result = await createItem(equipmentData);
         success = !!result;
         resultId = result?.id;
+        if (success) createdEquipment = result;
       }
       if (success) {
         needsRefreshAfterSubmissionRef.current = true;
@@ -272,6 +275,8 @@ const MedicalEquipment = () => {
               component: 'MedicalEquipment',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdEquipment) setEditingEquipment(createdEquipment);
           }
           refreshFileCount(resultId);
         } else {
@@ -305,7 +310,7 @@ const MedicalEquipment = () => {
     clampPage(filteredEquipment.length);
   }, [filteredEquipment.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('equipment.loading', 'Loading equipment...')}

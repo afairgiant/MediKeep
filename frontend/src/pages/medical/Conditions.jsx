@@ -71,6 +71,7 @@ const Conditions = () => {
     items: conditions,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -275,6 +276,7 @@ const Conditions = () => {
     try {
       let success;
       let resultId;
+      let createdCondition = null;
 
       if (editingCondition) {
         const result = await updateItem(editingCondition.id, conditionData);
@@ -285,6 +287,7 @@ const Conditions = () => {
         success = !!result;
         resultId = result?.id;
         if (success) {
+          createdCondition = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -337,6 +340,8 @@ const Conditions = () => {
               component: 'Conditions',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdCondition) setEditingCondition(createdCondition);
           }
         } else {
           completeFileUpload(true, 0, 0);
@@ -372,7 +377,7 @@ const Conditions = () => {
     clampPage(filteredConditions.length);
   }, [filteredConditions.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('conditions.loading', 'Loading conditions...')}
@@ -422,6 +427,11 @@ const Conditions = () => {
             // the card's count even when the form closes without saving
             if (editingCondition) refreshFileCount(editingCondition.id);
             setShowModal(false);
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
           }}
           title={
             editingCondition

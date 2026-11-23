@@ -94,6 +94,7 @@ const Treatments = () => {
     items: treatments,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -313,6 +314,9 @@ const Treatments = () => {
               component: 'Treatments',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            // (result is set only by a create)
+            if (result) setEditingTreatment(result);
           }
         } else {
           completeFileUpload(true, 0, 0);
@@ -393,7 +397,7 @@ const Treatments = () => {
     clampPage(filteredTreatments.length);
   }, [filteredTreatments.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('treatments.loadingTreatments', 'Loading treatments...')}
@@ -636,6 +640,11 @@ const Treatments = () => {
           // the card's count even when the form closes without saving
           if (editingTreatment) refreshFileCount(editingTreatment.id);
           setShowModal(false);
+          // A new record whose upload failed is saved but not listed yet
+          if (needsRefreshAfterSubmissionRef.current) {
+            needsRefreshAfterSubmissionRef.current = false;
+            refreshData();
+          }
         }}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
         editingTreatment={editingTreatment}

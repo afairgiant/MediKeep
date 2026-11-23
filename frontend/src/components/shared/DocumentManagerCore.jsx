@@ -824,7 +824,7 @@ const useDocumentManagerCore = ({
     (file, description = '') => {
       monitoredSetPendingFiles(prev => [
         ...prev,
-        { file, description, id: Date.now() },
+        { file, description, id: `file-${generateId()}` },
       ]);
     },
     [monitoredSetPendingFiles]
@@ -1625,9 +1625,41 @@ const useDocumentManagerCore = ({
 
       const totalCount =
         currentPendingFiles.length + currentPendingLinks.length;
+      let failedCount = 0;
 
       try {
-        await Promise.all([...uploadPromises, ...linkPromises]);
+        // Wait for every upload and link, not just the first failure, so the
+        // counts are right and the queue keeps exactly the ones that failed
+        const results = await Promise.allSettled([
+          ...uploadPromises,
+          ...linkPromises,
+        ]);
+        const failures = results.filter(r => r.status === 'rejected');
+
+        if (failures.length > 0) {
+          failedCount = failures.length;
+          // Saving again retries against the same record, so drop what got
+          // through or it would be attached a second time. Matched by id, not
+          // by object: editing a description replaces the queued object.
+          const succeededIds = (items, offset) =>
+            new Set(
+              items
+                .filter((_, i) => results[offset + i].status === 'fulfilled')
+                .map(item => item.id)
+            );
+          const uploadedFileIds = succeededIds(currentPendingFiles, 0);
+          const linkedIds = succeededIds(
+            currentPendingLinks,
+            currentPendingFiles.length
+          );
+          monitoredSetPendingFiles(prev =>
+            prev.filter(f => !uploadedFileIds.has(f.id))
+          );
+          monitoredSetPendingLinks(prev =>
+            prev.filter(l => !linkedIds.has(l.id))
+          );
+          throw failures[0].reason;
+        }
 
         // Complete successfully
         if (showProgressModal) {
@@ -1658,13 +1690,9 @@ const useDocumentManagerCore = ({
 
         return true;
       } catch (error) {
-        // Some files / links failed
-        const completedCount = uploadState.files.filter(
-          f => f.status === 'completed'
-        ).length;
-        const failedCount = uploadState.files.filter(
-          f => f.status === 'failed'
-        ).length;
+        // Some files / links failed. Counted from this batch's results: the
+        // uploadState in this closure is from before the batch started.
+        const completedCount = totalCount - failedCount;
 
         if (showProgressModal) {
           completeUpload(
@@ -1696,7 +1724,6 @@ const useDocumentManagerCore = ({
       startUpload,
       updateFileProgress,
       completeUpload,
-      uploadState.files,
       loadFiles,
       onUploadComplete,
       debouncedUpdateProgress,

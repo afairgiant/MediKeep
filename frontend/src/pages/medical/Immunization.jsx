@@ -68,6 +68,7 @@ const Immunization = () => {
     items: immunizations,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -295,6 +296,7 @@ const Immunization = () => {
     try {
       let success;
       let resultId;
+      let createdImmunization = null;
 
       if (editingImmunization) {
         success = await updateItem(editingImmunization.id, immunizationData);
@@ -304,6 +306,7 @@ const Immunization = () => {
         success = !!result;
         resultId = result?.id;
         if (success) {
+          createdImmunization = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -336,6 +339,10 @@ const Immunization = () => {
               component: 'Immunization',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdImmunization) {
+              setEditingImmunization(createdImmunization);
+            }
           }
         } else {
           completeFileUpload(true, 0, 0);
@@ -385,7 +392,7 @@ const Immunization = () => {
     formatDate
   );
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t(
@@ -420,6 +427,11 @@ const Immunization = () => {
             // the card's count even when the form closes without saving
             if (editingImmunization) refreshFileCount(editingImmunization.id);
             resetForm();
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
           }}
           title={
             editingImmunization
