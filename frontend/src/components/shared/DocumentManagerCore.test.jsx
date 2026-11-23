@@ -49,6 +49,15 @@ import {
 import { linkPapraDocument } from '../../services/api/papraApi.jsx';
 import { apiService } from '../../services/api';
 
+const paperlessEnabledSettings = (overrides = {}) => ({
+  paperless_enabled: true,
+  paperless_url: 'https://paperless.example.com',
+  paperless_has_credentials: true,
+  paperless_auto_sync: false,
+  default_storage_backend: 'paperless',
+  ...overrides,
+});
+
 const baseProps = (overrides = {}) => ({
   entityType: 'insurance',
   entityId: null,
@@ -454,13 +463,7 @@ describe('useDocumentManagerCore - upload whose task Paperless will not show (#1
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    getPaperlessSettings.mockResolvedValue({
-      paperless_enabled: true,
-      paperless_url: 'https://paperless.example.com',
-      paperless_has_credentials: true,
-      paperless_auto_sync: false,
-      default_storage_backend: 'paperless',
-    });
+    getPaperlessSettings.mockResolvedValue(paperlessEnabledSettings());
     apiService.getEntityFiles.mockResolvedValue([
       { id: 1, storage_backend: 'paperless', sync_status: 'processing' },
     ]);
@@ -578,5 +581,91 @@ describe('useDocumentManagerCore - upload whose task Paperless will not show (#1
     });
 
     expect(apiService.updateProcessingFiles).not.toHaveBeenCalled();
+  });
+});
+
+describe('useDocumentManagerCore — manual sync check summary', () => {
+  const paperlessFile = id => ({
+    id,
+    entity_type: 'procedure',
+    entity_id: 3,
+    file_name: `doc-${id}.pdf`,
+    storage_backend: 'paperless',
+    sync_status: 'synced',
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getPaperlessSettings.mockResolvedValue(paperlessEnabledSettings());
+    apiService.getEntityFiles.mockResolvedValue([
+      paperlessFile(7),
+      paperlessFile(8),
+    ]);
+    vi.spyOn(notifications, 'show');
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("counts only this record's files, and not failed checks as missing", async () => {
+    // 8 failed to check; 99 is a file on another patient the user can edit
+    apiService.checkPaperlessSyncStatus.mockResolvedValue({
+      7: false,
+      8: null,
+      99: false,
+    });
+    const { result } = renderHook(() =>
+      useDocumentManagerCore(
+        baseProps({ entityType: 'procedure', entityId: 3, mode: 'edit' })
+      )
+    );
+    await waitFor(() => expect(result.current.files).toHaveLength(2));
+    await waitFor(() =>
+      expect(result.current.paperlessSettings?.paperless_enabled).toBe(true)
+    );
+
+    await act(async () => {
+      result.current.handleCheckSyncStatus();
+    });
+
+    await waitFor(() =>
+      expect(notifications.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining(
+            'Found 1 missing document(s) out of 2 checked'
+          ),
+        })
+      )
+    );
+  });
+
+  it('does not report unconfirmed checks as all synced', async () => {
+    apiService.checkPaperlessSyncStatus.mockResolvedValue({ 7: true, 8: null });
+    const { result } = renderHook(() =>
+      useDocumentManagerCore(
+        baseProps({ entityType: 'procedure', entityId: 3, mode: 'edit' })
+      )
+    );
+    await waitFor(() => expect(result.current.files).toHaveLength(2));
+    await waitFor(() =>
+      expect(result.current.paperlessSettings?.paperless_enabled).toBe(true)
+    );
+
+    await act(async () => {
+      result.current.handleCheckSyncStatus();
+    });
+
+    await waitFor(() =>
+      expect(notifications.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Sync Check Incomplete',
+          message: expect.stringContaining('1 of 2 remote document(s)'),
+        })
+      )
+    );
+    expect(notifications.show).not.toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Sync Check Complete' })
+    );
   });
 });

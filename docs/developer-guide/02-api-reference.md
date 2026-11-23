@@ -4679,10 +4679,16 @@ A file the caller uploaded, a local file, and a file with no recorded uploader a
 - Entity file objects returned by list, get metadata and update metadata have `stored_elsewhere: true`. The value is worked out for the caller, so two users can see different values for one file.
 - View and download answer `409` with error code `integration_stored_elsewhere`, without contacting Paperless or Papra.
 - Delete removes the file from MediKeep only and answers `Document unlinked successfully`; the document stays in the other member's instance.
-
-Before deleting any other Paperless document, MediKeep reads it through the caller's connection. When that instance holds a document with the file's ID whose original file name (or title) is not the file's name, the file is also only unlinked: the uploader is unknown or their URL changed, so the ID names another document. When the document cannot be read, the delete goes ahead as before.
 - The Papra sync check (`POST /entity-files/sync/papra`) and the Paperless sync check, including its pass over uploads that never got a document, skip it, so it is never marked missing. The Papra sync check reads each file in its own organisation, falling back to the caller's.
 - A ZIP export (`GET /export/data` with `include_files=true`) leaves it out and lists it in `FILES_NOT_INCLUDED.txt` as stored in another member's Paperless-ngx or Papra.
+
+Before deleting any other Paperless document, MediKeep reads it through the caller's connection. When that instance holds a document with the file's ID whose original file name (or title) is not the file's name, the file is also only unlinked: the uploader is unknown or their URL changed, so the ID names another document. When the document cannot be read, the delete goes ahead as before.
+
+### Sync Checks
+
+`POST /entity-files/sync/paperless` and `POST /entity-files/sync/papra` check, through the caller's own connection, the files on every patient the caller can **edit** (owned, or shared with `edit` or `full`), on every record type that holds files. View-only shares are not checked, because a check changes the file's status for everyone who sees it. Files stored elsewhere (above) are skipped, and so are files with no recorded uploader on a patient the caller does not own: those were most likely uploaded by the owner into their own instance. Each returns an object mapping each checked file ID to `true` (found, or for Paperless still processing or a `duplicate`), `false` (marked `missing`) or `null`. `null` means the check failed and the file is marked `error`, never `missing`; or, for Paperless, that another user's upload was not found and its status is left as it was, because Paperless also answers `404` for a document the caller's account may not view. A Paperless file is only marked `missing` when the caller uploaded it, or it has no recorded uploader and is on the caller's own patient.
+
+`POST /entity-files/processing/update` uses the same patient rule: an upload with no recorded uploader is only resolved on a patient the caller owns.
 
 ### List Files for Entity
 
@@ -4783,7 +4789,7 @@ The cleanup runs only after the delete has been committed, so if the delete fail
 
 - **Purpose**: Finish Paperless-ngx uploads that are still `processing` by reading their task from Paperless
 - **Authentication**: Yes
-- **Scope**: Only files the caller uploaded, files uploaded by users whose saved Paperless URL is the same as the caller's, and files with no recorded uploader, on patients the caller can edit (own patients, and patients shared with `edit` or `full`), checked through the caller's own Paperless connection. An upload in a different Paperless instance is left for its uploader
+- **Scope**: Only files the caller uploaded, files uploaded by users whose saved Paperless URL is the same as the caller's, on patients the caller can edit (own patients, and patients shared with `edit` or `full`), and files with no recorded uploader on the caller's own patients, checked through the caller's own Paperless connection. An upload in a different Paperless instance is left for its uploader
 - **Behaviour**: Only the task whose `task_id` matches the file's task is used. If the task status request fails (Paperless can't be reached or answers with an error), the file stays `processing` with its task kept and is checked again on the next call. If Paperless refuses the task read with `403` (the account lacks the View permission on PaperlessTask), the document is looked up by file name and upload time instead: when found, the file is `synced`, or `duplicate` if another file already holds that document; otherwise it stays `processing` with its task kept. If no matching task is returned, the file also stays `processing` and is left out of the response. If the task succeeded but gave no usable document ID, the document is looked up by file name and upload time; when that finds nothing, including when the lookup itself fails, the file is marked `duplicate` and its task is cleared. Returns an empty object when Paperless is not enabled for the caller
 - **Success Response** (200): Object mapping each checked file ID to its new status (`synced`, `processing`, `duplicate` or `failed`)
 
