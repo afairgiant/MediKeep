@@ -42,6 +42,7 @@ psycopg2-binary==2.9.13
 pycparser==3.0
 pydantic==2.13.5
 pydantic_core==2.46.5
+pydicom==3.0.2
 PyJWT==2.15.1
 pyotp==2.10.0
 pytest==9.1.1

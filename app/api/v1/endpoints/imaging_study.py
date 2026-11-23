@@ -1,23 +1,35 @@
 """API endpoints for Imaging Studies."""
 
+import shutil
 import threading
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
-from fastapi import APIRouter, Depends, Query, Request
+import aiofiles
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.api.activity_logging import log_update
 from app.api.v1.endpoints.utils import (
     handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.core.http.error_handling import BusinessLogicException, handle_database_errors
+from app.core.config import settings
+from app.core.http.error_handling import (
+    BusinessLogicException,
+    ConflictException,
+    handle_database_errors,
+)
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_data_access
+from app.core.logging.helpers import log_data_access, log_endpoint_access
+from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.core.utils.stored_files import resolve_stored_file
 from app.crud.encounter import encounter
 from app.crud.imaging_study import imaging_study
@@ -26,17 +38,33 @@ from app.models.activity_log import EntityType
 from app.models.imaging import ImagingStudy
 from app.models.models import User
 from app.schemas.imaging_study import (
+    ImagingImportJobResponse,
+    ImagingImportSummary,
     ImagingSeriesResponse,
+    ImagingStudyMove,
     ImagingStudyResponse,
     ImagingStudyUpdate,
 )
 from app.services.attachment_cleanup import cleanup_attachments, find_record_attachments
+from app.services.imaging_import_jobs import ImportJob, import_jobs
+from app.services.imaging_import_service import (
+    IMAGING_WRITE_LOCK,
+    ImagingImportError,
+    StudyConflictError,
+    move_study,
+    validate_upload,
+)
+from app.services.imaging_storage import create_import_staging_dir
 
 router = APIRouter()
 
 logger = get_logger(__name__, "app")
 
 DICOM_MEDIA_TYPE = "application/dicom"
+IMPORT_FILE_EXTENSIONS = {".zip", ".dcm", ".dicom"}
+# Network chunks are small; batching them keeps thread hops per upload low
+_UPLOAD_WRITE_SIZE = 4 * 1024 * 1024
+_import_limiter = SlidingWindowRateLimiter(max_requests=10, window_seconds=3600)
 
 # The viewer fetches every image of a study, so image reads are logged once per window
 FILE_ACCESS_LOG_WINDOW_SECONDS = 15 * 60
@@ -105,6 +133,173 @@ def _verify_links_belong_to_patient(
                 message=f"Cannot link a {label} that doesn't belong to the same patient",
                 request=request,
             )
+
+
+def _job_response(job: ImportJob) -> ImagingImportJobResponse:
+    return ImagingImportJobResponse(
+        job_id=job.id,
+        status=job.status,
+        patient_id=job.patient_id,
+        total_files=job.total_files,
+        processed_files=job.processed_files,
+        summary=(
+            ImagingImportSummary.model_validate(job.summary) if job.summary else None
+        ),
+        error=job.error,
+    )
+
+
+@contextmanager
+def _imaging_write_lock_or_409(request: Request) -> Iterator[None]:
+    """Hold IMAGING_WRITE_LOCK for the block; 409 if an import holds it."""
+    if not IMAGING_WRITE_LOCK.acquire(blocking=False):
+        raise ConflictException(
+            message="An imaging import is running. Try again when it finishes.",
+            request=request,
+        )
+    try:
+        yield
+    finally:
+        IMAGING_WRITE_LOCK.release()
+
+
+def _upload_too_large() -> HTTPException:
+    limit_mb = settings.IMAGING_MAX_UPLOAD_SIZE // (1024 * 1024)
+    return HTTPException(
+        status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+        detail=f"The upload exceeds the {limit_mb} MB imaging upload limit",
+    )
+
+
+async def _receive_upload(request: Request, target: Path, max_bytes: int) -> int:
+    """Stream the request body to target; raises 413 as soon as it passes max_bytes."""
+    received = 0
+    buffer = bytearray()
+    async with aiofiles.open(target, "wb") as out:
+        async for chunk in request.stream():
+            received += len(chunk)
+            if received > max_bytes:
+                raise _upload_too_large()
+            buffer += chunk
+            if len(buffer) >= _UPLOAD_WRITE_SIZE:
+                await out.write(bytes(buffer))
+                buffer.clear()
+        if buffer:
+            await out.write(bytes(buffer))
+    return received
+
+
+@router.post(
+    "/import",
+    response_model=ImagingImportJobResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def import_imaging_files(
+    *,
+    request: Request,
+    filename: str = Query(..., min_length=1, max_length=255),
+    patient_id: Optional[int] = Query(None, gt=0),
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Start importing a .dcm file or a ZIP sent as the raw request body.
+
+    Returns the queued job; poll GET /import/{job_id} for progress and the summary.
+    """
+    if not _import_limiter.is_allowed(current_user.id):
+        raise _import_limiter.too_many_requests(
+            current_user.id, "Too many imaging imports.", "imaging_import_rate_limited"
+        )
+    # Only queued imports count toward the limit, so a rejected upload can be retried
+    try:
+        return await _queue_import(request, filename, patient_id, db, current_user)
+    except BaseException:
+        _import_limiter.release(current_user.id)
+        raise
+
+
+async def _queue_import(
+    request: Request,
+    filename: str,
+    patient_id: Optional[int],
+    db: Session,
+    current_user: User,
+) -> ImagingImportJobResponse:
+    if Path(filename).suffix.lower() not in IMPORT_FILE_EXTENSIONS:
+        raise BusinessLogicException(
+            message="Upload a .dcm file or a .zip archive", request=request
+        )
+    max_bytes = settings.IMAGING_MAX_UPLOAD_SIZE
+    try:
+        declared = int(request.headers.get("content-length", "0"))
+    except ValueError:
+        declared = 0
+    if declared > max_bytes:
+        raise _upload_too_large()
+
+    target_patient_id = await run_in_threadpool(
+        _resolve_import_patient, db, current_user, patient_id
+    )
+    user_id = current_user.id
+    # Ending the transaction frees the pooled connection for the length of the upload
+    await run_in_threadpool(db.commit)
+
+    work_dir = await run_in_threadpool(create_import_staging_dir)
+    try:
+        upload_path = work_dir / "upload"
+        size = await _receive_upload(request, upload_path, max_bytes)
+        if size == 0:
+            raise BusinessLogicException(message="The upload is empty", request=request)
+        try:
+            await run_in_threadpool(validate_upload, upload_path)
+        except ImagingImportError as exc:
+            raise BusinessLogicException(message=str(exc), request=request) from exc
+        job = import_jobs.submit(
+            user_id=user_id,
+            patient_id=target_patient_id,
+            upload_path=upload_path,
+            original_name=filename,
+            work_dir=work_dir,
+        )
+    except BaseException:
+        await run_in_threadpool(shutil.rmtree, work_dir, ignore_errors=True)
+        raise
+
+    log_endpoint_access(
+        logger,
+        request,
+        user_id,
+        "imaging_import_queued",
+        patient_id=target_patient_id,
+        message="Imaging import queued",
+        job_id=job.id,
+        size_bytes=size,
+    )
+    return _job_response(job)
+
+
+def _resolve_import_patient(
+    db: Session, current_user: User, patient_id: Optional[int]
+) -> int:
+    """The patient to import into, which the user must be able to edit."""
+    if patient_id is None:
+        patient_id = deps.get_current_user_patient_id(db, current_user.id)
+    return deps.verify_patient_access(
+        patient_id, db, current_user, required_permission="edit"
+    )
+
+
+@router.get("/import/{job_id}", response_model=ImagingImportJobResponse)
+def read_import_job(
+    *,
+    job_id: str,
+    request: Request,
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Progress and, once finished, the summary or error of an import job."""
+    job = import_jobs.get(job_id, current_user.id)
+    handle_not_found(job, "ImagingImportJob", request)
+    return _job_response(job)
 
 
 @router.get("/", response_model=List[ImagingStudyResponse])
@@ -283,18 +478,67 @@ def delete_imaging_study(
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Delete an imaging study and move its files to trash."""
-    # Found before the delete, while the row still names the study's folder
-    pending = find_record_attachments(db, ImagingStudy, [study_id])
-    result = handle_delete_with_logging(
-        db=db,
-        crud_obj=imaging_study,
-        entity_id=study_id,
-        entity_type=EntityType.IMAGING_STUDY,
-        user_id=current_user_id,
-        entity_name="ImagingStudy",
-        request=request,
-        current_user=current_user,
-        current_user_patient_id=current_user_patient_id,
-    )
-    cleanup_attachments(db, pending, reason=f"imaging study {study_id} deletion")
+    with _imaging_write_lock_or_409(request):
+        # Found before the delete, while the row still names the study's folder
+        pending = find_record_attachments(db, ImagingStudy, [study_id])
+        result = handle_delete_with_logging(
+            db=db,
+            crud_obj=imaging_study,
+            entity_id=study_id,
+            entity_type=EntityType.IMAGING_STUDY,
+            user_id=current_user_id,
+            entity_name="ImagingStudy",
+            request=request,
+            current_user=current_user,
+            current_user_patient_id=current_user_patient_id,
+        )
+        cleanup_attachments(db, pending, reason=f"imaging study {study_id} deletion")
     return result
+
+
+@router.post("/{study_id}/move", response_model=ImagingStudyResponse)
+def move_imaging_study(
+    *,
+    study_id: int,
+    move_in: ImagingStudyMove,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Move a study to another patient the user can edit, clearing its links."""
+    with handle_database_errors(request=request):
+        study = _get_accessible_study(
+            db,
+            study_id,
+            current_user_patient_id,
+            current_user,
+            request,
+            permission="edit",
+        )
+        target_patient_id = move_in.target_patient_id
+        if target_patient_id == study.patient_id:
+            raise BusinessLogicException(
+                message="The study already belongs to this patient", request=request
+            )
+        deps.verify_patient_access(
+            target_patient_id, db, current_user, required_permission="edit"
+        )
+        with _imaging_write_lock_or_409(request):
+            try:
+                move_study(db, study, target_patient_id)
+            except StudyConflictError as exc:
+                raise ConflictException(message=str(exc), request=request) from exc
+
+        db.refresh(study)
+        log_update(db, EntityType.IMAGING_STUDY, study, current_user.id, request)
+        log_endpoint_access(
+            logger,
+            request,
+            current_user.id,
+            "imaging_study_moved",
+            patient_id=target_patient_id,
+            message="Imaging study moved to another patient",
+            record_id=study_id,
+        )
+        return study

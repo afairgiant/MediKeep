@@ -25,6 +25,7 @@
 - **Frontend**: React 18, Mantine UI 8.x, Vite 7.x
 - **Backend**: FastAPI, Python 3.12+
 - **Database**: PostgreSQL 15-18, SQLAlchemy 2.0, Alembic migrations
+- **Medical imaging**: pydicom (reads DICOM headers on import; images are decoded only in the browser)
 - **Authentication**: JWT access tokens, SSO (Google, GitHub, Microsoft/Azure AD)
 - **Localization**: i18next (11 languages: en, fr, de, es, it, pt, ru, sv, nl, pl, el)
 - **Deployment**: Docker (single container, frontend + backend)

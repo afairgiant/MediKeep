@@ -25,6 +25,7 @@ from app.core.utils.security import SecurityValidator
 from app.events.backup_events import BackupCompletedEvent, BackupFailedEvent
 from app.models.models import BackupRecord
 from app.services.file_management_service import file_management_service
+from app.services.imaging_storage import IMPORT_STAGING_DIR
 
 logger = get_logger(__name__, "app")
 
@@ -34,11 +35,12 @@ RESTORE_STAGING_PREFIX = ".restore-staging-"
 
 def backup_excluded_paths(upload_dir: Path) -> List[Path]:
     """Paths relative to upload_dir that backups leave out and restores leave in place."""
+    excluded = [Path(IMPORT_STAGING_DIR)]
     try:
         trash = settings.TRASH_DIR.resolve().relative_to(upload_dir.resolve())
     except ValueError:
-        return []
-    return [trash] if trash.parts else []
+        return excluded
+    return excluded + [trash] if trash.parts else excluded
 
 
 def is_excluded_from_backup(relative: Path, excluded: List[Path]) -> bool:
