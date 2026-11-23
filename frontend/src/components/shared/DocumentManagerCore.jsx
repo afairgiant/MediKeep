@@ -550,6 +550,9 @@ const useDocumentManagerCore = ({
         const missingCount = shownResults.filter(
           result => result === false
         ).length;
+        const unconfirmedCount = shownResults.filter(
+          result => result === null
+        ).length;
         const totalChecked = shownResults.length;
 
         logger.info('Remote sync status check completed', {
@@ -573,6 +576,14 @@ const useDocumentManagerCore = ({
             notifications.show({
               title: 'Sync Check Complete',
               message: `Found ${missingCount} missing document(s) out of ${totalChecked} checked. Missing documents are marked with red strikethrough.`,
+              color: 'yellow',
+              icon: <IconAlertTriangle size={16} />,
+              autoClose: 8000,
+            });
+          } else if (unconfirmedCount > 0) {
+            notifications.show({
+              title: 'Sync Check Incomplete',
+              message: `${unconfirmedCount} of ${totalChecked} remote document(s) could not be confirmed. They are not marked missing; try again later.`,
               color: 'yellow',
               icon: <IconAlertTriangle size={16} />,
               autoClose: 8000,

@@ -639,4 +639,33 @@ describe('useDocumentManagerCore — manual sync check summary', () => {
       )
     );
   });
+
+  it('does not report unconfirmed checks as all synced', async () => {
+    apiService.checkPaperlessSyncStatus.mockResolvedValue({ 7: true, 8: null });
+    const { result } = renderHook(() =>
+      useDocumentManagerCore(
+        baseProps({ entityType: 'procedure', entityId: 3, mode: 'edit' })
+      )
+    );
+    await waitFor(() => expect(result.current.files).toHaveLength(2));
+    await waitFor(() =>
+      expect(result.current.paperlessSettings?.paperless_enabled).toBe(true)
+    );
+
+    await act(async () => {
+      result.current.handleCheckSyncStatus();
+    });
+
+    await waitFor(() =>
+      expect(notifications.show).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Sync Check Incomplete',
+          message: expect.stringContaining('1 of 2 remote document(s)'),
+        })
+      )
+    );
+    expect(notifications.show).not.toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Sync Check Complete' })
+    );
+  });
 });

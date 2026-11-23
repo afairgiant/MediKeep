@@ -97,8 +97,8 @@ class TestScope:
     ):
         shared = patient_for(db_session, other_user.id)
         share(db_session, shared, other_user.id, test_user.id, "view")
-        upload = processing_upload(db_session, shared.id, "owner-task")
-        paperless = RecordingPaperless({"/api/tasks/": task_response("owner-task", 3)})
+        upload = processing_upload(db_session, shared.id, "viewer-task", test_user.id)
+        paperless = RecordingPaperless({"/api/tasks/": task_response("viewer-task", 3)})
 
         result = await poll(db_session, test_user.id, paperless)
 
@@ -114,7 +114,7 @@ class TestScope:
         shared.privacy_level = "private"
         db_session.commit()
         share(db_session, shared, other_user.id, test_user.id, "edit")
-        processing_upload(db_session, shared.id, "private-task")
+        processing_upload(db_session, shared.id, "private-task", test_user.id)
         paperless = RecordingPaperless(
             {"/api/tasks/": task_response("private-task", 3)}
         )
