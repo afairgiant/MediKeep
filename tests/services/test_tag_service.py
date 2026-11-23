@@ -21,6 +21,7 @@ from app.models.models import (
     ActivityLog,
     BloodDonation,
     Condition,
+    ImagingStudy,
     Medication,
     Patient,
 )
@@ -411,6 +412,59 @@ class TestTagServiceBloodDonations:
         )
 
         assert [row["id"] for row in results["blood_donation"]] == [donation.id]
+
+
+class TestTagServiceImagingStudies:
+    """Imaging studies take part in tag management like other tagged entities."""
+
+    @pytest.fixture
+    def study(self, db_session: Session, test_user):
+        patient = patient_crud.create_for_user(
+            db_session,
+            user_id=test_user.id,
+            patient_data=PatientCreate(
+                first_name="Jane",
+                last_name="Doe",
+                birth_date=date(1990, 1, 1),
+                gender="F",
+                address="1 Main St",
+            ),
+        )
+        study = ImagingStudy(
+            patient_id=patient.id,
+            study_instance_uid="1.2.3",
+            series_count=0,
+            instance_count=0,
+            total_size=0,
+            tags=["knee"],
+        )
+        db_session.add(study)
+        db_session.commit()
+        return study
+
+    def test_rename_updates_study_tags(self, db_session, test_user, study):
+        updated = tag_service.rename_tag_across_entities(
+            db_session, old_tag="knee", new_tag="left-knee", user_id=test_user.id
+        ).records_updated
+
+        db_session.refresh(study)
+        assert updated == 1
+        assert study.tags == ["left-knee"]
+
+    def test_delete_removes_study_tags(self, db_session, test_user, study):
+        tag_service.delete_tag_across_entities(
+            db_session, tag="knee", user_id=test_user.id
+        )
+
+        db_session.refresh(study)
+        assert "knee" not in (study.tags or [])
+
+    def test_study_tags_are_found_by_search(self, db_session, test_user, study):
+        results = tag_service.search_across_entities_by_tags(
+            db_session, tags=["knee"], patient_id=study.patient_id
+        )
+
+        assert [row["id"] for row in results["imaging_study"]] == [study.id]
 
 
 class TestTagListFunctions:

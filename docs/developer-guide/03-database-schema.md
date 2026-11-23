@@ -229,6 +229,7 @@ JUNCTION TABLES (Many-to-Many)
 - `symptoms`: One-to-many with Symptom (cascade delete)
 - `injuries`: One-to-many with Injury (cascade delete)
 - `blood_donations`: One-to-many with BloodDonation (cascade delete)
+- `imaging_studies`: One-to-many with ImagingStudy (cascade delete)
 - `shares`: One-to-many with PatientShare (cascade delete)
 - `photo`: One-to-one with PatientPhoto (cascade delete)
 
@@ -967,6 +968,96 @@ JUNCTION TABLES (Many-to-Many)
 - Eligibility is computed, not stored: the latest of donation date plus the per-type interval over all donations
   from `user_preferences.blood_donation_intervals` (defaults: whole_blood 56, plasma 14,
   platelets 14, double_red_cells 112 days)
+
+## Imaging Tables
+
+DICOM files live on disk at
+`{UPLOAD_DIR}/imaging/{patient_id}/{study_instance_uid}/{series_instance_uid}/{sop_instance_uid}.dcm`.
+The server builds every path component; UIDs are validated as DICOM UIDs (digits and
+dots, at most 64 characters) before use. Header values are PHI and are never logged.
+
+### imaging_studies
+**Purpose**: One imaging exam per row, with fields read from its DICOM headers
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique study ID |
+| patient_id | Integer | FK(patients.id, ON DELETE CASCADE), NOT NULL | Associated patient |
+| study_instance_uid | String(64) | NOT NULL | DICOM Study Instance UID |
+| study_date | Date | | Study date from the header |
+| modalities | JSON | DEFAULT [] | Modalities across the study's series (e.g. ["CT"]) |
+| body_part | String(64) | | Body part examined |
+| study_description | String(255) | | Study description |
+| accession_number | String(64) | | Accession number |
+| institution_name | String(255) | | Performing institution |
+| referring_physician | String(255) | | Referring physician name |
+| notes | Text | | User notes |
+| report_text | Text | | Radiologist's report, pasted by the user |
+| tags | JSON | DEFAULT [] | User tags |
+| procedure_id | Integer | FK(procedures.id, ON DELETE SET NULL) | Optional linked procedure |
+| encounter_id | Integer | FK(encounters.id, ON DELETE SET NULL) | Optional linked encounter |
+| practitioner_id | Integer | FK(practitioners.id, ON DELETE SET NULL) | Optional practitioner |
+| series_count | Integer | NOT NULL | Number of series |
+| instance_count | Integer | NOT NULL | Number of stored images |
+| total_size | BigInteger | NOT NULL | Total bytes on disk |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Constraints and Indexes**:
+- `uq_imaging_studies_patient_study_uid` UNIQUE (patient_id, study_instance_uid)
+- `idx_imaging_studies_patient_date` on (patient_id, study_date)
+- `idx_imaging_studies_procedure_id`, `idx_imaging_studies_encounter_id`,
+  `idx_imaging_studies_practitioner_id`
+
+**Relationships**:
+- `patient`: Many-to-one with Patient
+- `series`: One-to-many with ImagingSeries (cascade delete)
+
+### imaging_series
+**Purpose**: One series (a run of images) within a study
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique series ID |
+| study_id | Integer | FK(imaging_studies.id, ON DELETE CASCADE), NOT NULL | Parent study |
+| series_instance_uid | String(64) | NOT NULL | DICOM Series Instance UID |
+| modality | String(16) | | Modality (CT, MR, US, ...) |
+| series_number | Integer | | Series number |
+| series_description | String(255) | | Series description |
+| instance_count | Integer | NOT NULL | Number of images |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Constraints and Indexes**:
+- `uq_imaging_series_study_series_uid` UNIQUE (study_id, series_instance_uid), which
+  also serves lookups by study_id
+
+### imaging_instances
+**Purpose**: One stored DICOM file (an image, possibly multi-frame)
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique instance ID |
+| series_id | Integer | FK(imaging_series.id, ON DELETE CASCADE), NOT NULL | Parent series |
+| sop_instance_uid | String(64) | NOT NULL | DICOM SOP Instance UID |
+| instance_number | Integer | | Instance number (slice order) |
+| file_path | String | NOT NULL | Path of the stored file |
+| file_size | BigInteger | NOT NULL | File size in bytes |
+| transfer_syntax_uid | String(64) | | Transfer syntax (compression) |
+| rows | Integer | | Image rows |
+| cols | Integer | | Image columns |
+| number_of_frames | Integer | | Frames, for multi-frame images |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Constraints and Indexes**:
+- `uq_imaging_instances_series_sop_uid` UNIQUE (series_id, sop_instance_uid); a
+  re-import skips images already stored; also serves lookups by series_id
+
+**Business Rules**:
+- Deleting a study removes its rows (cascade) and moves its directory to trash as one
+  entry, named `imaging_{patient_id}_{study_instance_uid}`
+- Deleting a patient or an account does the same for every study of the deleted patients
 
 ## Symptom System Tables
 

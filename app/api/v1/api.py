@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     family_member,
     frontend_logs,
     health_record_import,
+    imaging_study,
     immunization,
     injury,
     injury_type,
@@ -136,6 +137,9 @@ api_router.include_router(
 )
 api_router.include_router(
     blood_donation.router, prefix="/blood-donations", tags=["blood-donations"]
+)
+api_router.include_router(
+    imaging_study.router, prefix="/imaging-studies", tags=["imaging-studies"]
 )
 api_router.include_router(allergy.router, prefix="/allergies", tags=["allergies"])
 api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])

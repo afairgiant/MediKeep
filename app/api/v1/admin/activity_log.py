@@ -50,6 +50,7 @@ ENTITY_TYPE_DISPLAY = {
     "injury_type": "Injury Type",
     "medical_equipment": "Medical Equipment",
     "blood_donation": "Blood Donation",
+    "imaging_study": "Imaging Study",
     "practice": "Practice",
     "system": "System",
     "backup": "Backup",

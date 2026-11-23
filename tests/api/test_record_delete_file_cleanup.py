@@ -24,6 +24,7 @@ from app.crud.medication import medication as medication_crud
 from app.crud.patient import patient as patient_crud
 from app.models.models import (
     EntityFile,
+    ImagingStudy,
     LabResult,
     LabResultFile,
     Patient,
@@ -38,6 +39,7 @@ from app.services.attachment_cleanup import (
     find_record_attachments,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
+from app.services.imaging_storage import study_directory
 from app.services.user_deletion_service import UserDeletionService
 from tests.utils.user import create_random_user, create_user_token_headers
 
@@ -329,6 +331,139 @@ class TestPatientDeleteFileCleanup:
         db_session.expire_all()
         assert _stored_path(db_session, file_id).read_bytes() == b"mine"
         assert _trashed_contents(trash) == []
+
+
+def _imaging_study_dir(db_session, patient_id, study_uid="1.2.3"):
+    """An imaging study row with one stored file; returns its directory."""
+    db_session.add(
+        ImagingStudy(
+            patient_id=patient_id,
+            study_instance_uid=study_uid,
+            series_count=0,
+            instance_count=0,
+            total_size=0,
+        )
+    )
+    db_session.commit()
+    directory = study_directory(patient_id, study_uid)
+    directory.mkdir(parents=True)
+    (directory / "image.dcm").write_bytes(b"dicom")
+    return directory
+
+
+class TestImagingStudyFileCleanup:
+    """Imaging study folders move to trash, each as one entry, with their patient."""
+
+    def test_patient_delete_removes_its_imaging_folders_only(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        doomed = _create_owned_patient(db_session, user_with_patient["user"].id)
+        doomed_dir = _imaging_study_dir(db_session, doomed.id)
+        kept_dir = _imaging_study_dir(db_session, user_with_patient["patient"].id)
+
+        resp = client.delete(
+            f"/api/v1/patient-management/{doomed.id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 200
+        assert not doomed_dir.exists()
+        assert kept_dir.is_dir()
+        assert [p.read_bytes() for p in trash.rglob("*.dcm")] == [b"dicom"]
+
+    def test_patient_delete_by_non_owner_keeps_imaging_folders(
+        self, client: TestClient, db_session: Session, user_with_patient, trash
+    ):
+        patient = user_with_patient["patient"]
+        directory = _imaging_study_dir(db_session, patient.id)
+        other = create_random_user(db_session)
+
+        resp = client.delete(
+            f"/api/v1/patient-management/{patient.id}",
+            headers=create_user_token_headers(other["user"].username),
+        )
+
+        assert resp.status_code == 403
+        assert directory.is_dir()
+
+    def test_account_delete_removes_imaging_folders_of_owned_patients(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        test_admin_user,
+        trash,
+    ):
+        family = _create_owned_patient(db_session, user_with_patient["user"].id)
+        own_dir = _imaging_study_dir(db_session, user_with_patient["patient"].id)
+        family_dir = _imaging_study_dir(db_session, family.id, "4.5.6")
+
+        resp = client.delete("/api/v1/users/me", headers=authenticated_headers)
+
+        assert resp.status_code == 200
+        assert not own_dir.exists()
+        assert not family_dir.exists()
+
+    def test_admin_patient_delete_removes_imaging_folders(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        admin_token_headers,
+        trash,
+    ):
+        family = _create_owned_patient(db_session, user_with_patient["user"].id)
+        directory = _imaging_study_dir(db_session, family.id)
+
+        resp = client.delete(
+            f"/api/v1/admin/models/patient/{family.id}", headers=admin_token_headers
+        )
+
+        assert resp.status_code == 200
+        assert not directory.exists()
+
+    def test_record_lookup_covers_imaging_studies(
+        self, db_session: Session, user_with_patient, trash
+    ):
+        patient_id = user_with_patient["patient"].id
+        doomed_dir = _imaging_study_dir(db_session, patient_id)
+        kept_dir = _imaging_study_dir(db_session, patient_id, "4.5.6")
+        study = (
+            db_session.query(ImagingStudy).filter_by(study_instance_uid="1.2.3").one()
+        )
+
+        pending = find_record_attachments(db_session, ImagingStudy, [study.id])
+        db_session.delete(study)
+        db_session.commit()
+        stats = cleanup_attachments(db_session, pending, reason="test")
+
+        assert stats["errors"] == 0
+        assert not doomed_dir.exists()
+        assert kept_dir.is_dir()
+
+    def test_failed_folder_removal_is_counted_as_an_error(
+        self, db_session: Session, user_with_patient, trash, monkeypatch
+    ):
+        patient_id = user_with_patient["patient"].id
+        directory = _imaging_study_dir(db_session, patient_id)
+        pending = find_patient_attachments(db_session, [patient_id])
+
+        def locked(*args, **kwargs):
+            raise PermissionError("file in use")
+
+        monkeypatch.setattr(
+            "app.services.imaging_storage.file_management_service.move_directory_to_trash",
+            locked,
+        )
+        stats = cleanup_attachments(db_session, pending, reason="test")
+
+        assert stats["errors"] == 1
+        assert directory.is_dir()
 
 
 class TestAccountDeleteFileCleanup:
