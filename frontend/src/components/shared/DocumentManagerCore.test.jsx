@@ -590,18 +590,20 @@ describe('useDocumentManagerCore - Save again after some uploads failed (#1275)'
   });
 
   it('keeps only the failed uploads queued, so a retry does not attach the others twice', async () => {
+    let finishCardUpload;
     apiService.uploadEntityFileWithTaskMonitoring.mockImplementation(
       (_type, _id, file) =>
         file.name === 'scan.pdf'
           ? Promise.reject(new Error('offline'))
-          : Promise.resolve({ taskMonitored: false })
+          : new Promise(resolve => {
+              finishCardUpload = () => resolve({ taskMonitored: false });
+            })
     );
     const onUploadComplete = vi.fn();
     const { result } = renderHook(() =>
       useDocumentManagerCore(baseProps({ onUploadComplete }))
     );
 
-    // Added together, so the files can share a Date.now() id
     act(() => {
       result.current.handleAddPendingFile(
         new File(['a'], 'card.pdf', { type: 'application/pdf' }),
@@ -614,9 +616,22 @@ describe('useDocumentManagerCore - Save again after some uploads failed (#1275)'
       result.current.handleAddPendingLink({ paperless_document_id: '262' });
     });
 
+    let saving;
+    act(() => {
+      saving = result.current.uploadPendingFiles(42).catch(err => err);
+    });
+    // A description edited while the batch runs replaces the queued object
+    const card = result.current.pendingFiles.find(
+      f => f.file.name === 'card.pdf'
+    );
+    act(() => {
+      result.current.handlePendingFileDescriptionChange(card.id, 'Front');
+    });
+
     let saveError;
     await act(async () => {
-      saveError = await result.current.uploadPendingFiles(42).catch(err => err);
+      finishCardUpload();
+      saveError = await saving;
     });
 
     expect(saveError).toBeInstanceOf(Error);

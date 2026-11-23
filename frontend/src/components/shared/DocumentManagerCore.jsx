@@ -824,7 +824,7 @@ const useDocumentManagerCore = ({
     (file, description = '') => {
       monitoredSetPendingFiles(prev => [
         ...prev,
-        { file, description, id: Date.now() },
+        { file, description, id: `file-${generateId()}` },
       ]);
     },
     [monitoredSetPendingFiles]
@@ -1639,24 +1639,24 @@ const useDocumentManagerCore = ({
         if (failures.length > 0) {
           failedCount = failures.length;
           // Saving again retries against the same record, so drop what got
-          // through or it would be attached a second time. Matched by
-          // reference: pending file ids come from Date.now() and can repeat.
-          const succeeded = (items, offset) =>
+          // through or it would be attached a second time. Matched by id, not
+          // by object: editing a description replaces the queued object.
+          const succeededIds = (items, offset) =>
             new Set(
-              items.filter(
-                (_, i) => results[offset + i].status === 'fulfilled'
-              )
+              items
+                .filter((_, i) => results[offset + i].status === 'fulfilled')
+                .map(item => item.id)
             );
-          const uploadedFiles = succeeded(currentPendingFiles, 0);
-          const linkedLinks = succeeded(
+          const uploadedFileIds = succeededIds(currentPendingFiles, 0);
+          const linkedIds = succeededIds(
             currentPendingLinks,
             currentPendingFiles.length
           );
           monitoredSetPendingFiles(prev =>
-            prev.filter(f => !uploadedFiles.has(f))
+            prev.filter(f => !uploadedFileIds.has(f.id))
           );
           monitoredSetPendingLinks(prev =>
-            prev.filter(l => !linkedLinks.has(l))
+            prev.filter(l => !linkedIds.has(l.id))
           );
           throw failures[0].reason;
         }
