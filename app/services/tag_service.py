@@ -31,6 +31,7 @@ from app.models.models import (
     BloodDonation,
     Condition,
     Encounter,
+    ImagingStudy,
     Immunization,
     Injury,
     LabResult,
@@ -58,6 +59,7 @@ ENTITY_MODELS: Dict[str, Any] = {
     "symptom": Symptom,
     "medical_equipment": MedicalEquipment,
     "blood_donation": BloodDonation,
+    "imaging_study": ImagingStudy,
 }
 
 

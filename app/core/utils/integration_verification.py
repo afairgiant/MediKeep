@@ -7,11 +7,36 @@ and the flag is derived from comparing URLs.
 """
 
 from typing import Any, Dict, Optional
+from urllib.parse import urlsplit, urlunsplit
+
+_DEFAULT_PORTS = {"http": 80, "https": 443}
 
 
 def normalize_integration_url(url: Optional[str]) -> str:
     """Normalise a URL for comparison (whitespace and trailing slashes)."""
     return (url or "").strip().rstrip("/")
+
+
+def integration_instance_key(url: Optional[str]) -> str:
+    """``url`` as an instance identity: scheme and host lowercased, default port dropped.
+
+    The path stays case-sensitive. A URL that cannot be parsed is only normalised.
+    """
+    normalized = normalize_integration_url(url)
+    try:
+        parts = urlsplit(normalized)
+        port = parts.port
+    except ValueError:
+        return normalized
+    if not parts.scheme or not parts.hostname:
+        return normalized
+    scheme = parts.scheme.lower()
+    host = f"[{parts.hostname}]" if ":" in parts.hostname else parts.hostname
+    if port is not None and port != _DEFAULT_PORTS.get(scheme):
+        host = f"{host}:{port}"
+    userinfo = parts.netloc.rpartition("@")[0]
+    netloc = f"{userinfo}@{host}" if userinfo else host
+    return urlunsplit((scheme, netloc, parts.path, parts.query, parts.fragment))
 
 
 def verification_after_test(

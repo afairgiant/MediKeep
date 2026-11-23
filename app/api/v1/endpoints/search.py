@@ -19,6 +19,7 @@ from app.models.models import (
     BloodDonation,
     Condition,
     Encounter,
+    ImagingStudy,
     Immunization,
     Injury,
     LabResult,
@@ -51,6 +52,7 @@ SEARCH_TYPE_MODELS = {
     "symptoms": Symptom,
     "medical_equipment": MedicalEquipment,
     "blood_donations": BloodDonation,
+    "imaging_studies": ImagingStudy,
     "vitals": Vitals,
 }
 
@@ -218,6 +220,13 @@ class BloodDonationSearchItem(SearchItemBase):
     donation_type: str
     location: Optional[str]
     donation_date: Optional[str]
+
+
+class ImagingStudySearchItem(SearchItemBase):
+    study_description: Optional[str]
+    modalities: List[str]
+    body_part: Optional[str]
+    study_date: Optional[str]
 
 
 class VitalSearchItem(SearchItemBase):
@@ -921,6 +930,58 @@ def search_patient_records(
             ],
         )
         total_count += donation_count
+
+    if "imaging_studies" in search_types:
+        studies_query = db.query(ImagingStudy).filter(
+            ImagingStudy.patient_id == target_patient_id
+        )
+        if query_lower:
+            studies_query = studies_query.filter(
+                or_(
+                    contains_ignore_case(ImagingStudy.study_description, query_lower),
+                    contains_ignore_case(ImagingStudy.body_part, query_lower),
+                    contains_ignore_case(ImagingStudy.institution_name, query_lower),
+                    contains_ignore_case(ImagingStudy.notes, query_lower),
+                    contains_ignore_case(ImagingStudy.report_text, query_lower),
+                    _tag_text_filter(db, ImagingStudy.tags, query_lower),
+                )
+            )
+
+        studies_query = _apply_date_filter(
+            studies_query, ImagingStudy.study_date, parsed_date_from, parsed_date_to
+        )
+        studies_query = _apply_sort(
+            studies_query,
+            sort,
+            ImagingStudy.study_date,
+            title_col=ImagingStudy.study_description,
+            nulls_last=True,
+        )
+
+        studies, study_count = _windowed_query(
+            studies_query, ImagingStudy.id, skip, limit
+        )
+
+        results["imaging_studies"] = SearchResultGroup(
+            count=study_count,
+            items=[
+                ImagingStudySearchItem(
+                    id=study.id,
+                    type="imaging_study",
+                    study_description=study.study_description,
+                    modalities=study.modalities or [],
+                    body_part=study.body_part,
+                    study_date=(
+                        study.study_date.isoformat() if study.study_date else None
+                    ),
+                    tags=study.tags or [],
+                    highlight=study.study_description or "Imaging study",
+                    score=DEFAULT_SEARCH_SCORE,
+                ).model_dump()
+                for study in studies
+            ],
+        )
+        total_count += study_count
 
     # Search vitals (no tags column, no title sort)
     if "vitals" in search_types:

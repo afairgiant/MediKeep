@@ -1,13 +1,15 @@
 """
 Paperless-ngx and Papra sync checks.
 
-Each check finds the user's remote files through the record they are attached to, so
-it must look at every record type files can be attached to (#1267). Another user's
-files must never be checked or changed.
+Each check finds remote files through the record they are attached to, so it must
+look at every record type files can be attached to (#1267). Only files on patients the
+user can edit are checked or changed.
 """
 
+import logging
 from contextlib import asynccontextmanager
 from datetime import date, datetime
+from pathlib import Path
 from urllib.parse import parse_qs
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
@@ -27,9 +29,19 @@ from app.services.generic_entity_file_service import (
     _file_name_matches,
 )
 from tests.utils.attachment_records import add_record_for_every_file_entity_type
+from tests.utils.log_output import persisted_text
+from tests.utils.paperless_uploads import (
+    member,
+    patient_for,
+    share,
+    use_paperless,
+    use_papra,
+)
 from tests.utils.user import create_random_user
 
 pytestmark = pytest.mark.asyncio
+
+FILE_NAME = "manual.pdf"
 
 
 class _RemoteWhereEveryDocumentIsGone:
@@ -89,11 +101,12 @@ def _remote_file(
     sync_status="synced",
     task_uuid=None,
     entity_type="medical-equipment",
+    uploaded_by_user_id=None,
 ):
     entity_file = EntityFile(
         entity_type=entity_type,
         entity_id=record.id,
-        file_name="manual.pdf",
+        file_name=FILE_NAME,
         file_path=f"{backend}://",
         file_type="application/pdf",
         file_size=1024,
@@ -103,6 +116,7 @@ def _remote_file(
         paperless_document_id=document_id if backend == "paperless" else None,
         paperless_task_uuid=task_uuid,
         papra_document_id=document_id if backend == "papra" else None,
+        uploaded_by_user_id=uploaded_by_user_id,
     )
     db_session.add(entity_file)
     db_session.commit()
@@ -672,3 +686,209 @@ class TestPapraCheck:
 
         assert _sync_statuses(db_session, files) == dict.fromkeys(files, "missing")
         assert result == {f.id: False for f in files.values()}
+
+
+SHARED_PAPERLESS = "https://paperless.family"
+SHARED_PAPRA = "https://papra.family"
+
+
+class _RemoteWhereEveryDocumentExists(_RemoteWhereEveryDocumentIsGone):
+    async def check_document_exists(self, document_id):
+        self.checked.append(document_id)
+        return True
+
+
+class _RemoteThatFails(_RemoteWhereEveryDocumentIsGone):
+    async def check_document_exists(self, document_id):
+        self.checked.append(document_id)
+        raise RuntimeError("connection reset")
+
+
+class TestSharedPatients:
+    """An editor's checks cover the patients shared with them, through their own connection."""
+
+    @pytest.fixture
+    def owner(self, db_session):
+        return member(db_session, SHARED_PAPERLESS, SHARED_PAPRA)
+
+    @pytest.fixture
+    def editor(self, db_session):
+        return member(db_session, SHARED_PAPERLESS, SHARED_PAPRA)
+
+    def _shared_equipment(
+        self, db_session, owner, editor, permission_level="edit", restrict=None
+    ):
+        """Equipment on an owner's patient shared with ``editor``; ``restrict(patient, share)`` may narrow it."""
+        patient = patient_for(db_session, owner.id)
+        patient_share = share(
+            db_session, patient, owner.id, editor.id, permission_level
+        )
+        if restrict:
+            restrict(patient, patient_share)
+            db_session.commit()
+        return _equipment(db_session, patient.id)
+
+    async def test_paperless_check_marks_the_editors_own_upload_missing(
+        self, db_session, owner, editor, remote
+    ):
+        record = self._shared_equipment(db_session, owner, editor)
+        mine = _remote_file(
+            db_session, record, "paperless", "7", uploaded_by_user_id=editor.id
+        )
+
+        result = await _run_paperless_sync_check(db_session, editor.id, remote)
+
+        assert result == {mine.id: False}
+        db_session.refresh(mine)
+        assert mine.sync_status == "missing"
+
+    async def test_another_users_upload_not_found_is_left_alone(
+        self, db_session, owner, editor, remote
+    ):
+        # Paperless answers 404 for a document this account may not view
+        record = self._shared_equipment(db_session, owner, editor)
+        theirs = _remote_file(
+            db_session, record, "paperless", "7", uploaded_by_user_id=owner.id
+        )
+
+        result = await _run_paperless_sync_check(db_session, editor.id, remote)
+
+        assert result == {theirs.id: None}
+        assert remote.checked == ["7"]
+        db_session.refresh(theirs)
+        assert theirs.sync_status == "synced"
+
+    async def test_another_users_upload_that_is_found_recovers(
+        self, db_session, owner, editor
+    ):
+        record = self._shared_equipment(db_session, owner, editor)
+        theirs = _remote_file(
+            db_session,
+            record,
+            "paperless",
+            "7",
+            sync_status="error",
+            uploaded_by_user_id=owner.id,
+        )
+
+        result = await _run_paperless_sync_check(
+            db_session, editor.id, _RemoteWhereEveryDocumentExists()
+        )
+
+        assert result == {theirs.id: True}
+        db_session.refresh(theirs)
+        assert theirs.sync_status == "synced"
+
+    @pytest.mark.parametrize(
+        "permission_level, restrict",
+        [
+            ("view", None),
+            ("edit", lambda _, s: setattr(s, "expires_at", datetime(2020, 1, 1))),
+            ("edit", lambda _, s: setattr(s, "is_active", False)),
+            ("edit", lambda p, _: setattr(p, "privacy_level", "private")),
+        ],
+        ids=["view-only", "expired", "inactive", "private-patient"],
+    )
+    async def test_share_without_edit_access_is_not_checked(
+        self, db_session, owner, editor, remote, permission_level, restrict
+    ):
+        record = self._shared_equipment(
+            db_session, owner, editor, permission_level, restrict
+        )
+        shared = _remote_file(
+            db_session, record, "paperless", "7", uploaded_by_user_id=owner.id
+        )
+        papra = _remote_file(
+            db_session, record, "papra", "doc-7", uploaded_by_user_id=owner.id
+        )
+
+        assert await _run_paperless_sync_check(db_session, editor.id, remote) == {}
+        assert await _run_papra_sync_check(db_session, editor.id, remote) == {}
+        assert remote.checked == []
+        db_session.refresh(shared)
+        db_session.refresh(papra)
+        assert (shared.sync_status, papra.sync_status) == ("synced", "synced")
+
+    @pytest.mark.parametrize("backend", ["paperless", "papra"])
+    async def test_unknown_uploader_is_checked_only_on_own_patients(
+        self, db_session, owner, editor, remote, backend
+    ):
+        shared = _remote_file(
+            db_session, self._shared_equipment(db_session, owner, editor), backend, "7"
+        )
+        own = _remote_file(
+            db_session,
+            _equipment(db_session, patient_for(db_session, editor.id).id),
+            backend,
+            "8",
+        )
+
+        run = (
+            _run_paperless_sync_check
+            if backend == "paperless"
+            else _run_papra_sync_check
+        )
+        result = await run(db_session, editor.id, remote)
+
+        assert result == {own.id: False}
+        db_session.refresh(shared)
+        assert shared.sync_status == "synced"
+
+    async def test_orphan_pass_covers_an_edit_share(self, db_session, owner, editor):
+        record = self._shared_equipment(db_session, owner, editor)
+        orphan = _remote_file(
+            db_session, record, "paperless", None, uploaded_by_user_id=owner.id
+        )
+        unknown = _remote_file(db_session, record, "paperless", None)
+
+        await GenericEntityFileService()._handle_orphaned_paperless_records(
+            db_session, editor.id
+        )
+
+        db_session.refresh(orphan)
+        db_session.refresh(unknown)
+        assert (orphan.sync_status, unknown.sync_status) == ("missing", "synced")
+
+    async def test_papra_check_covers_an_edit_share(
+        self, db_session, owner, editor, remote
+    ):
+        record = self._shared_equipment(db_session, owner, editor)
+        shared = _remote_file(
+            db_session, record, "papra", "doc-7", uploaded_by_user_id=owner.id
+        )
+        shared.papra_organization_id = "org-1"
+        db_session.commit()
+
+        result = await _run_papra_sync_check(db_session, editor.id, remote)
+
+        assert result == {shared.id: False}
+        assert remote.checked == ["doc-7"]
+
+
+@pytest.mark.parametrize(
+    "backend, remote_cls",
+    [
+        ("paperless", _RemoteWhereEveryDocumentIsGone),
+        ("paperless", _RemoteThatFails),
+        ("papra", _RemoteWhereEveryDocumentIsGone),
+    ],
+)
+async def test_sync_checks_never_log_file_names(
+    db_session, test_user, test_patient, caplog, backend, remote_cls
+):
+    record = _equipment(db_session, test_patient.id)
+    if backend == "paperless":
+        use_paperless(db_session, test_user.id)
+        _remote_file(db_session, record, "paperless", "1")
+        _remote_file(db_session, record, "paperless", None, sync_status="failed")
+        run = _run_paperless_sync_check
+    else:
+        use_papra(db_session, test_user.id)
+        _remote_file(db_session, record, "papra", "doc-1")
+        run = _run_papra_sync_check
+
+    with caplog.at_level(logging.DEBUG):
+        await run(db_session, test_user.id, remote_cls())
+
+    assert caplog.records
+    assert Path(FILE_NAME).stem not in persisted_text(caplog)

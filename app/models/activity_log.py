@@ -157,6 +157,7 @@ class EntityType:
     INJURY_TYPE = "injury_type"
     MEDICAL_EQUIPMENT = "medical_equipment"
     BLOOD_DONATION = "blood_donation"
+    IMAGING_STUDY = "imaging_study"
     TAG = "tag"
     HEALTH_RECORD_IMPORT = "health_record_import"
 
@@ -194,6 +195,7 @@ class EntityType:
             cls.INJURY,
             cls.INJURY_TYPE,
             cls.BLOOD_DONATION,
+            cls.IMAGING_STUDY,
             cls.TAG,
             cls.HEALTH_RECORD_IMPORT,
             cls.SYSTEM,

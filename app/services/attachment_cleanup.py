@@ -28,13 +28,20 @@ from sqlalchemy.orm import Session
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.stored_files import resolve_storage_path, resolve_stored_file
-from app.models.models import EntityFile, LabResult, LabResultFile, Patient
+from app.models.models import (
+    EntityFile,
+    ImagingStudy,
+    LabResult,
+    LabResultFile,
+    Patient,
+)
 from app.services.file_management_service import file_management_service
 from app.services.generic_entity_file_service import (
     FILE_ENTITY_SOURCES,
     GenericEntityFileService,
     entity_files_of_records,
 )
+from app.services.imaging_storage import trash_study_files
 
 logger = get_logger(__name__, "app")
 
@@ -52,14 +59,18 @@ class PendingAttachments:
         result files cascade with their lab result, and file records deleted
         directly), so only the file on disk is left to trash. Files that a
         surviving file row still uses are left out.
+    imaging_studies: (patient_id, study_instance_uid) of imaging studies whose
+        directories move to trash, each as one entry.
     """
 
     entity_file_ids: List[int] = field(default_factory=list)
     local_paths: List[Path] = field(default_factory=list)
+    imaging_studies: List[Tuple[int, str]] = field(default_factory=list)
 
     def extend(self, other: "PendingAttachments") -> None:
         self.entity_file_ids.extend(other.entity_file_ids)
         self.local_paths.extend(other.local_paths)
+        self.imaging_studies.extend(other.imaging_studies)
 
 
 def _local_paths(file_records: Iterable[Any]) -> List[Path]:
@@ -140,9 +151,22 @@ def find_patient_attachments(
     """Attachments of every record of the patients, for a patient delete."""
     if not patient_ids:
         return PendingAttachments()
-    return _source_attachments(
+    pending = _source_attachments(
         db, FILE_ENTITY_SOURCES, lambda model: model.patient_id.in_(patient_ids)
     )
+    pending.imaging_studies = _imaging_study_dirs(
+        db, ImagingStudy.patient_id.in_(patient_ids)
+    )
+    return pending
+
+
+def _imaging_study_dirs(db: Session, condition: Any) -> List[Tuple[int, str]]:
+    return [
+        (row.patient_id, row.study_instance_uid)
+        for row in db.query(
+            ImagingStudy.patient_id, ImagingStudy.study_instance_uid
+        ).filter(condition)
+    ]
 
 
 def find_record_attachments(
@@ -157,6 +181,10 @@ def find_record_attachments(
         return PendingAttachments()
     if model is Patient:
         return find_patient_attachments(db, record_ids)
+    if model is ImagingStudy:
+        return PendingAttachments(
+            imaging_studies=_imaging_study_dirs(db, ImagingStudy.id.in_(record_ids))
+        )
     # File records themselves: deleting one leaves only its stored file
     if model in (EntityFile, LabResultFile):
         query = db.query(model).filter(model.id.in_(record_ids))
@@ -187,7 +215,11 @@ def cleanup_attachments(
     counted in "errors" rather than failing the delete.
     """
     stats = {"files_deleted": 0, "files_preserved": 0, "errors": 0}
-    if not pending.entity_file_ids and not pending.local_paths:
+    if (
+        not pending.entity_file_ids
+        and not pending.local_paths
+        and not pending.imaging_studies
+    ):
         return stats
 
     try:
@@ -230,6 +262,13 @@ def cleanup_attachments(
                     LogFields.EVENT: "attachment_trash_failed",
                 },
             )
+
+    for patient_id, study_uid in pending.imaging_studies:
+        moved = trash_study_files(patient_id, study_uid, reason=reason)
+        if moved:
+            stats["files_deleted"] += 1
+        elif moved is False:
+            stats["errors"] += 1  # trash_study_files has already logged the cause
 
     logger.info(
         "Cleaned up attachments of deleted records",

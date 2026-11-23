@@ -61,6 +61,7 @@ class IntegrationErrorCode:
     FILE_TOO_LARGE = "integration_file_too_large"
     PERMISSION_DENIED = "integration_permission_denied"
     TASK_PERMISSION_DENIED = "integration_task_permission_denied"
+    STORED_ELSEWHERE = "integration_stored_elsewhere"
     STORAGE_FULL = "integration_storage_full"
     PROCESSING_FAILED = "integration_processing_failed"
     NETWORK_ERROR = "integration_network_error"
@@ -73,6 +74,19 @@ class IntegrationErrorCode:
 PAPERLESS_AUTH_FAILED_MESSAGE = (
     "Paperless authentication failed. Please check your credentials and permissions."
 )
+
+
+REMOTE_SERVICE_NAMES = {"paperless": "Paperless-ngx", "papra": "Papra"}
+
+
+def stored_elsewhere_message(provider: str) -> str:
+    """Message for a file in another member's ``provider`` that this user cannot reach."""
+    return (
+        f"This document is stored in another member's {provider}, which your "
+        f"{provider} connection cannot reach."
+    )
+
+
 PAPERLESS_TASK_PERMISSION_MESSAGE = (
     "Paperless did not let this account read upload tasks, so MediKeep cannot "
     "confirm uploads. In Paperless, give the account the View permission on "

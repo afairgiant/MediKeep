@@ -23,6 +23,9 @@
     "noFiles": "Inga filer"
   },
   "fileList": {
+    "deleteFile": "Ta bort fil",
+    "downloadFile": "Ladda ned fil",
+    "unlinkDocument": "Koppla bort dokument",
     "deleteUnfinishedPaperlessWarning": "Den här uppladdningen har inte slutfört bearbetningen i Paperless. Om Paperless slutför den senare kan dokumentet finnas kvar i Paperless efter att det tagits bort här.",
     "fileDetails": "FILDETALJER",
     "loading": "Laddar filer...",
@@ -40,6 +43,7 @@
     "viewUnavailable": {
       "missing": "Dokumentet hittades inte i lagringstjänsten. Det kan ha tagits bort där. Du kan ta bort det i postens redigeringsformulär.",
       "processing": "Dokumentet bearbetas fortfarande av Paperless och kan inte öppnas ännu. Försök igen om en stund.",
+      "storedElsewhere": "Det här dokumentet lagras i en annan medlems {{service}}, som din {{service}}-anslutning inte når. Medlemmen kan öppna det från sitt eget konto.",
       "title": "Dokumentet är inte tillgängligt",
       "unavailable": "Dokumentet sparades inte korrekt och kan inte öppnas. Du kan ta bort det i postens redigeringsformulär och ladda upp det igen."
     }

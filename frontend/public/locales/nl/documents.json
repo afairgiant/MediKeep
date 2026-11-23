@@ -23,6 +23,9 @@
     "noFiles": "Geen bestanden"
   },
   "fileList": {
+    "deleteFile": "Bestand verwijderen",
+    "downloadFile": "Bestand downloaden",
+    "unlinkDocument": "Document ontkoppelen",
     "deleteUnfinishedPaperlessWarning": "Deze upload is nog niet klaar met verwerken in Paperless. Als Paperless de upload later voltooit, kan het document in Paperless blijven staan nadat het hier is verwijderd.",
     "fileDetails": "BESTANDSDETAILS",
     "loading": "Bestanden laden...",
@@ -40,6 +43,7 @@
     "viewUnavailable": {
       "missing": "Dit document is niet gevonden in de opslagservice. Mogelijk is het daar verwijderd. U kunt het verwijderen in het bewerkingsformulier van het dossier.",
       "processing": "Dit document wordt nog verwerkt door Paperless en kan nog niet worden geopend. Probeer het zo opnieuw.",
+      "storedElsewhere": "Dit document is opgeslagen in de {{service}} van een ander lid, die uw {{service}}-verbinding niet kan bereiken. Dat lid kan het openen vanuit het eigen account.",
       "title": "Document niet beschikbaar",
       "unavailable": "Dit document is niet correct opgeslagen en kan niet worden geopend. U kunt het verwijderen in het bewerkingsformulier van het dossier en opnieuw uploaden."
     }

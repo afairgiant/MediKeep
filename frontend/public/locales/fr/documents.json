@@ -23,6 +23,9 @@
     "noFiles": "Aucun fichier"
   },
   "fileList": {
+    "deleteFile": "Supprimer le fichier",
+    "downloadFile": "Télécharger le fichier",
+    "unlinkDocument": "Dissocier le document",
     "deleteUnfinishedPaperlessWarning": "Ce téléversement n'a pas fini d'être traité dans Paperless. Si Paperless le termine plus tard, le document pourra rester dans Paperless après sa suppression ici.",
     "fileDetails": "DETAILS DU FICHIER",
     "loading": "Chargement des fichiers...",
@@ -40,6 +43,7 @@
     "viewUnavailable": {
       "missing": "Ce document est introuvable dans son service de stockage. Il a peut-être été supprimé là-bas. Vous pouvez le retirer depuis le formulaire de modification de l'entrée.",
       "processing": "Ce document est encore en cours de traitement par Paperless et ne peut pas encore être ouvert. Réessayez dans un instant.",
+      "storedElsewhere": "Ce document est stocké dans le {{service}} d'un autre membre, que votre connexion {{service}} ne peut pas atteindre. Ce membre peut l'ouvrir depuis son compte.",
       "title": "Document indisponible",
       "unavailable": "Ce document n'a pas été enregistré correctement et ne peut pas être ouvert. Vous pouvez le retirer depuis le formulaire de modification de l'entrée, puis le téléverser à nouveau."
     }

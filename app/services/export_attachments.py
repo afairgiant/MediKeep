@@ -270,6 +270,7 @@ def _attachments_of_source(
                     "papra_organization_id": getattr(
                         file, "papra_organization_id", None
                     ),
+                    "uploaded_by_user_id": getattr(file, "uploaded_by_user_id", None),
                 }
             )
     return attachments
@@ -328,6 +329,7 @@ LEFT_OUT_REASON_TEXT_KEYS = {
     "not_found": "export_left_out_not_found",
     "not_configured": "export_left_out_not_configured",
     "download_failed": "export_left_out_download_failed",
+    "stored_elsewhere": "export_left_out_stored_elsewhere",
     "failed": "export_left_out_failed",
 }
 

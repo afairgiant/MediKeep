@@ -45,6 +45,7 @@ from app.services.credential_encryption import SecurityError, credential_encrypt
 from app.services.generic_entity_file_service import (
     FILE_ENTITY_SOURCES,
     entity_files_of_records,
+    resolvable_uploads,
 )
 from app.services.paperless_auth_methods import (
     DEFAULT_AUTH_METHOD,
@@ -118,7 +119,8 @@ def _update_entity_file_from_task_result(
     """
     Update EntityFile record based on Paperless task completion result.
 
-    Leaves the record alone unless the user has edit access to its patient.
+    Leaves the record alone unless the user may resolve its upload (see
+    ``resolvable_uploads``) and has edit access to its patient.
 
     Args:
         db: Database session
@@ -132,7 +134,10 @@ def _update_entity_file_from_task_result(
         # Find the EntityFile record by task UUID
         entity_file = (
             db.query(EntityFile)
-            .filter(EntityFile.paperless_task_uuid == task_uuid)
+            .filter(
+                EntityFile.paperless_task_uuid == task_uuid,
+                resolvable_uploads(db, user.id),
+            )
             .first()
         )
 
@@ -1674,6 +1679,7 @@ async def set_background_task(
                 EntityFile.entity_type == request_data.entity_type,
                 EntityFile.entity_id == request_data.entity_id,
                 EntityFile.file_name == request_data.file_name,
+                resolvable_uploads(db, current_user.id),
             )
             .order_by(EntityFile.created_at.desc())
             .first()
@@ -1796,6 +1802,7 @@ async def update_background_task(
                 EntityFile.entity_id == request_data.entity_id,
                 EntityFile.file_name == request_data.file_name,
                 EntityFile.paperless_task_uuid == request_data.task_uuid,
+                resolvable_uploads(db, current_user.id),
             )
             .first()
         )
