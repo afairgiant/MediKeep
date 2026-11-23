@@ -1,5 +1,7 @@
 """Directories moved to trash as one entry: listing, restore and permanent delete."""
 
+import os
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -144,6 +146,67 @@ class TestPermanentDeleteEndpoint:
 
         assert response.status_code == 400
         assert victim.exists()
+
+
+class TestMoveDirectoryRollback:
+    def test_failed_metadata_write_moves_directory_back(self, storage, monkeypatch):
+        source = _study_dir(storage)
+
+        def _fail(*args, **kwargs):
+            raise OSError("disk full")
+
+        monkeypatch.setattr(
+            "app.services.file_management_service._write_metadata", _fail
+        )
+
+        with pytest.raises(OSError, match="disk full"):
+            FileManagementService().move_directory_to_trash(str(source), "imaging_7_x")
+
+        assert (source / "1.2.3.4" / "a.dcm").read_bytes() == b"a" * 10
+        assert not any(settings.TRASH_DIR.rglob("imaging_7_x*"))
+
+
+class TestTrashRetention:
+    def _age(self, path: Path, days: int) -> None:
+        old = (datetime.now() - timedelta(days=days)).timestamp()
+        for p in [path, *path.rglob("*")]:
+            os.utime(p, (old, old))
+
+    def test_new_entry_with_old_files_is_kept(self, storage):
+        source = _study_dir(storage)
+        self._age(source, settings.TRASH_RETENTION_DAYS + 30)
+        trashed = FileManagementService().move_directory_to_trash(
+            str(source), trash_name="imaging_7_1.2.3"
+        )
+
+        stats = FileManagementService().cleanup_old_trash()
+
+        assert stats == {"deleted_files": 0, "deleted_dirs": 0}
+        assert (trashed / "1.2.3.4" / "a.dcm").exists()
+        assert FileManagementService().is_trashed_directory(trashed)
+
+    def test_expired_day_folder_is_removed_whole(self, storage):
+        trashed = _trash(storage)
+        expired = settings.TRASH_DIR / (
+            datetime.now() - timedelta(days=settings.TRASH_RETENTION_DAYS + 1)
+        ).strftime("%Y-%m-%d")
+        trashed.parent.rename(expired)
+
+        stats = FileManagementService().cleanup_old_trash()
+
+        assert stats == {"deleted_files": 3, "deleted_dirs": 1}
+        assert not expired.exists()
+
+    def test_old_file_outside_day_folders_is_removed(self, storage):
+        stray = settings.TRASH_DIR / "legacy" / "old.pdf"
+        stray.parent.mkdir()
+        stray.write_bytes(b"x")
+        self._age(stray, settings.TRASH_RETENTION_DAYS + 1)
+
+        stats = FileManagementService().cleanup_old_trash()
+
+        assert stats["deleted_files"] == 1
+        assert not stray.exists()
 
 
 class TestTrashedDirectorySize:

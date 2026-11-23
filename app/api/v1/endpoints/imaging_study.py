@@ -1,5 +1,6 @@
 """API endpoints for Imaging Studies."""
 
+import threading
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -41,6 +42,7 @@ DICOM_MEDIA_TYPE = "application/dicom"
 FILE_ACCESS_LOG_WINDOW_SECONDS = 15 * 60
 _FILE_ACCESS_LOG_MAX_ENTRIES = 10_000
 _file_access_logged_at: Dict[Tuple[int, int], float] = {}
+_file_access_log_lock = threading.Lock()
 
 
 def _should_log_file_access(user_id: int, study_id: int) -> bool:
@@ -50,17 +52,19 @@ def _should_log_file_access(user_id: int, study_id: int) -> bool:
     """
     now = time.monotonic()
     key = (user_id, study_id)
-    last = _file_access_logged_at.get(key)
-    if last is not None and now - last < FILE_ACCESS_LOG_WINDOW_SECONDS:
-        return False
-    if len(_file_access_logged_at) >= _FILE_ACCESS_LOG_MAX_ENTRIES:
-        cutoff = now - FILE_ACCESS_LOG_WINDOW_SECONDS
-        for stale in [k for k, t in _file_access_logged_at.items() if t < cutoff]:
-            del _file_access_logged_at[stale]
+    # Sync endpoints run on threadpool threads; pruning must not race inserts
+    with _file_access_log_lock:
+        last = _file_access_logged_at.get(key)
+        if last is not None and now - last < FILE_ACCESS_LOG_WINDOW_SECONDS:
+            return False
         if len(_file_access_logged_at) >= _FILE_ACCESS_LOG_MAX_ENTRIES:
-            _file_access_logged_at.clear()
-    _file_access_logged_at[key] = now
-    return True
+            cutoff = now - FILE_ACCESS_LOG_WINDOW_SECONDS
+            for stale in [k for k, t in _file_access_logged_at.items() if t < cutoff]:
+                del _file_access_logged_at[stale]
+            if len(_file_access_logged_at) >= _FILE_ACCESS_LOG_MAX_ENTRIES:
+                _file_access_logged_at.clear()
+        _file_access_logged_at[key] = now
+        return True
 
 
 def _get_accessible_study(

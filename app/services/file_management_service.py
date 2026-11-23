@@ -46,6 +46,17 @@ def _write_metadata(trash_path: Path, source: Path, reason: Optional[str], **ext
     return metadata
 
 
+TRASH_DAY_FORMAT = "%Y-%m-%d"
+
+
+def _is_day_folder_name(name: str) -> bool:
+    try:
+        datetime.strptime(name, TRASH_DAY_FORMAT)
+    except ValueError:
+        return False
+    return True
+
+
 def _tree_size(directory: Path) -> int:
     return sum(p.stat().st_size for p in directory.rglob("*") if p.is_file())
 
@@ -74,7 +85,7 @@ class FileManagementService:
         return Path(settings.TRASH_DIR)
 
     def _daily_trash_dir(self) -> Path:
-        daily_trash_dir = self.trash_dir / datetime.now().strftime("%Y-%m-%d")
+        daily_trash_dir = self.trash_dir / datetime.now().strftime(TRASH_DAY_FORMAT)
         daily_trash_dir.mkdir(parents=True, exist_ok=True)
         return daily_trash_dir
 
@@ -197,9 +208,15 @@ class FileManagementService:
         # Measured once here so listing the trash need not walk every file
         size_bytes = _tree_size(source)
         shutil.move(str(source), str(trash_path))
-        _write_metadata(
-            trash_path, source, reason, is_directory=True, size_bytes=size_bytes
-        )
+        try:
+            _write_metadata(
+                trash_path, source, reason, is_directory=True, size_bytes=size_bytes
+            )
+        except OSError:
+            # Without its sidecar the entry could be neither listed nor restored
+            _metadata_path(trash_path).unlink(missing_ok=True)
+            shutil.move(str(trash_path), str(source))
+            raise
         return trash_path
 
     def is_trashed_directory(self, path: Path) -> bool:
@@ -292,26 +309,22 @@ class FileManagementService:
             deleted_files = 0
             deleted_dirs = 0
 
-            # Walk through trash directory
-            for root, _dirs, files in os.walk(self.trash_dir, topdown=False):
+            for entry in list(self.trash_dir.iterdir()):
+                if not entry.is_dir() or not _is_day_folder_name(entry.name):
+                    continue
+                # The folder date is the trash date; moved files keep their old mtimes
+                if datetime.strptime(entry.name, TRASH_DAY_FORMAT) < cutoff_date:
+                    deleted_files += sum(1 for p in entry.rglob("*") if p.is_file())
+                    shutil.rmtree(entry)
+                    deleted_dirs += 1
+                    logger.info(f"Deleted old trash directory: {entry}")
+
+            # Files outside day folders have no trash date, so their own age decides
+            for root, dirs, files in os.walk(self.trash_dir, topdown=True):
                 root_path = Path(root)
+                if root_path == self.trash_dir:
+                    dirs[:] = [d for d in dirs if not _is_day_folder_name(d)]
 
-                # Check if this is a daily directory (YYYY-MM-DD format)
-                if root_path.parent == self.trash_dir:
-                    try:
-                        dir_date = datetime.strptime(root_path.name, "%Y-%m-%d")
-                        if dir_date < cutoff_date:
-                            # Delete entire directory and its contents
-                            shutil.rmtree(root_path)
-                            deleted_dirs += 1
-                            deleted_files += len(files)
-                            logger.info(f"Deleted old trash directory: {root_path}")
-                            continue
-                    except ValueError:
-                        # Not a date directory, skip
-                        pass
-
-                # For files in non-date directories, check individual file age
                 for file in files:
                     file_path = root_path / file
                     if file_path.stat().st_mtime < cutoff_date.timestamp():
