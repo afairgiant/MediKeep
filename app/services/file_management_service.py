@@ -97,13 +97,15 @@ class FileManagementService:
                 was not trashed as one entry (such as a day folder).
             FileNotFoundError: nothing exists at the path.
         """
-        trash_root = self.trash_dir.resolve()
+        trash_root = os.path.realpath(self.trash_dir)
         try:
-            resolved = Path(trash_path).resolve()
+            real_path = os.path.realpath(trash_path)
         except (OSError, ValueError) as exc:
             raise ValueError(f"Invalid trash path: {trash_path}") from exc
-        if resolved == trash_root or not resolved.is_relative_to(trash_root):
+        # The separator rejects the root itself and siblings such as trash_old
+        if not real_path.startswith(trash_root + os.sep):
             raise ValueError(f"Invalid trash path: {trash_path}")
+        resolved = Path(real_path)
         if not resolved.exists():
             raise FileNotFoundError(f"File not found in trash: {trash_path}")
         if resolved.is_dir() and not self.is_trashed_directory(resolved):
