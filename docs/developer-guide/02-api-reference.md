@@ -3909,6 +3909,154 @@ check when the patient may donate again.
 
 ---
 
+### 6.15 Imaging Studies
+
+Base path: `/api/v1/imaging-studies`
+
+**Purpose**: Stored DICOM studies (X-ray, CT, MRI, ultrasound) with their series and
+images. Studies are created by the import endpoints (planned); these endpoints read,
+edit and delete them. Header-derived fields (`study_date`, `modalities`, `body_part`,
+`study_description`, `accession_number`, `institution_name`, `referring_physician`)
+are read-only.
+
+**Access**: reads need view access to the study's patient (owner or any share);
+updates and deletes need edit access. A study the user cannot access returns `404`.
+
+##### List Imaging Studies
+
+`GET /imaging-studies/`
+
+- **Purpose**: Studies for the current or an accessible patient, newest study date
+  first; undated studies last
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `patient_id` (optional): an accessible patient; defaults to the active patient
+  - `skip` (default 0), `limit` (default 20, max 100)
+  - `tags`, `tag_match_all`: tag filter, as on other record types
+- **Success Response** (200): array of imaging study objects
+- **Error Responses**:
+  - `403`: No access to `patient_id`
+
+##### Get Imaging Study
+
+`GET /imaging-studies/{study_id}`
+
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+{
+  "id": 3,
+  "patient_id": 1,
+  "study_instance_uid": "1.2.840.113619.2.55.3.604688119",
+  "study_date": "2026-05-01",
+  "modalities": ["CT"],
+  "body_part": "CHEST",
+  "study_description": "CT CHEST W/O CONTRAST",
+  "accession_number": "A12345",
+  "institution_name": "General Hospital",
+  "referring_physician": "SMITH^JANE",
+  "notes": null,
+  "report_text": null,
+  "procedure_id": null,
+  "encounter_id": null,
+  "practitioner_id": null,
+  "series_count": 2,
+  "instance_count": 412,
+  "total_size": 216530944,
+  "tags": [],
+  "created_at": "2026-11-22T12:00:00Z",
+  "updated_at": "2026-11-22T12:00:00Z"
+}
+```
+
+- **Error Responses**:
+  - `404`: Study not found or not accessible
+
+##### List Series and Images
+
+`GET /imaging-studies/{study_id}/series`
+
+- **Purpose**: Series in series-number order, each with its images in instance-number
+  order, for the viewer. File paths are never returned.
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+[
+  {
+    "id": 5,
+    "series_instance_uid": "1.2.840.113619.2.55.3.604688119.2",
+    "modality": "CT",
+    "series_number": 2,
+    "series_description": "AXIAL 1.25mm",
+    "instance_count": 1,
+    "instances": [
+      {
+        "id": 88,
+        "sop_instance_uid": "1.2.840.113619.2.55.3.604688119.2.1",
+        "instance_number": 1,
+        "rows": 512,
+        "cols": 512,
+        "number_of_frames": null
+      }
+    ]
+  }
+]
+```
+
+##### Get Image File
+
+`GET /imaging-studies/{study_id}/instances/{instance_id}/file`
+
+- **Purpose**: Raw DICOM bytes of one image, for the viewer's `wadouri` loader. The
+  first image read of a study by a user is access-logged once per 15 minutes.
+- **Authentication**: Yes (Authorization header)
+- **Success Response** (200): `application/dicom` body, `Cache-Control: private, no-store`
+- **Error Responses**:
+  - `404`: Study not accessible, image not in this study, or file missing from storage
+
+##### Update Imaging Study
+
+`PUT /imaging-studies/{study_id}`
+
+- **Purpose**: Update the user-editable fields. Fields not listed below are ignored.
+- **Authentication**: Yes (edit access)
+- **Request Body** (all optional):
+
+```json
+{
+  "notes": "Follow-up in 6 months",
+  "report_text": "Radiologist's report pasted here",
+  "procedure_id": 12,
+  "encounter_id": 40,
+  "practitioner_id": 3,
+  "tags": ["chest"]
+}
+```
+
+- **Validation**:
+  - `notes`: max 5000 characters, `report_text`: max 50000 characters
+  - `procedure_id` and `encounter_id` must belong to the study's patient
+- **Success Response** (200): Imaging study object
+- **Error Responses**:
+  - `400`: Linked procedure or encounter belongs to another patient
+  - `404`: Study not found or no edit access
+  - `422`: Validation error
+
+##### Delete Imaging Study
+
+`DELETE /imaging-studies/{study_id}`
+
+- **Purpose**: Delete the study, its series and images, and move its folder to trash
+  as one entry (restorable by an admin until trash retention expires)
+- **Authentication**: Yes (edit access)
+- **Success Response** (200): `{"message": "ImagingStudy deleted successfully"}`
+- **Error Responses**:
+  - `404`: Study not found or no edit access
+
+---
+
 ## 7. Related Information
 
 ### 7.1 Insurance
@@ -4771,6 +4919,8 @@ Deletes that remove records without going through their own endpoint clean up th
 Lab results also have older attachments in `lab_result_files`. Those rows are deleted along with the lab result, and their locally stored files move to trash.
 
 In the deletes listed above, a stored file from `lab_result_files`, or from an `entity_file` or `lab_result_file` record deleted directly, stays in place while another file record still points to it.
+
+Imaging studies of a deleted patient (and `DELETE /imaging-studies/{study_id}`) move their whole study folder to trash as one entry, named `imaging_{patient_id}_{study_instance_uid}`.
 
 The cleanup runs only after the delete has been committed, so if the delete fails the attachments stay in place. A failure during cleanup is logged and does not change the response.
 
@@ -6742,7 +6892,8 @@ Base path: `/api/v1/admin/trash`
 `GET /admin/trash/`
 
 - **Purpose**: List all files currently in trash
-- **Success Response** (200): Array of trash file objects
+- **Success Response** (200): Array of trash file objects. A folder trashed as one entry
+  (an imaging study) is listed once, with the total size of its files
 
 #### Cleanup Old Trash
 
@@ -6762,9 +6913,9 @@ Base path: `/api/v1/admin/trash`
 
 `POST /admin/trash/restore`
 
-- **Purpose**: Restore a file from trash
+- **Purpose**: Restore a file, or a folder trashed as one entry, from trash
 - **Query Parameters**:
-  - `trash_path` (string, required): Path to file in trash
+  - `trash_path` (string, required): Path to file in trash; any other folder is refused
   - `restore_path` (string, optional): Target restore path
 - **Success Response** (200):
 
@@ -6779,9 +6930,10 @@ Base path: `/api/v1/admin/trash`
 
 `DELETE /admin/trash/permanently-delete`
 
-- **Purpose**: Permanently delete a file (cannot be recovered)
+- **Purpose**: Permanently delete a file, or a folder trashed as one entry (cannot be recovered)
 - **Query Parameters**:
-  - `trash_path` (string, required): Path to file in trash
+  - `trash_path` (string, required): Path to file in trash; the trash root and its day
+    folders are refused with `400`
 - **Success Response** (200):
 
 ```json

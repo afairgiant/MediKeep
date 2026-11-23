@@ -78,44 +78,23 @@ async def restore_file_from_trash(
 
 
 @router.delete("/trash/permanently-delete")
-async def permanently_delete_from_trash(
+def permanently_delete_from_trash(
     trash_path: str,
     current_user: User = Depends(get_current_admin_user),
 ) -> Dict[str, str]:
     """
-    Permanently delete a file from trash (cannot be recovered).
+    Permanently delete a file, or a directory trashed as one entry (cannot be recovered).
     """
     try:
-        import os
-        from pathlib import Path
-
-        from app.core.config import settings
-
-        # Validate and normalize trash_path to prevent directory traversal
-        normalized_trash_path = os.path.normpath(trash_path)
-        if not normalized_trash_path.startswith(str(settings.TRASH_DIR)):
-            raise ValueError(f"Invalid trash path: {trash_path}")
-
-        trash_file = Path(normalized_trash_path)
-        if not trash_file.exists():
-            raise HTTPException(status_code=404, detail="File not found in trash")
-
-        # Remove the file and its metadata
-        trash_file.unlink()
-
-        metadata_path = trash_file.with_suffix(trash_file.suffix + ".meta")
-        if metadata_path.exists():
-            metadata_path.unlink()
-
+        file_management_service.permanently_delete_from_trash(trash_path)
         return {
             "status": "success",
             "message": f"File permanently deleted: {trash_path}",
         }
-
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="File not found in trash")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except HTTPException:
-        raise
     except Exception as e:
         _log_trash_failure("trash_permanent_delete_failed", current_user, e)
         raise HTTPException(
