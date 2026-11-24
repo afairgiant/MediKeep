@@ -13,11 +13,15 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.v1.admin.models import MODEL_REGISTRY
+from app.core.logging.config import get_logger
+from app.crud.activity_log import activity_log
 from app.models.models import User
 from app.services.attachment_cleanup import (
     cleanup_attachments,
     find_record_attachments,
 )
+
+logger = get_logger(__name__, "app")
 
 router = APIRouter()
 
@@ -75,6 +79,9 @@ def bulk_delete_records(
                 record_files = find_record_attachments(
                     db, model_info["model"], [record_id]
                 )
+                if request.model_name == "patient":
+                    # Rolled back with the delete if the delete fails
+                    activity_log.detach_patient_activity(db, patient_ids=[record_id])
                 crud_instance.delete(db, id=record_id)
                 cleanup_attachments(
                     db,
@@ -84,7 +91,13 @@ def bulk_delete_records(
                 success_count += 1
             else:
                 failed_records.append(record_id)
-        except Exception:
+        except Exception as e:
+            db.rollback()
+            logger.warning(
+                f"Bulk delete failed for {request.model_name} {record_id}: "
+                f"{type(e).__name__}",
+                extra={"model": request.model_name, "record_id": record_id},
+            )
             failed_records.append(record_id)
 
     return BulkOperationResponse(

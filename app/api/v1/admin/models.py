@@ -50,6 +50,7 @@ from app.crud import (
     user,
     vitals,
 )
+from app.crud.activity_log import activity_log
 from app.crud.base import CRUDBase
 from app.crud.blood_donation import blood_donation
 from app.crud.emergency_contact import emergency_contact
@@ -58,7 +59,7 @@ from app.crud.injury import injury
 from app.crud.injury_type import injury_type
 from app.crud.medical_equipment import medical_equipment
 from app.crud.symptom import symptom_occurrence, symptom_parent
-from app.models.activity_log import ActionType, ActivityLog, EntityType
+from app.models.activity_log import ActionType, EntityType
 from app.models.enums import get_all_donation_types
 from app.models.labs import LabTestComponent
 from app.models.models import (
@@ -1835,10 +1836,7 @@ def delete_model_record(
                 )
 
             if model_name == "patient":
-                # Detach the audit trail; activity_logs.patient_id has no ON DELETE action
-                db.query(ActivityLog).filter(
-                    ActivityLog.patient_id == record_id
-                ).update({"patient_id": None}, synchronize_session=False)
+                activity_log.detach_patient_activity(db, patient_ids=[record_id])
 
             record_files = find_record_attachments(db, model_info["model"], [record_id])
             crud_instance.delete(db, id=record_id)
