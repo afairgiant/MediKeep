@@ -151,7 +151,7 @@ class TestLabResultFileDeleteDoesNotEchoTheCause:
     ):
         headers, lab_result_id = _owner_with_uploaded_file(db_session, client)
 
-        def explode(file_obj):
+        def explode(db, file_obj, deleted_ids):
             raise OSError(CAUSE)
 
         monkeypatch.setattr(lab_result_file_module, "_remove_physical_file", explode)
