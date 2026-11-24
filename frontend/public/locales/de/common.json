@@ -520,6 +520,7 @@
     "labResultsAvailableToLink_one": "{{count}} Laborergebnisse zum Verknüpfen verfügbar",
     "labResultsAvailableToLink_other": "{{count}} Laborergebnisse zum Verknüpfen verfügbar",
     "loading": "Lädt...",
+    "opensInNewTab": "(öffnet in neuem Tab)",
     "verifyingAuthentication": "Authentifizierung wird überprüft...",
     "loadingOption": "{{option}} wird geladen...",
     "medicationsAvailableToLink": "{{count}} Medikamente zum Verknüpfen verfügbar",

@@ -519,6 +519,7 @@
     "expectedFrequency": "预期频率",
     "labResultsAvailableToLink_other": "有 {{count}} 条检验结果可关联",
     "loading": "正在加载...",
+    "opensInNewTab": "（在新标签页中打开）",
     "verifyingAuthentication": "正在验证身份...",
     "loadingOption": "正在加载{{option}}...",
     "medicationsAvailableToLink": "有{{count}}个药物可关联",

@@ -8,8 +8,9 @@ type PreferenceMatrix = {
 /**
  * Whether the current user has a notification channel on for ``eventType``.
  *
- * Checks while ``active`` and again when ``recheckKey`` changes. Stays true when
- * the check fails, so a transient error never shows a false warning.
+ * Checks while ``active``, again when ``recheckKey`` changes, and, while no
+ * channel is on, whenever the window regains focus. Stays true when the check
+ * fails, so a transient error never shows a false warning.
  */
 export const useReminderChannelStatus = (
   eventType: string,
@@ -17,6 +18,15 @@ export const useReminderChannelStatus = (
   recheckKey?: unknown
 ) => {
   const [hasChannel, setHasChannel] = useState(true);
+  const [focusCount, setFocusCount] = useState(0);
+
+  // The settings link opens in another tab; returning here should clear a fixed warning
+  useEffect(() => {
+    if (!active || hasChannel) return undefined;
+    const onFocus = () => setFocusCount(count => count + 1);
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [active, hasChannel]);
 
   useEffect(() => {
     if (!active) return undefined;
@@ -36,7 +46,7 @@ export const useReminderChannelStatus = (
     return () => {
       cancelled = true;
     };
-  }, [eventType, active, recheckKey]);
+  }, [eventType, active, recheckKey, focusCount]);
 
   return [hasChannel, setHasChannel] as const;
 };

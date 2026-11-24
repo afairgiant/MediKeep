@@ -16,7 +16,6 @@ import {
   Switch,
   Alert,
   ActionIcon,
-  Anchor,
   Chip,
 } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
@@ -34,6 +33,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useLinkPanelDescription } from '../../hooks/useLinkPanelDescription';
+import NotificationSettingsLink from '../shared/NotificationSettingsLink';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import { getReminderBlockerDescriptors, REMINDER_BLOCKERS } from '../../utils/medicationReminders';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
@@ -691,12 +691,12 @@ const MantineMedicationForm = ({
                           'No notification channel is configured for medication reminders. Open Notification Settings to enable a channel.'
                         )}
                       </Text>
-                      <Anchor href="/settings?tab=notifications" size="sm">
+                      <NotificationSettingsLink>
                         {t(
                           'medications.reminders.openSettings',
                           'Open Notification Settings'
                         )}
-                      </Anchor>
+                      </NotificationSettingsLink>
                     </Alert>
                   )}
                   {reminderBlockerDescriptors.length > 0 && (

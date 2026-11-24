@@ -520,6 +520,7 @@
     "labResultsAvailableToLink_one": "Результатов исследований, доступных для связывания: {{count}}",
     "labResultsAvailableToLink_other": "Результатов исследований, доступных для связывания: {{count}}",
     "loading": "Загрузка...",
+    "opensInNewTab": "(откроется в новой вкладке)",
     "verifyingAuthentication": "Проверка аутентификации...",
     "loadingOption": "Загрузка {{option}}...",
     "medicationsAvailableToLink": "Доступно для связывания: {{count}} лекарств",

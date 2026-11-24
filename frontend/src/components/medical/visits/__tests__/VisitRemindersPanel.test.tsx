@@ -144,6 +144,9 @@ describe('VisitRemindersPanel', () => {
     expect(
       await screen.findByText('No notification channel enabled')
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /Open Notification Settings/ })
+    ).toBeInTheDocument();
   });
 
   it('warns that a past visit will not be reminded', () => {

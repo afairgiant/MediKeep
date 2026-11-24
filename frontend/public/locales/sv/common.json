@@ -520,6 +520,7 @@
     "labResultsAvailableToLink_one": "{{count}} laboratorieresultat kan länkas",
     "labResultsAvailableToLink_other": "{{count}} laboratorieresultat kan länkas",
     "loading": "Laddar...",
+    "opensInNewTab": "(öppnas i en ny flik)",
     "verifyingAuthentication": "Verifierar autentisering...",
     "loadingOption": "Laddar {{option}}...",
     "medicationsAvailableToLink": "{{count}} läkemedel tillgängliga att länka",

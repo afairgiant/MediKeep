@@ -520,6 +520,7 @@
     "labResultsAvailableToLink_one": "{{count}} εργαστηριακό αποτέλεσμα διαθέσιμο για σύνδεση",
     "labResultsAvailableToLink_other": "{{count}} εργαστηριακά αποτελέσματα διαθέσιμα για σύνδεση",
     "loading": "Φόρτωση...",
+    "opensInNewTab": "(ανοίγει σε νέα καρτέλα)",
     "verifyingAuthentication": "Επαλήθευση ταυτότητας...",
     "loadingOption": "Φόρτωση {{option}}...",
     "medicationsAvailableToLink": "{{count}} φάρμακα διαθέσιμα για σύνδεση",

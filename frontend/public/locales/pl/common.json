@@ -520,6 +520,7 @@
     "labResultsAvailableToLink_one": "Wyniki laboratoryjne dostępne do połączenia: {{count}}",
     "labResultsAvailableToLink_other": "Wyniki laboratoryjne dostępne do połączenia: {{count}}",
     "loading": "Ładowanie...",
+    "opensInNewTab": "(otwiera się w nowej karcie)",
     "verifyingAuthentication": "Weryfikowanie uwierzytelnienia...",
     "loadingOption": "Ładowanie {{option}}...",
     "medicationsAvailableToLink": "Dostępne do połączenia: {{count}} leków",
