@@ -4,11 +4,20 @@
   top: 0;
   left: 0;
   height: 100vh;
+  /* dvh excludes mobile browser toolbars that would cover the last nav item */
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background: var(--mantine-color-body);
   border-right: 1px solid var(--mantine-color-default-border);
   transition: width 0.3s ease;
   z-index: 1000;
   overflow: hidden;
+}
+
+.admin-sidebar-scroll {
+  flex: 1;
+  min-height: 0;
 }
 
 .admin-sidebar.open {
