@@ -141,6 +141,12 @@ describe('injuryFormUtils', () => {
     );
     expect(payload).not.toHaveProperty('pending_visit_links');
   });
+
+  it('sends active when the status was cleared', () => {
+    expect(buildInjuryPayload({ ...filled, status: '' }, 7).status).toBe(
+      'active'
+    );
+  });
 });
 
 describe('symptomFormUtils', () => {
