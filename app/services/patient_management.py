@@ -254,11 +254,13 @@ class PatientManagementService:
         Delete a patient record (only owner can delete)
 
         This method handles all foreign key constraints by:
-        1. Clearing active_patient_id references in users table
-        2. Removing patient sharing relationships
-        3. Deleting activity logs that reference this patient
-        4. Deleting all associated medical records (cascaded via database)
-        5. Finally deleting the patient record
+        1. Removing patient sharing relationships
+        2. Deleting activity logs that reference this patient
+        3. Deleting the patient record (its medical records are cascaded via database)
+        4. Cleaning up the records' attachments
+
+        Users whose active patient is this one have active_patient_id cleared by
+        the database (ON DELETE SET NULL).
 
         Args:
             user: The user deleting the patient
@@ -281,7 +283,7 @@ class PatientManagementService:
         try:
             # Temporarily disable activity tracking to prevent new logs during deletion
             activity_tracking_disabled_var.set(True)
-            # Step 2: Remove patient sharing relationships
+            # Step 1: Remove patient sharing relationships
             sharing_records = (
                 self.db.query(PatientShare)
                 .filter(PatientShare.patient_id == patient_id)
@@ -294,7 +296,7 @@ class PatientManagementService:
                 )
                 self.db.delete(share)
 
-            # Step 3: Delete activity logs that reference this patient
+            # Step 2: Delete activity logs that reference this patient
             from app.models import ActivityLog
 
             activity_logs = (
@@ -307,7 +309,7 @@ class PatientManagementService:
                 logger.info(f"Removing activity log {log.id} for patient {patient_id}")
                 self.db.delete(log)
 
-            # Step 4: Delete the patient (medical records will be cascaded by database constraints)
+            # Step 3: Delete the patient (medical records will be cascaded by database constraints)
             logger.info(
                 f"Deleting patient {patient_id} and all associated medical records"
             )
@@ -325,7 +327,7 @@ class PatientManagementService:
                 f"Successfully deleted patient {patient.id} and cleared all references"
             )
 
-            # Step 5: Clean up the records' attachments, which nothing cascades to
+            # Step 4: Clean up the records' attachments, which nothing cascades to
             cleanup_attachments(
                 self.db, patient_files, reason=f"patient {patient_id} deletion"
             )
