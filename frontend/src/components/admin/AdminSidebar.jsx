@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -26,6 +27,7 @@ import {
   IconSettings,
   IconChevronLeft,
   IconChevronRight,
+  IconArrowLeft,
 } from '@tabler/icons-react';
 import './AdminSidebar.css';
 
@@ -98,6 +100,18 @@ const getNavSections = t => [
         label: t('shared:labels.settings', 'Settings'),
         icon: IconSettings,
         path: '/admin/settings',
+      },
+    ],
+  },
+  {
+    key: 'exit',
+    divider: true,
+    items: [
+      {
+        label: t('header.returnToDashboard', 'Return to Dashboard'),
+        icon: IconArrowLeft,
+        path: '/dashboard',
+        exact: true,
       },
     ],
   },
@@ -175,11 +189,26 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
           </ActionIcon>
         </Group>
 
-        <ScrollArea h="calc(100vh - 70px)" px={isOpen ? 'xs' : 0} py="md">
+        <ScrollArea
+          className="admin-sidebar-scroll"
+          px={isOpen ? 'xs' : 0}
+          py="md"
+        >
           <Stack gap="lg">
             {sections.map(section => (
-              <Box key={section.label}>
-                {isOpen && (
+              <Box
+                key={section.key ?? section.label}
+                pt={section.divider ? 'md' : undefined}
+                style={
+                  section.divider
+                    ? {
+                        borderTop:
+                          '1px solid var(--mantine-color-default-border)',
+                      }
+                    : undefined
+                }
+              >
+                {isOpen && section.label && (
                   <Text
                     size="xs"
                     tt="uppercase"
@@ -221,6 +250,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
                             variant={active ? 'light' : 'subtle'}
                             color={active ? 'blue' : 'gray'}
                             size="lg"
+                            aria-label={item.label}
                             aria-current={active ? 'page' : undefined}
                             disabled={item.disabled}
                             style={{
@@ -258,6 +288,12 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
       </Box>
     </>
   );
+};
+
+AdminSidebar.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func,
+  currentPath: PropTypes.string.isRequired,
 };
 
 export default AdminSidebar;

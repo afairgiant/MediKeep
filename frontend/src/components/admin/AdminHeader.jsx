@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -45,6 +46,9 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
 
   const handleLogout = () => onLogout?.();
   const handleToggleSidebar = () => onToggleSidebar?.();
+  const goToDashboard = () => navigate('/dashboard');
+  const returnLabel = t('header.returnToDashboard', 'Return to Dashboard');
+  const logoutLabel = t('header.logout', 'Logout');
 
   return (
     <Box
@@ -67,8 +71,21 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
           >
             <IconMenu2 size={20} />
           </ActionIcon>
-          <Text fw={600} size="xl" style={{ whiteSpace: 'nowrap' }}>
+          <Text
+            fw={600}
+            size="xl"
+            style={{ whiteSpace: 'nowrap' }}
+            visibleFrom="sm"
+          >
             {t('header.title', 'Medical Records Admin')}
+          </Text>
+          <Text
+            fw={600}
+            size="xl"
+            style={{ whiteSpace: 'nowrap' }}
+            hiddenFrom="sm"
+          >
+            {t('shared:labels.admin', 'Admin')}
           </Text>
         </Group>
 
@@ -88,7 +105,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
                 variant="subtle"
                 size="sm"
                 onClick={handleSearch}
-                aria-label="Search"
+                aria-label={t('common:buttons.search', 'Search')}
               >
                 <IconSearch size={14} />
               </ActionIcon>
@@ -97,18 +114,29 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
         </Box>
 
         <Group gap="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
-          <Tooltip label={t('header.returnToDashboard', 'Return to Dashboard')}>
+          <Tooltip label={returnLabel}>
             <Button
               variant="default"
               size="compact-sm"
               leftSection={<IconArrowLeft size={14} />}
-              onClick={() => navigate('/dashboard')}
-              title={t('header.returnToDashboard', 'Return to Dashboard')}
+              onClick={goToDashboard}
+              title={returnLabel}
               visibleFrom="md"
             >
               {t('shared:labels.dashboard', 'Dashboard')}
             </Button>
           </Tooltip>
+
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="xl"
+            onClick={goToDashboard}
+            aria-label={returnLabel}
+            hiddenFrom="md"
+          >
+            <IconArrowLeft size={18} />
+          </ActionIcon>
 
           <Group
             gap="xs"
@@ -165,14 +193,32 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             size="compact-sm"
             leftSection={<IconLogout size={14} />}
             onClick={handleLogout}
-            title={t('header.logout', 'Logout')}
+            title={logoutLabel}
+            visibleFrom="sm"
           >
-            {t('header.logout', 'Logout')}
+            {logoutLabel}
           </Button>
+
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="xl"
+            onClick={handleLogout}
+            aria-label={logoutLabel}
+            hiddenFrom="sm"
+          >
+            <IconLogout size={18} />
+          </ActionIcon>
         </Group>
       </Group>
     </Box>
   );
+};
+
+AdminHeader.propTypes = {
+  user: PropTypes.shape({ username: PropTypes.string }),
+  onLogout: PropTypes.func,
+  onToggleSidebar: PropTypes.func,
 };
 
 export default AdminHeader;

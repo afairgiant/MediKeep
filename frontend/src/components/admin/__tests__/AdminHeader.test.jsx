@@ -54,6 +54,17 @@ describe('AdminHeader', () => {
     );
   });
 
+  test('compact return-to-dashboard icon navigates to /dashboard', () => {
+    renderAdminHeader();
+
+    const iconBtn = screen.getByRole('button', {
+      name: 'Return to Dashboard',
+    });
+    fireEvent.click(iconBtn);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+  });
+
   test('pressing Enter in search input navigates to /admin/data-models with encoded query', () => {
     renderAdminHeader();
 
@@ -157,21 +168,23 @@ describe('AdminHeader', () => {
     expect(() => fireEvent.click(sidebarToggleBtn)).not.toThrow();
   });
 
-  test('logout button calls onLogout when provided', () => {
+  test('full and compact logout buttons each call onLogout', () => {
     const onLogout = vi.fn();
     renderAdminHeader({ onLogout });
 
-    const logoutBtn = screen.getByRole('button', { name: /logout/i });
-    fireEvent.click(logoutBtn);
+    const logoutBtns = screen.getAllByRole('button', { name: /logout/i });
+    expect(logoutBtns).toHaveLength(2);
+    logoutBtns.forEach(btn => fireEvent.click(btn));
 
-    expect(onLogout).toHaveBeenCalledTimes(1);
+    expect(onLogout).toHaveBeenCalledTimes(2);
   });
 
-  test('logout button does not throw when onLogout is not provided', () => {
+  test('logout buttons do not throw when onLogout is not provided', () => {
     renderAdminHeader();
 
-    const logoutBtn = screen.getByRole('button', { name: /logout/i });
-    expect(() => fireEvent.click(logoutBtn)).not.toThrow();
+    screen
+      .getAllByRole('button', { name: /logout/i })
+      .forEach(btn => expect(() => fireEvent.click(btn)).not.toThrow());
   });
 
   test('search query with special characters is URL-encoded in navigation path', () => {
