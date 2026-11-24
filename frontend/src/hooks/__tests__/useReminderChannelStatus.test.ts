@@ -31,6 +31,36 @@ describe('useReminderChannelStatus', () => {
     await waitFor(() => expect(result.current[0]).toBe(true));
   });
 
+  it('keeps the warning when a focus recheck fails and retries on the next focus', async () => {
+    getMatrix.mockResolvedValueOnce(withChannel(false));
+    const { result } = renderHook(() =>
+      useReminderChannelStatus('medication_reminder', true)
+    );
+    await waitFor(() => expect(result.current[0]).toBe(false));
+
+    getMatrix.mockRejectedValueOnce(new Error('network'));
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    await waitFor(() => expect(getMatrix).toHaveBeenCalledTimes(2));
+    expect(result.current[0]).toBe(false);
+
+    getMatrix.mockResolvedValueOnce(withChannel(true));
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    await waitFor(() => expect(result.current[0]).toBe(true));
+  });
+
+  it('assumes a channel when the initial check fails', async () => {
+    getMatrix.mockRejectedValueOnce(new Error('network'));
+    const { result } = renderHook(() =>
+      useReminderChannelStatus('medication_reminder', true)
+    );
+    await waitFor(() => expect(getMatrix).toHaveBeenCalledTimes(1));
+    expect(result.current[0]).toBe(true);
+  });
+
   it('does not check on focus while inactive', () => {
     renderHook(() => useReminderChannelStatus('medication_reminder', false));
     window.dispatchEvent(new Event('focus'));
