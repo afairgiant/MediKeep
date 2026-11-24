@@ -256,7 +256,8 @@ class PatientManagementService:
         This method handles all foreign key constraints by:
         1. Removing patient sharing relationships
         2. Deleting activity logs that reference this patient
-        3. Deleting the patient record (its medical records are cascaded via database)
+        3. Deleting the patient record; the ORM cascades (cascade="all, delete-orphan"
+           on the Patient relationships) delete its medical records
         4. Cleaning up the records' attachments
 
         Users whose active patient is this one have active_patient_id cleared by
@@ -309,7 +310,7 @@ class PatientManagementService:
                 logger.info(f"Removing activity log {log.id} for patient {patient_id}")
                 self.db.delete(log)
 
-            # Step 3: Delete the patient (medical records will be cascaded by database constraints)
+            # Step 3: Delete the patient (the Patient relationships' ORM cascades delete the medical records)
             logger.info(
                 f"Deleting patient {patient_id} and all associated medical records"
             )
