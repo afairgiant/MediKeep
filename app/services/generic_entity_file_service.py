@@ -3270,6 +3270,10 @@ class GenericEntityFileService:
                     f"Error processing file {file_record.id}: {str(file_error)}"
                 )
                 errors += 1
+                # Its row stays, so later rows sharing its file must keep it
+                kept_path = local_paths.get(file_record.id)
+                if kept_path:
+                    shared_paths.add(kept_path)
                 # Continue with other files
 
         # Commit all file record deletions

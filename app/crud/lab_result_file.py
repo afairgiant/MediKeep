@@ -101,7 +101,9 @@ class CRUDLabResultFile(
         """Delete all files associated with a lab result (moves to trash)"""
         # Get all files for this lab result
         files_to_delete = self.get_by_lab_result(db=db, lab_result_id=lab_result_id)
-        deleted_ids = [file_record.id for file_record in files_to_delete]
+        # Rows still to be removed. A row whose file fails to move stays, so it
+        # keeps counting as a user of that file for the rows after it.
+        deleting = {file_record.id for file_record in files_to_delete}
 
         deleted_count = 0
         for file_record in files_to_delete:
@@ -109,7 +111,7 @@ class CRUDLabResultFile(
                 trash_unshared_file(
                     db,
                     file_record,
-                    {LabResultFile: deleted_ids},
+                    {LabResultFile: deleting},
                     reason=f"Lab result {lab_result_id} deletion",
                 )
 
@@ -119,6 +121,7 @@ class CRUDLabResultFile(
 
             except Exception as e:
                 # Log error but continue with other files
+                deleting.discard(file_record.id)
                 logger.error(f"Failed to delete file {file_record.id}: {str(e)}")
 
         db.commit()

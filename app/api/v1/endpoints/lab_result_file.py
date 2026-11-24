@@ -3,7 +3,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import Collection, List, Optional
 
 from fastapi import (
     APIRouter,
@@ -158,7 +158,7 @@ def _get_file_or_404(db: Session, file_id: int) -> LabResultFile:
 
 
 def _remove_physical_file(
-    db: Session, file_obj: LabResultFile, deleted_ids: Sequence[int]
+    db: Session, file_obj: LabResultFile, deleted_ids: Collection[int]
 ) -> bool:
     """Move the record's file to trash; True when it moved.
 
@@ -736,7 +736,8 @@ def delete_all_files_for_lab_result(
 
     # Get all files for this lab result
     files = lab_result_file.get_by_lab_result(db=db, lab_result_id=lab_result_id)
-    deleted_ids = [file_obj.id for file_obj in files]
+    # Rows still to be removed; a row whose file fails to move keeps using it
+    deleting = {file_obj.id for file_obj in files}
 
     # Delete physical files
     deleted_files = 0
@@ -744,9 +745,10 @@ def delete_all_files_for_lab_result(
 
     for file_obj in files:
         try:
-            if _remove_physical_file(db, file_obj, deleted_ids):
+            if _remove_physical_file(db, file_obj, deleting):
                 deleted_files += 1
         except Exception as e:
+            deleting.discard(file_obj.id)
             file_name = getattr(file_obj, "file_name", "unknown")
             _record_file_failure(
                 errors, f"Error deleting file {file_name}", e, current_user

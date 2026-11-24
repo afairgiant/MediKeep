@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.utils.stored_files import resolve_stored_file
 from app.crud.encounter import encounter as encounter_crud
+from app.crud.lab_result_file import lab_result_file as lab_result_file_crud
 from app.crud.medication import medication as medication_crud
 from app.crud.patient import patient as patient_crud
 from app.models.models import (
@@ -38,7 +39,7 @@ from app.services.attachment_cleanup import (
     find_patient_attachments,
     find_record_attachments,
 )
-from app.services.file_management_service import file_management_service
+from app.services.file_management_service import FileManagementService
 from app.services.generic_entity_file_service import GenericEntityFileService
 from app.services.imaging_storage import study_directory
 from app.services.user_deletion_service import UserDeletionService
@@ -812,6 +813,21 @@ def _legacy_file_ids(db_session, lab_result_id):
     ]
 
 
+@pytest.fixture
+def trash_fails_once(monkeypatch):
+    """The first move to trash fails; later moves succeed."""
+    original = FileManagementService.move_to_trash
+    calls = []
+
+    def flaky(self, file_path, reason=None):
+        calls.append(file_path)
+        if len(calls) == 1:
+            raise OSError("first move fails")
+        return original(self, file_path, reason=reason)
+
+    monkeypatch.setattr(FileManagementService, "move_to_trash", flaky)
+
+
 class TestSharedStoredFiles:
     """A stored file stays in place while another file row still points to it (#1296)."""
 
@@ -1009,10 +1025,12 @@ class TestLegacyLabResultFileDeletes:
 
     @pytest.fixture
     def failing_trash(self, monkeypatch):
-        def explode(file_path, reason=None):
+        def explode(self, file_path, reason=None):
             raise OSError("disk detail")
 
-        monkeypatch.setattr(file_management_service, "move_to_trash", explode)
+        # On the class: undoing a patch on the shared instance would leave the
+        # original method on it, hiding later class patches from it
+        monkeypatch.setattr(FileManagementService, "move_to_trash", explode)
 
     @pytest.mark.parametrize(
         "url",
@@ -1110,3 +1128,80 @@ class TestLegacyLabResultFileDeletes:
         db_session.expire_all()
         assert _legacy_file_ids(db_session, lab_id) == [legacy_id]
         assert stored.read_bytes() == b"legacy"
+
+
+class TestFailedMovesKeepSharedFiles:
+    """A row whose file fails to move stays, so it still uses that file (#1296)."""
+
+    def test_record_delete_keeps_a_file_a_failed_row_still_uses(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+        trash_fails_once,
+    ):
+        med = _create_medication(db_session, user_with_patient["patient"].id)
+        first = _upload(client, authenticated_headers, "medication", med.id, b"first")
+        second = _upload(client, authenticated_headers, "medication", med.id, b"")
+        stored = _stored_path(db_session, first)
+        _share_stored_file(db_session, second, stored)
+
+        stats = GenericEntityFileService().cleanup_entity_files_on_deletion(
+            db=db_session, entity_type="medication", entity_id=med.id
+        )
+
+        assert stats == {"files_deleted": 0, "files_preserved": 0, "errors": 1}
+        db_session.expire_all()
+        remaining = [db_session.get(EntityFile, i) for i in (first, second)]
+        assert sum(record is not None for record in remaining) == 1
+        assert stored.read_bytes() == b"first"
+        assert _trashed_contents(trash) == []
+
+    def test_lab_result_files_delete_keeps_a_file_a_failed_row_still_uses(
+        self, db_session: Session, user_with_patient, trash, trash_fails_once
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        stored = _legacy_lab_file(db_session, trash, lab.id, b"legacy")
+        _legacy_lab_file(db_session, trash, lab.id, b"", stored=stored)
+
+        deleted = lab_result_file_crud.delete_by_lab_result(
+            db_session, lab_result_id=lab.id
+        )
+
+        assert deleted == 1
+        db_session.expire_all()
+        assert len(_legacy_file_ids(db_session, lab.id)) == 1
+        assert stored.read_bytes() == b"legacy"
+        assert _trashed_contents(trash) == []
+
+    def test_failed_metadata_write_leaves_the_file_in_place(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+        monkeypatch,
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        stored = _legacy_lab_file(db_session, trash, lab.id, b"legacy")
+        (legacy_id,) = _legacy_file_ids(db_session, lab.id)
+
+        def fail(*args, **kwargs):
+            raise OSError("disk full")
+
+        monkeypatch.setattr(
+            "app.services.file_management_service._write_metadata", fail
+        )
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/{legacy_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 500
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab.id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+        assert not any(path.is_file() for path in trash.rglob("*"))

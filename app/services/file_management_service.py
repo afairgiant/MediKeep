@@ -163,8 +163,14 @@ class FileManagementService:
 
             # Move file to trash
             shutil.move(str(source_path), str(trash_path))
-
-            metadata = _write_metadata(trash_path, source_path, reason)
+            try:
+                metadata = _write_metadata(trash_path, source_path, reason)
+            except OSError:
+                # Without its sidecar the file could be neither listed nor
+                # restored, and its record would point to a missing file
+                _metadata_path(trash_path).unlink(missing_ok=True)
+                shutil.move(str(trash_path), str(source_path))
+                raise
 
             logger.info(f"File moved to trash: {file_path} -> {trash_path}")
 

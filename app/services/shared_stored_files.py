@@ -58,7 +58,7 @@ def paths_in_use(
                 )
             )
             if excluded:
-                query = query.filter(file_model.id.notin_(excluded))
+                query = query.filter(file_model.id.notin_(list(excluded)))
             in_use.update(resolve_storage_path(path) for (path,) in query)
     return wanted & in_use
 
