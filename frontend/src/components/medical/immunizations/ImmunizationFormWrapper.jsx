@@ -41,6 +41,8 @@ import {
 } from '../../../constants/vaccineLibrary';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const ImmunizationFormWrapper = ({
   isOpen,
@@ -56,6 +58,7 @@ const ImmunizationFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
+  formError = null,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -219,7 +222,10 @@ const ImmunizationFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -769,7 +775,7 @@ const ImmunizationFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

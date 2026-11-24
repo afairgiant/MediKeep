@@ -10,7 +10,7 @@ const VitalFormWrapper = ({
   patientId,
   practitionerId,
   onSave,
-  error,
+  formError,
   clearError,
   isLoading,
   createItem,
@@ -27,7 +27,7 @@ const VitalFormWrapper = ({
 
   const handleFormSave = async formData => {
     try {
-      await onSave(formData);
+      return await onSave(formData);
     } catch (error) {
       handleError(error);
       throw error; // Re-throw so the form can handle it
@@ -62,7 +62,7 @@ const VitalFormWrapper = ({
         isEdit={!!editingVital}
         createItem={createItem}
         updateItem={updateItem}
-        error={error}
+        formError={formError}
         clearError={clearError}
       />
     </Modal>

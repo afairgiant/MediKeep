@@ -10,7 +10,6 @@ import {
   Select,
   Tabs,
   Box,
-  Alert,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -39,6 +38,8 @@ import logger from '../../../services/logger';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const EquipmentFormWrapper = ({
   isOpen,
@@ -150,7 +151,10 @@ const EquipmentFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -451,12 +455,6 @@ const EquipmentFormWrapper = ({
             </Tabs.Panel>
           </Tabs>
 
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
-
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button
@@ -478,7 +476,7 @@ const EquipmentFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

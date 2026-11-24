@@ -465,6 +465,41 @@ describe('useFormSubmissionWithUploads Hook', () => {
       expect(result.current.submissionState.hasErrors).toBe(true);
       expect(mockOnError).toHaveBeenCalledWith('User friendly: null');
     });
+
+    // A toast can hide behind the open dialog, so the form shows the error (#1317)
+    test('hands a form failure to onFormError instead of a toast', () => {
+      const onFormError = vi.fn();
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads({ ...defaultProps, onFormError }),
+        { wrapper }
+      );
+
+      act(() => {
+        result.current.handleSubmissionFailure('Name: Too short', 'form');
+      });
+
+      expect(onFormError).toHaveBeenCalledWith('User friendly: Name: Too short');
+      expect(notifications.show).not.toHaveBeenCalled();
+      expect(result.current.isSubmitting).toBe(false);
+      expect(result.current.isBlocking).toBe(false);
+    });
+
+    test('still shows a toast for an upload failure when onFormError is set', () => {
+      const onFormError = vi.fn();
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads({ ...defaultProps, onFormError }),
+        { wrapper }
+      );
+
+      act(() => {
+        result.current.handleSubmissionFailure(new Error('Too big'), 'upload');
+      });
+
+      expect(onFormError).not.toHaveBeenCalled();
+      expect(notifications.show).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'File Upload Failed' })
+      );
+    });
   });
 
   describe('Reset Functionality', () => {

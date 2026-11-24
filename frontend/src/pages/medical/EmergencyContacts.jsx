@@ -19,6 +19,7 @@ import {
 import { IconPlus, IconShieldCheck, IconStar } from '@tabler/icons-react';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { useMedicalData, useDataManagement } from '../../hooks';
+import { patientNotAvailableMessage } from '../../utils/formCheckMessages';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -74,7 +75,8 @@ const EmergencyContacts = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'emergency_contact',
     entityLabel: t('medical:emergencyContacts.entityName'),
@@ -125,6 +127,7 @@ const EmergencyContacts = () => {
       address: '',
       notes: '',
     });
+    setFormError(null);
     setShowModal(true);
   };
 
@@ -150,6 +153,7 @@ const EmergencyContacts = () => {
       address: contact.address || '',
       notes: contact.notes || '',
     });
+    setFormError(null);
     setShowModal(true);
   };
 
@@ -173,7 +177,7 @@ const EmergencyContacts = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError('Patient information not available');
+      setFormError(patientNotAvailableMessage());
       return;
     }
 
@@ -653,6 +657,7 @@ const EmergencyContacts = () => {
       </Container>
 
       <MantineEmergencyContactForm
+        formError={formError}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={

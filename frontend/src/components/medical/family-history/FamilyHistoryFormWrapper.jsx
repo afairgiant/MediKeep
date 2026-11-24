@@ -24,6 +24,9 @@ const FamilyHistoryFormWrapper = ({
   onConditionSubmit,
   conditionFormLoading,
   selectedFamilyMember,
+
+  // Why the open form could not be saved
+  formError = null,
 }) => {
   const handleError = (error, formType) => {
     logger.error('family_history_form_wrapper_error', {
@@ -90,6 +93,7 @@ const FamilyHistoryFormWrapper = ({
             onInputChange={onMemberInputChange}
             onSubmit={handleMemberFormSubmit}
             editingMember={editingMember}
+            formError={formError}
           />
         </Modal>
       )}
@@ -113,6 +117,7 @@ const FamilyHistoryFormWrapper = ({
             onInputChange={onConditionInputChange}
             onSubmit={handleConditionFormSubmit}
             editingCondition={editingCondition}
+            formError={formError}
           />
         </Modal>
       )}

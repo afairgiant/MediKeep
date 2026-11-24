@@ -81,7 +81,8 @@ const Visits = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'encounter',
     entityLabel: t('medical:entityNames.visit'),
@@ -113,6 +114,7 @@ const Visits = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'visit',
+    onFormError: setFormError,
     onSuccess: () => {
       // Reset form and close modal on complete success
       setShowModal(false);
@@ -228,6 +230,7 @@ const Visits = () => {
 
   const handleAddVisit = () => {
     resetSubmission(); // Reset submission state
+    setFormError(null);
     setEditingVisit(null);
     setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
@@ -239,6 +242,7 @@ const Visits = () => {
 
   const handleEditVisit = visit => {
     resetSubmission(); // Reset submission state
+    setFormError(null);
     setEditingVisit(visit);
     setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
@@ -281,7 +285,7 @@ const Visits = () => {
 
     const validationError = validateVisitForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -581,6 +585,7 @@ const Visits = () => {
       </Container>
 
       <VisitFormWrapper
+        formError={formError}
         isOpen={showModal}
         onClose={() => {
           if (isBlocking) return;

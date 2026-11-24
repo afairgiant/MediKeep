@@ -79,7 +79,8 @@ const Conditions = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'condition',
     entityLabel: t('medical:entityNames.condition'),
@@ -151,6 +152,7 @@ const Conditions = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'condition',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowModal(false);
       setEditingCondition(null);
@@ -190,6 +192,7 @@ const Conditions = () => {
 
   const handleAddCondition = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingCondition(null);
     setFormData({
@@ -218,6 +221,7 @@ const Conditions = () => {
 
   const handleEditCondition = condition => {
     resetSubmission();
+    setFormError(null);
     setEditingCondition(condition);
     // Apply default status early if condition doesn't have one
     setFormData({
@@ -261,7 +265,7 @@ const Conditions = () => {
 
     const validationError = validateConditionForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -346,8 +350,6 @@ const Conditions = () => {
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('conditions_submission_error', {
@@ -419,6 +421,7 @@ const Conditions = () => {
 
         {/* Form Modal */}
         <ConditionFormWrapper
+          formError={formError}
           isOpen={showModal}
           patientId={currentPatient?.id}
           onClose={() => {

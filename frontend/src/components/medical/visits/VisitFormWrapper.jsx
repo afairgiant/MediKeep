@@ -19,6 +19,7 @@ const VisitFormWrapper = ({
   onError,
   patientId,
   navigate,
+  formError = null,
   children,
 }) => {
   const handleDocumentError = error => {
@@ -65,6 +66,7 @@ const VisitFormWrapper = ({
       onDocumentManagerRef={onDocumentManagerRef}
       onFileUploadComplete={handleDocumentUploadComplete}
       onDocumentError={handleDocumentError}
+      formError={formError}
     >
       {children}
     </MantineVisitForm>
@@ -88,6 +90,7 @@ VisitFormWrapper.propTypes = {
   onError: PropTypes.func,
   patientId: PropTypes.number,
   navigate: PropTypes.func,
+  formError: PropTypes.string,
   children: PropTypes.node,
 };
 

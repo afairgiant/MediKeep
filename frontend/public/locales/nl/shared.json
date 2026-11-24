@@ -364,5 +364,14 @@
     "write": "Schrijven",
     "preview": "Voorbeeld",
     "previewEmpty": "Niets om te tonen"
+  },
+  "formValidation": {
+    "required": "{{field}} is verplicht.",
+    "requiredOnTab": "{{field}} op het tabblad '{{tab}}' is verplicht.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} op het tabblad '{{tab}}': {{reason}}",
+    "unnamedField": "Een veld",
+    "popupTitle": "Kan niet opslaan",
+    "ok": "OK"
   }
 }

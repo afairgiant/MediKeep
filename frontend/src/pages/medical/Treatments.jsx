@@ -102,7 +102,8 @@ const Treatments = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'treatment',
     entityLabel: t('medical:entityNames.treatment'),
@@ -190,6 +191,7 @@ const Treatments = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'treatment',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowModal(false);
       setEditingTreatment(null);
@@ -213,6 +215,7 @@ const Treatments = () => {
 
   const handleAddTreatment = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingTreatment(null);
     setFormData(INITIAL_TREATMENT_FORM_DATA);
@@ -221,6 +224,7 @@ const Treatments = () => {
 
   const handleEditTreatment = treatment => {
     resetSubmission();
+    setFormError(null);
     setEditingTreatment(treatment);
     setFormData({
       treatment_name: treatment.treatment_name || '',
@@ -257,7 +261,7 @@ const Treatments = () => {
 
     const validationError = validateTreatmentForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -321,8 +325,6 @@ const Treatments = () => {
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
 
       return result;
@@ -633,6 +635,7 @@ const Treatments = () => {
       </Container>
 
       <TreatmentFormWrapper
+        formError={formError}
         isOpen={showModal}
         onClose={() => {
           if (isBlocking) return;

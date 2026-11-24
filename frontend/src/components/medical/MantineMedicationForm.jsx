@@ -52,6 +52,8 @@ import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import RecordLinkCard from '../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../shared/RecordLinkTabButtons';
 import { useSubDialog } from '../../contexts/SubDialogContext';
+import FormErrorPopup from '../shared/FormErrorPopup';
+import RecordForm from '../shared/RecordForm';
 
 const REMINDER_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 // Mirrors MAX_REMINDER_TIMES in app/schemas/medication.py
@@ -551,7 +553,10 @@ const MantineMedicationForm = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -849,12 +854,6 @@ const MantineMedicationForm = ({
           {/* Custom children content */}
           {children}
 
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
-
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button
@@ -871,7 +870,7 @@ const MantineMedicationForm = ({
             </Button>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

@@ -483,6 +483,8 @@ describe('Conditions Page Integration Tests', () => {
       deleteItem: vi.fn().mockResolvedValue(true),
       refreshData: vi.fn(),
       clearError: vi.fn(),
+      formError: null,
+      setFormError: vi.fn(),
       setError: vi.fn(),
       setSuccessMessage: vi.fn(),
     });
@@ -553,6 +555,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -618,6 +622,8 @@ describe('Conditions Page Integration Tests', () => {
           deleteItem: vi.fn(),
           refreshData: vi.fn(),
           clearError: vi.fn(),
+          formError: null,
+          setFormError: vi.fn(),
           setError: vi.fn(),
           setSuccessMessage: vi.fn(),
         });
@@ -757,6 +763,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -810,6 +818,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: mockDeleteItem,
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -994,6 +1004,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -1041,6 +1053,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -1086,6 +1100,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -1136,6 +1152,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -1173,6 +1191,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });
@@ -1197,6 +1217,8 @@ describe('Conditions Page Integration Tests', () => {
         deleteItem: vi.fn(),
         refreshData: vi.fn(),
         clearError: vi.fn(),
+        formError: null,
+        setFormError: vi.fn(),
         setError: vi.fn(),
         setSuccessMessage: vi.fn(),
       });

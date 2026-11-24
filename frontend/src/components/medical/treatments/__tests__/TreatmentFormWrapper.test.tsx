@@ -392,7 +392,11 @@ describe('TreatmentFormWrapper - Visits tab in both modes', () => {
         <TreatmentFormWrapper
           {...defaultProps}
           onSubmit={onSubmit}
-          formData={{ ...defaultProps.formData, mode }}
+          formData={{
+            ...defaultProps.formData,
+            treatment_name: 'Physiotherapy',
+            mode,
+          }}
           onInputChange={(e: { target: { name: string; value: string } }) => {
             if (e.target.name === 'mode') setMode(e.target.value);
           }}

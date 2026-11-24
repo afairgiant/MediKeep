@@ -44,6 +44,7 @@ import { useTranslation } from 'react-i18next';
 import PractitionerCard from '../../components/medical/practitioners/PractitionerCard';
 import PractitionerViewModal from '../../components/medical/practitioners/PractitionerViewModal';
 import PractitionerFormWrapper from '../../components/medical/practitioners/PractitionerFormWrapper';
+import { getUserFriendlyError } from '../../constants/errorMessages';
 import PracticeEditModal from '../../components/medical/practitioners/PracticeEditModal';
 import PracticesList from '../../components/medical/practitioners/PracticesList';
 
@@ -64,6 +65,8 @@ const Practitioners = () => {
   } = usePractitioners();
 
   const [error, setError] = useState('');
+  // Why the open form could not be saved, shown in its popup
+  const [formError, setFormError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -123,6 +126,7 @@ const Practitioners = () => {
       website: '',
       rating: '',
     });
+    setFormError(null);
     setShowModal(true);
   };
 
@@ -162,6 +166,7 @@ const Practitioners = () => {
       website: practitioner.website || '',
       rating: practitioner.rating || '',
     });
+    setFormError(null);
     setShowModal(true);
   };
 
@@ -199,6 +204,7 @@ const Practitioners = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setFormError(null);
     try {
       const dataToSubmit = cleanPractitionerFormData(formData);
 
@@ -218,7 +224,7 @@ const Practitioners = () => {
       await refresh();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError('Failed to save practitioner. Please try again.');
+      setFormError(getUserFriendlyError(err, 'save'));
       frontendLogger.logError('Failed to save practitioner', {
         practitionerId: editingPractitioner?.id,
         action: editingPractitioner ? 'update' : 'create',
@@ -785,6 +791,7 @@ const Practitioners = () => {
         editingItem={editingPractitioner}
         isLoading={false}
         statusMessage={''}
+        formError={formError}
       />
 
       <PractitionerViewModal

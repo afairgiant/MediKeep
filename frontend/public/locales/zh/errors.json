@@ -39,7 +39,18 @@
     "mustBeValidNumber": "必须是有效数字",
     "patientNotSelected": "请选择患者。",
     "requiredFieldMissing": "请填写所有必填字段。",
-    "submissionFailed": "保存表单失败。请检查您的输入并重试。"
+    "submissionFailed": "保存表单失败。请检查您的输入并重试。",
+    "endBeforeStart": "结束日期不能早于开始日期",
+    "endBeforeOnset": "结束日期不能早于发病日期",
+    "dateInFuture": "{{field}}（{{date}}）不能是将来的日期。请选择今天（{{today}}）或之前的日期。",
+    "requiredForPrescription": "处方药保险必须填写{{field}}",
+    "expirationBeforeEffective": "到期日期必须晚于生效日期",
+    "invalidFormat": "格式无效。",
+    "tooShort": "至少使用 {{min}} 个字符。",
+    "tooLong": "最多使用 {{max}} 个字符。",
+    "belowMinimum": "不能小于 {{min}}。",
+    "aboveMaximum": "不能大于 {{max}}。",
+    "invalidValue": "该值无效。"
   },
   "general": {
     "maintenanceMode": "系统当前正在维护中。请稍后重试。",
@@ -106,5 +117,6 @@
     "largeFileWarning": "检测到大文件。上传可能需要几分钟。",
     "partialSuccess": "操作完成，但有一些警告。",
     "slowConnection": "由于连接缓慢，上传时间比平时长。"
-  }
+  },
+  "symptomNotAvailable": "症状信息不可用"
 }

@@ -364,5 +364,14 @@
     "write": "Escrever",
     "preview": "Pré-visualizar",
     "previewEmpty": "Nada para pré-visualizar"
+  },
+  "formValidation": {
+    "required": "{{field}}: campo obrigatório.",
+    "requiredOnTab": "{{field}} (aba «{{tab}}»): campo obrigatório.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} (aba «{{tab}}»): {{reason}}",
+    "unnamedField": "Um campo",
+    "popupTitle": "Não é possível salvar",
+    "ok": "OK"
   }
 }

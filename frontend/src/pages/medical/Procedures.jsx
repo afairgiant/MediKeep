@@ -16,9 +16,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import {
-  ERROR_MESSAGES,
-} from '../../constants/errorMessages';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -92,7 +89,8 @@ const Procedures = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'procedure',
     entityLabel: t('medical:entityNames.procedure'),
@@ -166,6 +164,7 @@ const Procedures = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'procedure',
+    onFormError: setFormError,
     onSuccess: () => {
       // Reset form and close modal on complete success
       setShowModal(false);
@@ -191,6 +190,7 @@ const Procedures = () => {
 
   const handleAddProcedure = () => {
     resetSubmission();
+    setFormError(null);
     setEditingProcedure(null);
     setFormData({ ...INITIAL_FORM_DATA });
     setShowModal(true);
@@ -198,6 +198,7 @@ const Procedures = () => {
 
   const handleEditProcedure = procedure => {
     resetSubmission();
+    setFormError(null);
     setEditingProcedure(procedure);
     setFormData({
       procedure_name: procedure.procedure_name || '',
@@ -240,7 +241,7 @@ const Procedures = () => {
     // Basic validation
     const validationError = validateProcedureForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -337,11 +338,6 @@ const Procedures = () => {
           // No files to upload, complete immediately
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(
-          new Error(ERROR_MESSAGES.FORM_SUBMISSION_FAILED),
-          'form'
-        );
       }
     } catch (error) {
       logger.error('procedures_submission_error', {
@@ -547,6 +543,7 @@ const Procedures = () => {
       </Container>
 
       <ProcedureFormWrapper
+        formError={formError}
         isOpen={showModal}
         onClose={() => {
           if (isBlocking) return;

@@ -125,7 +125,8 @@ const BloodDonations = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'blood_donation',
     entityLabel: t('medical:entityNames.bloodDonation', 'blood donation'),
@@ -237,6 +238,7 @@ const BloodDonations = () => {
   const handleAddDonation = () => {
     setEditingDonation(null);
     setFormData(EMPTY_FORM_DATA);
+    setFormError(null);
     setShowModal(true);
   };
 
@@ -256,6 +258,7 @@ const BloodDonations = () => {
       notes: donation.notes || '',
       tags: donation.tags || [],
     });
+    setFormError(null);
     setShowModal(true);
   };
 
@@ -270,19 +273,19 @@ const BloodDonations = () => {
     e.preventDefault();
 
     if (!formData.donation_date) {
-      setError(
+      setFormError(
         t('bloodDonations.validation.dateRequired', 'Donation date is required')
       );
       return;
     }
     if (!formData.donation_type) {
-      setError(
+      setFormError(
         t('bloodDonations.validation.typeRequired', 'Donation type is required')
       );
       return;
     }
     if (!currentPatient?.id) {
-      setError(
+      setFormError(
         t(
           'shared:labels.patientInfoNotAvailable',
           'Patient information not available'
@@ -336,7 +339,7 @@ const BloodDonations = () => {
         check.value !== null &&
         (check.value < check.min || check.value > check.max)
       ) {
-        setError(
+        setFormError(
           t('bloodDonations.validation.outOfRange', {
             field: t(check.fieldKey, check.fallback),
             min: check.min,
@@ -349,7 +352,7 @@ const BloodDonations = () => {
     }
 
     if (systolic !== null && diastolic !== null && systolic <= diastolic) {
-      setError(
+      setFormError(
         t(
           'bloodDonations.validation.bpOrder',
           'Systolic must be greater than diastolic'
@@ -579,6 +582,7 @@ const BloodDonations = () => {
       </Container>
 
       <BloodDonationFormWrapper
+        formError={formError}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={

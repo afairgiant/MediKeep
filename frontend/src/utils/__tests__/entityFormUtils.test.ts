@@ -332,15 +332,15 @@ describe('conditionFormUtils', () => {
     );
     expect(
       validateConditionForm({ ...filled, onset_date: '2999-01-01' }, 7)
-    ).toMatch(/^Onset date \(2999-01-01\) cannot be in the future/);
+    ).toMatch(/^Onset Date \(2999-01-01\) cannot be in the future/);
     expect(
       validateConditionForm({ ...filled, end_date: '2999-01-01' }, 7)
-    ).toMatch(/^End date \(2999-01-01\) cannot be in the future/);
+    ).toMatch(/^End Date \(2999-01-01\) cannot be in the future/);
     expect(
       validateConditionForm({ ...filled, end_date: '2025-01-01' }, 7)
     ).toBe('End date cannot be before onset date');
     expect(validateConditionForm({ ...filled, status: '' }, 7)).toBe(
-      'Status is required. Please select a status.'
+      'Status is required.'
     );
     expect(validateConditionForm(INITIAL_CONDITION_FORM_DATA, 7)).toBe(
       'Diagnosis is required.'
@@ -393,11 +393,11 @@ describe('medicationFormUtils', () => {
       'Patient information not available'
     );
     expect(validateMedicationForm(INITIAL_MEDICATION_FORM_DATA, 7)).toBe(
-      'Medication name is required'
+      'Medication Name is required.'
     );
     expect(
       validateMedicationForm({ ...filled, medication_name: ' a ' }, 7)
-    ).toBe('Medication name must be at least 2 characters long');
+    ).toBe('Medication Name: Use at least 2 characters.');
     expect(validateMedicationForm(filled, 7)).toBeNull();
   });
 
@@ -462,7 +462,7 @@ describe('treatmentFormUtils', () => {
 
   it('checks name, then date order, then patient', () => {
     expect(validateTreatmentForm(INITIAL_TREATMENT_FORM_DATA, undefined)).toBe(
-      'Treatment name is required'
+      'Treatment Name is required.'
     );
     expect(
       validateTreatmentForm(

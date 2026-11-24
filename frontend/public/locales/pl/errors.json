@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Musi być prawidłową liczbą",
     "patientNotSelected": "Proszę wybrać pacjenta.",
     "requiredFieldMissing": "Proszę wypełnić wszystkie wymagane pola.",
-    "submissionFailed": "Nie udało się zapisać formularza. Proszę sprawdzić wprowadzone dane i spróbować ponownie."
+    "submissionFailed": "Nie udało się zapisać formularza. Proszę sprawdzić wprowadzone dane i spróbować ponownie.",
+    "endBeforeStart": "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia",
+    "endBeforeOnset": "Data zakończenia nie może być wcześniejsza niż data wystąpienia",
+    "dateInFuture": "{{field}} ({{date}}): data nie może być z przyszłości. Wybierz datę nie późniejszą niż dzisiaj ({{today}}).",
+    "requiredForPrescription": "{{field}}: pole wymagane dla ubezpieczenia na leki",
+    "expirationBeforeEffective": "Data wygaśnięcia musi być późniejsza niż data wejścia w życie",
+    "invalidFormat": "Format jest nieprawidłowy.",
+    "tooShort": "Użyj co najmniej {{min}} znaków.",
+    "tooLong": "Użyj najwyżej {{max}} znaków.",
+    "belowMinimum": "Musi wynosić co najmniej {{min}}.",
+    "aboveMaximum": "Może wynosić najwyżej {{max}}.",
+    "invalidValue": "Ta wartość jest nieprawidłowa."
   },
   "general": {
     "maintenanceMode": "System jest obecnie w trakcie konserwacji. Proszę spróbować ponownie później.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "Wykryto duży plik. Przesyłanie może potrwać kilka minut.",
     "partialSuccess": "Operacja została zakończona z pewnymi ostrzeżeniami.",
     "slowConnection": "Przesyłanie trwa dłużej niż zwykle z powodu wolnego połączenia."
-  }
+  },
+  "symptomNotAvailable": "Informacje o objawie są niedostępne"
 }

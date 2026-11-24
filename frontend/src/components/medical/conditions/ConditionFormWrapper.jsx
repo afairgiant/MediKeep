@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
-  Alert,
   Modal,
   Tabs,
   Box,
@@ -36,6 +35,8 @@ import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import { useLinkPanelDescription } from '../../../hooks/useLinkPanelDescription';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const ConditionFormWrapper = ({
   formError,
@@ -157,7 +158,10 @@ const ConditionFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -560,12 +564,6 @@ const ConditionFormWrapper = ({
             </Tabs.Panel>
           </Tabs>
 
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
-
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button
@@ -585,7 +583,7 @@ const ConditionFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

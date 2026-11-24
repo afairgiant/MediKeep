@@ -11,6 +11,7 @@ const PharmacyFormWrapper = ({
   editingPharmacy,
   isLoading,
   statusMessage: _statusMessage,
+  formError = null,
 }) => {
   const handleError = error => {
     logger.error('pharmacy_form_wrapper_error', {
@@ -59,6 +60,7 @@ const PharmacyFormWrapper = ({
       onInputChange={handleInputChange}
       onSubmit={handleSubmit}
       editingPharmacy={editingPharmacy}
+      formError={formError}
     />
   );
 };

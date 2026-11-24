@@ -1,3 +1,8 @@
+import {
+  patientNotAvailableMessage,
+  requiredMessage,
+} from './formCheckMessages';
+
 /** Form state of the Add/Edit Medical Equipment dialog. */
 export interface EquipmentFormData {
   equipment_name: string;
@@ -38,9 +43,11 @@ export const validateEquipmentForm = (
   form: EquipmentFormData,
   patientId?: number | null
 ): string | null => {
-  if (!form.equipment_name.trim()) return 'Equipment name is required';
-  if (!form.equipment_type) return 'Equipment type is required';
-  if (!patientId) return 'Patient information not available';
+  if (!form.equipment_name.trim())
+    return requiredMessage('shared:labels.equipmentName', 'Equipment Name');
+  if (!form.equipment_type)
+    return requiredMessage('common:equipment.form.type', 'Equipment Type');
+  if (!patientId) return patientNotAvailableMessage();
   return null;
 };
 

@@ -47,6 +47,8 @@ import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
 import CollapsibleLinkTabs from '../../shared/CollapsibleLinkTabs';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const EMPTY_PENDING_RELATIONSHIPS = {
   medications: [],
@@ -388,7 +390,10 @@ const TreatmentFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -937,12 +942,6 @@ const TreatmentFormWrapper = ({
               </Box>
             )}
 
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
-
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button
@@ -962,7 +961,7 @@ const TreatmentFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

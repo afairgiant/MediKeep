@@ -17,7 +17,7 @@ const {
   deleteItem,
   refreshData,
   clearError,
-  setError,
+  setFormError,
   unitSystemRef,
   hemoglobinUnitRef,
 } = vi.hoisted(() => ({
@@ -30,7 +30,7 @@ const {
   deleteItem: vi.fn(() => Promise.resolve(true)),
   refreshData: vi.fn(() => Promise.resolve()),
   clearError: vi.fn(),
-  setError: vi.fn(),
+  setFormError: vi.fn(),
   unitSystemRef: { current: 'imperial' },
   hemoglobinUnitRef: { current: 'g_dl' },
 }));
@@ -250,7 +250,8 @@ function setupDefaults({ items = mockDonations } = {}) {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError: null,
+    setFormError,
   });
 
   useViewModalNavigation.mockReturnValue({
@@ -319,7 +320,7 @@ describe('BloodDonations page', () => {
     await user.click(screen.getByText('submit'));
 
     await waitFor(() => {
-      expect(setError).toHaveBeenCalledWith(
+      expect(setFormError).toHaveBeenCalledWith(
         'Systolic (mmHg) must be between 60 and 250'
       );
     });
@@ -342,7 +343,7 @@ describe('BloodDonations page', () => {
       expect(createItem).toHaveBeenCalledTimes(1);
     });
 
-    expect(setError).not.toHaveBeenCalled();
+    expect(setFormError).not.toHaveBeenCalledWith(expect.any(String));
     expect(createItem).toHaveBeenCalledWith(
       expect.objectContaining({
         donation_date: '2026-01-15',
@@ -372,7 +373,7 @@ describe('BloodDonations page', () => {
       expect(createItem).toHaveBeenCalledTimes(1);
     });
 
-    expect(setError).not.toHaveBeenCalled();
+    expect(setFormError).not.toHaveBeenCalledWith(expect.any(String));
     expect(createItem).toHaveBeenCalledWith(
       expect.objectContaining({ hemoglobin: 14 })
     );
@@ -391,7 +392,7 @@ describe('BloodDonations page', () => {
     await user.click(screen.getByText('submit'));
 
     await waitFor(() => {
-      expect(setError).toHaveBeenCalled();
+      expect(setFormError).toHaveBeenCalledWith(expect.any(String));
     });
     expect(createItem).not.toHaveBeenCalled();
   });
@@ -450,7 +451,8 @@ describe('BloodDonations page', () => {
       deleteItem,
       refreshData,
       clearError,
-      setError,
+      formError: null,
+      setFormError,
     });
 
     rerender(

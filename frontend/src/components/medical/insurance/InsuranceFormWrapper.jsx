@@ -47,6 +47,8 @@ import NotesField from '../../shared/NotesField';
 import { useTranslation } from 'react-i18next';
 import { translateField } from '../../../utils/translateField';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const InsuranceFormWrapper = ({
   isOpen,
@@ -63,6 +65,7 @@ const InsuranceFormWrapper = ({
   onFileUploadComplete,
   onError,
   practitioners = [],
+  formError = null,
 }) => {
   const { t, i18n } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -73,6 +76,8 @@ const InsuranceFormWrapper = ({
 
   // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
+  // This form's own check failed: its messages, shown in the popup
+  const [checkError, setCheckError] = useState(null);
 
   // Form handlers
   const { handleTextInputChange } = useFormHandlers(onInputChange);
@@ -124,6 +129,7 @@ const InsuranceFormWrapper = ({
       setFieldErrors({});
       setIsSubmitting(false);
     }
+    setCheckError(null);
   }, [isOpen]);
 
   // Enhanced submit handler with field-level validation and logging
@@ -144,6 +150,15 @@ const InsuranceFormWrapper = ({
       const newFieldErrors = {};
       let hasErrors = false;
 
+      // Field names as the form shows them, for the messages below
+      const filteredFields = getFilteredInsuranceFields(formData.insurance_type);
+      const fieldLabel = name => {
+        const labelKey = filteredFields.find(f => f.name === name)?.labelKey;
+        return labelKey
+          ? t(labelKey)
+          : t('shared:formValidation.unnamedField', 'A field');
+      };
+
       // Basic required fields validation
       const basicRequiredFields = [
         'insurance_type',
@@ -155,13 +170,16 @@ const InsuranceFormWrapper = ({
       ];
       basicRequiredFields.forEach(field => {
         if (!formData[field] || formData[field].toString().trim() === '') {
-          newFieldErrors[field] = `${field.replace(/_/g, ' ')} is required`;
+          newFieldErrors[field] = t(
+            'shared:formValidation.required',
+            '{{field}} is required.',
+            { field: fieldLabel(field) }
+          );
           hasErrors = true;
         }
       });
 
       // Phone validation using centralized detection
-      const filteredFields = getFilteredInsuranceFields(formData.insurance_type);
       Object.keys(formData).forEach(fieldName => {
         const fieldConfig = filteredFields.find(f => f.name === fieldName);
         const isPhoneFieldCheck = isPhoneField(fieldName, fieldConfig?.type);
@@ -185,13 +203,19 @@ const InsuranceFormWrapper = ({
       const selectedType = formData.insurance_type;
       if (selectedType === 'prescription') {
         if (!formData.bin_number || formData.bin_number.trim() === '') {
-          newFieldErrors.bin_number =
-            'BIN Number is required for prescription insurance';
+          newFieldErrors.bin_number = t(
+            'errors:form.requiredForPrescription',
+            '{{field}} is required for prescription insurance',
+            { field: fieldLabel('bin_number') }
+          );
           hasErrors = true;
         }
         if (!formData.pcn_number || formData.pcn_number.trim() === '') {
-          newFieldErrors.pcn_number =
-            'PCN Number is required for prescription insurance';
+          newFieldErrors.pcn_number = t(
+            'errors:form.requiredForPrescription',
+            '{{field}} is required for prescription insurance',
+            { field: fieldLabel('pcn_number') }
+          );
           hasErrors = true;
         }
       }
@@ -201,8 +225,10 @@ const InsuranceFormWrapper = ({
         const effectiveDate = new Date(formData.effective_date);
         const expirationDate = new Date(formData.expiration_date);
         if (expirationDate <= effectiveDate) {
-          newFieldErrors.expiration_date =
-            'Expiration date must be after effective date';
+          newFieldErrors.expiration_date = t(
+            'errors:form.expirationBeforeEffective',
+            'Expiration date must be after effective date'
+          );
           hasErrors = true;
         }
       }
@@ -210,6 +236,7 @@ const InsuranceFormWrapper = ({
       // If there are validation errors, set them and prevent submission
       if (hasErrors) {
         setFieldErrors(newFieldErrors);
+        setCheckError(Object.values(newFieldErrors).join('\n'));
         setIsSubmitting(false);
         logger.warn('Insurance form validation failed', {
           fieldErrors: newFieldErrors,
@@ -220,6 +247,7 @@ const InsuranceFormWrapper = ({
 
       // Clear any existing field errors
       setFieldErrors({});
+      setCheckError(null);
 
       await onSubmit(e);
 
@@ -441,7 +469,10 @@ const InsuranceFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={checkError || formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -636,7 +667,7 @@ const InsuranceFormWrapper = ({
             </Button>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

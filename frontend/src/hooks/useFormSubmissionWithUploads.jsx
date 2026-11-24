@@ -11,11 +11,16 @@ import {
 /**
  * Hook for handling form submissions that include file uploads
  * Manages the complete flow from form submission to file upload completion
+ *
+ * @param {Function} [options.onFormError] - Receives the message for a failed
+ *   form save, to show inside the open form. When given, that failure shows no
+ *   toast.
  */
 export const useFormSubmissionWithUploads = ({
   entityType,
   onSuccess,
   onError,
+  onFormError,
   component = 'FormWithUploads',
 }) => {
   const [submissionState, setSubmissionState] = useState({
@@ -207,20 +212,24 @@ export const useFormSubmissionWithUploads = ({
         component,
       });
 
-      notifications.show({
-        title:
-          stage === 'form' ? 'Form Submission Failed' : 'File Upload Failed',
-        message: errorMessage,
-        color: 'red',
-        icon: <IconX size={16} />,
-        autoClose: 7000,
-      });
+      if (stage === 'form' && onFormError) {
+        onFormError(errorMessage);
+      } else {
+        notifications.show({
+          title:
+            stage === 'form' ? 'Form Submission Failed' : 'File Upload Failed',
+          message: errorMessage,
+          color: 'red',
+          icon: <IconX size={16} />,
+          autoClose: 7000,
+        });
+      }
 
       if (onError) {
         onError(errorMessage);
       }
     },
-    [entityType, component, onError]
+    [entityType, component, onError, onFormError]
   );
 
   // Reset submission state

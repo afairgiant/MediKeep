@@ -73,6 +73,8 @@ const Injuries = () => {
     refreshData,
     clearError,
     setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'injury',
     entityLabel: t('medical:entityNames.injury'),
@@ -206,6 +208,7 @@ const Injuries = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'injury',
+    onFormError: setFormError,
     onSuccess: () => {
       resetForm();
 
@@ -235,6 +238,7 @@ const Injuries = () => {
 
   const handleAddInjury = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
@@ -242,6 +246,7 @@ const Injuries = () => {
 
   const handleEditInjury = injury => {
     resetSubmission();
+    setFormError(null);
     setFormData({
       injury_name: injury.injury_name || '',
       injury_type_id: injury.injury_type_id || null,
@@ -266,7 +271,7 @@ const Injuries = () => {
 
     const validationError = validateInjuryForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -339,8 +344,6 @@ const Injuries = () => {
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('injuries_submission_error', {
@@ -413,6 +416,7 @@ const Injuries = () => {
 
         {/* Form Modal */}
         <InjuryFormWrapper
+          formError={formError}
           isOpen={showAddForm}
           patientId={currentPatient?.id}
           navigate={navigate}

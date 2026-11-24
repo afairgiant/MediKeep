@@ -402,6 +402,8 @@ const defaultMedicalData = {
   deleteItem: vi.fn().mockResolvedValue({}),
   refreshData: vi.fn(),
   clearError: vi.fn(),
+  formError: null,
+  setFormError: vi.fn(),
   setError: vi.fn(),
   setSuccessMessage: vi.fn(),
 };
