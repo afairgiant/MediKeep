@@ -161,7 +161,7 @@ const VisitRemindersPanel = ({
               'No notification channel is turned on for visit reminders. Open Notification Settings to enable one.'
             )}
           </Text>
-          <Anchor href="/settings/notifications" size="sm">
+          <Anchor href="/settings?tab=notifications" size="sm">
             {t('visits.reminders.openSettings', 'Open Notification Settings')}
           </Anchor>
         </Alert>

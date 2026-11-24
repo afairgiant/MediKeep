@@ -691,7 +691,7 @@ const MantineMedicationForm = ({
                           'No notification channel is configured for medication reminders. Open Notification Settings to enable a channel.'
                         )}
                       </Text>
-                      <Anchor href="/settings/notifications" size="sm">
+                      <Anchor href="/settings?tab=notifications" size="sm">
                         {t(
                           'medications.reminders.openSettings',
                           'Open Notification Settings'
