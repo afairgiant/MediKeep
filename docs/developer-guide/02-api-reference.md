@@ -4134,7 +4134,7 @@ updates and deletes need edit access. A study the user cannot access returns `40
 - **Success Response** (200): `{"message": "ImagingStudy deleted successfully"}`
 - **Error Responses**:
   - `404`: Study not found or no edit access
-  - `409`: An import is running
+  - `409`: An import or a backup restore is running
 
 ##### Move Imaging Study
 
@@ -4150,7 +4150,8 @@ updates and deletes need edit access. A study the user cannot access returns `40
   - `400`: The study already belongs to the target patient
   - `403`: No edit access to the target patient
   - `404`: Study not found or no edit access to it
-  - `409`: The target patient already has this study, or an import is running
+  - `409`: The target patient already has this study, or an import or a backup
+    restore is running
 
 ---
 

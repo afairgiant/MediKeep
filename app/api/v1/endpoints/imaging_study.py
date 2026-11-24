@@ -22,6 +22,7 @@ from app.api.v1.endpoints.utils import (
     verify_patient_ownership,
 )
 from app.core.config import settings
+from app.core.database.advisory_lock import UPLOADS_RESTORE_LOCK_KEY, try_advisory_lock
 from app.core.http.error_handling import (
     BusinessLogicException,
     ConflictException,
@@ -171,6 +172,23 @@ def _imaging_write_lock_or_409(request: Request) -> Iterator[None]:
         yield
     finally:
         IMAGING_WRITE_LOCK.release()
+
+
+@contextmanager
+def _no_restore_or_409(db: Session, request: Request) -> Iterator[None]:
+    """Hold the uploads lock shared for the block; 409 while a restore holds it."""
+    with try_advisory_lock(
+        db.get_bind(),
+        UPLOADS_RESTORE_LOCK_KEY,
+        shared=True,
+        release_failed_event="imaging_uploads_lock_release_failed",
+    ) as acquired:
+        if not acquired:
+            raise ConflictException(
+                message="A backup restore is running. Try again when it finishes.",
+                request=request,
+            )
+        yield
 
 
 def _upload_too_large() -> HTTPException:
@@ -491,7 +509,7 @@ def delete_imaging_study(
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Delete an imaging study and move its files to trash."""
-    with _imaging_write_lock_or_409(request):
+    with _imaging_write_lock_or_409(request), _no_restore_or_409(db, request):
         # Found before the delete, while the row still names the study's folder
         pending = find_record_attachments(db, ImagingStudy, [study_id])
         result = handle_delete_with_logging(
@@ -521,7 +539,9 @@ def move_imaging_study(
 ) -> Any:
     """Move a study to another patient the user can edit, clearing its links."""
     # Locked before the study is read, so access is checked against its current owner
-    with handle_database_errors(request=request), _imaging_write_lock_or_409(request):
+    with handle_database_errors(request=request), _imaging_write_lock_or_409(
+        request
+    ), _no_restore_or_409(db, request):
         _lock_study_row(db, study_id)
         study = _get_accessible_study(
             db,

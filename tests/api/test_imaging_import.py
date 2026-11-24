@@ -1,5 +1,6 @@
 """Imaging import, import-job and move endpoints."""
 
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 
@@ -379,6 +380,29 @@ class TestMove:
 
         assert response.status_code == 409
 
+    def test_running_restore_is_409_and_leaves_the_study(
+        self,
+        client,
+        db_session,
+        user_with_patient,
+        authenticated_headers,
+        imported,
+        monkeypatch,
+    ):
+        source_id = imported.patient_id
+        sibling = _second_patient(db_session, user_with_patient["user"])
+
+        @contextmanager
+        def restore_running(*_args, **_kwargs):
+            yield False
+
+        monkeypatch.setattr(imaging_endpoints, "try_advisory_lock", restore_running)
+        response = _move(client, authenticated_headers, imported.id, sibling.id)
+
+        db_session.refresh(imported)
+        assert response.status_code == 409
+        assert imported.patient_id == source_id
+
     def test_lock_is_taken_before_the_study_is_read(
         self, client, db_session, user_with_patient, authenticated_headers
     ):
@@ -399,6 +423,22 @@ class TestDeleteDuringImport:
 
         with IMAGING_WRITE_LOCK:
             response = client.delete(f"{URL}/{study_id}", headers=authenticated_headers)
+
+        assert response.status_code == 409
+        assert db_session.get(ImagingStudy, study_id) is not None
+
+    def test_running_restore_is_409_and_keeps_the_study(
+        self, client, db_session, authenticated_headers, monkeypatch
+    ):
+        job = _import(client, authenticated_headers, dicom_bytes(), "a.dcm").json()
+        study_id = job["summary"]["studies"][0]["study_id"]
+
+        @contextmanager
+        def restore_running(*_args, **_kwargs):
+            yield False
+
+        monkeypatch.setattr(imaging_endpoints, "try_advisory_lock", restore_running)
+        response = client.delete(f"{URL}/{study_id}", headers=authenticated_headers)
 
         assert response.status_code == 409
         assert db_session.get(ImagingStudy, study_id) is not None
