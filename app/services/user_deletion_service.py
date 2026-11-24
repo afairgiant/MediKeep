@@ -16,6 +16,7 @@ from app.models.models import (
     FamilyHistoryShare,
     Invitation,
     Patient,
+    PatientPhoto,
     PatientShare,
     TrustedDevice,
     User,
@@ -229,7 +230,15 @@ class UserDeletionService:
 
         deletion_stats["deleted_records"]["activity_logs_updated"] = updated_logs
 
-        # 8. Delete the user
+        # 8. Clear the uploader on photos the user added to patients they don't own
+        # (shared edit access). The photo stays with its patient.
+        deletion_stats["deleted_records"]["patient_photos_updated"] = (
+            db.query(PatientPhoto)
+            .filter(PatientPhoto.uploaded_by == user_id)
+            .update({"uploaded_by": None}, synchronize_session=False)
+        )
+
+        # 9. Delete the user
         user_obj = db.query(User).filter(User.id == user_id).first()
         if user_obj:
             # Bulk deletes must not leave stale relationship collections for ORM cleanup.
