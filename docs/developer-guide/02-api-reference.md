@@ -3914,13 +3914,93 @@ check when the patient may donate again.
 Base path: `/api/v1/imaging-studies`
 
 **Purpose**: Stored DICOM studies (X-ray, CT, MRI, ultrasound) with their series and
-images. Studies are created by the import endpoints (planned); these endpoints read,
-edit and delete them. Header-derived fields (`study_date`, `modalities`, `body_part`,
+images. Studies are created by the import endpoints below; the others read, edit,
+move and delete them. Header-derived fields (`study_date`, `modalities`, `body_part`,
 `study_description`, `accession_number`, `institution_name`, `referring_physician`)
 are read-only.
 
 **Access**: reads need view access to the study's patient (owner or any share);
 updates and deletes need edit access. A study the user cannot access returns `404`.
+
+##### Import DICOM Files
+
+`POST /imaging-studies/import?filename={name}`
+
+- **Purpose**: Start importing one `.dcm` file or a `.zip` of a CD/DVD export. The file
+  is sent as the raw request body (not multipart), streamed to disk and imported by a
+  background job; poll the job for progress and the summary.
+- **Authentication**: Yes (edit access to the target patient)
+- **Query Parameters**:
+  - `filename` (required): the original file name, ending `.zip`, `.dcm` or `.dicom`.
+    Used for display only; stored files are named by their DICOM UIDs.
+  - `patient_id` (optional): the patient to import into; defaults to the active patient
+- **Request Body**: the file bytes, at most `IMAGING_MAX_UPLOAD_SIZE` (default 2GB)
+- **Rate Limit**: 10 queued imports per user per hour; rejected requests do not count
+- **Behavior**:
+  - Any ZIP entry with the DICOM marker is imported whatever its name; `DICOMDIR`,
+    bundled viewers, scripts, `autorun.inf` and other files are skipped
+  - Only images are stored (files with rows and columns); reports and other DICOM
+    objects are skipped
+  - Images merge into an existing study of the patient with the same Study Instance
+    UID, and images already stored (same SOP Instance UID) are skipped, so re-imports
+    are safe. Header fields of an existing study are only filled in where empty
+  - A study whose header names a different patient or birth date is still imported,
+    with `patient_mismatch: true`; move it with the move endpoint if needed
+  - Imports run one at a time. A failed import stores nothing. The job fails if the
+    user lost edit access while it waited in the queue
+- **Success Response** (202): an import job (see below)
+- **Error Responses**:
+  - `400`: Wrong file extension, empty upload, not a DICOM file or ZIP, or a ZIP that
+    fails the archive checks (too many files, unpacks too large)
+  - `403`: No edit access to the patient
+  - `413`: Upload larger than `IMAGING_MAX_UPLOAD_SIZE`
+  - `429` `imaging_import_rate_limited`, with `Retry-After`
+
+##### Get Import Job
+
+`GET /imaging-studies/import/{job_id}`
+
+- **Purpose**: Progress and result of an import. Jobs are visible only to the user who
+  started them, are kept in server memory for an hour after finishing, and are lost on
+  restart.
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+{
+  "job_id": "3f2c9a6e0b7d4c1e9a8f5b2d6c4e1a07",
+  "status": "completed",
+  "patient_id": 1,
+  "total_files": 415,
+  "processed_files": 415,
+  "summary": {
+    "studies": [
+      {
+        "study_id": 3,
+        "created": true,
+        "series_added": 2,
+        "instances_added": 412,
+        "patient_mismatch": false
+      }
+    ],
+    "instances_added": 412,
+    "duplicates_skipped": 0,
+    "skipped": [{ "name": "DICOMDIR", "reason": "ignored" }],
+    "skipped_count": 3
+  },
+  "error": null
+}
+```
+
+- `status` is `queued`, `running`, `completed` or `failed`; `error` is a user-facing
+  message when failed
+- `skipped` lists at most 100 files; `skipped_count` counts all of them. `reason` is
+  one of `ignored`, `encrypted`, `unreadable`, `not_dicom`, `not_an_image`,
+  `invalid_uid`, `unsupported` (a deflated DICOM file, which is not read)
+- A job fails at once if a backup restore is running, and a restore is refused
+  with `409` while an import runs
+- **Error Responses**:
+  - `404`: Unknown or expired job, or another user's job
 
 ##### List Imaging Studies
 
@@ -4054,6 +4134,24 @@ updates and deletes need edit access. A study the user cannot access returns `40
 - **Success Response** (200): `{"message": "ImagingStudy deleted successfully"}`
 - **Error Responses**:
   - `404`: Study not found or no edit access
+  - `409`: An import or a backup restore is running
+
+##### Move Imaging Study
+
+`POST /imaging-studies/{study_id}/move`
+
+- **Purpose**: Move a study, with its files, to another patient, typically after an
+  import flagged `patient_mismatch` because a family shared one CD. The procedure and
+  encounter links are cleared, since they belong to the old patient.
+- **Authentication**: Yes (edit access to both patients)
+- **Request Body**: `{"target_patient_id": 2}`
+- **Success Response** (200): Imaging study object
+- **Error Responses**:
+  - `400`: The study already belongs to the target patient
+  - `403`: No edit access to the target patient
+  - `404`: Study not found or no edit access to it
+  - `409`: The target patient already has this study, or an import or a backup
+    restore is running
 
 ---
 

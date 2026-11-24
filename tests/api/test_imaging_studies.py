@@ -21,6 +21,7 @@ from tests.utils.user import (
     create_random_user,
     create_test_user_with_patient,
     create_user_token_headers,
+    share_patient,
 )
 
 URL = "/api/v1/imaging-studies/"
@@ -88,22 +89,6 @@ def _user_with_patient(db: Session):
         data["patient"],
         create_user_token_headers(data["user"].username),
     )
-
-
-def _shared_user_headers(db: Session, owner, patient_id: int, permission: str):
-    viewer = create_random_user(db)
-    db.add(
-        PatientShare(
-            patient_id=patient_id,
-            shared_by_user_id=owner.id,
-            shared_with_user_id=viewer["user"].id,
-            permission_level=permission,
-            is_active=True,
-        )
-    )
-    viewer["user"].active_patient_id = patient_id
-    db.commit()
-    return create_user_token_headers(viewer["user"].username)
 
 
 @pytest.fixture(autouse=True)
@@ -430,7 +415,7 @@ class TestSharedAccess:
     def test_view_share_can_read_but_not_change(
         self, client, db_session, user_with_patient, patient_id, study
     ):
-        headers = _shared_user_headers(
+        _, headers = share_patient(
             db_session, user_with_patient["user"], patient_id, "view"
         )
         instance_id = study.series[0].instances[0].id
@@ -454,7 +439,7 @@ class TestSharedAccess:
     def test_edit_share_can_update(
         self, client, db_session, user_with_patient, patient_id, study
     ):
-        headers = _shared_user_headers(
+        _, headers = share_patient(
             db_session, user_with_patient["user"], patient_id, "edit"
         )
 

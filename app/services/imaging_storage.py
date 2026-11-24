@@ -1,6 +1,8 @@
 """On-disk layout for imaging studies under UPLOAD_DIR/imaging."""
 
 import re
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -12,6 +14,9 @@ from app.services.file_management_service import file_management_service
 logger = get_logger(__name__, "app")
 
 IMAGING_SUBDIR = "imaging"
+
+# Holds one work directory per import; backups skip it, startup empties it
+IMPORT_STAGING_DIR = ".imaging-staging"
 
 # DICOM UIDs are digits and dots, at most 64 characters (PS3.5 9.1)
 _UID_PATTERN = re.compile(r"^[0-9]+(\.[0-9]+)*$")
@@ -39,6 +44,44 @@ def study_directory(patient_id: int, study_instance_uid: str) -> Path:
     if not is_valid_uid(study_instance_uid):
         raise ValueError("Invalid study instance UID")
     return imaging_root() / str(int(patient_id)) / study_instance_uid
+
+
+def instance_path(
+    patient_id: int, study_instance_uid: str, series_instance_uid: str, sop_uid: str
+) -> Path:
+    """Where one image file is stored. Raises ValueError for any invalid UID."""
+    if not (is_valid_uid(series_instance_uid) and is_valid_uid(sop_uid)):
+        raise ValueError("Invalid series or SOP instance UID")
+    return (
+        study_directory(patient_id, study_instance_uid)
+        / series_instance_uid
+        / f"{sop_uid}.dcm"
+    )
+
+
+def import_staging_root() -> Path:
+    return Path(settings.UPLOAD_DIR) / IMPORT_STAGING_DIR
+
+
+def create_import_staging_dir() -> Path:
+    """A new empty directory under UPLOAD_DIR for one import; the caller removes it."""
+    root = import_staging_root()
+    root.mkdir(parents=True, exist_ok=True)
+    return Path(tempfile.mkdtemp(dir=root))
+
+
+def remove_stale_import_staging() -> int:
+    """Delete staging directories left by interrupted imports; returns how many.
+
+    Call only at startup, before any import can be running. Raises OSError when a
+    directory could not be removed.
+    """
+    root = import_staging_root()
+    if not root.is_dir():
+        return 0
+    removed = sum(1 for _ in root.iterdir())
+    shutil.rmtree(root)
+    return removed
 
 
 def trash_study_files(

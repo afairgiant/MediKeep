@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.crud.user import user as user_crud
+from app.models.sharing import PatientShare
 from app.schemas.user import UserCreate
 from app.core.utils.security import create_access_token
 
@@ -135,3 +136,20 @@ def create_test_user_with_patient(db: Session) -> dict:
 
     user_data["patient"] = patient
     return user_data
+
+
+def share_patient(db: Session, owner, patient_id: int, permission: str):
+    """A new user the owner shared patient_id with; returns (user, auth headers)."""
+    other = create_random_user(db)["user"]
+    db.add(
+        PatientShare(
+            patient_id=patient_id,
+            shared_by_user_id=owner.id,
+            shared_with_user_id=other.id,
+            permission_level=permission,
+            is_active=True,
+        )
+    )
+    other.active_patient_id = patient_id
+    db.commit()
+    return other, create_user_token_headers(other.username)

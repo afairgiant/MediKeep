@@ -331,6 +331,9 @@ class Settings:  # App Info
         os.getenv("UPLOAD_DIR", "./uploads")
     )
     MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", str(10 * 1024 * 1024)))  # 10MB
+    IMAGING_MAX_UPLOAD_SIZE: int = int(
+        os.getenv("IMAGING_MAX_UPLOAD_SIZE", str(2 * 1024 * 1024 * 1024))
+    )  # bytes
 
     # Backup Configuration
     # Note: Backups not supported in Windows EXE mode (SQLite-only, no PostgreSQL backups)

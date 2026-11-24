@@ -82,3 +82,48 @@ class ImagingSeriesResponse(BaseModel):
     instances: List[ImagingInstanceResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ImagingStudyMove(BaseModel):
+    target_patient_id: int = Field(..., gt=0)
+
+
+class ImagingImportSkippedFile(BaseModel):
+    """A file left out of an import; reason is a stable code (see SkipReason)."""
+
+    name: str
+    reason: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ImagingImportStudyResult(BaseModel):
+    study_id: int
+    created: bool
+    series_added: int
+    instances_added: int
+    patient_mismatch: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ImagingImportSummary(BaseModel):
+    """skipped is capped; skipped_count counts every skipped file."""
+
+    studies: List[ImagingImportStudyResult]
+    instances_added: int
+    duplicates_skipped: int
+    skipped: List[ImagingImportSkippedFile]
+    skipped_count: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ImagingImportJobResponse(BaseModel):
+    job_id: str
+    status: str
+    patient_id: int
+    total_files: int
+    processed_files: int
+    summary: Optional[ImagingImportSummary] = None
+    error: Optional[str] = None
