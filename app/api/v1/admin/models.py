@@ -1834,6 +1834,12 @@ def delete_model_record(
                     commit=False,
                 )
 
+            if model_name == "patient":
+                # Detach the audit trail; activity_logs.patient_id has no ON DELETE action
+                db.query(ActivityLog).filter(
+                    ActivityLog.patient_id == record_id
+                ).update({"patient_id": None}, synchronize_session=False)
+
             record_files = find_record_attachments(db, model_info["model"], [record_id])
             crud_instance.delete(db, id=record_id)
 
