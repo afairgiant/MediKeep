@@ -465,6 +465,7 @@ def log_delete(
     entity_obj: Any,
     user_id: int,
     request: Optional[Request] = None,
+    commit: bool = True,
 ) -> None:
     """Log a DELETE operation."""
     safe_log_activity(
@@ -474,6 +475,7 @@ def log_delete(
         entity_obj=entity_obj,
         user_id=user_id,
         request=request,
+        commit=commit,
     )
 
 

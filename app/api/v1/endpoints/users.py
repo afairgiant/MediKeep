@@ -110,13 +110,14 @@ def delete_current_user_account(
             )
 
         username = current_user.username
-        # Log deletion attempt
+        # Log the deletion in the same transaction, so it rolls back if the delete fails
         log_delete(
             db=db,
             entity_type=EntityType.USER,
             entity_obj=current_user,
             user_id=user_id,
             request=request,
+            commit=False,
         )
 
         # Prepare request metadata for logging
