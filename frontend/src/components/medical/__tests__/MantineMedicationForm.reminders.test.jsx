@@ -235,6 +235,9 @@ describe('MantineMedicationForm — Reminders tab', () => {
         screen.getByText(/No notification channel is configured/i)
       ).toBeInTheDocument();
     });
+    expect(
+      screen.getByRole('link', { name: /Open Notification Settings/ })
+    ).toBeInTheDocument();
   });
 
   it('hides the no-channel warning when at least one channel is enabled', async () => {

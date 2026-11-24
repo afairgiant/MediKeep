@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
-  Anchor,
   Button,
   Checkbox,
   Chip,
@@ -15,6 +14,7 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle, IconPlus, IconSend } from '@tabler/icons-react';
 import { apiService } from '../../../services/api';
+import NotificationSettingsLink from '../../shared/NotificationSettingsLink';
 import { useReminderChannelStatus } from '../../../hooks/useReminderChannelStatus';
 import logger from '../../../services/logger';
 import { timezoneService } from '../../../services/timezoneService';
@@ -161,9 +161,9 @@ const VisitRemindersPanel = ({
               'No notification channel is turned on for visit reminders. Open Notification Settings to enable one.'
             )}
           </Text>
-          <Anchor href="/settings?tab=notifications" size="sm">
+          <NotificationSettingsLink>
             {t('visits.reminders.openSettings', 'Open Notification Settings')}
-          </Anchor>
+          </NotificationSettingsLink>
         </Alert>
       )}
       {enabled && isPastVisit && (

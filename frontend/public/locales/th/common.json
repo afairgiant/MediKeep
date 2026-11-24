@@ -512,6 +512,7 @@
   "labels": {
     "addCustom": "+ เพิ่ม \"{{value}}\"",
     "loading": "กำลังโหลด...",
+    "opensInNewTab": "(เปิดในแท็บใหม่)",
     "verifyingAuthentication": "กำลังตรวจสอบการยืนยันตัวตน...",
     "loadingOption": "กำลังโหลด {{option}}...",
     "new": "ใหม่",

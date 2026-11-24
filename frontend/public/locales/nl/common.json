@@ -520,6 +520,7 @@
     "labResultsAvailableToLink_one": "{{count}} laboratoriumuitslagen beschikbaar om te koppelen",
     "labResultsAvailableToLink_other": "{{count}} laboratoriumuitslagen beschikbaar om te koppelen",
     "loading": "Laden...",
+    "opensInNewTab": "(opent in een nieuw tabblad)",
     "verifyingAuthentication": "Authenticatie wordt gecontroleerd...",
     "loadingOption": "{{option}} laden...",
     "medicationsAvailableToLink": "{{count}} medicatie beschikbaar om te koppelen",
