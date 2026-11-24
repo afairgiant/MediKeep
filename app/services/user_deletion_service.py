@@ -9,6 +9,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.core.constants import get_admin_roles_filter, is_admin_role
+from app.crud.activity_log import activity_log
 from app.core.logging.config import get_logger
 from app.models.activity_log import ActivityLog
 from app.models.models import (
@@ -195,16 +196,11 @@ class UserDeletionService:
                 find_patient_attachments(db, [patient.id for patient in patients])
             )
 
-        patient_ids = []
+        patient_ids = [patient.id for patient in patients]
+        activity_log.detach_patient_activity(db, patient_ids=patient_ids)
+
         for patient_record in patients:
             patient_id = patient_record.id
-            patient_ids.append(patient_id)
-
-            # Detach the audit trail; activity_logs.patient_id has no ON DELETE action
-            db.query(ActivityLog).filter(ActivityLog.patient_id == patient_id).update(
-                {"patient_id": None}, synchronize_session=False
-            )
-
             db.delete(patient_record)
             db.flush()
 
