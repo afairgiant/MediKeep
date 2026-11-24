@@ -353,6 +353,31 @@ def test_admin_patient_delete_clears_active_patient_references(
     assert db_session.get(Patient, patient_id) is None
 
 
+def test_admin_patient_delete_keeps_activity_history(
+    admin_client, db_session, test_user, test_patient
+):
+    patient_id = test_patient.id
+    log = ActivityLog(
+        user_id=test_user.id,
+        patient_id=patient_id,
+        action=ActionType.CREATED,
+        entity_type=EntityType.MEDICATION,
+        entity_id=None,
+        description="medication added",
+    )
+    db_session.add(log)
+    db_session.commit()
+    log_id = log.id
+
+    response = admin_client.delete(f"/api/v1/admin/models/patient/{patient_id}")
+    assert response.status_code == 200, response.text
+    db_session.expire_all()
+    assert db_session.get(Patient, patient_id) is None
+    kept = db_session.get(ActivityLog, log_id)
+    assert kept is not None
+    assert kept.patient_id is None
+
+
 def test_noncommitting_crud_delete_does_not_rollback_caller(db_session, test_user):
     from app.crud.patient import patient
 
