@@ -12,16 +12,12 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.v1.admin.models import MODEL_REGISTRY
-from app.core.logging.config import get_logger
-from app.crud.activity_log import activity_log
-from app.models.models import User
-from app.services.attachment_cleanup import (
-    cleanup_attachments,
-    find_record_attachments,
+from app.api.v1.admin.models import (
+    MODEL_REGISTRY,
+    delete_registry_record,
+    log_model_failure,
 )
-
-logger = get_logger(__name__, "app")
+from app.models.models import User
 
 router = APIRouter()
 
@@ -75,28 +71,20 @@ def bulk_delete_records(
             # Check if record exists
             record = crud_instance.get(db, id=record_id)
             if record:
-                # Attachments are cleaned up once the delete has committed
-                record_files = find_record_attachments(
-                    db, model_info["model"], [record_id]
-                )
-                if request.model_name == "patient":
-                    # Rolled back with the delete if the delete fails
-                    activity_log.detach_patient_activity(db, patient_ids=[record_id])
-                crud_instance.delete(db, id=record_id)
-                cleanup_attachments(
-                    db,
-                    record_files,
-                    reason=f"{request.model_name} {record_id} deletion",
-                )
+                delete_registry_record(db, request.model_name, record, current_user.id)
                 success_count += 1
             else:
                 failed_records.append(record_id)
         except Exception as e:
+            # A failure before the delete's own rollback would poison the next record
             db.rollback()
-            logger.warning(
-                f"Bulk delete failed for {request.model_name} {record_id}: "
-                f"{type(e).__name__}",
-                extra={"model": request.model_name, "record_id": record_id},
+            log_model_failure(
+                "admin_bulk_delete_record_failed",
+                f"Error bulk deleting {request.model_name} record",
+                current_user,
+                request.model_name,
+                e,
+                record_id=record_id,
             )
             failed_records.append(record_id)
 
