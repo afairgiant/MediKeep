@@ -2,6 +2,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from app.crud.activity_log import activity_log
 from app.crud.base import CRUDBase
 from app.models.models import Patient
 from app.schemas.patient import PatientCreate, PatientUpdate
@@ -207,8 +208,12 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
         if not db_patient:
             return None
 
-        # Use the base delete method
         return self.delete(db, id=int(db_patient.id))
+
+    def delete(self, db: Session, *, id: int, commit: bool = True) -> Patient:
+        """Delete a patient, keeping its activity history with patient_id cleared."""
+        activity_log.detach_patient_activity(db, patient_ids=[id])
+        return super().delete(db, id=id, commit=commit)
 
 
 # Create the patient CRUD instance

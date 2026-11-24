@@ -841,6 +841,7 @@ Base path: `/api/v1/patients`
 - **Purpose**: Delete patient record and ALL medical data
 - **Authentication**: Yes
 - **Warning**: Cascades to medications, lab results, allergies, conditions, procedures, treatments, encounters, vitals, immunizations
+- **Note**: The patient's activity history is kept, with `patient_id` set to null
 - **Success Response** (200):
 
 ```json
@@ -6588,6 +6589,7 @@ Base path: `/api/v1/admin/models`
 - **Purpose**: Delete a record
 - **Note**: Protects against deleting last user or last admin
 - **Note**: Also removes the record's attachments (see [Deleting the Parent Record](#deleting-the-parent-record))
+- **Note**: Deleting a `patient` keeps its activity history; those entries remain with `patient_id` set to null
 - **Success Response** (200):
 
 ```json
@@ -6933,6 +6935,9 @@ Base path: `/api/v1/admin/bulk`
 
 - **Purpose**: Delete multiple records at once
 - **Note**: Also removes the attachments of each deleted record (see [Deleting the Parent Record](#deleting-the-parent-record))
+- **Note**: Deleting a `patient` keeps its activity history; those entries remain with `patient_id` set to null
+- **Note**: Each record is deleted on its own; a record that fails is listed in `failed_records` and does not stop the rest
+- **Note**: Each deleted record gets a `deleted` activity entry for the admin, the same as a single admin delete
 - **Request Body**:
 
 ```json
