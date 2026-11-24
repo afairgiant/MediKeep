@@ -21,6 +21,7 @@ const MedicationFormWrapper = memo(
     onDocumentManagerRef,
     onFileUploadComplete,
     onError,
+    formError,
   }) => {
     return (
       <MantineMedicationForm
@@ -41,6 +42,7 @@ const MedicationFormWrapper = memo(
         onDocumentManagerRef={onDocumentManagerRef}
         onFileUploadComplete={onFileUploadComplete}
         onError={onError}
+        formError={formError}
       />
     );
   },
@@ -54,6 +56,7 @@ const MedicationFormWrapper = memo(
       'patientId',
       'isLoading',
       'statusMessage',
+      'formError',
     ];
 
     // Check primitive props

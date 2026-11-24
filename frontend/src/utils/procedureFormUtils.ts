@@ -1,4 +1,8 @@
-import { ERROR_MESSAGES } from '../constants/errorMessages';
+import {
+  invalidDateMessage,
+  patientNotSelectedMessage,
+  requiredFieldsMissingMessage,
+} from './formCheckMessages';
 
 /** Form state of the Add/Edit Procedure dialog. */
 export interface ProcedureFormData {
@@ -44,9 +48,9 @@ export const validateProcedureForm = (
   form: ProcedureFormData,
   patientId?: number | null
 ): string | null => {
-  if (!form.procedure_name.trim()) return ERROR_MESSAGES.REQUIRED_FIELD_MISSING;
-  if (!form.procedure_date) return ERROR_MESSAGES.INVALID_DATE;
-  if (!patientId) return ERROR_MESSAGES.PATIENT_NOT_SELECTED;
+  if (!form.procedure_name.trim()) return requiredFieldsMissingMessage();
+  if (!form.procedure_date) return invalidDateMessage();
+  if (!patientId) return patientNotSelectedMessage();
   return null;
 };
 

@@ -1,4 +1,7 @@
-import { ERROR_MESSAGES } from '../constants/errorMessages';
+import {
+  patientNotAvailableMessage,
+  requiredFieldsMissingMessage,
+} from './formCheckMessages';
 import { getTodayString } from './dateUtils';
 
 /** Form state of the Add/Edit Symptom dialog. */
@@ -61,8 +64,8 @@ export const validateSymptomForm = (
   form: SymptomFormData,
   patientId?: number | null
 ): string | null => {
-  if (!patientId) return 'Patient information not available';
-  if (!form.symptom_name.trim()) return ERROR_MESSAGES.REQUIRED_FIELD_MISSING;
+  if (!patientId) return patientNotAvailableMessage();
+  if (!form.symptom_name.trim()) return requiredFieldsMissingMessage();
   return null;
 };
 

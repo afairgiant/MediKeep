@@ -1,3 +1,9 @@
+import {
+  patientNotAvailableMessage,
+  requiredMessage,
+  tooShortMessage,
+} from './formCheckMessages';
+
 /** Form state of the Add/Edit Medication dialog. */
 export interface MedicationFormData {
   medication_name: string;
@@ -48,11 +54,16 @@ export const validateMedicationForm = (
   form: MedicationFormData,
   patientId?: number | null
 ): string | null => {
-  if (!patientId) return 'Patient information not available';
+  if (!patientId) return patientNotAvailableMessage();
   const name = form.medication_name?.trim() || '';
-  if (!name) return 'Medication name is required';
+  if (!name)
+    return requiredMessage('shared:labels.medicationName', 'Medication Name');
   if (name.length < 2)
-    return 'Medication name must be at least 2 characters long';
+    return tooShortMessage(
+      'shared:labels.medicationName',
+      'Medication Name',
+      2
+    );
   return null;
 };
 

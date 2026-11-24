@@ -364,5 +364,14 @@
     "write": "Редактор",
     "preview": "Просмотр",
     "previewEmpty": "Нечего показать"
+  },
+  "formValidation": {
+    "required": "{{field}}: обязательное поле.",
+    "requiredOnTab": "{{field}} (вкладка «{{tab}}»): обязательное поле.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} (вкладка «{{tab}}»): {{reason}}",
+    "unnamedField": "Поле",
+    "popupTitle": "Не удалось сохранить",
+    "ok": "ОК"
   }
 }

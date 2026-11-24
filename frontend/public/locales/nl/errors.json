@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Moet een geldig getal zijn",
     "patientNotSelected": "Selecteer een patiënt.",
     "requiredFieldMissing": "Vul alle verplichte velden in.",
-    "submissionFailed": "Formulier opslaan mislukt. Controleer uw invoer en probeer het opnieuw."
+    "submissionFailed": "Formulier opslaan mislukt. Controleer uw invoer en probeer het opnieuw.",
+    "endBeforeStart": "De einddatum kan niet vóór de begindatum liggen",
+    "endBeforeOnset": "De einddatum kan niet vóór de aanvangsdatum liggen",
+    "dateInFuture": "{{field}} ({{date}}) kan niet in de toekomst liggen. Kies een datum op of vóór vandaag ({{today}}).",
+    "requiredForPrescription": "{{field}} is verplicht voor een geneesmiddelenverzekering",
+    "expirationBeforeEffective": "De vervaldatum moet na de ingangsdatum liggen",
+    "invalidFormat": "De indeling is ongeldig.",
+    "tooShort": "Gebruik minimaal {{min}} tekens.",
+    "tooLong": "Gebruik maximaal {{max}} tekens.",
+    "belowMinimum": "Moet minimaal {{min}} zijn.",
+    "aboveMaximum": "Mag maximaal {{max}} zijn.",
+    "invalidValue": "Deze waarde is ongeldig."
   },
   "general": {
     "maintenanceMode": "Het systeem is momenteel in onderhoud. Probeer het later opnieuw.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "Groot bestand gedetecteerd. Upload kan enkele minuten duren.",
     "partialSuccess": "Bewerking voltooid met enkele waarschuwingen.",
     "slowConnection": "Upload duurt langer dan gebruikelijk vanwege een trage verbinding."
-  }
+  },
+  "symptomNotAvailable": "Symptoominformatie niet beschikbaar"
 }

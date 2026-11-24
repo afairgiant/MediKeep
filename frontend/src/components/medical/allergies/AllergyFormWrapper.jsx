@@ -33,6 +33,8 @@ import TagsField from '../../shared/TagsField';
 import logger from '../../../services/logger';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const AllergyFormWrapper = ({
   isOpen,
@@ -49,6 +51,7 @@ const AllergyFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
+  formError = null,
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -151,7 +154,10 @@ const AllergyFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -455,7 +461,7 @@ const AllergyFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

@@ -86,6 +86,8 @@ vi.mock('../../hooks/useMedicalData', () => ({
     deleteItem: vi.fn(),
     refreshData: vi.fn(),
     clearError: vi.fn(),
+    formError: null,
+    setFormError: vi.fn(),
     setError: vi.fn(),
   }),
 }));

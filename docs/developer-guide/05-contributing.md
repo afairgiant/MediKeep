@@ -469,6 +469,19 @@ npm run test:run       # Tests pass (Vitest)
    });
    ```
 
+### Record Forms and Validation
+
+Every record Add/Edit dialog (Allergy, Injury, Medication, ...) uses one form for both Add and Edit. Build a new one the same way, and copy an existing form such as `InjuryFormWrapper.jsx`.
+
+1. **Use `RecordForm` in place of `<form>`** (`frontend/src/components/shared/RecordForm.tsx`).
+2. **Mark mandatory fields with the `required` prop.** That is the whole rule, for text inputs, dates and Selects, on any tab. On submit, `RecordForm` finds the first empty or invalid field, switches to its tab, focuses it, and says which field it is in a popup. The page's submit handler runs only when every field passes.
+3. **Put `<FormErrorPopup error={formError} />` right after the `RecordForm` opening tag** (`frontend/src/components/shared/FormErrorPopup.tsx`). It pops up over the form with the message from `RecordForm`, the page's own form check, or the server, and the user dismisses it with OK. When it is about a field, the cursor goes to that field. Escape closes only the popup, not the form.
+4. **Other rules go in the page's form check** (for example `validateInjuryForm` in `utils/injuryFormUtils.ts`): a range, or one field that depends on another. Return a translated message that names the field, never a hardcoded string: use the helpers in `utils/formCheckMessages.ts` (for example `requiredMessage('shared:labels.medicationName', 'Medication Name')`) or a `t()` call. Pass it to `setFormError` from `useMedicalData`, never to the page-level `setError`. A page alert sits behind the open dialog, where nobody sees it. If the form component runs a check of its own before calling the page, give its message to the popup too: `error={checkError || formError}` (see `VitalsForm.jsx`).
+5. **The backend is the final check.** When a save fails, `useMedicalData` puts the server's message in `formError`, and the popup shows it.
+6. **Clear `formError` when a save starts.** `useMedicalData`'s `createItem` and `updateItem` already do. A page that saves some other way calls `setFormError(null)` before saving, or an error from the last save pops up again.
+
+Do not use a plain `<form>`, and do not add `noValidate` yourself. The browser's own check stops the submit without a word when a required field is on a tab that is not showing, and it never checks a non-searchable Mantine `Select`.
+
 ### Database Migrations
 
 ```bash

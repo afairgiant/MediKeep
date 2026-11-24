@@ -20,6 +20,8 @@ import { isValidPhoneNumber } from '../../utils/phoneUtils';
 import logger from '../../services/logger';
 import { EMERGENCY_CONTACT_RELATIONSHIPS } from '../../constants/emergencyContactRelationships';
 import NotesField from '../shared/NotesField';
+import FormErrorPopup from '../shared/FormErrorPopup';
+import RecordForm from '../shared/RecordForm';
 
 const MantineEmergencyContactForm = ({
   isOpen,
@@ -31,6 +33,7 @@ const MantineEmergencyContactForm = ({
   editingContact = null,
   isLoading = false,
   statusMessage,
+  formError = null,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
@@ -137,7 +140,10 @@ const MantineEmergencyContactForm = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -320,7 +326,7 @@ const MantineEmergencyContactForm = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

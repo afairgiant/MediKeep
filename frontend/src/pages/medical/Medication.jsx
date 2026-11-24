@@ -134,6 +134,8 @@ const Medication = () => {
     refreshData,
     clearError,
     setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'medication',
     entityLabel: t('medical:entityNames.medication'),
@@ -236,6 +238,7 @@ const Medication = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'medication',
+    onFormError: setFormError,
     onSuccess: () => {
       resetForm();
 
@@ -286,6 +289,7 @@ const Medication = () => {
 
   const handleAddMedication = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
@@ -307,6 +311,7 @@ const Medication = () => {
 
   const handleEditMedication = useCallback(medication => {
     resetSubmission();
+    setFormError(null);
     setFormData({
       medication_name: medication.medication_name || '',
       alternative_name: medication.alternative_name || '',
@@ -338,7 +343,7 @@ const Medication = () => {
     });
     setEditingMedication(medication);
     setShowAddForm(true);
-  }, [resetSubmission]);
+  }, [resetSubmission, setFormError]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
@@ -357,7 +362,7 @@ const Medication = () => {
         currentPatient?.id
       );
       if (validationError) {
-        setError(validationError);
+        setFormError(validationError);
         return;
       }
 
@@ -457,8 +462,6 @@ const Medication = () => {
           } else {
             completeFileUpload(true, 0, 0);
           }
-        } else {
-          handleSubmissionFailure(new Error('Form submission failed'), 'form');
         }
       } catch (error) {
         logger.error('medications_submission_error', {
@@ -473,7 +476,7 @@ const Medication = () => {
       formData,
       currentPatient,
       editingMedication,
-      setError,
+      setFormError,
       updateItem,
       createItem,
       startSubmission,
@@ -682,6 +685,7 @@ const Medication = () => {
 
         {/* Form Modal */}
         <MedicationFormWrapper
+          formError={formError}
           isOpen={showAddForm}
           onClose={handleCloseForm}
           title={editingMedication ? 'Edit Medication' : 'Add New Medication'}

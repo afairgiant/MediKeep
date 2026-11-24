@@ -141,6 +141,8 @@ const mockMedicalData = items => {
     deleteItem: vi.fn(),
     refreshData: vi.fn(),
     clearError: vi.fn(),
+    formError: null,
+    setFormError: vi.fn(),
     setError: vi.fn(),
   });
 };

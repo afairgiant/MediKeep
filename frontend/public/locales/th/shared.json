@@ -364,5 +364,14 @@
     "write": "เขียน",
     "preview": "แสดงตัวอย่าง",
     "previewEmpty": "ไม่มีเนื้อหาให้แสดงตัวอย่าง"
+  },
+  "formValidation": {
+    "required": "{{field}}: จำเป็นต้องกรอก",
+    "requiredOnTab": "{{field}} (แท็บ \"{{tab}}\"): จำเป็นต้องกรอก",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} (แท็บ \"{{tab}}\"): {{reason}}",
+    "unnamedField": "ช่องข้อมูล",
+    "popupTitle": "ไม่สามารถบันทึกได้",
+    "ok": "ตกลง"
   }
 }

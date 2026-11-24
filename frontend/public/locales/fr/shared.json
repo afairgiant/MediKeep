@@ -364,5 +364,14 @@
     "write": "Écrire",
     "preview": "Aperçu",
     "previewEmpty": "Rien à afficher"
+  },
+  "formValidation": {
+    "required": "{{field}} : champ obligatoire.",
+    "requiredOnTab": "{{field}} (onglet « {{tab}} ») : champ obligatoire.",
+    "invalid": "{{field}} : {{reason}}",
+    "invalidOnTab": "{{field}} (onglet « {{tab}} ») : {{reason}}",
+    "unnamedField": "Un champ",
+    "popupTitle": "Enregistrement impossible",
+    "ok": "OK"
   }
 }

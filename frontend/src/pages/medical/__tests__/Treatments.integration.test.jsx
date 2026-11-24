@@ -288,6 +288,8 @@ function setupDefaults({
       deleteItem: vi.fn(() => Promise.resolve(true)),
       refreshData: vi.fn(),
       clearError: vi.fn(),
+      formError: null,
+      setFormError: vi.fn(),
       setError: vi.fn(),
     };
   });

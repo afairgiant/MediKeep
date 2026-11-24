@@ -1,4 +1,8 @@
-import { ERROR_MESSAGES } from '../constants/errorMessages';
+import {
+  invalidDateMessage,
+  patientNotSelectedMessage,
+  requiredFieldsMissingMessage,
+} from './formCheckMessages';
 import { usableOffsets } from './visitReminders';
 
 /** Form state of the Add/Edit Visit dialog. */
@@ -50,9 +54,9 @@ export const validateVisitForm = (
   form: VisitFormData,
   patientId?: number | null
 ): string | null => {
-  if (!form.reason.trim()) return ERROR_MESSAGES.REQUIRED_FIELD_MISSING;
-  if (!form.date) return ERROR_MESSAGES.INVALID_DATE;
-  if (!patientId) return ERROR_MESSAGES.PATIENT_NOT_SELECTED;
+  if (!form.reason.trim()) return requiredFieldsMissingMessage();
+  if (!form.date) return invalidDateMessage();
+  if (!patientId) return patientNotSelectedMessage();
   return null;
 };
 

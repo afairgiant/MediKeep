@@ -11,6 +11,7 @@ const MantineFamilyMemberForm = ({
   onInputChange,
   onSubmit,
   editingMember = null,
+  formError = null,
 }) => {
   const dynamicOptions = {
     // Add any dynamic options for family members if needed
@@ -62,6 +63,7 @@ const MantineFamilyMemberForm = ({
       onInputChange={handleInputChange}
       onSubmit={onSubmit}
       editingItem={editingMember}
+      formError={formError}
       fields={filteredFields}
       dynamicOptions={dynamicOptions}
     />

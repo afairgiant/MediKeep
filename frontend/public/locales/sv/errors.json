@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Måste vara ett giltigt nummer",
     "patientNotSelected": "Välj en patient.",
     "requiredFieldMissing": "Fyll i alla obligatoriska fält.",
-    "submissionFailed": "Det gick inte att spara formuläret. Kontrollera dina uppgifter och försök igen."
+    "submissionFailed": "Det gick inte att spara formuläret. Kontrollera dina uppgifter och försök igen.",
+    "endBeforeStart": "Slutdatumet kan inte vara före startdatumet",
+    "endBeforeOnset": "Slutdatumet kan inte vara före debutdatumet",
+    "dateInFuture": "{{field}} ({{date}}) kan inte vara i framtiden. Välj ett datum till och med i dag ({{today}}).",
+    "requiredForPrescription": "{{field}}: obligatoriskt för läkemedelsförsäkring",
+    "expirationBeforeEffective": "Utgångsdatumet måste vara efter giltighetsdatumet",
+    "invalidFormat": "Formatet är ogiltigt.",
+    "tooShort": "Använd minst {{min}} tecken.",
+    "tooLong": "Använd högst {{max}} tecken.",
+    "belowMinimum": "Måste vara minst {{min}}.",
+    "aboveMaximum": "Får vara högst {{max}}.",
+    "invalidValue": "Värdet är ogiltigt."
   },
   "general": {
     "maintenanceMode": "Systemet är för närvarande under underhåll. Försök igen senare.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "Stor fil identifierad. Uppladdningen kan ta flera minuter.",
     "partialSuccess": "Åtgärden slutfördes med vissa varningar.",
     "slowConnection": "Uppladdningen tar längre tid än vanligt på grund av långsam anslutning."
-  }
+  },
+  "symptomNotAvailable": "Symtominformation är inte tillgänglig"
 }

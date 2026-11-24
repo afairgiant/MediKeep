@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Muss eine gültige Zahl sein",
     "patientNotSelected": "Bitte wählen Sie einen Patienten aus.",
     "requiredFieldMissing": "Bitte füllen Sie alle erforderlichen Felder aus.",
-    "submissionFailed": "Formular konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut."
+    "submissionFailed": "Formular konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut.",
+    "endBeforeStart": "Das Enddatum darf nicht vor dem Startdatum liegen",
+    "endBeforeOnset": "Das Enddatum darf nicht vor dem Beginndatum liegen",
+    "dateInFuture": "{{field}} ({{date}}) darf nicht in der Zukunft liegen. Bitte wählen Sie ein Datum bis einschließlich heute ({{today}}).",
+    "requiredForPrescription": "{{field}} ist für Rezeptversicherungen erforderlich",
+    "expirationBeforeEffective": "Das Ablaufdatum muss nach dem Gültigkeitsdatum liegen",
+    "invalidFormat": "Das Format ist ungültig.",
+    "tooShort": "Mindestens {{min}} Zeichen verwenden.",
+    "tooLong": "Höchstens {{max}} Zeichen verwenden.",
+    "belowMinimum": "Muss mindestens {{min}} sein.",
+    "aboveMaximum": "Darf höchstens {{max}} sein.",
+    "invalidValue": "Dieser Wert ist ungültig."
   },
   "general": {
     "maintenanceMode": "Das System befindet sich derzeit in Wartung. Bitte versuchen Sie es später erneut.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "Große Datei erkannt. Upload kann mehrere Minuten dauern.",
     "partialSuccess": "Vorgang mit einigen Warnungen abgeschlossen.",
     "slowConnection": "Upload dauert länger als üblich aufgrund langsamer Verbindung."
-  }
+  },
+  "symptomNotAvailable": "Symptominformationen nicht verfügbar"
 }

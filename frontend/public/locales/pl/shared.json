@@ -364,5 +364,14 @@
     "write": "Pisz",
     "preview": "Podgląd",
     "previewEmpty": "Brak treści do podglądu"
+  },
+  "formValidation": {
+    "required": "{{field}}: pole wymagane.",
+    "requiredOnTab": "{{field}} (karta „{{tab}}”): pole wymagane.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} (karta „{{tab}}”): {{reason}}",
+    "unnamedField": "Pole",
+    "popupTitle": "Nie można zapisać",
+    "ok": "OK"
   }
 }

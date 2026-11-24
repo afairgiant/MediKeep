@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Deve ser um número válido",
     "patientNotSelected": "Por favor, selecione um paciente.",
     "requiredFieldMissing": "Por favor, preencha todos os campos obrigatórios.",
-    "submissionFailed": "Falha ao salvar o formulário. Verifique os dados e tente novamente."
+    "submissionFailed": "Falha ao salvar o formulário. Verifique os dados e tente novamente.",
+    "endBeforeStart": "A data de término não pode ser anterior à data de início",
+    "endBeforeOnset": "A data de término não pode ser anterior à data de surgimento",
+    "dateInFuture": "{{field}} ({{date}}) não pode estar no futuro. Selecione uma data igual ou anterior a hoje ({{today}}).",
+    "requiredForPrescription": "{{field}}: obrigatório para seguro de medicamentos",
+    "expirationBeforeEffective": "A data de vencimento deve ser posterior à data de vigência",
+    "invalidFormat": "O formato não é válido.",
+    "tooShort": "Use pelo menos {{min}} caracteres.",
+    "tooLong": "Use no máximo {{max}} caracteres.",
+    "belowMinimum": "Deve ser pelo menos {{min}}.",
+    "aboveMaximum": "Deve ser no máximo {{max}}.",
+    "invalidValue": "Este valor não é válido."
   },
   "general": {
     "maintenanceMode": "O sistema está em manutenção no momento. Tente novamente mais tarde.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "Arquivo grande detectado. O envio pode levar vários minutos.",
     "partialSuccess": "Operação concluída com alguns avisos.",
     "slowConnection": "O envio está demorando mais que o normal devido à conexão lenta."
-  }
+  },
+  "symptomNotAvailable": "Informações do sintoma não disponíveis"
 }

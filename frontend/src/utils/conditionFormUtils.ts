@@ -1,4 +1,10 @@
 import {
+  dateInFutureMessage,
+  endBeforeOnsetMessage,
+  patientNotAvailableMessage,
+  requiredMessage,
+} from './formCheckMessages';
+import {
   formatDateForAPI,
   getTodayString,
   isDateInFuture,
@@ -41,20 +47,31 @@ export const validateConditionForm = (
   form: ConditionFormData,
   patientId?: number | null
 ): string | null => {
-  if (!patientId) return 'Patient information not available';
+  if (!patientId) return patientNotAvailableMessage();
 
   const todayString = getTodayString();
   if (isDateInFuture(form.onset_date)) {
-    return `Onset date (${form.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`;
+    return dateInFutureMessage(
+      'shared:fields.onsetDate',
+      'Onset Date',
+      form.onset_date,
+      todayString
+    );
   }
   if (isDateInFuture(form.end_date)) {
-    return `End date (${form.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`;
+    return dateInFutureMessage(
+      'shared:labels.endDate',
+      'End Date',
+      form.end_date,
+      todayString
+    );
   }
   if (isEndDateBeforeStartDate(form.onset_date, form.end_date)) {
-    return 'End date cannot be before onset date';
+    return endBeforeOnsetMessage();
   }
-  if (!form.status) return 'Status is required. Please select a status.';
-  if (!form.diagnosis) return 'Diagnosis is required.';
+  if (!form.status) return requiredMessage('shared:fields.status', 'Status');
+  if (!form.diagnosis)
+    return requiredMessage('shared:labels.diagnosis', 'Diagnosis');
   return null;
 };
 

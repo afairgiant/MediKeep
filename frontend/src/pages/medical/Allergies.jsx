@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Container, Paper, Stack } from '@mantine/core';
 import { IconAlertTriangle, IconPlus } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { patientNotAvailableMessage } from '../../utils/formCheckMessages';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
@@ -67,6 +68,8 @@ const Allergies = () => {
     refreshData,
     clearError,
     setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'allergy',
     entityLabel: t('medical:entityNames.allergy'),
@@ -163,6 +166,7 @@ const Allergies = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'allergy',
+    onFormError: setFormError,
     onSuccess: () => {
       resetForm();
 
@@ -203,6 +207,7 @@ const Allergies = () => {
 
   const handleAddAllergy = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingAllergy(null);
     setFormData({
@@ -220,6 +225,7 @@ const Allergies = () => {
 
   const handleEditAllergy = allergy => {
     resetSubmission();
+    setFormError(null);
     setFormData({
       allergen: allergy.allergen || '',
       severity: allergy.severity || '',
@@ -240,7 +246,7 @@ const Allergies = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError('Patient information not available');
+      setFormError(patientNotAvailableMessage());
       return;
     }
 
@@ -312,8 +318,6 @@ const Allergies = () => {
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('allergies_submission_error', {
@@ -385,6 +389,7 @@ const Allergies = () => {
 
         {/* Form Modal */}
         <AllergyFormWrapper
+          formError={formError}
           isOpen={showAddForm}
           onClose={() => {
             if (isBlocking) return;

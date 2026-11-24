@@ -1,4 +1,7 @@
-import { ERROR_MESSAGES } from '../constants/errorMessages';
+import {
+  patientNotAvailableMessage,
+  requiredFieldsMissingMessage,
+} from './formCheckMessages';
 
 /** Form state of the Add/Edit Injury dialog. */
 export interface InjuryFormData {
@@ -38,8 +41,8 @@ export const validateInjuryForm = (
   form: InjuryFormData,
   patientId?: number | null
 ): string | null => {
-  if (!patientId) return 'Patient information not available';
-  if (!form.injury_name.trim()) return ERROR_MESSAGES.REQUIRED_FIELD_MISSING;
+  if (!patientId) return patientNotAvailableMessage();
+  if (!form.injury_name.trim()) return requiredFieldsMissingMessage();
   return null;
 };
 

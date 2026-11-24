@@ -364,5 +364,14 @@
     "write": "Γραφή",
     "preview": "Προεπισκόπηση",
     "previewEmpty": "Δεν υπάρχει κάτι για προεπισκόπηση"
+  },
+  "formValidation": {
+    "required": "{{field}}: υποχρεωτικό πεδίο.",
+    "requiredOnTab": "{{field}} (καρτέλα «{{tab}}»): υποχρεωτικό πεδίο.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} (καρτέλα «{{tab}}»): {{reason}}",
+    "unnamedField": "Ένα πεδίο",
+    "popupTitle": "Δεν είναι δυνατή η αποθήκευση",
+    "ok": "OK"
   }
 }

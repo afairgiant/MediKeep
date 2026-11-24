@@ -18,6 +18,9 @@ export const useMedicalData = config => {
   const [items, setItems] = useState([]);
   const [filesCounts, setFilesCounts] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  // Why the last create or update failed. Pages show it inside the open form,
+  // not in the page alert behind the dialog.
+  const [formError, setFormError] = useState(null);
   const isInitialized = useRef(false);
   const abortControllerRef = useRef(null);
 
@@ -161,6 +164,7 @@ export const useMedicalData = config => {
         hasData: !!data,
       });
 
+      setFormError(null);
       const result = await execute(
         async signal => {
           logger.info('medical_data_create', 'Calling API create method', {
@@ -169,7 +173,7 @@ export const useMedicalData = config => {
           });
           return await apiMethodsConfig.create(data, signal);
         },
-        { errorMessage: `Failed to create ${entityName}` }
+        { errorMessage: `Failed to create ${entityName}`, onError: setFormError }
       );
 
       logger.info('medical_data_create', 'Entity creation completed', {
@@ -193,9 +197,10 @@ export const useMedicalData = config => {
   // Update item
   const updateItem = useCallback(
     async (id, data) => {
+      setFormError(null);
       const result = await execute(
         async signal => await apiMethodsConfig.update(id, data, signal),
-        { errorMessage: `Failed to update ${entityName}` }
+        { errorMessage: `Failed to update ${entityName}`, onError: setFormError }
       );
 
       if (result) {
@@ -494,6 +499,8 @@ export const useMedicalData = config => {
     // queued in it, are not unmounted by a save.
     listLoading: refreshesInFlight > 0 || patientLoading || authLoading,
     error,
+    // Show this over the open form (FormErrorPopup), not in the page alert
+    formError,
     successMessage,
 
     // Actions
@@ -506,5 +513,7 @@ export const useMedicalData = config => {
     // Utilities
     setSuccessMessage,
     setError,
+    // For the page's own form checks, and to clear it when the form opens or closes
+    setFormError,
   };
 };

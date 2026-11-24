@@ -11,6 +11,7 @@ import {
 } from '@mantine/core';
 import { IconPlus, IconVaccine } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { patientNotAvailableMessage } from '../../utils/formCheckMessages';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
@@ -76,7 +77,8 @@ const Immunization = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'immunization',
     entityLabel: t('medical:entityNames.immunization'),
@@ -152,6 +154,7 @@ const Immunization = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'immunization',
+    onFormError: setFormError,
     onSuccess: () => {
       resetForm();
 
@@ -202,6 +205,7 @@ const Immunization = () => {
 
   const handleAddImmunization = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
@@ -209,6 +213,7 @@ const Immunization = () => {
 
   const handleEditImmunization = immunization => {
     resetSubmission();
+    setFormError(null);
     // Auto-link on open: if the stored vaccine_name already matches a library
     // entry, pre-populate who_code so a plain Save persists the FK without the
     // user having to re-pick from the dropdown. The user can still re-pick to
@@ -245,7 +250,7 @@ const Immunization = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError('Patient information not available');
+      setFormError(patientNotAvailableMessage());
       return;
     }
 
@@ -347,8 +352,6 @@ const Immunization = () => {
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('immunizations_submission_error', {
@@ -420,6 +423,7 @@ const Immunization = () => {
         {/* Modals stay outside Tabs so switching tabs doesn't unmount them */}
         {/* Form Modal */}
         <ImmunizationFormWrapper
+          formError={formError}
           isOpen={showAddForm}
           onClose={() => {
             if (isBlocking) return;

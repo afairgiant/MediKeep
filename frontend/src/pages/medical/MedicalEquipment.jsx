@@ -72,7 +72,8 @@ const MedicalEquipment = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'equipment',
     entityLabel: t('medical:entityNames.equipment'),
@@ -139,6 +140,7 @@ const MedicalEquipment = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'medical-equipment',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowModal(false);
       setEditingEquipment(null);
@@ -173,6 +175,7 @@ const MedicalEquipment = () => {
 
   const handleAddEquipment = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingEquipment(null);
     setFormData(EMPTY_FORM_DATA);
@@ -181,6 +184,7 @@ const MedicalEquipment = () => {
 
   const handleEditEquipment = equip => {
     resetSubmission();
+    setFormError(null);
     setEditingEquipment(equip);
     setFormData({
       equipment_name: equip.equipment_name || '',
@@ -216,7 +220,7 @@ const MedicalEquipment = () => {
 
     const validationError = validateEquipmentForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -282,8 +286,6 @@ const MedicalEquipment = () => {
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('equipment_submission_error', {
@@ -496,6 +498,7 @@ const MedicalEquipment = () => {
       </Container>
 
       <EquipmentFormWrapper
+        formError={formError}
         isOpen={showModal}
         onClose={handleCloseForm}
         title={

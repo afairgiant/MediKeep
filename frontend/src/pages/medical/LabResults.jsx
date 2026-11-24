@@ -17,9 +17,7 @@ import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePersistedToggle } from '../../hooks/usePersistedToggle';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import {
-  ERROR_MESSAGES,
-} from '../../constants/errorMessages';
+import { patientNotSelectedMessage } from '../../utils/formCheckMessages';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
@@ -125,7 +123,8 @@ const LabResults = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'lab-result',
     entityLabel: t('medical:entityNames.labResult'),
@@ -167,6 +166,7 @@ const LabResults = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'lab-result',
+    onFormError: setFormError,
     onSuccess: () => {
       const newResult = newlyCreatedResultRef.current;
       newlyCreatedResultRef.current = null;
@@ -465,26 +465,28 @@ const LabResults = () => {
 
       if (labResult) {
         resetSubmission();
+        setFormError(null);
         setEditingLabResult(labResult);
         setFormData(labResultToFormData(labResult));
         setPostCreateMode(true);
         setShowModal(true);
       }
     },
-    [refreshData, refreshPatientComponents, resetSubmission]
+    [refreshData, refreshPatientComponents, resetSubmission, setFormError]
   );
 
   // Opens the full tabbed form directly (relationships, notes, files) instead of
   // the quick panel-creation dialog. Shared by the "Add" button and the in-form toggle.
   const openAdvancedForm = useCallback(() => {
     resetSubmission();
+    setFormError(null);
     setEditingLabResult(null);
     setDocumentManagerMethods(null);
     setPendingRelationshipsMethods(null);
     setPendingComponentsMethods(null);
     setFormData(EMPTY_FORM_DATA);
     setShowModal(true);
-  }, [resetSubmission]);
+  }, [resetSubmission, setFormError]);
 
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
   const handleAddLabResult = useCallback(() => {
@@ -498,11 +500,12 @@ const LabResults = () => {
   const handleEditLabResult = useCallback(
     async labResult => {
       resetSubmission(); // Reset submission state to prevent modal flash
+      setFormError(null);
       setEditingLabResult(labResult);
       setFormData(labResultToFormData(labResult));
       setShowModal(true);
     },
-    [resetSubmission]
+    [resetSubmission, setFormError]
   );
 
   const handleLabResultUpdated = useCallback(async () => {
@@ -691,12 +694,12 @@ const LabResults = () => {
 
       // Basic validation first
       if (!formData.test_name.trim()) {
-        setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
+        setFormError(t('labresults:testNameRequired', 'Test name is required'));
         return;
       }
 
       if (!currentPatient?.id) {
-        setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+        setFormError(patientNotSelectedMessage());
         return;
       }
 
@@ -940,7 +943,7 @@ const LabResults = () => {
       pendingRelationshipsMethods,
       pendingComponentsMethods,
       startSubmission,
-      setError,
+      setFormError,
       completeFormSubmission,
       startFileUpload,
       completeFileUpload,
@@ -1381,6 +1384,7 @@ const LabResults = () => {
       {/* Create/Edit Form Modal */}
       {showModal && (
         <LabResultFormWrapper
+          formError={formError}
           isOpen={showModal}
           onClose={() => !isBlocking && handleCloseModal()}
           title={

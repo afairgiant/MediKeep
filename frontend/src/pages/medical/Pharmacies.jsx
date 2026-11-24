@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import PharmacyCard from '../../components/medical/pharmacy/PharmacyCard';
 import PharmacyViewModal from '../../components/medical/pharmacy/PharmacyViewModal';
 import PharmacyFormWrapper from '../../components/medical/pharmacy/PharmacyFormWrapper';
+import { getUserFriendlyError } from '../../constants/errorMessages';
 
 const Pharmacies = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -35,6 +36,8 @@ const Pharmacies = () => {
     PAGE_SIZE_OPTIONS,
   } = usePagination();
   const [error, setError] = useState('');
+  // Why the open form could not be saved, shown in its popup
+  const [formError, setFormError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -106,6 +109,7 @@ const Pharmacies = () => {
       specialty_services: '',
     });
     setEditingPharmacy(null);
+    setFormError(null);
     setShowModal(false);
   };
 
@@ -152,11 +156,13 @@ const Pharmacies = () => {
       specialty_services: pharmacy.specialty_services || '',
     });
     setEditingPharmacy(pharmacy);
+    setFormError(null);
     setShowModal(true);
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setFormError(null);
     try {
       setError('');
       setSuccessMessage('');
@@ -185,7 +191,7 @@ const Pharmacies = () => {
       await refreshPharmacies(); // Refresh global cache
       resetForm();
     } catch (error) {
-      setError(`Failed to save pharmacy: ${error.message}`);
+      setFormError(getUserFriendlyError(error, 'save'));
     }
   };
 
@@ -333,6 +339,7 @@ const Pharmacies = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingPharmacy={editingPharmacy}
+        formError={formError}
       />
 
       <PharmacyViewModal

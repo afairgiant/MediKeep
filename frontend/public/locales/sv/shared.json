@@ -364,5 +364,14 @@
     "write": "Skriv",
     "preview": "Förhandsgranska",
     "previewEmpty": "Inget att förhandsgranska"
+  },
+  "formValidation": {
+    "required": "{{field}}: obligatoriskt fält.",
+    "requiredOnTab": "{{field}} (fliken ”{{tab}}”): obligatoriskt fält.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} (fliken ”{{tab}}”): {{reason}}",
+    "unnamedField": "Ett fält",
+    "popupTitle": "Det går inte att spara",
+    "ok": "OK"
   }
 }

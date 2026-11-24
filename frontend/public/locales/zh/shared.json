@@ -364,5 +364,14 @@
     "write": "编辑",
     "preview": "预览",
     "previewEmpty": "没有可预览的内容"
+  },
+  "formValidation": {
+    "required": "{{field}}为必填项。",
+    "requiredOnTab": "“{{tab}}”标签页中的{{field}}为必填项。",
+    "invalid": "{{field}}：{{reason}}",
+    "invalidOnTab": "“{{tab}}”标签页中的{{field}}：{{reason}}",
+    "unnamedField": "某个字段",
+    "popupTitle": "无法保存",
+    "ok": "确定"
   }
 }

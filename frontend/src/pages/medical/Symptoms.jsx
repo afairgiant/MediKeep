@@ -44,6 +44,7 @@ import PaginationControls from '../../components/shared/PaginationControls';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { applyOccurrenceSeverityAutoFill } from '../../utils/anticipatoryAutoFill';
 import { notesToPlainText } from '../../utils/notesMarkdown';
+import { getUserFriendlyError } from '../../constants/errorMessages';
 import {
   applySymptomInputChange,
   buildSymptomPayload,
@@ -76,6 +77,8 @@ const Symptoms = () => {
   const [symptoms, setSymptoms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Why the open symptom or episode form could not be saved, shown inside it
+  const [formError, setFormError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
   // View state
@@ -195,6 +198,7 @@ const Symptoms = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'symptom',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowSymptomForm(false);
       setEditingSymptom(null);
@@ -225,6 +229,7 @@ const Symptoms = () => {
   // Symptom Definition Handlers
   const handleAddSymptom = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setSymptomFormData({
       ...createInitialSymptomFormData(),
@@ -236,6 +241,7 @@ const Symptoms = () => {
 
   const handleEditSymptom = symptom => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setSymptomFormData({
       symptom_name: symptom.symptom_name || '',
@@ -264,10 +270,11 @@ const Symptoms = () => {
       currentPatient?.id
     );
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
+    setFormError(null);
     startSubmission();
 
     try {
@@ -347,7 +354,6 @@ const Symptoms = () => {
         editing: !!editingSymptom,
         component: 'Symptoms',
       });
-      setError(err.message || 'Failed to save symptom');
     }
   };
 
@@ -389,6 +395,7 @@ const Symptoms = () => {
     setEditingOccurrence(null);
     autoFilledOccurrenceFieldsRef.current.clear();
     setOccurrenceFormData(getDefaultOccurrenceFormData(true));
+    setFormError(null);
     setShowOccurrenceForm(true);
   };
 
@@ -417,6 +424,7 @@ const Symptoms = () => {
       resolution_notes: occurrence.resolution_notes || '',
       notes: occurrence.notes || '',
     });
+    setFormError(null);
     setShowOccurrenceForm(true);
   };
 
@@ -436,10 +444,13 @@ const Symptoms = () => {
     e.preventDefault();
 
     if (!selectedSymptomForOccurrence?.id) {
-      setError('Symptom information not available');
+      setFormError(
+        t('errors:symptomNotAvailable', 'Symptom information not available')
+      );
       return;
     }
 
+    setFormError(null);
     try {
       const submitData = {
         ...occurrenceFormData,
@@ -499,7 +510,16 @@ const Symptoms = () => {
         error: err.message,
         component: 'Symptoms',
       });
-      setError(err.message || 'Failed to save episode');
+      setFormError(
+        getUserFriendlyError(
+          err.message ||
+            t(
+              'errors:form.submissionFailed',
+              'Failed to save form. Please check your input and try again.'
+            ),
+          'save'
+        )
+      );
     }
   };
 
@@ -801,6 +821,7 @@ const Symptoms = () => {
 
       {/* Symptom Definition Form Modal */}
       <MantineSymptomForm
+        formError={formError}
         isOpen={showSymptomForm}
         onClose={() => {
           if (!isBlocking) {
@@ -857,6 +878,7 @@ const Symptoms = () => {
         onInputChange={handleOccurrenceInputChange}
         onSubmit={handleOccurrenceSubmit}
         editingOccurrence={editingOccurrence}
+        formError={formError}
         submitButtonText={
           editingOccurrence
             ? t('buttons.update', 'Update')

@@ -364,5 +364,14 @@
     "write": "Escribir",
     "preview": "Vista previa",
     "previewEmpty": "Nada que mostrar"
+  },
+  "formValidation": {
+    "required": "{{field}}: campo obligatorio.",
+    "requiredOnTab": "{{field}} (pestaña «{{tab}}»): campo obligatorio.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} (pestaña «{{tab}}»): {{reason}}",
+    "unnamedField": "Un campo",
+    "popupTitle": "No se puede guardar",
+    "ok": "Aceptar"
   }
 }
