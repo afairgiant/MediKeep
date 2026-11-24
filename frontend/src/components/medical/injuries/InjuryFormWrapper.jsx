@@ -411,6 +411,7 @@ const InjuryFormWrapper = ({
                       ]}
                       onChange={handleSelectChange('status')}
                       required
+                      allowDeselect={false}
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                       description={t(
                         'injuries.status.description',

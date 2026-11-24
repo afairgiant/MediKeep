@@ -58,7 +58,7 @@ export const buildInjuryPayload = (
   date_of_injury: form.date_of_injury || null,
   mechanism: form.mechanism || null,
   severity: form.severity || null,
-  status: form.status,
+  status: form.status || 'active',
   treatment_received: form.treatment_received || null,
   recovery_notes: form.recovery_notes || null,
   practitioner_id: form.practitioner_id || null,
