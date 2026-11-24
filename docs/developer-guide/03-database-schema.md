@@ -160,7 +160,7 @@ JUNCTION TABLES (Many-to-Many)
 | last_sso_login | DateTime | | Last SSO login timestamp |
 | account_linked_at | DateTime | | When account linked to SSO |
 | sso_linking_preference | String(20) | | auto_link, create_separate, always_ask |
-| active_patient_id | Integer | FK(patients.id) | Current patient context |
+| active_patient_id | Integer | FK(patients.id), ON DELETE SET NULL | Current patient context |
 | session_version | Integer | NOT NULL, DEFAULT 0 | Compared with each JWT's `sv` claim; raising it ends every existing session |
 | created_at | DateTime | NOT NULL | Account creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
@@ -181,6 +181,7 @@ JUNCTION TABLES (Many-to-Many)
 - Username and email must be unique across the system
 - SSO users may have external_id instead of password_hash
 - active_patient_id determines which patient's records are currently active
+- Deleting a patient sets active_patient_id to NULL for every user who had that patient selected
 - session_version is raised on password change, admin password reset, deactivation,
   turning two-factor off, and "sign out other sessions"
 
