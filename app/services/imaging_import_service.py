@@ -2,6 +2,7 @@
 
 import os
 import re
+from contextlib import contextmanager
 import shutil
 import threading
 import unicodedata
@@ -10,10 +11,11 @@ import zlib
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
-from typing import IO, Any, Callable, Dict, List, Optional, Set, Union
+from typing import IO, Any, Callable, Dict, Iterator, List, Optional, Set, Union
 
 import pydicom
 from pydicom.errors import InvalidDicomError
+from pydicom.filereader import _read_file_meta_info, read_preamble
 from pydicom.multival import MultiValue
 from pydicom.valuerep import PersonName
 from sqlalchemy import func
@@ -48,6 +50,28 @@ _IGNORED_FILE_NAMES = {"DICOMDIR", "AUTORUN.INF"}
 _COPY_CHUNK_SIZE = 1024 * 1024
 _ZIP_ENCRYPTED_FLAG = 0x1
 _ZIP_READ_ERRORS = (zipfile.BadZipFile, zlib.error, NotImplementedError, EOFError)
+# pydicom inflates a deflated dataset whole, with no size limit
+_UNSUPPORTED_TRANSFER_SYNTAXES = {pydicom.uid.DeflatedExplicitVRLittleEndian}
+_HEADER_TAGS = [
+    "StudyInstanceUID",
+    "SeriesInstanceUID",
+    "SOPInstanceUID",
+    "Rows",
+    "Columns",
+    "InstanceNumber",
+    "NumberOfFrames",
+    "Modality",
+    "SeriesNumber",
+    "SeriesDescription",
+    "StudyDate",
+    "BodyPartExamined",
+    "StudyDescription",
+    "AccessionNumber",
+    "InstitutionName",
+    "ReferringPhysicianName",
+    "PatientName",
+    "PatientBirthDate",
+]
 
 
 class SkipReason:
@@ -59,10 +83,15 @@ class SkipReason:
     NOT_DICOM = "not_dicom"
     NOT_AN_IMAGE = "not_an_image"
     INVALID_UID = "invalid_uid"
+    UNSUPPORTED = "unsupported"
 
 
 class ImagingImportError(Exception):
     """An upload that cannot be imported at all; the message is safe to show the user."""
+
+
+class _UnsupportedEncodingError(Exception):
+    """A DICOM file in a transfer syntax the import refuses to read."""
 
 
 class StudyConflictError(Exception):
@@ -249,8 +278,12 @@ def _import_member(
     extracted: Path,
 ) -> None:
     # The header is read inside the archive so a re-imported image is never unpacked
-    with zf.open(member) as source:
-        header = importer.read_header(source, member.filename)
+    try:
+        with zf.open(member) as source:
+            header = importer.read_header(source, member.filename)
+    except _ZIP_READ_ERRORS:
+        importer.summary.skip(member.filename, SkipReason.UNREADABLE)
+        return
     if header is None or not importer.is_new(header):
         return
     if _extract(zf, member, extracted):
@@ -287,6 +320,7 @@ class _StudyImporter:
         self.patient = patient
         self.summary = ImportSummary()
         self._studies: Dict[str, _StudyState] = {}
+        self._not_stored: Set[str] = set()
         self._stored: List[Path] = []
 
     @property
@@ -301,6 +335,9 @@ class _StudyImporter:
             header = _read_header(source)
         except InvalidDicomError:
             self.summary.skip(name, SkipReason.NOT_DICOM)
+            return None
+        except _UnsupportedEncodingError:
+            self.summary.skip(name, SkipReason.UNSUPPORTED)
             return None
         except Exception:  # pydicom and zip reads raise many error types for bad files
             self.summary.skip(name, SkipReason.UNREADABLE)
@@ -318,7 +355,8 @@ class _StudyImporter:
 
     def is_new(self, header: _Header) -> bool:
         """False, counting a duplicate, when the study already holds this image."""
-        if header.sop_uid in self._study_state(header).sop_uids:
+        state = self._find_state(header)
+        if state is not None and header.sop_uid in state.sop_uids:
             self.summary.duplicates_skipped += 1
             return False
         return True
@@ -355,28 +393,41 @@ class _StudyImporter:
         state.result.instances_added += 1
         self.summary.instances_added += 1
 
+    def _find_state(self, header: _Header) -> Optional[_StudyState]:
+        """The study's state, or None while the patient has no such study."""
+        uid = header.study_uid
+        if uid not in self._studies and uid not in self._not_stored:
+            study = (
+                self.db.query(ImagingStudy)
+                .filter(
+                    ImagingStudy.patient_id == self.patient.id,
+                    ImagingStudy.study_instance_uid == uid,
+                )
+                .first()
+            )
+            if study is None:
+                self._not_stored.add(uid)
+            else:
+                self._track(study, header, created=False)
+        return self._studies.get(uid)
+
     def _study_state(self, header: _Header) -> _StudyState:
-        state = self._studies.get(header.study_uid)
+        state = self._find_state(header)
         if state is not None:
             return state
-
-        study = (
-            self.db.query(ImagingStudy)
-            .filter(
-                ImagingStudy.patient_id == self.patient.id,
-                ImagingStudy.study_instance_uid == header.study_uid,
-            )
-            .first()
+        study = ImagingStudy(
+            patient_id=self.patient.id,
+            study_instance_uid=header.study_uid,
+            modalities=[],
+            tags=[],
         )
-        created = study is None
-        if created:
-            study = ImagingStudy(
-                patient_id=self.patient.id,
-                study_instance_uid=header.study_uid,
-                modalities=[],
-                tags=[],
-            )
-            self.db.add(study)
+        self.db.add(study)
+        self._not_stored.discard(header.study_uid)
+        return self._track(study, header, created=True)
+
+    def _track(
+        self, study: ImagingStudy, header: _Header, created: bool
+    ) -> _StudyState:
         _fill_missing_study_fields(study, header)
         self.db.flush()
 
@@ -484,9 +535,26 @@ def _fill_missing_study_fields(study: ImagingStudy, header: _Header) -> None:
             setattr(study, attr, getattr(header, attr))
 
 
+@contextmanager
+def _binary(source: Union[Path, IO[bytes]]) -> Iterator[IO[bytes]]:
+    if isinstance(source, Path):
+        with open(source, "rb") as fp:
+            yield fp
+    else:
+        yield source
+
+
 def _read_header(source: Union[Path, IO[bytes]]) -> _Header:
-    """Raises InvalidDicomError for a non-DICOM file, other errors for a malformed one."""
-    ds = pydicom.dcmread(source, stop_before_pixels=True)
+    """Raises InvalidDicomError for a non-DICOM file, _UnsupportedEncodingError for a
+    refused transfer syntax, other errors for a malformed one.
+    """
+    with _binary(source) as fp:
+        read_preamble(fp, False)
+        meta = _read_file_meta_info(fp)
+        if meta.get("TransferSyntaxUID") in _UNSUPPORTED_TRANSFER_SYNTAXES:
+            raise _UnsupportedEncodingError()
+        fp.seek(0)
+        ds = pydicom.dcmread(fp, stop_before_pixels=True, specific_tags=_HEADER_TAGS)
     file_meta = getattr(ds, "file_meta", None)
     transfer_syntax = (
         str(file_meta.get("TransferSyntaxUID", "")) if file_meta is not None else ""

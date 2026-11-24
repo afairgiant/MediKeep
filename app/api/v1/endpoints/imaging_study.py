@@ -116,6 +116,16 @@ def _get_accessible_study(
     return study
 
 
+def _lock_study_row(db: Session, study_id: int) -> None:
+    """Lock the study's row until the transaction ends and reload it if loaded.
+
+    A move and an edit of one study then run one after the other.
+    """
+    db.query(ImagingStudy).filter(
+        ImagingStudy.id == study_id
+    ).with_for_update().populate_existing().first()
+
+
 def _verify_links_belong_to_patient(
     db: Session, patient_id: int, update: ImagingStudyUpdate, request: Request
 ) -> None:
@@ -450,6 +460,9 @@ def update_imaging_study(
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update the user-editable fields of an imaging study."""
+    # Without the lock a move could clear the links after they were checked
+    with handle_database_errors(request=request):
+        _lock_study_row(db, study_id)
     return handle_update_with_logging(
         db=db,
         crud_obj=imaging_study,
@@ -507,7 +520,9 @@ def move_imaging_study(
     current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Move a study to another patient the user can edit, clearing its links."""
-    with handle_database_errors(request=request):
+    # Locked before the study is read, so access is checked against its current owner
+    with handle_database_errors(request=request), _imaging_write_lock_or_409(request):
+        _lock_study_row(db, study_id)
         study = _get_accessible_study(
             db,
             study_id,
@@ -524,11 +539,10 @@ def move_imaging_study(
         deps.verify_patient_access(
             target_patient_id, db, current_user, required_permission="edit"
         )
-        with _imaging_write_lock_or_409(request):
-            try:
-                move_study(db, study, target_patient_id)
-            except StudyConflictError as exc:
-                raise ConflictException(message=str(exc), request=request) from exc
+        try:
+            move_study(db, study, target_patient_id)
+        except StudyConflictError as exc:
+            raise ConflictException(message=str(exc), request=request) from exc
 
         db.refresh(study)
         log_update(db, EntityType.IMAGING_STUDY, study, current_user.id, request)

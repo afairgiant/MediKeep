@@ -3996,7 +3996,9 @@ updates and deletes need edit access. A study the user cannot access returns `40
   message when failed
 - `skipped` lists at most 100 files; `skipped_count` counts all of them. `reason` is
   one of `ignored`, `encrypted`, `unreadable`, `not_dicom`, `not_an_image`,
-  `invalid_uid`
+  `invalid_uid`, `unsupported` (a deflated DICOM file, which is not read)
+- A job fails at once if a backup restore is running, and a restore is refused
+  with `409` while an import runs
 - **Error Responses**:
   - `404`: Unknown or expired job, or another user's job
 

@@ -23,6 +23,8 @@ from app.services.imaging_storage import (
     remove_stale_import_staging,
     study_directory,
 )
+from pydicom.uid import DeflatedExplicitVRLittleEndian
+
 from tests.utils.dicom import (
     SERIES_UID,
     STUDY_UID,
@@ -184,6 +186,50 @@ class TestZipImport:
         assert summary.instances_added == 1
         assert [(s.name, s.reason) for s in summary.skipped] == [
             ("secret.dcm", SkipReason.ENCRYPTED)
+        ]
+
+    def test_unopenable_entry_is_skipped(self, db_session, patient, user_id):
+        data = bytearray(
+            zip_bytes(
+                {
+                    "broken.dcm": dicom_bytes(),
+                    "plain.dcm": dicom_bytes(instance_number=2),
+                }
+            )
+        )
+        # An unknown compression method makes zipfile refuse to open the first entry
+        method_at = data.index(b"PK") + 10
+        data[method_at : method_at + 2] = (99).to_bytes(2, "little")
+
+        summary = _run(db_session, patient, user_id, bytes(data))
+
+        assert summary.instances_added == 1
+        assert [(s.name, s.reason) for s in summary.skipped] == [
+            ("broken.dcm", SkipReason.UNREADABLE)
+        ]
+
+    def test_deflated_file_is_skipped_unread(self, db_session, patient, user_id):
+        deflated = dicom_bytes(transfer_syntax=DeflatedExplicitVRLittleEndian)
+        data = zip_bytes({"deflated.dcm": deflated, "plain.dcm": dicom_bytes()})
+
+        summary = _run(db_session, patient, user_id, data)
+
+        assert summary.instances_added == 1
+        assert [(s.name, s.reason) for s in summary.skipped] == [
+            ("deflated.dcm", SkipReason.UNSUPPORTED)
+        ]
+
+    def test_study_is_not_created_when_no_image_could_be_stored(
+        self, db_session, patient, user_id, monkeypatch
+    ):
+        monkeypatch.setattr(service, "_extract", lambda *_: False)
+
+        summary = _run(db_session, patient, user_id, zip_bytes({"a": dicom_bytes()}))
+
+        assert summary.studies == [] and summary.instances_added == 0
+        assert db_session.query(ImagingStudy).count() == 0
+        assert [(s.name, s.reason) for s in summary.skipped] == [
+            ("a", SkipReason.UNREADABLE)
         ]
 
     def test_skip_list_is_capped(self, db_session, patient, user_id, monkeypatch):

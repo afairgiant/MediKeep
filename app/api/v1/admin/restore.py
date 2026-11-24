@@ -22,7 +22,11 @@ from app.core.logging.helpers import (
     log_validation_error,
 )
 from app.models.models import User
-from app.services.restore_service import RestoreInProgressError, RestoreService
+from app.services.restore_service import (
+    RESTORE_BUSY_MESSAGE,
+    RestoreInProgressError,
+    RestoreService,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -211,9 +215,7 @@ async def execute_restore(
         return RestoreExecuteResponse(**result)
 
     except RestoreInProgressError:
-        raise HTTPException(
-            status_code=409, detail="Another restore is already in progress"
-        )
+        raise HTTPException(status_code=409, detail=RESTORE_BUSY_MESSAGE)
     except ValueError as e:
         log_validation_error(
             logger, request, str(e), user_id=current_user.id, backup_id=backup_id

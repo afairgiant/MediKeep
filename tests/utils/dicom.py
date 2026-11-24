@@ -23,13 +23,14 @@ def dicom_bytes(
     modality: str = "CT",
     series_number: int = 1,
     image: bool = True,
+    transfer_syntax: str = ExplicitVRLittleEndian,
 ) -> bytes:
     """A valid Part 10 file; image=False leaves out the pixel module, like a report."""
     sop_uid = sop_uid or f"{series_uid}.{instance_number}"
     meta = FileMetaDataset()
     meta.MediaStorageSOPClassUID = CTImageStorage
     meta.MediaStorageSOPInstanceUID = sop_uid
-    meta.TransferSyntaxUID = ExplicitVRLittleEndian
+    meta.TransferSyntaxUID = transfer_syntax
 
     ds = FileDataset("test.dcm", {}, file_meta=meta, preamble=b"\x00" * 128)
     ds.SOPClassUID = CTImageStorage

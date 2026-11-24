@@ -1,6 +1,7 @@
 """Import job registry on its real background thread, plus job retention."""
 
 import time
+from contextlib import contextmanager
 
 import pytest
 from sqlalchemy.orm import sessionmaker
@@ -8,9 +9,11 @@ from sqlalchemy.orm import sessionmaker
 from app.services import imaging_import_jobs
 from app.services.imaging_import_jobs import ImportJobRegistry, ImportJobStatus
 from app.services.imaging_import_service import IMAGING_WRITE_LOCK
+from app.models.imaging import ImagingInstance
+from app.models.sharing import PatientShare
 from app.services.imaging_storage import create_import_staging_dir
 from tests.utils.dicom import dicom_bytes, write
-from tests.utils.user import create_random_user
+from tests.utils.user import create_random_user, share_patient
 
 pytestmark = pytest.mark.usefixtures("isolated_uploads")
 
@@ -65,9 +68,7 @@ def test_finished_jobs_expire(registry, test_user, test_patient, monkeypatch):
     assert registry.get(job.id, test_user.id) is None
 
 
-def test_job_fails_when_edit_access_was_revoked_while_queued(
-    registry, db_session, test_patient
-):
+def test_job_fails_without_edit_access(registry, db_session, test_patient):
     outsider = create_random_user(db_session)["user"]
 
     job, _ = _submit(registry, outsider.id, test_patient.id)
@@ -94,3 +95,41 @@ def test_shutdown_cancels_queued_jobs(registry, test_user, test_patient):
     assert queued.status == ImportJobStatus.QUEUED
     # Startup removes the cancelled job's staging directory
     assert queued_dir.exists()
+
+
+def test_job_fails_when_edit_access_was_revoked_while_queued(
+    registry, db_session, test_user, test_patient
+):
+    editor, _ = share_patient(db_session, test_user, test_patient.id, "edit")
+
+    with IMAGING_WRITE_LOCK:
+        job, _ = _submit(registry, editor.id, test_patient.id)
+        share = (
+            db_session.query(PatientShare)
+            .filter(PatientShare.shared_with_user_id == editor.id)
+            .one()
+        )
+        share.is_active = False
+        db_session.commit()
+    registry.executor.shutdown(wait=True)
+
+    assert job.status == ImportJobStatus.FAILED
+    assert job.error == "You no longer have permission to edit this patient"
+    assert db_session.query(ImagingInstance).count() == 0
+
+
+def test_job_fails_while_a_restore_holds_the_uploads_lock(
+    registry, db_session, test_user, test_patient, monkeypatch
+):
+    @contextmanager
+    def restore_running(*_args, **_kwargs):
+        yield False
+
+    monkeypatch.setattr(imaging_import_jobs, "try_advisory_lock", restore_running)
+
+    job, _ = _submit(registry, test_user.id, test_patient.id)
+    registry.executor.shutdown(wait=True)
+
+    assert job.status == ImportJobStatus.FAILED
+    assert job.error == imaging_import_jobs.RESTORE_RUNNING_MESSAGE
+    assert db_session.query(ImagingInstance).count() == 0

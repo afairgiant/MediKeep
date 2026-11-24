@@ -73,13 +73,14 @@ def create_import_staging_dir() -> Path:
 def remove_stale_import_staging() -> int:
     """Delete staging directories left by interrupted imports; returns how many.
 
-    Call only at startup, before any import can be running.
+    Call only at startup, before any import can be running. Raises OSError when a
+    directory could not be removed.
     """
     root = import_staging_root()
     if not root.is_dir():
         return 0
     removed = sum(1 for _ in root.iterdir())
-    shutil.rmtree(root, ignore_errors=True)
+    shutil.rmtree(root)
     return removed
 
 

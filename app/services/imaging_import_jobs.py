@@ -15,6 +15,7 @@ from typing import Callable, Dict, Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.database.advisory_lock import UPLOADS_RESTORE_LOCK_KEY, try_advisory_lock
 from app.core.database.database import SessionLocal
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -32,6 +33,9 @@ logger = get_logger(__name__, "app")
 # Finished jobs stay pollable this long, so a client that reconnects can still read the result
 JOB_RETENTION_SECONDS = 60 * 60
 GENERIC_FAILURE_MESSAGE = "The import failed. No images from this upload were saved."
+RESTORE_RUNNING_MESSAGE = (
+    "A backup restore is running. Try the import again when it finishes."
+)
 
 
 class ImportJobStatus:
@@ -130,40 +134,49 @@ class ImportJobRegistry:
 
         db = self.session_factory()
         try:
-            patient = db.get(Patient, job.patient_id)
-            if patient is None:
-                raise ImagingImportError("The patient no longer exists")
-            # Access can be revoked while the job waits in the queue
-            user = db.get(User, job.user_id)
-            if user is None or not PatientAccessService(db).can_access_patient(
-                user, patient, "edit"
-            ):
-                raise ImagingImportError(
-                    "You no longer have permission to edit this patient"
+            # A restore replaces the uploads directory, so it must not run mid-import
+            with try_advisory_lock(
+                db.get_bind(),
+                UPLOADS_RESTORE_LOCK_KEY,
+                shared=True,
+                release_failed_event="imaging_import_lock_release_failed",
+            ) as acquired:
+                if not acquired:
+                    raise ImagingImportError(RESTORE_RUNNING_MESSAGE)
+                patient = db.get(Patient, job.patient_id)
+                if patient is None:
+                    raise ImagingImportError("The patient no longer exists")
+                # Access can be revoked while the job waits in the queue
+                user = db.get(User, job.user_id)
+                if user is None or not PatientAccessService(db).can_access_patient(
+                    user, patient, "edit"
+                ):
+                    raise ImagingImportError(
+                        "You no longer have permission to edit this patient"
+                    )
+                job.summary = import_dicom_upload(
+                    db,
+                    patient=patient,
+                    user_id=job.user_id,
+                    upload_path=upload_path,
+                    original_name=original_name,
+                    work_dir=work_dir,
+                    on_progress=progress,
                 )
-            job.summary = import_dicom_upload(
-                db,
-                patient=patient,
-                user_id=job.user_id,
-                upload_path=upload_path,
-                original_name=original_name,
-                work_dir=work_dir,
-                on_progress=progress,
-            )
-            job.status = ImportJobStatus.COMPLETED
-            logger.info(
-                "Imaging import completed",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "imaging_import_completed",
-                    LogFields.USER_ID: job.user_id,
-                    LogFields.PATIENT_ID: job.patient_id,
-                    "job_id": job.id,
-                    "studies": len(job.summary.studies),
-                    "instances_added": job.summary.instances_added,
-                    "skipped": job.summary.skipped_count,
-                },
-            )
+                job.status = ImportJobStatus.COMPLETED
+                logger.info(
+                    "Imaging import completed",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "imaging_import_completed",
+                        LogFields.USER_ID: job.user_id,
+                        LogFields.PATIENT_ID: job.patient_id,
+                        "job_id": job.id,
+                        "studies": len(job.summary.studies),
+                        "instances_added": job.summary.instances_added,
+                        "skipped": job.summary.skipped_count,
+                    },
+                )
         except ImagingImportError as exc:
             job.status, job.error = ImportJobStatus.FAILED, str(exc)
         except Exception as exc:

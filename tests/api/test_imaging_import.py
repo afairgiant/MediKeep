@@ -379,6 +379,16 @@ class TestMove:
 
         assert response.status_code == 409
 
+    def test_lock_is_taken_before_the_study_is_read(
+        self, client, db_session, user_with_patient, authenticated_headers
+    ):
+        sibling = _second_patient(db_session, user_with_patient["user"])
+
+        with IMAGING_WRITE_LOCK:
+            response = _move(client, authenticated_headers, 999_999, sibling.id)
+
+        assert response.status_code == 409
+
 
 class TestDeleteDuringImport:
     def test_running_import_is_409_and_keeps_the_study(
