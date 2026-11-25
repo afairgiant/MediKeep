@@ -87,6 +87,22 @@ def test_failed_commit_rolls_back_and_leaves_session_usable(
     assert _audit_rows(db_session, "failed commit audit") == 0
 
 
+def test_failed_flush_of_pending_work_leaves_session_usable(db_session, test_user):
+    db_session.add(User(username=None, email="invalid@test.com", password_hash="x"))
+
+    assert not log_crud_activity(
+        db_session,
+        ActionType.UPDATED,
+        "user",
+        test_user,
+        test_user.id,
+        description="failed flush audit",
+    )
+
+    assert db_session.query(User).filter(User.id == test_user.id).count() == 1
+    assert _audit_rows(db_session, "failed flush audit") == 0
+
+
 def test_successful_log_commits_entry_and_pending_change(db_session, test_user):
     test_user.full_name = CHANGED_NAME
 

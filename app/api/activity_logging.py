@@ -246,6 +246,16 @@ def log_crud_activity(
         True if logging succeeded, False otherwise
     """
     try:
+        # begin_nested would flush the caller's pending work first; a failure there is theirs
+        db.flush()
+    except Exception as e:
+        if commit:
+            # A session whose flush failed is unusable until rolled back
+            db.rollback()
+        _log_activity_failure(e, action, entity_type, user_id)
+        return False
+
+    try:
         # Generate description if not provided, otherwise sanitize the provided description
         if not description:
             description = get_entity_description(entity_obj, entity_type, action)
