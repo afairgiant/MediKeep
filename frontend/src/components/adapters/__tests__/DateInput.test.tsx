@@ -156,6 +156,22 @@ describe('DateInput adapter', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('moves the open picker to a new controlled value and still navigates', async () => {
+    const { rerender } = render(
+      <DateInput label="Start" value="2024-03-10" onChange={vi.fn()} />
+    );
+    const picker = await openPicker();
+    expect(picker).toHaveTextContent('March 2024');
+
+    rerender(<DateInput label="Start" value="2025-07-04" onChange={vi.fn()} />);
+    await waitFor(() => expect(picker).toHaveTextContent('July 2025'));
+
+    fireEvent.click(
+      picker.querySelector('[data-direction="next"]') as HTMLElement
+    );
+    await waitFor(() => expect(picker).toHaveTextContent('August 2025'));
+  });
+
   it('closes an open picker when the field becomes disabled', async () => {
     const { rerender } = render(
       <DateInput label="Start" value="2024-03-10" onChange={vi.fn()} />

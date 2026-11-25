@@ -6,7 +6,7 @@ import {
   DatePicker,
   pickCalendarProps,
 } from '@mantine/dates';
-import { useMediaQuery, useUncontrolled } from '@mantine/hooks';
+import { useDidUpdate, useMediaQuery, useUncontrolled } from '@mantine/hooks';
 import { IconCalendar } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -52,6 +52,14 @@ export const DateInput = ({
     onChange,
   });
   const { calendarProps } = pickCalendarProps(props);
+  const [pickerDate, setPickerDate] = useUncontrolled({
+    value: calendarProps.date,
+    defaultValue: calendarProps.defaultDate ?? (currentValue || undefined),
+    onChange: calendarProps.onDateChange,
+  });
+  useDidUpdate(() => {
+    if (currentValue) setPickerDate(currentValue);
+  }, [currentValue]);
   const effectiveFormat = valueFormat || dateInputFormat;
   const pickerDisabled = disabled || readOnly;
 
@@ -88,7 +96,8 @@ export const DateInput = ({
         <DatePicker
           {...calendarProps}
           value={currentValue || null}
-          defaultDate={calendarProps.defaultDate ?? (currentValue || undefined)}
+          date={pickerDate}
+          onDateChange={setPickerDate}
           allowDeselect={calendarProps.allowDeselect ?? clearable}
           onChange={handlePick}
           size={size}
