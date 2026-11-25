@@ -28,9 +28,10 @@ from app.core.http.integration_errors import (
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.integration_verification import integration_instance_key
-from app.core.utils.stored_files import resolve_stored_file
+from app.core.utils.stored_files import resolve_storage_path, resolve_stored_file
 from app.models.models import (
     EntityFile,
+    LabResultFile,
     Patient,
     User,
     UserPreferences,
@@ -70,6 +71,11 @@ from app.services.paperless_service import (
 )
 from app.services.paperless_task_status import extract_task, parse_task
 from app.services.patient_access import PatientAccessService
+from app.services.shared_stored_files import (
+    log_shared_file_kept,
+    paths_in_use,
+    unshared_stored_file,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -357,6 +363,29 @@ def entity_files_of_records(
         for entity_type, model in sources
     ]
     return db.query(EntityFile).filter(or_(*attached_to_records), *conditions).all()
+
+
+def _legacy_lab_result_copies(
+    db: Session, file_record: EntityFile
+) -> List[LabResultFile]:
+    """Legacy lab result file rows ``file_record`` was copied from.
+
+    The startup migration copies each lab_result_files row to an EntityFile with
+    the same file_path. Only rows of the same lab result and the same stored file
+    match, so a row another lab result points at that file is left alone.
+    """
+    if file_record.entity_type != "lab-result":
+        return []
+    stored = resolve_storage_path(file_record.file_path)
+    if stored is None:
+        return []
+    return [
+        legacy_file
+        for legacy_file in db.query(LabResultFile).filter(
+            LabResultFile.lab_result_id == file_record.entity_id
+        )
+        if resolve_storage_path(legacy_file.file_path) == stored
+    ]
 
 
 def _entity_files(db: Session, sources, patient_ids, *conditions) -> List[EntityFile]:
@@ -883,14 +912,27 @@ class GenericEntityFileService:
                     current_user_id=current_user_id,
                 )
             elif file_record.storage_backend == "local":
-                # Handle local file deletion
-                file_path = resolve_stored_file(file_record)
+                # Remove the legacy row this file was migrated from too, or the
+                # startup migration would copy it back as a new attachment
+                legacy_copies = _legacy_lab_result_copies(db, file_record)
+                file_path = unshared_stored_file(
+                    db,
+                    file_record,
+                    {
+                        EntityFile: [file_record.id],
+                        LabResultFile: [
+                            legacy_copy.id for legacy_copy in legacy_copies
+                        ],
+                    },
+                )
                 if file_path:
                     trash_result = self.file_management_service.move_to_trash(
                         str(file_path),
                         reason=f"Deleted via API for {file_record.entity_type} {file_record.entity_id}",
                     )
                     logger.info(f"File moved to trash: {trash_result}")
+                for legacy_copy in legacy_copies:
+                    db.delete(legacy_copy)
             else:
                 raise HTTPException(
                     status_code=400,
@@ -3149,9 +3191,10 @@ class GenericEntityFileService:
         """
         Remove EntityFile rows whose records were deleted, and commit.
 
-        Local files move to trash. Paperless and Papra documents stay in those
-        services; only the link is removed. A file that fails keeps its row and is
-        counted in "errors"; the others are still removed.
+        Local files move to trash, unless a file row outside ``entity_files`` still
+        points to them. Paperless and Papra documents stay in those services; only
+        the link is removed. A file that fails keeps its row and is counted in
+        "errors"; the others are still removed.
 
         Args:
             db: Database session
@@ -3166,15 +3209,34 @@ class GenericEntityFileService:
         preserved_remote_files = 0
         errors = 0
 
+        local_paths = {
+            file_record.id: resolve_stored_file(file_record)
+            for file_record in entity_files
+            if file_record.storage_backend == "local"
+        }
+        # Files another file row still uses stay in place. Rows in this list do
+        # not count: removing all of them trashes the file, once.
+        shared_paths = paths_in_use(
+            db,
+            local_paths.values(),
+            {EntityFile: [file_record.id for file_record in entity_files]},
+        )
+        trashed_paths = set()
+
         for file_record in entity_files:
             try:
                 if file_record.storage_backend == "local":
                     # Delete local files (move to trash)
-                    file_path = resolve_stored_file(file_record)
-                    if file_path:
+                    file_path = local_paths[file_record.id]
+                    if file_path in shared_paths:
+                        log_shared_file_kept(file_record)
+                    elif file_path in trashed_paths:
+                        pass  # Shared with a row trashed earlier in this list
+                    elif file_path:
                         self.file_management_service.move_to_trash(
                             str(file_path), reason=reason
                         )
+                        trashed_paths.add(file_path)
                         logger.info(f"Moved local file to trash: file {file_record.id}")
                         deleted_local_files += 1
                     else:
@@ -3208,6 +3270,10 @@ class GenericEntityFileService:
                     f"Error processing file {file_record.id}: {str(file_error)}"
                 )
                 errors += 1
+                # Its row stays, so later rows sharing its file must keep it
+                kept_path = local_paths.get(file_record.id)
+                if kept_path:
+                    shared_paths.add(kept_path)
                 # Continue with other files
 
         # Commit all file record deletions

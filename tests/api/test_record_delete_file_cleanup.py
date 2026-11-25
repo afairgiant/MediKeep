@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.utils.stored_files import resolve_stored_file
 from app.crud.encounter import encounter as encounter_crud
+from app.crud.lab_result_file import lab_result_file as lab_result_file_crud
 from app.crud.medication import medication as medication_crud
 from app.crud.patient import patient as patient_crud
 from app.models.models import (
@@ -37,6 +38,10 @@ from app.services.attachment_cleanup import (
     cleanup_attachments,
     find_patient_attachments,
     find_record_attachments,
+)
+from app.services.file_management_service import (
+    FileManagementService,
+    _metadata_path,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
 from app.services.imaging_storage import study_directory
@@ -791,3 +796,469 @@ class TestCleanupAttachments:
         pending = find_record_attachments(db_session, LabResult, [lab.id])
 
         assert sorted(pending.local_paths) == stored[:-1]
+
+
+def _share_stored_file(db_session, file_id, stored):
+    """Point an EntityFile row at another row's stored file, as an admin edit can.
+
+    Uses the relative form of the path, so matching must compare resolved paths.
+    """
+    db_session.get(EntityFile, file_id).file_path = os.path.relpath(stored)
+    db_session.commit()
+
+
+def _legacy_file_ids(db_session, lab_result_id):
+    return [
+        file_id
+        for (file_id,) in db_session.query(LabResultFile.id).filter(
+            LabResultFile.lab_result_id == lab_result_id
+        )
+    ]
+
+
+@pytest.fixture
+def trash_fails_once(monkeypatch):
+    """The first move to trash fails; later moves succeed."""
+    original = FileManagementService.move_to_trash
+    calls = []
+
+    def flaky(self, file_path, reason=None):
+        calls.append(file_path)
+        if len(calls) == 1:
+            raise OSError("first move fails")
+        return original(self, file_path, reason=reason)
+
+    monkeypatch.setattr(FileManagementService, "move_to_trash", flaky)
+
+
+class TestSharedStoredFiles:
+    """A stored file stays in place while another file row still points to it (#1296)."""
+
+    def test_record_delete_keeps_a_file_another_record_still_uses(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        patient_id = user_with_patient["patient"].id
+        doomed = _create_medication(db_session, patient_id)
+        kept = _create_medication(db_session, patient_id)
+        doomed_file = _upload(
+            client, authenticated_headers, "medication", doomed.id, b"shared"
+        )
+        kept_file = _upload(client, authenticated_headers, "medication", kept.id, b"")
+        stored = _stored_path(db_session, doomed_file)
+        _share_stored_file(db_session, kept_file, stored)
+
+        resp = client.delete(
+            f"/api/v1/medications/{doomed.id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert db_session.get(EntityFile, doomed_file) is None
+        assert stored.read_bytes() == b"shared"
+        assert _trashed_contents(trash) == []
+
+    def test_rows_of_one_delete_sharing_a_file_trash_it_once(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        med = _create_medication(db_session, user_with_patient["patient"].id)
+        first = _upload(client, authenticated_headers, "medication", med.id, b"first")
+        second = _upload(client, authenticated_headers, "medication", med.id, b"")
+        _share_stored_file(db_session, second, _stored_path(db_session, first))
+
+        stats = GenericEntityFileService().cleanup_entity_files_on_deletion(
+            db=db_session, entity_type="medication", entity_id=med.id
+        )
+
+        assert stats == {"files_deleted": 1, "files_preserved": 0, "errors": 0}
+        db_session.expire_all()
+        assert db_session.get(EntityFile, first) is None
+        assert db_session.get(EntityFile, second) is None
+        assert _trashed_contents(trash) == [b"first"]
+
+    def test_file_delete_keeps_a_file_another_record_still_uses(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        patient_id = user_with_patient["patient"].id
+        meds = [_create_medication(db_session, patient_id) for _ in range(2)]
+        doomed_file = _upload(
+            client, authenticated_headers, "medication", meds[0].id, b"shared"
+        )
+        kept_file = _upload(
+            client, authenticated_headers, "medication", meds[1].id, b""
+        )
+        stored = _stored_path(db_session, doomed_file)
+        _share_stored_file(db_session, kept_file, stored)
+
+        resp = client.delete(
+            f"/api/v1/entity-files/files/{doomed_file}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert db_session.get(EntityFile, doomed_file) is None
+        assert stored.read_bytes() == b"shared"
+        assert _trashed_contents(trash) == []
+
+    def test_deleting_a_migrated_file_also_removes_its_legacy_row(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        # Left behind, the legacy row would be copied back by the startup migration
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        file_id = _upload(client, authenticated_headers, "lab-result", lab.id, b"lab")
+        _legacy_lab_file(
+            db_session, trash, lab.id, b"", stored=_stored_path(db_session, file_id)
+        )
+
+        resp = client.delete(
+            f"/api/v1/entity-files/files/{file_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert db_session.get(EntityFile, file_id) is None
+        assert _legacy_file_ids(db_session, lab.id) == []
+        assert _trashed_contents(trash) == [b"lab"]
+
+    def test_deleting_a_migrated_file_keeps_another_lab_results_legacy_row(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        patient_id = user_with_patient["patient"].id
+        lab = _create_lab_result(db_session, patient_id)
+        other_lab = _create_lab_result(db_session, patient_id)
+        file_id = _upload(client, authenticated_headers, "lab-result", lab.id, b"lab")
+        stored = _stored_path(db_session, file_id)
+        _legacy_lab_file(db_session, trash, other_lab.id, b"", stored=stored)
+
+        resp = client.delete(
+            f"/api/v1/entity-files/files/{file_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert len(_legacy_file_ids(db_session, other_lab.id)) == 1
+        assert stored.read_bytes() == b"lab"
+        assert _trashed_contents(trash) == []
+
+    def test_lab_result_delete_trashes_a_migrated_file_once(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        # Both rows go in this delete, so neither may keep the file for the other
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        file_id = _upload(client, authenticated_headers, "lab-result", lab.id, b"lab")
+        _legacy_lab_file(
+            db_session, trash, lab.id, b"", stored=_stored_path(db_session, file_id)
+        )
+
+        resp = client.delete(
+            f"/api/v1/lab-results/{lab.id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 200
+        assert resp.json()["files_deleted"] == 1
+        db_session.expire_all()
+        assert db_session.get(EntityFile, file_id) is None
+        assert _legacy_file_ids(db_session, lab.id) == []
+        assert _trashed_contents(trash) == [b"lab"]
+
+    def test_legacy_file_delete_keeps_the_file_its_copy_uses(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        file_id = _upload(client, authenticated_headers, "lab-result", lab.id, b"lab")
+        stored = _stored_path(db_session, file_id)
+        _legacy_lab_file(db_session, trash, lab.id, b"", stored=stored)
+        (legacy_id,) = _legacy_file_ids(db_session, lab.id)
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/{legacy_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab.id) == []
+        assert stored.read_bytes() == b"lab"
+
+
+class TestLegacyLabResultFileDeletes:
+    """Legacy lab result file deletes move the stored file to trash and never leave it
+    behind without a record (#1296)."""
+
+    @pytest.fixture
+    def legacy_file(self, db_session: Session, user_with_patient, trash):
+        """(lab result id, legacy file id, stored path) of a file no other row uses."""
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        stored = _legacy_lab_file(db_session, trash, lab.id, b"legacy")
+        (legacy_id,) = _legacy_file_ids(db_session, lab.id)
+        return lab.id, legacy_id, stored
+
+    @pytest.fixture
+    def failing_trash(self, monkeypatch):
+        def explode(self, file_path, reason=None):
+            raise OSError("disk detail")
+
+        # On the class: undoing a patch on the shared instance would leave the
+        # original method on it, hiding later class patches from it
+        monkeypatch.setattr(FileManagementService, "move_to_trash", explode)
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "/api/v1/lab-result-files/{file_id}",
+            "/api/v1/lab-results/{lab_id}/files/{file_id}",
+        ],
+    )
+    def test_delete_moves_the_file_to_trash(
+        self,
+        url,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        legacy_file,
+        trash,
+    ):
+        lab_id, legacy_id, stored = legacy_file
+
+        resp = client.delete(
+            url.format(lab_id=lab_id, file_id=legacy_id),
+            headers=authenticated_headers,
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab_id) == []
+        assert not stored.exists()
+        assert _trashed_contents(trash) == [b"legacy"]
+
+    def test_lab_result_file_delete_keeps_the_file_its_copy_uses(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        file_id = _upload(client, authenticated_headers, "lab-result", lab.id, b"lab")
+        stored = _stored_path(db_session, file_id)
+        _legacy_lab_file(db_session, trash, lab.id, b"", stored=stored)
+        (legacy_id,) = _legacy_file_ids(db_session, lab.id)
+
+        resp = client.delete(
+            f"/api/v1/lab-results/{lab.id}/files/{legacy_id}",
+            headers=authenticated_headers,
+        )
+
+        assert resp.status_code == 200
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab.id) == []
+        assert stored.read_bytes() == b"lab"
+        assert _trashed_contents(trash) == []
+
+    def test_failed_move_keeps_the_record(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        legacy_file,
+        failing_trash,
+    ):
+        lab_id, legacy_id, stored = legacy_file
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/{legacy_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 500
+        assert "disk detail" not in resp.text
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab_id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+
+    def test_failed_move_in_a_batch_keeps_the_record(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        legacy_file,
+        failing_trash,
+    ):
+        lab_id, legacy_id, stored = legacy_file
+
+        resp = client.post(
+            "/api/v1/lab-result-files/batch-operation",
+            headers=authenticated_headers,
+            json={"file_ids": [legacy_id], "operation": "delete"},
+        )
+
+        assert resp.status_code == 200
+        assert resp.json()["results"] == []
+        assert resp.json()["errors"]
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab_id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+
+    def test_failed_move_in_delete_all_keeps_the_record(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        legacy_file,
+        trash,
+        trash_fails_once,
+    ):
+        """Each file moves at most once, so a later attempt cannot delete the row
+        after the failure was already reported."""
+        lab_id, legacy_id, stored = legacy_file
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/lab-result/{lab_id}/files",
+            headers=authenticated_headers,
+        )
+
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["deleted_records"] == 0
+        assert body["deleted_physical_files"] == 0
+        assert len(body["errors"]) == 1
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab_id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+        assert _trashed_contents(trash) == []
+
+
+class TestFailedMovesKeepSharedFiles:
+    """A row whose file fails to move stays, so it still uses that file (#1296)."""
+
+    def test_record_delete_keeps_a_file_a_failed_row_still_uses(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+        trash_fails_once,
+    ):
+        med = _create_medication(db_session, user_with_patient["patient"].id)
+        first = _upload(client, authenticated_headers, "medication", med.id, b"first")
+        second = _upload(client, authenticated_headers, "medication", med.id, b"")
+        stored = _stored_path(db_session, first)
+        _share_stored_file(db_session, second, stored)
+
+        stats = GenericEntityFileService().cleanup_entity_files_on_deletion(
+            db=db_session, entity_type="medication", entity_id=med.id
+        )
+
+        assert stats == {"files_deleted": 0, "files_preserved": 0, "errors": 1}
+        db_session.expire_all()
+        remaining = [db_session.get(EntityFile, i) for i in (first, second)]
+        assert sum(record is not None for record in remaining) == 1
+        assert stored.read_bytes() == b"first"
+        assert _trashed_contents(trash) == []
+
+    def test_lab_result_files_delete_keeps_a_file_a_failed_row_still_uses(
+        self, db_session: Session, user_with_patient, trash, trash_fails_once
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        stored = _legacy_lab_file(db_session, trash, lab.id, b"legacy")
+        _legacy_lab_file(db_session, trash, lab.id, b"", stored=stored)
+
+        deleted = lab_result_file_crud.delete_by_lab_result(
+            db_session, lab_result_id=lab.id
+        )
+
+        assert deleted == 1
+        db_session.expire_all()
+        assert len(_legacy_file_ids(db_session, lab.id)) == 1
+        assert stored.read_bytes() == b"legacy"
+        assert _trashed_contents(trash) == []
+
+    def test_failed_metadata_write_leaves_the_file_in_place(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+        monkeypatch,
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        stored = _legacy_lab_file(db_session, trash, lab.id, b"legacy")
+        (legacy_id,) = _legacy_file_ids(db_session, lab.id)
+
+        def fail(*args, **kwargs):
+            raise OSError("disk full")
+
+        monkeypatch.setattr(
+            "app.services.file_management_service._write_metadata", fail
+        )
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/{legacy_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 500
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab.id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+        assert not any(path.is_file() for path in trash.rglob("*"))
+
+    def test_failed_metadata_cleanup_still_moves_the_file_back(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        stored = _legacy_lab_file(db_session, trash, lab.id, b"legacy")
+        (legacy_id,) = _legacy_file_ids(db_session, lab.id)
+        # A directory where the metadata goes: writing it fails, and so does
+        # removing it afterwards
+        daily_trash = FileManagementService()._daily_trash_dir()
+        _metadata_path(daily_trash / stored.name).mkdir()
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/{legacy_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 500
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab.id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+        assert not any(path.is_file() for path in trash.rglob("*"))

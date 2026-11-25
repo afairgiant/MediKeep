@@ -2164,7 +2164,7 @@ Base path: `/api/v1/entity-files`
 - **Remote storage**: For Paperless/Papra files the remote document is deleted too, except linked documents (unlinked only), documents still referenced by another record, and records marked `missing`. A record with no remote document ID (an upload still processing, or whose task failed) has nothing to remove remotely, so only the database record is deleted.
 - **Success Response** (200): File operation result
 
-> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them.
+> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them. Their deletes (`DELETE /lab-results/{lab_result_id}/files/{file_id}`, `DELETE /lab-result-files/{file_id}`, `DELETE /lab-result-files/lab-result/{lab_result_id}/files` and the `delete` operation of `POST /lab-result-files/batch-operation`) move the stored file to trash. If the file cannot be moved, the record is kept: the single deletes return a 500, and the batch operation and `DELETE /lab-result-files/lab-result/{lab_result_id}/files` list the file under `errors`.
 
 > **Removed**: `POST /lab-result-files/`, `PUT /lab-result-files/{file_id}`, `POST /entity-files/{entity_type}/{entity_id}/files/pending` and `PUT /entity-files/files/{file_id}/status` accepted a client-supplied file path and were removed (GHSA-876g-4mgh-cqhf). Upload through `POST /entity-files/{entity_type}/{entity_id}/files` or `POST /lab-result-files/upload/{lab_result_id}`; the server always chooses where the file is stored. Downloads, views, deletes and exports only touch files inside `UPLOAD_DIR` or `TRASH_DIR`, and the admin model editor rejects a `file_path` outside them.
 
@@ -4999,6 +4999,7 @@ Before deleting any other Paperless document, MediKeep reads it through the call
 - **Authentication**: Yes
 - **Permission**: `edit` on the owning patient
 - **Success Response** (200): File operation result. A linked document or a file stored elsewhere is only unlinked from MediKeep
+- A `lab-result` file copied from `lab_result_files` also removes the `lab_result_files` row it was copied from (same lab result, same stored file), so the copy is not recreated at the next start
 
 ### Deleting the Parent Record
 
@@ -5017,7 +5018,7 @@ Deletes that remove records without going through their own endpoint clean up th
 
 Lab results also have older attachments in `lab_result_files`. Those rows are deleted along with the lab result, and their locally stored files move to trash.
 
-In the deletes listed above, a stored file from `lab_result_files`, or from an `entity_file` or `lab_result_file` record deleted directly, stays in place while another file record still points to it.
+In every delete that removes file records, a locally stored file stays in place while an `entity_files` or `lab_result_files` row outside that delete still points to it. This covers the deletes listed above, `DELETE /entity-files/files/{file_id}` and the legacy lab result file deletes. Paths are compared once resolved, so a relative and an absolute path to the same file match.
 
 Imaging studies of a deleted patient (and `DELETE /imaging-studies/{study_id}`) move their whole study folder to trash as one entry, named `imaging_{patient_id}_{study_instance_uid}`.
 

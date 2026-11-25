@@ -20,14 +20,13 @@ only the link is removed.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Sequence, Tuple
 
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.utils.stored_files import resolve_storage_path, resolve_stored_file
 from app.models.models import (
     EntityFile,
     ImagingStudy,
@@ -42,12 +41,9 @@ from app.services.generic_entity_file_service import (
     entity_files_of_records,
 )
 from app.services.imaging_storage import trash_study_files
+from app.services.shared_stored_files import unshared_local_paths
 
 logger = get_logger(__name__, "app")
-
-# File names matched per query. Each name adds a level to the query's OR, and
-# SQLite rejects expressions deeper than 1000 by default.
-_NAME_BATCH_SIZE = 500
 
 
 @dataclass
@@ -73,44 +69,6 @@ class PendingAttachments:
         self.imaging_studies.extend(other.imaging_studies)
 
 
-def _local_paths(file_records: Iterable[Any]) -> List[Path]:
-    """Stored files of the records; remote placeholders and missing files are skipped."""
-    return [path for path in map(resolve_stored_file, file_records) if path]
-
-
-def _unshared_local_paths(
-    db: Session, file_records: List[Any], deleted_ids: Dict[type, Sequence[int]]
-) -> List[Path]:
-    """Stored files of ``file_records`` that no file row outside ``deleted_ids`` uses.
-
-    Two file rows can share a stored file: a legacy lab result file copied to an
-    EntityFile, or a row an admin pointed at another row's file. Deleting some of
-    them must leave the file in place for the others. Paths are compared once
-    resolved, so a relative and an absolute path to the same file match.
-    """
-    paths = _local_paths(file_records)
-    if not paths:
-        return []
-    names = sorted({path.name for path in paths})
-    still_used = set()
-    for file_model in (EntityFile, LabResultFile):
-        excluded = deleted_ids.get(file_model)
-        for start in range(0, len(names), _NAME_BATCH_SIZE):
-            batch = names[start : start + _NAME_BATCH_SIZE]
-            query = db.query(file_model.file_path).filter(
-                or_(
-                    *(
-                        file_model.file_path.endswith(name, autoescape=True)
-                        for name in batch
-                    )
-                )
-            )
-            if excluded:
-                query = query.filter(file_model.id.notin_(excluded))
-            still_used.update(resolve_storage_path(path) for (path,) in query)
-    return [path for path in paths if path not in still_used]
-
-
 def _source_attachments(
     db: Session,
     sources: Sequence[Tuple[str, type]],
@@ -134,7 +92,7 @@ def _source_attachments(
             )
             .all()
         )
-        pending.local_paths = _unshared_local_paths(
+        pending.local_paths = unshared_local_paths(
             db,
             legacy_files,
             {
@@ -192,7 +150,7 @@ def find_record_attachments(
             query = query.filter(EntityFile.storage_backend == "local")
         file_records = query.all()
         return PendingAttachments(
-            local_paths=_unshared_local_paths(
+            local_paths=unshared_local_paths(
                 db, file_records, {model: [record.id for record in file_records]}
             )
         )
