@@ -95,8 +95,11 @@ Documents linked to medical records (lab results, encounter notes, etc.) can be 
   so MediKeep cannot tell which document the upload became
 - Give the account the View permission on PaperlessTask (see Required Paperless
   Permissions above), then open the record's documents or run a sync check
-- Until then, MediKeep looks the document up by file name and upload time, which
-  links most uploads; affected MediKeep 0.75.0 and earlier left them processing
+- Until then, MediKeep finds the document by its checksum (Paperless records one for
+  every file) and upload time, which links most uploads; affected MediKeep 0.75.0 and
+  earlier left them processing
+- Uploads made before MediKeep stored checksums are not looked up: attach them with
+  **Link Existing Document**, or delete and upload them again
 
 ### Timeout Errors
 

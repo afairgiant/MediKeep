@@ -45,6 +45,10 @@ class EntityFile(Base):
     paperless_task_uuid = Column(
         String(255), nullable=True
     )  # UUID of the task in paperless-ngx system
+    # Digests of the uploaded bytes, to find the document when its task can't be read.
+    # Paperless-ngx 3.x stores a document's checksum as SHA-256, 2.x as MD5.
+    paperless_sha256 = Column(String(64), nullable=True)
+    paperless_md5 = Column(String(32), nullable=True)
 
     # Papra integration fields
     papra_document_id = Column(String(255), nullable=True)  # ID in Papra system

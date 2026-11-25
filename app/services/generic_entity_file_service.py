@@ -3,6 +3,8 @@ Generic Entity File Service for handling file operations across all entity types
 Supports lab-results, insurance, visits, procedures, and future entity types.
 """
 
+import asyncio
+import hashlib
 import logging
 import uuid
 from collections import defaultdict
@@ -60,10 +62,7 @@ from app.services.paperless_client import (
 from app.services.paperless_client import (
     create_paperless_client,
 )
-from app.services.paperless_service import (
-    _build_title_fallback_query,
-    log_task_permission_denied,
-)
+from app.services.paperless_service import log_task_permission_denied
 from app.services.paperless_service import (
     PaperlessAuthenticationError,
     PaperlessError,
@@ -301,6 +300,8 @@ def _document_linked_elsewhere(file_record: EntityFile, document_id: str) -> boo
     db = object_session(file_record)
     if db is None:
         return False
+    # Count links made earlier in the same pass: the session does not autoflush
+    db.flush()
     return (
         db.query(EntityFile.id)
         .filter(
@@ -313,9 +314,41 @@ def _document_linked_elsewhere(file_record: EntityFile, document_id: str) -> boo
     )
 
 
+def _unclaimed_document(
+    file_record: EntityFile, document_ids: List[str]
+) -> Optional[str]:
+    """The first of ``document_ids`` that no other file record holds."""
+    return next(
+        (
+            document_id
+            for document_id in document_ids
+            if not _document_linked_elsewhere(file_record, document_id)
+        ),
+        None,
+    )
+
+
+def _content_digests(content: bytes) -> Dict[str, str]:
+    """The EntityFile columns that let a lookup find this content's Paperless document."""
+    return {
+        "paperless_sha256": hashlib.sha256(content).hexdigest(),
+        "paperless_md5": hashlib.md5(content, usedforsecurity=False).hexdigest(),
+    }
+
+
+@dataclass(frozen=True)
+class _ContentMatches:
+    """Paperless documents with an upload's content, added around the time of the upload."""
+
+    document_ids: List[str]
+    # Only Paperless 2.x stores MD5 checksums, and it never consumes a re-upload.
+    # 3.x consumes one unless its CONSUMER_DELETE_DUPLICATES setting is on.
+    rejects_re_uploads: bool = False
+
+
 _DOCUMENT_SEARCH_PAGE_SIZE = 100
-# Bounds the requests one lookup can make
-_DOCUMENT_SEARCH_MAX_PAGES = 5
+# How far a document's "added" time may be from the upload time and still be the upload's document
+_UPLOAD_WINDOW = timedelta(minutes=30)
 
 
 def _added_within(document: Dict[str, Any], start: datetime, end: datetime) -> bool:
@@ -1484,8 +1517,11 @@ class GenericEntityFileService:
                 uploaded_by_user_id=current_user_id,
             )
 
-            # Create database record from validated schema
-            entity_file = EntityFile(**file_create.model_dump())
+            # Create database record from validated schema; hashing a large file would block the event loop
+            entity_file = EntityFile(
+                **file_create.model_dump(),
+                **await asyncio.to_thread(_content_digests, file_content),
+            )
 
             db.add(entity_file)
             db.commit()
@@ -2152,9 +2188,10 @@ class GenericEntityFileService:
                                 file_record.sync_status == "missing"
                                 and file_record.paperless_task_uuid
                             ):
-                                # Try fallback search for document by filename and upload timestamp
-                                fallback_doc_id = await self._link_document_found_by_filename_and_time(
-                                    file_record, paperless_service
+                                fallback_doc_id = (
+                                    await self._link_document_found_by_checksum(
+                                        file_record, paperless_service
+                                    )
                                 )
 
                                 if fallback_doc_id:
@@ -2171,7 +2208,7 @@ class GenericEntityFileService:
                                     _log_file_event(
                                         logging.WARNING,
                                         "paperless_missing_file_not_found",
-                                        "Missing file not found by name and upload time",
+                                        "Missing file not found by checksum and upload time",
                                         file_record,
                                     )
                                     sync_status[file_record.id] = (
@@ -2506,7 +2543,7 @@ class GenericEntityFileService:
 
             # Records whose task Paperless no longer knows (for example, after its
             # task history was cleared). The task can't say which document it
-            # made, so these are looked up by file name and upload time below.
+            # made, so these are looked up by checksum and upload time below.
             unknown_task_files = []
             tasks_forbidden = False
 
@@ -2616,17 +2653,17 @@ class GenericEntityFileService:
                     continue
 
             for file_record in unknown_task_files:
-                linked_id = await self._link_document_found_by_filename_and_time(
+                linked_id = await self._link_document_found_by_checksum(
                     file_record, paperless_service
                 )
                 if linked_id:
                     logger.info(
                         f"Linked file {file_record.id} to Paperless document {linked_id} "
-                        "found by file name and upload time (task not found or not readable)"
+                        "found by checksum and upload time (task not found or not readable)"
                     )
                 else:
                     logger.info(
-                        f"No Paperless document found by file name and upload time "
+                        f"No Paperless document found by checksum and upload time "
                         f"for file {file_record.id} (task not found or not readable)"
                     )
 
@@ -2932,14 +2969,15 @@ class GenericEntityFileService:
         _log_file_event(
             logging.INFO,
             "paperless_document_fallback_search_started",
-            "Looking up Paperless document by file name and upload time",
+            "Looking up Paperless document by checksum and upload time",
             file_record,
         )
 
         try:
-            fallback_doc_id = await self._search_document_by_filename_and_time(
-                file_record.file_name, file_record.uploaded_at, paperless_service
+            matches = await self._find_documents_with_upload_content(
+                file_record, paperless_service
             )
+            fallback_doc_id = _unclaimed_document(file_record, matches.document_ids)
             if fallback_doc_id:
                 _log_file_event(
                     logging.INFO,
@@ -2947,7 +2985,7 @@ class GenericEntityFileService:
                     f"Fallback search found Paperless document {fallback_doc_id}",
                     file_record,
                 )
-                return str(fallback_doc_id)
+                return fallback_doc_id
             _log_file_event(
                 logging.WARNING,
                 "paperless_document_fallback_search_empty",
@@ -2971,159 +3009,98 @@ class GenericEntityFileService:
         _log_file_event(
             logging.DEBUG,
             "paperless_document_lookup_without_task",
-            "Looking the document up by file name and upload time",
+            "Looking the document up by checksum and upload time",
             file_record,
             task_uuid=file_record.paperless_task_uuid,
         )
-        await self._link_document_found_by_filename_and_time(
-            file_record, paperless_service
-        )
+        await self._link_document_found_by_checksum(file_record, paperless_service)
         return file_record.sync_status
 
-    async def _link_document_found_by_filename_and_time(
+    async def _link_document_found_by_checksum(
         self, file_record: EntityFile, paperless_service
     ) -> Optional[str]:
         """
-        Find a record's Paperless document by file name and upload time and, if
+        Find a record's Paperless document by checksum and upload time and, if
         found, link the record to it: store the document ID, clear the task UUID
         and mark the record synced. The caller commits.
 
         Returns:
-            The linked document ID, or None if nothing was linked. When the match is
-            already another record's document, the record is marked duplicate instead.
+            The linked document ID, or None if nothing was linked. When every match
+            is already another record's document and Paperless rejects re-uploads,
+            the record is marked duplicate instead.
         """
-        document_id = await self._search_document_by_filename_and_time(
-            file_record.file_name, file_record.uploaded_at, paperless_service
+        matches = await self._find_documents_with_upload_content(
+            file_record, paperless_service
         )
-        if not document_id:
+        document_id = _unclaimed_document(file_record, matches.document_ids)
+        if document_id is None:
+            # Otherwise this upload's own copy may not be consumed yet
+            if matches.document_ids and matches.rejects_re_uploads:
+                _mark_duplicate(file_record)
             return None
 
-        # Paperless rejects a re-upload of the same file; the match is the earlier upload's document
-        if _document_linked_elsewhere(file_record, str(document_id)):
-            _mark_duplicate(file_record)
-            return None
-
-        file_record.paperless_document_id = str(document_id)
+        file_record.paperless_document_id = document_id
         file_record.paperless_task_uuid = None
         file_record.sync_status = "synced"
         file_record.last_sync_at = get_utc_now()
         return file_record.paperless_document_id
 
-    async def _search_document_by_filename_and_time(
-        self, filename: str, upload_time, paperless_service
-    ) -> Optional[int]:
+    async def _find_documents_with_upload_content(
+        self, file_record: EntityFile, paperless_service
+    ) -> _ContentMatches:
         """
-        Fallback method to search for a document by filename and upload timestamp.
-        Used when the task gives no usable document ID or cannot be read.
-
-        Args:
-            filename: Original filename to search for
-            upload_time: When file was uploaded (datetime)
-            paperless_service: Paperless service instance for API calls
-
-        Returns:
-            Document ID if found, None otherwise
+        Find the Paperless documents whose checksum is a digest of the uploaded
+        bytes and that were added within 30 minutes of the upload. Used when the
+        upload's task gives no usable document ID or cannot be read. A failed
+        lookup finds nothing.
         """
+        if not file_record.paperless_sha256:
+            _log_file_event(
+                logging.DEBUG,
+                "paperless_document_lookup_skipped",
+                "Upload predates stored checksums, so its document cannot be looked up",
+                file_record,
+            )
+            return _ContentMatches([])
+
+        uploaded_at = _as_naive_utc(file_record.uploaded_at)
+        start, end = uploaded_at - _UPLOAD_WINDOW, uploaded_at + _UPLOAD_WINDOW
         try:
-            # Convert upload_time to datetime if needed
-            if isinstance(upload_time, str):
-                upload_time = datetime.fromisoformat(upload_time.replace("Z", "+00:00"))
-            upload_time = _as_naive_utc(upload_time)
-
-            # Search window: 30 minutes before and after upload time
-            search_start = upload_time - timedelta(minutes=30)
-            search_end = upload_time + timedelta(minutes=30)
-
-            logger.info(
-                f"Searching for document by file name uploaded between {search_start} and {search_end}",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "paperless_document_search_started",
-                },
-            )
-
-            # Call the async search method directly
-            result = await self._async_search_document(
-                filename, search_start, search_end, paperless_service
-            )
-            return result
-
+            for checksum, rejects_re_uploads in (
+                (file_record.paperless_sha256, False),
+                (file_record.paperless_md5, True),
+            ):
+                query = urlencode(
+                    {
+                        "checksum__iexact": checksum,
+                        "page_size": _DOCUMENT_SEARCH_PAGE_SIZE,
+                    }
+                )
+                async with paperless_service._make_request(
+                    "GET", f"/api/documents/?{query}"
+                ) as response:
+                    if response.status != 200:
+                        continue
+                    documents = (await response.json()).get("results", [])
+                if documents:
+                    return _ContentMatches(
+                        [
+                            str(doc["id"])
+                            for doc in documents
+                            if _added_within(doc, start, end)
+                        ],
+                        rejects_re_uploads,
+                    )
         except Exception as e:
-            logger.error(
-                "Error in fallback document search",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "paperless_document_search_failed",
-                    LogFields.ERROR: str(e),
-                },
+            _log_file_event(
+                logging.ERROR,
+                "paperless_document_search_failed",
+                "Looking the Paperless document up by checksum failed",
+                file_record,
+                # The message can quote the request URL, which holds the checksum
+                error=type(e).__name__,
             )
-            return None
-
-    async def _async_search_document(
-        self, filename: str, search_start, search_end, paperless_service
-    ) -> Optional[int]:
-        """
-        Async helper to search for document by filename and time range.
-        """
-        try:
-            title_search = {
-                "query": _build_title_fallback_query(Path(filename).stem),
-                "page_size": _DOCUMENT_SEARCH_PAGE_SIZE,
-            }
-            # Paperless compares __date in its own time zone; _added_within does the exact check
-            recent_documents = {
-                "added__date__gte": (search_start - timedelta(days=1)).strftime(
-                    "%Y-%m-%d"
-                ),
-                "added__date__lte": (search_end + timedelta(days=1)).strftime(
-                    "%Y-%m-%d"
-                ),
-                "ordering": "-added",
-                "page_size": _DOCUMENT_SEARCH_PAGE_SIZE,
-            }
-
-            for params in (title_search, recent_documents):
-                for page in range(1, _DOCUMENT_SEARCH_MAX_PAGES + 1):
-                    async with paperless_service._make_request(
-                        "GET", f"/api/documents/?{urlencode({**params, 'page': page})}"
-                    ) as response:
-                        if response.status != 200:
-                            break
-                        data = await response.json()
-                    for doc in data.get("results", []):
-                        if _file_name_matches(doc, filename) and _added_within(
-                            doc, search_start, search_end
-                        ):
-                            logger.info(
-                                f"Found matching document ID {doc.get('id')} by file name, added at {doc.get('added')}",
-                                extra={
-                                    LogFields.CATEGORY: "app",
-                                    LogFields.EVENT: "paperless_document_search_matched",
-                                },
-                            )
-                            return doc.get("id")
-                    if not data.get("next"):
-                        break
-
-            logger.warning(
-                f"No document found by file name in time range {search_start} to {search_end}",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "paperless_document_search_empty",
-                },
-            )
-            return None
-
-        except Exception as e:
-            logger.error(
-                "Error in async document search",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "paperless_document_search_failed",
-                    LogFields.ERROR: str(e),
-                },
-            )
-            return None
+        return _ContentMatches([])
 
     def cleanup_entity_files_on_deletion(
         self,
