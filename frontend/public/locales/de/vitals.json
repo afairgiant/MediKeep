@@ -34,7 +34,6 @@
     "measurementLocation": "Messort",
     "missingPatientInfo": "Fehlende Patienteninformationen",
     "notesPlaceholder": "Zusätzliche Notizen zur Vitalzeichenmessung...",
-    "openCalendar": "Kalender öffnen",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Datum/Uhrzeit eingeben oder einfügen, oder Kalender zum Auswählen anklicken",
     "patientHeight": "Patientengröße: {{height}} Zoll (aus Profil)",

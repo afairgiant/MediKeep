@@ -34,7 +34,6 @@
     "measurementLocation": "Miejsce pomiaru",
     "missingPatientInfo": "Brakujące informacje o pacjencie",
     "notesPlaceholder": "Dodatkowe uwagi dotyczące pomiaru parametrów życiowych...",
-    "openCalendar": "Otwórz kalendarz",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Wpisz lub wklej datę/godzinę albo kliknij kalendarz, aby wybrać",
     "patientHeight": "Wzrost pacjenta: {{height}} cali (z profilu)",

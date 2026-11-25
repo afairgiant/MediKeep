@@ -892,7 +892,7 @@ const VitalsForm = ({
                 <ActionIcon
                   variant="subtle"
                   onClick={() => setDatePickerOpened(o => !o)}
-                  aria-label={t('vitals:form.openCalendar', 'Open calendar')}
+                  aria-label={t('common:buttons.openCalendar', 'Open calendar')}
                 >
                   <IconCalendar size={16} />
                 </ActionIcon>

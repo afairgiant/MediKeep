@@ -34,7 +34,6 @@
     "measurementLocation": "测量位置",
     "missingPatientInfo": "缺少患者信息",
     "notesPlaceholder": "关于生命体征测量的其他备注...",
-    "openCalendar": "打开日历",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "输入或粘贴日期/时间，或点击日历选择",
     "patientHeight": "患者身高：{{height}}英寸（来自档案）",

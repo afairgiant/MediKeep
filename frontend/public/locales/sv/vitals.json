@@ -34,7 +34,6 @@
     "measurementLocation": "Mätplats",
     "missingPatientInfo": "Saknad patientinformation",
     "notesPlaceholder": "Ytterligare anteckningar om vitalparametermätningen...",
-    "openCalendar": "Öppna kalender",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Skriv eller klistra in datum/tid, eller klicka på kalendern för att välja",
     "patientHeight": "Patientlängd: {{height}} tum (från profil)",

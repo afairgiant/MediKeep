@@ -34,7 +34,6 @@
     "measurementLocation": "Meetlocatie",
     "missingPatientInfo": "Ontbrekende patiëntinformatie",
     "notesPlaceholder": "Aanvullende opmerkingen over de meting van vitale functies...",
-    "openCalendar": "Kalender openen",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Typ of plak datum/tijd, of klik op de kalender om te selecteren",
     "patientHeight": "Lengte patiënt: {{height}} inch (uit profiel)",
