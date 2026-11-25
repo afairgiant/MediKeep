@@ -214,6 +214,70 @@ def test_failed_audit_flush_keeps_callers_transaction(
     )
 
 
+@pytest.mark.parametrize("fail_at", ["description", "flush"])
+def test_failed_audit_commit_keeps_callers_changes(
+    db_session, test_user, monkeypatch, fail_at
+):
+    """#1288: with commit=True, a failed audit write must not roll back the
+    caller's pending changes, whether it fails before any SQL runs or on the
+    insert itself."""
+    from app.api import activity_logging
+    from app.api.activity_logging import safe_log_activity
+
+    test_user.full_name = "Changed before failed audit"
+    db_session.flush()
+
+    if fail_at == "description":
+
+        def boom(*args, **kwargs):
+            raise RuntimeError("description failed")
+
+        monkeypatch.setattr(activity_logging, "get_entity_description", boom)
+    else:
+
+        def invalid_log(**kwargs):
+            kwargs["db"].add(
+                ActivityLog(action=None, entity_type="user", description="invalid")
+            )
+            kwargs["db"].flush()
+
+        monkeypatch.setattr(activity_log, "log_activity", invalid_log)
+
+    safe_log_activity(db_session, ActionType.UPDATED, "user", test_user, test_user.id)
+    db_session.commit()
+    db_session.expire_all()
+    assert db_session.get(User, test_user.id).full_name == "Changed before failed audit"
+    assert (
+        db_session.query(ActivityLog)
+        .filter(ActivityLog.description == "invalid")
+        .count()
+        == 0
+    )
+
+
+def test_audit_commit_saves_entry_and_callers_changes(db_session, test_user):
+    from app.api.activity_logging import safe_log_activity
+
+    test_user.full_name = "Changed with audit"
+    db_session.flush()
+    safe_log_activity(
+        db_session,
+        ActionType.UPDATED,
+        "user",
+        test_user,
+        test_user.id,
+        description="committed audit row",
+    )
+    db_session.rollback()  # nothing left to undo: both were committed
+    assert db_session.get(User, test_user.id).full_name == "Changed with audit"
+    assert (
+        db_session.query(ActivityLog)
+        .filter(ActivityLog.description == "committed audit row")
+        .count()
+        == 1
+    )
+
+
 def test_failed_user_delete_after_audit_log_does_not_leave_patient_deleted(
     admin_client, db_session: Session, test_user, test_patient, monkeypatch
 ):
