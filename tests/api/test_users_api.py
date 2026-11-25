@@ -602,6 +602,39 @@ class TestUserAccountDeletion:
             data = response.json()
             assert "deletion_summary" in data
 
+    def test_failed_self_delete_does_not_log_a_deletion(
+        self,
+        client: TestClient,
+        db_session: Session,
+        deletable_user,
+        deletable_user_headers,
+        monkeypatch,
+    ):
+        """Issue #1287: the audit entry rolls back with a failed self-delete."""
+        from app.models.activity_log import ActionType, ActivityLog, EntityType
+        from app.services.user_deletion_service import UserDeletionService
+
+        def fail(*args, **kwargs):
+            raise RuntimeError("simulated deletion failure")
+
+        monkeypatch.setattr(UserDeletionService, "delete_user_account", fail)
+        user_id = deletable_user["user"].id
+
+        response = client.delete("/api/v1/users/me", headers=deletable_user_headers)
+
+        assert response.status_code == 500
+        db_session.expire_all()
+        deleted_entries = (
+            db_session.query(ActivityLog)
+            .filter(
+                ActivityLog.action == ActionType.DELETED,
+                ActivityLog.entity_type == EntityType.USER,
+                ActivityLog.entity_id == user_id,
+            )
+            .count()
+        )
+        assert deleted_entries == 0
+
     def test_delete_account_cascade_verification(
         self, client: TestClient, db_session: Session
     ):
