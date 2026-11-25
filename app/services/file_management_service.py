@@ -5,6 +5,7 @@ File Management Service for handling file operations including trash management.
 import json
 import os
 import shutil
+from contextlib import suppress
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -44,6 +45,18 @@ def _write_metadata(trash_path: Path, source: Path, reason: Optional[str], **ext
     with open(_metadata_path(trash_path), "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
     return metadata
+
+
+def _undo_move_to_trash(trash_path: Path, source: Path) -> None:
+    """Move an entry back out of trash after its metadata could not be written.
+
+    Without its sidecar the entry could be neither listed nor restored, and its
+    record would point to a missing path. The entry moves back first, so failing
+    to remove a partial sidecar cannot leave it in trash.
+    """
+    shutil.move(str(trash_path), str(source))
+    with suppress(OSError):
+        _metadata_path(trash_path).unlink(missing_ok=True)
 
 
 TRASH_DAY_FORMAT = "%Y-%m-%d"
@@ -166,10 +179,7 @@ class FileManagementService:
             try:
                 metadata = _write_metadata(trash_path, source_path, reason)
             except OSError:
-                # Without its sidecar the file could be neither listed nor
-                # restored, and its record would point to a missing file
-                _metadata_path(trash_path).unlink(missing_ok=True)
-                shutil.move(str(trash_path), str(source_path))
+                _undo_move_to_trash(trash_path, source_path)
                 raise
 
             logger.info(f"File moved to trash: {file_path} -> {trash_path}")
@@ -221,9 +231,7 @@ class FileManagementService:
                 trash_path, source, reason, is_directory=True, size_bytes=size_bytes
             )
         except OSError:
-            # Without its sidecar the entry could be neither listed nor restored
-            _metadata_path(trash_path).unlink(missing_ok=True)
-            shutil.move(str(trash_path), str(source))
+            _undo_move_to_trash(trash_path, source)
             raise
         return trash_path
 

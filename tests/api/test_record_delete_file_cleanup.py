@@ -39,7 +39,10 @@ from app.services.attachment_cleanup import (
     find_patient_attachments,
     find_record_attachments,
 )
-from app.services.file_management_service import FileManagementService
+from app.services.file_management_service import (
+    FileManagementService,
+    _metadata_path,
+)
 from app.services.generic_entity_file_service import GenericEntityFileService
 from app.services.imaging_storage import study_directory
 from app.services.user_deletion_service import UserDeletionService
@@ -1129,6 +1132,34 @@ class TestLegacyLabResultFileDeletes:
         assert _legacy_file_ids(db_session, lab_id) == [legacy_id]
         assert stored.read_bytes() == b"legacy"
 
+    def test_failed_move_in_delete_all_keeps_the_record(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        legacy_file,
+        trash,
+        trash_fails_once,
+    ):
+        """Each file moves at most once, so a later attempt cannot delete the row
+        after the failure was already reported."""
+        lab_id, legacy_id, stored = legacy_file
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/lab-result/{lab_id}/files",
+            headers=authenticated_headers,
+        )
+
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["deleted_records"] == 0
+        assert body["deleted_physical_files"] == 0
+        assert len(body["errors"]) == 1
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab_id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+        assert _trashed_contents(trash) == []
+
 
 class TestFailedMovesKeepSharedFiles:
     """A row whose file fails to move stays, so it still uses that file (#1296)."""
@@ -1195,6 +1226,32 @@ class TestFailedMovesKeepSharedFiles:
         monkeypatch.setattr(
             "app.services.file_management_service._write_metadata", fail
         )
+
+        resp = client.delete(
+            f"/api/v1/lab-result-files/{legacy_id}", headers=authenticated_headers
+        )
+
+        assert resp.status_code == 500
+        db_session.expire_all()
+        assert _legacy_file_ids(db_session, lab.id) == [legacy_id]
+        assert stored.read_bytes() == b"legacy"
+        assert not any(path.is_file() for path in trash.rglob("*"))
+
+    def test_failed_metadata_cleanup_still_moves_the_file_back(
+        self,
+        client: TestClient,
+        db_session: Session,
+        authenticated_headers,
+        user_with_patient,
+        trash,
+    ):
+        lab = _create_lab_result(db_session, user_with_patient["patient"].id)
+        stored = _legacy_lab_file(db_session, trash, lab.id, b"legacy")
+        (legacy_id,) = _legacy_file_ids(db_session, lab.id)
+        # A directory where the metadata goes: writing it fails, and so does
+        # removing it afterwards
+        daily_trash = FileManagementService()._daily_trash_dir()
+        _metadata_path(daily_trash / stored.name).mkdir()
 
         resp = client.delete(
             f"/api/v1/lab-result-files/{legacy_id}", headers=authenticated_headers

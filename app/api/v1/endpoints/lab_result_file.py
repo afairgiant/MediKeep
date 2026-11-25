@@ -739,10 +739,12 @@ def delete_all_files_for_lab_result(
     # Rows still to be removed; a row whose file fails to move keeps using it
     deleting = {file_obj.id for file_obj in files}
 
-    # Delete physical files
+    deleted_count = 0
     deleted_files = 0
     errors = []
 
+    # One pass: each file moves at most once, and only rows whose file moved (or
+    # stays for another row) are deleted, so the counts match what happened
     for file_obj in files:
         try:
             if _remove_physical_file(db, file_obj, deleting):
@@ -753,11 +755,12 @@ def delete_all_files_for_lab_result(
             _record_file_failure(
                 errors, f"Error deleting file {file_name}", e, current_user
             )
+            # Keep the record, so its file is not left behind
+            continue
+        db.delete(file_obj)
+        deleted_count += 1
 
-    # Delete from database
-    deleted_count = lab_result_file.delete_by_lab_result(
-        db=db, lab_result_id=lab_result_id
-    )
+    db.commit()
 
     return {
         "message": f"Deleted {deleted_count} file records and {deleted_files} physical files",
