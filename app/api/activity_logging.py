@@ -238,11 +238,23 @@ def log_crud_activity(
         metadata: Optional additional metadata
         request: Optional FastAPI request object for IP/user agent
         commit: False adds the entry to the caller's transaction (flushed,
-            not committed), so it lands or rolls back with the caller's work
+            not committed), so it lands or rolls back with the caller's work.
+            True also commits the caller's pending work. A failed audit write
+            leaves that work pending; only a failed commit rolls it back.
 
     Returns:
         True if logging succeeded, False otherwise
     """
+    try:
+        # begin_nested would flush the caller's pending work first; a failure there is theirs
+        db.flush()
+    except Exception as e:
+        if commit:
+            # A session whose flush failed is unusable until rolled back
+            db.rollback()
+        _log_activity_failure(e, action, entity_type, user_id)
+        return False
+
     try:
         # Generate description if not provided, otherwise sanitize the provided description
         if not description:
@@ -279,37 +291,46 @@ def log_crud_activity(
             "user_agent": user_agent,
         }
 
-        if commit:
-            activity_log.log_activity(**log_kwargs, commit=True)
-        else:
-            connection = db.connection()
-            if connection.dialect.name == "sqlite":
-                # Legacy SQLite mode needs BEGIN before SAVEPOINT to preserve rollback.
-                if not connection.connection.driver_connection.in_transaction:
-                    connection.exec_driver_sql("BEGIN")
-            with db.begin_nested():
-                activity_log.log_activity(**log_kwargs, commit=False)
-
-        return True
-
+        connection = db.connection()
+        if connection.dialect.name == "sqlite":
+            # Legacy SQLite mode needs BEGIN before SAVEPOINT to preserve rollback.
+            if not connection.connection.driver_connection.in_transaction:
+                connection.exec_driver_sql("BEGIN")
+        with db.begin_nested():
+            activity_log.log_activity(**log_kwargs, commit=False)
     except Exception as e:
-        if commit:
-            db.rollback()
-        # Sanitize error message to prevent sensitive data exposure
-        safe_error_msg = sanitize_log_input(str(e))
-        sanitized_entity_type = (
-            "[REDACTED]" if _is_sensitive_field(entity_type) else entity_type
-        )
-        logger.error(
-            f"Failed to log activity: {action} {entity_type}",
-            extra={
-                "error": safe_error_msg,
-                "user_id": user_id,
-                "entity_type": sanitized_entity_type,
-                "action": action,
-            },
-        )
+        # The savepoint already undid the audit row; the caller's work is untouched
+        _log_activity_failure(e, action, entity_type, user_id)
         return False
+
+    if commit:
+        try:
+            db.commit()
+        except Exception as e:
+            # A session whose commit failed is unusable until rolled back
+            db.rollback()
+            _log_activity_failure(e, action, entity_type, user_id)
+            return False
+
+    return True
+
+
+def _log_activity_failure(
+    error: Exception, action: str, entity_type: str, user_id: Optional[int]
+) -> None:
+    safe_error_msg = sanitize_log_input(str(error))
+    sanitized_entity_type = (
+        "[REDACTED]" if _is_sensitive_field(entity_type) else entity_type
+    )
+    logger.error(
+        f"Failed to log activity: {action} {entity_type}",
+        extra={
+            "error": safe_error_msg,
+            "user_id": user_id,
+            "entity_type": sanitized_entity_type,
+            "action": action,
+        },
+    )
 
 
 def safe_log_activity(
@@ -353,11 +374,6 @@ def safe_log_activity(
             commit=commit,
         )
     except Exception as e:
-        if commit:
-            try:
-                db.rollback()
-            except Exception:
-                pass
         # Sanitize error message to prevent sensitive data exposure in logs
         safe_error_msg = sanitize_log_input(str(e))
         sanitized_entity_type = (
