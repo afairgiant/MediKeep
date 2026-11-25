@@ -238,7 +238,9 @@ def log_crud_activity(
         metadata: Optional additional metadata
         request: Optional FastAPI request object for IP/user agent
         commit: False adds the entry to the caller's transaction (flushed,
-            not committed), so it lands or rolls back with the caller's work
+            not committed), so it lands or rolls back with the caller's work.
+            True also commits the session. Either way, a failure while
+            logging leaves the caller's pending changes in place.
 
     Returns:
         True if logging succeeded, False otherwise
@@ -279,22 +281,27 @@ def log_crud_activity(
             "user_agent": user_agent,
         }
 
+        # The entry goes in a savepoint, so a failed write undoes only the
+        # entry and never the caller's pending changes.
+        connection = db.connection()
+        if connection.dialect.name == "sqlite":
+            # Legacy SQLite mode needs BEGIN before SAVEPOINT to preserve rollback.
+            if not connection.connection.driver_connection.in_transaction:
+                connection.exec_driver_sql("BEGIN")
+        with db.begin_nested():
+            activity_log.log_activity(**log_kwargs, commit=False)
+
         if commit:
-            activity_log.log_activity(**log_kwargs, commit=True)
-        else:
-            connection = db.connection()
-            if connection.dialect.name == "sqlite":
-                # Legacy SQLite mode needs BEGIN before SAVEPOINT to preserve rollback.
-                if not connection.connection.driver_connection.in_transaction:
-                    connection.exec_driver_sql("BEGIN")
-            with db.begin_nested():
-                activity_log.log_activity(**log_kwargs, commit=False)
+            try:
+                db.commit()
+            except Exception:
+                # A failed commit leaves the session unusable until rolled back.
+                db.rollback()
+                raise
 
         return True
 
     except Exception as e:
-        if commit:
-            db.rollback()
         # Sanitize error message to prevent sensitive data exposure
         safe_error_msg = sanitize_log_input(str(e))
         sanitized_entity_type = (
@@ -353,11 +360,6 @@ def safe_log_activity(
             commit=commit,
         )
     except Exception as e:
-        if commit:
-            try:
-                db.rollback()
-            except Exception:
-                pass
         # Sanitize error message to prevent sensitive data exposure in logs
         safe_error_msg = sanitize_log_input(str(e))
         sanitized_entity_type = (
