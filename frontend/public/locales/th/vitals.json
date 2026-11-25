@@ -34,7 +34,6 @@
     "measurementLocation": "สถานที่ในการวัด",
     "missingPatientInfo": "ข้อมูลผู้ป่วยไม่ครบถ้วน",
     "notesPlaceholder": "หมายเหตุเพิ่มเติมเกี่ยวกับการวัดสัญญาณชีพ...",
-    "openCalendar": "เปิดปฏิทิน",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "พิมพ์หรือวางวันที่/เวลา หรือคลิกปฏิทินเพื่อเลือก",
     "patientHeight": "ส่วนสูงผู้ป่วย: {{height}} นิ้ว (จากโปรไฟล์)",

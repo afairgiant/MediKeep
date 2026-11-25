@@ -14,7 +14,7 @@ import '@testing-library/jest-dom';
 import MantinePatientForm from '../MantinePatientForm';
 
 // Mock DateInput component since it has complex dependencies
-vi.mock('@mantine/dates', () => ({
+vi.mock('../../adapters/DateInput', () => ({
   DateInput: ({ label, value, onChange, required, description, ...props }) => {
     // Filter out non-DOM props
     const {

@@ -30,7 +30,7 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
 }));
 
 // Mock Date Input component
-vi.mock('@mantine/dates', () => ({
+vi.mock('../../../adapters/DateInput', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => (
     <div>
       <label htmlFor={`date-${label}`}>

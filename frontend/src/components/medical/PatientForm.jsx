@@ -22,7 +22,6 @@ import {
 } from '@mantine/core';
 import {
   IconUser,
-  IconCalendar,
   IconMapPin,
   IconAlertCircle,
   IconDeviceFloppy,
@@ -369,7 +368,6 @@ const PatientForm = ({
                 required
                 valueFormat={dateInputFormat}
                 dateParser={dateParser}
-                leftSection={<IconCalendar size="1rem" />}
                 value={formData.birth_date}
                 onChange={date =>
                   setFormData({ ...formData, birth_date: date })

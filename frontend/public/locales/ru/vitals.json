@@ -34,7 +34,6 @@
     "measurementLocation": "Место измерения",
     "missingPatientInfo": "Отсутствует информация о пациенте",
     "notesPlaceholder": "Дополнительные заметки об измерении витальных показателей...",
-    "openCalendar": "Открыть календарь",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Введите или вставьте дату/время, или нажмите на календарь для выбора",
     "patientHeight": "Рост пациента: {{height}} дюймов (из профиля)",

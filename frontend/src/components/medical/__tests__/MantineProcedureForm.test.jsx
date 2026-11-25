@@ -31,7 +31,7 @@ vi.mock('../practitioners/PractitionerSelectWithCreate', () => ({
 }));
 
 // Mock Date Input component since it has complex dependencies
-vi.mock('@mantine/dates', () => ({
+vi.mock('../../adapters/DateInput', () => ({
   DateInput: ({ label, value, onChange, required, description, ...props }) => (
     <div>
       <label htmlFor={`date-${label}`}>
