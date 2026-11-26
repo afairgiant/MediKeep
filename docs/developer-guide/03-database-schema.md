@@ -1509,6 +1509,8 @@ dots, at most 64 characters) before use. Header values are PHI and are never log
 | storage_backend | String(20) | NOT NULL, DEFAULT 'local' | local or paperless |
 | paperless_document_id | String(255) | | Paperless-ngx document ID |
 | paperless_task_uuid | String(255) | | Paperless-ngx task UUID |
+| paperless_sha256 | String(64) | | SHA-256 of the uploaded bytes, matched against the document checksum of Paperless-ngx 3.x when the upload's task can't be read. NULL for files uploaded before it was stored |
+| paperless_md5 | String(32) | | MD5 of the uploaded bytes, matched the same way against Paperless-ngx 2.x |
 | uploaded_by_user_id | Integer | FK users.id, ON DELETE SET NULL | User who uploaded or linked the file, so whose Paperless or Papra holds it. NULL when the uploader is unknown (older files with no activity-log entry) or their account was deleted |
 | sync_status | String(20) | NOT NULL, DEFAULT 'synced' | Sync status |
 | last_sync_at | DateTime | | Last sync timestamp |

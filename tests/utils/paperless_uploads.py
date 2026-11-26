@@ -1,5 +1,6 @@
 """Builders and a fake Paperless for tests of processing Paperless uploads."""
 
+import hashlib
 from contextlib import asynccontextmanager
 from datetime import date
 from types import SimpleNamespace
@@ -13,6 +14,9 @@ from app.services.generic_entity_file_service import GenericEntityFileService
 from tests.utils.user import create_random_user
 
 FILE_NAME = "blood-panel-results.pdf"
+# Digests of the uploaded bytes, as the upload stores them
+FILE_SHA256 = hashlib.sha256(b"blood panel").hexdigest()
+FILE_MD5 = hashlib.md5(b"blood panel").hexdigest()
 
 
 class RecordingPaperless:
@@ -122,6 +126,8 @@ def processing_upload(db_session, patient_id, task_uuid, uploaded_by_user_id=Non
         storage_backend="paperless",
         sync_status="processing",
         paperless_task_uuid=task_uuid,
+        paperless_sha256=FILE_SHA256,
+        paperless_md5=FILE_MD5,
         uploaded_by_user_id=uploaded_by_user_id,
     )
     db_session.add(record)
