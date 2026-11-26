@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from app.api import deps
 from app.core.http.error_handling import (
     BusinessLogicException,
-    DatabaseException,
     ForbiddenException,
     NotFoundException,
     handle_database_errors,
@@ -610,22 +609,18 @@ def delete_patient(
                 message="Only the patient owner can delete this record", request=request
             )
 
-        success = service.delete_patient(current_user, patient_id)
+        service.delete_patient(current_user, patient_id)
 
-        if success:
-            log_data_access(
-                logger,
-                request,
-                current_user.id,
-                "delete",
-                "Patient",
-                record_id=patient_id,
-                patient_id=patient_id,
-            )
-
-            return {
-                "message": "Patient record and all associated medical records deleted successfully"
-            }
-        raise DatabaseException(
-            message="Failed to delete patient record", request=request
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "delete",
+            "Patient",
+            record_id=patient_id,
+            patient_id=patient_id,
         )
+
+        return {
+            "message": "Patient record and all associated medical records deleted successfully"
+        }
