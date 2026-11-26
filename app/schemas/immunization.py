@@ -8,9 +8,8 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
-from app.schemas.merged_rules import MergedRule, as_date, ordered_check
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.read_model import read_model
-
 
 check_expiration_after_administered = ordered_check(
     "Expiration date cannot be before administration date"
@@ -74,15 +73,18 @@ class ImmunizationBase(TaggedEntityMixin):
 
     @field_validator("expiration_date", mode="before")
     @classmethod
-    def validate_expiration_date(cls, v, info: ValidationInfo):
+    def validate_expiration_date(cls, v):
         if v and isinstance(v, str):
             try:
                 v = date.fromisoformat(v)
             except ValueError:
                 raise ValueError("Invalid expiration date format. Use YYYY-MM-DD")
-        admin_date = as_date(info.data.get("date_administered"))
-        if isinstance(admin_date, date) and isinstance(v, date):
-            check_expiration_after_administered(admin_date, v)
+        return v
+
+    @field_validator("expiration_date")
+    @classmethod
+    def validate_expiration_after_administered(cls, v, info: ValidationInfo):
+        check_expiration_after_administered(info.data.get("date_administered"), v)
         return v
 
     @field_validator("route")

@@ -86,7 +86,8 @@ saved record with the sent fields laid over it, so a request that sends one side
 checked against the saved other side. A rule is checked only when the request changes one of its
 fields, so a record saved before a rule existed still accepts edits to other fields. A broken rule
 returns `422` with the rule's message as the only entry in `detail`. Sending `null` clears a field,
-and a rule with an empty side passes.
+and a comparison rule with an empty side passes. The encounter rule is the exception: an empty
+`visit_time` means an all-day visit, so it still rejects hour or minute `reminder_offsets`.
 
 | Record | Rule |
 |---|---|
