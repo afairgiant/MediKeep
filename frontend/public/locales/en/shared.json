@@ -364,5 +364,14 @@
     "write": "Write",
     "preview": "Preview",
     "previewEmpty": "Nothing to preview"
+  },
+  "formValidation": {
+    "required": "{{field}} is required.",
+    "requiredOnTab": "{{field}} on the {{tab}} tab is required.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} on the {{tab}} tab: {{reason}}",
+    "unnamedField": "A field",
+    "popupTitle": "Cannot save",
+    "ok": "OK"
   }
 }

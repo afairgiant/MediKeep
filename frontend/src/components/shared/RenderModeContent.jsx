@@ -53,7 +53,6 @@ const RenderModeContent = memo(
     onCheckSyncStatus,
     onDownloadFile,
     onViewFile,
-    onImmediateDelete,
     onMarkFileForDeletion,
     onUnmarkFileForDeletion,
     onRemovePendingFile,
@@ -270,12 +269,10 @@ const RenderModeContent = memo(
       </Stack>
     );
 
+    // Read-only: files are added and deleted in the Edit form
     if (mode === 'view') {
       return (
         <Stack gap="md">
-          {storageBackendSelector}
-          {addDocumentMenu('Add Document')}
-
           {hasRemoteFiles && (
             <Group justify="space-between" align="center">
               <Text fw={500}>{t('shared:tabs.documents')}</Text>
@@ -289,7 +286,6 @@ const RenderModeContent = memo(
             showActions={true}
             onDownload={onDownloadFile}
             onView={onViewFile}
-            onDelete={onImmediateDelete}
           />
         </Stack>
       );

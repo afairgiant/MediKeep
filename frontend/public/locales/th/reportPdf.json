@@ -384,6 +384,7 @@
     "exportLeftOutNotFound": "ไม่พบไฟล์",
     "exportLeftOutNotConfigured": "การเชื่อมต่อ {{service}} ไม่ได้เปิดใช้งานหรือยังตั้งค่าไม่สมบูรณ์",
     "exportLeftOutDownloadFailed": "ไม่สามารถดาวน์โหลดจาก {{service}} ได้",
+    "exportLeftOutStoredElsewhere": "จัดเก็บใน {{service}} ของสมาชิกคนอื่น",
     "exportLeftOutFailed": "ไม่สามารถเพิ่มไฟล์ได้",
     "upcoming": "กำลังจะมาถึง"
   },

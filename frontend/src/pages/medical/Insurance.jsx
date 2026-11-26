@@ -75,6 +75,7 @@ const Insurance = () => {
     items: insurances = [],
     currentPatient,
     loading = false,
+    listLoading,
     error,
     successMessage,
     clearError,
@@ -82,6 +83,8 @@ const Insurance = () => {
     updateItem = async () => {},
     deleteItem = async () => {},
     refreshData = () => {},
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'insurance',
     entityLabel: t('medical:entityNames.insurance'),
@@ -116,11 +119,6 @@ const Insurance = () => {
   } = useViewModalNavigation({
     items: insurances,
     loading,
-    onClose: insurance => {
-      if (insurance) {
-        refreshFileCount(insurance.id);
-      }
-    },
   });
 
   // Track if we need to refresh after form submission (but not after uploads)
@@ -139,6 +137,7 @@ const Insurance = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'insurance',
+    onFormError: setFormError,
     onSuccess: () => {
       // Reset form and close modal on complete success
       setIsFormOpen(false);
@@ -306,6 +305,7 @@ const Insurance = () => {
 
       let success;
       let resultId;
+      let createdInsurance = null;
 
       // Submit form data
       if (editingInsurance) {
@@ -327,6 +327,7 @@ const Insurance = () => {
         resultId = result?.id;
         // Set flag to refresh after new insurance creation (but only after form submission, not uploads)
         if (success) {
+          createdInsurance = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -376,6 +377,8 @@ const Insurance = () => {
               0,
               documentManagerMethods.getPendingFilesCount()
             );
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdInsurance) setEditingInsurance(createdInsurance);
           }
         } else {
           // No files to upload, complete immediately
@@ -405,6 +408,7 @@ const Insurance = () => {
 
       setEditingInsurance(insurance);
       setFormData(initialFormData);
+      setFormError(null);
       setIsFormOpen(true);
     } catch (error) {
       logger.error('Error initiating insurance edit:', error);
@@ -507,6 +511,7 @@ const Insurance = () => {
   // Handle add new
   const handleAddNew = () => {
     resetSubmission(); // Reset submission state
+    setFormError(null);
     setEditingInsurance(null);
     setDocumentManagerMethods(null); // Reset document manager methods
     setFormData(initializeFormData());
@@ -514,7 +519,7 @@ const Insurance = () => {
   };
 
   // Loading state
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('insurance.loading', 'Loading insurance records...')}
@@ -696,14 +701,24 @@ const Insurance = () => {
 
       {/* Form Modal */}
       <InsuranceFormWrapper
+        formError={formError}
         isOpen={isFormOpen}
         onClose={() => {
           if (!isBlocking) {
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingInsurance) refreshFileCount(editingInsurance.id);
             resetSubmission();
+            setFormError(null);
             setIsFormOpen(false);
             setEditingInsurance(null);
             setDocumentManagerMethods(null);
             setFormData(initializeFormData());
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
           }
         }}
         title={
@@ -743,11 +758,6 @@ const Insurance = () => {
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
         onSetPrimary={handleSetPrimary}
-        onFileUploadComplete={success => {
-          if (success && viewingInsurance) {
-            refreshFileCount(viewingInsurance.id);
-          }
-        }}
         practitioners={practitioners}
       />
     </Container>

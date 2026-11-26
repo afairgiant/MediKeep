@@ -34,7 +34,6 @@
     "measurementLocation": "Lugar de medición",
     "missingPatientInfo": "Información del paciente faltante",
     "notesPlaceholder": "Notas adicionales sobre la medición de signos vitales...",
-    "openCalendar": "Abrir calendario",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Escriba o pegue la fecha/hora, o haga clic en el calendario para seleccionar",
     "patientHeight": "Estatura del paciente: {{height}} pulgadas (del perfil)",

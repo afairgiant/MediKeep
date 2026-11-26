@@ -72,7 +72,6 @@ describe('MedicationViewModal - alternative_name', () => {
     onEdit: vi.fn(),
     navigate: vi.fn(),
     onError: vi.fn(),
-    onFileUploadComplete: vi.fn(),
     practitioners: [],
     conditions: [],
   };
@@ -135,7 +134,6 @@ describe('MedicationViewModal - footer actions', () => {
           onEdit={vi.fn()}
           navigate={vi.fn()}
           onError={vi.fn()}
-          onFileUploadComplete={vi.fn()}
           practitioners={[]}
           conditions={[]}
           {...props}

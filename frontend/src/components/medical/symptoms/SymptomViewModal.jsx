@@ -582,7 +582,6 @@ const SymptomViewModal = ({
                       error
                     );
                   }}
-                  showProgressModal={true}
                 />
               </Stack>
             </Box>

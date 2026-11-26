@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.logging.config import get_logger, log_security_event
 from app.core.logging.constants import LogFields
 from app.core.utils.activity_tracker import activity_tracking_disabled_var
+from app.crud.activity_log import activity_log
 from app.models.models import Patient, PatientShare, User
 from app.models.practice import Practitioner
 from app.services.attachment_cleanup import (
@@ -249,26 +250,15 @@ class PatientManagementService:
                 raise ValueError("This update would create a duplicate patient record")
             raise ValueError("Failed to update patient due to database constraint")
 
-    def delete_patient(self, user: User, patient_id: int) -> bool:
-        """
-        Delete a patient record (only owner can delete)
+    def delete_patient(self, user: User, patient_id: int) -> None:
+        """Delete a patient the user owns, with its medical records and attachments.
 
-        This method handles all foreign key constraints by:
-        1. Removing patient sharing relationships
-        2. Deleting activity logs that reference this patient
-        3. Deleting the patient record, which deletes all associated medical
-           records (cascaded via database)
-        4. Cleaning up the records' attachments, which nothing cascades to
+        The patient's activity history is kept with patient_id cleared, and users
+        whose active patient this was have it cleared by the database.
 
-        Users whose active_patient_id points at this patient are cleared by the
-        database (users.active_patient_id is ON DELETE SET NULL).
-
-        Args:
-            user: The user deleting the patient
-            patient_id: ID of the patient to delete
-
-        Returns:
-            True if deleted successfully
+        Raises:
+            ValueError: the patient does not exist or the user is not its owner.
+            SQLAlchemyError: the delete failed; the session is rolled back.
         """
         logger.info(f"User {user.id} deleting patient {patient_id}")
 
@@ -277,81 +267,30 @@ class PatientManagementService:
         if not patient:
             raise ValueError("Patient not found")
 
-        # Only owner can delete
         if patient.owner_user_id != user.id:
             raise ValueError("Only the patient owner can delete this record")
 
         try:
-            # Temporarily disable activity tracking to prevent new logs during deletion
+            # Deleting records would otherwise log new activity for this patient
             activity_tracking_disabled_var.set(True)
-            # Step 1: Remove patient sharing relationships
-            sharing_records = (
-                self.db.query(PatientShare)
-                .filter(PatientShare.patient_id == patient_id)
-                .all()
-            )
-
-            for share in sharing_records:
-                logger.info(
-                    f"Removing patient share: patient {patient_id} shared by {share.shared_by_user_id} with {share.shared_with_user_id}"
-                )
-                self.db.delete(share)
-
-            # Step 2: Delete activity logs that reference this patient
-            from app.models import ActivityLog
-
-            activity_logs = (
-                self.db.query(ActivityLog)
-                .filter(ActivityLog.patient_id == patient_id)
-                .all()
-            )
-
-            for log in activity_logs:
-                logger.info(f"Removing activity log {log.id} for patient {patient_id}")
-                self.db.delete(log)
-
-            # Step 3: Delete the patient (medical records will be cascaded by database constraints)
-            logger.info(
-                f"Deleting patient {patient_id} and all associated medical records"
-            )
+            activity_log.detach_patient_activity(self.db, patient_ids=[patient_id])
             # Found now, while the records still link the files to this patient
             patient_files = find_patient_attachments(self.db, [patient_id])
             self.db.delete(patient)
-
-            # Commit all changes
             self.db.commit()
-
-            # Ensure transaction is fully flushed and visible to other connections
-            self.db.flush()
-
-            logger.info(
-                f"Successfully deleted patient {patient.id} and cleared all references"
-            )
-
-            # Step 4: Clean up the records' attachments, which nothing cascades to
+            logger.info(f"Deleted patient {patient_id}")
+            # Attachments are files on disk, which nothing cascades to
             cleanup_attachments(
                 self.db, patient_files, reason=f"patient {patient_id} deletion"
             )
-            return True
-
-        except IntegrityError as e:
-            self.db.rollback()
-            error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
-            logger.error(
-                f"Database integrity error during patient deletion: {error_msg}"
-            )
-
-            if "foreign key" in error_msg.lower():
-                raise ValueError(
-                    "Cannot delete patient: there are still medical records associated with this patient"
-                )
-            raise ValueError("Failed to delete patient due to database constraint")
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Unexpected error during patient deletion: {str(e)}")
-            raise ValueError(f"Failed to delete patient: {str(e)}")
+            logger.error(
+                f"Patient deletion failed: {type(e).__name__}",
+                extra={LogFields.PATIENT_ID: patient_id, LogFields.USER_ID: user.id},
+            )
+            raise
         finally:
-            # Re-enable activity tracking
             activity_tracking_disabled_var.set(False)
 
     def get_user_patients(self, user: User) -> List[Patient]:

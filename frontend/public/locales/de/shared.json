@@ -364,5 +364,14 @@
     "write": "Schreiben",
     "preview": "Vorschau",
     "previewEmpty": "Keine Vorschau verfügbar"
+  },
+  "formValidation": {
+    "required": "{{field}} ist ein Pflichtfeld.",
+    "requiredOnTab": "{{field}} im Tab „{{tab}}“ ist ein Pflichtfeld.",
+    "invalid": "{{field}}: {{reason}}",
+    "invalidOnTab": "{{field}} im Tab „{{tab}}“: {{reason}}",
+    "unnamedField": "Ein Feld",
+    "popupTitle": "Speichern nicht möglich",
+    "ok": "OK"
   }
 }

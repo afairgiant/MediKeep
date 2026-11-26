@@ -97,6 +97,12 @@ class Patient(Base):
     blood_donations = orm_relationship(
         "BloodDonation", back_populates="patient", cascade="all, delete-orphan"
     )
+    imaging_studies = orm_relationship(
+        "ImagingStudy",
+        back_populates="patient",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
     symptoms = orm_relationship(
         "Symptom", back_populates="patient", cascade="all, delete-orphan"
     )

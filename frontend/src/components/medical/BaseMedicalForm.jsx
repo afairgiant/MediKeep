@@ -36,6 +36,8 @@ import SpecialtySelect from '../admin/SpecialtySelect';
 import { translateField } from '../../utils/translateField';
 import logger from '../../services/logger';
 import NotesField from '../shared/NotesField';
+import FormErrorPopup from '../shared/FormErrorPopup';
+import RecordForm from '../shared/RecordForm';
 import { useDateFormat } from '../../hooks/useDateFormat';
 
 // Initialize medical form layout strategy
@@ -78,6 +80,9 @@ const BaseMedicalForm = ({
 
   // Custom content
   children,
+
+  // Why the form could not be saved, shown in a popup over the form
+  formError = null,
 
   // Field errors
   fieldErrors = {},
@@ -892,7 +897,10 @@ const BaseMedicalForm = ({
       deviceType={responsiveState.deviceType}
       zIndex={zIndex}
     >
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack spacing={layoutConfig.spacing}>
           {/* Render form fields */}
           {fieldRows.map((row, rowIndex) => (
@@ -953,7 +961,7 @@ const BaseMedicalForm = ({
             </Button>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </ResponsiveModal>
   );
 };
@@ -973,6 +981,7 @@ const MemoizedBaseMedicalForm = memo(
       'submitButtonText',
       'submitButtonColor',
       'zIndex',
+      'formError',
     ];
     for (const prop of primitiveProps) {
       if (prevProps[prop] !== nextProps[prop]) {

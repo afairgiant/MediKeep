@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import render, { screen } from '../../../../test-utils/render';
+import render, { screen, within } from '../../../../test-utils/render';
 import '@testing-library/jest-dom';
 import LabResultViewModal from '../LabResultViewModal';
 
@@ -17,11 +17,7 @@ const baseResult = {
   is_panel: true,
 };
 
-const renderModal = (
-  isGroupedResult: boolean,
-  tags: string[] = ['fasting'],
-  initialTab = 'overview'
-) =>
+const renderModal = (isGroupedResult: boolean, tags: string[] = ['fasting']) =>
   render(
     <LabResultViewModal
       isOpen
@@ -29,47 +25,29 @@ const renderModal = (
       labResult={{ ...baseResult, tags }}
       practitioners={[]}
       isGroupedResult={isGroupedResult}
-      initialTab={initialTab}
     />
   );
 
-describe('LabResultViewModal tags', () => {
-  it('shows tags for a new-style (grouped) result', () => {
-    renderModal(true);
-    expect(screen.getByText('fasting')).toBeInTheDocument();
+// Inactive tab panels stay mounted but hidden, so toBeVisible() proves the
+// tags are on the default Overview tab
+describe.each([
+  ['new-style (grouped)', true],
+  ['legacy (individual)', false],
+])('LabResultViewModal tags for a %s result', (_label, isGroupedResult) => {
+  it('shows the tags on the Overview tab', () => {
+    renderModal(isGroupedResult);
+    expect(screen.getByText('fasting')).toBeVisible();
   });
 
-  it('shows tags for a legacy (individual) result', () => {
-    renderModal(false);
-    expect(screen.getAllByText('fasting').length).toBeGreaterThan(0);
+  it('shows a Not specified placeholder on the Overview tab when there are no tags', () => {
+    renderModal(isGroupedResult, []);
+    const tagsSection = screen.getByText('Tags').closest('div') as HTMLElement;
+    expect(tagsSection).toBeVisible();
+    expect(within(tagsSection).getByText('Not specified')).toBeInTheDocument();
   });
 
-  it('shows a Not specified placeholder when a new-style result has no tags', () => {
-    renderModal(true, []);
-    expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getAllByText('Not specified').length).toBeGreaterThan(0);
-  });
-
-  it('shows the Tags tab for a legacy result even with no tags', () => {
-    renderModal(false, []);
-    expect(screen.getByRole('tab', { name: /Tags/ })).toBeInTheDocument();
-  });
-
-  it('falls back to Overview when a new-style result is opened on the Tags tab', () => {
-    renderModal(true, ['fasting'], 'tags');
+  it('has no separate Tags tab', () => {
+    renderModal(isGroupedResult);
     expect(screen.queryByRole('tab', { name: /Tags/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Overview/ })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-  });
-
-  it('shows the Tags panel content for a legacy result opened on the Tags tab', () => {
-    renderModal(false, [], 'tags');
-    expect(screen.getByRole('tab', { name: /Tags/ })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-    expect(screen.getAllByText('Not specified').length).toBeGreaterThan(0);
   });
 });

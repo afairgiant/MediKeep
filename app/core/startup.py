@@ -15,6 +15,7 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields, sanitize_log_input
 from app.core.utils.datetime_utils import set_application_startup_time
 from app.core.utils.security import redact_database_url
+from app.services.imaging_storage import remove_stale_import_staging
 from app.services.notification_handlers import create_notification_handler
 
 logger = get_logger(__name__, "app")
@@ -90,6 +91,31 @@ def _warn_if_temp_dir_unwritable():
         )
 
 
+def _remove_stale_imaging_staging():
+    """Delete imaging import work directories left by a restart. Never raises."""
+    try:
+        removed = remove_stale_import_staging()
+    except OSError as e:
+        logger.warning(
+            "Could not remove leftover imaging import directories",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "imaging_staging_cleanup_failed",
+                LogFields.ERROR: type(e).__name__,
+            },
+        )
+        return
+    if removed:
+        logger.info(
+            "Removed leftover imaging import directories",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "imaging_staging_cleaned",
+                "count": removed,
+            },
+        )
+
+
 def _log_effective_auth_mode():
     """Log the authentication configuration the instance actually came up with.
 
@@ -148,6 +174,7 @@ async def startup_event():
         raise RuntimeError(str(e)) from e
 
     _warn_if_temp_dir_unwritable()
+    _remove_stale_imaging_staging()
 
     # Initialize the event system (event registry and bus)
     event_bus = setup_event_system()

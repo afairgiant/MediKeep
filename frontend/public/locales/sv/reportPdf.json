@@ -384,6 +384,7 @@
     "exportLeftOutNotFound": "filen hittades inte",
     "exportLeftOutNotConfigured": "integrationen med {{service}} är inte aktiverad eller inte helt konfigurerad",
     "exportLeftOutDownloadFailed": "kunde inte laddas ned från {{service}}",
+    "exportLeftOutStoredElsewhere": "lagras i en annan medlems {{service}}",
     "exportLeftOutFailed": "kunde inte läggas till",
     "upcoming": "Kommande"
   },

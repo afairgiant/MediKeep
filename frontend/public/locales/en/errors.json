@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Must be a valid number",
     "patientNotSelected": "Please select a patient.",
     "requiredFieldMissing": "Please fill in all required fields.",
-    "submissionFailed": "Failed to save form. Please check your input and try again."
+    "submissionFailed": "Failed to save form. Please check your input and try again.",
+    "endBeforeStart": "End date cannot be before start date",
+    "endBeforeOnset": "End date cannot be before onset date",
+    "dateInFuture": "{{field}} ({{date}}) cannot be in the future. Please select a date on or before today ({{today}}).",
+    "requiredForPrescription": "{{field}} is required for prescription insurance",
+    "expirationBeforeEffective": "Expiration date must be after effective date",
+    "invalidFormat": "The format is not valid.",
+    "tooShort": "Use at least {{min}} characters.",
+    "tooLong": "Use no more than {{max}} characters.",
+    "belowMinimum": "Must be at least {{min}}.",
+    "aboveMaximum": "Must be at most {{max}}.",
+    "invalidValue": "This value is not valid."
   },
   "general": {
     "maintenanceMode": "The system is currently under maintenance. Please try again later.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "Large file detected. Upload may take several minutes.",
     "partialSuccess": "Operation completed with some warnings.",
     "slowConnection": "Upload is taking longer than usual due to slow connection."
-  }
+  },
+  "symptomNotAvailable": "Symptom information not available"
 }

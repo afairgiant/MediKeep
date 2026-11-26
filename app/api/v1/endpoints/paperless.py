@@ -18,6 +18,8 @@ from app.api.deps import get_current_user
 from app.api.v1.endpoints.entity_file import get_entity_by_type_and_id
 from app.core.database.database import get_db
 from app.core.http.integration_errors import (
+    PAPERLESS_TASK_PERMISSION_MESSAGE,
+    IntegrationErrorCode,
     IntegrationFailure,
     integration_http_exception,
     upstream_status_failure,
@@ -40,6 +42,11 @@ from app.crud.user_preferences import user_preferences
 from app.models.models import Patient, User
 from app.schemas.user_preferences import PaperlessConnectionData
 from app.services.credential_encryption import SecurityError, credential_encryption
+from app.services.generic_entity_file_service import (
+    FILE_ENTITY_SOURCES,
+    entity_files_of_records,
+    resolvable_uploads,
+)
 from app.services.paperless_auth_methods import (
     DEFAULT_AUTH_METHOD,
     credential_kwargs,
@@ -55,12 +62,16 @@ from app.services.paperless_service import (
     PaperlessRedirectError,
     _build_title_fallback_query,
     create_paperless_service,
+    log_task_permission_denied,
 )
 from app.services.paperless_task_status import extract_task, parse_task
 from app.services.patient_access import PatientAccessService
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+# Stable value the frontend matches on
+TASK_PERMISSION_MISSING_WARNING = "task_permission_missing"
 
 
 class MockRequest:
@@ -108,7 +119,8 @@ def _update_entity_file_from_task_result(
     """
     Update EntityFile record based on Paperless task completion result.
 
-    Leaves the record alone unless the user has edit access to its patient.
+    Leaves the record alone unless the user may resolve its upload (see
+    ``resolvable_uploads``) and has edit access to its patient.
 
     Args:
         db: Database session
@@ -122,7 +134,10 @@ def _update_entity_file_from_task_result(
         # Find the EntityFile record by task UUID
         entity_file = (
             db.query(EntityFile)
-            .filter(EntityFile.paperless_task_uuid == task_uuid)
+            .filter(
+                EntityFile.paperless_task_uuid == task_uuid,
+                resolvable_uploads(db, user.id),
+            )
             .first()
         )
 
@@ -403,6 +418,10 @@ async def test_paperless_connection(
             result = await paperless_service.test_connection()
             logger.debug(f"test_connection() completed with result: {result}")
 
+            # Uploads still work without it, so this warns instead of failing the test
+            if await paperless_service.can_view_tasks() is False:
+                result["warnings"] = [TASK_PERMISSION_MISSING_WARNING]
+
             # Add authentication method to result
             result["auth_method"] = paperless_service.get_auth_type()
             result["used_saved_credentials"] = use_saved_credentials
@@ -561,10 +580,6 @@ async def get_storage_usage_stats(
         request = MockRequest()
     try:
         # Query file statistics scoped to the current user's patients
-        from sqlalchemy import and_
-
-        from app.models.models import EntityFile, Patient
-
         # Get patient IDs belonging to the current user
         user_patient_ids = [
             p.id
@@ -585,47 +600,11 @@ async def get_storage_usage_stats(
 
         all_patient_ids = list(set(user_patient_ids + shared_patient_ids))
 
-        # Build a subquery for entity files belonging to the user's patients
-        # EntityFile links to entities via entity_type + entity_id
-        # All entities have patient_id, so we join through each entity type
-        from app.models.models import (
-            Encounter,
-            Insurance,
-            LabResult,
-            MedicalEquipment,
-            Procedure,
-        )
-
-        entity_models = {
-            "lab-result": LabResult,
-            "procedure": Procedure,
-            "insurance": Insurance,
-            "encounter": Encounter,
-            "medical-equipment": MedicalEquipment,
-        }
-
-        # Collect all file IDs belonging to the user across entity types
-        user_file_ids = set()
-        for entity_type_str, model in entity_models.items():
-            file_ids = (
-                db.query(EntityFile.id)
-                .join(
-                    model,
-                    and_(
-                        EntityFile.entity_type == entity_type_str,
-                        EntityFile.entity_id == model.id,
-                    ),
-                )
-                .filter(model.patient_id.in_(all_patient_ids))
-                .all()
-            )
-            user_file_ids.update(fid for (fid,) in file_ids)
-
-        # Now compute stats only for the user's files
-        user_files = (
-            (db.query(EntityFile).filter(EntityFile.id.in_(user_file_ids)).all())
-            if user_file_ids
-            else []
+        # Files on every record type of those patients
+        user_files = entity_files_of_records(
+            db,
+            FILE_ENTITY_SOURCES,
+            lambda model: model.patient_id.in_(all_patient_ids),
         )
 
         def compute_stats(files_list, backend):
@@ -1323,12 +1302,13 @@ async def get_paperless_task_status(
                             "timestamp": datetime.utcnow().isoformat(),
                         }
                     if response.status == 403:
-                        logger.warning(
-                            f"Permission denied checking task {task_uuid} - auth may have failed"
-                        )
-                        raise HTTPException(
-                            status_code=status.HTTP_403_FORBIDDEN,
-                            detail=f"Permission denied accessing task status",
+                        log_task_permission_denied(current_user.id)
+                        # Not a 403: the MediKeep session is fine, the Paperless account lacks a permission
+                        raise integration_http_exception(
+                            IntegrationFailure(
+                                IntegrationErrorCode.TASK_PERMISSION_DENIED,
+                                PAPERLESS_TASK_PERMISSION_MESSAGE,
+                            )
                         )
                     response_text = await response.text()
                     logger.warning(
@@ -1699,6 +1679,7 @@ async def set_background_task(
                 EntityFile.entity_type == request_data.entity_type,
                 EntityFile.entity_id == request_data.entity_id,
                 EntityFile.file_name == request_data.file_name,
+                resolvable_uploads(db, current_user.id),
             )
             .order_by(EntityFile.created_at.desc())
             .first()
@@ -1821,6 +1802,7 @@ async def update_background_task(
                 EntityFile.entity_id == request_data.entity_id,
                 EntityFile.file_name == request_data.file_name,
                 EntityFile.paperless_task_uuid == request_data.task_uuid,
+                resolvable_uploads(db, current_user.id),
             )
             .first()
         )

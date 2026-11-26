@@ -41,7 +41,7 @@ import {
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
-import LabResultTagsField from './LabResultTagsField';
+import TagsField from '../../shared/TagsField';
 import RecordVisitsCard from '../../shared/RecordVisitsCard';
 import LabResultLinkTabButtons from './LabResultLinkTabs';
 import LabResultRecordLinksCard from './LabResultRecordLinksCard';
@@ -57,6 +57,8 @@ import {
 import logger from '../../../services/logger';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const LabResultFormWrapper = ({
   isOpen,
@@ -74,6 +76,7 @@ const LabResultFormWrapper = ({
   onSwitchToQuickImport,
   onFileUploadComplete,
   onError,
+  formError = null,
   // Saved links of the lab results, for the numbers on the link tabs
   labResultConditions = {},
   fetchLabResultConditions,
@@ -516,7 +519,10 @@ const LabResultFormWrapper = ({
       closeOnClickOutside={!isLoading && !isSubmitting}
       closeOnEscape={!isLoading && !isSubmitting}
     >
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -733,7 +739,7 @@ const LabResultFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <LabResultTagsField
+                    <TagsField
                       value={formData.tags || []}
                       onChange={tags => {
                         onInputChange({
@@ -1129,7 +1135,7 @@ const LabResultFormWrapper = ({
             </Group>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
 
       {children}
     </Modal>

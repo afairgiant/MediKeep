@@ -44,6 +44,7 @@ import PaginationControls from '../../components/shared/PaginationControls';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import { applyOccurrenceSeverityAutoFill } from '../../utils/anticipatoryAutoFill';
 import { notesToPlainText } from '../../utils/notesMarkdown';
+import { getUserFriendlyError } from '../../constants/errorMessages';
 import {
   applySymptomInputChange,
   buildSymptomPayload,
@@ -76,6 +77,8 @@ const Symptoms = () => {
   const [symptoms, setSymptoms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Why the open symptom or episode form could not be saved, shown inside it
+  const [formError, setFormError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
   // View state
@@ -180,6 +183,10 @@ const Symptoms = () => {
     };
   }, [patientId, fetchSymptoms]);
 
+  // Set when a new symptom is saved. If its upload then fails, the form stays
+  // open and the list is refreshed when it closes.
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
   const {
     startSubmission,
     completeFormSubmission,
@@ -191,9 +198,11 @@ const Symptoms = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'symptom',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowSymptomForm(false);
       setEditingSymptom(null);
+      needsRefreshAfterSubmissionRef.current = false;
       fetchSymptoms();
     },
     onError: error => {
@@ -220,6 +229,7 @@ const Symptoms = () => {
   // Symptom Definition Handlers
   const handleAddSymptom = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setSymptomFormData({
       ...createInitialSymptomFormData(),
@@ -231,6 +241,7 @@ const Symptoms = () => {
 
   const handleEditSymptom = symptom => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setSymptomFormData({
       symptom_name: symptom.symptom_name || '',
@@ -259,10 +270,11 @@ const Symptoms = () => {
       currentPatient?.id
     );
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
+    setFormError(null);
     startSubmission();
 
     try {
@@ -275,6 +287,7 @@ const Symptoms = () => {
 
       let success;
       let resultId;
+      let createdSymptom = null;
 
       if (editingSymptom) {
         await symptomApi.update(editingSymptom.id, submitData);
@@ -284,6 +297,10 @@ const Symptoms = () => {
         const result = await symptomApi.create(submitData);
         success = !!result;
         resultId = result?.id;
+        if (success) {
+          createdSymptom = result;
+          needsRefreshAfterSubmissionRef.current = true;
+        }
       }
 
       // Link visits chosen in the Add form now that the record exists
@@ -316,6 +333,8 @@ const Symptoms = () => {
               0,
               documentManagerMethods.getPendingFilesCount()
             );
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdSymptom) setEditingSymptom(createdSymptom);
           }
         } else {
           completeFileUpload(true, 0, 0);
@@ -335,7 +354,6 @@ const Symptoms = () => {
         editing: !!editingSymptom,
         component: 'Symptoms',
       });
-      setError(err.message || 'Failed to save symptom');
     }
   };
 
@@ -377,6 +395,7 @@ const Symptoms = () => {
     setEditingOccurrence(null);
     autoFilledOccurrenceFieldsRef.current.clear();
     setOccurrenceFormData(getDefaultOccurrenceFormData(true));
+    setFormError(null);
     setShowOccurrenceForm(true);
   };
 
@@ -405,6 +424,7 @@ const Symptoms = () => {
       resolution_notes: occurrence.resolution_notes || '',
       notes: occurrence.notes || '',
     });
+    setFormError(null);
     setShowOccurrenceForm(true);
   };
 
@@ -424,10 +444,13 @@ const Symptoms = () => {
     e.preventDefault();
 
     if (!selectedSymptomForOccurrence?.id) {
-      setError('Symptom information not available');
+      setFormError(
+        t('errors:symptomNotAvailable', 'Symptom information not available')
+      );
       return;
     }
 
+    setFormError(null);
     try {
       const submitData = {
         ...occurrenceFormData,
@@ -487,7 +510,16 @@ const Symptoms = () => {
         error: err.message,
         component: 'Symptoms',
       });
-      setError(err.message || 'Failed to save episode');
+      setFormError(
+        getUserFriendlyError(
+          err.message ||
+            t(
+              'errors:form.submissionFailed',
+              'Failed to save form. Please check your input and try again.'
+            ),
+          'save'
+        )
+      );
     }
   };
 
@@ -505,8 +537,10 @@ const Symptoms = () => {
     clampPage(symptoms.length);
   }, [symptoms.length, clampPage]);
 
-  // Loading state
-  if (loading && symptoms.length === 0) {
+  // Loading state. Never replace an open form: it holds the files queued for
+  // upload, and a new symptom whose upload failed can be open while the list
+  // is still empty.
+  if (loading && symptoms.length === 0 && !showSymptomForm) {
     return (
       <MedicalPageLoading
         message={t('symptoms.loading', 'Loading symptoms...')}
@@ -787,11 +821,17 @@ const Symptoms = () => {
 
       {/* Symptom Definition Form Modal */}
       <MantineSymptomForm
+        formError={formError}
         isOpen={showSymptomForm}
         onClose={() => {
           if (!isBlocking) {
             setShowSymptomForm(false);
             setEditingSymptom(null);
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              fetchSymptoms();
+            }
           }
         }}
         title={
@@ -838,6 +878,7 @@ const Symptoms = () => {
         onInputChange={handleOccurrenceInputChange}
         onSubmit={handleOccurrenceSubmit}
         editingOccurrence={editingOccurrence}
+        formError={formError}
         submitButtonText={
           editingOccurrence
             ? t('buttons.update', 'Update')

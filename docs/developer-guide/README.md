@@ -194,7 +194,7 @@ All documentation has been validated against the actual codebase for accuracy.
 
 ### Before Submitting PR
 
-- [ ] All tests pass (`pytest` and `npm test`)
+- [ ] All tests pass (`pytest` and `npm test`). For a faster full backend run, use `scripts/run_backend_tests_sharded.py` (see [Backend Tests](05-contributing.md#backend-tests))
 - [ ] Code follows style guidelines
 - [ ] Documentation updated
 - [ ] No console.log or debug code

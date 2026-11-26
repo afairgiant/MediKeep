@@ -480,10 +480,11 @@ SSL_KEYFILE=/app/certs/medikeep.key
 
 ### File Storage Configuration
 
-| Variable        | Type    | Default     | Description                   |
-| --------------- | ------- | ----------- | ----------------------------- |
-| `UPLOAD_DIR`    | path    | `./uploads` | Upload directory path         |
-| `MAX_FILE_SIZE` | integer | `10485760`  | Max file size in bytes (10MB) |
+| Variable                  | Type    | Default      | Description                                         |
+| ------------------------- | ------- | ------------ | --------------------------------------------------- |
+| `UPLOAD_DIR`              | path    | `./uploads`  | Upload directory path                               |
+| `MAX_FILE_SIZE`           | integer | `10485760`   | Max file size in bytes (10MB)                       |
+| `IMAGING_MAX_UPLOAD_SIZE` | integer | `2147483648` | Max DICOM import upload (a `.dcm` or a CD-export ZIP) in bytes (2GB) |
 
 **Example:**
 
@@ -1121,6 +1122,12 @@ Using a reverse proxy is recommended for production to handle SSL termination an
 > `TRUSTED_PROXY_IPS` explicitly.
 
 ### Nginx Configuration
+
+The examples below cap request bodies at 100MB with `client_max_body_size`. Imaging
+imports send a whole CD export (often 300MB to 2GB) in one request, so raise it to at
+least `IMAGING_MAX_UPLOAD_SIZE`, at minimum for `/api/v1/imaging-studies/import`, or
+those imports fail with `413` from the proxy. Uploads are streamed to disk under
+`UPLOAD_DIR`, so the uploads volume needs room for the upload plus the imported images.
 
 #### Basic HTTP
 

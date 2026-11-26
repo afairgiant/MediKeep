@@ -76,7 +76,8 @@
     "syncTagsLabel": "Sync document tags and categories",
     "syncTagsDescription": "Keep document metadata synchronized with Paperless (Coming Soon)",
     "loadingSettings": "Loading settings...",
-    "credentialsIncomplete": "Enter both your username and password to test the connection."
+    "credentialsIncomplete": "Enter both your username and password to test the connection.",
+    "taskPermissionMissing": "Connected, but this Paperless account cannot read upload tasks, so MediKeep has to look new uploads up by file name. In Paperless, give the account the View permission on PaperlessTask (Settings > Users & Groups > edit the user > Permissions)."
   },
   "papra": {
     "apiTokenPlaceholder": "Enter your Papra API token",

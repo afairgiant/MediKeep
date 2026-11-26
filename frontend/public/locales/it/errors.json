@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Deve essere un numero valido",
     "patientNotSelected": "Si prega di selezionare un paziente.",
     "requiredFieldMissing": "Si prega di compilare tutti i campi obbligatori.",
-    "submissionFailed": "Salvataggio del modulo non riuscito. Verificare i dati inseriti e riprovare."
+    "submissionFailed": "Salvataggio del modulo non riuscito. Verificare i dati inseriti e riprovare.",
+    "endBeforeStart": "La data di fine non può essere precedente alla data di inizio",
+    "endBeforeOnset": "La data di fine non può essere precedente alla data di insorgenza",
+    "dateInFuture": "{{field}} ({{date}}) non può essere nel futuro. Seleziona una data non successiva a oggi ({{today}}).",
+    "requiredForPrescription": "{{field}}: obbligatorio per l'assicurazione farmaci",
+    "expirationBeforeEffective": "La data di scadenza deve essere successiva alla data di decorrenza",
+    "invalidFormat": "Il formato non è valido.",
+    "tooShort": "Usa almeno {{min}} caratteri.",
+    "tooLong": "Usa al massimo {{max}} caratteri.",
+    "belowMinimum": "Deve essere almeno {{min}}.",
+    "aboveMaximum": "Deve essere al massimo {{max}}.",
+    "invalidValue": "Questo valore non è valido."
   },
   "general": {
     "maintenanceMode": "Il sistema è attualmente in manutenzione. Riprovare più tardi.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "File di grandi dimensioni rilevato. Il caricamento potrebbe richiedere diversi minuti.",
     "partialSuccess": "Operazione completata con alcuni avvisi.",
     "slowConnection": "Il caricamento sta richiedendo più tempo del normale a causa della connessione lenta."
-  }
+  },
+  "symptomNotAvailable": "Informazioni sul sintomo non disponibili"
 }

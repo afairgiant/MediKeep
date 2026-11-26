@@ -58,7 +58,7 @@ from app.crud.injury import injury
 from app.crud.injury_type import injury_type
 from app.crud.medical_equipment import medical_equipment
 from app.crud.symptom import symptom_occurrence, symptom_parent
-from app.models.activity_log import ActionType, ActivityLog, EntityType
+from app.models.activity_log import ActionType, EntityType
 from app.models.enums import get_all_donation_types
 from app.models.labs import LabTestComponent
 from app.models.models import (
@@ -1628,7 +1628,7 @@ def list_model_records(
         )
 
     except Exception as e:
-        _log_model_failure(
+        log_model_failure(
             "model_records_list_failed",
             f"Error fetching {model_name} records",
             current_user,
@@ -1733,7 +1733,7 @@ def get_model_record(
     except HTTPException:
         raise
     except Exception as e:
-        _log_model_failure(
+        log_model_failure(
             "model_record_fetch_failed",
             f"Error fetching {model_name} record",
             current_user,
@@ -1823,24 +1823,11 @@ def delete_model_record(
                 db, user_id=record_id, attachments=record_files
             )
             db.commit()
+            cleanup_attachments(
+                db, record_files, reason=f"{model_name} {record_id} deletion"
+            )
         else:
-            if current_user_id is not None:
-                safe_log_activity(
-                    db=db,
-                    action=ActionType.DELETED,
-                    entity_type=model_name,
-                    entity_obj=record,
-                    user_id=current_user_id,
-                    commit=False,
-                )
-
-            record_files = find_record_attachments(db, model_info["model"], [record_id])
-            crud_instance.delete(db, id=record_id)
-
-        # Nothing cascades to the attachments; cleaned up only once the delete held
-        cleanup_attachments(
-            db, record_files, reason=f"{model_name} {record_id} deletion"
-        )
+            delete_registry_record(db, model_name, record, current_user_id)
 
         return {
             "message": f"{model_name} record {record_id} deleted successfully",
@@ -1850,7 +1837,7 @@ def delete_model_record(
     except HTTPException:
         raise
     except Exception as e:
-        _log_model_failure(
+        log_model_failure(
             "model_record_delete_failed",
             f"Error deleting {model_name} record",
             current_user,
@@ -2215,20 +2202,48 @@ def create_model_record(
 logger = get_logger(__name__, "app")
 
 
-def _log_model_failure(
-    event: str, message: str, user: User, model_name: str, error: Exception
+def delete_registry_record(
+    db: Session, model_name: str, record: Any, user_id: Optional[int]
+) -> None:
+    """Audit and delete one registry record (not a user), then clean up its attachments.
+
+    Commits the audit entry and the delete together.
+    """
+    model_info = MODEL_REGISTRY[model_name]
+    if user_id is not None:
+        safe_log_activity(
+            db=db,
+            action=ActionType.DELETED,
+            entity_type=model_name,
+            entity_obj=record,
+            user_id=user_id,
+            commit=False,
+        )
+    record_files = find_record_attachments(db, model_info["model"], [record.id])
+    model_info["crud"].delete(db, id=record.id)
+    # Nothing cascades to the attachments; cleaned up only once the delete held
+    cleanup_attachments(db, record_files, reason=f"{model_name} {record.id} deletion")
+
+
+def log_model_failure(
+    event: str,
+    message: str,
+    user: User,
+    model_name: str,
+    error: Exception,
+    record_id: Optional[int] = None,
 ) -> None:
     """Log an unexpected admin model failure so the HTTP response can stay generic."""
-    logger.error(
-        message,
-        extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: event,
-            LogFields.USER_ID: user.id,
-            LogFields.MODEL: model_name,
-            LogFields.ERROR: str(error),
-        },
-    )
+    extra = {
+        LogFields.CATEGORY: "app",
+        LogFields.EVENT: event,
+        LogFields.USER_ID: user.id,
+        LogFields.MODEL: model_name,
+        LogFields.ERROR: str(error),
+    }
+    if record_id is not None:
+        extra[LogFields.RECORD_ID] = record_id
+    logger.error(message, extra=extra)
 
 
 class AdminResetPasswordRequest(BaseModel):

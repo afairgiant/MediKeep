@@ -40,6 +40,7 @@ def preferences_row(authenticated_client):
 @pytest.fixture
 def paperless_connects(monkeypatch):
     service = MagicMock()
+    service.can_view_tasks = AsyncMock(return_value=True)
     service.test_connection = AsyncMock(return_value={"status": "connected"})
     service.get_auth_type.return_value = "token"
 

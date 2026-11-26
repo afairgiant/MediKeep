@@ -39,7 +39,6 @@ const ProcedureViewModal = ({
   onEdit,
   practitioners = [],
   navigate,
-  onFileUploadComplete,
   onError,
   disableEdit = false,
   disableEditTooltip,
@@ -71,25 +70,6 @@ const ProcedureViewModal = ({
 
   const handleDocumentError = error => {
     handleError(error, 'document_management');
-  };
-
-  const handleDocumentUploadComplete = (
-    success,
-    completedCount,
-    failedCount
-  ) => {
-    logger.info('procedures_view_upload_completed', {
-      message: 'File upload completed in procedures view',
-      procedureId: procedure?.id,
-      success,
-      completedCount,
-      failedCount,
-      component: 'ProcedureViewModal',
-    });
-
-    if (onFileUploadComplete) {
-      onFileUploadComplete(success, completedCount, failedCount);
-    }
   };
 
   const handleEditClick = () => {
@@ -508,8 +488,6 @@ const ProcedureViewModal = ({
                   entityType="procedure"
                   entityId={procedure.id}
                   mode="view"
-                  showProgressModal={true}
-                  onUploadComplete={handleDocumentUploadComplete}
                   onError={handleDocumentError}
                 />
               </Box>

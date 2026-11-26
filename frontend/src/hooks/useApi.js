@@ -34,20 +34,23 @@ export const useApi = () => {
 
       return result;
     } catch (err) {
-      // Don't show errors if request was cancelled or if it's an AbortError
-      if (err.name !== 'AbortError' && !controller.signal.aborted) {
+      // Use actual error message (already processed by extractErrorMessage in baseApi)
+      // Fall back to options.errorMessage only if err.message is empty,
+      // then apply getUserFriendlyError to format with error codes
+      const formatError = () =>
+        getUserFriendlyError(
+          err.message || options.errorMessage || 'An error occurred',
+          options.operation || 'save'
+        );
+
+      if (err.name !== 'AbortError' && options.onError) {
+        // The caller awaits this exact request and shows its error itself,
+        // so a newer request superseding it does not hide the failure
+        options.onError(formatError());
+      } else if (err.name !== 'AbortError' && !controller.signal.aborted) {
         // Only show error if this is the most recent request
         if (abortControllerRef.current === controller) {
-          // Use actual error message (already processed by extractErrorMessage in baseApi)
-          // Fall back to options.errorMessage only if err.message is empty
-          let errorMessage =
-            err.message || options.errorMessage || 'An error occurred';
-
-          // Apply getUserFriendlyError to format with error codes
-          const operation = options.operation || 'save';
-          const friendlyError = getUserFriendlyError(errorMessage, operation);
-
-          setError(friendlyError);
+          setError(formatError());
         }
         // API error logged by apiService automatically
       }

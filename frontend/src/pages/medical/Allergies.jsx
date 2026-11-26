@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Container, Paper, Stack } from '@mantine/core';
 import { IconAlertTriangle, IconPlus } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
+import { patientNotAvailableMessage } from '../../utils/formCheckMessages';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
@@ -58,6 +59,7 @@ const Allergies = () => {
     items: allergies,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -66,6 +68,8 @@ const Allergies = () => {
     refreshData,
     clearError,
     setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'allergy',
     entityLabel: t('medical:entityNames.allergy'),
@@ -162,6 +166,7 @@ const Allergies = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'allergy',
+    onFormError: setFormError,
     onSuccess: () => {
       resetForm();
 
@@ -202,6 +207,7 @@ const Allergies = () => {
 
   const handleAddAllergy = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingAllergy(null);
     setFormData({
@@ -219,6 +225,7 @@ const Allergies = () => {
 
   const handleEditAllergy = allergy => {
     resetSubmission();
+    setFormError(null);
     setFormData({
       allergen: allergy.allergen || '',
       severity: allergy.severity || '',
@@ -239,7 +246,7 @@ const Allergies = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError('Patient information not available');
+      setFormError(patientNotAvailableMessage());
       return;
     }
 
@@ -262,6 +269,7 @@ const Allergies = () => {
     try {
       let success;
       let resultId;
+      let createdAllergy = null;
 
       if (editingAllergy) {
         success = await updateItem(editingAllergy.id, allergyData);
@@ -271,6 +279,7 @@ const Allergies = () => {
         success = !!result;
         resultId = result?.id;
         if (success) {
+          createdAllergy = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -303,12 +312,12 @@ const Allergies = () => {
               component: 'Allergies',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdAllergy) setEditingAllergy(createdAllergy);
           }
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('allergies_submission_error', {
@@ -341,7 +350,7 @@ const Allergies = () => {
     clampPage(processedAllergies.length);
   }, [processedAllergies.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('allergies.messages.loading', 'Loading allergies...')}
@@ -380,8 +389,20 @@ const Allergies = () => {
 
         {/* Form Modal */}
         <AllergyFormWrapper
+          formError={formError}
           isOpen={showAddForm}
-          onClose={() => !isBlocking && resetForm()}
+          onClose={() => {
+            if (isBlocking) return;
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingAllergy) refreshFileCount(editingAllergy.id);
+            resetForm();
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
+          }}
           title={
             editingAllergy
               ? t('allergies.editTitle', 'Edit Allergy')

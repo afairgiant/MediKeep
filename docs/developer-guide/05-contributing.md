@@ -238,6 +238,38 @@ pytest --cov=app --cov-report=html
 pytest -v
 ```
 
+**Run the full suite in shards (faster):**
+
+A serial `pytest` run of the whole backend suite takes 10 minutes or more. `scripts/run_backend_tests_sharded.py` splits the test files across several pytest processes that run at the same time (6 by default). That brings a full run down to a few minutes. Use it when you need the whole suite, for example before opening a PR. For a single file or directory, plain `pytest` is still quicker.
+
+```bash
+# Linux / macOS
+python3 scripts/run_backend_tests_sharded.py
+
+# Windows
+.venv\Scripts\python.exe scripts\run_backend_tests_sharded.py
+
+# Options
+python3 scripts/run_backend_tests_sharded.py --shards 4             # Fewer processes
+python3 scripts/run_backend_tests_sharded.py tests/api tests/crud   # Only some directories
+python3 scripts/run_backend_tests_sharded.py -- -x -k medication    # Args after -- go to every pytest process
+python3 scripts/run_backend_tests_sharded.py --keep                 # Keep the shard copies for debugging
+```
+
+How it works:
+
+- Test files are assigned to shards by file size, so each shard gets about the same amount of work.
+- Each shard runs in its own temporary copy of the working tree. `tests/conftest.py` uses `test_database.db` relative to the working directory and deletes it at startup, so shards sharing one directory would delete each other's database. The copy includes uncommitted changes and your `.env` file, but not gitignored files such as `node_modules` or `.venv`. The script needs `git` on your PATH.
+- Each shard writes its output to a log file. At the end the script lists every failed and errored test and prints the log directory. The copies are deleted; the logs are kept.
+- The exit code is 0 when every shard passed. Otherwise it is the highest pytest exit code from any shard: 1 means tests failed, and 2 to 4 mean a shard was interrupted or could not run (its log says why). The exit code is 5 only when no shard collected any tests, for example when `-k` matches nothing.
+
+Limitations:
+
+- The shards run with the Python interpreter that started the script, so start it with your virtualenv's Python.
+- There is no combined coverage report. Use `pytest --cov=app` for coverage.
+- `-x` and `--maxfail` stop only the shard that hit the failure.
+- Files are grouped differently from a serial run. A test that passes only when another file runs before it in the same session can fail here. That test has a hidden dependency and should be fixed.
+
 **Example test:**
 
 ```python
@@ -436,6 +468,19 @@ npm run test:run       # Tests pass (Vitest)
      expect(screen.getByText('08:00 AM')).toBeInTheDocument();
    });
    ```
+
+### Record Forms and Validation
+
+Every record Add/Edit dialog (Allergy, Injury, Medication, ...) uses one form for both Add and Edit. Build a new one the same way, and copy an existing form such as `InjuryFormWrapper.jsx`.
+
+1. **Use `RecordForm` in place of `<form>`** (`frontend/src/components/shared/RecordForm.tsx`).
+2. **Mark mandatory fields with the `required` prop.** That is the whole rule, for text inputs, dates and Selects, on any tab. On submit, `RecordForm` finds the first empty or invalid field, switches to its tab, focuses it, and says which field it is in a popup. The page's submit handler runs only when every field passes.
+3. **Put `<FormErrorPopup error={formError} />` right after the `RecordForm` opening tag** (`frontend/src/components/shared/FormErrorPopup.tsx`). It pops up over the form with the message from `RecordForm`, the page's own form check, or the server, and the user dismisses it with OK. When it is about a field, the cursor goes to that field. Escape closes only the popup, not the form.
+4. **Other rules go in the page's form check** (for example `validateInjuryForm` in `utils/injuryFormUtils.ts`): a range, or one field that depends on another. Return a translated message that names the field, never a hardcoded string: use the helpers in `utils/formCheckMessages.ts` (for example `requiredMessage('shared:labels.medicationName', 'Medication Name')`) or a `t()` call. Pass it to `setFormError` from `useMedicalData`, never to the page-level `setError`. A page alert sits behind the open dialog, where nobody sees it. If the form component runs a check of its own before calling the page, give its message to the popup too: `error={checkError || formError}` (see `VitalsForm.jsx`).
+5. **The backend is the final check.** When a save fails, `useMedicalData` puts the server's message in `formError`, and the popup shows it.
+6. **Clear `formError` when a save starts.** `useMedicalData`'s `createItem` and `updateItem` already do. A page that saves some other way calls `setFormError(null)` before saving, or an error from the last save pops up again.
+
+Do not use a plain `<form>`, and do not add `noValidate` yourself. The browser's own check stops the submit without a word when a required field is on a tab that is not showing, and it never checks a non-searchable Mantine `Select`.
 
 ### Database Migrations
 

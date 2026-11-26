@@ -71,6 +71,7 @@ const Conditions = () => {
     items: conditions,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -78,7 +79,8 @@ const Conditions = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'condition',
     entityLabel: t('medical:entityNames.condition'),
@@ -150,6 +152,7 @@ const Conditions = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'condition',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowModal(false);
       setEditingCondition(null);
@@ -189,6 +192,7 @@ const Conditions = () => {
 
   const handleAddCondition = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingCondition(null);
     setFormData({
@@ -217,6 +221,7 @@ const Conditions = () => {
 
   const handleEditCondition = condition => {
     resetSubmission();
+    setFormError(null);
     setEditingCondition(condition);
     // Apply default status early if condition doesn't have one
     setFormData({
@@ -260,7 +265,7 @@ const Conditions = () => {
 
     const validationError = validateConditionForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -275,6 +280,7 @@ const Conditions = () => {
     try {
       let success;
       let resultId;
+      let createdCondition = null;
 
       if (editingCondition) {
         const result = await updateItem(editingCondition.id, conditionData);
@@ -285,6 +291,7 @@ const Conditions = () => {
         success = !!result;
         resultId = result?.id;
         if (success) {
+          createdCondition = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -337,12 +344,12 @@ const Conditions = () => {
               component: 'Conditions',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdCondition) setEditingCondition(createdCondition);
           }
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('conditions_submission_error', {
@@ -372,7 +379,7 @@ const Conditions = () => {
     clampPage(filteredConditions.length);
   }, [filteredConditions.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('conditions.loading', 'Loading conditions...')}
@@ -414,9 +421,21 @@ const Conditions = () => {
 
         {/* Form Modal */}
         <ConditionFormWrapper
+          formError={formError}
           isOpen={showModal}
           patientId={currentPatient?.id}
-          onClose={() => !isBlocking && setShowModal(false)}
+          onClose={() => {
+            if (isBlocking) return;
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingCondition) refreshFileCount(editingCondition.id);
+            setShowModal(false);
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
+          }}
           title={
             editingCondition
               ? t('conditions.editTitle', 'Edit Condition')

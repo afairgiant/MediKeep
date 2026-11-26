@@ -23,6 +23,9 @@
     "noFiles": "No files"
   },
   "fileList": {
+    "deleteFile": "Delete file",
+    "downloadFile": "Download file",
+    "unlinkDocument": "Unlink document",
     "deleteUnfinishedPaperlessWarning": "This upload has not finished processing in Paperless. If Paperless completes it later, the document may remain in Paperless after it is deleted here.",
     "fileDetails": "FILE DETAILS",
     "loading": "Loading files...",
@@ -38,10 +41,11 @@
     "statusMissing": "Missing",
     "statusProcessing": "Processing",
     "viewUnavailable": {
-      "missing": "This document could not be found in its storage service. It may have been deleted there. You can remove it from this list.",
+      "missing": "This document could not be found in its storage service. It may have been deleted there. You can remove it in the record's Edit form.",
       "processing": "This document is still being processed by Paperless and can't be opened yet. Try again in a moment.",
+      "storedElsewhere": "This document is stored in another member's {{service}}, which your {{service}} connection can't reach. They can open it from their account.",
       "title": "Document not available",
-      "unavailable": "This document was not stored successfully, so it can't be opened. You can remove it and upload it again."
+      "unavailable": "This document was not stored successfully, so it can't be opened. You can remove it in the record's Edit form and upload it again."
     }
   },
   "fileUpload": {
@@ -104,7 +108,9 @@
     "duplicateHint": "If you need to upload a new version, please modify the document first.",
     "processingDocument": "Document is being processed by Paperless...",
     "syncFailed": "Sync failed",
-    "syncing": "Syncing..."
+    "syncing": "Syncing...",
+    "taskPermissionDenied": "Your file was sent to Paperless, but this Paperless account cannot read upload tasks. MediKeep will look for the document by file name instead. To fix this, give the account the View permission on PaperlessTask in Paperless (Settings > Users & Groups).",
+    "taskPermissionDeniedTitle": "Paperless can't confirm uploads"
   },
   "renderMode": {
     "compactView": "Compact View",

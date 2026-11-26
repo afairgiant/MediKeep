@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Alert,
   Modal,
   Tabs,
   Box,
@@ -34,12 +33,15 @@ import {
 } from '../../utils/dateUtils';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
+import TagsField from '../shared/TagsField';
 import logger from '../../services/logger';
 import RecordVisitsTab from '../shared/RecordVisitsTab';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import { useSubDialog } from '../../contexts/SubDialogContext';
 import RecordLinkTabButtons from '../shared/RecordLinkTabButtons';
 import NotesField from '../shared/NotesField';
+import FormErrorPopup from '../shared/FormErrorPopup';
+import RecordForm from '../shared/RecordForm';
 
 /**
  * Form for creating/editing a symptom definition (parent record).
@@ -179,7 +181,10 @@ const MantineSymptomForm = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -291,6 +296,18 @@ const MantineSymptomForm = ({
                       placeholder={t('shared:fields.selectStatus')}
                       required
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t('common:fields.tags.description')}
+                      placeholder={t('common:fields.tags.placeholder')}
                     />
                   </Grid.Col>
                 </Grid>
@@ -415,35 +432,10 @@ const MantineSymptomForm = ({
                       maxLength={2000}
                     />
                   </Grid.Col>
-                  <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t('common:fields.tags.description')}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('common:fields.tags.placeholder')}
-                      />
-                    </Box>
-                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
           </Tabs>
-
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
@@ -465,7 +457,7 @@ const MantineSymptomForm = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

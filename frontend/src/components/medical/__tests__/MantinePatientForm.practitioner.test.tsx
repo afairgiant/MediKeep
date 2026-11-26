@@ -42,7 +42,7 @@ vi.mock('../practitioners/PractitionerSelectWithCreate', () => ({
   ),
 }));
 
-vi.mock('@mantine/dates', () => ({
+vi.mock('../../adapters/DateInput', () => ({
   DateInput: ({
     label,
     value,

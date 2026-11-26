@@ -3,18 +3,13 @@ from dataclasses import asdict, is_dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, asc, desc, func, select, text
 from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database.utils import get_database_type
 from app.core.logging.config import get_logger
-from app.core.logging.constants import (
-    LogFields,
-    format_log_message,
-    sanitize_log_input,
-)
+from app.core.logging.constants import LogFields, format_log_message
 
 # Define the type variables for the Generic class
 ModelType = TypeVar("ModelType")
@@ -368,30 +363,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         self.model_name = model.__name__.lower()
         self.logger = get_logger(f"crud.{self.model_name}", "app")
 
-    def _sanitize_for_logging(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize sensitive data before logging."""
-        sanitized = {}
-        sensitive_fields = {
-            "password",
-            "token",
-            "secret",
-            "key",
-            "ssn",
-            "social_security",
-        }
-
-        for key, value in data.items():
-            if any(sensitive in key.lower() for sensitive in sensitive_fields):
-                sanitized[key] = "[REDACTED]"
-            elif isinstance(value, str):
-                sanitized[key] = sanitize_log_input(
-                    str(value)[:100]
-                )  # Truncate long strings
-            else:
-                sanitized[key] = str(value)[:100] if value is not None else None
-
-        return sanitized
-
     def _log_operation(self, operation: str, **context):
         """Log CRUD operations with consistent format."""
         log_data = {
@@ -682,19 +653,17 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                     old_value = getattr(db_obj, field, None)
                     setattr(db_obj, field, value)
 
-                    # Only log and count fields that actually changed
                     if old_value != value:
                         updated_fields.append(field)
-                        self.logger.debug(
-                            f"Updated {self.model_name}.{field}: {old_value} → {value}"
-                        )
 
             db.add(db_obj)
             db.commit()
             db.refresh(db_obj)
 
+            # Field names only: values are patient data
             self.logger.info(
-                f"Successfully updated {self.model_name} record {record_id} ({len(updated_fields)} fields)"
+                f"Successfully updated {self.model_name} record {record_id} ({len(updated_fields)} fields)",
+                extra={"updated_fields": updated_fields},
             )
             return db_obj
 
@@ -761,21 +730,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 )
                 # This will be caught by endpoints and converted to NotFoundException
                 raise ValueError(f"{self.model_name} with id {id} not found")
-
-            # Log some key fields before deletion (for audit purposes)
-            obj_data = jsonable_encoder(obj)
-            sanitized_data = self._sanitize_for_logging(obj_data)
-
-            self.logger.info(
-                f"Deleting {self.model_name} record with data",
-                extra={
-                    LogFields.MODEL: self.model_name,
-                    LogFields.OPERATION: "delete",
-                    LogFields.RECORD_ID: record_id,
-                    LogFields.DATA: sanitized_data,
-                    LogFields.STATUS: "confirmed",
-                },
-            )
 
             db.delete(obj)
             if commit:

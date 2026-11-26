@@ -16,7 +16,7 @@ import { useTagColors } from '../../../hooks/useTagColors';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
-import { ClickableTagBadge } from '../../common/ClickableTagBadge';
+import CardTagBadges from '../../shared/CardTagBadges';
 import '../../../styles/shared/MedicalPageShared.css';
 
 const TYPE_FALLBACKS = {
@@ -128,24 +128,7 @@ const MedicationCard = ({
                 )}
             </Group>
             <Group gap="xs">
-              {medication.tags &&
-                medication.tags.length > 0 &&
-                medication.tags
-                  .slice(0, 2)
-                  .map(tag => (
-                    <ClickableTagBadge
-                      key={tag}
-                      tag={tag}
-                      color={getTagColor(tag)}
-                      size="sm"
-                      compact
-                    />
-                  ))}
-              {medication.tags && medication.tags.length > 2 && (
-                <Text size="xs" c="dimmed">
-                  +{medication.tags.length - 2}
-                </Text>
-              )}
+              <CardTagBadges tags={medication.tags} getTagColor={getTagColor} />
               <FileCountBadge
                 count={fileCount}
                 entityType="medication"

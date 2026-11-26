@@ -23,6 +23,9 @@
     "noFiles": "Keine Dateien"
   },
   "fileList": {
+    "deleteFile": "Datei löschen",
+    "downloadFile": "Datei herunterladen",
+    "unlinkDocument": "Verknüpfung des Dokuments aufheben",
     "deleteUnfinishedPaperlessWarning": "Dieser Upload wurde in Paperless noch nicht fertig verarbeitet. Wenn Paperless ihn später abschließt, kann das Dokument in Paperless verbleiben, auch wenn es hier gelöscht wurde.",
     "fileDetails": "DATEIDETAILS",
     "loading": "Dateien werden geladen...",
@@ -38,10 +41,11 @@
     "statusMissing": "Fehlend",
     "statusProcessing": "Wird verarbeitet",
     "viewUnavailable": {
-      "missing": "Dieses Dokument wurde im Speicherdienst nicht gefunden. Möglicherweise wurde es dort gelöscht. Sie können es aus dieser Liste entfernen.",
+      "missing": "Dieses Dokument wurde im Speicherdienst nicht gefunden. Möglicherweise wurde es dort gelöscht. Sie können es im Bearbeitungsformular des Eintrags entfernen.",
       "processing": "Dieses Dokument wird noch von Paperless verarbeitet und kann noch nicht geöffnet werden. Bitte versuchen Sie es gleich noch einmal.",
+      "storedElsewhere": "Dieses Dokument ist im {{service}} eines anderen Mitglieds gespeichert, das Ihre {{service}}-Verbindung nicht erreicht. Das Mitglied kann es über sein eigenes Konto öffnen.",
       "title": "Dokument nicht verfügbar",
-      "unavailable": "Dieses Dokument wurde nicht erfolgreich gespeichert und kann nicht geöffnet werden. Sie können es entfernen und erneut hochladen."
+      "unavailable": "Dieses Dokument wurde nicht erfolgreich gespeichert und kann nicht geöffnet werden. Sie können es im Bearbeitungsformular des Eintrags entfernen und erneut hochladen."
     }
   },
   "fileUpload": {
@@ -104,7 +108,9 @@
     "duplicateHint": "Wenn Sie eine neue Version hochladen möchten, ändern Sie bitte zuerst das Dokument.",
     "processingDocument": "Dokument wird von Paperless verarbeitet...",
     "syncFailed": "Synchronisation fehlgeschlagen",
-    "syncing": "Synchronisiere..."
+    "syncing": "Synchronisiere...",
+    "taskPermissionDenied": "Ihre Datei wurde an Paperless gesendet, aber dieses Paperless-Konto kann keine Upload-Aufgaben lesen. MediKeep sucht das Dokument stattdessen anhand des Dateinamens. Um das zu beheben, erteilen Sie dem Konto in Paperless die Berechtigung Anzeigen für PaperlessTask (Einstellungen > Benutzer & Gruppen).",
+    "taskPermissionDeniedTitle": "Paperless kann Uploads nicht bestätigen"
   },
   "renderMode": {
     "compactView": "Kompakte Ansicht",

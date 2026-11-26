@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Alert,
   Modal,
   Tabs,
   Box,
@@ -13,7 +12,6 @@ import {
   Select,
   Textarea,
   NumberInput,
-  Text,
 } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
 import { DateInput } from '../adapters/DateInput';
@@ -36,13 +34,15 @@ import {
   VisitLinkTabButtons,
   VisitLinkTabPanels,
 } from './visits/VisitLinkTabs';
-import { TagInput } from '../common/TagInput';
+import TagsField from '../shared/TagsField';
 import logger from '../../services/logger';
 import NotesField from '../shared/NotesField';
 import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import { useSubDialog } from '../../contexts/SubDialogContext';
 import VisitRemindersPanel from './visits/VisitRemindersPanel';
+import FormErrorPopup from '../shared/FormErrorPopup';
+import RecordForm from '../shared/RecordForm';
 
 const MantineVisitForm = ({
   formError,
@@ -254,29 +254,19 @@ const MantineVisitForm = ({
       case 'custom':
         if (translatedField.component === 'TagInput') {
           return (
-            <Box key={translatedField.name}>
-              <Text size="sm" fw={500} mb="xs">
-                {translatedField.label}
-                {translatedField.required && (
-                  <span style={{ color: 'red' }}> *</span>
-                )}
-              </Text>
-              {translatedField.description && (
-                <Text size="xs" c="dimmed" mb="xs">
-                  {translatedField.description}
-                </Text>
-              )}
-              <TagInput
-                value={formData[translatedField.name] || []}
-                onChange={tags => {
-                  onInputChange({
-                    target: { name: translatedField.name, value: tags },
-                  });
-                }}
-                placeholder={translatedField.placeholder}
-                maxTags={translatedField.maxTags}
-              />
-            </Box>
+            <TagsField
+              key={translatedField.name}
+              value={formData[translatedField.name] || []}
+              onChange={tags => {
+                onInputChange({
+                  target: { name: translatedField.name, value: tags },
+                });
+              }}
+              label={translatedField.label}
+              description={translatedField.description}
+              placeholder={translatedField.placeholder}
+              maxTags={translatedField.maxTags}
+            />
           );
         }
         return null;
@@ -329,7 +319,10 @@ const MantineVisitForm = ({
         message={t('common:visits.form.savingVisit', 'Saving visit...')}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -444,12 +437,6 @@ const MantineVisitForm = ({
           {/* Custom children content */}
           {children}
 
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
-
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button
@@ -466,7 +453,7 @@ const MantineVisitForm = ({
             </Button>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

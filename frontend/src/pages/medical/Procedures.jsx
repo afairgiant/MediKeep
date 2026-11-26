@@ -16,9 +16,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import {
-  ERROR_MESSAGES,
-} from '../../constants/errorMessages';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -84,6 +81,7 @@ const Procedures = () => {
     items: procedures,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -91,7 +89,8 @@ const Procedures = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'procedure',
     entityLabel: t('medical:entityNames.procedure'),
@@ -139,11 +138,6 @@ const Procedures = () => {
   } = useViewModalNavigation({
     items: procedures,
     loading,
-    onClose: procedure => {
-      if (procedure) {
-        refreshFileCount(procedure.id);
-      }
-    },
   });
 
   // Form state
@@ -170,6 +164,7 @@ const Procedures = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'procedure',
+    onFormError: setFormError,
     onSuccess: () => {
       // Reset form and close modal on complete success
       setShowModal(false);
@@ -195,6 +190,7 @@ const Procedures = () => {
 
   const handleAddProcedure = () => {
     resetSubmission();
+    setFormError(null);
     setEditingProcedure(null);
     setFormData({ ...INITIAL_FORM_DATA });
     setShowModal(true);
@@ -202,6 +198,7 @@ const Procedures = () => {
 
   const handleEditProcedure = procedure => {
     resetSubmission();
+    setFormError(null);
     setEditingProcedure(procedure);
     setFormData({
       procedure_name: procedure.procedure_name || '',
@@ -244,7 +241,7 @@ const Procedures = () => {
     // Basic validation
     const validationError = validateProcedureForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -261,6 +258,7 @@ const Procedures = () => {
     try {
       let success;
       let resultId;
+      let createdProcedure = null;
 
       // Submit form data
       if (editingProcedure) {
@@ -273,6 +271,7 @@ const Procedures = () => {
         resultId = result?.id;
         // Set flag to refresh after new procedure creation (but only after form submission, not uploads)
         if (success) {
+          createdProcedure = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -332,16 +331,13 @@ const Procedures = () => {
 
             // File upload failed
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdProcedure) setEditingProcedure(createdProcedure);
           }
         } else {
           // No files to upload, complete immediately
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(
-          new Error(ERROR_MESSAGES.FORM_SUBMISSION_FAILED),
-          'form'
-        );
       }
     } catch (error) {
       logger.error('procedures_submission_error', {
@@ -365,7 +361,7 @@ const Procedures = () => {
     clampPage(filteredProcedures.length);
   }, [filteredProcedures.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('procedures.loadingProcedures', 'Loading procedures...')}
@@ -547,8 +543,20 @@ const Procedures = () => {
       </Container>
 
       <ProcedureFormWrapper
+        formError={formError}
         isOpen={showModal}
-        onClose={() => !isBlocking && setShowModal(false)}
+        onClose={() => {
+          if (isBlocking) return;
+          // Files added in the Edit form are attached straight away, so refresh
+          // the card's count even when the form closes without saving
+          if (editingProcedure) refreshFileCount(editingProcedure.id);
+          setShowModal(false);
+          // A new record whose upload failed is saved but not listed yet
+          if (needsRefreshAfterSubmissionRef.current) {
+            needsRefreshAfterSubmissionRef.current = false;
+            refreshData();
+          }
+        }}
         title={
           editingProcedure
             ? t('procedures.editProcedure', 'Edit Procedure')
@@ -590,11 +598,6 @@ const Procedures = () => {
         navigate={navigate}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onFileUploadComplete={success => {
-          if (success && viewingProcedure) {
-            refreshFileCount(viewingProcedure.id);
-          }
-        }}
       />
     </>
   );

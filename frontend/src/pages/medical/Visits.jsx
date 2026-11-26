@@ -73,6 +73,7 @@ const Visits = () => {
     items: visits,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -80,7 +81,8 @@ const Visits = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'encounter',
     entityLabel: t('medical:entityNames.visit'),
@@ -112,6 +114,7 @@ const Visits = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'visit',
+    onFormError: setFormError,
     onSuccess: () => {
       // Reset form and close modal on complete success
       setShowModal(false);
@@ -151,11 +154,6 @@ const Visits = () => {
   } = useViewModalNavigation({
     items: visits,
     loading,
-    onClose: visit => {
-      if (visit) {
-        refreshFileCount(visit.id);
-      }
-    },
   });
 
   // Get patient conditions for linking
@@ -232,6 +230,7 @@ const Visits = () => {
 
   const handleAddVisit = () => {
     resetSubmission(); // Reset submission state
+    setFormError(null);
     setEditingVisit(null);
     setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
@@ -243,6 +242,7 @@ const Visits = () => {
 
   const handleEditVisit = visit => {
     resetSubmission(); // Reset submission state
+    setFormError(null);
     setEditingVisit(visit);
     setDocumentManagerMethods(null); // Reset document manager methods
     setFormData({
@@ -285,7 +285,7 @@ const Visits = () => {
 
     const validationError = validateVisitForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -305,6 +305,7 @@ const Visits = () => {
     try {
       let success;
       let resultId;
+      let createdVisit = null;
 
       // Submit form data
       if (editingVisit) {
@@ -317,6 +318,7 @@ const Visits = () => {
         resultId = result?.id;
         // Set flag to refresh after new visit creation (but only after form submission, not uploads)
         if (success) {
+          createdVisit = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -383,6 +385,8 @@ const Visits = () => {
 
             // File upload failed
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdVisit) setEditingVisit(createdVisit);
           }
         } else {
           // No files to upload, complete immediately
@@ -410,7 +414,7 @@ const Visits = () => {
     clampPage(filteredVisits.length);
   }, [filteredVisits.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('visits.loadingVisits', 'Loading visits...')}
@@ -581,8 +585,20 @@ const Visits = () => {
       </Container>
 
       <VisitFormWrapper
+        formError={formError}
         isOpen={showModal}
-        onClose={() => !isBlocking && setShowModal(false)}
+        onClose={() => {
+          if (isBlocking) return;
+          // Files added in the Edit form are attached straight away, so refresh
+          // the card's count even when the form closes without saving
+          if (editingVisit) refreshFileCount(editingVisit.id);
+          setShowModal(false);
+          // A new record whose upload failed is saved but not listed yet
+          if (needsRefreshAfterSubmissionRef.current) {
+            needsRefreshAfterSubmissionRef.current = false;
+            refreshData();
+          }
+        }}
         title={
           editingVisit
             ? t('visits.editVisit', 'Edit Visit')
@@ -622,11 +638,6 @@ const Visits = () => {
         isBlocking={isBlocking}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onFileUploadComplete={success => {
-          if (success && viewingVisit) {
-            refreshFileCount(viewingVisit.id);
-          }
-        }}
         patientId={currentPatient?.id}
       />
     </>

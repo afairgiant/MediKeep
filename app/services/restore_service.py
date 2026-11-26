@@ -23,6 +23,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.database.advisory_lock import UPLOADS_RESTORE_LOCK_KEY, try_advisory_lock
 from app.core.database.database import engine
 from app.core.database.postgres_tools import psql_binary
 from app.core.logging.config import get_logger
@@ -43,52 +44,34 @@ _DB_MEMBER = "database.sql"
 RESTORE_WORK_DIR_PREFIX = ".restore-"
 _STAGING_PREFIX = RESTORE_STAGING_PREFIX
 _PREVIOUS_PREFIX = f"{RESTORE_WORK_DIR_PREFIX}previous-"
-# Arbitrary app-wide key; any process restoring into this database must use the same one.
-_RESTORE_LOCK_KEY = 0x4D4B5253
 _DRIVE_PREFIX = re.compile(r"[A-Za-z]:")
 
 _T = TypeVar("_T")
 
 
+RESTORE_BUSY_MESSAGE = "Another restore or an imaging import is in progress"
+
+
 class RestoreInProgressError(Exception):
-    """Another restore holds the restore lock."""
+    """Another restore or an imaging import holds the uploads lock."""
 
 
 @contextmanager
 def _restore_lock() -> Iterator[None]:
-    """Hold a database-wide lock for one restore, across every process using this database.
+    """Hold the uploads lock exclusively for one restore, across every process.
 
-    Raises RestoreInProgressError at once if another restore holds it. A no-op on
-    databases without advisory locks.
+    Raises RestoreInProgressError at once if another restore or an imaging import
+    holds it.
     """
-    if engine.dialect.name != "postgresql":
-        yield
-        return
-    with engine.connect() as conn:
-        # Without autocommit the session sits idle in a transaction for the whole restore.
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        acquired = conn.execute(
-            text("SELECT pg_try_advisory_lock(:key)"), {"key": _RESTORE_LOCK_KEY}
-        ).scalar()
+    with try_advisory_lock(
+        engine,
+        UPLOADS_RESTORE_LOCK_KEY,
+        shared=False,
+        release_failed_event="restore_lock_release_failed",
+    ) as acquired:
         if not acquired:
-            raise RestoreInProgressError("Another restore is already in progress")
-        try:
-            yield
-        finally:
-            try:
-                conn.execute(
-                    text("SELECT pg_advisory_unlock(:key)"), {"key": _RESTORE_LOCK_KEY}
-                )
-            except Exception as e:
-                # Closing the connection releases a session-level lock.
-                logger.error(
-                    f"Could not release the restore lock: {e}",
-                    extra={
-                        LogFields.CATEGORY: "app",
-                        LogFields.EVENT: "restore_lock_release_failed",
-                    },
-                )
-                conn.invalidate()
+            raise RestoreInProgressError(RESTORE_BUSY_MESSAGE)
+        yield
 
 
 async def _run_to_completion(func: Callable[..., _T], *args: Any) -> _T:
@@ -437,7 +420,8 @@ class RestoreService:
             Dictionary containing restore results
 
         Raises:
-            RestoreInProgressError: another restore, in any process, is running.
+            RestoreInProgressError: another restore or an imaging import, in any
+                process, is running.
         """
         with _restore_lock():
             return await self._execute_restore_locked(backup_id, confirmation_token)

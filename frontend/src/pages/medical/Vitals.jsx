@@ -250,6 +250,8 @@ const Vitals = () => {
     deleteItem,
     refreshData,
     clearError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'vitals',
     entityLabel: t('medical:entityNames.vitals'),
@@ -332,8 +334,9 @@ const Vitals = () => {
   // Form handlers
   const handleAddNew = useCallback(() => {
     setEditingVitals(null);
+    setFormError(null);
     setShowForm(true);
-  }, []);
+  }, [setFormError]);
 
   const handleViewVital = useCallback(
     vital => {
@@ -364,12 +367,13 @@ const Vitals = () => {
   const handleEdit = useCallback(
     vitals => {
       setEditingVitals(vitals);
+      setFormError(null);
       setShowForm(true);
       if (showViewModal) {
         setShowViewModal(false);
       }
     },
-    [showViewModal]
+    [showViewModal, setFormError]
   );
 
   const handleFormSave = useCallback(
@@ -389,6 +393,7 @@ const Vitals = () => {
           await refreshData();
           await loadStats();
         }
+        return !!success;
       } catch (error) {
         logger.error('Error saving vitals:', error);
         throw error; // Let the form handle the error display
@@ -599,7 +604,7 @@ const Vitals = () => {
           patientId={currentPatient?.id}
           practitionerId={null}
           onSave={handleFormSave}
-          error={vitalsError}
+          formError={formError}
           clearError={clearError}
           isLoading={false}
           createItem={createItem}

@@ -55,8 +55,12 @@ const FileList = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByType, setFilterByType] = useState('');
 
-  const getViewUnavailableMessage = reason => {
+  const getViewUnavailableMessage = (reason, file) => {
     switch (reason) {
+      case 'stored_elsewhere':
+        return t('fileList.viewUnavailable.storedElsewhere', {
+          service: getStorageBackendInfo(file.storage_backend).label,
+        });
       case 'processing':
         return t('fileList.viewUnavailable.processing');
       case 'missing':
@@ -66,18 +70,30 @@ const FileList = ({
     }
   };
 
+  const showViewUnavailable = (file, unavailableReason) => {
+    notifications.show({
+      title: t('fileList.viewUnavailable.title'),
+      message: getViewUnavailableMessage(unavailableReason, file),
+      color: 'yellow',
+    });
+  };
+
   // The view URL opens in a new tab, so a backend error there would render as
   // raw JSON. Tell the user why the document can't be opened instead.
   const handleViewClick = (file, unavailableReason) => {
     if (unavailableReason) {
-      notifications.show({
-        title: t('fileList.viewUnavailable.title'),
-        message: getViewUnavailableMessage(unavailableReason),
-        color: 'yellow',
-      });
+      showViewUnavailable(file, unavailableReason);
       return;
     }
     onView(file.id, file.file_name);
+  };
+
+  const handleDownloadClick = file => {
+    if (file.stored_elsewhere) {
+      showViewUnavailable(file, 'stored_elsewhere');
+      return;
+    }
+    onDownload(file.id, file.file_name);
   };
 
   // Get file icon and color based on type
@@ -357,15 +373,27 @@ const FileList = ({
             // Check if file processing failed
             const isFailed = isRemoteBackend && file.sync_status === 'failed';
 
+            // Paperless is still consuming this upload (task known, no document
+            // yet). Deleting it cannot remove a document Paperless creates later.
+            const hasUnfinishedPaperlessUpload =
+              file.storage_backend === 'paperless' &&
+              !file.paperless_document_id &&
+              !!file.paperless_task_uuid;
+
             // Check if this is a linked document (not uploaded by us)
             const isLinkedDocument =
               file.file_path &&
               (file.file_path.startsWith('paperless://document/') ||
                 file.file_path.startsWith('papra://document/'));
 
+            // Deleting either only removes it from MediKeep; the remote copy stays
+            const isUnlinkOnly = isLinkedDocument || file.stored_elsewhere;
+
             // Remote documents the backend cannot serve (no remote ID yet, or gone)
             let viewUnavailableReason = null;
-            if (isProcessing) {
+            if (file.stored_elsewhere) {
+              viewUnavailableReason = 'stored_elsewhere';
+            } else if (isProcessing) {
               viewUnavailableReason = 'processing';
             } else if (isMissing) {
               viewUnavailableReason = 'missing';
@@ -500,6 +528,19 @@ const FileList = ({
                         )}
                       </Group>
 
+                      {isMarkedForDeletion && hasUnfinishedPaperlessUpload && (
+                        <Group gap={6} wrap="nowrap" align="flex-start">
+                          <IconAlertTriangle
+                            size={14}
+                            color="var(--mantine-color-orange-6)"
+                            style={{ flexShrink: 0, marginTop: 2 }}
+                          />
+                          <Text size="xs">
+                            {t('fileList.deleteUnfinishedPaperlessWarning')}
+                          </Text>
+                        </Group>
+                      )}
+
                       {/* Description */}
                       {showDescriptions && file.description && (
                         <>
@@ -533,8 +574,8 @@ const FileList = ({
                         <ActionIcon
                           variant="light"
                           color="blue"
-                          onClick={() => onDownload(file.id, file.file_name)}
-                          title="Download file"
+                          onClick={() => handleDownloadClick(file)}
+                          title={t('fileList.downloadFile')}
                         >
                           <IconDownload size={16} />
                         </ActionIcon>
@@ -554,13 +595,15 @@ const FileList = ({
                       {onDelete && !isMarkedForDeletion && (
                         <ActionIcon
                           variant="light"
-                          color={isLinkedDocument ? 'blue' : 'red'}
+                          color={isUnlinkOnly ? 'blue' : 'red'}
                           onClick={() => onDelete(file.id)}
                           title={
-                            isLinkedDocument ? 'Unlink document' : 'Delete file'
+                            isUnlinkOnly
+                              ? t('fileList.unlinkDocument')
+                              : t('fileList.deleteFile')
                           }
                         >
-                          {isLinkedDocument ? (
+                          {isUnlinkOnly ? (
                             <IconUnlink size={16} />
                           ) : (
                             <IconTrash size={16} />

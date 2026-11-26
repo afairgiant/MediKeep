@@ -34,7 +34,6 @@
     "measurementLocation": "Measurement Location",
     "missingPatientInfo": "Missing Patient Information",
     "notesPlaceholder": "Additional notes about the vital signs measurement...",
-    "openCalendar": "Open calendar",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Type or paste date/time, or click calendar to select",
     "patientHeight": "Patient Height: {{height}} inches (from profile)",

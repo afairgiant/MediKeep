@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Alert,
   Modal,
   Tabs,
   Box,
@@ -27,7 +26,7 @@ import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import InjuryTypeSelect from './InjuryTypeSelect';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import logger from '../../../services/logger';
@@ -36,6 +35,8 @@ import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import RecordLinkTabButtons from '../../shared/RecordLinkTabButtons';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const InjuryFormWrapper = ({
   formError,
@@ -169,7 +170,10 @@ const InjuryFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -411,6 +415,7 @@ const InjuryFormWrapper = ({
                       ]}
                       onChange={handleSelectChange('status')}
                       required
+                      allowDeselect={false}
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                       description={t(
                         'injuries.status.description',
@@ -447,6 +452,24 @@ const InjuryFormWrapper = ({
                         'The healthcare provider treating this injury'
                       )}
                       onPractitionerCreated={onPractitionerCreated}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t(
+                        'common:fields.tags.description',
+                        'Add tags to help organize and search'
+                      )}
+                      placeholder={t(
+                        'common:fields.tags.placeholder',
+                        'Add tags to organize...'
+                      )}
                     />
                   </Grid.Col>
                 </Grid>
@@ -576,36 +599,10 @@ const InjuryFormWrapper = ({
                       )}
                     />
                   </Grid.Col>
-                  <Grid.Col span={12}>
-                    <TagInput
-                      label={t('shared:labels.tags', 'Tags')}
-                      value={formData.tags || []}
-                      onChange={tags => {
-                        onInputChange({
-                          target: { name: 'tags', value: tags },
-                        });
-                      }}
-                      placeholder={t(
-                        'common:fields.tags.placeholder',
-                        'Add tags to organize...'
-                      )}
-                      description={t(
-                        'common:fields.tags.description',
-                        'Add tags to help organize and search'
-                      )}
-                      maxTags={15}
-                    />
-                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
           </Tabs>
-
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
 
           {/* Form Actions */}
           <Group justify="flex-end" mt="xl">
@@ -619,7 +616,7 @@ const InjuryFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

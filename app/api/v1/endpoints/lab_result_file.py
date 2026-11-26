@@ -3,7 +3,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import Collection, List, Optional
 
 from fastapi import (
     APIRouter,
@@ -40,6 +40,7 @@ from app.schemas.lab_result_file import (
     LabResultFileCreate,
     LabResultFileResponse,
 )
+from app.services.shared_stored_files import trash_unshared_file
 
 logger = get_logger(__name__)
 
@@ -156,13 +157,21 @@ def _get_file_or_404(db: Session, file_id: int) -> LabResultFile:
     return file_obj
 
 
-def _remove_physical_file(file_obj: LabResultFile) -> bool:
-    """Delete the record's file from disk; False when missing or outside storage."""
-    file_path = resolve_stored_file(file_obj)
-    if not file_path:
-        return False
-    file_path.unlink()
-    return True
+def _remove_physical_file(
+    db: Session, file_obj: LabResultFile, deleted_ids: Collection[int]
+) -> bool:
+    """Move the record's file to trash; True when it moved.
+
+    False when the file is missing, outside storage, or still used by a file row
+    other than the ``deleted_ids`` LabResultFile rows of the same delete. Raises
+    when the move fails.
+    """
+    return trash_unshared_file(
+        db,
+        file_obj,
+        {LabResultFile: deleted_ids},
+        reason=f"Lab result file {file_obj.id} deletion",
+    )
 
 
 def _accessible_files_query(db: Session, current_user: User):
@@ -420,27 +429,10 @@ def delete_lab_result_file(
         db, file_obj.lab_result_id, current_user, permission="edit"
     )
 
-    # Log the deletion activity BEFORE deleting using centralized logging
-    log_delete(
-        db=db,
-        entity_type=EntityType.LAB_RESULT_FILE,
-        entity_obj=file_obj,
-        user_id=current_user_id,
-    )
-
     try:
-        if _remove_physical_file(file_obj):
-            logger.info(
-                f"Physical file deleted for lab result file {file_id}",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "physical_file_deleted",
-                    LogFields.USER_ID: current_user_id,
-                    "file_id": file_id,
-                },
-            )
+        file_trashed = _remove_physical_file(db, file_obj, [file_obj.id])
     except Exception as e:
-        # Log error but continue with database deletion
+        # Keep the record, so its file is not left behind with nothing pointing to it
         logger.error(
             f"Error deleting physical file for lab result file {file_id}",
             extra={
@@ -451,6 +443,25 @@ def delete_lab_result_file(
                 "file_id": file_id,
             },
         )
+        raise HTTPException(status_code=500, detail="Failed to delete file") from e
+    if file_trashed:
+        logger.info(
+            f"Physical file moved to trash for lab result file {file_id}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "physical_file_deleted",
+                LogFields.USER_ID: current_user_id,
+                "file_id": file_id,
+            },
+        )
+
+    # Log the deletion activity BEFORE deleting the record using centralized logging
+    log_delete(
+        db=db,
+        entity_type=EntityType.LAB_RESULT_FILE,
+        entity_obj=file_obj,
+        user_id=current_user_id,
+    )
 
     # Delete from database
     lab_result_file.delete(db=db, id=file_id)
@@ -675,7 +686,7 @@ def batch_file_operation(
 
             if operation.operation == "delete":
                 try:
-                    _remove_physical_file(file_obj)
+                    _remove_physical_file(db, file_obj, [file_obj.id])
                 except Exception as e:
                     _record_file_failure(
                         errors,
@@ -683,6 +694,8 @@ def batch_file_operation(
                         e,
                         current_user,
                     )
+                    # Keep the record, so its file is not left behind
+                    continue
 
                 # Delete from database
                 lab_result_file.delete(db=db, id=file_id)
@@ -723,25 +736,31 @@ def delete_all_files_for_lab_result(
 
     # Get all files for this lab result
     files = lab_result_file.get_by_lab_result(db=db, lab_result_id=lab_result_id)
+    # Rows still to be removed; a row whose file fails to move keeps using it
+    deleting = {file_obj.id for file_obj in files}
 
-    # Delete physical files
+    deleted_count = 0
     deleted_files = 0
     errors = []
 
+    # One pass: each file moves at most once, and only rows whose file moved (or
+    # stays for another row) are deleted, so the counts match what happened
     for file_obj in files:
         try:
-            if _remove_physical_file(file_obj):
+            if _remove_physical_file(db, file_obj, deleting):
                 deleted_files += 1
         except Exception as e:
+            deleting.discard(file_obj.id)
             file_name = getattr(file_obj, "file_name", "unknown")
             _record_file_failure(
                 errors, f"Error deleting file {file_name}", e, current_user
             )
+            # Keep the record, so its file is not left behind
+            continue
+        db.delete(file_obj)
+        deleted_count += 1
 
-    # Delete from database
-    deleted_count = lab_result_file.delete_by_lab_result(
-        db=db, lab_result_id=lab_result_id
-    )
+    db.commit()
 
     return {
         "message": f"Deleted {deleted_count} file records and {deleted_files} physical files",

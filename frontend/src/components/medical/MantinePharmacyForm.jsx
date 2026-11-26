@@ -14,8 +14,11 @@ const MantinePharmacyForm = ({
   onInputChange,
   onSubmit,
   editingPharmacy = null,
+  formError = null,
 }) => {
   const { t } = useTranslation('errors');
+  // This form's own check failed: shown in the popup like a save error
+  const [checkError, setCheckError] = useState(null);
 
   // Custom handler for store number formatting
   const handleStoreNumberChange = event => {
@@ -103,8 +106,10 @@ const MantinePharmacyForm = ({
   const handleSubmit = e => {
     if (websiteError) {
       e.preventDefault();
+      setCheckError(websiteError);
       return;
     }
+    setCheckError(null);
     onSubmit(e);
   };
 
@@ -135,6 +140,7 @@ const MantinePharmacyForm = ({
       fields={pharmacyFormFields}
       modalSize="lg"
       fieldErrors={fieldErrors}
+      formError={checkError || formError}
     >
       {customContent}
     </BaseMedicalForm>

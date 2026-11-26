@@ -805,7 +805,8 @@ def delete_lab_result_file(
             )
 
         try:
-            lab_result_file.delete(db, id=file_id)
+            # Moves the stored file to trash too, unless another file row uses it
+            lab_result_file.remove(db, id=file_id)
             return {"message": "File deleted successfully"}
         except Exception as e:
             log_endpoint_error(

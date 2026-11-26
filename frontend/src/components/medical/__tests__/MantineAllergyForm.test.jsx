@@ -12,7 +12,7 @@ import MantineAllergyForm from '../MantineAllergyForm';
 // The DateInput mock generates data-testid from the label prop.
 // Since i18n mock returns the key as-is, label will be 'common:labels.onsetDate'.
 // data-testid = 'date-shared:fields.onsetdate'
-vi.mock('@mantine/dates', () => ({
+vi.mock('../../adapters/DateInput', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => (
     <div>
       <label htmlFor={`date-${label}`}>

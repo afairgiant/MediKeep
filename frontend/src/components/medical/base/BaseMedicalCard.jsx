@@ -14,7 +14,7 @@ import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import NotesView from '../../shared/NotesView';
 import { notesToPlainText } from '../../../utils/notesMarkdown';
-import { ClickableTagBadge } from '../../common/ClickableTagBadge';
+import CardTagBadges from '../../shared/CardTagBadges';
 import { useTagColors } from '../../../hooks/useTagColors';
 import logger from '../../../services/logger';
 import { createCardClickHandler } from '../../../utils/helpers';
@@ -130,23 +130,7 @@ const BaseMedicalCard = ({
                     {badge.label}
                   </Badge>
                 ))}
-                {tags.length > 0 &&
-                  tags
-                    .slice(0, 2)
-                    .map(tag => (
-                      <ClickableTagBadge
-                        key={tag}
-                        tag={tag}
-                        color={getTagColor(tag)}
-                        size="sm"
-                        compact
-                      />
-                    ))}
-                {tags.length > 2 && (
-                  <Text size="xs" c="dimmed">
-                    +{tags.length - 2}
-                  </Text>
-                )}
+                <CardTagBadges tags={tags} getTagColor={getTagColor} />
                 {entityType && (
                   <FileCountBadge
                     count={fileCount}

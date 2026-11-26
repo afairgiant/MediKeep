@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { vi } from 'vitest';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { notifications } from '@mantine/notifications';
 import { renderWithPatient } from '../../../test-utils/render';
 import MedicalEquipment from '../MedicalEquipment';
 import { useMedicalData } from '../../../hooks/useMedicalData';
@@ -78,6 +80,8 @@ vi.mock(
       onSubmit,
       onInputChange,
       onDocumentManagerRef,
+      editingEquipment,
+      formError,
     }) => {
       useEffect(() => {
         if (isOpen) onDocumentManagerRef(documentManager.current);
@@ -89,6 +93,8 @@ vi.mock(
       };
       return (
         <form aria-label="equipment form" onSubmit={onSubmit}>
+          {editingEquipment && <p>Editing {editingEquipment.id}</p>}
+          {formError && <p role="alert">{formError}</p>}
           <button type="button" onClick={fill}>
             Fill
           </button>
@@ -136,6 +142,8 @@ const mockMedicalData = overrides => {
     deleteItem: vi.fn(),
     refreshData: vi.fn(),
     clearError: vi.fn(),
+    formError: null,
+    setFormError: vi.fn(),
     setError: vi.fn(),
     ...overrides,
   };
@@ -169,6 +177,9 @@ describe('MedicalEquipment documents', () => {
     };
     const data = mockMedicalData({
       createItem: vi.fn().mockResolvedValue({ id: 42 }),
+      // loading also covers a save; only listLoading may replace the form
+      loading: true,
+      listLoading: false,
     });
 
     renderWithPatient(<MedicalEquipment />);
@@ -235,6 +246,74 @@ describe('MedicalEquipment documents', () => {
     expect(data.refreshData).toHaveBeenCalledTimes(1);
   });
 
+  it('saves again to the same equipment after its upload fails', async () => {
+    documentManager.current = {
+      hasPendingFiles: () => true,
+      getPendingFilesCount: () => 1,
+      uploadPendingFiles: vi
+        .fn()
+        .mockRejectedValueOnce(new Error('offline'))
+        .mockResolvedValueOnce(true),
+    };
+    const data = mockMedicalData({
+      createItem: vi
+        .fn()
+        .mockResolvedValue({ id: 42, equipment_name: 'CPAP', tags: [] }),
+      updateItem: vi.fn().mockResolvedValue({ id: 42 }),
+    });
+
+    renderWithPatient(<MedicalEquipment />);
+    fireEvent.click(screen.getByRole('button', { name: /add equipment/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Fill' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    // The form moves on to the saved equipment, keeping the queued files
+    expect(await screen.findByText('Editing 42')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('form', { name: 'equipment form' })
+      ).not.toBeInTheDocument()
+    );
+    expect(data.createItem).toHaveBeenCalledTimes(1);
+    expect(data.updateItem).toHaveBeenCalledWith(
+      42,
+      expect.objectContaining({ equipment_name: 'CPAP' })
+    );
+    expect(documentManager.current.uploadPendingFiles.mock.calls).toEqual([
+      [42],
+      [42],
+    ]);
+    expect(data.refreshData).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshes the card file count when the edit form closes without saving', async () => {
+    mockMedicalData();
+    renderWithPatient(<MedicalEquipment />);
+    await waitFor(() =>
+      expect(apiService.getEntityFiles).toHaveBeenCalledWith(
+        'medical-equipment',
+        1
+      )
+    );
+
+    // A file uploaded in the Edit form is attached straight away
+    apiService.getEntityFiles.mockImplementation((entityType, id) =>
+      Promise.resolve(id === 1 ? [{ id: 7 }] : [])
+    );
+    const card = screen
+      .getByText('ResMed AirSense 11')
+      .closest('.mantine-Card-root');
+    fireEvent.click(
+      within(card).getByRole('button', { name: 'shared:labels.edit' })
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(await within(card).findByText('1 attached')).toBeInTheDocument();
+  });
+
   it('shows the number of attached files on each card', async () => {
     mockMedicalData();
     apiService.getEntityFiles.mockImplementation((entityType, id) =>
@@ -252,5 +331,86 @@ describe('MedicalEquipment documents', () => {
       'medical-equipment',
       2
     );
+  });
+
+  describe('save errors (#1317)', () => {
+    const SAVE_ERROR =
+      'Equipment Name: Must be at least 2 characters (Error: VAL-422)';
+
+    // Like the real hook, keeps formError in state so the form re-renders with it
+    const mockMedicalDataWithFormError = overrides => {
+      const setter = { current: null };
+      const data = mockMedicalData(overrides);
+      useMedicalData.mockImplementation(() => {
+        const [formError, setFormError] = useState(null);
+        setter.current = setFormError;
+        return { ...data, formError, setFormError };
+      });
+      return { data, setFormError: message => setter.current(message) };
+    };
+
+    const openAddForm = () => {
+      fireEvent.click(screen.getByRole('button', { name: /add equipment/i }));
+      return screen.getByRole('form', { name: 'equipment form' });
+    };
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('shows why the save failed inside the form, with no generic toast', async () => {
+      const showToast = vi.spyOn(notifications, 'show');
+      const createItem = vi.fn();
+      const { setFormError } = mockMedicalDataWithFormError({ createItem });
+      // What useMedicalData does when the backend rejects the create
+      createItem.mockImplementation(async () => {
+        setFormError(SAVE_ERROR);
+        return false;
+      });
+
+      renderWithPatient(<MedicalEquipment />);
+      const form = openAddForm();
+      fireEvent.click(screen.getByRole('button', { name: 'Fill' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      expect(await within(form).findByText(SAVE_ERROR)).toBeInTheDocument();
+      // Only in the form: the page alert behind the dialog does not repeat it
+      expect(screen.getAllByText(SAVE_ERROR)).toHaveLength(1);
+      expect(showToast).not.toHaveBeenCalled();
+
+      // The form stays open with what was typed, so Save can be tried again
+      fireEvent.click(within(form).getByRole('button', { name: 'Save' }));
+      await waitFor(() => expect(createItem).toHaveBeenCalledTimes(2));
+      expect(createItem).toHaveBeenLastCalledWith(
+        expect.objectContaining({ equipment_name: 'CPAP' })
+      );
+    });
+
+    it('shows the page form check inside the form', async () => {
+      const { data } = mockMedicalDataWithFormError({ createItem: vi.fn() });
+
+      renderWithPatient(<MedicalEquipment />);
+      const form = openAddForm();
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      expect(
+        await within(form).findByText('Equipment Name is required.')
+      ).toBeInTheDocument();
+      expect(data.setError).not.toHaveBeenCalled();
+      expect(data.createItem).not.toHaveBeenCalled();
+    });
+
+    it('clears the error when the form is opened again', async () => {
+      mockMedicalDataWithFormError({ createItem: vi.fn() });
+
+      renderWithPatient(<MedicalEquipment />);
+      let form = openAddForm();
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await within(form).findByText('Equipment Name is required.');
+
+      fireEvent.click(within(form).getByRole('button', { name: 'Cancel' }));
+      form = openAddForm();
+      expect(within(form).queryByRole('alert')).not.toBeInTheDocument();
+    });
   });
 });

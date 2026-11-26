@@ -50,6 +50,7 @@ import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import { getUserFriendlyError } from '../../constants/errorMessages';
 
 // Removed style constants - now handled in extracted components
 
@@ -103,6 +104,8 @@ const FamilyHistory = () => {
     deleteItem,
     refreshData,
     setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'family_member',
     entityLabel: t('medical:entityNames.familyMember'),
@@ -313,6 +316,7 @@ const FamilyHistory = () => {
     });
     setEditingMember(null);
     setShowModal(false);
+    setFormError(null);
   };
 
   const resetConditionForm = () => {
@@ -329,6 +333,7 @@ const FamilyHistory = () => {
     // Don't reset selectedFamilyMember here since we need it for form submission
     // setSelectedFamilyMember(null);
     setShowConditionModal(false);
+    setFormError(null);
   };
 
   const handleAddMember = () => {
@@ -347,6 +352,7 @@ const FamilyHistory = () => {
       is_deceased: member.is_deceased || false,
       notes: member.notes || '',
     });
+    setFormError(null);
     setShowModal(true);
   };
 
@@ -378,7 +384,7 @@ const FamilyHistory = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError(
+      setFormError(
         t('errors:patientNotAvailable', 'Patient information not available')
       );
       return;
@@ -466,6 +472,7 @@ const FamilyHistory = () => {
       icd10_code: condition.icd10_code || condition.icd10Code || '',
       notes: condition.notes || '',
     });
+    setFormError(null);
     setShowConditionModal(true);
   };
 
@@ -552,7 +559,7 @@ const FamilyHistory = () => {
           component: 'FamilyHistory',
         }
       );
-      setError(
+      setFormError(
         t(
           'familyHistory.errors.familyMemberNotAvailable',
           'Family member information not available'
@@ -571,6 +578,8 @@ const FamilyHistory = () => {
       notes: conditionFormData.notes || null,
     };
 
+    // A new save: an error from the last one would otherwise pop up again
+    setFormError(null);
     try {
       // Find the family member to get its patient_id
       const familyMember = familyMembers.find(
@@ -630,10 +639,14 @@ const FamilyHistory = () => {
         error: error.message,
         patientId: currentPatient?.id,
       });
-      setError(
-        t(
-          'familyHistory.errors.failedToSaveCondition',
-          'Failed to save condition'
+      setFormError(
+        getUserFriendlyError(
+          error.message ||
+            t(
+              'familyHistory.errors.failedToSaveCondition',
+              'Failed to save condition'
+            ),
+          'save'
         )
       );
     }
@@ -703,6 +716,7 @@ const FamilyHistory = () => {
         icd10_code: condition.icd10_code || condition.icd10Code || '',
         notes: condition.notes || '',
       });
+      setFormError(null);
       // Temporarily close view modal to prevent overlap
       const params = new URLSearchParams(location.search);
       params.delete('view');
@@ -1607,6 +1621,7 @@ const FamilyHistory = () => {
           onMemberInputChange={handleInputChange}
           onMemberSubmit={handleSubmit}
           memberFormLoading={loading}
+          formError={formError}
           // Family Condition Form Props
           conditionFormOpen={showConditionModal}
           onConditionFormClose={

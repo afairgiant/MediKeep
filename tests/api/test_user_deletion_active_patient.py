@@ -6,6 +6,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, ActivityLog, EntityType
 from app.models.models import Patient, User
 from app.services.user_deletion_service import UserDeletionService
@@ -188,7 +189,6 @@ def test_failed_audit_flush_keeps_callers_transaction(
     db_session, test_user, monkeypatch
 ):
     from app.api.activity_logging import safe_log_activity
-    from app.crud.activity_log import activity_log
 
     test_user.full_name = "Changed before failed audit"
     db_session.flush()
@@ -351,6 +351,121 @@ def test_admin_patient_delete_clears_active_patient_references(
     db_session.expire_all()
     assert db_session.get(User, test_user.id).active_patient_id is None
     assert db_session.get(Patient, patient_id) is None
+
+
+def _patient_log(db_session: Session, user_id: int, patient_id: int) -> int:
+    log = ActivityLog(
+        user_id=user_id,
+        patient_id=patient_id,
+        action=ActionType.CREATED,
+        entity_type=EntityType.MEDICATION,
+        entity_id=None,
+        description="medication added",
+    )
+    db_session.add(log)
+    db_session.commit()
+    return log.id
+
+
+def test_admin_patient_delete_keeps_activity_history(
+    admin_client, db_session, test_user, test_patient
+):
+    patient_id = test_patient.id
+    log_id = _patient_log(db_session, test_user.id, patient_id)
+
+    response = admin_client.delete(f"/api/v1/admin/models/patient/{patient_id}")
+    assert response.status_code == 200, response.text
+    db_session.expire_all()
+    assert db_session.get(Patient, patient_id) is None
+    kept = db_session.get(ActivityLog, log_id)
+    assert kept is not None
+    assert kept.patient_id is None
+
+
+def test_admin_bulk_patient_delete_keeps_activity_history(
+    admin_client, db_session, test_user, test_admin_user, test_patient
+):
+    second = _other_patient(db_session, test_user, "Second")
+    bystander = _other_patient(db_session, test_admin_user, "Bystander")
+    deleted_ids = [test_patient.id, second.id]
+    deleted_logs = [_patient_log(db_session, test_user.id, pid) for pid in deleted_ids]
+    bystander_log = _patient_log(db_session, test_admin_user.id, bystander.id)
+    bystander_id = bystander.id
+
+    response = admin_client.post(
+        "/api/v1/admin/bulk/delete",
+        json={"model_name": "patient", "record_ids": deleted_ids},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["failed_records"] == []
+    assert body["affected_records"] == 2
+
+    db_session.expire_all()
+    for patient_id, log_id in zip(deleted_ids, deleted_logs):
+        assert db_session.get(Patient, patient_id) is None
+        assert db_session.get(ActivityLog, log_id).patient_id is None
+    assert db_session.get(ActivityLog, bystander_log).patient_id == bystander_id
+
+    audited = {
+        row.entity_id
+        for row in db_session.query(ActivityLog).filter(
+            ActivityLog.action == ActionType.DELETED,
+            ActivityLog.entity_type == "patient",
+            ActivityLog.user_id == test_admin_user.id,
+        )
+    }
+    assert audited == set(deleted_ids)
+
+
+def test_admin_bulk_delete_failure_does_not_block_later_records(
+    admin_client, db_session, test_user, test_patient, monkeypatch
+):
+    second = _other_patient(db_session, test_user, "Second")
+    first_id, second_id = test_patient.id, second.id
+    real_detach = activity_log.detach_patient_activity
+
+    def detach_failing_first(db, *, patient_ids):
+        if patient_ids == [first_id]:
+            # A failed flush leaves the session unusable until it is rolled back
+            db.add(ActivityLog(action=None, entity_type="patient", description="x"))
+            db.flush()
+        return real_detach(db, patient_ids=patient_ids)
+
+    monkeypatch.setattr(activity_log, "detach_patient_activity", detach_failing_first)
+
+    response = admin_client.post(
+        "/api/v1/admin/bulk/delete",
+        json={"model_name": "patient", "record_ids": [first_id, second_id]},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["failed_records"] == [first_id]
+
+    db_session.expire_all()
+    assert db_session.get(Patient, first_id) is not None
+    assert db_session.get(Patient, second_id) is None
+
+
+def test_delete_my_patient_record_keeps_activity_history(
+    authenticated_client, db_session, test_user, test_patient
+):
+    patient_id = test_patient.id
+    log_id = _patient_log(db_session, test_user.id, patient_id)
+
+    response = authenticated_client.delete("/api/v1/patients/me")
+    assert response.status_code == 200, response.text
+    db_session.expire_all()
+    assert db_session.get(Patient, patient_id) is None
+    assert db_session.get(ActivityLog, log_id).patient_id is None
+
+
+def test_detach_patient_activity_with_no_ids_changes_nothing(
+    db_session, test_user, test_patient
+):
+    log_id = _patient_log(db_session, test_user.id, test_patient.id)
+    assert activity_log.detach_patient_activity(db_session, patient_ids=[]) == 0
+    db_session.expire_all()
+    assert db_session.get(ActivityLog, log_id).patient_id == test_patient.id
 
 
 def test_noncommitting_crud_delete_does_not_rollback_caller(db_session, test_user):

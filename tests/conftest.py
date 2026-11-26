@@ -393,6 +393,15 @@ def setup_test_environment():
 
 
 # File handling fixtures
+@pytest.fixture
+def isolated_uploads(tmp_path, monkeypatch):
+    """A per-test uploads directory with its trash inside, for tests that inspect it."""
+    uploads = tmp_path / "uploads"
+    monkeypatch.setattr(settings, "UPLOAD_DIR", uploads)
+    monkeypatch.setattr(settings, "TRASH_DIR", uploads / "trash")
+    return uploads
+
+
 @pytest.fixture(scope="session", autouse=True)
 def temp_upload_dir():
     """Redirect all file uploads to a temporary directory during testing.

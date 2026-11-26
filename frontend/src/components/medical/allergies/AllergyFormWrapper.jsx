@@ -10,7 +10,6 @@ import {
   TextInput,
   Textarea,
   Select,
-  Text,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -30,10 +29,12 @@ import {
   formatDateInputChange,
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import logger from '../../../services/logger';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const AllergyFormWrapper = ({
   isOpen,
@@ -50,6 +51,7 @@ const AllergyFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
+  formError = null,
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -152,7 +154,10 @@ const AllergyFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -331,23 +336,16 @@ const AllergyFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t('common:fields.tags.description')}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('common:fields.tags.placeholder')}
-                      />
-                    </Box>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t('common:fields.tags.description')}
+                      placeholder={t('common:fields.tags.placeholder')}
+                    />
                   </Grid.Col>
                 </Grid>
               </Box>
@@ -463,7 +461,7 @@ const AllergyFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

@@ -22,6 +22,7 @@ from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.models.models import EntityFile, LabResultFile
 from app.schemas.lab_result import LabResultCreate
 from app.services import report_translations
+from tests.utils.user import create_random_user
 
 EXPORT_URL = "/api/v1/export/data"
 MANIFEST = "FILES_NOT_INCLUDED.txt"
@@ -489,6 +490,99 @@ class TestPapraFiles:
         zip_file = _export_zip(client, authenticated_headers)
 
         assert "could not be downloaded from Papra" in _manifest(zip_file)
+
+
+class TestOtherMembersFiles:
+    """A file another member uploaded to an instance the exporter cannot reach."""
+
+    @pytest.fixture
+    def other_member(self, db_session):
+        member = create_random_user(db_session)["user"]
+        _set_prefs(
+            db_session,
+            member,
+            paperless_enabled=True,
+            paperless_url="https://their-paperless.test",
+            papra_enabled=True,
+            papra_url=PAPRA_URL,
+            papra_organization_id="org-theirs",
+        )
+        return member
+
+    def test_paperless_file_in_another_instance_is_listed_not_downloaded(
+        self,
+        client,
+        db_session,
+        user_with_patient,
+        authenticated_headers,
+        lab_result,
+        remote,
+        other_member,
+    ):
+        _paperless_prefs(db_session, user_with_patient)
+        _add_paperless_file(
+            db_session,
+            lab_result,
+            document_id="11",
+            uploaded_by_user_id=other_member.id,
+        )
+        remote.documents["11"] = b"exporters-own-document"
+
+        zip_file = _export_zip(client, authenticated_headers)
+
+        assert _path(lab_result, "scan.pdf") not in zip_file.namelist()
+        assert (
+            f"{_entry(lab_result, 'scan.pdf')}: stored in another member's Paperless-ngx"
+            in _manifest(zip_file)
+        )
+        assert remote.calls == []
+
+    def test_papra_file_in_another_organisation_is_listed(
+        self,
+        client,
+        db_session,
+        user_with_patient,
+        authenticated_headers,
+        lab_result,
+        remote,
+        other_member,
+    ):
+        _papra_prefs(db_session, user_with_patient)
+        _add_papra_file(
+            db_session,
+            lab_result,
+            org_id="org-theirs",
+            uploaded_by_user_id=other_member.id,
+        )
+
+        zip_file = _export_zip(client, authenticated_headers)
+
+        assert "stored in another member's Papra" in _manifest(zip_file)
+        assert remote.calls == []
+
+    def test_file_from_the_same_instance_is_included(
+        self,
+        client,
+        db_session,
+        user_with_patient,
+        authenticated_headers,
+        lab_result,
+        remote,
+        other_member,
+    ):
+        _paperless_prefs(db_session, user_with_patient)
+        _set_prefs(db_session, other_member, paperless_url=PAPERLESS_URL + "/")
+        _add_paperless_file(
+            db_session,
+            lab_result,
+            document_id="11",
+            uploaded_by_user_id=other_member.id,
+        )
+        remote.documents["11"] = b"paperless-bytes"
+
+        zip_file = _export_zip(client, authenticated_headers)
+
+        assert zip_file.read(_path(lab_result, "scan.pdf")) == b"paperless-bytes"
 
 
 class TestLocalFiles:

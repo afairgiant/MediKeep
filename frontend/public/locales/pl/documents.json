@@ -23,6 +23,9 @@
     "noFiles": "Brak plików"
   },
   "fileList": {
+    "deleteFile": "Usuń plik",
+    "downloadFile": "Pobierz plik",
+    "unlinkDocument": "Odłącz dokument",
     "deleteUnfinishedPaperlessWarning": "To przesyłanie nie zostało jeszcze przetworzone w Paperless. Jeśli Paperless zakończy je później, dokument może pozostać w Paperless po usunięciu go tutaj.",
     "fileDetails": "SZCZEGÓŁY PLIKU",
     "loading": "Ładowanie plików...",
@@ -38,10 +41,11 @@
     "statusMissing": "Brak",
     "statusProcessing": "Przetwarzanie",
     "viewUnavailable": {
-      "missing": "Nie znaleziono tego dokumentu w usłudze przechowywania. Mógł zostać tam usunięty. Możesz usunąć go z tej listy.",
+      "missing": "Nie znaleziono tego dokumentu w usłudze przechowywania. Mógł zostać tam usunięty. Możesz go usunąć w formularzu edycji rekordu.",
       "processing": "Ten dokument jest nadal przetwarzany przez Paperless i nie można go jeszcze otworzyć. Spróbuj ponownie za chwilę.",
+      "storedElsewhere": "Ten dokument jest przechowywany w {{service}} innego członka, do którego Twoje połączenie {{service}} nie ma dostępu. Ten członek może go otworzyć ze swojego konta.",
       "title": "Dokument niedostępny",
-      "unavailable": "Ten dokument nie został poprawnie zapisany i nie można go otworzyć. Możesz go usunąć i przesłać ponownie."
+      "unavailable": "Ten dokument nie został poprawnie zapisany i nie można go otworzyć. Możesz go usunąć w formularzu edycji rekordu i przesłać ponownie."
     }
   },
   "fileUpload": {
@@ -104,7 +108,9 @@
     "duplicateHint": "Jeśli potrzebujesz przesłać nową wersję, najpierw zmodyfikuj dokument.",
     "processingDocument": "Dokument jest przetwarzany przez Paperless...",
     "syncFailed": "Synchronizacja nie powiodła się",
-    "syncing": "Synchronizacja..."
+    "syncing": "Synchronizacja...",
+    "taskPermissionDenied": "Plik został wysłany do Paperless, ale to konto Paperless nie może odczytywać zadań przesyłania. MediKeep wyszuka dokument według nazwy pliku. Aby to naprawić, nadaj kontu w Paperless uprawnienie Wyświetlanie dla PaperlessTask (Ustawienia > Użytkownicy i grupy).",
+    "taskPermissionDeniedTitle": "Paperless nie może potwierdzić przesłanych plików"
   },
   "renderMode": {
     "compactView": "Widok kompaktowy",

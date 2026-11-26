@@ -17,9 +17,7 @@ import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePersistedToggle } from '../../hooks/usePersistedToggle';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import {
-  ERROR_MESSAGES,
-} from '../../constants/errorMessages';
+import { patientNotSelectedMessage } from '../../utils/formCheckMessages';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
@@ -117,7 +115,7 @@ const LabResults = () => {
   const {
     items: labResults,
     currentPatient,
-    loading: labResultsLoading,
+    listLoading: labResultsListLoading,
     error,
     successMessage,
     createItem,
@@ -125,7 +123,8 @@ const LabResults = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'lab-result',
     entityLabel: t('medical:entityNames.labResult'),
@@ -167,6 +166,7 @@ const LabResults = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'lab-result',
+    onFormError: setFormError,
     onSuccess: () => {
       const newResult = newlyCreatedResultRef.current;
       newlyCreatedResultRef.current = null;
@@ -409,7 +409,7 @@ const LabResults = () => {
   // Combined loading state — include component fetch when in results-table view to avoid content flash.
   // For the components table specifically, only block on initial load (empty array); subsequent refreshes must not
   // unmount the table or the expanded-row state (local useState) is destroyed.
-  const loading = labResultsLoading || practitionersLoading || (viewMode === 'components' && tableLayout && patientComponentsLoading && patientComponents.length === 0);
+  const loading = labResultsListLoading || practitionersLoading || (viewMode === 'components' && tableLayout && patientComponentsLoading && patientComponents.length === 0);
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -440,10 +440,7 @@ const LabResults = () => {
   } = useViewModalNavigation({
     items: labResults,
     loading,
-    onClose: labResult => {
-      if (labResult) {
-        refreshFileCount(labResult.id);
-      }
+    onClose: () => {
       setInitialViewTab('overview');
     },
   });
@@ -468,26 +465,28 @@ const LabResults = () => {
 
       if (labResult) {
         resetSubmission();
+        setFormError(null);
         setEditingLabResult(labResult);
         setFormData(labResultToFormData(labResult));
         setPostCreateMode(true);
         setShowModal(true);
       }
     },
-    [refreshData, refreshPatientComponents, resetSubmission]
+    [refreshData, refreshPatientComponents, resetSubmission, setFormError]
   );
 
   // Opens the full tabbed form directly (relationships, notes, files) instead of
   // the quick panel-creation dialog. Shared by the "Add" button and the in-form toggle.
   const openAdvancedForm = useCallback(() => {
     resetSubmission();
+    setFormError(null);
     setEditingLabResult(null);
     setDocumentManagerMethods(null);
     setPendingRelationshipsMethods(null);
     setPendingComponentsMethods(null);
     setFormData(EMPTY_FORM_DATA);
     setShowModal(true);
-  }, [resetSubmission]);
+  }, [resetSubmission, setFormError]);
 
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
   const handleAddLabResult = useCallback(() => {
@@ -501,11 +500,12 @@ const LabResults = () => {
   const handleEditLabResult = useCallback(
     async labResult => {
       resetSubmission(); // Reset submission state to prevent modal flash
+      setFormError(null);
       setEditingLabResult(labResult);
       setFormData(labResultToFormData(labResult));
       setShowModal(true);
     },
-    [resetSubmission]
+    [resetSubmission, setFormError]
   );
 
   const handleLabResultUpdated = useCallback(async () => {
@@ -694,12 +694,12 @@ const LabResults = () => {
 
       // Basic validation first
       if (!formData.test_name.trim()) {
-        setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
+        setFormError(t('labresults:testNameRequired', 'Test name is required'));
         return;
       }
 
       if (!currentPatient?.id) {
-        setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+        setFormError(patientNotSelectedMessage());
         return;
       }
 
@@ -913,6 +913,15 @@ const LabResults = () => {
                 0,
                 documentManagerMethods.getPendingFilesCount()
               );
+              // Saved now, so Save again updates it instead of adding a copy.
+              // onSuccess makes the same switch after a full save.
+              const createdLabResult = newlyCreatedResultRef.current;
+              if (createdLabResult) {
+                newlyCreatedResultRef.current = null;
+                setEditingLabResult(createdLabResult);
+                setFormData(labResultToFormData(createdLabResult));
+                setPostCreateMode(true);
+              }
             }
           } else {
             // No files to upload, complete immediately
@@ -934,7 +943,7 @@ const LabResults = () => {
       pendingRelationshipsMethods,
       pendingComponentsMethods,
       startSubmission,
-      setError,
+      setFormError,
       completeFormSubmission,
       startFileUpload,
       completeFileUpload,
@@ -999,6 +1008,9 @@ const LabResults = () => {
       return;
     }
 
+    // Files added in the Edit form are attached straight away, so refresh
+    // the card's count even when the form closes without saving
+    if (editingLabResult) refreshFileCount(editingLabResult.id);
     resetSubmission(); // Reset submission state
     setShowModal(false);
     setEditingLabResult(null);
@@ -1009,7 +1021,19 @@ const LabResults = () => {
     // Sync the components table — tests may have been added via TestComponentsTab
     refreshPatientComponents();
     setFormData(EMPTY_FORM_DATA);
-  }, [isBlocking, resetSubmission, refreshPatientComponents]);
+    // A new record whose upload failed is saved but not listed yet
+    if (needsRefreshAfterSubmissionRef.current) {
+      needsRefreshAfterSubmissionRef.current = false;
+      refreshData();
+    }
+  }, [
+    isBlocking,
+    editingLabResult,
+    refreshFileCount,
+    resetSubmission,
+    refreshPatientComponents,
+    refreshData,
+  ]);
 
   // Shared by handleAdvancedModeToggle and handleSwitchToQuickImport: whether the
   // advanced create form has anything a user would lose by abandoning it.
@@ -1360,6 +1384,7 @@ const LabResults = () => {
       {/* Create/Edit Form Modal */}
       {showModal && (
         <LabResultFormWrapper
+          formError={formError}
           isOpen={showModal}
           onClose={() => !isBlocking && handleCloseModal()}
           title={
@@ -1423,11 +1448,6 @@ const LabResults = () => {
         isBlocking={isBlocking}
         initialTab={initialViewTab}
         isGroupedResult={!!(viewingLabResult && (viewingLabResult.is_panel || parentIdsWithComponents.has(viewingLabResult.id)))}
-        onFileUploadComplete={success => {
-          if (success && viewingLabResult) {
-            refreshFileCount(viewingLabResult.id);
-          }
-        }}
         onLabResultUpdated={handleLabResultUpdated}
         labResultMedications={labResultMedications}
         fetchLabResultMedications={fetchLabResultMedications}

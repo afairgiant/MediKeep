@@ -22,6 +22,7 @@ const PractitionerFormWrapper = ({
   isLoading,
   statusMessage: _statusMessage,
   zIndex,
+  formError = null,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
@@ -102,10 +103,14 @@ const PractitionerFormWrapper = ({
   // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
 
+  // This form's own check failed: shown in the popup like a save error
+  const [checkError, setCheckError] = useState(null);
+
   // Clear field errors when modal is closed
   useEffect(() => {
     if (!isOpen) {
       setFieldErrors({});
+      setCheckError(null);
     }
   }, [isOpen]);
 
@@ -203,8 +208,10 @@ const PractitionerFormWrapper = ({
   const handleSubmit = e => {
     if (websiteError) {
       e.preventDefault();
+      setCheckError(websiteError);
       return;
     }
+    setCheckError(null);
     onSubmit(e);
   };
 
@@ -261,6 +268,7 @@ const PractitionerFormWrapper = ({
         fieldExtras={{ practice_id: practiceFieldExtra }}
         isLoading={isLoading || isLoadingPractices}
         zIndex={zIndex}
+        formError={checkError || formError}
       >
         {customContent}
       </BaseMedicalForm>
@@ -289,6 +297,7 @@ PractitionerFormWrapper.propTypes = {
   isLoading: PropTypes.bool,
   statusMessage: PropTypes.string,
   zIndex: PropTypes.number,
+  formError: PropTypes.string,
 };
 
 export default PractitionerFormWrapper;

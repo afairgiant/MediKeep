@@ -76,7 +76,8 @@
     "syncTagsLabel": "Synkronisera dokumenttaggar och kategorier",
     "syncTagsDescription": "Håll dokumentmetadata synkroniserad med Paperless (Kommer snart)",
     "loadingSettings": "Laddar inställningar...",
-    "credentialsIncomplete": "Ange både användarnamn och lösenord för att testa anslutningen."
+    "credentialsIncomplete": "Ange både användarnamn och lösenord för att testa anslutningen.",
+    "taskPermissionMissing": "Ansluten, men det här Paperless-kontot kan inte läsa uppladdningsuppgifter, så MediKeep måste söka efter nya uppladdningar med filnamnet. Ge kontot behörigheten Visa för PaperlessTask i Paperless (Inställningar > Användare och grupper > redigera användaren > Behörigheter)."
   },
   "papra": {
     "privateUrlNote": "Privata och interna adresser (localhost, 192.168.x.x, 10.x.x.x) stöds för självhostade installationer. Moln-metadata- och link-local-adresser (169.254.x.x) blockeras alltid av säkerhetsskäl. Om din administratör har begränsat integrationer till offentliga adresser kommer privata URL:er att avvisas.",

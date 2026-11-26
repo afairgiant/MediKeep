@@ -36,7 +36,7 @@ import {
   formatDateInputChange,
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
 import TreatmentPlanSetup from './TreatmentPlanSetup';
 import { apiService } from '../../../services/api';
@@ -47,6 +47,8 @@ import { useTreatmentLinkCounts } from '../../../hooks/useTreatmentLinkCounts';
 import CollapsibleLinkTabs from '../../shared/CollapsibleLinkTabs';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const EMPTY_PENDING_RELATIONSHIPS = {
   medications: [],
@@ -388,7 +390,10 @@ const TreatmentFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -783,26 +788,19 @@ const TreatmentFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags', 'Tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t(
-                          'treatments.form.tagsDesc',
-                          'Add tags to categorize and organize treatments'
-                        )}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('shared:fields.addTags', 'Add tags...')}
-                      />
-                    </Box>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t(
+                        'treatments.form.tagsDesc',
+                        'Add tags to categorize and organize treatments'
+                      )}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
+                    />
                   </Grid.Col>
                 </Grid>
 
@@ -944,12 +942,6 @@ const TreatmentFormWrapper = ({
               </Box>
             )}
 
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
-
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button
@@ -969,7 +961,7 @@ const TreatmentFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

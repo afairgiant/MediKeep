@@ -10,13 +10,11 @@ import {
   Group,
   ScrollArea,
   Tabs,
-  Badge,
   Box,
 } from '@mantine/core';
 import {
   IconInfoCircle,
   IconFlask,
-  IconTags,
   IconFileText,
   IconNotes,
 } from '@tabler/icons-react';
@@ -41,7 +39,6 @@ const LabResultViewModal = ({
   labResult,
   onEdit,
   practitioners,
-  onFileUploadComplete,
   labResultConditions = {},
   fetchLabResultConditions,
   navigate,
@@ -81,7 +78,6 @@ const LabResultViewModal = ({
     if (!isOpen) return;
     const conditionalTabs = {
       notes: !!labResult?.notes,
-      tags: !isGroupedResult,
       'test-components': isGroupedResult || hasTestComponents !== false,
     };
     if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
@@ -212,16 +208,6 @@ const LabResultViewModal = ({
                   treatments: listCountState(labResultTreatments[labResult.id]),
                 }}
               />
-              {!isGroupedResult && (
-                <Tabs.Tab value="tags" leftSection={<IconTags size={16} />}>
-                  {t('shared:labels.tags', 'Tags')}
-                  {labResult.tags?.length > 0 && (
-                    <Badge size="sm" color="blue" style={{ marginLeft: 8 }}>
-                      {labResult.tags.length}
-                    </Badge>
-                  )}
-                </Tabs.Tab>
-              )}
               <Tabs.Tab value="files" leftSection={<IconFileText size={16} />}>
                 {t('shared:tabs.documents', 'Documents')}
               </Tabs.Tab>
@@ -317,26 +303,6 @@ const LabResultViewModal = ({
                             </Stack>
                           )}
                         </SimpleGrid>
-                      </div>
-                      <div>
-                        <Title order={4} mb="sm">
-                          {t('shared:labels.tags', 'Tags')}
-                        </Title>
-                        {labResult.tags && labResult.tags.length > 0 ? (
-                          <Group gap="xs">
-                            {labResult.tags.map((tag, index) => (
-                              <ClickableTagBadge
-                                key={index}
-                                tag={tag}
-                                color={getTagColor(tag)}
-                              />
-                            ))}
-                          </Group>
-                        ) : (
-                          <Text c="dimmed">
-                            {t('shared:labels.notSpecified', 'Not specified')}
-                          </Text>
-                        )}
                       </div>
                     </>
                   ) : (
@@ -505,6 +471,26 @@ const LabResultViewModal = ({
                       </div>
                     </>
                   )}
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:labels.tags', 'Tags')}
+                    </Title>
+                    {labResult.tags && labResult.tags.length > 0 ? (
+                      <Group gap="xs">
+                        {labResult.tags.map((tag, index) => (
+                          <ClickableTagBadge
+                            key={index}
+                            tag={tag}
+                            color={getTagColor(tag)}
+                          />
+                        ))}
+                      </Group>
+                    ) : (
+                      <Text c="dimmed">
+                        {t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    )}
+                  </div>
                 </Stack>
               </Box>
             </Tabs.Panel>
@@ -611,32 +597,6 @@ const LabResultViewModal = ({
               </Tabs.Panel>
             )}
 
-            {/* Tags Tab — individual results only; panels show tags inline in overview */}
-            {!isGroupedResult && (
-              <Tabs.Panel value="tags">
-                <Box mt="md">
-                  <Stack gap="md">
-                    <Title order={4}>{t('shared:labels.tags', 'Tags')}</Title>
-                    {labResult.tags && labResult.tags.length > 0 ? (
-                      <Group gap="xs">
-                        {labResult.tags.map((tag, index) => (
-                          <ClickableTagBadge
-                            key={index}
-                            tag={tag}
-                            color={getTagColor(tag)}
-                          />
-                        ))}
-                      </Group>
-                    ) : (
-                      <Text c="dimmed">
-                        {t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    )}
-                  </Stack>
-                </Box>
-              </Tabs.Panel>
-            )}
-
             {/* Files Tab */}
             <Tabs.Panel value="files">
               <Box mt="md">
@@ -651,9 +611,7 @@ const LabResultViewModal = ({
                     entityType="lab-result"
                     entityId={labResult.id}
                     mode="view"
-                    onUploadComplete={onFileUploadComplete}
                     onError={handleDocumentError}
-                    showProgressModal={true}
                   />
                 </Stack>
               </Box>

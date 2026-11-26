@@ -44,9 +44,10 @@ import { timezoneService } from '../services/timezoneService';
 import ReleaseNotesHistory from '../components/settings/ReleaseNotesHistory';
 import UpdateAvailableLabel from '../components/shared/UpdateAvailableLabel';
 import { useLatestVersion } from '../hooks/useLatestVersion';
+import { SETTINGS_TABS } from '../constants/settingsTabs';
+import { useSettingsTab } from '../hooks/useSettingsTab';
 import '../styles/pages/Settings.css';
 
-const SETTINGS_TABS = ['general', 'documents', 'notifications', 'about'];
 // Set by the server when a connection test succeeds; never edited or saved from here
 const SERVER_DERIVED_KEYS = [
   'paperless_connection_verified',
@@ -165,7 +166,7 @@ const Settings = () => {
     loading: loadingPreferences,
     updateLocalPreferences,
   } = useUserPreferences();
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useSettingsTab();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   // Raised when other sessions are signed out, which also ends every remembered device
   const [sessionsRevision, setSessionsRevision] = useState(0);

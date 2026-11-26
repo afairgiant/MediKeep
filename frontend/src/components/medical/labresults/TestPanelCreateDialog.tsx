@@ -15,7 +15,7 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle, IconX } from '@tabler/icons-react';
 import { DateInput } from '../../adapters/DateInput';
-import LabResultTagsField from './LabResultTagsField';
+import TagsField from '../../shared/TagsField';
 import SameAsOrderedLink from './SameAsOrderedLink';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -407,7 +407,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
             />
           </Grid.Col>
           <Grid.Col span={12}>
-            <LabResultTagsField
+            <TagsField
               value={formData.tags}
               onChange={tags => setFormData(prev => ({ ...prev, tags }))}
               disabled={isSubmitting}

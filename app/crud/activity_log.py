@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
@@ -346,6 +346,28 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
             "start_date": cutoff_date,
             "end_date": datetime.utcnow(),
         }
+
+    def detach_patient_activity(
+        self, db: Session, *, patient_ids: Iterable[int]
+    ) -> int:
+        """
+        Set patient_id to NULL on the activity rows of patients about to be deleted.
+
+        activity_logs.patient_id has no ON DELETE action, so a patient with
+        activity history can't be deleted until its rows are detached. The
+        history is kept. Does not commit; the caller's delete does.
+
+        Returns:
+            Number of activity rows updated
+        """
+        ids = list(patient_ids)
+        if not ids:
+            return 0
+        return (
+            db.query(ActivityLog)
+            .filter(ActivityLog.patient_id.in_(ids))
+            .update({"patient_id": None}, synchronize_session=False)
+        )
 
     def log_activity(
         self,

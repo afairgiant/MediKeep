@@ -269,13 +269,20 @@ Manage emergency contact information for each patient:
 
 ## Documents & Files
 
-### Uploading Documents
+### Adding and Removing Documents
 
-1. Navigate to a patient's profile
-2. Go to the **Documents** section
-3. Click **Upload**
-4. Select your file (PDF, images, etc.)
-5. Add a description and tags
+Documents are attached to individual records, such as a lab result, visit or procedure. You add and remove them in the record's form:
+
+1. Open the record and click **Edit** (or start a new record)
+2. Go to the **Documents** tab
+3. Click **Add Document**, then choose **Upload new file**, or link an existing document from Paperless-ngx or Papra if you have set one up
+4. Select your file (PDF, images, etc.) and add an optional description
+5. To remove a file, click its trash icon (or the unlink icon for a linked document). The file is marked for deletion and can be restored until you save
+6. Click **Save**. Files marked for deletion are deleted when the record is saved
+
+When you edit an existing record, a new file is attached as soon as you add it. When you create a new record, files are attached when you save it.
+
+The **Documents** tab in a record's view dialog is read-only. You can open and download files there and check their sync status, but not add or delete them.
 
 ### Organizing with Tags
 

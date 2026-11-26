@@ -34,7 +34,6 @@
     "measurementLocation": "Local da Medição",
     "missingPatientInfo": "Informações do Paciente Ausentes",
     "notesPlaceholder": "Observações adicionais sobre a medição dos sinais vitais...",
-    "openCalendar": "Abrir calendário",
     "painScaleUnit": "(0-10)",
     "pasteDateTimeDescription": "Digite ou cole a data/hora, ou clique no calendário para selecionar",
     "patientHeight": "Altura do Paciente: {{height}} polegadas (do perfil)",

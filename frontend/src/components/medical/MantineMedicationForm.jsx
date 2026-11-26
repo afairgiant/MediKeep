@@ -16,7 +16,6 @@ import {
   Switch,
   Alert,
   ActionIcon,
-  Anchor,
   Chip,
 } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
@@ -34,6 +33,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useLinkPanelDescription } from '../../hooks/useLinkPanelDescription';
+import NotificationSettingsLink from '../shared/NotificationSettingsLink';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import { getReminderBlockerDescriptors, REMINDER_BLOCKERS } from '../../utils/medicationReminders';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
@@ -41,7 +41,7 @@ import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
-import { TagInput } from '../common/TagInput';
+import TagsField from '../shared/TagsField';
 import logger from '../../services/logger';
 import NotesField from '../shared/NotesField';
 import { apiService } from '../../services/api';
@@ -52,6 +52,8 @@ import { getRememberedEditTab } from '../../utils/editTabHandoff';
 import RecordLinkCard from '../shared/RecordLinkCard';
 import RecordLinkTabButtons from '../shared/RecordLinkTabButtons';
 import { useSubDialog } from '../../contexts/SubDialogContext';
+import FormErrorPopup from '../shared/FormErrorPopup';
+import RecordForm from '../shared/RecordForm';
 
 const REMINDER_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 // Mirrors MAX_REMINDER_TIMES in app/schemas/medication.py
@@ -491,25 +493,17 @@ const MantineMedicationForm = ({
       case 'custom':
         if (field.component === 'TagInput') {
           return (
-            <Box key={field.name}>
-              <Text size="sm" fw={500} mb="xs">
-                {field.label}
-                {field.required && <span style={{ color: 'red' }}> *</span>}
-              </Text>
-              {field.description && (
-                <Text size="xs" c="dimmed" mb="xs">
-                  {field.description}
-                </Text>
-              )}
-              <TagInput
-                value={formData[field.name] || []}
-                onChange={tags => {
-                  onInputChange({ target: { name: field.name, value: tags } });
-                }}
-                placeholder={field.placeholder}
-                maxTags={field.maxTags}
-              />
-            </Box>
+            <TagsField
+              key={field.name}
+              value={formData[field.name] || []}
+              onChange={tags => {
+                onInputChange({ target: { name: field.name, value: tags } });
+              }}
+              label={commonProps.label}
+              description={commonProps.description}
+              placeholder={commonProps.placeholder}
+              maxTags={field.maxTags}
+            />
           );
         }
         return null;
@@ -559,7 +553,10 @@ const MantineMedicationForm = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -699,12 +696,12 @@ const MantineMedicationForm = ({
                           'No notification channel is configured for medication reminders. Open Notification Settings to enable a channel.'
                         )}
                       </Text>
-                      <Anchor href="/settings/notifications" size="sm">
+                      <NotificationSettingsLink>
                         {t(
                           'medications.reminders.openSettings',
                           'Open Notification Settings'
                         )}
-                      </Anchor>
+                      </NotificationSettingsLink>
                     </Alert>
                   )}
                   {reminderBlockerDescriptors.length > 0 && (
@@ -857,12 +854,6 @@ const MantineMedicationForm = ({
           {/* Custom children content */}
           {children}
 
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
-
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button
@@ -879,7 +870,7 @@ const MantineMedicationForm = ({
             </Button>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

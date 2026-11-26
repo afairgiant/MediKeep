@@ -1,4 +1,4 @@
-import { useState, useEffect, useId } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Modal,
@@ -10,8 +10,6 @@ import {
   Select,
   Tabs,
   Box,
-  Alert,
-  Input,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -31,7 +29,7 @@ import {
   parseDateInput,
   formatDateInputChange,
 } from '../../../utils/dateUtils';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import {
   EQUIPMENT_TYPE_OPTIONS,
   EQUIPMENT_STATUS_OPTIONS,
@@ -40,6 +38,8 @@ import logger from '../../../services/logger';
 import { useSubDialog } from '../../../contexts/SubDialogContext';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const EquipmentFormWrapper = ({
   isOpen,
@@ -64,7 +64,6 @@ const EquipmentFormWrapper = ({
 
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const tagsInputId = useId();
 
   // Open on the tab the View dialog had open, if it handed over to this form
   useEffect(() => {
@@ -152,7 +151,10 @@ const EquipmentFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -253,6 +255,17 @@ const EquipmentFormWrapper = ({
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                       disabled={practitionersLoading}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
                     />
                   </Grid.Col>
                 </Grid>
@@ -437,42 +450,10 @@ const EquipmentFormWrapper = ({
                       )}
                     />
                   </Grid.Col>
-                  <Grid.Col span={12}>
-                    {/* TagInput has no label of its own. The theme's label
-                        styles skip Input.Wrapper, so match them here
-                        (as LabResultTagsField does) */}
-                    <Input.Wrapper
-                      id={tagsInputId}
-                      label={t('shared:labels.tags', 'Tags')}
-                      styles={{
-                        label: {
-                          color: 'var(--color-text-primary)',
-                          fontWeight: 600,
-                        },
-                      }}
-                    >
-                      <TagInput
-                        id={tagsInputId}
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('shared:fields.addTags', 'Add tags...')}
-                      />
-                    </Input.Wrapper>
-                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
           </Tabs>
-
-          {formError && (
-            <Alert color="red" variant="light" role="alert">
-              {formError}
-            </Alert>
-          )}
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
@@ -495,7 +476,7 @@ const EquipmentFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };

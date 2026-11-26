@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.constants import get_admin_roles_filter, is_admin_role
 from app.core.logging.config import get_logger
+from app.crud.activity_log import activity_log
 from app.models.activity_log import ActivityLog
 from app.models.models import (
     FamilyHistoryShare,
@@ -188,23 +189,16 @@ class UserDeletionService:
 
         # 5. Delete every patient the user owns
         patients = db.query(Patient).filter(Patient.user_id == user_id).all()
+        patient_ids = [patient.id for patient in patients]
         if attachments is not None:
             # Taken from the patients deleted here, after the account lock, so the
             # cleanup matches this delete even if a patient was transferred meanwhile
-            attachments.extend(
-                find_patient_attachments(db, [patient.id for patient in patients])
-            )
+            attachments.extend(find_patient_attachments(db, patient_ids))
 
-        patient_ids = []
+        activity_log.detach_patient_activity(db, patient_ids=patient_ids)
+
         for patient_record in patients:
             patient_id = patient_record.id
-            patient_ids.append(patient_id)
-
-            # Detach the audit trail; activity_logs.patient_id has no ON DELETE action
-            db.query(ActivityLog).filter(ActivityLog.patient_id == patient_id).update(
-                {"patient_id": None}, synchronize_session=False
-            )
-
             db.delete(patient_record)
             db.flush()
 

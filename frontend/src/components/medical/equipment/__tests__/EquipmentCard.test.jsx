@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MantineProvider } from '@mantine/core';
+import { MemoryRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import EquipmentCard from '../EquipmentCard';
 
@@ -20,6 +21,10 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
 }));
 
 // Mock logger
+vi.mock('../../../../hooks/useTagColors', () => ({
+  useTagColors: () => ({ getTagColor: () => 'blue' }),
+}));
+
 vi.mock('../../../../services/logger', () => ({
   default: {
     error: vi.fn(),
@@ -63,6 +68,22 @@ describe('EquipmentCard', () => {
   });
 
   describe('Rendering', () => {
+    test('shows tags as badges on the card', () => {
+      render(
+        <MemoryRouter>
+          <MantineWrapper>
+            <EquipmentCard
+              {...defaultProps}
+              equipment={{ ...defaultEquipment, tags: ['sleep', 'nightly'] }}
+            />
+          </MantineWrapper>
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText('sleep')).toBeInTheDocument();
+      expect(screen.getByText('nightly')).toBeInTheDocument();
+    });
+
     test('renders equipment name', () => {
       render(
         <MantineWrapper>

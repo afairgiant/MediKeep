@@ -4,20 +4,12 @@ from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
-from app.core.utils.stored_files import resolve_stored_file
 from app.crud.base import CRUDBase
 from app.models.models import LabResultFile
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileUpdate
-from app.services.file_management_service import file_management_service
+from app.services.shared_stored_files import trash_unshared_file
 
 logger = get_logger(__name__, "app")
-
-
-def _trash_physical_file(file_record: LabResultFile, reason: str) -> None:
-    """Move the record's file to trash; a missing or out-of-storage path is skipped."""
-    file_path = resolve_stored_file(file_record)
-    if file_path:
-        file_management_service.move_to_trash(str(file_path), reason=reason)
 
 
 class CRUDLabResultFile(
@@ -109,12 +101,18 @@ class CRUDLabResultFile(
         """Delete all files associated with a lab result (moves to trash)"""
         # Get all files for this lab result
         files_to_delete = self.get_by_lab_result(db=db, lab_result_id=lab_result_id)
+        # Rows still to be removed. A row whose file fails to move stays, so it
+        # keeps counting as a user of that file for the rows after it.
+        deleting = {file_record.id for file_record in files_to_delete}
 
         deleted_count = 0
         for file_record in files_to_delete:
             try:
-                _trash_physical_file(
-                    file_record, reason=f"Lab result {lab_result_id} deletion"
+                trash_unshared_file(
+                    db,
+                    file_record,
+                    {LabResultFile: deleting},
+                    reason=f"Lab result {lab_result_id} deletion",
                 )
 
                 # Remove database record
@@ -123,6 +121,7 @@ class CRUDLabResultFile(
 
             except Exception as e:
                 # Log error but continue with other files
+                deleting.discard(file_record.id)
                 logger.error(f"Failed to delete file {file_record.id}: {str(e)}")
 
         db.commit()
@@ -136,7 +135,12 @@ class CRUDLabResultFile(
             return None
 
         try:
-            _trash_physical_file(file_record, reason="Individual file deletion")
+            trash_unshared_file(
+                db,
+                file_record,
+                {LabResultFile: [file_record.id]},
+                reason="Individual file deletion",
+            )
 
             # Remove database record
             db.delete(file_record)

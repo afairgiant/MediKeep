@@ -94,6 +94,7 @@ const Treatments = () => {
     items: treatments,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -101,7 +102,8 @@ const Treatments = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'treatment',
     entityLabel: t('medical:entityNames.treatment'),
@@ -189,6 +191,7 @@ const Treatments = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'treatment',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowModal(false);
       setEditingTreatment(null);
@@ -212,6 +215,7 @@ const Treatments = () => {
 
   const handleAddTreatment = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingTreatment(null);
     setFormData(INITIAL_TREATMENT_FORM_DATA);
@@ -220,6 +224,7 @@ const Treatments = () => {
 
   const handleEditTreatment = treatment => {
     resetSubmission();
+    setFormError(null);
     setEditingTreatment(treatment);
     setFormData({
       treatment_name: treatment.treatment_name || '',
@@ -256,7 +261,7 @@ const Treatments = () => {
 
     const validationError = validateTreatmentForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -313,12 +318,13 @@ const Treatments = () => {
               component: 'Treatments',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            // (result is set only by a create)
+            if (result) setEditingTreatment(result);
           }
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
 
       return result;
@@ -393,7 +399,7 @@ const Treatments = () => {
     clampPage(filteredTreatments.length);
   }, [filteredTreatments.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('treatments.loadingTreatments', 'Loading treatments...')}
@@ -629,8 +635,20 @@ const Treatments = () => {
       </Container>
 
       <TreatmentFormWrapper
+        formError={formError}
         isOpen={showModal}
-        onClose={() => !isBlocking && setShowModal(false)}
+        onClose={() => {
+          if (isBlocking) return;
+          // Files added in the Edit form are attached straight away, so refresh
+          // the card's count even when the form closes without saving
+          if (editingTreatment) refreshFileCount(editingTreatment.id);
+          setShowModal(false);
+          // A new record whose upload failed is saved but not listed yet
+          if (needsRefreshAfterSubmissionRef.current) {
+            needsRefreshAfterSubmissionRef.current = false;
+            refreshData();
+          }
+        }}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
         editingTreatment={editingTreatment}
         patientId={currentPatient?.id}

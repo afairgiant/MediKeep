@@ -169,3 +169,12 @@ describe('InjuryFormWrapper — Add Practitioner', () => {
     });
   });
 });
+
+describe('InjuryFormWrapper — Tags field', () => {
+  test('shows a labelled Tags field on the Basic Info tab', () => {
+    render(<InjuryFormWrapper {...defaultProps} />);
+    // Inactive tab panels stay mounted but hidden, so visibility proves the
+    // field is on the default Basic Info tab
+    expect(screen.getByLabelText('Tags')).toBeVisible();
+  });
+});

@@ -16,6 +16,7 @@ import pytest
 from app.core.config import settings
 from app.services import restore_service as restore_module
 from app.services.backup_service import BackupService
+from app.services.imaging_storage import IMPORT_STAGING_DIR
 from app.services.restore_service import RestoreService
 from tests.utils.log_output import records_with_event
 
@@ -240,6 +241,18 @@ class TestRestoreReplacesUploadsInPlace:
         )
         assert ".restore-staging-x/a.pdf" not in contents
         assert contents["restored.pdf"] == b"new"
+
+    @pytest.mark.asyncio
+    async def test_running_imaging_import_staging_is_left_alone(
+        self, service, uploads, tmp_path, kind
+    ):
+        upload = uploads / IMPORT_STAGING_DIR / "job" / "upload"
+        upload.parent.mkdir(parents=True)
+        upload.write_bytes(b"queued import")
+
+        await _restore(service, kind, _backup(tmp_path, kind, {"restored.pdf": "new"}))
+
+        assert upload.read_bytes() == b"queued import"
 
     @pytest.mark.asyncio
     async def test_corrupt_archive_is_rejected_before_anything_changes(

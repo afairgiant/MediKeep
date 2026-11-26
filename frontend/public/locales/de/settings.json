@@ -76,7 +76,8 @@
     "syncTagsLabel": "Dokument-Tags und Kategorien synchronisieren",
     "syncTagsDescription": "Dokument-Metadaten mit Paperless synchron halten (Demnächst verfügbar)",
     "loadingSettings": "Einstellungen werden geladen...",
-    "credentialsIncomplete": "Geben Sie Benutzername und Passwort ein, um die Verbindung zu testen."
+    "credentialsIncomplete": "Geben Sie Benutzername und Passwort ein, um die Verbindung zu testen.",
+    "taskPermissionMissing": "Verbunden, aber dieses Paperless-Konto kann keine Upload-Aufgaben lesen, daher muss MediKeep neue Uploads anhand des Dateinamens suchen. Erteilen Sie dem Konto in Paperless die Berechtigung Anzeigen für PaperlessTask (Einstellungen > Benutzer & Gruppen > Benutzer bearbeiten > Berechtigungen)."
   },
   "papra": {
     "privateUrlNote": "Private und interne Adressen (localhost, 192.168.x.x, 10.x.x.x) werden für selbst gehostete Setups unterstützt. Cloud-Metadaten- und Link-Local-Adressen (169.254.x.x) werden aus Sicherheitsgründen immer blockiert. Wenn Ihr Administrator Integrationen auf öffentliche Adressen beschränkt hat, werden private URLs abgelehnt.",

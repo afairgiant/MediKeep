@@ -429,18 +429,21 @@ describe('Add Procedure from an open Visit (saved visit)', () => {
       within(sub).getByRole('button', { name: 'Create Procedure' })
     );
 
-    // The message is in the dialog itself, not only in a toast that could hide behind it
-    expect(await within(sub).findByRole('alert')).toHaveTextContent(
-      'Please enter a valid date.'
-    );
+    // The message pops up over the dialog, not only in a toast that could hide behind it
+    expect(
+      await screen.findByText('Please enter a valid date.')
+    ).toBeInTheDocument();
     expect(api.createProcedure).not.toHaveBeenCalled();
     expect(within(sub).getByLabelText(/Procedure Name/)).toHaveValue(
       'Knee scope'
     );
 
-    // Fixing the field clears the message, and the same dialog then creates it
+    // After OK, fixing the field lets the same dialog create it
+    await user.click(screen.getByRole('button', { name: 'OK' }));
+    await waitFor(() =>
+      expect(screen.queryByText('Please enter a valid date.')).toBeNull()
+    );
     await user.type(within(sub).getByLabelText(/Procedure Date/), '2026-01-15');
-    expect(within(sub).queryByRole('alert')).toBeNull();
     await user.click(
       within(sub).getByRole('button', { name: 'Create Procedure' })
     );
@@ -456,10 +459,10 @@ describe('Add Procedure from an open Visit (saved visit)', () => {
         name: 'common:inlineCreate.add.procedure',
       })
     );
-    const sub = await fillAndSubmitSubDialog(user);
-    expect(await within(sub).findByRole('alert')).toHaveTextContent(
-      'Could not create it. Please try again.'
-    );
+    await fillAndSubmitSubDialog(user);
+    expect(
+      await screen.findByText('Could not create it. Please try again.')
+    ).toBeInTheDocument();
   });
 
   it('keeps the procedure and says so when linking fails', async () => {

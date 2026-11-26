@@ -1,3 +1,9 @@
+import {
+  endBeforeStartMessage,
+  patientNotAvailableMessage,
+  requiredMessage,
+} from './formCheckMessages';
+
 /** Form state of the Add/Edit Treatment dialog. */
 export interface TreatmentFormData {
   treatment_name: string;
@@ -36,15 +42,16 @@ export const validateTreatmentForm = (
   form: TreatmentFormData,
   patientId?: number | null
 ): string | null => {
-  if (!form.treatment_name.trim()) return 'Treatment name is required';
+  if (!form.treatment_name.trim())
+    return requiredMessage('shared:fields.treatmentName', 'Treatment Name');
   if (
     form.end_date &&
     form.start_date &&
     new Date(form.end_date) < new Date(form.start_date)
   ) {
-    return 'End date cannot be before start date';
+    return endBeforeStartMessage();
   }
-  if (!patientId) return 'Patient information not available';
+  if (!patientId) return patientNotAvailableMessage();
   return null;
 };
 

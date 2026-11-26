@@ -23,6 +23,9 @@
     "noFiles": "Nenhum ficheiro"
   },
   "fileList": {
+    "deleteFile": "Excluir arquivo",
+    "downloadFile": "Baixar arquivo",
+    "unlinkDocument": "Desvincular documento",
     "deleteUnfinishedPaperlessWarning": "Este envio ainda não terminou de ser processado no Paperless. Se o Paperless concluí-lo mais tarde, o documento poderá permanecer no Paperless depois de ser excluído aqui.",
     "fileDetails": "DETALHES DO FICHEIRO",
     "loading": "A carregar ficheiros...",
@@ -38,10 +41,11 @@
     "statusMissing": "Em falta",
     "statusProcessing": "A processar",
     "viewUnavailable": {
-      "missing": "Este documento não foi encontrado no serviço de armazenamento. Ele pode ter sido excluído lá. Você pode removê-lo desta lista.",
+      "missing": "Este documento não foi encontrado no serviço de armazenamento. Ele pode ter sido excluído lá. Você pode removê-lo no formulário de edição do registro.",
       "processing": "Este documento ainda está sendo processado pelo Paperless e ainda não pode ser aberto. Tente novamente em instantes.",
+      "storedElsewhere": "Este documento está armazenado no {{service}} de outro membro, que a sua conexão com o {{service}} não consegue acessar. Esse membro pode abri-lo pela própria conta.",
       "title": "Documento indisponível",
-      "unavailable": "Este documento não foi salvo corretamente e não pode ser aberto. Você pode removê-lo e enviá-lo novamente."
+      "unavailable": "Este documento não foi salvo corretamente e não pode ser aberto. Você pode removê-lo no formulário de edição do registro e enviá-lo novamente."
     }
   },
   "fileUpload": {
@@ -104,7 +108,9 @@
     "duplicateHint": "Se precisar de carregar uma nova versão, modifique primeiro o documento.",
     "processingDocument": "O documento está a ser processado pelo Paperless...",
     "syncFailed": "Sincronização falhada",
-    "syncing": "A sincronizar..."
+    "syncing": "A sincronizar...",
+    "taskPermissionDenied": "O seu ficheiro foi enviado para o Paperless, mas esta conta do Paperless não consegue ler as tarefas de envio. O MediKeep vai procurar o documento pelo nome do ficheiro. Para corrigir, conceda à conta a permissão Ver em PaperlessTask no Paperless (Definições > Utilizadores e grupos).",
+    "taskPermissionDeniedTitle": "O Paperless não consegue confirmar os envios"
   },
   "renderMode": {
     "compactView": "Vista compacta",

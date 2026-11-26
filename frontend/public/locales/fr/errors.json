@@ -39,7 +39,18 @@
     "mustBeValidNumber": "Le chiffre doit être valide",
     "patientNotSelected": "Veuillez sélectionner un patient.",
     "requiredFieldMissing": "Veuillez remplir tous les champs requis.",
-    "submissionFailed": "Echec de la sauvegarde du formulaire. Veuillez vérifier votre saisie et réessayer."
+    "submissionFailed": "Echec de la sauvegarde du formulaire. Veuillez vérifier votre saisie et réessayer.",
+    "endBeforeStart": "La date de fin ne peut pas être antérieure à la date de début",
+    "endBeforeOnset": "La date de fin ne peut pas être antérieure à la date d'apparition",
+    "dateInFuture": "{{field}} ({{date}}) ne peut pas être dans le futur. Choisissez une date au plus tard aujourd'hui ({{today}}).",
+    "requiredForPrescription": "{{field}} : obligatoire pour une assurance médicaments",
+    "expirationBeforeEffective": "La date d'expiration doit être postérieure à la date d'effet",
+    "invalidFormat": "Le format n'est pas valide.",
+    "tooShort": "Utilisez au moins {{min}} caractères.",
+    "tooLong": "Utilisez au plus {{max}} caractères.",
+    "belowMinimum": "Doit être au moins {{min}}.",
+    "aboveMaximum": "Doit être au plus {{max}}.",
+    "invalidValue": "Cette valeur n'est pas valide."
   },
   "general": {
     "maintenanceMode": "Le système est actuellement en cours de maintenance. Veuillez réessayer plus tard.",
@@ -106,5 +117,6 @@
     "largeFileWarning": "Fichier lourd détecté. Le téléversement peut prendre plusieurs minutes.",
     "partialSuccess": "Opération complétée avec des alertes.",
     "slowConnection": "Le téléversement prend plus de temps que d'habitude en raison d'une connexion lente."
-  }
+  },
+  "symptomNotAvailable": "Informations sur le symptôme non disponibles"
 }

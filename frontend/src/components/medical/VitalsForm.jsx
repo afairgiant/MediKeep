@@ -58,6 +58,8 @@ import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
 import NotesField from '../shared/NotesField';
+import FormErrorPopup from '../shared/FormErrorPopup';
+import RecordForm from '../shared/RecordForm';
 import './VitalsForm.css';
 
 const VitalsForm = ({
@@ -67,6 +69,7 @@ const VitalsForm = ({
   onSave,
   onCancel,
   isEdit = false,
+  formError = null,
 }) => {
   const { t } = useTranslation(['common', 'errors', 'shared']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
@@ -470,6 +473,8 @@ const VitalsForm = ({
   const [errors, setErrors] = useState({});
   const [warnings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  // This form's own check failed: shown in the popup like a save error
+  const [checkError, setCheckError] = useState(null);
   const [touchedFields, setTouchedFields] = useState(new Set());
   // State for manual datetime text input (for copy-paste support)
   // Initialize empty, will be set by useEffect once hook is ready
@@ -700,9 +705,15 @@ const VitalsForm = ({
     setTouchedFields(new Set(Object.keys(FIELD_CONFIGS)));
 
     if (!validateForm()) {
-      notifyError('notifications:toasts.vitals.formErrors');
+      setCheckError(
+        t(
+          'notifications:toasts.vitals.formErrors',
+          'Please correct the form errors'
+        )
+      );
       return;
     }
+    setCheckError(null);
 
     setIsLoading(true);
 
@@ -767,7 +778,9 @@ const VitalsForm = ({
         }
       });
 
-      await onSave(processedData);
+      const saved = await onSave(processedData);
+      // false: the save failed and formError says why
+      if (saved === false) return;
       notifySuccess('notifications:toasts.vitals.savedSuccess', {
         interpolation: { action: isEdit ? 'updated' : 'recorded' },
       });
@@ -879,7 +892,7 @@ const VitalsForm = ({
                 <ActionIcon
                   variant="subtle"
                   onClick={() => setDatePickerOpened(o => !o)}
-                  aria-label={t('vitals:form.openCalendar', 'Open calendar')}
+                  aria-label={t('common:buttons.openCalendar', 'Open calendar')}
                 >
                   <IconCalendar size={16} />
                 </ActionIcon>
@@ -1014,7 +1027,10 @@ const VitalsForm = ({
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={checkError || formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -1201,7 +1217,7 @@ const VitalsForm = ({
             </Button>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Stack>
   );
 };

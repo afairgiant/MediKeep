@@ -64,6 +64,7 @@ const Injuries = () => {
     items: injuries,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -72,6 +73,8 @@ const Injuries = () => {
     refreshData,
     clearError,
     setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'injury',
     entityLabel: t('medical:entityNames.injury'),
@@ -205,6 +208,7 @@ const Injuries = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'injury',
+    onFormError: setFormError,
     onSuccess: () => {
       resetForm();
 
@@ -234,6 +238,7 @@ const Injuries = () => {
 
   const handleAddInjury = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
@@ -241,6 +246,7 @@ const Injuries = () => {
 
   const handleEditInjury = injury => {
     resetSubmission();
+    setFormError(null);
     setFormData({
       injury_name: injury.injury_name || '',
       injury_type_id: injury.injury_type_id || null,
@@ -265,7 +271,7 @@ const Injuries = () => {
 
     const validationError = validateInjuryForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -280,6 +286,7 @@ const Injuries = () => {
     try {
       let success;
       let resultId;
+      let createdInjury = null;
 
       if (editingInjury) {
         success = await updateItem(editingInjury.id, injuryData);
@@ -289,6 +296,7 @@ const Injuries = () => {
         success = !!result;
         resultId = result?.id;
         if (success) {
+          createdInjury = result;
           needsRefreshAfterSubmissionRef.current = true;
         }
       }
@@ -330,12 +338,12 @@ const Injuries = () => {
               component: 'Injuries',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdInjury) setEditingInjury(createdInjury);
           }
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('injuries_submission_error', {
@@ -366,7 +374,7 @@ const Injuries = () => {
     clampPage(processedInjuries.length);
   }, [processedInjuries.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('injuries.messages.loading', 'Loading injuries...')}
@@ -408,10 +416,22 @@ const Injuries = () => {
 
         {/* Form Modal */}
         <InjuryFormWrapper
+          formError={formError}
           isOpen={showAddForm}
           patientId={currentPatient?.id}
           navigate={navigate}
-          onClose={() => !isBlocking && resetForm()}
+          onClose={() => {
+            if (isBlocking) return;
+            // Files added in the Edit form are attached straight away, so refresh
+            // the card's count even when the form closes without saving
+            if (editingInjury) refreshFileCount(editingInjury.id);
+            resetForm();
+            // A new record whose upload failed is saved but not listed yet
+            if (needsRefreshAfterSubmissionRef.current) {
+              needsRefreshAfterSubmissionRef.current = false;
+              refreshData();
+            }
+          }}
           title={
             editingInjury
               ? t('injuries.editTitle', 'Edit Injury')

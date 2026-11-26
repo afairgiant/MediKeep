@@ -173,7 +173,7 @@ vi.mock('../../practitioners/PractitionerSelectWithCreate', () => ({
   ),
 }));
 
-vi.mock('../LabResultTagsField', () => ({
+vi.mock('../../../shared/TagsField', () => ({
   default: ({ value, onChange }: any) => (
     <button type="button" onClick={() => onChange([...value, 'fasting'])}>
       add-tag

@@ -841,6 +841,7 @@ Base path: `/api/v1/patients`
 - **Purpose**: Delete patient record and ALL medical data
 - **Authentication**: Yes
 - **Warning**: Cascades to medications, lab results, allergies, conditions, procedures, treatments, encounters, vitals, immunizations
+- **Note**: The patient's activity history is kept, with `patient_id` set to null
 - **Success Response** (200):
 
 ```json
@@ -2163,7 +2164,7 @@ Base path: `/api/v1/entity-files`
 - **Remote storage**: For Paperless/Papra files the remote document is deleted too, except linked documents (unlinked only), documents still referenced by another record, and records marked `missing`. A record with no remote document ID (an upload still processing, or whose task failed) has nothing to remove remotely, so only the database record is deleted.
 - **Success Response** (200): File operation result
 
-> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them.
+> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them. Their deletes (`DELETE /lab-results/{lab_result_id}/files/{file_id}`, `DELETE /lab-result-files/{file_id}`, `DELETE /lab-result-files/lab-result/{lab_result_id}/files` and the `delete` operation of `POST /lab-result-files/batch-operation`) move the stored file to trash. If the file cannot be moved, the record is kept: the single deletes return a 500, and the batch operation and `DELETE /lab-result-files/lab-result/{lab_result_id}/files` list the file under `errors`.
 
 > **Removed**: `POST /lab-result-files/`, `PUT /lab-result-files/{file_id}`, `POST /entity-files/{entity_type}/{entity_id}/files/pending` and `PUT /entity-files/files/{file_id}/status` accepted a client-supplied file path and were removed (GHSA-876g-4mgh-cqhf). Upload through `POST /entity-files/{entity_type}/{entity_id}/files` or `POST /lab-result-files/upload/{lab_result_id}`; the server always chooses where the file is stored. Downloads, views, deletes and exports only touch files inside `UPLOAD_DIR` or `TRASH_DIR`, and the admin model editor rejects a `file_path` outside them.
 
@@ -3909,6 +3910,252 @@ check when the patient may donate again.
 
 ---
 
+### 6.15 Imaging Studies
+
+Base path: `/api/v1/imaging-studies`
+
+**Purpose**: Stored DICOM studies (X-ray, CT, MRI, ultrasound) with their series and
+images. Studies are created by the import endpoints below; the others read, edit,
+move and delete them. Header-derived fields (`study_date`, `modalities`, `body_part`,
+`study_description`, `accession_number`, `institution_name`, `referring_physician`)
+are read-only.
+
+**Access**: reads need view access to the study's patient (owner or any share);
+updates and deletes need edit access. A study the user cannot access returns `404`.
+
+##### Import DICOM Files
+
+`POST /imaging-studies/import?filename={name}`
+
+- **Purpose**: Start importing one `.dcm` file or a `.zip` of a CD/DVD export. The file
+  is sent as the raw request body (not multipart), streamed to disk and imported by a
+  background job; poll the job for progress and the summary.
+- **Authentication**: Yes (edit access to the target patient)
+- **Query Parameters**:
+  - `filename` (required): the original file name, ending `.zip`, `.dcm` or `.dicom`.
+    Used for display only; stored files are named by their DICOM UIDs.
+  - `patient_id` (optional): the patient to import into; defaults to the active patient
+- **Request Body**: the file bytes, at most `IMAGING_MAX_UPLOAD_SIZE` (default 2GB)
+- **Rate Limit**: 10 queued imports per user per hour; rejected requests do not count
+- **Behavior**:
+  - Any ZIP entry with the DICOM marker is imported whatever its name; `DICOMDIR`,
+    bundled viewers, scripts, `autorun.inf` and other files are skipped
+  - Only images are stored (files with rows and columns); reports and other DICOM
+    objects are skipped
+  - Images merge into an existing study of the patient with the same Study Instance
+    UID, and images already stored (same SOP Instance UID) are skipped, so re-imports
+    are safe. Header fields of an existing study are only filled in where empty
+  - A study whose header names a different patient or birth date is still imported,
+    with `patient_mismatch: true`; move it with the move endpoint if needed
+  - Imports run one at a time. A failed import stores nothing. The job fails if the
+    user lost edit access while it waited in the queue
+- **Success Response** (202): an import job (see below)
+- **Error Responses**:
+  - `400`: Wrong file extension, empty upload, not a DICOM file or ZIP, or a ZIP that
+    fails the archive checks (too many files, unpacks too large)
+  - `403`: No edit access to the patient
+  - `413`: Upload larger than `IMAGING_MAX_UPLOAD_SIZE`
+  - `429` `imaging_import_rate_limited`, with `Retry-After`
+
+##### Get Import Job
+
+`GET /imaging-studies/import/{job_id}`
+
+- **Purpose**: Progress and result of an import. Jobs are visible only to the user who
+  started them, are kept in server memory for an hour after finishing, and are lost on
+  restart.
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+{
+  "job_id": "3f2c9a6e0b7d4c1e9a8f5b2d6c4e1a07",
+  "status": "completed",
+  "patient_id": 1,
+  "total_files": 415,
+  "processed_files": 415,
+  "summary": {
+    "studies": [
+      {
+        "study_id": 3,
+        "created": true,
+        "series_added": 2,
+        "instances_added": 412,
+        "patient_mismatch": false
+      }
+    ],
+    "instances_added": 412,
+    "duplicates_skipped": 0,
+    "skipped": [{ "name": "DICOMDIR", "reason": "ignored" }],
+    "skipped_count": 3
+  },
+  "error": null
+}
+```
+
+- `status` is `queued`, `running`, `completed` or `failed`; `error` is a user-facing
+  message when failed
+- `skipped` lists at most 100 files; `skipped_count` counts all of them. `reason` is
+  one of `ignored`, `encrypted`, `unreadable`, `not_dicom`, `not_an_image`,
+  `invalid_uid`, `unsupported` (a deflated DICOM file, which is not read)
+- A job fails at once if a backup restore is running, and a restore is refused
+  with `409` while an import runs
+- **Error Responses**:
+  - `404`: Unknown or expired job, or another user's job
+
+##### List Imaging Studies
+
+`GET /imaging-studies/`
+
+- **Purpose**: Studies for the current or an accessible patient, newest study date
+  first; undated studies last
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `patient_id` (optional): an accessible patient; defaults to the active patient
+  - `skip` (default 0), `limit` (default 20, max 100)
+  - `tags`, `tag_match_all`: tag filter, as on other record types
+- **Success Response** (200): array of imaging study objects
+- **Error Responses**:
+  - `403`: No access to `patient_id`
+
+##### Get Imaging Study
+
+`GET /imaging-studies/{study_id}`
+
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+{
+  "id": 3,
+  "patient_id": 1,
+  "study_instance_uid": "1.2.840.113619.2.55.3.604688119",
+  "study_date": "2026-05-01",
+  "modalities": ["CT"],
+  "body_part": "CHEST",
+  "study_description": "CT CHEST W/O CONTRAST",
+  "accession_number": "A12345",
+  "institution_name": "General Hospital",
+  "referring_physician": "SMITH^JANE",
+  "notes": null,
+  "report_text": null,
+  "procedure_id": null,
+  "encounter_id": null,
+  "practitioner_id": null,
+  "series_count": 2,
+  "instance_count": 412,
+  "total_size": 216530944,
+  "tags": [],
+  "created_at": "2026-11-22T12:00:00Z",
+  "updated_at": "2026-11-22T12:00:00Z"
+}
+```
+
+- **Error Responses**:
+  - `404`: Study not found or not accessible
+
+##### List Series and Images
+
+`GET /imaging-studies/{study_id}/series`
+
+- **Purpose**: Series in series-number order, each with its images in instance-number
+  order, for the viewer. File paths are never returned.
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+[
+  {
+    "id": 5,
+    "series_instance_uid": "1.2.840.113619.2.55.3.604688119.2",
+    "modality": "CT",
+    "series_number": 2,
+    "series_description": "AXIAL 1.25mm",
+    "instance_count": 1,
+    "instances": [
+      {
+        "id": 88,
+        "sop_instance_uid": "1.2.840.113619.2.55.3.604688119.2.1",
+        "instance_number": 1,
+        "rows": 512,
+        "cols": 512,
+        "number_of_frames": null
+      }
+    ]
+  }
+]
+```
+
+##### Get Image File
+
+`GET /imaging-studies/{study_id}/instances/{instance_id}/file`
+
+- **Purpose**: Raw DICOM bytes of one image, for the viewer's `wadouri` loader. The
+  first image read of a study by a user is access-logged once per 15 minutes.
+- **Authentication**: Yes (Authorization header)
+- **Success Response** (200): `application/dicom` body, `Cache-Control: private, no-store`
+- **Error Responses**:
+  - `404`: Study not accessible, image not in this study, or file missing from storage
+
+##### Update Imaging Study
+
+`PUT /imaging-studies/{study_id}`
+
+- **Purpose**: Update the user-editable fields. Fields not listed below are ignored.
+- **Authentication**: Yes (edit access)
+- **Request Body** (all optional):
+
+```json
+{
+  "notes": "Follow-up in 6 months",
+  "report_text": "Radiologist's report pasted here",
+  "procedure_id": 12,
+  "encounter_id": 40,
+  "practitioner_id": 3,
+  "tags": ["chest"]
+}
+```
+
+- **Validation**:
+  - `notes`: max 5000 characters, `report_text`: max 50000 characters
+  - `procedure_id` and `encounter_id` must belong to the study's patient
+- **Success Response** (200): Imaging study object
+- **Error Responses**:
+  - `400`: Linked procedure or encounter belongs to another patient
+  - `404`: Study not found or no edit access
+  - `422`: Validation error
+
+##### Delete Imaging Study
+
+`DELETE /imaging-studies/{study_id}`
+
+- **Purpose**: Delete the study, its series and images, and move its folder to trash
+  as one entry (restorable by an admin until trash retention expires)
+- **Authentication**: Yes (edit access)
+- **Success Response** (200): `{"message": "ImagingStudy deleted successfully"}`
+- **Error Responses**:
+  - `404`: Study not found or no edit access
+  - `409`: An import or a backup restore is running
+
+##### Move Imaging Study
+
+`POST /imaging-studies/{study_id}/move`
+
+- **Purpose**: Move a study, with its files, to another patient, typically after an
+  import flagged `patient_mismatch` because a family shared one CD. The procedure and
+  encounter links are cleared, since they belong to the old patient.
+- **Authentication**: Yes (edit access to both patients)
+- **Request Body**: `{"target_patient_id": 2}`
+- **Success Response** (200): Imaging study object
+- **Error Responses**:
+  - `400`: The study already belongs to the target patient
+  - `403`: No edit access to the target patient
+  - `404`: Study not found or no edit access to it
+  - `409`: The target patient already has this study, or an import or a backup
+    restore is running
+
+---
+
 ## 7. Related Information
 
 ### 7.1 Insurance
@@ -4667,13 +4914,36 @@ All file endpoints are **patient-scoped**. The server resolves the patient that 
 
 A caller with no access to the patient — or with only `view` access attempting a write — receives `403 Forbidden`. Access covers records the user owns and records shared with them at the required level (see [Section 10 — Sharing & Collaboration](#10-sharing--collaboration)). List/search endpoints only return files whose owning patient the caller can access.
 
+### Files In Another Member's Paperless Or Papra
+
+On a shared patient, a Paperless or Papra file is reached through the caller's own connection. A file is **stored elsewhere** for the caller when another user uploaded or linked it and the caller's connection cannot reach it:
+
+- Paperless: the uploader's saved Paperless URL differs from the caller's (compared with scheme and host case, a default port and a trailing slash ignored; the path is case-sensitive). A saved URL counts even while that user's integration is turned off.
+- Papra: the uploader's saved Papra URL differs from the caller's, or the file's organisation is not the caller's saved organisation.
+
+A file the caller uploaded, a local file, and a file with no recorded uploader are never stored elsewhere. For a file stored elsewhere:
+
+- Entity file objects returned by list, get metadata and update metadata have `stored_elsewhere: true`. The value is worked out for the caller, so two users can see different values for one file.
+- View and download answer `409` with error code `integration_stored_elsewhere`, without contacting Paperless or Papra.
+- Delete removes the file from MediKeep only and answers `Document unlinked successfully`; the document stays in the other member's instance.
+- The Papra sync check (`POST /entity-files/sync/papra`) and the Paperless sync check, including its pass over uploads that never got a document, skip it, so it is never marked missing. The Papra sync check reads each file in its own organisation, falling back to the caller's.
+- A ZIP export (`GET /export/data` with `include_files=true`) leaves it out and lists it in `FILES_NOT_INCLUDED.txt` as stored in another member's Paperless-ngx or Papra.
+
+Before deleting any other Paperless document, MediKeep reads it through the caller's connection. When that instance holds a document with the file's ID whose original file name (or title) is not the file's name, the file is also only unlinked: the uploader is unknown or their URL changed, so the ID names another document. When the document cannot be read, the delete goes ahead as before.
+
+### Sync Checks
+
+`POST /entity-files/sync/paperless` and `POST /entity-files/sync/papra` check, through the caller's own connection, the files on every patient the caller can **edit** (owned, or shared with `edit` or `full`), on every record type that holds files. View-only shares are not checked, because a check changes the file's status for everyone who sees it. Files stored elsewhere (above) are skipped, and so are files with no recorded uploader on a patient the caller does not own: those were most likely uploaded by the owner into their own instance. Each returns an object mapping each checked file ID to `true` (found, or for Paperless still processing or a `duplicate`), `false` (marked `missing`) or `null`. `null` means the check failed and the file is marked `error`, never `missing`; or, for Paperless, that another user's upload was not found and its status is left as it was, because Paperless also answers `404` for a document the caller's account may not view. A Paperless file is only marked `missing` when the caller uploaded it, or it has no recorded uploader and is on the caller's own patient.
+
+`POST /entity-files/processing/update` uses the same patient rule: an upload with no recorded uploader is only resolved on a patient the caller owns.
+
 ### List Files for Entity
 
 `GET /entity-files/{entity_type}/{entity_id}/files`
 
 - **Purpose**: List files attached to an entity
 - **Authentication**: Yes
-- **Success Response** (200): Array of entity file objects
+- **Success Response** (200): Array of entity file objects, each with `stored_elsewhere` for the caller (see above)
 
 ### Upload File to Entity
 
@@ -4703,6 +4973,7 @@ A caller with no access to the patient — or with only `view` access attempting
 
 - **Purpose**: Stream file inline (e.g., PDF preview, image display)
 - **Authentication**: Yes
+- **Errors**: `409` with `integration_stored_elsewhere` for a file stored elsewhere
 
 ### Download File
 
@@ -4710,6 +4981,7 @@ A caller with no access to the patient — or with only `view` access attempting
 
 - **Purpose**: Download file with `Content-Disposition: attachment`
 - **Authentication**: Yes
+- **Errors**: `409` with `integration_stored_elsewhere` for a file stored elsewhere
 
 ### Update File Metadata
 
@@ -4726,7 +4998,8 @@ A caller with no access to the patient — or with only `view` access attempting
 
 - **Authentication**: Yes
 - **Permission**: `edit` on the owning patient
-- **Success Response** (200): File operation result
+- **Success Response** (200): File operation result. A linked document or a file stored elsewhere is only unlinked from MediKeep
+- A `lab-result` file copied from `lab_result_files` also removes the `lab_result_files` row it was copied from (same lab result, same stored file), so the copy is not recreated at the next start
 
 ### Deleting the Parent Record
 
@@ -4745,7 +5018,9 @@ Deletes that remove records without going through their own endpoint clean up th
 
 Lab results also have older attachments in `lab_result_files`. Those rows are deleted along with the lab result, and their locally stored files move to trash.
 
-In the deletes listed above, a stored file from `lab_result_files`, or from an `entity_file` or `lab_result_file` record deleted directly, stays in place while another file record still points to it.
+In every delete that removes file records, a locally stored file stays in place while an `entity_files` or `lab_result_files` row outside that delete still points to it. This covers the deletes listed above, `DELETE /entity-files/files/{file_id}` and the legacy lab result file deletes. Paths are compared once resolved, so a relative and an absolute path to the same file match.
+
+Imaging studies of a deleted patient (and `DELETE /imaging-studies/{study_id}`) move their whole study folder to trash as one entry, named `imaging_{patient_id}_{study_instance_uid}`.
 
 The cleanup runs only after the delete has been committed, so if the delete fails the attachments stay in place. A failure during cleanup is logged and does not change the response.
 
@@ -4764,8 +5039,8 @@ The cleanup runs only after the delete has been committed, so if the delete fail
 
 - **Purpose**: Finish Paperless-ngx uploads that are still `processing` by reading their task from Paperless
 - **Authentication**: Yes
-- **Scope**: Only files on patients the caller can edit (own patients, and patients shared with `edit` or `full`), checked through the caller's own Paperless connection
-- **Behaviour**: Only the task whose `task_id` matches the file's task is used. If the task status request fails (Paperless can't be reached or answers with an error), the file stays `processing` with its task kept and is checked again on the next call. If no matching task is returned, the file also stays `processing` and is left out of the response. If the task succeeded but gave no usable document ID, the document is looked up by file name and upload time; when that finds nothing, including when the lookup itself fails, the file is marked `duplicate` and its task is cleared. Returns an empty object when Paperless is not enabled for the caller
+- **Scope**: Only files the caller uploaded, files uploaded by users whose saved Paperless URL is the same as the caller's, on patients the caller can edit (own patients, and patients shared with `edit` or `full`), and files with no recorded uploader on the caller's own patients, checked through the caller's own Paperless connection. An upload in a different Paperless instance is left for its uploader
+- **Behaviour**: Only the task whose `task_id` matches the file's task is used. If the task status request fails (Paperless can't be reached or answers with an error), the file stays `processing` with its task kept and is checked again on the next call. If Paperless refuses the task read with `403` (the account lacks the View permission on PaperlessTask), the document is looked up by file name and upload time instead: when found, the file is `synced`, or `duplicate` if another file already holds that document; otherwise it stays `processing` with its task kept. If no matching task is returned, the file also stays `processing` and is left out of the response. If the task succeeded but gave no usable document ID, the document is looked up by file name and upload time; when that finds nothing, including when the lookup itself fails, the file is marked `duplicate` and its task is cleared. Returns an empty object when Paperless is not enabled for the caller
 - **Success Response** (200): Object mapping each checked file ID to its new status (`synced`, `processing`, `duplicate` or `failed`)
 
 ---
@@ -5556,6 +5831,10 @@ Base path: `/api/v1/paperless`
   with no saved credentials returns `400`.
 - **Errors**: `400` with `X-Error-Code: integration_credentials_unusable` when the saved
   credentials cannot be decrypted (see the error table in 13.2).
+- **Warnings**: when the account can connect but Paperless refuses to let it read upload
+  tasks, the test still succeeds and the response adds
+  `"warnings": ["task_permission_missing"]`. Without that permission MediKeep cannot read
+  an upload's result and has to find the document by file name.
 
 ### 13.2 Integration Error Responses (Paperless-ngx and Papra)
 
@@ -5610,6 +5889,8 @@ wrong and an `error_code` that identifies it:
 | `integration_unsupported_format` | Upload rejected: file type not supported |
 | `integration_file_too_large` | Upload rejected: file too large |
 | `integration_permission_denied` | Upload rejected: no permission |
+| `integration_task_permission_denied` | `GET /paperless/tasks/{task_uuid}/status`: the Paperless account may not read upload tasks (it needs the View permission on PaperlessTask) |
+| `integration_stored_elsewhere` | View or download (`409`): the file is in another member's Paperless or Papra, which the caller's connection cannot reach |
 | `integration_storage_full` | Upload rejected: the integration is out of storage |
 | `integration_processing_failed` | Upload accepted but processing failed |
 | `integration_network_error` | Upload failed on the network |
@@ -6309,6 +6590,7 @@ Base path: `/api/v1/admin/models`
 - **Purpose**: Delete a record
 - **Note**: Protects against deleting last user or last admin
 - **Note**: Also removes the record's attachments (see [Deleting the Parent Record](#deleting-the-parent-record))
+- **Note**: Deleting a `patient` keeps its activity history; those entries remain with `patient_id` set to null
 - **Success Response** (200):
 
 ```json
@@ -6654,6 +6936,9 @@ Base path: `/api/v1/admin/bulk`
 
 - **Purpose**: Delete multiple records at once
 - **Note**: Also removes the attachments of each deleted record (see [Deleting the Parent Record](#deleting-the-parent-record))
+- **Note**: Deleting a `patient` keeps its activity history; those entries remain with `patient_id` set to null
+- **Note**: Each record is deleted on its own; a record that fails is listed in `failed_records` and does not stop the rest
+- **Note**: Each deleted record gets a `deleted` activity entry for the admin, the same as a single admin delete
 - **Request Body**:
 
 ```json
@@ -6711,7 +6996,8 @@ Base path: `/api/v1/admin/trash`
 `GET /admin/trash/`
 
 - **Purpose**: List all files currently in trash
-- **Success Response** (200): Array of trash file objects
+- **Success Response** (200): Array of trash file objects. A folder trashed as one entry
+  (an imaging study) is listed once, with the total size of its files
 
 #### Cleanup Old Trash
 
@@ -6731,9 +7017,9 @@ Base path: `/api/v1/admin/trash`
 
 `POST /admin/trash/restore`
 
-- **Purpose**: Restore a file from trash
+- **Purpose**: Restore a file, or a folder trashed as one entry, from trash
 - **Query Parameters**:
-  - `trash_path` (string, required): Path to file in trash
+  - `trash_path` (string, required): Path to file in trash; any other folder is refused
   - `restore_path` (string, optional): Target restore path
 - **Success Response** (200):
 
@@ -6748,9 +7034,10 @@ Base path: `/api/v1/admin/trash`
 
 `DELETE /admin/trash/permanently-delete`
 
-- **Purpose**: Permanently delete a file (cannot be recovered)
+- **Purpose**: Permanently delete a file, or a folder trashed as one entry (cannot be recovered)
 - **Query Parameters**:
-  - `trash_path` (string, required): Path to file in trash
+  - `trash_path` (string, required): Path to file in trash; the trash root and its day
+    folders are refused with `400`
 - **Success Response** (200):
 
 ```json

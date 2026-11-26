@@ -125,6 +125,7 @@ const Medication = () => {
     items: medications,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -133,6 +134,8 @@ const Medication = () => {
     refreshData,
     clearError,
     setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'medication',
     entityLabel: t('medical:entityNames.medication'),
@@ -235,6 +238,7 @@ const Medication = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'medication',
+    onFormError: setFormError,
     onSuccess: () => {
       resetForm();
 
@@ -285,6 +289,7 @@ const Medication = () => {
 
   const handleAddMedication = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
@@ -292,12 +297,21 @@ const Medication = () => {
 
   const handleCloseForm = useCallback(() => {
     if (isBlocking) return;
+    // Files added in the Edit form are attached straight away, so refresh
+    // the card's count even when the form closes without saving
+    if (editingMedication) refreshFileCount(editingMedication.id);
     setShowAddForm(false);
     setEditingMedication(null);
-  }, [isBlocking]);
+    // A new record whose upload failed is saved but not listed yet
+    if (needsRefreshAfterSubmissionRef.current) {
+      needsRefreshAfterSubmissionRef.current = false;
+      refreshData();
+    }
+  }, [isBlocking, editingMedication, refreshFileCount, refreshData]);
 
   const handleEditMedication = useCallback(medication => {
     resetSubmission();
+    setFormError(null);
     setFormData({
       medication_name: medication.medication_name || '',
       alternative_name: medication.alternative_name || '',
@@ -329,7 +343,7 @@ const Medication = () => {
     });
     setEditingMedication(medication);
     setShowAddForm(true);
-  }, [resetSubmission]);
+  }, [resetSubmission, setFormError]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
@@ -348,7 +362,7 @@ const Medication = () => {
         currentPatient?.id
       );
       if (validationError) {
-        setError(validationError);
+        setFormError(validationError);
         return;
       }
 
@@ -366,6 +380,7 @@ const Medication = () => {
       try {
         let success;
         let resultId;
+        let createdMedication = null;
 
         if (editingMedication) {
           success = await updateItem(editingMedication.id, medicationData);
@@ -375,6 +390,7 @@ const Medication = () => {
           success = !!result;
           resultId = result?.id;
           if (success) {
+            createdMedication = result;
             needsRefreshAfterSubmissionRef.current = true;
           }
         }
@@ -440,12 +456,12 @@ const Medication = () => {
                 component: 'Medication',
               });
               completeFileUpload(false, 0, pendingCount);
+              // Saved now, so Save again updates it instead of adding a copy
+              if (createdMedication) setEditingMedication(createdMedication);
             }
           } else {
             completeFileUpload(true, 0, 0);
           }
-        } else {
-          handleSubmissionFailure(new Error('Form submission failed'), 'form');
         }
       } catch (error) {
         logger.error('medications_submission_error', {
@@ -460,7 +476,7 @@ const Medication = () => {
       formData,
       currentPatient,
       editingMedication,
-      setError,
+      setFormError,
       updateItem,
       createItem,
       startSubmission,
@@ -502,7 +518,7 @@ const Medication = () => {
     clampPage(processedMedications.length);
   }, [processedMedications.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('medications.loading', 'Loading medications...')}
@@ -669,6 +685,7 @@ const Medication = () => {
 
         {/* Form Modal */}
         <MedicationFormWrapper
+          formError={formError}
           isOpen={showAddForm}
           onClose={handleCloseForm}
           title={editingMedication ? 'Edit Medication' : 'Add New Medication'}

@@ -32,6 +32,14 @@ describe('MantineEmergencyContactForm', () => {
     editingContact: null,
   };
 
+  // The required fields. RecordForm will not submit the form without them.
+  const requiredFormData = {
+    ...defaultProps.formData,
+    name: 'Emergency Contact',
+    relationship: 'spouse',
+    phone_number: '911',
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -210,7 +218,12 @@ describe('MantineEmergencyContactForm', () => {
 
   describe('Form Submission', () => {
     test('calls onSubmit when form is submitted', () => {
-      render(<MantineEmergencyContactForm {...defaultProps} />);
+      render(
+        <MantineEmergencyContactForm
+          {...defaultProps}
+          formData={requiredFormData}
+        />
+      );
 
       const form = document.querySelector('form');
       fireEvent.submit(form);
@@ -228,7 +241,12 @@ describe('MantineEmergencyContactForm', () => {
     });
 
     test('prevents default form submission', () => {
-      render(<MantineEmergencyContactForm {...defaultProps} />);
+      render(
+        <MantineEmergencyContactForm
+          {...defaultProps}
+          formData={requiredFormData}
+        />
+      );
 
       const form = document.querySelector('form');
       fireEvent.submit(form);
@@ -594,16 +612,13 @@ describe('MantineEmergencyContactForm', () => {
     });
 
     test('supports minimal urgent contact entry', () => {
-      render(<MantineEmergencyContactForm {...defaultProps} />);
-
-      // Fill only required fields for urgent entry
-      const nameInput = screen.getByLabelText(/shared:fields\.fullName/);
-      fireEvent.change(nameInput, { target: { value: 'Emergency Contact' } });
-
-      const phoneInput = screen.getByLabelText(
-        /medical:emergencyContacts\.form\.primaryPhone\.label/
+      // Only the required fields are filled in
+      render(
+        <MantineEmergencyContactForm
+          {...defaultProps}
+          formData={requiredFormData}
+        />
       );
-      fireEvent.change(phoneInput, { target: { value: '911' } });
 
       const form = document.querySelector('form');
       fireEvent.submit(form);

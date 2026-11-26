@@ -24,7 +24,7 @@ import {
   parseDateInput,
   formatDateInputChange,
 } from '../../../utils/dateUtils';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import { unitLabels, validationRanges } from '../../../utils/unitConversion';
 import {
   getDonationTypeOptions,
@@ -36,6 +36,8 @@ import {
   SCREENING_RANGES,
 } from '../../../constants/bloodDonationConstants';
 import logger from '../../../services/logger';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const BloodDonationFormWrapper = ({
   isOpen,
@@ -49,6 +51,7 @@ const BloodDonationFormWrapper = ({
   hemoglobinUnit = DEFAULT_HEMOGLOBIN_UNIT,
   isLoading = false,
   locationSuggestions = [],
+  formError = null,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -105,7 +108,10 @@ const BloodDonationFormWrapper = ({
         message={t('bloodDonations.form.saving', 'Saving donation...')}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -173,6 +179,13 @@ const BloodDonationFormWrapper = ({
                         'bloodDonations.form.locationPlaceholder',
                         'e.g., Red Cross blood drive, City Hospital'
                       )}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => setField('tags', tags)}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
                     />
                   </Grid.Col>
                 </Grid>
@@ -248,14 +261,6 @@ const BloodDonationFormWrapper = ({
                       minRows={2}
                     />
                   </Grid.Col>
-                  <Grid.Col span={12}>
-                    <TagInput
-                      value={formData.tags || []}
-                      onChange={tags => setField('tags', tags)}
-                      label={t('shared:labels.tags', 'Tags')}
-                      placeholder={t('shared:fields.addTags', 'Add tags...')}
-                    />
-                  </Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
@@ -279,7 +284,7 @@ const BloodDonationFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };
@@ -306,6 +311,7 @@ BloodDonationFormWrapper.propTypes = {
   hemoglobinUnit: PropTypes.oneOf(HEMOGLOBIN_UNITS),
   isLoading: PropTypes.bool,
   locationSuggestions: PropTypes.arrayOf(PropTypes.string),
+  formError: PropTypes.string,
 };
 
 export default BloodDonationFormWrapper;

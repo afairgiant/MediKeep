@@ -15,8 +15,8 @@ import patientApi from '../../../services/api/patientApi';
 // test's id-based queries.
 afterEach(cleanup);
 
-// Mock DateInput component (via @mantine/dates, same pattern as MantinePatientForm tests)
-vi.mock('@mantine/dates', () => ({
+// Mock the DateInput adapter, same pattern as MantinePatientForm tests
+vi.mock('../../adapters/DateInput', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => {
     const {
       firstDayOfWeek: _firstDayOfWeek,

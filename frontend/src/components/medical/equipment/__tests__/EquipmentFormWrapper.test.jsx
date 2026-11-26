@@ -30,7 +30,7 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
 }));
 
 // Mock Date Input component
-vi.mock('@mantine/dates', () => ({
+vi.mock('../../../adapters/DateInput', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => (
     <div>
       <label htmlFor={`date-${label}`}>
@@ -180,6 +180,11 @@ describe('EquipmentFormWrapper', () => {
       expect(screen.getByText('Equipment Type')).toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByText('Prescribed By')).toBeInTheDocument();
+      // Tags is labelled and on Basic Info (inactive panels are hidden)
+      expect(screen.getByLabelText('Tags')).toBe(
+        screen.getByTestId('tag-input')
+      );
+      expect(screen.getByLabelText('Tags')).toBeVisible();
 
       // Navigate to Device Details tab to check those fields
       await user.click(screen.getByRole('tab', { name: /Device Details/i }));
@@ -197,9 +202,6 @@ describe('EquipmentFormWrapper', () => {
       expect(
         screen.getByRole('textbox', { name: /^Notes/i })
       ).toBeInTheDocument();
-      expect(screen.getByLabelText('Tags')).toBe(
-        screen.getByTestId('tag-input')
-      );
     });
 
     test('renders date fields', async () => {

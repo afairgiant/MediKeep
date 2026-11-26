@@ -67,6 +67,13 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"Error shutting down data retention scheduler: {e}")
 
+        try:
+            from app.services.imaging_import_jobs import import_jobs
+
+            import_jobs.shutdown()
+        except Exception as e:
+            logger.warning(f"Error cancelling queued imaging imports: {e}")
+
 
 # Create FastAPI app
 app = FastAPI(

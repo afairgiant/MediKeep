@@ -21,6 +21,7 @@ const {
   mockRefreshData,
   mockClearError,
   mockSetError,
+  mockSetFormError,
   mockOpenModal,
   mockCloseModal,
   mockStartSubmission,
@@ -45,6 +46,7 @@ const {
   mockRefreshData: vi.fn(),
   mockClearError: vi.fn(),
   mockSetError: vi.fn(),
+  mockSetFormError: vi.fn(),
   mockOpenModal: vi.fn(),
   mockCloseModal: vi.fn(),
   mockStartSubmission: vi.fn(),
@@ -631,6 +633,8 @@ function setupDefaults(overrides = {}) {
     deleteItem: mockDeleteItem,
     refreshData: mockRefreshData,
     clearError: mockClearError,
+    formError: null,
+    setFormError: mockSetFormError,
     setError: mockSetError,
     ...overrides,
   });
@@ -1017,6 +1021,7 @@ describe('Procedures Page Integration Tests', () => {
         items: [],
         currentPatient: { id: 1 },
         loading: true,
+        listLoading: true,
         error: null,
         successMessage: null,
         createItem: mockCreateItem,
@@ -1024,6 +1029,8 @@ describe('Procedures Page Integration Tests', () => {
         deleteItem: mockDeleteItem,
         refreshData: mockRefreshData,
         clearError: mockClearError,
+        formError: null,
+        setFormError: mockSetFormError,
         setError: mockSetError,
       });
 
@@ -1068,6 +1075,8 @@ describe('Procedures Page Integration Tests', () => {
         deleteItem: mockDeleteItem,
         refreshData: mockRefreshData,
         clearError: mockClearError,
+        formError: null,
+        setFormError: mockSetFormError,
         setError: mockSetError,
       });
 
@@ -1089,6 +1098,8 @@ describe('Procedures Page Integration Tests', () => {
         deleteItem: mockDeleteItem,
         refreshData: mockRefreshData,
         clearError: mockClearError,
+        formError: null,
+        setFormError: mockSetFormError,
         setError: mockSetError,
       });
 
@@ -1101,7 +1112,7 @@ describe('Procedures Page Integration Tests', () => {
 
   /* ============ Form Validation ============ */
   describe('Form Validation', () => {
-    it('calls setError when submitting without procedure name', async () => {
+    it('shows a missing procedure name inside the form', async () => {
       render(<Procedures />);
 
       // Open form
@@ -1112,11 +1123,14 @@ describe('Procedures Page Integration Tests', () => {
       const submitBtn = screen.getByText('buttons.submit');
       await userEvent.click(submitBtn);
 
-      // Component should call setError for required field
-      expect(mockSetError).toHaveBeenCalledWith('Required field missing');
+      // Shown in the dialog, not in the page alert behind it
+      expect(mockSetFormError).toHaveBeenCalledWith(
+        'Please fill in all required fields.'
+      );
+      expect(mockSetError).not.toHaveBeenCalled();
     });
 
-    it('calls setError when submitting without procedure date', async () => {
+    it('shows a missing procedure date inside the form', async () => {
       render(<Procedures />);
 
       // Open form
@@ -1135,8 +1149,10 @@ describe('Procedures Page Integration Tests', () => {
       const submitBtn = screen.getByText('buttons.submit');
       await userEvent.click(submitBtn);
 
-      // Should call setError for invalid date
-      expect(mockSetError).toHaveBeenCalledWith('Invalid date');
+      expect(mockSetFormError).toHaveBeenCalledWith(
+        'Please enter a valid date.'
+      );
+      expect(mockSetError).not.toHaveBeenCalled();
     });
   });
 

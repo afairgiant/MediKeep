@@ -64,6 +64,7 @@ const MedicalEquipment = () => {
     items: equipment,
     currentPatient,
     loading,
+    listLoading,
     error,
     successMessage,
     createItem,
@@ -71,7 +72,8 @@ const MedicalEquipment = () => {
     deleteItem,
     refreshData,
     clearError,
-    setError,
+    formError,
+    setFormError,
   } = useMedicalData({
     entityName: 'equipment',
     entityLabel: t('medical:entityNames.equipment'),
@@ -112,12 +114,6 @@ const MedicalEquipment = () => {
   } = useViewModalNavigation({
     items: equipment,
     loading,
-    // Files can be added or deleted from the view modal
-    onClose: equip => {
-      if (equip) {
-        refreshFileCount(equip.id);
-      }
-    },
   });
 
   // Form state
@@ -144,6 +140,7 @@ const MedicalEquipment = () => {
     statusMessage,
   } = useFormSubmissionWithUploads({
     entityType: 'medical-equipment',
+    onFormError: setFormError,
     onSuccess: () => {
       setShowModal(false);
       setEditingEquipment(null);
@@ -166,6 +163,9 @@ const MedicalEquipment = () => {
   // Closing after a save whose upload failed still shows the saved record
   const handleCloseForm = () => {
     if (isBlocking) return;
+    // Files added in the Edit form are attached straight away, so refresh
+    // the card's count even when the form closes without saving
+    if (editingEquipment) refreshFileCount(editingEquipment.id);
     setShowModal(false);
     if (needsRefreshAfterSubmissionRef.current) {
       needsRefreshAfterSubmissionRef.current = false;
@@ -175,6 +175,7 @@ const MedicalEquipment = () => {
 
   const handleAddEquipment = () => {
     resetSubmission();
+    setFormError(null);
     setDocumentManagerMethods(null);
     setEditingEquipment(null);
     setFormData(EMPTY_FORM_DATA);
@@ -183,6 +184,7 @@ const MedicalEquipment = () => {
 
   const handleEditEquipment = equip => {
     resetSubmission();
+    setFormError(null);
     setEditingEquipment(equip);
     setFormData({
       equipment_name: equip.equipment_name || '',
@@ -218,7 +220,7 @@ const MedicalEquipment = () => {
 
     const validationError = validateEquipmentForm(formData, currentPatient?.id);
     if (validationError) {
-      setError(validationError);
+      setFormError(validationError);
       return;
     }
 
@@ -234,6 +236,7 @@ const MedicalEquipment = () => {
     try {
       let success;
       let resultId;
+      let createdEquipment = null;
 
       if (editingEquipment) {
         success = await updateItem(editingEquipment.id, equipmentData);
@@ -242,6 +245,7 @@ const MedicalEquipment = () => {
         const result = await createItem(equipmentData);
         success = !!result;
         resultId = result?.id;
+        if (success) createdEquipment = result;
       }
       if (success) {
         needsRefreshAfterSubmissionRef.current = true;
@@ -275,13 +279,13 @@ const MedicalEquipment = () => {
               component: 'MedicalEquipment',
             });
             completeFileUpload(false, 0, pendingCount);
+            // Saved now, so Save again updates it instead of adding a copy
+            if (createdEquipment) setEditingEquipment(createdEquipment);
           }
           refreshFileCount(resultId);
         } else {
           completeFileUpload(true, 0, 0);
         }
-      } else {
-        handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
     } catch (error) {
       logger.error('equipment_submission_error', {
@@ -308,7 +312,7 @@ const MedicalEquipment = () => {
     clampPage(filteredEquipment.length);
   }, [filteredEquipment.length, clampPage]);
 
-  if (loading) {
+  if (listLoading) {
     return (
       <MedicalPageLoading
         message={t('equipment.loading', 'Loading equipment...')}
@@ -494,6 +498,7 @@ const MedicalEquipment = () => {
       </Container>
 
       <EquipmentFormWrapper
+        formError={formError}
         isOpen={showModal}
         onClose={handleCloseForm}
         title={
@@ -510,6 +515,11 @@ const MedicalEquipment = () => {
         isLoading={isBlocking}
         statusMessage={statusMessage}
         onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={success => {
+          if (success && editingEquipment?.id) {
+            refreshFileCount(editingEquipment.id);
+          }
+        }}
       />
 
       <EquipmentViewModal

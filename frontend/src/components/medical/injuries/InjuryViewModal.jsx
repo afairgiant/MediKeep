@@ -331,7 +331,6 @@ const InjuryViewModal = ({
               <DocumentManagerWithProgress
                 entityType="injury"
                 entityId={injury.id}
-                readOnly={true}
               />
             </Box>
           </Tabs.Panel>

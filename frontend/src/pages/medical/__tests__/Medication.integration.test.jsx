@@ -457,6 +457,8 @@ const defaultMedicalData = {
   deleteItem: vi.fn().mockResolvedValue({}),
   refreshData: vi.fn(),
   clearError: vi.fn(),
+  formError: null,
+  setFormError: vi.fn(),
   setError: vi.fn(),
   setSuccessMessage: vi.fn(),
 };
@@ -499,6 +501,7 @@ describe('Medication Page Integration Tests', () => {
         ...defaultMedicalData,
         items: [],
         loading: true,
+        listLoading: true,
       });
 
       renderWithPatient(<Medication />);

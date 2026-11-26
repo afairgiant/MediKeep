@@ -31,7 +31,7 @@ import {
   formatDateInputChange,
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { TagInput } from '../../common/TagInput';
+import TagsField from '../../shared/TagsField';
 import logger from '../../../services/logger';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import {
@@ -41,6 +41,8 @@ import {
 } from '../../../constants/vaccineLibrary';
 import { getRememberedEditTab } from '../../../utils/editTabHandoff';
 import NotesField from '../../shared/NotesField';
+import FormErrorPopup from '../../shared/FormErrorPopup';
+import RecordForm from '../../shared/RecordForm';
 
 const ImmunizationFormWrapper = ({
   isOpen,
@@ -56,6 +58,7 @@ const ImmunizationFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
+  formError = null,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -219,7 +222,10 @@ const ImmunizationFormWrapper = ({
         type={statusMessage?.type || 'loading'}
       />
 
-      <form onSubmit={handleSubmit}>
+      {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
+      <RecordForm onSubmit={handleSubmit}>
+        {/* Why a save failed, in a popup over the form (dismissed with OK) */}
+        <FormErrorPopup error={formError} />
         <Stack gap="lg">
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -465,26 +471,19 @@ const ImmunizationFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags', 'Tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t(
-                          'immunizations.form.tagsDesc',
-                          'Add tags to categorize and organize immunizations'
-                        )}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('shared:fields.addTags', 'Add tags...')}
-                      />
-                    </Box>
+                    <TagsField
+                      value={formData.tags || []}
+                      onChange={tags => {
+                        onInputChange({
+                          target: { name: 'tags', value: tags },
+                        });
+                      }}
+                      description={t(
+                        'immunizations.form.tagsDesc',
+                        'Add tags to categorize and organize immunizations'
+                      )}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
+                    />
                   </Grid.Col>
                 </Grid>
               </Box>
@@ -776,7 +775,7 @@ const ImmunizationFormWrapper = ({
             </SubmitButton>
           </Group>
         </Stack>
-      </form>
+      </RecordForm>
     </Modal>
   );
 };
