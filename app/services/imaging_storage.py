@@ -96,10 +96,10 @@ def trash_study_files(
         directory = study_directory(patient_id, study_instance_uid)
     except ValueError:
         return None
-    if not directory.is_dir():
-        return None
 
     try:
+        if not directory.is_dir():
+            return None
         file_management_service.move_directory_to_trash(
             str(directory),
             trash_name=f"imaging_{int(patient_id)}_{study_instance_uid}",

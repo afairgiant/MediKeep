@@ -102,3 +102,12 @@ def test_trash_refuses_directory_outside_storage(trash, monkeypatch, tmp_path):
 
     assert trash_study_files(904, STUDY_UID, reason="test") is False
     assert outside.exists()
+
+
+def test_trash_unreadable_directory_returns_false(trash, monkeypatch):
+    def denied(self):
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(Path, "is_dir", denied)
+
+    assert trash_study_files(905, STUDY_UID, reason="test") is False
