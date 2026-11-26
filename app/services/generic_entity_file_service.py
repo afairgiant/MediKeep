@@ -357,6 +357,8 @@ class _ContentMatches:
     rejects_re_uploads: bool = False
     # A document with this content was added before the upload window, so Paperless held it already
     earlier_copy: bool = False
+    # A checksum request failed, so finding nothing does not show there is no document
+    lookup_failed: bool = False
 
 
 _DOCUMENT_SEARCH_PAGE_SIZE = 100
@@ -2846,7 +2848,9 @@ class GenericEntityFileService:
         """
         Record a finished Paperless task on its upload and clear the task UUID.
 
-        Both task checkers (``update_processing_files`` and the sync check's
+        A successful task with no usable document ID whose document lookup
+        failed is left as it is, so the next check reads the task and looks
+        again. Both task checkers (``update_processing_files`` and the sync check's
         ``_resolve_task_uuids_to_document_ids``) use this, so a task result
         gives the same status whichever of them reads it first. The caller
         commits.
@@ -2857,7 +2861,7 @@ class GenericEntityFileService:
         task_uuid = file_record.paperless_task_uuid
 
         if parsed.is_success:
-            document_id = await self._validate_and_process_document_id(
+            document_id, lookup_failed = await self._validate_and_process_document_id(
                 parsed.document_id, file_record, paperless_service, current_user_id
             )
             if document_id:
@@ -2866,6 +2870,15 @@ class GenericEntityFileService:
                     logging.INFO,
                     "paperless_task_resolved",
                     f"Paperless task resolved to document {document_id}",
+                    file_record,
+                    task_uuid=task_uuid,
+                )
+            elif lookup_failed:
+                # Paperless may hold the document; keep the task to look again later
+                _log_file_event(
+                    logging.INFO,
+                    "paperless_task_document_lookup_failed",
+                    "Paperless task succeeded but its document could not be looked up; will retry",
                     file_record,
                     task_uuid=task_uuid,
                 )
@@ -2910,7 +2923,7 @@ class GenericEntityFileService:
 
     async def _validate_and_process_document_id(
         self, document_id, file_record, paperless_service, current_user_id: int
-    ) -> Optional[str]:
+    ) -> Tuple[Optional[str], bool]:
         """
         Validate document ID and handle fallback logic for invalid IDs.
 
@@ -2921,7 +2934,9 @@ class GenericEntityFileService:
             current_user_id: User whose Paperless ``paperless_service`` connects to
 
         Returns:
-            Valid document ID as string, or None if invalid and fallback failed
+            The valid document ID as a string, or None if it is invalid and the
+            fallback lookup found nothing; and whether that lookup failed, in
+            which case finding nothing does not show there is no document.
         """
         if document_id and str(document_id).lower() not in [
             "unknown",
@@ -2932,7 +2947,7 @@ class GenericEntityFileService:
             try:
                 doc_id_int = int(document_id)
                 if doc_id_int > 0:
-                    return str(doc_id_int)
+                    return str(doc_id_int), False
             except (ValueError, TypeError):
                 pass
             _log_file_event(
@@ -2963,14 +2978,17 @@ class GenericEntityFileService:
                     f"Fallback search found Paperless document {fallback_doc_id}",
                     file_record,
                 )
-                return fallback_doc_id
+                return fallback_doc_id, False
+            if matches.lookup_failed:
+                # The lookup logged why
+                return None, True
             _log_file_event(
                 logging.WARNING,
                 "paperless_document_fallback_search_empty",
                 "Fallback search found no Paperless document",
                 file_record,
             )
-            return None
+            return None, False
 
         except Exception as e:
             _log_file_event(
@@ -2980,7 +2998,7 @@ class GenericEntityFileService:
                 file_record,
                 error=str(e),
             )
-            return None
+            return None, True
 
     async def _resolve_without_task(
         self, file_record, paperless_service, current_user_id: int
@@ -3036,7 +3054,8 @@ class GenericEntityFileService:
         Find the Paperless documents whose checksum is a digest of the uploaded
         bytes and that were added within 30 minutes of the upload, and whether
         one was added before that. Used when the upload's task gives no usable
-        document ID or cannot be read. A failed lookup finds nothing.
+        document ID or cannot be read. A failed lookup finds nothing and sets
+        ``lookup_failed``.
         """
         if not file_record.paperless_sha256:
             _log_file_event(
@@ -3049,6 +3068,7 @@ class GenericEntityFileService:
 
         uploaded_at = _as_naive_utc(file_record.uploaded_at)
         start, end = uploaded_at - _UPLOAD_WINDOW, uploaded_at + _UPLOAD_WINDOW
+        lookup_failed = False
         try:
             for checksum, rejects_re_uploads in (
                 (file_record.paperless_sha256, False),
@@ -3064,6 +3084,13 @@ class GenericEntityFileService:
                     "GET", f"/api/documents/?{query}"
                 ) as response:
                     if response.status != 200:
+                        lookup_failed = True
+                        _log_file_event(
+                            logging.WARNING,
+                            "paperless_document_search_refused",
+                            f"Paperless answered HTTP {response.status} to a checksum lookup",
+                            file_record,
+                        )
                         continue
                     documents = (await response.json()).get("results", [])
                 if documents:
@@ -3089,7 +3116,8 @@ class GenericEntityFileService:
                 # The message can quote the request URL, which holds the checksum
                 error=type(e).__name__,
             )
-        return _ContentMatches([])
+            return _ContentMatches([], lookup_failed=True)
+        return _ContentMatches([], lookup_failed=lookup_failed)
 
     def cleanup_entity_files_on_deletion(
         self,

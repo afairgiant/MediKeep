@@ -541,3 +541,34 @@ class TestTaskOutcomes:
             ) == (expected, None, None)
         # Paperless's error message quotes the file name
         assert Path(FILE_NAME).stem not in persisted_text(caplog)
+
+    async def test_failed_document_lookup_leaves_the_upload_processing(
+        self, db_session, test_user, test_patient
+    ):
+        # The task gave no document ID and Paperless refused the checksum lookup,
+        # so the document may be there: both checkers keep the task to look again
+        upload = processing_upload(db_session, test_patient.id, "task")
+        paperless = RecordingPaperless(
+            {
+                "/api/tasks/": task_response("task", None),
+                "/api/documents/?": (500, {}),
+            }
+        )
+
+        await GenericEntityFileService()._resolve_task_uuids_to_document_ids(
+            db_session, paperless, [upload], test_user.id
+        )
+        db_session.refresh(upload)
+        assert (upload.sync_status, upload.paperless_task_uuid) == (
+            "processing",
+            "task",
+        )
+
+        result = await poll(db_session, test_user.id, paperless)
+
+        assert result == {str(upload.id): "processing"}
+        db_session.refresh(upload)
+        assert (upload.sync_status, upload.paperless_task_uuid) == (
+            "processing",
+            "task",
+        )

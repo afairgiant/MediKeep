@@ -571,13 +571,13 @@ async def test_upload_without_stored_checksums_is_not_looked_up():
     assert requests == []
 
 
-async def test_failed_lookup_finds_nothing():
+async def test_failed_lookup_finds_nothing_and_says_so():
     def respond(endpoint):
         raise ConnectionError("Paperless went away")
 
     assert await _find(
         _paperless_upload(), _FakePaperlessApi(respond)
-    ) == _ContentMatches([])
+    ) == _ContentMatches([], lookup_failed=True)
 
 
 @pytest.mark.parametrize(
