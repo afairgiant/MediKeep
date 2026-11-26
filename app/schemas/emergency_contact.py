@@ -1,7 +1,13 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidatorFunctionWrapHandler,
+    field_validator,
+)
 
 from app.schemas.validators import validate_phone_number
 from app.schemas.read_model import read_model
@@ -164,6 +170,14 @@ class EmergencyContactResponse(read_model(EmergencyContactBase)):
     patient_id: int = Field(..., description="ID of the patient")
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("phone_number", mode="wrap")
+    @classmethod
+    def keep_blank_phone_number(cls, v, handler: ValidatorFunctionWrapHandler):
+        # The shared phone validator turns blank into None, which this str field rejects
+        if isinstance(v, str) and not v.strip():
+            return v
+        return handler(v)
 
 
 class EmergencyContactWithRelations(EmergencyContactResponse):

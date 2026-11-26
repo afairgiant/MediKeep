@@ -27,6 +27,7 @@ READ_SIDE_VALIDATORS = {
     "Patient.validate_gender_response",
     "Patient.convert_empty_strings_to_none_for_response",
     "FamilyMemberResponse.auto_correct_deceased_status",
+    "EmergencyContactResponse.keep_blank_phone_number",
     "LabTestComponentResponse.validate_ref_range_text",
     "LabTestComponentResponse.validate_textual_value",
     "LabTestComponentResponse.validate_status",

@@ -7,6 +7,7 @@ import pytest
 
 from app.models.clinical import Encounter, Medication
 from app.models.labs import LabResult
+from app.models.patient import EmergencyContact
 from app.models.procedures import Treatment
 from app.models.reporting import ReportTemplate
 from app.models.user import User
@@ -167,3 +168,22 @@ def test_user_with_email_that_fails_format_check(
     response = client.get("/api/v1/users/me", headers=authenticated_headers)
     assert response.status_code == 200, response.text
     assert response.json()["email"] == "admin@localhost"
+
+
+def test_emergency_contact_with_blank_phone_number(
+    client, db_session, authenticated_headers, patient_id
+):
+    path = "/api/v1/emergency-contacts/"
+    record_id = _create(
+        client,
+        authenticated_headers,
+        path,
+        {"name": "Alex Doe", "relationship": "friend", "phone_number": "555-0100"},
+    )
+    db_session.get(EmergencyContact, record_id).phone_number = ""
+    db_session.commit()
+
+    listing = client.get(path, headers=authenticated_headers)
+    assert listing.status_code == 200, listing.text
+    row = next(row for row in listing.json() if row["id"] == record_id)
+    assert row["phone_number"] == ""
