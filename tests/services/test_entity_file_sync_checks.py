@@ -7,7 +7,7 @@ user can edit are checked or changed.
 """
 
 import logging
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, nullcontext
 from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import parse_qs
@@ -32,9 +32,11 @@ from app.services.generic_entity_file_service import (
 from tests.utils.attachment_records import add_record_for_every_file_entity_type
 from tests.utils.log_output import persisted_text
 from tests.utils.paperless_uploads import (
+    RecordingPaperless,
     member,
     patient_for,
     share,
+    task_response,
     use_paperless,
     use_papra,
 )
@@ -146,8 +148,8 @@ def _sync_statuses(db_session, files):
     }
 
 
-async def _run_paperless_sync_check(db_session, user_id, remote):
-    """Run the Paperless sync check against ``remote``; task resolution leaves every task pending."""
+async def _run_paperless_sync_check(db_session, user_id, remote, resolve_tasks=False):
+    """Run the Paperless sync check against ``remote``; unless ``resolve_tasks``, every task is left pending."""
     with (
         patch(
             "app.services.generic_entity_file_service.has_usable_credentials",
@@ -161,10 +163,14 @@ async def _run_paperless_sync_check(db_session, user_id, remote):
             "app.services.paperless_service.create_paperless_service",
             return_value=remote,
         ),
-        patch.object(
-            GenericEntityFileService,
-            "_resolve_task_uuids_to_document_ids",
-            new=AsyncMock(),
+        (
+            nullcontext()
+            if resolve_tasks
+            else patch.object(
+                GenericEntityFileService,
+                "_resolve_task_uuids_to_document_ids",
+                new=AsyncMock(),
+            )
         ),
     ):
         return await GenericEntityFileService().check_paperless_sync_status(
@@ -238,8 +244,8 @@ class TestPaperlessChecks:
     async def test_file_whose_task_failed_is_marked_missing(
         self, db_session, test_user, test_patient
     ):
-        # _resolve_task_uuids_to_document_ids marks a failed task "failed" but
-        # keeps its task UUID, so a task UUID alone must not shield a record.
+        # update_processing_files marks a record "failed" and keeps its task UUID
+        # when it cannot process the record, so a task UUID alone must not shield it.
         failed = _remote_file(
             db_session,
             _equipment(db_session, test_patient.id),
@@ -297,6 +303,43 @@ class TestPaperlessChecks:
         db_session.refresh(processing)
         assert processing.sync_status == "processing"
         assert processing.paperless_task_uuid == "task-in-progress"
+
+    @pytest.mark.parametrize(
+        "message,expected",
+        [
+            pytest.param("Unsupported mime type", "failed", id="failed"),
+            pytest.param(
+                "Not consuming: It is a duplicate of report (#42)",
+                "duplicate",
+                id="duplicate",
+            ),
+        ],
+    )
+    async def test_upload_whose_task_fails_during_the_check_is_not_shown_processing(
+        self, db_session, test_user, test_patient, message, expected
+    ):
+        # Regression for #1279: the check's own task resolution marked the upload
+        # failed, then the check set it back to processing.
+        upload = _remote_file(
+            db_session,
+            _equipment(db_session, test_patient.id),
+            "paperless",
+            None,
+            sync_status="processing",
+            task_uuid="task-failed",
+        )
+        paperless = RecordingPaperless(
+            {"/api/tasks/": task_response("task-failed", None, "FAILURE", message)}
+        )
+
+        result = await _run_paperless_sync_check(
+            db_session, test_user.id, paperless, resolve_tasks=True
+        )
+
+        assert result == {upload.id: True}
+        db_session.refresh(upload)
+        assert upload.sync_status == expected
+        assert upload.paperless_task_uuid is None
 
     async def test_upload_whose_task_paperless_lost_is_found_by_checksum(
         self, db_session, test_user, test_patient
@@ -528,13 +571,13 @@ async def test_upload_without_stored_checksums_is_not_looked_up():
     assert requests == []
 
 
-async def test_failed_lookup_finds_nothing():
+async def test_failed_lookup_finds_nothing_and_says_so():
     def respond(endpoint):
         raise ConnectionError("Paperless went away")
 
     assert await _find(
         _paperless_upload(), _FakePaperlessApi(respond)
-    ) == _ContentMatches([])
+    ) == _ContentMatches([], lookup_failed=True)
 
 
 @pytest.mark.parametrize(

@@ -6,7 +6,9 @@ caller's own Paperless. Another user's task IDs and file names must never be sen
 anywhere, and only the task that was asked for may decide a record.
 """
 
+import logging
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 from fastapi import HTTPException
@@ -14,7 +16,11 @@ from fastapi import HTTPException
 from app.api.v1.endpoints.entity_file import get_entity_by_type_and_id
 from app.models.models import UserPreferences
 from app.schemas.entity_file import EntityType
-from app.services.generic_entity_file_service import FILE_ENTITY_SOURCES
+from app.services.generic_entity_file_service import (
+    FILE_ENTITY_SOURCES,
+    GenericEntityFileService,
+)
+from tests.utils.log_output import persisted_text
 from tests.utils.paperless_uploads import (
     FILE_MD5,
     FILE_NAME,
@@ -368,8 +374,18 @@ class TestTaskPermissionDenied:
         assert again.paperless_document_id is None
         assert again.paperless_task_uuid == "again"
 
+    @pytest.mark.parametrize(
+        "sha256_answer, expected, task_uuid",
+        [
+            pytest.param(
+                (200, {"results": []}), "duplicate", None, id="sha256-found-nothing"
+            ),
+            # The refused request may have missed this upload's own copy
+            pytest.param((500, {}), "processing", "again", id="sha256-refused"),
+        ],
+    )
     async def test_re_upload_rejected_by_paperless_2_is_a_duplicate(
-        self, db_session, test_user, test_patient
+        self, db_session, test_user, test_patient, sha256_answer, expected, task_uuid
     ):
         # Paperless 2.x (MD5 checksums) rejects a re-upload, so the match is the first upload's document
         first = processing_upload(db_session, test_patient.id, "first")
@@ -382,10 +398,7 @@ class TestTaskPermissionDenied:
         paperless = RecordingPaperless(
             {
                 "/api/tasks/": (403, {}),
-                f"/api/documents/?checksum__iexact={FILE_SHA256}": (
-                    200,
-                    {"results": []},
-                ),
+                f"/api/documents/?checksum__iexact={FILE_SHA256}": sha256_answer,
                 f"/api/documents/?checksum__iexact={FILE_MD5}": (
                     200,
                     {"results": [{"id": 55, "added": added}]},
@@ -395,10 +408,10 @@ class TestTaskPermissionDenied:
 
         result = await poll(db_session, test_user.id, paperless)
 
-        assert result == {str(again.id): "duplicate"}
+        assert result == {str(again.id): expected}
         db_session.refresh(again)
         assert again.paperless_document_id is None
-        assert again.paperless_task_uuid is None
+        assert again.paperless_task_uuid == task_uuid
 
     @pytest.mark.parametrize(
         "checksum, status",
@@ -467,3 +480,124 @@ async def test_sources_match_the_entity_types_that_accept_files(db_session):
         except HTTPException:
             accepts_files = False
         assert (entity_type.value in covered) == accepts_files, entity_type.value
+
+
+class TestTaskOutcomes:
+    """Regression for #1279: both task checkers record the same task result the same way."""
+
+    @pytest.mark.parametrize(
+        "status,document_id,message,expected",
+        [
+            pytest.param(
+                "FAILURE",
+                None,
+                f"Not consuming {FILE_NAME}: It is a duplicate of blood panel (#42)",
+                "duplicate",
+                id="failed-as-duplicate",
+            ),
+            pytest.param(
+                "FAILURE",
+                None,
+                f"{FILE_NAME}: Error while consuming document {FILE_NAME}: "
+                "Unsupported mime type",
+                "failed",
+                id="failed-other-error",
+            ),
+            pytest.param(
+                "SUCCESS", None, None, "duplicate", id="succeeded-without-document"
+            ),
+        ],
+    )
+    async def test_poll_and_sync_check_agree(
+        self,
+        db_session,
+        test_user,
+        test_patient,
+        caplog,
+        status,
+        document_id,
+        message,
+        expected,
+    ):
+        polled = processing_upload(db_session, test_patient.id, "polled")
+        sync_checked = processing_upload(db_session, test_patient.id, "sync-checked")
+        paperless = RecordingPaperless(
+            {
+                f"/api/tasks/?task_id={task_uuid}": task_response(
+                    task_uuid, document_id, status, message
+                )
+                for task_uuid in ("polled", "sync-checked")
+            }
+            | {"/api/documents/?": (200, {"results": []})}
+        )
+
+        with caplog.at_level(logging.DEBUG):
+            # Resolved first, so the poll below only finds the other upload
+            await GenericEntityFileService()._resolve_task_uuids_to_document_ids(
+                db_session, paperless, [sync_checked], test_user.id
+            )
+            result = await poll(db_session, test_user.id, paperless)
+
+        assert result == {str(polled.id): expected}
+        for upload in (polled, sync_checked):
+            db_session.refresh(upload)
+            assert (
+                upload.sync_status,
+                upload.paperless_task_uuid,
+                upload.paperless_document_id,
+            ) == (expected, None, None)
+        # Paperless's error message quotes the file name
+        assert Path(FILE_NAME).stem not in persisted_text(caplog)
+
+    @pytest.mark.parametrize(
+        "lookup",
+        [
+            pytest.param({"/api/documents/?": (500, {})}, id="every-request-refused"),
+            pytest.param(
+                {
+                    f"/api/documents/?checksum__iexact={FILE_SHA256}": (500, {}),
+                    f"/api/documents/?checksum__iexact={FILE_MD5}": (
+                        200,
+                        {
+                            "results": [
+                                {
+                                    "id": 55,
+                                    "added": (
+                                        datetime.now(timezone.utc) - timedelta(hours=2)
+                                    ).isoformat(),
+                                }
+                            ]
+                        },
+                    ),
+                },
+                id="sha256-refused-md5-finds-an-older-copy",
+            ),
+        ],
+    )
+    async def test_failed_document_lookup_leaves_the_upload_processing(
+        self, db_session, test_user, test_patient, lookup
+    ):
+        # The task gave no document ID and Paperless refused a checksum lookup,
+        # so the document may be there: both checkers keep the task to look again
+        upload = processing_upload(db_session, test_patient.id, "task")
+        paperless = RecordingPaperless(
+            {"/api/tasks/": task_response("task", None)} | lookup
+        )
+
+        await GenericEntityFileService()._resolve_task_uuids_to_document_ids(
+            db_session, paperless, [upload], test_user.id
+        )
+        db_session.refresh(upload)
+        assert (upload.sync_status, upload.paperless_task_uuid) == (
+            "processing",
+            "task",
+        )
+
+        result = await poll(db_session, test_user.id, paperless)
+
+        assert result == {str(upload.id): "processing"}
+        db_session.refresh(upload)
+        assert (upload.sync_status, upload.paperless_task_uuid) == (
+            "processing",
+            "task",
+        )
