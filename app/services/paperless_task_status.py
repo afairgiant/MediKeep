@@ -169,4 +169,17 @@ def _is_duplicate(task: Dict[str, Any], error_message: Optional[str]) -> bool:
         return False
 
     lowered = error_message.lower()
+    file_name = _task_file_name(task)
+    if file_name:
+        # Paperless quotes the file name, which must not decide the outcome
+        lowered = lowered.replace(file_name.lower(), "")
     return any(keyword in lowered for keyword in DUPLICATE_KEYWORDS)
+
+
+def _task_file_name(task: Dict[str, Any]) -> Optional[str]:
+    """The uploaded file's name: v10 ``input_data.filename``, v9 ``task_file_name``."""
+    input_data = task.get("input_data")
+    if isinstance(input_data, dict) and input_data.get("filename"):
+        return str(input_data["filename"])
+    file_name = task.get("task_file_name")
+    return str(file_name) if file_name else None

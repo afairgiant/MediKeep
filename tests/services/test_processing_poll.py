@@ -374,8 +374,18 @@ class TestTaskPermissionDenied:
         assert again.paperless_document_id is None
         assert again.paperless_task_uuid == "again"
 
+    @pytest.mark.parametrize(
+        "sha256_answer, expected, task_uuid",
+        [
+            pytest.param(
+                (200, {"results": []}), "duplicate", None, id="sha256-found-nothing"
+            ),
+            # The refused request may have missed this upload's own copy
+            pytest.param((500, {}), "processing", "again", id="sha256-refused"),
+        ],
+    )
     async def test_re_upload_rejected_by_paperless_2_is_a_duplicate(
-        self, db_session, test_user, test_patient
+        self, db_session, test_user, test_patient, sha256_answer, expected, task_uuid
     ):
         # Paperless 2.x (MD5 checksums) rejects a re-upload, so the match is the first upload's document
         first = processing_upload(db_session, test_patient.id, "first")
@@ -388,10 +398,7 @@ class TestTaskPermissionDenied:
         paperless = RecordingPaperless(
             {
                 "/api/tasks/": (403, {}),
-                f"/api/documents/?checksum__iexact={FILE_SHA256}": (
-                    200,
-                    {"results": []},
-                ),
+                f"/api/documents/?checksum__iexact={FILE_SHA256}": sha256_answer,
                 f"/api/documents/?checksum__iexact={FILE_MD5}": (
                     200,
                     {"results": [{"id": 55, "added": added}]},
@@ -401,10 +408,10 @@ class TestTaskPermissionDenied:
 
         result = await poll(db_session, test_user.id, paperless)
 
-        assert result == {str(again.id): "duplicate"}
+        assert result == {str(again.id): expected}
         db_session.refresh(again)
         assert again.paperless_document_id is None
-        assert again.paperless_task_uuid is None
+        assert again.paperless_task_uuid == task_uuid
 
     @pytest.mark.parametrize(
         "checksum, status",
@@ -542,17 +549,39 @@ class TestTaskOutcomes:
         # Paperless's error message quotes the file name
         assert Path(FILE_NAME).stem not in persisted_text(caplog)
 
+    @pytest.mark.parametrize(
+        "lookup",
+        [
+            pytest.param({"/api/documents/?": (500, {})}, id="every-request-refused"),
+            pytest.param(
+                {
+                    f"/api/documents/?checksum__iexact={FILE_SHA256}": (500, {}),
+                    f"/api/documents/?checksum__iexact={FILE_MD5}": (
+                        200,
+                        {
+                            "results": [
+                                {
+                                    "id": 55,
+                                    "added": (
+                                        datetime.now(timezone.utc) - timedelta(hours=2)
+                                    ).isoformat(),
+                                }
+                            ]
+                        },
+                    ),
+                },
+                id="sha256-refused-md5-finds-an-older-copy",
+            ),
+        ],
+    )
     async def test_failed_document_lookup_leaves_the_upload_processing(
-        self, db_session, test_user, test_patient
+        self, db_session, test_user, test_patient, lookup
     ):
-        # The task gave no document ID and Paperless refused the checksum lookup,
+        # The task gave no document ID and Paperless refused a checksum lookup,
         # so the document may be there: both checkers keep the task to look again
         upload = processing_upload(db_session, test_patient.id, "task")
         paperless = RecordingPaperless(
-            {
-                "/api/tasks/": task_response("task", None),
-                "/api/documents/?": (500, {}),
-            }
+            {"/api/tasks/": task_response("task", None)} | lookup
         )
 
         await GenericEntityFileService()._resolve_task_uuids_to_document_ids(

@@ -163,6 +163,46 @@ class TestParseFailure:
         # The duplicated document must not be linked as the upload's own document.
         assert parsed.document_id is None
 
+    @pytest.mark.parametrize(
+        "task, is_duplicate",
+        [
+            pytest.param(
+                {
+                    "status": "FAILURE",
+                    "task_file_name": "duplicate.pdf",
+                    "result": "duplicate.pdf: Error while consuming document "
+                    "duplicate.pdf: Unsupported mime type",
+                },
+                False,
+                id="v9-other-error",
+            ),
+            pytest.param(
+                {
+                    "status": "failure",
+                    "input_data": {"filename": "Duplicate Scan.pdf"},
+                    "result_data": {
+                        "error_message": "Duplicate Scan.pdf: Unsupported mime type"
+                    },
+                },
+                False,
+                id="v10-other-error",
+            ),
+            pytest.param(
+                {
+                    "status": "FAILURE",
+                    "task_file_name": "duplicate.pdf",
+                    "result": "Not consuming duplicate.pdf: It is a duplicate of "
+                    "duplicate (#42)",
+                },
+                True,
+                id="v9-duplicate",
+            ),
+        ],
+    )
+    def test_file_name_does_not_decide_a_duplicate(self, task, is_duplicate):
+        # Paperless quotes the file name in its messages
+        assert parse_task(task).is_duplicate is is_duplicate
+
     def test_v10_error_message(self):
         parsed = parse_task(
             {

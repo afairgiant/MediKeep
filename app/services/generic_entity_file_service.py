@@ -3037,9 +3037,12 @@ class GenericEntityFileService:
             file_record, matches.document_ids, current_user_id
         )
         if document_id is None:
-            # Otherwise this upload's own copy may not be consumed yet
-            if matches.rejects_re_uploads and (
-                matches.document_ids or matches.earlier_copy
+            # Otherwise this upload's own copy may not be consumed yet, or a
+            # failed request may have missed it
+            if (
+                matches.rejects_re_uploads
+                and not matches.lookup_failed
+                and (matches.document_ids or matches.earlier_copy)
             ):
                 _mark_duplicate(file_record)
             return None
@@ -3106,6 +3109,7 @@ class GenericEntityFileService:
                             added_at is not None and added_at < start
                             for _, added_at in added
                         ),
+                        lookup_failed=lookup_failed,
                     )
         except Exception as e:
             _log_file_event(
