@@ -87,6 +87,7 @@
     "documentsToLink": "Te koppelen documenten:",
     "duplicateDocument": "Duplicaat document",
     "duplicateExists": "Dit document bestaat al in Paperless en kan niet opnieuw worden geüpload.",
+    "errorPopupTitle": "Documentfout",
     "filesToUpload": "Te uploaden bestanden:",
     "linkDescriptionPlaceholder": "Beschrijving (optioneel)",
     "linkPaperless": "Bestaand Paperless-document koppelen",

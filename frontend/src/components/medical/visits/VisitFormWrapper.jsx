@@ -16,7 +16,6 @@ const VisitFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
   patientId,
   navigate,
   formError = null,
@@ -29,7 +28,6 @@ const VisitFormWrapper = ({
       error,
       component: 'VisitFormWrapper',
     });
-    onError?.(error);
   };
 
   const handleDocumentUploadComplete = (
@@ -87,7 +85,6 @@ VisitFormWrapper.propTypes = {
   statusMessage: PropTypes.object,
   onDocumentManagerRef: PropTypes.func,
   onFileUploadComplete: PropTypes.func,
-  onError: PropTypes.func,
   patientId: PropTypes.number,
   navigate: PropTypes.func,
   formError: PropTypes.string,

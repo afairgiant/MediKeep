@@ -60,7 +60,6 @@ import RecordForm from '../shared/RecordForm';
  *     statusMessage={statusMessage}
  *     onDocumentManagerRef={setDocumentManagerMethods}
  *     onFileUploadComplete={(success) => { if (success) fetchSymptoms(); }}
- *     onError={(error) => logger.error('symptom_document_error', { error })}
  *   />
  */
 const MantineSymptomForm = ({
@@ -78,7 +77,6 @@ const MantineSymptomForm = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const linkPanelDescription = useLinkPanelDescription();
@@ -106,10 +104,6 @@ const MantineSymptomForm = ({
       error: error,
       component: 'MantineSymptomForm',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

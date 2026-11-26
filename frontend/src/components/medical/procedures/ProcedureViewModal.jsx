@@ -68,8 +68,15 @@ const ProcedureViewModal = ({
     }
   };
 
+  // The document manager shows its errors inside this dialog. They are only
+  // logged here: passing them to onError would show them again on the page.
   const handleDocumentError = error => {
-    handleError(error, 'document_management');
+    logger.error('document_manager_error', {
+      message: 'Document manager error in procedure view',
+      procedureId: procedure?.id,
+      error,
+      component: 'ProcedureViewModal',
+    });
   };
 
   const handleEditClick = () => {

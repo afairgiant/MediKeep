@@ -34,7 +34,6 @@ const ImmunizationViewModal = ({
   onEdit,
   practitioners = [],
   navigate,
-  onError,
   disableEdit = false,
   disableEditTooltip,
 }) => {
@@ -417,7 +416,6 @@ const ImmunizationViewModal = ({
               <DocumentManagerWithProgress
                 entityType="immunization"
                 entityId={immunization.id}
-                onError={onError}
               />
             </Box>
           </Tabs.Panel>

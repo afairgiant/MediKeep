@@ -58,7 +58,6 @@ const ProcedureFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const linkPanelDescription = useLinkPanelDescription();
@@ -98,10 +97,6 @@ const ProcedureFormWrapper = ({
       error: error,
       component: 'ProcedureFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

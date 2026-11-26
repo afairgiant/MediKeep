@@ -225,6 +225,8 @@ const LabResultFormWrapper = ({
     if (onDocumentManagerRef) onDocumentManagerRef(methods);
   };
 
+  // The document manager shows its errors inside this dialog. They are only
+  // logged here: passing them to onError would show them again on the page.
   const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in lab results ${editingItem ? 'edit' : 'create'}`,
@@ -232,7 +234,6 @@ const LabResultFormWrapper = ({
       error,
       component: 'LabResultFormWrapper',
     });
-    if (onError) onError(error);
   };
 
   const handleDocumentUploadComplete = (

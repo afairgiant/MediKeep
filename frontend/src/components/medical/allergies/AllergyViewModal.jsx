@@ -68,6 +68,17 @@ const AllergyViewModal = ({
     }
   };
 
+  // The document manager shows its errors inside this dialog. They are only
+  // logged here: passing them to onError would show them again on the page.
+  const handleDocumentError = error => {
+    logger.error('document_manager_error', {
+      message: 'Document manager error in allergy view',
+      allergyId: allergy?.id,
+      error,
+      component: 'AllergyViewModal',
+    });
+  };
+
   if (!isOpen || !allergy) return null;
 
   // Helper function to get severity icon
@@ -407,7 +418,7 @@ const AllergyViewModal = ({
                 <DocumentManagerWithProgress
                   entityType="allergy"
                   entityId={allergy.id}
-                  onError={onError}
+                  onError={handleDocumentError}
                 />
               </Box>
             </Tabs.Panel>

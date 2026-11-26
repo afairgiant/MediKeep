@@ -87,6 +87,7 @@
     "documentsToLink": "Dokument att länka:",
     "duplicateDocument": "Duplicerat dokument",
     "duplicateExists": "Detta dokument finns redan i Paperless och kan inte laddas upp igen.",
+    "errorPopupTitle": "Dokumentfel",
     "filesToUpload": "Filer att ladda upp:",
     "linkDescriptionPlaceholder": "Beskrivning (valfritt)",
     "linkPaperless": "Länka befintligt Paperless-dokument",

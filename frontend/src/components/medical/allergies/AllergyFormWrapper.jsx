@@ -50,7 +50,6 @@ const AllergyFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
   formError = null,
 }) => {
   // Translation hooks
@@ -80,10 +79,6 @@ const AllergyFormWrapper = ({
       error: error,
       component: 'AllergyFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

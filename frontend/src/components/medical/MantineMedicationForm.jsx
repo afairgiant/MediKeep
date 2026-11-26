@@ -79,7 +79,6 @@ const MantineMedicationForm = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
 }) => {
   // Translation
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -163,10 +162,6 @@ const MantineMedicationForm = ({
       error: error,
       component: 'MantineMedicationForm',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

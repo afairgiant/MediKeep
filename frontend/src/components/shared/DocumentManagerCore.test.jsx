@@ -368,9 +368,9 @@ describe('useDocumentManagerCore — deleting files marked in the Edit form (iss
       apiService.uploadEntityFileWithTaskMonitoring
     ).not.toHaveBeenCalled();
     expect(result.current.pendingFiles).toHaveLength(1);
-    expect(notifications.show).toHaveBeenCalledWith(
-      expect.objectContaining({ color: 'red' })
-    );
+    // Shown in the document manager's error popup, not also in a toast
+    expect(result.current.error).toBeTruthy();
+    expect(notifications.show).not.toHaveBeenCalled();
   });
 
   it('treats a marked file that is already gone (404) as deleted', async () => {
@@ -745,5 +745,44 @@ describe('useDocumentManagerCore — manual sync check summary', () => {
     expect(notifications.show).not.toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Sync Check Complete' })
     );
+  });
+});
+
+describe('useDocumentManagerCore - failed file list reload (#1282)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    apiService.getEntityFiles.mockResolvedValue([]);
+  });
+
+  const renderViewMode = async () => {
+    const hook = renderHook(() =>
+      useDocumentManagerCore(
+        baseProps({ entityType: 'medication', entityId: 1, mode: 'view' })
+      )
+    );
+    await waitFor(() => expect(apiService.getEntityFiles).toHaveBeenCalled());
+    return hook;
+  };
+
+  it('reports a failed load the user is waiting for', async () => {
+    const { result } = await renderViewMode();
+    apiService.getEntityFiles.mockRejectedValue(new Error('Network Error'));
+
+    await act(async () => {
+      await result.current.loadFiles();
+    });
+
+    expect(result.current.error).toBe('Network Error');
+  });
+
+  it('only logs a failed background reload, so no popup opens unprompted', async () => {
+    const { result } = await renderViewMode();
+    apiService.getEntityFiles.mockRejectedValue(new Error('Network Error'));
+
+    await act(async () => {
+      await result.current.loadFiles({ background: true });
+    });
+
+    expect(result.current.error).toBe('');
   });
 });

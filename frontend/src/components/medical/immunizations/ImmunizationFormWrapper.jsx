@@ -57,7 +57,6 @@ const ImmunizationFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
   formError = null,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
@@ -76,10 +75,6 @@ const ImmunizationFormWrapper = ({
       error: error,
       component: 'ImmunizationFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

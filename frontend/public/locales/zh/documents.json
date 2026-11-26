@@ -87,6 +87,7 @@
     "documentsToLink": "待链接文档：",
     "duplicateDocument": "重复文档",
     "duplicateExists": "此文档在 Paperless 中已存在，无法重复上传。",
+    "errorPopupTitle": "文档错误",
     "filesToUpload": "待上传文件：",
     "linkDescriptionPlaceholder": "描述（可选）",
     "linkPaperless": "链接现有 Paperless 文档",

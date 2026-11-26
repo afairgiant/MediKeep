@@ -32,8 +32,12 @@ vi.mock('../../../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }));
 
+const documentManagerProps = vi.hoisted(() => ({ current: null }));
 vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
-  default: () => null,
+  default: props => {
+    documentManagerProps.current = props;
+    return null;
+  },
 }));
 vi.mock('../MedicationTreatmentsList', () => ({ default: () => null }));
 vi.mock('../../StatusBadge', () => ({
@@ -71,7 +75,6 @@ describe('MedicationViewModal - alternative_name', () => {
     medication: baseMedication,
     onEdit: vi.fn(),
     navigate: vi.fn(),
-    onError: vi.fn(),
     practitioners: [],
     conditions: [],
   };
@@ -133,7 +136,6 @@ describe('MedicationViewModal - footer actions', () => {
           medication={medication}
           onEdit={vi.fn()}
           navigate={vi.fn()}
-          onError={vi.fn()}
           practitioners={[]}
           conditions={[]}
           {...props}
@@ -156,5 +158,30 @@ describe('MedicationViewModal - footer actions', () => {
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Close' })).toBeEnabled();
+  });
+});
+
+describe('MedicationViewModal - document errors', () => {
+  it('does not pass document errors on to the page behind the dialog', () => {
+    documentManagerProps.current = null;
+    const onError = vi.fn();
+    render(
+      <MantineWrapper>
+        <MedicationViewModal
+          isOpen
+          onClose={vi.fn()}
+          medication={{ id: 1, medication_name: 'Acetaminophen', tags: [] }}
+          onEdit={vi.fn()}
+          navigate={vi.fn()}
+          onError={onError}
+          practitioners={[]}
+        />
+      </MantineWrapper>
+    );
+
+    // The document manager shows this error inside the dialog itself.
+    documentManagerProps.current.onError('Failed to load files');
+
+    expect(onError).not.toHaveBeenCalled();
   });
 });
