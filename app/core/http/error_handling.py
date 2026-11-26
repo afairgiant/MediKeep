@@ -43,6 +43,7 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_error, log_security_event
 from app.core.utils.client_ip import get_client_ip
+from app.schemas.merged_rules import MergedRuleError
 
 # Initialize logger for error handling
 logger = get_logger(__name__, "app")
@@ -669,6 +670,13 @@ def setup_error_handling(app: FastAPI):
             status_code=exc.http_status_code,
             content=exc.to_response_model().model_dump(exclude_none=False),
             headers=exc.headers or None,
+        )
+
+    @app.exception_handler(MergedRuleError)
+    async def merged_rule_error_handler(request: Request, exc: MergedRuleError):
+        return await api_exception_handler(
+            request,
+            ValidationException(message=str(exc), validation_errors=[str(exc)]),
         )
 
     # Replace default validation error handler with our enhanced version

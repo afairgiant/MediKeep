@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.database.utils import get_database_type
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields, format_log_message
+from app.schemas.merged_rules import check_merged_rules
 
 # Define the type variables for the Generic class
 ModelType = TypeVar("ModelType")
@@ -631,7 +632,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         db_obj: ModelType,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]],
     ) -> ModelType:
-        """Update an existing record."""
+        """Update an existing record.
+
+        Raises:
+            MergedRuleError: if ``obj_in``'s sent fields over ``db_obj`` break one
+                of its ``MERGED_RULES``; nothing is written
+        """
+        check_merged_rules(obj_in, db_obj)
         record_id = str(db_obj.id)  # type: ignore
 
         # Normalize input to dictionary, keeping Python types for SQLAlchemy

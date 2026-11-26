@@ -16,13 +16,11 @@ from app.api.v1.endpoints.utils import (
 from app.core.events.bus import publish_from_thread
 from app.core.http.error_handling import (
     BusinessLogicException,
-    ValidationException,
     handle_database_errors,
 )
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
-from app.core.utils.visit_reminders import check_offsets_fit_visit_time
 from app.crud.encounter import encounter, encounter_lab_result
 from app.crud.lab_result import lab_result
 from app.events.visit_events import VisitReminderDueEvent
@@ -184,22 +182,6 @@ def update_encounter(
     Raises 422 when the saved and sent start time and reminder offsets together
     give an all-day visit an hour-based reminder.
     """
-    sent = encounter_in.model_fields_set
-
-    def check_reminders_fit(existing) -> None:
-        visit_time = (
-            encounter_in.visit_time if "visit_time" in sent else existing.visit_time
-        )
-        offsets = (
-            encounter_in.reminder_offsets
-            if "reminder_offsets" in sent
-            else existing.reminder_offsets
-        )
-        try:
-            check_offsets_fit_visit_time(visit_time, offsets)
-        except ValueError as e:
-            raise ValidationException(message=str(e)) from e
-
     return handle_update_with_logging(
         db=db,
         crud_obj=encounter,
@@ -211,7 +193,6 @@ def update_encounter(
         request=request,
         current_user=current_user,
         current_user_patient_id=current_user_patient_id,
-        before_update=check_reminders_fit,
     )
 
 

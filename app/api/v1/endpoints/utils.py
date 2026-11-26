@@ -290,6 +290,8 @@ def handle_update_with_logging(
 
     Raises:
         HTTPException: If entity not found, user lacks permission, or update fails
+        MergedRuleError: If the sent fields over the stored ones break one of
+            the update schema's ``MERGED_RULES`` (answered as 422)
     """
     user_ip = get_client_ip(request) if request else "unknown"
 

@@ -10,6 +10,7 @@ from app.crud.standardized_vaccine import (
 )
 from app.models.models import Immunization
 from app.schemas.immunization import ImmunizationCreate, ImmunizationUpdate
+from app.schemas.merged_rules import check_merged_rules
 
 
 def _resolve_library_fk(
@@ -80,6 +81,7 @@ class CRUDImmunization(
         absent or null. To explicitly unlink, edit to a vaccine_name that
         doesn't match any library entry.
         """
+        check_merged_rules(obj_in, db_obj)
         update_data = obj_in.model_dump(exclude_unset=True)
 
         # FK touched only when the user changed the vaccine identity (new

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 from pydantic import (
     BaseModel,
@@ -14,6 +14,21 @@ from pydantic import (
 from ..models.enums import get_all_family_relationships
 
 from app.schemas.read_model import read_model
+
+from .merged_rules import MergedRule, ordered_check
+
+
+check_death_after_birth = ordered_check("Death year cannot be before birth year")
+
+
+def check_death_year_needs_deceased(
+    death_year: Optional[int], is_deceased: Optional[bool]
+) -> None:
+    """Raise ``ValueError`` if a death year is set on someone not marked deceased."""
+    if death_year and is_deceased is False:
+        raise ValueError(
+            "If death year is provided, family member must be marked as deceased"
+        )
 
 
 class FamilyMemberBase(BaseModel):
@@ -67,24 +82,13 @@ class FamilyMemberBase(BaseModel):
     @field_validator("death_year")
     @classmethod
     def validate_death_year(cls, v, info: ValidationInfo):
-        if v:
-            if info.data.get("birth_year") and v < info.data["birth_year"]:
-                raise ValueError("Death year cannot be before birth year")
-            # Only validate is_deceased flag if it's explicitly set to False
-            # (don't fail if is_deceased isn't in values yet due to field order)
-            if info.data.get("is_deceased") is False:
-                raise ValueError(
-                    "Death year can only be set if family member is deceased"
-                )
+        check_death_after_birth(info.data.get("birth_year"), v)
         return v
 
     @field_validator("is_deceased")
     @classmethod
     def validate_is_deceased(cls, v, info: ValidationInfo):
-        if not v and info.data.get("death_year"):
-            raise ValueError(
-                "If death year is provided, family member must be marked as deceased"
-            )
+        check_death_year_needs_deceased(info.data.get("death_year"), v)
         return v
 
 
@@ -100,6 +104,11 @@ class FamilyMemberUpdate(BaseModel):
     death_year: Optional[int] = Field(None, ge=1900, le=2030)
     is_deceased: Optional[bool] = None
     notes: Optional[str] = Field(None, max_length=5000)
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(("birth_year", "death_year"), check_death_after_birth),
+        MergedRule(("death_year", "is_deceased"), check_death_year_needs_deceased),
+    )
 
     @field_validator("relationship")
     @classmethod
@@ -129,18 +138,6 @@ class FamilyMemberUpdate(BaseModel):
             if normalized not in gender_mapping:
                 raise ValueError("Gender must be one of: male, female, other (or M, F)")
             return gender_mapping[normalized]
-        return v
-
-    @field_validator("death_year")
-    @classmethod
-    def validate_death_year(cls, v, info: ValidationInfo):
-        if v:
-            if info.data.get("birth_year") and v < info.data["birth_year"]:
-                raise ValueError("Death year cannot be before birth year")
-            if info.data.get("is_deceased") is False:
-                raise ValueError(
-                    "Death year can only be set if family member is deceased"
-                )
         return v
 
 

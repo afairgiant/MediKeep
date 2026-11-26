@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 from pydantic import (
     BaseModel,
@@ -16,8 +16,25 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.merged_rules import (
+    MergedRule,
+    as_date,
+    ordered_check,
+    status_date_check,
+)
 from app.schemas.validators import validate_lab_result_link_purpose
 from app.schemas.read_model import read_model
+
+
+check_start_date_for_status = status_date_check(
+    "Start date", "treatments", future_ok={"planned", "on_hold", "cancelled"}
+)
+
+
+check_end_after_start = ordered_check("End date cannot be before start date")
+check_specific_end_after_start = ordered_check(
+    "Specific end date cannot be before specific start date"
+)
 
 
 # Helper function for validating relevance notes
@@ -98,55 +115,19 @@ class TreatmentBase(TaggedEntityMixin):
     @model_validator(mode="before")
     @classmethod
     def validate_start_date_with_status(cls, values):
-        """Validate treatment start date based on status.
-
-        When status is not provided (partial updates), skip validation to allow
-        updating only the start_date field without requiring status.
-        """
-        from datetime import timedelta
-
+        """Validate treatment start date based on status, when both are sent."""
         if not isinstance(values, dict):
             return values
 
-        start_date_value = values.get("start_date")
-        status = values.get("status", "").lower() if values.get("status") else ""
-
-        if not start_date_value:
-            return values
-
-        # Convert string date to date object if needed
-        if isinstance(start_date_value, str):
-            try:
-                start_date_value = date.fromisoformat(start_date_value)
-            except ValueError:
-                return values  # Let field validator handle invalid date
-
-        # Skip validation if status is not provided (partial update scenario)
-        if not status:
-            return values
-
-        # For planned or on_hold treatments, allow reasonable future dates
-        if status in ["planned", "on_hold"]:
-            max_future = date.today() + timedelta(days=3650)  # 10 years
-            if start_date_value > max_future:
-                raise ValueError(
-                    "Start date cannot be more than 10 years in the future"
-                )
-            # Allow past dates for planned treatments (e.g., rescheduled from past)
-            return values
-
-        # For all other statuses (not planned/on_hold), start date should not be in future
-        if start_date_value > date.today():
-            raise ValueError(
-                f"Start date cannot be in the future for {status} treatments"
-            )
+        check_start_date_for_status(
+            as_date(values.get("start_date")), values.get("status")
+        )
         return values
 
     @field_validator("end_date")
     @classmethod
     def validate_end_date(cls, v, info: ValidationInfo):
-        if v and info.data.get("start_date") and v < info.data["start_date"]:
-            raise ValueError("End date cannot be before start date")
+        check_end_after_start(info.data.get("start_date"), v)
         return v
 
     @field_validator("status")
@@ -191,6 +172,11 @@ class TreatmentUpdate(TaggedEntityUpdateMixin):
     practitioner_id: Optional[int] = Field(None, gt=0)
     condition_id: Optional[int] = Field(None, gt=0)
 
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(("start_date", "status"), check_start_date_for_status),
+        MergedRule(("start_date", "end_date"), check_end_after_start),
+    )
+
     @model_validator(mode="before")
     @classmethod
     def convert_empty_strings_to_none(cls, values):
@@ -210,60 +196,6 @@ class TreatmentUpdate(TaggedEntityUpdateMixin):
                 if field in values and values[field] == "":
                     values[field] = None
         return values
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_start_date_with_status(cls, values):
-        """Validate treatment start date based on status.
-
-        When status is not provided (partial updates), skip validation to allow
-        updating only the start_date field without requiring status.
-        """
-        from datetime import timedelta
-
-        if not isinstance(values, dict):
-            return values
-
-        start_date_value = values.get("start_date")
-        status = values.get("status", "").lower() if values.get("status") else ""
-
-        if not start_date_value:
-            return values
-
-        # Convert string date to date object if needed
-        if isinstance(start_date_value, str):
-            try:
-                start_date_value = date.fromisoformat(start_date_value)
-            except ValueError:
-                return values  # Let field validator handle invalid date
-
-        # Skip validation if status is not provided (partial update scenario)
-        if not status:
-            return values
-
-        # For planned or on_hold treatments, allow reasonable future dates
-        if status in ["planned", "on_hold"]:
-            max_future = date.today() + timedelta(days=3650)  # 10 years
-            if start_date_value > max_future:
-                raise ValueError(
-                    "Start date cannot be more than 10 years in the future"
-                )
-            # Allow past dates for planned treatments (e.g., rescheduled from past)
-            return values
-
-        # For all other statuses (not planned/on_hold), start date should not be in future
-        if start_date_value > date.today():
-            raise ValueError(
-                f"Start date cannot be in the future for {status} treatments"
-            )
-        return values
-
-    @field_validator("end_date")
-    @classmethod
-    def validate_end_date(cls, v, info: ValidationInfo):
-        if v and info.data.get("start_date") and v < info.data["start_date"]:
-            raise ValueError("End date cannot be before start date")
-        return v
 
     @field_validator("status")
     @classmethod
@@ -411,12 +343,7 @@ class TreatmentMedicationCreate(BaseModel):
     @field_validator("specific_end_date")
     @classmethod
     def validate_specific_end_date(cls, v, info: ValidationInfo):
-        if (
-            v
-            and info.data.get("specific_start_date")
-            and v < info.data["specific_start_date"]
-        ):
-            raise ValueError("Specific end date cannot be before specific start date")
+        check_specific_end_after_start(info.data.get("specific_start_date"), v)
         return v
 
 
@@ -433,21 +360,17 @@ class TreatmentMedicationUpdate(BaseModel):
     specific_start_date: Optional[date] = None
     specific_end_date: Optional[date] = None
 
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(
+            ("specific_start_date", "specific_end_date"),
+            check_specific_end_after_start,
+        ),
+    )
+
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
         return _validate_relevance_note(v)
-
-    @field_validator("specific_end_date")
-    @classmethod
-    def validate_specific_end_date(cls, v, info: ValidationInfo):
-        if (
-            v
-            and info.data.get("specific_start_date")
-            and v < info.data["specific_start_date"]
-        ):
-            raise ValueError("Specific end date cannot be before specific start date")
-        return v
 
 
 class TreatmentMedicationResponse(read_model(TreatmentMedicationBase)):
