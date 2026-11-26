@@ -299,7 +299,7 @@ class TestPaperlessChecks:
         assert processing.paperless_task_uuid == "task-in-progress"
 
     async def test_upload_whose_task_paperless_lost_is_found_by_checksum(
-        self, db_session, test_patient
+        self, db_session, test_user, test_patient
     ):
         # Paperless no longer knows the first upload's task, so its document is
         # looked up by checksum and upload time. The second upload's task is
@@ -344,7 +344,7 @@ class TestPaperlessChecks:
             new=AsyncMock(return_value=_ContentMatches(["555"])),
         ) as search:
             await service._resolve_task_uuids_to_document_ids(
-                db_session, paperless, [lost, running]
+                db_session, paperless, [lost, running], test_user.id
             )
 
         search.assert_awaited_once()
@@ -358,7 +358,7 @@ class TestPaperlessChecks:
         assert running.paperless_task_uuid == "task-running"
 
     async def test_upload_whose_task_cannot_be_read_is_found_by_checksum(
-        self, db_session, test_patient
+        self, db_session, test_user, test_patient
     ):
         # Regression for #1280: the account can upload but Paperless refuses its task reads.
         upload = _remote_file(
@@ -384,7 +384,7 @@ class TestPaperlessChecks:
             new=AsyncMock(return_value=_ContentMatches(["321"])),
         ):
             await service._resolve_task_uuids_to_document_ids(
-                db_session, _TasksForbidden(), [upload]
+                db_session, _TasksForbidden(), [upload], test_user.id
             )
 
         db_session.refresh(upload)
@@ -461,21 +461,27 @@ async def _find(upload, paperless):
 
 
 @pytest.mark.parametrize(
-    "added, found",
+    "added, matches",
     [
         # Stored upload times are naive UTC; Paperless timestamps can carry "Z".
-        ("2026-11-19T12:05:00Z", ["7"]),
-        ("2026-11-19T12:05:00+00:00", ["7"]),
-        ("2026-11-19T15:00:00Z", []),
+        ("2026-11-19T12:05:00Z", _ContentMatches(["7"])),
+        ("2026-11-19T12:05:00+00:00", _ContentMatches(["7"])),
+        ("2026-11-19T15:00:00Z", _ContentMatches([])),
+        ("2026-11-19T09:00:00Z", _ContentMatches([], earlier_copy=True)),
     ],
-    ids=["z_suffix", "utc_offset", "added_outside_the_upload_window"],
+    ids=[
+        "z_suffix",
+        "utc_offset",
+        "added_after_the_upload_window",
+        "added_before_the_upload_window",
+    ],
 )
-async def test_checksum_match_must_be_added_around_the_upload(added, found):
+async def test_checksum_match_must_be_added_around_the_upload(added, matches):
     # "created" is the date read from the document, often long before the upload
     document = {"id": 7, "created": "2019-03-02", "added": added}
     paperless = _paperless_listing_by_checksum({SHA256: [document]})
 
-    assert await _find(_paperless_upload(), paperless) == _ContentMatches(found)
+    assert await _find(_paperless_upload(), paperless) == matches
 
 
 async def test_lookup_asks_for_the_sha256_then_the_md5():

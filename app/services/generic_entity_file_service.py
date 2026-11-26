@@ -295,8 +295,10 @@ def _mark_duplicate(file_record: EntityFile) -> None:
     file_record.last_sync_at = get_utc_now()
 
 
-def _document_linked_elsewhere(file_record: EntityFile, document_id: str) -> bool:
-    """Whether another file record already points at this Paperless document."""
+def _document_linked_elsewhere(
+    file_record: EntityFile, document_id: str, user_id: int
+) -> bool:
+    """Whether another file record in ``user_id``'s Paperless already points at this document."""
     db = object_session(file_record)
     if db is None:
         return False
@@ -308,6 +310,8 @@ def _document_linked_elsewhere(file_record: EntityFile, document_id: str) -> boo
             EntityFile.id != file_record.id,
             EntityFile.storage_backend == "paperless",
             EntityFile.paperless_document_id == document_id,
+            # Document IDs repeat across Paperless instances
+            resolvable_uploads(db, user_id),
         )
         .first()
         is not None
@@ -315,14 +319,14 @@ def _document_linked_elsewhere(file_record: EntityFile, document_id: str) -> boo
 
 
 def _unclaimed_document(
-    file_record: EntityFile, document_ids: List[str]
+    file_record: EntityFile, document_ids: List[str], user_id: int
 ) -> Optional[str]:
-    """The first of ``document_ids`` that no other file record holds."""
+    """The first of ``document_ids``, from ``user_id``'s Paperless, that no other file record holds."""
     return next(
         (
             document_id
             for document_id in document_ids
-            if not _document_linked_elsewhere(file_record, document_id)
+            if not _document_linked_elsewhere(file_record, document_id, user_id)
         ),
         None,
     )
@@ -344,6 +348,8 @@ class _ContentMatches:
     # Only Paperless 2.x stores MD5 checksums, and it never consumes a re-upload.
     # 3.x consumes one unless its CONSUMER_DELETE_DUPLICATES setting is on.
     rejects_re_uploads: bool = False
+    # A document with this content was added before the upload window, so Paperless held it already
+    earlier_copy: bool = False
 
 
 _DOCUMENT_SEARCH_PAGE_SIZE = 100
@@ -351,17 +357,16 @@ _DOCUMENT_SEARCH_PAGE_SIZE = 100
 _UPLOAD_WINDOW = timedelta(minutes=30)
 
 
-def _added_within(document: Dict[str, Any], start: datetime, end: datetime) -> bool:
-    """Whether a Paperless document was added between naive-UTC ``start`` and ``end``."""
+def _added_at(document: Dict[str, Any]) -> Optional[datetime]:
+    """When Paperless stored a document, in naive UTC, or None if it gives no usable time."""
     # "added" is when Paperless stored it; "created" is the date read from its content
     added = document.get("added")
     if not isinstance(added, str):
-        return False
+        return None
     try:
-        added_at = _as_naive_utc(datetime.fromisoformat(added.replace("Z", "+00:00")))
+        return _as_naive_utc(datetime.fromisoformat(added.replace("Z", "+00:00")))
     except ValueError:
-        return False
-    return start <= added_at <= end
+        return None
 
 
 def _normalized(name: Any) -> str:
@@ -2172,7 +2177,7 @@ class GenericEntityFileService:
 
             # First pass: resolve any task UUIDs to document IDs if possible
             await self._resolve_task_uuids_to_document_ids(
-                db, paperless_service, paperless_files
+                db, paperless_service, paperless_files, current_user_id
             )
 
             # Check each document
@@ -2190,7 +2195,7 @@ class GenericEntityFileService:
                             ):
                                 fallback_doc_id = (
                                     await self._link_document_found_by_checksum(
-                                        file_record, paperless_service
+                                        file_record, paperless_service, current_user_id
                                     )
                                 )
 
@@ -2519,7 +2524,11 @@ class GenericEntityFileService:
             return {}
 
     async def _resolve_task_uuids_to_document_ids(
-        self, db: Session, paperless_service, paperless_files: List
+        self,
+        db: Session,
+        paperless_service,
+        paperless_files: List,
+        current_user_id: int,
     ) -> None:
         """
         Helper method to resolve task UUIDs to document IDs for files that have completed processing.
@@ -2528,6 +2537,7 @@ class GenericEntityFileService:
             db: Database session
             paperless_service: Paperless service instance
             paperless_files: List of EntityFile records with paperless storage
+            current_user_id: User whose Paperless ``paperless_service`` connects to
         """
         try:
             # Find files that have active task UUIDs (in the paperless_task_uuid field)
@@ -2588,7 +2598,10 @@ class GenericEntityFileService:
                                 # Use centralized validation and fallback logic
                                 validated_doc_id = (
                                     await self._validate_and_process_document_id(
-                                        document_id, file_record, paperless_service
+                                        document_id,
+                                        file_record,
+                                        paperless_service,
+                                        current_user_id,
                                     )
                                 )
 
@@ -2654,7 +2667,7 @@ class GenericEntityFileService:
 
             for file_record in unknown_task_files:
                 linked_id = await self._link_document_found_by_checksum(
-                    file_record, paperless_service
+                    file_record, paperless_service, current_user_id
                 )
                 if linked_id:
                     logger.info(
@@ -2755,7 +2768,7 @@ class GenericEntityFileService:
                         if tasks_forbidden:
                             status_updates[str(file_record.id)] = (
                                 await self._resolve_without_task(
-                                    file_record, paperless_service
+                                    file_record, paperless_service, current_user_id
                                 )
                             )
                             continue
@@ -2788,7 +2801,10 @@ class GenericEntityFileService:
 
                                         # Use centralized validation and fallback logic
                                         validated_doc_id = await self._validate_and_process_document_id(
-                                            document_id, file_record, paperless_service
+                                            document_id,
+                                            file_record,
+                                            paperless_service,
+                                            current_user_id,
                                         )
 
                                         if validated_doc_id:
@@ -2889,7 +2905,9 @@ class GenericEntityFileService:
                                     log_task_permission_denied(current_user_id)
                                     status_updates[str(file_record.id)] = (
                                         await self._resolve_without_task(
-                                            file_record, paperless_service
+                                            file_record,
+                                            paperless_service,
+                                            current_user_id,
                                         )
                                     )
                                 else:
@@ -2934,7 +2952,7 @@ class GenericEntityFileService:
             return {}
 
     async def _validate_and_process_document_id(
-        self, document_id, file_record, paperless_service
+        self, document_id, file_record, paperless_service, current_user_id: int
     ) -> Optional[str]:
         """
         Validate document ID and handle fallback logic for invalid IDs.
@@ -2943,6 +2961,7 @@ class GenericEntityFileService:
             document_id: Document ID to validate (can be string, int, or None)
             file_record: Database record for the file
             paperless_service: Paperless service instance for fallback search
+            current_user_id: User whose Paperless ``paperless_service`` connects to
 
         Returns:
             Valid document ID as string, or None if invalid and fallback failed
@@ -2977,7 +2996,9 @@ class GenericEntityFileService:
             matches = await self._find_documents_with_upload_content(
                 file_record, paperless_service
             )
-            fallback_doc_id = _unclaimed_document(file_record, matches.document_ids)
+            fallback_doc_id = _unclaimed_document(
+                file_record, matches.document_ids, current_user_id
+            )
             if fallback_doc_id:
                 _log_file_event(
                     logging.INFO,
@@ -3004,7 +3025,9 @@ class GenericEntityFileService:
             )
             return None
 
-    async def _resolve_without_task(self, file_record, paperless_service) -> str:
+    async def _resolve_without_task(
+        self, file_record, paperless_service, current_user_id: int
+    ) -> str:
         """Link a processing upload whose task cannot be read; returns its new status. The caller commits."""
         _log_file_event(
             logging.DEBUG,
@@ -3013,11 +3036,13 @@ class GenericEntityFileService:
             file_record,
             task_uuid=file_record.paperless_task_uuid,
         )
-        await self._link_document_found_by_checksum(file_record, paperless_service)
+        await self._link_document_found_by_checksum(
+            file_record, paperless_service, current_user_id
+        )
         return file_record.sync_status
 
     async def _link_document_found_by_checksum(
-        self, file_record: EntityFile, paperless_service
+        self, file_record: EntityFile, paperless_service, current_user_id: int
     ) -> Optional[str]:
         """
         Find a record's Paperless document by checksum and upload time and, if
@@ -3025,17 +3050,22 @@ class GenericEntityFileService:
         and mark the record synced. The caller commits.
 
         Returns:
-            The linked document ID, or None if nothing was linked. When every match
-            is already another record's document and Paperless rejects re-uploads,
-            the record is marked duplicate instead.
+            The linked document ID, or None if nothing was linked. When Paperless
+            rejects re-uploads and already held this content (as another record's
+            document, or one added before the upload), the record is marked
+            duplicate instead.
         """
         matches = await self._find_documents_with_upload_content(
             file_record, paperless_service
         )
-        document_id = _unclaimed_document(file_record, matches.document_ids)
+        document_id = _unclaimed_document(
+            file_record, matches.document_ids, current_user_id
+        )
         if document_id is None:
             # Otherwise this upload's own copy may not be consumed yet
-            if matches.document_ids and matches.rejects_re_uploads:
+            if matches.rejects_re_uploads and (
+                matches.document_ids or matches.earlier_copy
+            ):
                 _mark_duplicate(file_record)
             return None
 
@@ -3050,9 +3080,9 @@ class GenericEntityFileService:
     ) -> _ContentMatches:
         """
         Find the Paperless documents whose checksum is a digest of the uploaded
-        bytes and that were added within 30 minutes of the upload. Used when the
-        upload's task gives no usable document ID or cannot be read. A failed
-        lookup finds nothing.
+        bytes and that were added within 30 minutes of the upload, and whether
+        one was added before that. Used when the upload's task gives no usable
+        document ID or cannot be read. A failed lookup finds nothing.
         """
         if not file_record.paperless_sha256:
             _log_file_event(
@@ -3083,13 +3113,18 @@ class GenericEntityFileService:
                         continue
                     documents = (await response.json()).get("results", [])
                 if documents:
+                    added = [(str(doc["id"]), _added_at(doc)) for doc in documents]
                     return _ContentMatches(
                         [
-                            str(doc["id"])
-                            for doc in documents
-                            if _added_within(doc, start, end)
+                            document_id
+                            for document_id, added_at in added
+                            if added_at is not None and start <= added_at <= end
                         ],
                         rejects_re_uploads,
+                        earlier_copy=any(
+                            added_at is not None and added_at < start
+                            for _, added_at in added
+                        ),
                     )
         except Exception as e:
             _log_file_event(

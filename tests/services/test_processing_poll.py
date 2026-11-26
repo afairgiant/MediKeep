@@ -6,7 +6,7 @@ caller's own Paperless. Another user's task IDs and file names must never be sen
 anywhere, and only the task that was asked for may decide a record.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi import HTTPException
@@ -20,6 +20,7 @@ from tests.utils.paperless_uploads import (
     FILE_NAME,
     FILE_SHA256,
     RecordingPaperless,
+    member,
     patient_for,
     poll,
     processing_upload,
@@ -162,6 +163,44 @@ class TestLinking:
         assert result == {str(upload.id): "duplicate"}
         db_session.refresh(upload)
         assert upload.paperless_document_id is None
+
+    async def test_same_document_id_on_another_paperless_does_not_hold_the_match(
+        self, db_session, test_user, test_patient
+    ):
+        # Paperless document IDs are small integers, so they repeat across instances
+        neighbour = member(db_session)
+        theirs = processing_upload(
+            db_session,
+            patient_for(db_session, neighbour.id).id,
+            "theirs",
+            uploaded_by_user_id=neighbour.id,
+        )
+        theirs.paperless_task_uuid = None
+        theirs.sync_status = "synced"
+        theirs.paperless_document_id = "55"
+        db_session.commit()
+        upload = processing_upload(
+            db_session, test_patient.id, "task", uploaded_by_user_id=test_user.id
+        )
+        paperless = RecordingPaperless(
+            {
+                "/api/tasks/": task_response("task", "unknown"),
+                "/api/documents/?": (
+                    200,
+                    {
+                        "results": [
+                            {"id": 55, "added": datetime.now(timezone.utc).isoformat()}
+                        ]
+                    },
+                ),
+            }
+        )
+
+        result = await poll(db_session, test_user.id, paperless)
+
+        assert result == {str(upload.id): "synced"}
+        db_session.refresh(upload)
+        assert upload.paperless_document_id == "55"
 
     async def test_nothing_is_checked_when_paperless_is_disabled(
         self, db_session, test_user, test_patient
@@ -360,6 +399,33 @@ class TestTaskPermissionDenied:
         db_session.refresh(again)
         assert again.paperless_document_id is None
         assert again.paperless_task_uuid is None
+
+    @pytest.mark.parametrize(
+        "checksum, status",
+        [(FILE_SHA256, "processing"), (FILE_MD5, "duplicate")],
+        ids=["paperless_3_keeps_re_uploads", "paperless_2_rejects_re_uploads"],
+    )
+    async def test_re_upload_of_an_older_document(
+        self, db_session, test_user, test_patient, checksum, status
+    ):
+        again = processing_upload(db_session, test_patient.id, "again")
+        added = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+        paperless = RecordingPaperless(
+            {
+                "/api/tasks/": (403, {}),
+                f"/api/documents/?checksum__iexact={checksum}": (
+                    200,
+                    {"results": [{"id": 55, "added": added}]},
+                ),
+                "/api/documents/?": (200, {"results": []}),
+            }
+        )
+
+        result = await poll(db_session, test_user.id, paperless)
+
+        assert result == {str(again.id): status}
+        db_session.refresh(again)
+        assert again.paperless_document_id is None
 
     async def test_tasks_are_read_once_per_run_after_a_refusal(
         self, db_session, test_user, test_patient

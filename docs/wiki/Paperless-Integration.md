@@ -98,8 +98,11 @@ Documents linked to medical records (lab results, encounter notes, etc.) can be 
 - Until then, MediKeep finds the document by its checksum (Paperless records one for
   every file) and upload time, which links most uploads; affected MediKeep 0.75.0 and
   earlier left them processing
-- Uploads made before MediKeep stored checksums are not looked up: attach them with
-  **Link Existing Document**, or delete and upload them again
+- Uploads made before MediKeep stored checksums are not looked up: delete the stuck
+  entry, then attach the document with **Link Existing Document** or upload the file again
+- On Paperless-ngx 3.x with `PAPERLESS_CONSUMER_DELETE_DUPLICATES` on, a file Paperless
+  already holds stays processing when uploaded again, because Paperless keeps no copy of
+  it: delete that entry
 
 ### Timeout Errors
 
