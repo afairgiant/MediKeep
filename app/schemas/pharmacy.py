@@ -10,6 +10,7 @@ from app.schemas.validators import (
     validate_url,
     validate_zip_code,
 )
+from app.schemas.read_model import read_model
 
 
 class PharmacyBase(BaseModel):
@@ -267,7 +268,7 @@ class PharmacyUpdate(BaseModel):
         )
 
 
-class Pharmacy(PharmacyBase):
+class Pharmacy(read_model(PharmacyBase)):
     """
     Schema for reading/returning pharmacy data.
 

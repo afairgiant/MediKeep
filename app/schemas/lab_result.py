@@ -11,6 +11,7 @@ from app.schemas.base_tags import (
     TaggedEntityUpdateMixin,
 )
 from app.schemas.validators import validate_lab_result_link_purpose
+from app.schemas.read_model import read_model
 
 
 def _validate_relevance_note(v):
@@ -504,7 +505,7 @@ class LabResultUpdate(TaggedEntityUpdateMixin):
         return self
 
 
-class LabResultResponse(TaggedEntityResponseMixin, LabResultBase):
+class LabResultResponse(TaggedEntityResponseMixin, read_model(LabResultBase)):
     """Schema for lab result response"""
 
     id: int
@@ -639,7 +640,7 @@ class LabResultConditionUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class LabResultConditionResponse(LabResultConditionBase):
+class LabResultConditionResponse(read_model(LabResultConditionBase)):
     """Schema for lab result condition relationship response"""
 
     id: int
@@ -690,7 +691,7 @@ class LabResultMedicationUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class LabResultMedicationResponse(LabResultMedicationBase):
+class LabResultMedicationResponse(read_model(LabResultMedicationBase)):
     """Schema for lab result medication relationship response"""
 
     id: int
@@ -753,7 +754,7 @@ class LabResultProcedureUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class LabResultProcedureResponse(LabResultProcedureBase):
+class LabResultProcedureResponse(read_model(LabResultProcedureBase)):
     """Schema for lab result procedure relationship response"""
 
     id: int

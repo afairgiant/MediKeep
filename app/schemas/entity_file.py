@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.schemas.read_model import read_model
+
 
 class EntityType(str, Enum):
     """Supported entity types for file management"""
@@ -293,7 +295,7 @@ class EntityFileUpdate(BaseModel):
         return v.strip() if v else None
 
 
-class EntityFileResponse(EntityFileBase):
+class EntityFileResponse(read_model(EntityFileBase)):
     """Schema for entity file response"""
 
     id: int

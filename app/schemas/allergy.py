@@ -9,6 +9,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.read_model import read_model
 
 VALID_SEVERITY_LEVELS = get_all_severity_levels()
 
@@ -100,7 +101,7 @@ class AllergyUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class AllergyResponse(TaggedEntityResponseMixin, AllergyBase):
+class AllergyResponse(TaggedEntityResponseMixin, read_model(AllergyBase)):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

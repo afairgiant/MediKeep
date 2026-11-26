@@ -15,6 +15,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.read_model import read_model
 
 
 class InsuranceBase(TaggedEntityMixin):
@@ -235,7 +236,7 @@ class InsuranceUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class Insurance(TaggedEntityResponseMixin, InsuranceBase):
+class Insurance(TaggedEntityResponseMixin, read_model(InsuranceBase)):
     """Schema for reading insurance (includes database fields)"""
 
     id: int

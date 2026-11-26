@@ -54,6 +54,7 @@ from app.schemas.custom_reports import (
     ReportTemplateResponse,
     SelectiveRecordRequest,
 )
+from app.schemas.read_model import read_model
 from app.schemas.trend_charts import TrendChartSelection
 from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.services.blood_donation_units import (
@@ -67,6 +68,9 @@ from app.services.report_translations import get_translator
 from app.utils.notes_markdown import MARKDOWN_FIELDS_BY_SECTION, notes_to_plain_text
 
 logger = get_logger(__name__, "app")
+
+# Saved templates keep chart selections that today's rules may reject
+_STORED_TREND_CHARTS = read_model(TrendChartSelection)
 
 # Maximum records per category offered for selection in the report builder
 MAX_SUMMARY_RECORDS_PER_CATEGORY = 250
@@ -1510,7 +1514,7 @@ class CustomReportService:
         trend_charts = None
         if trend_charts_data:
             try:
-                trend_charts = TrendChartSelection(**trend_charts_data)
+                trend_charts = _STORED_TREND_CHARTS.model_validate(trend_charts_data)
             except Exception as exc:  # stored blob from older schema; ignore
                 logger.warning(
                     "Failed to deserialize trend_charts from template: %s", exc
@@ -1530,12 +1534,7 @@ class CustomReportService:
             user_id=template.user_id,
             name=template.name,
             description=template.description,
-            selected_records=[
-                SelectiveRecordRequest(
-                    category=sr["category"], record_ids=sr["record_ids"]
-                )
-                for sr in selected_records_raw
-            ],
+            selected_records=selected_records_raw,
             trend_charts=trend_charts,
             report_settings=report_settings,
             is_public=template.is_public,

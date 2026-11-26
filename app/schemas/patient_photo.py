@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.schemas.read_model import read_model
+
 
 class PatientPhotoBase(BaseModel):
     """Base schema for patient photos"""
@@ -85,7 +87,7 @@ class PatientPhotoUpdate(BaseModel):
     height: Optional[int] = None
 
 
-class PatientPhotoResponse(PatientPhotoBase):
+class PatientPhotoResponse(read_model(PatientPhotoBase)):
     """Schema for patient photo response"""
 
     id: int

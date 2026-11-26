@@ -389,10 +389,29 @@ npm run test:run       # Tests pass (Vitest)
    # app/schemas/reminder.py
    from pydantic import BaseModel
 
-   class ReminderCreate(BaseModel):
+   class ReminderBase(BaseModel):
        medication_id: int
        time: str
+
+   class ReminderCreate(ReminderBase):
+       pass
    ```
+
+   Response schemas must never reject a row already in the database, so when one shares
+   fields with a validating `Base`, inherit from `read_model(Base)` rather than `Base`:
+
+   ```python
+   from pydantic import ConfigDict
+
+   from app.schemas.read_model import read_model
+
+   class ReminderResponse(read_model(ReminderBase)):
+       id: int
+       model_config = ConfigDict(from_attributes=True)
+   ```
+
+   `tests/unit/test_response_schema_leniency.py` fails if a route's response model carries a
+   validator or constraint that can raise on stored data.
 
 4. **Add tests:**
    ```python

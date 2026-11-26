@@ -15,6 +15,7 @@ from app.schemas.validators import (
     validate_required_text,
     validate_text_field,
 )
+from app.schemas.read_model import read_model
 
 # Valid values extracted for reuse
 VALID_SYMPTOM_STATUSES = [s.value for s in SymptomStatus]
@@ -163,7 +164,7 @@ class SymptomUpdate(TaggedEntityUpdateMixin):
         )
 
 
-class SymptomResponse(TaggedEntityResponseMixin, SymptomBase):
+class SymptomResponse(TaggedEntityResponseMixin, read_model(SymptomBase)):
     """Schema for symptom definition response"""
 
     id: int
@@ -355,7 +356,7 @@ class SymptomOccurrenceUpdate(BaseModel):
         return validate_text_field(v, max_length=2000, field_name="Text field")
 
 
-class SymptomOccurrenceResponse(SymptomOccurrenceBase):
+class SymptomOccurrenceResponse(read_model(SymptomOccurrenceBase)):
     """Schema for symptom occurrence response"""
 
     id: int
@@ -399,7 +400,7 @@ class SymptomConditionUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class SymptomConditionResponse(SymptomConditionBase):
+class SymptomConditionResponse(read_model(SymptomConditionBase)):
     """Schema for symptom-condition relationship response"""
 
     id: int
@@ -451,7 +452,7 @@ class SymptomMedicationUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class SymptomMedicationResponse(SymptomMedicationBase):
+class SymptomMedicationResponse(read_model(SymptomMedicationBase)):
     """Schema for symptom-medication relationship response"""
 
     id: int
@@ -489,7 +490,7 @@ class SymptomTreatmentUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class SymptomTreatmentResponse(SymptomTreatmentBase):
+class SymptomTreatmentResponse(read_model(SymptomTreatmentBase)):
     """Schema for symptom-treatment relationship response"""
 
     id: int

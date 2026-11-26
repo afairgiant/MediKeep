@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.schemas.read_model import read_model
+
 
 class LabResultFileBase(BaseModel):
     """Base schema for LabResultFile"""
@@ -173,7 +175,7 @@ class LabResultFileUpdate(BaseModel):
         return v
 
 
-class LabResultFileResponse(LabResultFileBase):
+class LabResultFileResponse(read_model(LabResultFileBase)):
     """Schema for lab result file response"""
 
     id: int

@@ -10,6 +10,7 @@ from app.services.blood_donation_eligibility import (
     MIN_DONATION_INTERVAL_DAYS,
 )
 from app.services.paperless_auth_methods import is_valid_auth_method
+from app.schemas.read_model import read_model
 
 # Supported languages - single source of truth
 SUPPORTED_LANGUAGES = [
@@ -380,7 +381,7 @@ class UserPreferencesUpdate(BaseModel):
         return _validate_hemoglobin_unit(v)
 
 
-class UserPreferences(UserPreferencesBase):
+class UserPreferences(read_model(UserPreferencesBase)):
     """Schema for reading/returning user preferences data."""
 
     id: int

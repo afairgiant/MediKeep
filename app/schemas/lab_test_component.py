@@ -11,6 +11,7 @@ from app.core.constants import (
     LAB_TEST_COMPONENT_RESULT_TYPES,
     LAB_TEST_COMPONENT_STATUSES,
 )
+from app.schemas.read_model import read_model
 
 
 class LabTestComponentBase(BaseModel):
@@ -503,7 +504,7 @@ class LabTestComponentUpdate(BaseModel):
         return self
 
 
-class LabTestComponentResponse(LabTestComponentBase):
+class LabTestComponentResponse(read_model(LabTestComponentBase)):
     """Schema for lab test component response"""
 
     id: int

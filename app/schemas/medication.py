@@ -15,6 +15,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.read_model import read_model
 from app.schemas.validators import validate_text_field
 
 if TYPE_CHECKING:
@@ -421,7 +422,7 @@ class MedicationUpdate(TaggedEntityUpdateMixin):
         return stripped or None
 
 
-class MedicationResponse(TaggedEntityResponseMixin, MedicationBase):
+class MedicationResponse(TaggedEntityResponseMixin, read_model(MedicationBase)):
     """Schema for medication response"""
 
     id: int
@@ -441,7 +442,9 @@ class MedicationWithRelations(MedicationResponse):
 
 
 # Enhanced response schema with nested objects
-class MedicationResponseWithNested(MedicationBase):
+class MedicationResponseWithNested(
+    TaggedEntityResponseMixin, read_model(MedicationBase)
+):
     """Schema for medication response with nested practitioner and pharmacy objects"""
 
     id: int

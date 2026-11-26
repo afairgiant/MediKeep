@@ -16,6 +16,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.read_model import read_model
 
 # Valid equipment types
 EQUIPMENT_TYPES = [
@@ -141,7 +142,9 @@ class MedicalEquipmentUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class MedicalEquipmentResponse(TaggedEntityResponseMixin, MedicalEquipmentBase):
+class MedicalEquipmentResponse(
+    TaggedEntityResponseMixin, read_model(MedicalEquipmentBase)
+):
     """Schema for medical equipment response."""
 
     id: int
