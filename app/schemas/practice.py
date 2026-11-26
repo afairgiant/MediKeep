@@ -10,6 +10,7 @@ from app.schemas.validators import (
     validate_text_field,
     validate_url,
 )
+from app.schemas.read_model import read_model
 
 
 class PracticeLocationSchema(BaseModel):
@@ -155,7 +156,7 @@ class PracticeUpdate(BaseModel):
         return validate_text_field(v, max_length=2000, field_name="Notes")
 
 
-class Practice(PracticeBase):
+class Practice(read_model(PracticeBase)):
     """Schema for reading/returning practice data."""
 
     id: int

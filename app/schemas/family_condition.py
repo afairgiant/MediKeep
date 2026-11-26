@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 # Import enums for validation
 from ..models.enums import get_all_condition_types, get_all_severity_levels
 
+from app.schemas.read_model import read_model
+
 
 class FamilyConditionBase(BaseModel):
     condition_name: str = Field(
@@ -112,7 +114,7 @@ class FamilyConditionUpdate(BaseModel):
         return v
 
 
-class FamilyConditionResponse(FamilyConditionBase):
+class FamilyConditionResponse(read_model(FamilyConditionBase)):
     id: int
     created_at: datetime
     updated_at: datetime

@@ -8,6 +8,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.read_model import read_model
 
 if TYPE_CHECKING:
     pass
@@ -183,11 +184,10 @@ class ImmunizationUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class ImmunizationResponse(TaggedEntityResponseMixin, ImmunizationBase):
+class ImmunizationResponse(TaggedEntityResponseMixin, read_model(ImmunizationBase)):
     id: int
     standardized_vaccine_id: Optional[int] = Field(
         None,
-        gt=0,
         description="FK to standardized_vaccines.id if this record is linked to the library",
     )
 
@@ -243,6 +243,5 @@ class ImmunizationHistoryResponse(BaseModel):
     )
     unmatched_count: int = Field(
         0,
-        ge=0,
         description="Number of records that could not be matched to the library",
     )

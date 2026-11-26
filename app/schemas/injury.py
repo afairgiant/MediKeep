@@ -22,6 +22,7 @@ from app.schemas.base_tags import (
 )
 from app.schemas.injury_type import InjuryTypeResponse
 from app.schemas.validators import validate_date_not_future, validate_text_field
+from app.schemas.read_model import read_model
 
 # Pre-fetch valid values for reuse
 VALID_INJURY_STATUSES = get_all_injury_statuses()
@@ -217,7 +218,7 @@ class InjuryUpdate(TaggedEntityUpdateMixin):
         return validate_text_field(v, max_length=2000, field_name="Notes")
 
 
-class InjuryResponse(TaggedEntityResponseMixin, InjuryBase):
+class InjuryResponse(TaggedEntityResponseMixin, read_model(InjuryBase)):
     """Schema for Injury response"""
 
     id: int
@@ -337,7 +338,7 @@ class InjuryMedicationUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class InjuryMedicationResponse(InjuryMedicationBase):
+class InjuryMedicationResponse(read_model(InjuryMedicationBase)):
     """Schema for injury medication relationship response"""
 
     id: int
@@ -381,7 +382,7 @@ class InjuryConditionCreate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class InjuryConditionResponse(InjuryConditionBase):
+class InjuryConditionResponse(read_model(InjuryConditionBase)):
     """Schema for injury condition relationship response"""
 
     id: int
@@ -425,7 +426,7 @@ class InjuryTreatmentCreate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class InjuryTreatmentResponse(InjuryTreatmentBase):
+class InjuryTreatmentResponse(read_model(InjuryTreatmentBase)):
     """Schema for injury treatment relationship response"""
 
     id: int
@@ -469,7 +470,7 @@ class InjuryProcedureCreate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class InjuryProcedureResponse(InjuryProcedureBase):
+class InjuryProcedureResponse(read_model(InjuryProcedureBase)):
     """Schema for injury procedure relationship response"""
 
     id: int

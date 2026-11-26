@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
+from app.schemas.read_model import read_model
+
 
 class UserBase(BaseModel):
     """
@@ -357,7 +359,7 @@ class UserUpdate(BaseModel):
         return v
 
 
-class User(UserBase):
+class User(read_model(UserBase)):
     """
     Schema for reading/returning user data.
 

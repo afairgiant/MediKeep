@@ -12,6 +12,7 @@ from app.schemas.validators import (
     validate_required_text,
     validate_text_field,
 )
+from app.schemas.read_model import read_model
 
 if TYPE_CHECKING:
     from schemas.user import User
@@ -263,7 +264,7 @@ class PatientUpdate(BaseModel):
         return validate_positive_id(v, field_name="Physician ID")
 
 
-class Patient(PatientBase):
+class Patient(read_model(PatientBase)):
     """
     Schema for reading/returning patient data.
 

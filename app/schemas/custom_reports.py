@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
+from app.schemas.read_model import read_model
 from app.schemas.trend_charts import TrendChartSelection
 
 
@@ -161,7 +162,7 @@ class ReportTemplate(BaseModel):
     )
 
 
-class ReportTemplateResponse(ReportTemplate):
+class ReportTemplateResponse(read_model(ReportTemplate)):
     """Response model for report templates with metadata"""
 
     id: int

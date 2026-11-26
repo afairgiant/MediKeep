@@ -28,6 +28,7 @@ from app.schemas.validators import (
     validate_required_text,
     validate_text_field,
 )
+from app.schemas.read_model import read_model
 
 
 def _blank_time_to_none(v):
@@ -279,7 +280,7 @@ class EncounterUpdate(TaggedEntityUpdateMixin):
         return validate_text_field(v, max_length=50, field_name="Priority")
 
 
-class EncounterResponse(TaggedEntityResponseMixin, EncounterBase):
+class EncounterResponse(TaggedEntityResponseMixin, read_model(EncounterBase)):
     """Schema for encounter response"""
 
     id: int

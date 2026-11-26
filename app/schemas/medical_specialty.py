@@ -7,6 +7,7 @@ from app.schemas.validators import (
     validate_required_text,
     validate_text_field,
 )
+from app.schemas.read_model import read_model
 
 
 class MedicalSpecialtyBase(BaseModel):
@@ -55,7 +56,7 @@ class MedicalSpecialtyUpdate(BaseModel):
         return validate_text_field(v, max_length=1000, field_name="Description")
 
 
-class MedicalSpecialty(MedicalSpecialtyBase):
+class MedicalSpecialty(read_model(MedicalSpecialtyBase)):
     """Schema for reading/returning medical specialty data."""
 
     id: int

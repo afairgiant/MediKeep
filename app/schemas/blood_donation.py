@@ -12,6 +12,7 @@ from app.schemas.base_tags import (
     TaggedEntityUpdateMixin,
 )
 from app.schemas.validators import validate_date_not_future, validate_text_field
+from app.schemas.read_model import read_model
 
 
 def _validate_donation_type(v: Optional[str]) -> Optional[str]:
@@ -133,7 +134,7 @@ class BloodDonationUpdate(TaggedEntityUpdateMixin):
         return self
 
 
-class BloodDonationResponse(TaggedEntityResponseMixin, BloodDonationBase):
+class BloodDonationResponse(TaggedEntityResponseMixin, read_model(BloodDonationBase)):
     """Schema for blood donation responses."""
 
     id: int

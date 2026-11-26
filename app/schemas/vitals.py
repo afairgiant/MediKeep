@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
 
+from app.schemas.read_model import read_model
+
 
 def serialize_datetime_utc(value: Optional[datetime]) -> Optional[str]:
     """Serialize datetime with Z suffix so frontend knows it's UTC."""
@@ -235,7 +237,7 @@ class VitalsUpdate(BaseModel):
         return _validate_glucose_context_strict(v)
 
 
-class VitalsResponse(VitalsBase):
+class VitalsResponse(read_model(VitalsBase)):
     """Schema for vitals response"""
 
     id: int

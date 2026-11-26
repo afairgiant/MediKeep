@@ -13,6 +13,8 @@ from pydantic import (
 # Import enums for validation
 from ..models.enums import get_all_family_relationships
 
+from app.schemas.read_model import read_model
+
 
 class FamilyMemberBase(BaseModel):
     name: str = Field(
@@ -142,7 +144,7 @@ class FamilyMemberUpdate(BaseModel):
         return v
 
 
-class FamilyMemberResponse(FamilyMemberBase):
+class FamilyMemberResponse(read_model(FamilyMemberBase)):
     id: int
     created_at: datetime
     updated_at: datetime

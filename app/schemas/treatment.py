@@ -17,6 +17,7 @@ from app.schemas.base_tags import (
     TaggedEntityUpdateMixin,
 )
 from app.schemas.validators import validate_lab_result_link_purpose
+from app.schemas.read_model import read_model
 
 
 # Helper function for validating relevance notes
@@ -284,7 +285,7 @@ class TreatmentUpdate(TaggedEntityUpdateMixin):
         return v
 
 
-class TreatmentResponse(TaggedEntityResponseMixin, TreatmentBase):
+class TreatmentResponse(TaggedEntityResponseMixin, read_model(TreatmentBase)):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
@@ -449,7 +450,7 @@ class TreatmentMedicationUpdate(BaseModel):
         return v
 
 
-class TreatmentMedicationResponse(TreatmentMedicationBase):
+class TreatmentMedicationResponse(read_model(TreatmentMedicationBase)):
     """Schema for treatment medication relationship response."""
 
     id: int
@@ -587,7 +588,7 @@ class TreatmentEncounterUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class TreatmentEncounterResponse(TreatmentEncounterBase):
+class TreatmentEncounterResponse(read_model(TreatmentEncounterBase)):
     """Schema for treatment encounter relationship response."""
 
     id: int
@@ -716,7 +717,7 @@ class TreatmentLabResultUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class TreatmentLabResultResponse(TreatmentLabResultBase):
+class TreatmentLabResultResponse(read_model(TreatmentLabResultBase)):
     """Schema for treatment lab result relationship response."""
 
     id: int
@@ -826,7 +827,7 @@ class TreatmentEquipmentUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class TreatmentEquipmentResponse(TreatmentEquipmentBase):
+class TreatmentEquipmentResponse(read_model(TreatmentEquipmentBase)):
     """Schema for treatment equipment relationship response."""
 
     id: int

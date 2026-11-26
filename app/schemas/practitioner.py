@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, PositiveInt, field_validator, model_
 
 from app.schemas.validators import empty_strings_to_none
 from app.schemas.validators import validate_phone_number as _validate_phone
+from app.schemas.read_model import read_model
 
 
 # Shared validation helper functions to avoid code duplication
@@ -257,7 +258,7 @@ class PractitionerUpdate(BaseModel):
         return _validate_rating_value(v)
 
 
-class Practitioner(PractitionerBase):
+class Practitioner(read_model(PractitionerBase)):
     """
     Schema for reading/returning practitioner data.
 

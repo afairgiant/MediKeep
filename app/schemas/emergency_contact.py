@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.validators import validate_phone_number
+from app.schemas.read_model import read_model
 
 
 class EmergencyContactBase(BaseModel):
@@ -158,9 +159,9 @@ class EmergencyContactUpdate(BaseModel):
         return v
 
 
-class EmergencyContactResponse(EmergencyContactBase):
+class EmergencyContactResponse(read_model(EmergencyContactBase)):
     id: int
-    patient_id: int = Field(..., gt=0, description="ID of the patient")
+    patient_id: int = Field(..., description="ID of the patient")
 
     model_config = ConfigDict(from_attributes=True)
 

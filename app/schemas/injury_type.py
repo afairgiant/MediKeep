@@ -11,6 +11,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.validators import validate_required_text, validate_text_field
+from app.schemas.read_model import read_model
 
 
 class InjuryTypeBase(BaseModel):
@@ -66,7 +67,7 @@ class InjuryTypeUpdate(BaseModel):
         return validate_text_field(v, max_length=300, field_name="Description")
 
 
-class InjuryTypeResponse(InjuryTypeBase):
+class InjuryTypeResponse(read_model(InjuryTypeBase)):
     """Schema for InjuryType response"""
 
     id: int

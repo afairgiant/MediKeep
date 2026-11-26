@@ -9,6 +9,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.read_model import read_model
 
 # Pre-fetch valid values for reuse
 VALID_PROCEDURE_STATUSES = [s.value for s in ProcedureStatus]
@@ -187,7 +188,7 @@ class ProcedureUpdate(TaggedEntityUpdateMixin):
         return _validate_procedure_outcome(v)
 
 
-class ProcedureResponse(TaggedEntityResponseMixin, ProcedureBase):
+class ProcedureResponse(TaggedEntityResponseMixin, read_model(ProcedureBase)):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

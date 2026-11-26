@@ -10,6 +10,7 @@ from app.schemas.base_tags import (
     TaggedEntityUpdateMixin,
 )
 from app.schemas.validators import validate_date_not_future, validate_text_field
+from app.schemas.read_model import read_model
 
 # Pre-fetch valid values for reuse
 VALID_CONDITION_STATUSES = get_all_condition_statuses()
@@ -154,7 +155,7 @@ class ConditionUpdate(TaggedEntityUpdateMixin):
         return _validate_severity(v)
 
 
-class ConditionResponse(TaggedEntityResponseMixin, ConditionBase):
+class ConditionResponse(TaggedEntityResponseMixin, read_model(ConditionBase)):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
@@ -293,7 +294,7 @@ class ConditionMedicationUpdate(BaseModel):
         return _validate_relevance_note(v)
 
 
-class ConditionMedicationResponse(ConditionMedicationBase):
+class ConditionMedicationResponse(read_model(ConditionMedicationBase)):
     """Schema for condition medication relationship response"""
 
     id: int
