@@ -664,10 +664,10 @@ class TestProceduresAPI:
         # Just check for 422 status - validation errors can have different formats
         # The important part is that the validation rejects the request
 
-    def test_cancelled_procedure_future_date_rejected(
+    def test_cancelled_procedure_future_date_accepted(
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
-        """Test that cancelled procedures cannot have future dates."""
+        """A scheduled procedure that never happened can be cancelled."""
         from datetime import timedelta
 
         future_date = (date.today() + timedelta(days=1)).isoformat()
@@ -683,9 +683,7 @@ class TestProceduresAPI:
             "/api/v1/procedures/", json=procedure_data, headers=authenticated_headers
         )
 
-        assert response.status_code == 422
-        # Just check for 422 status - validation errors can have different formats
-        # The important part is that the validation rejects the request
+        assert response.status_code in (200, 201), response.text
 
     def test_partial_update_date_without_status(
         self, client: TestClient, user_with_patient, authenticated_headers

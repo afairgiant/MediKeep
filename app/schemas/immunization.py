@@ -1,5 +1,5 @@
 from datetime import date
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
@@ -8,7 +8,12 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.read_model import read_model
+
+check_expiration_after_administered = ordered_check(
+    "Expiration date cannot be before administration date"
+)
 
 if TYPE_CHECKING:
     pass
@@ -68,21 +73,18 @@ class ImmunizationBase(TaggedEntityMixin):
 
     @field_validator("expiration_date", mode="before")
     @classmethod
-    def validate_expiration_date(cls, v, info: ValidationInfo):
+    def validate_expiration_date(cls, v):
         if v and isinstance(v, str):
             try:
                 v = date.fromisoformat(v)
             except ValueError:
                 raise ValueError("Invalid expiration date format. Use YYYY-MM-DD")
-        if v and info.data.get("date_administered"):
-            admin_date = info.data["date_administered"]
-            if isinstance(admin_date, str):
-                try:
-                    admin_date = date.fromisoformat(admin_date)
-                except ValueError:
-                    pass  # Skip comparison if admin_date is invalid
-            if isinstance(admin_date, date) and v < admin_date:
-                raise ValueError("Expiration date cannot be before administration date")
+        return v
+
+    @field_validator("expiration_date")
+    @classmethod
+    def validate_expiration_after_administered(cls, v, info: ValidationInfo):
+        check_expiration_after_administered(info.data.get("date_administered"), v)
         return v
 
     @field_validator("route")
@@ -139,6 +141,13 @@ class ImmunizationUpdate(TaggedEntityUpdateMixin):
         ),
     )
 
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(
+            ("date_administered", "expiration_date"),
+            check_expiration_after_administered,
+        ),
+    )
+
     @field_validator("date_administered", mode="before")
     @classmethod
     def validate_date_administered(cls, v):
@@ -153,18 +162,12 @@ class ImmunizationUpdate(TaggedEntityUpdateMixin):
 
     @field_validator("expiration_date", mode="before")
     @classmethod
-    def validate_expiration_date(cls, v, info: ValidationInfo):
+    def validate_expiration_date(cls, v):
         if v and isinstance(v, str):
             try:
                 v = date.fromisoformat(v)
             except ValueError:
                 raise ValueError("Invalid expiration date format. Use YYYY-MM-DD")
-        if (
-            v
-            and info.data.get("date_administered")
-            and v < info.data["date_administered"]
-        ):
-            raise ValueError("Expiration date cannot be before administration date")
         return v
 
     @field_validator("route")

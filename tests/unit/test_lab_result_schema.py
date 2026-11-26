@@ -17,6 +17,7 @@ from app.schemas.lab_result import (
     LabResultCreate,
     LabResultUpdate,
     LabResultResponse,
+    check_ref_range_order,
 )
 
 
@@ -295,8 +296,8 @@ class TestLabResultNumericFieldsUpdate:
             make_update(value=math.inf)
 
     def test_update_ref_range_inverted_rejected(self):
-        with pytest.raises(ValidationError, match="maximum must be greater"):
-            make_update(ref_range_min=10.0, ref_range_max=5.0)
+        with pytest.raises(ValueError, match="maximum must be greater"):
+            check_ref_range_order(10.0, 5.0)
 
     def test_update_ref_range_text_at_limit_accepted(self):
         text = "x" * 500

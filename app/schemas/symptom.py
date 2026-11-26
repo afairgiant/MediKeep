@@ -1,7 +1,13 @@
 from datetime import date, datetime, time
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
-from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from app.models.enums import SymptomSeverity, SymptomStatus
 from app.schemas.base_tags import (
@@ -15,7 +21,19 @@ from app.schemas.validators import (
     validate_required_text,
     validate_text_field,
 )
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.read_model import read_model
+
+
+check_resolved_after_first_occurrence = ordered_check(
+    "Resolved date cannot be before first occurrence date"
+)
+
+
+check_resolved_after_occurrence = ordered_check(
+    "Resolved date must be after occurrence date"
+)
+
 
 # Valid values extracted for reuse
 VALID_SYMPTOM_STATUSES = [s.value for s in SymptomStatus]
@@ -68,12 +86,9 @@ class SymptomBase(TaggedEntityMixin):
 
     @field_validator("resolved_date")
     @classmethod
-    def validate_resolved_date(cls, v, info: ValidationInfo):
+    def validate_resolved_date(cls, v):
         if v is not None:
             v = validate_date_not_future(v, field_name="Resolved date")
-            first_occurrence = info.data.get("first_occurrence_date") if info else None
-            if first_occurrence is not None and v is not None and v < first_occurrence:
-                raise ValueError("Resolved date cannot be before first occurrence date")
         return v
 
     @field_validator("symptom_name")
@@ -113,6 +128,13 @@ class SymptomCreate(SymptomBase):
     def validate_first_occurrence_date(cls, v):
         return validate_date_not_future(v, field_name="First occurrence date")
 
+    @model_validator(mode="after")
+    def validate_resolved_after_first_occurrence(self):
+        check_resolved_after_first_occurrence(
+            self.first_occurrence_date, self.resolved_date
+        )
+        return self
+
 
 class SymptomUpdate(TaggedEntityUpdateMixin):
     """Schema for updating symptom definition"""
@@ -124,6 +146,13 @@ class SymptomUpdate(TaggedEntityUpdateMixin):
     resolved_date: Optional[date] = None
     typical_triggers: Optional[List[str]] = None
     general_notes: Optional[str] = None
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(
+            ("first_occurrence_date", "resolved_date"),
+            check_resolved_after_first_occurrence,
+        ),
+    )
 
     @field_validator("resolved_date")
     @classmethod
@@ -249,10 +278,7 @@ class SymptomOccurrenceBase(BaseModel):
     @field_validator("resolved_date")
     @classmethod
     def validate_resolved_date(cls, v, info: ValidationInfo):
-        if v is not None:
-            occurrence_date = info.data.get("occurrence_date")
-            if occurrence_date is not None and v < occurrence_date:
-                raise ValueError("Resolved date must be after occurrence date")
+        check_resolved_after_occurrence(info.data.get("occurrence_date"), v)
         return v
 
     @field_validator("resolution_notes", "notes")
@@ -289,6 +315,12 @@ class SymptomOccurrenceUpdate(BaseModel):
     resolved_time: Optional[time] = None
     resolution_notes: Optional[str] = None
     notes: Optional[str] = None
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(
+            ("occurrence_date", "resolved_date"), check_resolved_after_occurrence
+        ),
+    )
 
     @field_validator("occurrence_date")
     @classmethod
@@ -340,15 +372,6 @@ class SymptomOccurrenceUpdate(BaseModel):
         return validate_list_field(
             v, max_items=20, max_item_length=100, default_empty=False
         )
-
-    @field_validator("resolved_date")
-    @classmethod
-    def validate_resolved_date(cls, v, info: ValidationInfo):
-        if v is not None:
-            occurrence_date = info.data.get("occurrence_date")
-            if occurrence_date is not None and v < occurrence_date:
-                raise ValueError("Resolved date must be after occurrence date")
-        return v
 
     @field_validator("resolution_notes", "notes")
     @classmethod

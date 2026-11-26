@@ -1,6 +1,6 @@
 import math
 from datetime import date, datetime
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
 
@@ -10,8 +10,19 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.validators import validate_lab_result_link_purpose
 from app.schemas.read_model import read_model
+
+
+check_completed_after_ordered = ordered_check(
+    "Completed date cannot be before ordered date"
+)
+
+
+check_ref_range_order = ordered_check(
+    "Reference range maximum must be greater than minimum", strict=True
+)
 
 
 def _validate_relevance_note(v):
@@ -248,17 +259,13 @@ class LabResultBase(TaggedEntityMixin):
     @model_validator(mode="after")
     def validate_date_order(self):
         """Validate that completed date is not before ordered date"""
-        if self.completed_date and self.ordered_date:
-            if self.completed_date < self.ordered_date:
-                raise ValueError("Completed date cannot be before ordered date")
+        check_completed_after_ordered(self.ordered_date, self.completed_date)
         return self
 
     @model_validator(mode="after")
     def validate_ref_range_order(self):
         """Validate that ref_range_max is greater than ref_range_min"""
-        if self.ref_range_min is not None and self.ref_range_max is not None:
-            if self.ref_range_max <= self.ref_range_min:
-                raise ValueError("Reference range maximum must be greater than minimum")
+        check_ref_range_order(self.ref_range_min, self.ref_range_max)
         return self
 
 
@@ -318,6 +325,11 @@ class LabResultUpdate(TaggedEntityUpdateMixin):
     ref_range_min: Optional[float] = None
     ref_range_max: Optional[float] = None
     ref_range_text: Optional[str] = None
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(("ordered_date", "completed_date"), check_completed_after_ordered),
+        MergedRule(("ref_range_min", "ref_range_max"), check_ref_range_order),
+    )
 
     @field_validator("test_name")
     @classmethod
@@ -487,22 +499,6 @@ class LabResultUpdate(TaggedEntityUpdateMixin):
                 )
             return v if v else None
         return v
-
-    @model_validator(mode="after")
-    def validate_date_order(self):
-        """Validate that completed date is not before ordered date"""
-        if self.completed_date and self.ordered_date:
-            if self.completed_date < self.ordered_date:
-                raise ValueError("Completed date cannot be before ordered date")
-        return self
-
-    @model_validator(mode="after")
-    def validate_ref_range_order(self):
-        """Validate that ref_range_max is greater than ref_range_min"""
-        if self.ref_range_min is not None and self.ref_range_max is not None:
-            if self.ref_range_max <= self.ref_range_min:
-                raise ValueError("Reference range maximum must be greater than minimum")
-        return self
 
 
 class LabResultResponse(TaggedEntityResponseMixin, read_model(LabResultBase)):

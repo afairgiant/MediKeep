@@ -79,6 +79,32 @@
 - `429`: Too many requests (rate limit)
 - `500`: Internal server error
 
+### Partial Updates
+
+`PUT` saves only the fields in the request body. Rules that compare two fields are checked on the
+saved record with the sent fields laid over it, so a request that sends one side of a rule is
+checked against the saved other side. A rule is checked only when the request changes one of its
+fields, so a record saved before a rule existed still accepts edits to other fields. A broken rule
+returns `422` with the rule's message as the only entry in `detail`. Sending `null` clears a field,
+and a comparison rule with an empty side passes. The encounter rule is the exception: an empty
+`visit_time` means an all-day visit, so it still rejects hour or minute `reminder_offsets`.
+
+| Record | Rule |
+|---|---|
+| Conditions | `end_date` not before `onset_date` |
+| Encounters | an all-day visit (no `visit_time`) takes only whole-day `reminder_offsets` |
+| Family members | `death_year` not before `birth_year`; a `death_year` needs `is_deceased` |
+| Immunizations | `expiration_date` not before `date_administered` |
+| Insurance | `expiration_date` after `effective_date` |
+| Lab results | `completed_date` not before `ordered_date`; `ref_range_max` above `ref_range_min` |
+| Medical equipment | `next_service_date` not before `last_service_date` |
+| Medications | `effective_period_end` not before `effective_period_start` |
+| Procedures | `date` in the future only for `scheduled`, `postponed` or `cancelled` |
+| Symptoms | `resolved_date` not before `first_occurrence_date` |
+| Symptom occurrences | `resolved_date` not before `occurrence_date` |
+| Treatments | `end_date` not before `start_date`; `start_date` in the future only for `planned`, `on_hold` or `cancelled` |
+| Treatment medications | `specific_end_date` not before `specific_start_date` |
+
 ### Rate Limiting
 
 - Standard endpoints: 100 requests/minute

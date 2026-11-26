@@ -1,7 +1,7 @@
 from datetime import date as DateType
 from datetime import datetime
 from datetime import time as TimeType
-from typing import Annotated, List, Optional
+from typing import Annotated, ClassVar, List, Optional
 
 from pydantic import (
     AfterValidator,
@@ -23,6 +23,7 @@ from app.core.utils.visit_reminders import (
     check_offsets_fit_visit_time,
     normalize_reminder_offsets,
 )
+from app.schemas.merged_rules import MergedRule
 from app.schemas.validators import (
     validate_positive_id,
     validate_required_text,
@@ -194,6 +195,10 @@ class EncounterUpdate(TaggedEntityUpdateMixin):
     reminder_enabled: Optional[bool] = None
     reminder_offsets: ReminderOffsets = None
     reminder_include_details: Optional[bool] = None
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(("visit_time", "reminder_offsets"), check_offsets_fit_visit_time),
+    )
 
     @field_validator("reminder_enabled", "reminder_include_details")
     @classmethod

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any, Dict, Optional
+from typing import Any, ClassVar, Dict, Optional
 
 from pydantic import (
     BaseModel,
@@ -15,7 +15,13 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.read_model import read_model
+
+
+check_expiration_after_effective = ordered_check(
+    "Expiration date must be after effective date", strict=True
+)
 
 
 class InsuranceBase(TaggedEntityMixin):
@@ -123,9 +129,7 @@ class InsuranceBase(TaggedEntityMixin):
     @classmethod
     def validate_expiration_date(cls, v, info: ValidationInfo):
         """Validate expiration date is after effective date"""
-        if v is not None and info.data.get("effective_date") is not None:
-            if v <= info.data["effective_date"]:
-                raise ValueError("Expiration date must be after effective date")
+        check_expiration_after_effective(info.data.get("effective_date"), v)
         return v
 
     @model_validator(mode="after")
@@ -196,6 +200,12 @@ class InsuranceUpdate(TaggedEntityUpdateMixin):
     coverage_details: Optional[Dict[str, Any]] = None
     contact_info: Optional[Dict[str, Any]] = None
     notes: Optional[str] = None
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(
+            ("effective_date", "expiration_date"), check_expiration_after_effective
+        ),
+    )
 
     @model_validator(mode="before")
     @classmethod

@@ -447,10 +447,10 @@ class TestTreatmentsAPI:
         # Just check for 422 status - validation errors can have different formats
         # The important part is that the validation rejects the request
 
-    def test_cancelled_treatment_future_date_rejected(
+    def test_cancelled_treatment_future_date_accepted(
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
-        """Test that cancelled treatments cannot have future start dates."""
+        """A planned treatment that never started can be cancelled."""
         future_date = (date.today() + timedelta(days=1)).isoformat()
 
         treatment_data = {
@@ -465,9 +465,7 @@ class TestTreatmentsAPI:
             "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
-        assert response.status_code == 422
-        # Just check for 422 status - validation errors can have different formats
-        # The important part is that the validation rejects the request
+        assert response.status_code in (200, 201), response.text
 
     def test_partial_update_start_date_without_status(
         self, client: TestClient, user_with_patient, authenticated_headers

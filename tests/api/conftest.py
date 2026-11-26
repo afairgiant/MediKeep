@@ -161,6 +161,11 @@ def authenticated_headers(user_with_patient):
 
 
 @pytest.fixture
+def patient_id(user_with_patient):
+    return user_with_patient["patient"].id
+
+
+@pytest.fixture
 def populated_patient_data(
     client: TestClient, user_with_patient, authenticated_headers
 ):

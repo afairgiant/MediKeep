@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
@@ -9,8 +9,12 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.validators import validate_date_not_future, validate_text_field
 from app.schemas.read_model import read_model
+
+
+check_end_after_onset = ordered_check("End date cannot be before onset date")
 
 # Pre-fetch valid values for reuse
 VALID_CONDITION_STATUSES = get_all_condition_statuses()
@@ -98,9 +102,7 @@ class ConditionBase(TaggedEntityMixin):
             return None
         if v > date.today():
             raise ValueError("End date cannot be in the future")
-        onset_date = info.data.get("onset_date")
-        if onset_date and v < onset_date:
-            raise ValueError("End date cannot be before onset date")
+        check_end_after_onset(info.data.get("onset_date"), v)
         return v
 
     @field_validator("severity")
@@ -127,6 +129,10 @@ class ConditionUpdate(TaggedEntityUpdateMixin):
     practitioner_id: Optional[int] = Field(None, gt=0)
     # Note: medication_id removed - use ConditionMedication junction table instead
 
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(("onset_date", "end_date"), check_end_after_onset),
+    )
+
     @field_validator("status")
     @classmethod
     def validate_status(cls, v):
@@ -139,14 +145,9 @@ class ConditionUpdate(TaggedEntityUpdateMixin):
 
     @field_validator("end_date")
     @classmethod
-    def validate_end_date(cls, v, info: ValidationInfo):
-        if v is None:
-            return None
-        if v > date.today():
+    def validate_end_date(cls, v):
+        if v is not None and v > date.today():
             raise ValueError("End date cannot be in the future")
-        onset_date = info.data.get("onset_date")
-        if onset_date and v < onset_date:
-            raise ValueError("End date cannot be before onset date")
         return v
 
     @field_validator("severity")

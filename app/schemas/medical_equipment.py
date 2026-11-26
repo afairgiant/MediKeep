@@ -1,7 +1,7 @@
 """Schemas for Medical Equipment."""
 
 from datetime import date, datetime
-from typing import Optional
+from typing import ClassVar, Optional
 
 from pydantic import (
     BaseModel,
@@ -16,6 +16,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.read_model import read_model
 
 # Valid equipment types
@@ -44,6 +45,11 @@ EQUIPMENT_TYPES = [
 
 # Valid equipment statuses
 EQUIPMENT_STATUSES = ["active", "inactive", "replaced", "returned", "lost"]
+
+
+check_service_dates = ordered_check(
+    "Next service date cannot be before last service date"
+)
 
 
 class MedicalEquipmentBase(TaggedEntityMixin):
@@ -93,9 +99,7 @@ class MedicalEquipmentBase(TaggedEntityMixin):
     @model_validator(mode="after")
     def validate_dates(self):
         """Validate that service dates are logical."""
-        if self.last_service_date and self.next_service_date:
-            if self.next_service_date < self.last_service_date:
-                raise ValueError("Next service date cannot be before last service date")
+        check_service_dates(self.last_service_date, self.next_service_date)
         return self
 
 
@@ -119,6 +123,10 @@ class MedicalEquipmentUpdate(TaggedEntityUpdateMixin):
     supplier: Optional[str] = Field(None, max_length=200)
     notes: Optional[str] = Field(None, max_length=5000)
     practitioner_id: Optional[int] = Field(None, gt=0)
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(("last_service_date", "next_service_date"), check_service_dates),
+    )
 
     @field_validator("equipment_type")
     @classmethod

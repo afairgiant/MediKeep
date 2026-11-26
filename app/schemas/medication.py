@@ -1,5 +1,5 @@
 from datetime import date
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, ClassVar, List, Optional
 
 from pydantic import (
     ConfigDict,
@@ -15,6 +15,7 @@ from app.schemas.base_tags import (
     TaggedEntityResponseMixin,
     TaggedEntityUpdateMixin,
 )
+from app.schemas.merged_rules import MergedRule, ordered_check
 from app.schemas.read_model import read_model
 from app.schemas.validators import validate_text_field
 
@@ -62,6 +63,9 @@ def _normalize_reminder_days(value):
             f"reminder_days values must be integers 0-6 (Mon=0, Sun=6); invalid: {invalid}"
         )
     return sorted(set(value))
+
+
+check_effective_period = ordered_check("End date must be after start date")
 
 
 class MedicationBase(TaggedEntityMixin):
@@ -223,10 +227,7 @@ class MedicationBase(TaggedEntityMixin):
     @classmethod
     def validate_effective_period(cls, v, info: ValidationInfo):
         """Validate that end date is after start date"""
-        # Only validate if both dates are provided and not None
-        if v and info.data.get("effective_period_start"):
-            if v < info.data["effective_period_start"]:
-                raise ValueError("End date must be after start date")
+        check_effective_period(info.data.get("effective_period_start"), v)
         return v
 
 
@@ -281,6 +282,12 @@ class MedicationUpdate(TaggedEntityUpdateMixin):
     reminder_times: Optional[List[str]] = None
     reminder_message: Optional[str] = None
     reminder_days: Optional[List[int]] = None
+
+    MERGED_RULES: ClassVar[tuple[MergedRule, ...]] = (
+        MergedRule(
+            ("effective_period_start", "effective_period_end"), check_effective_period
+        ),
+    )
 
     @field_validator("reminder_times")
     @classmethod
@@ -343,16 +350,6 @@ class MedicationUpdate(TaggedEntityUpdateMixin):
             if len(v) > 100:
                 raise ValueError("Alternative name must be 100 characters or fewer")
             return v.strip()
-        return v
-
-    @field_validator("effective_period_end")
-    @classmethod
-    def validate_end_date(cls, v, info: ValidationInfo):
-        """Validate end date - check against start date"""
-        # Only validate if both dates are provided and not None
-        if v and info.data.get("effective_period_start"):
-            if v < info.data["effective_period_start"]:
-                raise ValueError("End date must be after start date")
         return v
 
     @field_validator("route")
