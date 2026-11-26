@@ -55,20 +55,12 @@ class RecordingPaperless:
         yield SimpleNamespace(status=status, json=AsyncMock(return_value=body))
 
 
-def task_response(task_uuid, document_id, status="SUCCESS"):
-    """A ``/api/tasks/`` answer holding one task."""
-    return (
-        200,
-        {
-            "results": [
-                {
-                    "task_id": task_uuid,
-                    "status": status,
-                    "related_document": document_id,
-                }
-            ]
-        },
-    )
+def task_response(task_uuid, document_id, status="SUCCESS", result=None):
+    """A ``/api/tasks/`` answer holding one task; ``result`` is its v9 result message."""
+    task = {"task_id": task_uuid, "status": status, "related_document": document_id}
+    if result is not None:
+        task["result"] = result
+    return 200, {"results": [task]}
 
 
 def use_paperless(db_session, user_id, url=None):

@@ -68,7 +68,7 @@ from app.services.paperless_service import (
     PaperlessError,
     create_paperless_service,
 )
-from app.services.paperless_task_status import extract_task, parse_task
+from app.services.paperless_task_status import ParsedTask, extract_task, parse_task
 from app.services.patient_access import PatientAccessService
 from app.services.shared_stored_files import (
     log_shared_file_kept,
@@ -292,6 +292,13 @@ def resolvable_uploads(db: Session, user_id: int):
 def _mark_duplicate(file_record: EntityFile) -> None:
     file_record.paperless_task_uuid = None
     file_record.sync_status = "duplicate"
+    file_record.last_sync_at = get_utc_now()
+
+
+def _mark_linked(file_record: EntityFile, document_id: str) -> None:
+    file_record.paperless_document_id = document_id
+    file_record.paperless_task_uuid = None
+    file_record.sync_status = "synced"
     file_record.last_sync_at = get_utc_now()
 
 
@@ -2228,8 +2235,10 @@ class GenericEntityFileService:
                                 )
                                 missing_count += 1
                                 continue
-                            elif file_record.sync_status == "duplicate":
-                                # Paperless kept the earlier upload; nothing more to find
+                            elif file_record.sync_status in ("duplicate", "failed"):
+                                # Paperless kept the earlier upload or rejected this one,
+                                # so there is nothing more to find. The orphan check
+                                # marks failed uploads missing on the next sync check.
                                 sync_status[file_record.id] = True
                                 continue
                             else:
@@ -2590,63 +2599,13 @@ class GenericEntityFileService:
                                 defer_to_lookup(file_record)
                                 continue
 
-                            parsed = parse_task(task_data)
-
-                            if parsed.is_success:
-                                document_id = parsed.document_id
-
-                                # Use centralized validation and fallback logic
-                                validated_doc_id = (
-                                    await self._validate_and_process_document_id(
-                                        document_id,
-                                        file_record,
-                                        paperless_service,
-                                        current_user_id,
-                                    )
-                                )
-
-                                if validated_doc_id:
-                                    # Successfully validated or found via fallback
-                                    file_record.paperless_document_id = validated_doc_id
-                                    file_record.paperless_task_uuid = (
-                                        None  # Clear task UUID
-                                    )
-                                    file_record.sync_status = "synced"
-                                    file_record.last_sync_at = get_utc_now()
-                                    _log_file_event(
-                                        logging.INFO,
-                                        "paperless_task_resolved",
-                                        f"Paperless task resolved to document {validated_doc_id}",
-                                        file_record,
-                                        task_uuid=task_uuid,
-                                    )
-                                else:
-                                    # Validation and fallback both failed
-                                    file_record.sync_status = "failed"
-                                    file_record.last_sync_at = get_utc_now()
-                                    _log_file_event(
-                                        logging.ERROR,
-                                        "paperless_task_document_not_found",
-                                        "Paperless task succeeded but no document could be linked",
-                                        file_record,
-                                        task_uuid=task_uuid,
-                                    )
-
-                            elif parsed.is_failure:
-                                # Task failed - mark as failed
-                                error_info = parsed.error_message or "Unknown error"
-                                file_record.sync_status = "failed"
-                                file_record.last_sync_at = get_utc_now()
-                                _log_file_event(
-                                    logging.WARNING,
-                                    "paperless_task_failed",
-                                    "Paperless task failed",
-                                    file_record,
-                                    task_uuid=task_uuid,
-                                    error=error_info,
-                                )
-
-                            # If task is still pending/processing, leave as-is
+                            # A task that has not finished is left as it is
+                            await self._record_task_result(
+                                file_record,
+                                parse_task(task_data),
+                                paperless_service,
+                                current_user_id,
+                            )
 
                         elif response.status == 403:
                             # The account cannot read tasks; same lookup as an unknown task
@@ -2796,89 +2755,15 @@ class GenericEntityFileService:
                                         f"Task {task_uuid} status: {parsed.status}"
                                     )
 
-                                    if parsed.is_success:
-                                        document_id = parsed.document_id
+                                    new_status = await self._record_task_result(
+                                        file_record,
+                                        parsed,
+                                        paperless_service,
+                                        current_user_id,
+                                    )
 
-                                        # Use centralized validation and fallback logic
-                                        validated_doc_id = await self._validate_and_process_document_id(
-                                            document_id,
-                                            file_record,
-                                            paperless_service,
-                                            current_user_id,
-                                        )
-
-                                        if validated_doc_id:
-                                            # Successfully validated or found via fallback
-                                            file_record.paperless_document_id = (
-                                                validated_doc_id
-                                            )
-                                            file_record.paperless_task_uuid = None  # Clear task UUID since it's complete
-                                            file_record.sync_status = "synced"
-                                            file_record.last_sync_at = get_utc_now()
-                                            status_updates[str(file_record.id)] = (
-                                                "synced"
-                                            )
-
-                                            _log_file_event(
-                                                logging.INFO,
-                                                "paperless_task_resolved",
-                                                f"Paperless task resolved to document {validated_doc_id}",
-                                                file_record,
-                                                task_uuid=task_uuid,
-                                            )
-                                        else:
-                                            # Validation and fallback both failed - might be a duplicate or invalid
-                                            _mark_duplicate(file_record)
-                                            status_updates[str(file_record.id)] = (
-                                                "duplicate"
-                                            )
-
-                                            _log_file_event(
-                                                logging.INFO,
-                                                "paperless_task_document_not_found",
-                                                "Paperless task succeeded but no document could be linked; likely a duplicate",
-                                                file_record,
-                                                task_uuid=task_uuid,
-                                            )
-
-                                    elif parsed.is_failure:
-                                        error_info = (
-                                            parsed.error_message or "Unknown error"
-                                        )
-                                        is_duplicate = parsed.is_duplicate
-
-                                        # Update record accordingly
-                                        file_record.paperless_task_uuid = (
-                                            None  # Clear task UUID
-                                        )
-                                        if is_duplicate:
-                                            file_record.sync_status = "duplicate"
-                                            status_updates[str(file_record.id)] = (
-                                                "duplicate"
-                                            )
-                                            _log_file_event(
-                                                logging.INFO,
-                                                "paperless_task_duplicate",
-                                                "Paperless rejected the upload as a duplicate",
-                                                file_record,
-                                                task_uuid=task_uuid,
-                                                error=error_info,
-                                            )
-                                        else:
-                                            file_record.sync_status = "failed"
-                                            status_updates[str(file_record.id)] = (
-                                                "failed"
-                                            )
-                                            _log_file_event(
-                                                logging.ERROR,
-                                                "paperless_task_failed",
-                                                "Paperless task failed",
-                                                file_record,
-                                                task_uuid=task_uuid,
-                                                error=error_info,
-                                            )
-
-                                        file_record.last_sync_at = get_utc_now()
+                                    if new_status:
+                                        status_updates[str(file_record.id)] = new_status
 
                                     elif parsed.is_in_progress:
                                         # Task still in progress - keep as processing
@@ -2950,6 +2835,78 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error updating processing files: {str(e)}")
             return {}
+
+    async def _record_task_result(
+        self,
+        file_record: EntityFile,
+        parsed: ParsedTask,
+        paperless_service,
+        current_user_id: int,
+    ) -> Optional[str]:
+        """
+        Record a finished Paperless task on its upload and clear the task UUID.
+
+        Both task checkers (``update_processing_files`` and the sync check's
+        ``_resolve_task_uuids_to_document_ids``) use this, so a task result
+        gives the same status whichever of them reads it first. The caller
+        commits.
+
+        Returns:
+            The record's new status, or None if the task has not finished.
+        """
+        task_uuid = file_record.paperless_task_uuid
+
+        if parsed.is_success:
+            document_id = await self._validate_and_process_document_id(
+                parsed.document_id, file_record, paperless_service, current_user_id
+            )
+            if document_id:
+                _mark_linked(file_record, document_id)
+                _log_file_event(
+                    logging.INFO,
+                    "paperless_task_resolved",
+                    f"Paperless task resolved to document {document_id}",
+                    file_record,
+                    task_uuid=task_uuid,
+                )
+            else:
+                # No usable document ID, and the lookup found no copy it could link
+                _mark_duplicate(file_record)
+                _log_file_event(
+                    logging.INFO,
+                    "paperless_task_document_not_found",
+                    "Paperless task succeeded but no document could be linked; likely a duplicate",
+                    file_record,
+                    task_uuid=task_uuid,
+                )
+            return file_record.sync_status
+
+        if not parsed.is_failure:
+            return None
+
+        # Paperless's error message quotes the file name, so it is not logged
+        if parsed.is_duplicate:
+            _mark_duplicate(file_record)
+            _log_file_event(
+                logging.INFO,
+                "paperless_task_duplicate",
+                "Paperless rejected the upload as a duplicate",
+                file_record,
+                task_uuid=task_uuid,
+            )
+        else:
+            file_record.paperless_task_uuid = None
+            file_record.sync_status = "failed"
+            file_record.last_sync_at = get_utc_now()
+            _log_file_event(
+                logging.WARNING,
+                "paperless_task_failed",
+                "Paperless task failed",
+                file_record,
+                task_uuid=task_uuid,
+                error=f"task status {parsed.status}",
+            )
+        return file_record.sync_status
 
     async def _validate_and_process_document_id(
         self, document_id, file_record, paperless_service, current_user_id: int
@@ -3069,11 +3026,8 @@ class GenericEntityFileService:
                 _mark_duplicate(file_record)
             return None
 
-        file_record.paperless_document_id = document_id
-        file_record.paperless_task_uuid = None
-        file_record.sync_status = "synced"
-        file_record.last_sync_at = get_utc_now()
-        return file_record.paperless_document_id
+        _mark_linked(file_record, document_id)
+        return document_id
 
     async def _find_documents_with_upload_content(
         self, file_record: EntityFile, paperless_service
