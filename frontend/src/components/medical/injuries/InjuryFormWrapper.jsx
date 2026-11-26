@@ -57,7 +57,6 @@ const InjuryFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
   onPractitionerCreated = undefined,
 }) => {
   // Translation hooks
@@ -91,10 +90,6 @@ const InjuryFormWrapper = ({
       error: error,
       component: 'InjuryFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

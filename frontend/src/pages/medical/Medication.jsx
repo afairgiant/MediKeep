@@ -860,7 +860,6 @@ const Medication = () => {
           medication={viewingMedication}
           onEdit={handleEditMedication}
           navigate={navigate}
-          onError={setError}
           practitioners={practitioners}
           disableEdit={isViewOnly}
           disableEditTooltip={viewOnlyTooltip}

@@ -87,6 +87,7 @@
     "documentsToLink": "Документы для связывания:",
     "duplicateDocument": "Дублированный документ",
     "duplicateExists": "Этот документ уже существует в Paperless и не может быть загружен повторно.",
+    "errorPopupTitle": "Ошибка документа",
     "filesToUpload": "Файлы для загрузки:",
     "linkDescriptionPlaceholder": "Описание (необязательно)",
     "linkPaperless": "Связать существующий документ Paperless",

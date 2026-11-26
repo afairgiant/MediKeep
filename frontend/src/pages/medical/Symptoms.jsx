@@ -853,12 +853,6 @@ const Symptoms = () => {
             fetchSymptoms();
           }
         }}
-        onError={error => {
-          logger.error('symptom_document_error', {
-            error,
-            component: 'Symptoms',
-          });
-        }}
       />
 
       {/* Occurrence Form Modal */}

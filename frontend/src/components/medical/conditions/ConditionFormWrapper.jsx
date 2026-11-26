@@ -53,7 +53,6 @@ const ConditionFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
   navigate,
   onPractitionerCreated = undefined,
 }) => {
@@ -87,10 +86,6 @@ const ConditionFormWrapper = ({
       error: error,
       component: 'ConditionFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

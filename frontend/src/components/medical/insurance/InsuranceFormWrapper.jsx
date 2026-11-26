@@ -63,7 +63,6 @@ const InsuranceFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
   practitioners = [],
   formError = null,
 }) => {
@@ -95,10 +94,6 @@ const InsuranceFormWrapper = ({
       error: error,
       component: 'InsuranceFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

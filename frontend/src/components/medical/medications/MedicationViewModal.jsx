@@ -42,7 +42,6 @@ const MedicationViewModal = ({
   medication,
   onEdit,
   navigate,
-  onError,
   practitioners = [],
   disableEdit = false,
   disableEditTooltip,
@@ -650,9 +649,6 @@ const MedicationViewModal = ({
                       'Document manager error in medication view:',
                       error
                     );
-                    if (onError) {
-                      onError(error);
-                    }
                   }}
                 />
               </Stack>

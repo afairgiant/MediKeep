@@ -56,7 +56,6 @@ const EquipmentFormWrapper = ({
   formError = undefined,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
 }) => {
   const { t } = useTranslation(['common', 'medical', 'shared']);
   const subDialog = useSubDialog();
@@ -86,10 +85,6 @@ const EquipmentFormWrapper = ({
       error,
       component: 'EquipmentFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (
@@ -537,7 +532,6 @@ EquipmentFormWrapper.propTypes = {
   }),
   onDocumentManagerRef: PropTypes.func,
   onFileUploadComplete: PropTypes.func,
-  onError: PropTypes.func,
 };
 
 export default EquipmentFormWrapper;

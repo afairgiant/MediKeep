@@ -37,7 +37,6 @@ const ConditionViewModal = ({
   onEdit,
   practitioners = [],
   onPractitionerClick,
-  onError,
   navigate,
   disableEdit = false,
   disableEditTooltip,
@@ -483,7 +482,6 @@ const ConditionViewModal = ({
               <DocumentManagerWithProgress
                 entityType="condition"
                 entityId={condition.id}
-                onError={onError}
               />
             </Box>
           </Tabs.Panel>

@@ -501,6 +501,8 @@ Every record Add/Edit dialog (Allergy, Injury, Medication, ...) uses one form fo
 
 Do not use a plain `<form>`, and do not add `noValidate` yourself. The browser's own check stops the submit without a word when a required field is on a tab that is not showing, and it never checks a non-searchable Mantine `Select`.
 
+**Other errors inside a record dialog also go in a popup, never to the page.** `DocumentManagerWithProgress` shows its own errors (a failed download, view, delete or file list load) in `ErrorPopup` (`frontend/src/components/shared/ErrorPopup.tsx`), the popup `FormErrorPopup` is built on. A failed upload is shown by the upload progress window or a toast instead. Do not pass a document manager's `onError` on to the page's `setError`: the page alert sits behind the dialog. For a new kind of error inside a dialog, use `ErrorPopup` rather than an alert at the top of the dialog, which is out of sight when the dialog is scrolled down.
+
 ### Database Migrations
 
 ```bash

@@ -6,19 +6,19 @@ import React, {
 } from 'react';
 import {
   Stack,
-  Alert,
   Modal,
   Group,
   Button,
   FileInput,
   TextInput,
 } from '@mantine/core';
-import { IconUpload, IconAlertTriangle } from '@tabler/icons-react';
+import { IconUpload } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import useDocumentManagerCore from './DocumentManagerCore';
 import ProgressTracking from './ProgressTracking';
 import RenderModeContent from './RenderModeContent';
 import DocumentManagerErrorBoundary from './DocumentManagerErrorBoundary';
+import ErrorPopup from './ErrorPopup';
 import LinkPaperlessDocumentModal from './LinkPaperlessDocumentModal';
 import LinkPapraDocumentModal from './LinkPapraDocumentModal';
 import { linkPaperlessDocument } from '../../services/api/paperlessApi';
@@ -67,6 +67,19 @@ const DocumentManagerContent = ({
   // Store handlers in ref for stable access
   updateHandlersRef(coreHandlers);
 
+  // A popup, not an alert at the top: the user is often scrolled down to the
+  // file they acted on. The message stays until OK, even when a reload clears
+  // the core's error in the meantime.
+  const [popupError, setPopupError] = useState('');
+  useEffect(() => {
+    if (coreHandlers.error) setPopupError(coreHandlers.error);
+  }, [coreHandlers.error]);
+  const { setError } = coreHandlers;
+  const dismissError = useCallback(() => {
+    setPopupError('');
+    setError('');
+  }, [setError]);
+
   // logger.debug('document_manager_with_progress_render', 'DocumentManagerWithProgress rendering', {
   //   mode,
   //   entityType,
@@ -79,19 +92,12 @@ const DocumentManagerContent = ({
 
   return (
     <Stack gap="md" className={className}>
-      {/* Error Display */}
-      {coreHandlers.error && (
-        <Alert
-          variant="light"
-          color="red"
-          title="File Operation Error"
-          icon={<IconAlertTriangle size={16} />}
-          withCloseButton
-          onClose={() => coreHandlers.setError('')}
-        >
-          {coreHandlers.error}
-        </Alert>
-      )}
+      <ErrorPopup
+        opened={Boolean(popupError)}
+        title={t('manager.errorPopupTitle', 'Document error')}
+        message={popupError}
+        onDismiss={dismissError}
+      />
 
       {/* Main Content */}
       <DocumentManagerErrorBoundary

@@ -49,7 +49,6 @@ const TreatmentViewModal = ({
   onEncounterClick,
   onLabResultClick,
   onEquipmentClick,
-  onError,
   disableEdit = false,
   disableEditTooltip,
 }) => {
@@ -634,7 +633,6 @@ const TreatmentViewModal = ({
               <DocumentManagerWithProgress
                 entityType="treatment"
                 entityId={treatment.id}
-                onError={onError}
               />
             </Box>
           </Tabs.Panel>

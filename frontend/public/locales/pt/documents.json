@@ -87,6 +87,7 @@
     "documentsToLink": "Documentos para associar:",
     "duplicateDocument": "Documento duplicado",
     "duplicateExists": "Este documento já existe no Paperless e não pode ser carregado novamente.",
+    "errorPopupTitle": "Erro de documento",
     "filesToUpload": "Ficheiros para carregar:",
     "linkDescriptionPlaceholder": "Descrição (opcional)",
     "linkPaperless": "Associar documento Paperless existente",

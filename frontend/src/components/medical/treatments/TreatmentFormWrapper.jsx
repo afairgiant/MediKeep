@@ -72,7 +72,6 @@ const TreatmentFormWrapper = ({
   statusMessage,
   onDocumentManagerRef,
   onFileUploadComplete,
-  onError,
   formError = undefined,
   patientId = undefined,
   onPractitionerCreated = undefined,
@@ -107,10 +106,6 @@ const TreatmentFormWrapper = ({
       error: error,
       component: 'TreatmentFormWrapper',
     });
-
-    if (onError) {
-      onError(error);
-    }
   };
 
   const handleDocumentUploadComplete = (

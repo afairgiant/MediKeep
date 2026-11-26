@@ -104,8 +104,15 @@ const LabResultViewModal = ({
     }
   };
 
+  // The document manager shows its errors inside this dialog. They are only
+  // logged here: passing them to onError would show them again on the page.
   const handleDocumentError = error => {
-    handleError(error, 'document_manager');
+    logger.error('document_manager_error', {
+      message: 'Document manager error in lab result view',
+      labResultId: labResult?.id,
+      error,
+      component: 'LabResultViewModal',
+    });
   };
 
   const handleTestComponentsError = error => {

@@ -7,7 +7,6 @@ import {
 } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
-import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import {
   getPaperlessSettings,
@@ -141,8 +140,6 @@ const useDocumentManagerCore = ({
       performanceMonitor.lastViewModeLog = now;
     }
   }
-
-  const { t } = useTranslation('documents');
 
   // State management
   const [files, setFiles] = useState([]);
@@ -381,7 +378,11 @@ const useDocumentManagerCore = ({
       }
     } catch (err) {
       const errorMessage = err.message || 'Failed to load files';
-      setError(errorMessage);
+      // A reload in the background (the periodic sync check, the checks after
+      // an upload) is only logged, so it never opens the error popup unprompted.
+      if (!background) {
+        setError(errorMessage);
+      }
 
       if (onError) {
         onError(errorMessage);
@@ -726,7 +727,8 @@ const useDocumentManagerCore = ({
         component: 'DocumentManagerCore',
       });
 
-      checkSyncStatus();
+      // Runs by itself, not because the user asked: a failure is only logged
+      checkSyncStatus({ background: true });
     } else {
       logger.debug('auto_sync_not_triggered', 'Auto-sync not triggered', {
         reason: !currentAutoSync
@@ -1082,13 +1084,14 @@ const useDocumentManagerCore = ({
             component: 'DocumentManagerCore',
           });
 
-          // If it's a duplicate or background processing, don't set error (these are expected behaviors)
+          // If it's a duplicate or background processing, it is not an error
+          // (these are expected behaviors). A failed upload is not put in
+          // `error` either: the progress modal or the toast above shows it.
           if (
             result.success === false &&
             !result.isDuplicate &&
             !result.isBackgroundProcessing
           ) {
-            setError(result.message);
             if (onError) {
               onError(result.message);
             }
@@ -1148,8 +1151,7 @@ const useDocumentManagerCore = ({
           });
         }
 
-        setError(errorMessage);
-
+        // Not put in `error`: the progress modal or the toast above shows it
         if (onError) {
           onError(errorMessage);
         }
@@ -1217,12 +1219,6 @@ const useDocumentManagerCore = ({
       if (onError) {
         onError(errorMessage);
       }
-      notifications.show({
-        title: t('errors:file.deleteFailed'),
-        message: errorMessage,
-        color: 'red',
-        icon: <IconX size={16} />,
-      });
 
       logger.error('document_manager_marked_files_delete_error', {
         message: 'Some files marked for deletion could not be deleted',
@@ -1236,7 +1232,7 @@ const useDocumentManagerCore = ({
 
       throw new Error(errorMessage);
     },
-    [entityType, entityId, loadFiles, onError, t]
+    [entityType, entityId, loadFiles, onError]
   );
 
   // Applies the document changes queued before Save: deletes the files marked

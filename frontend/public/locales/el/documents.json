@@ -87,6 +87,7 @@
     "documentsToLink": "Έγγραφα προς Σύνδεση:",
     "duplicateDocument": "Διπλότυπο Έγγραφο",
     "duplicateExists": "Αυτό το έγγραφο υπάρχει ήδη στο Paperless και δεν μπορεί να μεταφορτωθεί ξανά.",
+    "errorPopupTitle": "Σφάλμα εγγράφου",
     "filesToUpload": "Αρχεία προς Μεταφόρτωση:",
     "linkDescriptionPlaceholder": "Περιγραφή (προαιρετικό)",
     "linkPaperless": "Σύνδεση Υπάρχοντος Εγγράφου Paperless",

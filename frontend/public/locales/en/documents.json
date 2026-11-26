@@ -87,6 +87,7 @@
     "documentsToLink": "Documents to Link:",
     "duplicateDocument": "Duplicate Document",
     "duplicateExists": "This document already exists in Paperless and cannot be uploaded again.",
+    "errorPopupTitle": "Document error",
     "filesToUpload": "Files to Upload:",
     "linkDescriptionPlaceholder": "Description (optional)",
     "linkPaperless": "Link Existing Paperless Document",

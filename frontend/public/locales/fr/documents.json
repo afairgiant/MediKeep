@@ -87,6 +87,7 @@
     "documentsToLink": "Documents à connecter :",
     "duplicateDocument": "Document en double",
     "duplicateExists": "Ce document existe déjà dans Paperless et ne peut pas être téléversé à nouveau.",
+    "errorPopupTitle": "Erreur de document",
     "filesToUpload": "Fichiers à téléverser :",
     "linkDescriptionPlaceholder": "Description (optionnelle)",
     "linkPaperless": "Connecter un document existant dans Paperless",

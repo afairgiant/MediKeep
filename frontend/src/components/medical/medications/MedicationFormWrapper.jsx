@@ -20,7 +20,6 @@ const MedicationFormWrapper = memo(
     statusMessage,
     onDocumentManagerRef,
     onFileUploadComplete,
-    onError,
     formError,
   }) => {
     return (
@@ -41,7 +40,6 @@ const MedicationFormWrapper = memo(
         statusMessage={statusMessage}
         onDocumentManagerRef={onDocumentManagerRef}
         onFileUploadComplete={onFileUploadComplete}
-        onError={onError}
         formError={formError}
       />
     );
