@@ -336,14 +336,20 @@ def _normalized(name: Any) -> str:
 
 
 def _file_name_matches(document: Dict[str, Any], filename: str) -> bool:
-    """Whether the document's original file name is ``filename``, or its title is the name or its stem."""
+    """Whether the document's original file name is ``filename``, or its title exactly matches the name or its stem.
+
+    Exact match only - no substring matching. This prevents false positives where
+    a short title like "scan" matches many file names.
+    """
     name = _normalized(filename)
     if not name:
         return False
     title = _normalized(document.get("title"))
-    return _normalized(document.get("original_file_name")) == name or title in (
-        name,
-        _normalized(Path(filename).stem),
+    stem = _normalized(Path(filename).stem)
+    return (
+        _normalized(document.get("original_file_name")) == name
+        or title == name
+        or title == stem
     )
 
 
@@ -3066,18 +3072,22 @@ class GenericEntityFileService:
         Async helper to search for document by filename and time range.
         """
         try:
+            # Both passes use date filtering on "added" (when Paperless stored the document),
+            # not "created" (the date from the document's content). Paperless supports
+            # date__gte/date__lte lookups for "added" but not for "created".
+            search_start_date = (search_start - timedelta(days=1)).strftime("%Y-%m-%d")
+            search_end_date = (search_end + timedelta(days=1)).strftime("%Y-%m-%d")
+
             title_search = {
                 "query": _build_title_fallback_query(Path(filename).stem),
+                "added__date__gte": search_start_date,
+                "added__date__lte": search_end_date,
                 "page_size": _DOCUMENT_SEARCH_PAGE_SIZE,
             }
             # Paperless compares __date in its own time zone; _added_within does the exact check
             recent_documents = {
-                "added__date__gte": (search_start - timedelta(days=1)).strftime(
-                    "%Y-%m-%d"
-                ),
-                "added__date__lte": (search_end + timedelta(days=1)).strftime(
-                    "%Y-%m-%d"
-                ),
+                "added__date__gte": search_start_date,
+                "added__date__lte": search_end_date,
                 "ordering": "-added",
                 "page_size": _DOCUMENT_SEARCH_PAGE_SIZE,
             }
