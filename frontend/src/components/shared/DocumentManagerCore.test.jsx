@@ -785,4 +785,28 @@ describe('useDocumentManagerCore - failed file list reload (#1282)', () => {
 
     expect(result.current.error).toBe('');
   });
+
+  it('only logs a failed reload after the automatic sync check in the Edit form', async () => {
+    getPaperlessSettings.mockResolvedValue(
+      paperlessEnabledSettings({ paperless_auto_sync: true })
+    );
+    apiService.getEntityFiles
+      .mockResolvedValueOnce([
+        { id: 1, storage_backend: 'paperless', sync_status: 'synced' },
+      ])
+      .mockRejectedValue(new Error('Network Error'));
+    const { result } = renderHook(() =>
+      useDocumentManagerCore(
+        baseProps({ entityType: 'medication', entityId: 1, mode: 'edit' })
+      )
+    );
+
+    // The check runs by itself shortly after the files load, then reloads them
+    await waitFor(
+      () => expect(apiService.getEntityFiles).toHaveBeenCalledTimes(2),
+      { timeout: 3000 }
+    );
+    expect(apiService.checkPaperlessSyncStatus).toHaveBeenCalled();
+    expect(result.current.error).toBe('');
+  });
 });

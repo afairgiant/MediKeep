@@ -727,7 +727,8 @@ const useDocumentManagerCore = ({
         component: 'DocumentManagerCore',
       });
 
-      checkSyncStatus();
+      // Runs by itself, not because the user asked: a failure is only logged
+      checkSyncStatus({ background: true });
     } else {
       logger.debug('auto_sync_not_triggered', 'Auto-sync not triggered', {
         reason: !currentAutoSync
