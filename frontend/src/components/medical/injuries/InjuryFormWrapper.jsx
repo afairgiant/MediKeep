@@ -158,7 +158,6 @@ const InjuryFormWrapper = ({
       styles={{ body: { position: 'relative' } }}
     >
       <FormLoadingOverlay
-        variant="frosted"
         visible={isSubmitting || isLoading}
         message={
           statusMessage?.title ||

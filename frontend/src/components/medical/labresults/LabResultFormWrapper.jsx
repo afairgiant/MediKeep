@@ -519,6 +519,8 @@ const LabResultFormWrapper = ({
       zIndex={2000}
       closeOnClickOutside={!isLoading && !isSubmitting}
       closeOnEscape={!isLoading && !isSubmitting}
+      // The loading overlay covers the body, so it covers the whole form when scrolled
+      styles={{ body: { position: 'relative' } }}
     >
       {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}
       <RecordForm onSubmit={handleSubmit}>

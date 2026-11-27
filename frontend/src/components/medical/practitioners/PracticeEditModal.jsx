@@ -124,6 +124,8 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
       size="lg"
       centered
       zIndex={2100}
+      // The loading overlay covers the body, so it covers the whole form when scrolled
+      styles={{ body: { position: 'relative' } }}
     >
       <FormLoadingOverlay
         visible={isSubmitting}

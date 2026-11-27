@@ -389,6 +389,8 @@ const LabResultQuickImportModal = ({
         zIndex={3000}
         closeOnClickOutside={false}
         closeOnEscape={false}
+        // The loading overlay covers the body, so it covers the whole form when scrolled
+        styles={{ body: { position: 'relative' } }}
       >
         <Stack gap="md">
           {/* Stepper */}

@@ -23,7 +23,6 @@ import { savePendingEncounterLinks } from '../../utils/encounterLinks';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
@@ -618,14 +617,9 @@ const Visits = () => {
         }}
         patientId={currentPatient?.id}
         navigate={navigate}
-      >
-        <FormLoadingOverlay
-          visible={isBlocking}
-          message={statusMessage?.title || 'Processing...'}
-          submessage={statusMessage?.message}
-          type={statusMessage?.type || 'loading'}
-        />
-      </VisitFormWrapper>
+        isLoading={isBlocking}
+        statusMessage={statusMessage}
+      />
 
       <VisitViewModal
         isOpen={showViewModal}
