@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.activity_log import activity_log
 from app.models.activity_log import ActionType, ActivityLog, EntityType
-from app.models.models import Patient, User
+from app.models.models import Patient, PatientPhoto, User
 from app.services.user_deletion_service import UserDeletionService
 
 
@@ -478,3 +478,37 @@ def test_noncommitting_crud_delete_does_not_rollback_caller(db_session, test_use
     db_session.commit()
     db_session.refresh(test_user)
     assert test_user.full_name == "Caller change"
+
+
+@pytest.mark.parametrize("through_admin", [False, True])
+def test_delete_user_who_uploaded_photo_to_another_owners_patient(
+    admin_client, db_session: Session, test_user, test_admin_user, through_admin
+):
+    """Issue #1285: a photo uploaded with shared edit access must not block the delete."""
+    db_session.commit()
+    user_id = test_user.id
+    other_patient = _other_patient(db_session, test_admin_user, "PhotoOwner")
+    photo = PatientPhoto(
+        patient_id=other_patient.id,
+        file_name="photo.jpg",
+        file_path="uploads/photos/photo.jpg",
+        uploaded_by=user_id,
+    )
+    db_session.add(photo)
+    db_session.commit()
+    photo_id = photo.id
+
+    if through_admin:
+        response = admin_client.delete(f"/api/v1/admin/models/user/{user_id}")
+        assert response.status_code == 200
+    else:
+        stats = UserDeletionService().delete_user_account(db_session, user_id)
+        db_session.commit()
+        assert stats["deleted_records"]["patient_photos_updated"] == 1
+
+    db_session.expire_all()
+    assert db_session.query(User).filter(User.id == user_id).first() is None
+    kept = db_session.query(PatientPhoto).filter(PatientPhoto.id == photo_id).first()
+    assert kept is not None
+    assert kept.patient_id == other_patient.id
+    assert kept.uploaded_by is None
