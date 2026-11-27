@@ -1,6 +1,6 @@
 {
-  "version": "1.8.3",
-  "lastUpdated": "2026-11-09",
+  "version": "1.8.4",
+  "lastUpdated": "2026-11-27",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -1006,7 +1006,7 @@
     {
       "test_name": "Partial Thromboplastin Time",
       "abbreviation": "PTT",
-      "test_code": "5894-1",
+      "test_code": "3173-2",
       "default_unit": "seconds",
       "category": "hematology",
       "common_names": [
@@ -1608,7 +1608,6 @@
     {
       "test_name": "Pure Tone Audiometry",
       "abbreviation": "PTA",
-      "test_code": "89024-4",
       "default_unit": "dB HL",
       "category": "hearing",
       "common_names": [
@@ -1624,7 +1623,6 @@
     {
       "test_name": "Tympanometry",
       "abbreviation": "TYMP",
-      "test_code": "89016-0",
       "default_unit": "mL",
       "category": "hearing",
       "common_names": [
@@ -1639,7 +1637,6 @@
     {
       "test_name": "Speech Reception Threshold",
       "abbreviation": "SRT",
-      "test_code": "89023-6",
       "default_unit": "dB HL",
       "category": "hearing",
       "common_names": [
@@ -1654,7 +1651,6 @@
     {
       "test_name": "Word Recognition Score",
       "abbreviation": "WRS",
-      "test_code": "89022-8",
       "default_unit": "%",
       "category": "hearing",
       "common_names": [
@@ -1670,7 +1666,6 @@
     {
       "test_name": "Otoacoustic Emissions",
       "abbreviation": "OAE",
-      "test_code": "89015-2",
       "default_unit": "dB SPL",
       "category": "hearing",
       "common_names": [
@@ -1686,7 +1681,6 @@
     {
       "test_name": "Auditory Brainstem Response",
       "abbreviation": "ABR",
-      "test_code": "89014-5",
       "default_unit": "ms",
       "category": "hearing",
       "common_names": [
