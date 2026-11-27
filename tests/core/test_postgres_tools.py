@@ -7,22 +7,25 @@ import pytest
 from app.core.database import postgres_tools
 from app.core.database.postgres_tools import (
     PostgresClientError,
+    archive_version_error,
     get_server_major,
     installed_client_majors,
     pg_dump_binary,
+    pg_restore_binary,
     psql_binary,
+    redact_client_output,
 )
 
 
 @pytest.fixture
 def bin_root(tmp_path, monkeypatch):
-    """Install fake pg_dump/psql binaries for the given majors and point the module at them."""
+    """Install fake client binaries for the given majors and point the module at them."""
 
     def _make(majors):
         for major in majors:
             bin_dir = tmp_path / str(major) / "bin"
             bin_dir.mkdir(parents=True)
-            for tool in ("pg_dump", "psql"):
+            for tool in ("pg_dump", "pg_restore", "psql"):
                 binary = bin_dir / tool
                 binary.write_text("#!/bin/sh\n")
                 binary.chmod(0o755)
@@ -126,3 +129,60 @@ class TestPsqlBinary:
         monkeypatch.setattr(postgres_tools, "PG_BIN_ROOT", tmp_path / "nope")
 
         assert psql_binary() == "psql"
+
+
+class TestPgRestoreBinary:
+    def test_picks_newest_installed(self, bin_root):
+        root = bin_root([15, 16, 17, 18])
+
+        assert pg_restore_binary() == str(root / "18" / "bin" / "pg_restore")
+
+    def test_no_bundled_client_uses_path(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(postgres_tools, "PG_BIN_ROOT", tmp_path / "nope")
+
+        assert pg_restore_binary() == "pg_restore"
+
+
+class TestArchiveVersionError:
+    STDERR = "pg_restore: error: unsupported version (1.17) in file header"
+
+    def test_names_the_bundled_client(self, bin_root):
+        bin_root([15, 18])
+
+        error = archive_version_error(self.STDERR)
+
+        assert isinstance(error, PostgresClientError)
+        assert "PostgreSQL 18" in str(error)
+        assert "newer pg_dump" in str(error)
+
+    def test_without_bundled_client_still_explains(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(postgres_tools, "PG_BIN_ROOT", tmp_path / "nope")
+
+        assert "newer pg_dump" in str(archive_version_error(self.STDERR))
+
+    @pytest.mark.parametrize("stderr", ["could not open input file", "", None])
+    def test_other_failures_are_not_version_errors(self, stderr):
+        assert archive_version_error(stderr) is None
+
+
+class TestRedactClientOutput:
+    def test_drops_lines_that_quote_row_data(self):
+        stderr = (
+            'pg_restore: error: COPY failed for table "patients": ERROR:  '
+            "duplicate key value violates unique constraint\n"
+            "DETAIL:  Key (email)=(jane@example.com) already exists.\n"
+            'CONTEXT:  COPY patients, line 1: "1\tJane\tDoe"\n'
+            "Command was: INSERT INTO patients VALUES (1, 'Jane');\n"
+            "psql:dump.sql:12: STATEMENT:  INSERT INTO patients VALUES (1, 'Jane');\n"
+            "LINE 1: INSERT INTO patients VALUES (1, 'Jane');\n"
+        )
+
+        redacted = redact_client_output(stderr)
+
+        assert "duplicate key value" in redacted
+        assert "Jane" not in redacted
+        assert "jane@example.com" not in redacted
+
+    @pytest.mark.parametrize("output", [None, ""])
+    def test_empty_output_is_empty(self, output):
+        assert redact_client_output(output) == ""

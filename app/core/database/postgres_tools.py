@@ -1,9 +1,10 @@
-"""Resolve the PostgreSQL client binary that matches the connected server.
+"""Resolve the PostgreSQL client binaries used by backup and restore.
 
 pg_dump refuses to dump a server newer than itself, so the container bundles one
 client per supported major and callers pick the matching one at runtime.
 """
 
+import re
 from pathlib import Path
 from typing import List, Optional
 
@@ -18,6 +19,11 @@ logger = get_logger(__name__, "app")
 
 # Debian/PGDG layout: <root>/<major>/bin/<tool>
 PG_BIN_ROOT = Path("/usr/lib/postgresql")
+
+# Server and client lines that quote row values or statement text from the dump.
+_DATA_BEARING_LINE = re.compile(
+    r"\b(?:DETAIL|CONTEXT|STATEMENT|LINE \d+):|^\s*Command was:"
+)
 
 
 class PostgresClientError(Exception):
@@ -110,7 +116,37 @@ def pg_dump_binary(db: Session) -> str:
     return _client_path("pg_dump", chosen)
 
 
+def _newest_client(tool: str) -> str:
+    installed = installed_client_majors()
+    return _client_path(tool, installed[-1]) if installed else tool
+
+
 def psql_binary() -> str:
     """Newest bundled psql, which reads dumps from every supported server."""
+    return _newest_client("psql")
+
+
+def pg_restore_binary() -> str:
+    """Newest bundled pg_restore, which reads archives from every supported server."""
+    return _newest_client("pg_restore")
+
+
+def redact_client_output(output: Optional[str]) -> str:
+    """psql or pg_restore output without the lines that can quote row data."""
+    lines = (output or "").splitlines()
+    return "\n".join(
+        line for line in lines if not _DATA_BEARING_LINE.search(line)
+    ).strip()
+
+
+def archive_version_error(stderr: str) -> Optional[PostgresClientError]:
+    """The named-version error when pg_restore rejected an archive as too new, else None."""
+    if "unsupported version" not in (stderr or ""):
+        return None
     installed = installed_client_majors()
-    return _client_path("psql", installed[-1]) if installed else "psql"
+    client = f"PostgreSQL {installed[-1]}" if installed else "the installed PostgreSQL"
+    return PostgresClientError(
+        f"This backup was written by a newer pg_dump than the bundled pg_restore "
+        f"({client}) can read. Upgrade MediKeep to a build that includes a newer "
+        f"PostgreSQL client."
+    )

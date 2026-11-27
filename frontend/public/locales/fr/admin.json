@@ -147,11 +147,11 @@
       "fullBackup": "Sauvegarde du système entier",
       "fullBackupDesc": "Sauvegarde complète (base de données + fichiers)",
       "invalidFileType": "Type de fichier invalide",
-      "invalidFileTypeDesc": "Veuillez sélectionner un fichier de sauvegarde au format .sql ou .zip.",
+      "invalidFileTypeDesc": "Veuillez sélectionner un fichier de sauvegarde au format .dump, .sql ou .zip.",
       "moreOptions": "Plus d'options",
       "title": "Opérations de sauvegarde",
       "uploadBackup": "Téléverser une sauvegarde",
-      "uploadBackupDesc": "Téléverser un fichier de sauvegarde externe (.sql ou .zip)"
+      "uploadBackupDesc": "Téléverser un fichier de sauvegarde externe (.dump, .sql ou .zip)"
     },
     "preview": {
       "affectedData": "Données affectées",

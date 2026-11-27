@@ -147,11 +147,11 @@
       "fullBackup": "完整系统备份",
       "fullBackupDesc": "完整备份（数据库+文件）",
       "invalidFileType": "无效文件类型",
-      "invalidFileTypeDesc": "请选择.sql或.zip备份文件。",
+      "invalidFileTypeDesc": "请选择.dump、.sql或.zip备份文件。",
       "moreOptions": "更多选项",
       "title": "备份操作",
       "uploadBackup": "上传备份",
-      "uploadBackupDesc": "上传外部备份文件（.sql或.zip）"
+      "uploadBackupDesc": "上传外部备份文件（.dump、.sql或.zip）"
     },
     "preview": {
       "affectedData": "受影响的数据",

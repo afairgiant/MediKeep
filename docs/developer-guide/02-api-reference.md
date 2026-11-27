@@ -6676,7 +6676,7 @@ Base path: `/api/v1/admin/backup`
 {
   "id": 1,
   "backup_type": "database",
-  "filename": "backup_db_2025-10-04_103000.sql",
+  "filename": "database_backup_20251004_103000.dump",
   "size_bytes": 5242880,
   "status": "completed",
   "created_at": "2025-10-04T10:30:00Z",
@@ -6875,7 +6875,7 @@ Base path: `/api/v1/admin/restore`
 
 - **Purpose**: Upload an external backup file for restore
 - **Content-Type**: `multipart/form-data`
-- **Supported Files**: `.sql` (database), `.zip` (files or full)
+- **Supported Files**: `.dump` (database, PostgreSQL custom format), `.sql` (legacy database backup), `.zip` (files or full)
 - **Success Response** (200):
 
 ```json

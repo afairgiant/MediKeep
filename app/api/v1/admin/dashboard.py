@@ -340,8 +340,10 @@ def get_system_health(
             # Look for backup files in common locations
             backup_patterns = [
                 "backups/*.sql",
+                "backups/*.dump",
                 "backups/*.db",
                 "backup/*.sql",
+                "backup/*.dump",
                 "backup/*.db",
                 "*.backup",
                 "*backup*.sql",

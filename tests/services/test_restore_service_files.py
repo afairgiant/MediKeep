@@ -747,7 +747,7 @@ class TestExecuteRestore:
     ):
         safety = _zip(tmp_path / "safety.zip", {"uploads/a.pdf": "x"})
 
-        with pytest.raises(Exception, match="no database.sql"):
+        with pytest.raises(Exception, match="no database dump"):
             await run_execute(safety)
 
         _assert_untouched(uploads)

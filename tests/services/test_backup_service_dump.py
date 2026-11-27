@@ -1,10 +1,14 @@
 """Tests for the pg_dump invocation used by database and full backups."""
 
+import json
 import subprocess
+import zipfile
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app.core.config import settings
 from app.core.database.postgres_tools import PostgresClientError
 from app.services.backup_service import BackupService
 
@@ -46,6 +50,12 @@ class TestNativeDatabaseDump:
         assert len(excluded) == 2
         assert conn_params["hostname"] in cmd
         assert conn_params["database"] in cmd
+
+    @pytest.mark.asyncio
+    async def test_writes_a_custom_format_archive(self, run_dump, completed_process):
+        mock_run = await run_dump(return_value=completed_process())
+
+        assert "--format=custom" in mock_run.call_args.args[0]
 
     @pytest.mark.asyncio
     async def test_password_passed_via_env_not_argv(
@@ -98,3 +108,44 @@ class TestNativeDatabaseDump:
 
         assert str(exc.value) == message
         mock_run.assert_not_called()
+
+
+class TestBackupArtifacts:
+    @pytest.fixture
+    def service(self, tmp_path, conn_params, monkeypatch):
+        db = MagicMock()
+        db.add.side_effect = lambda record: setattr(
+            record, "created_at", datetime.now()
+        )
+        service = BackupService(db)
+        service.backup_dir = tmp_path / "backups"
+        monkeypatch.setattr(settings, "UPLOAD_DIR", tmp_path / "uploads")
+
+        async def _dump(path, _conn_params):
+            path.write_bytes(b"PGDMP-archive")
+
+        service._create_native_database_dump = _dump
+        with patch(
+            "app.services.backup_service.SecurityValidator.validate_connection_params",
+            return_value=conn_params,
+        ):
+            yield service
+
+    @pytest.mark.asyncio
+    async def test_database_backup_is_a_compressed_dump_file(self, service):
+        result = await service.create_database_backup("test")
+
+        assert result["filename"].endswith(".dump")
+        (record,) = [call.args[0] for call in service.db.add.call_args_list]
+        assert record.compression_used is True
+
+    @pytest.mark.asyncio
+    async def test_full_backup_holds_database_dump_named_in_manifest(self, service):
+        result = await service.create_full_backup("test")
+
+        with zipfile.ZipFile(result["file_path"]) as zipf:
+            assert zipf.read("database.dump") == b"PGDMP-archive"
+            assert zipf.getinfo("database.dump").compress_type == zipfile.ZIP_STORED
+            assert "database.sql" not in zipf.namelist()
+            manifest = json.loads(zipf.read("backup_manifest.json"))
+        assert manifest["components"]["database"] == "database.dump"
