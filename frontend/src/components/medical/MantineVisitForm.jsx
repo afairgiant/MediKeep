@@ -57,7 +57,7 @@ const MantineVisitForm = ({
   conditionsLoading: _conditionsLoading = false,
   editingVisit = null,
   isLoading = false,
-  statusMessage: _statusMessage,
+  statusMessage,
   patientId,
   navigate,
   onDocumentManagerRef,
@@ -316,7 +316,12 @@ const MantineVisitForm = ({
     >
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
-        message={t('common:visits.form.savingVisit', 'Saving visit...')}
+        message={
+          statusMessage?.title ||
+          t('common:visits.form.savingVisit', 'Saving visit...')
+        }
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
       />
 
       {/* Mark mandatory fields `required`: RecordForm checks them on every tab */}

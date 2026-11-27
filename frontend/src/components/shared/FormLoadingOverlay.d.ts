@@ -4,10 +4,9 @@ export interface FormLoadingOverlayProps {
   visible: boolean;
   message?: string;
   submessage?: string;
-  type?: 'loading' | 'success' | 'error';
+  type?: 'loading' | 'success' | 'error' | 'warning';
   showIcon?: boolean;
   blur?: number;
-  opacity?: number;
   zIndex?: number;
 }
 

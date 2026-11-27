@@ -285,6 +285,9 @@ const LabResultQuickImportModal = ({
 
   // Handle modal close - check if we need to cleanup
   const handleClose = useCallback(() => {
+    // The header close button stays clickable while the lab result is created;
+    // closing then would leave the new record behind without the cleanup prompt
+    if (isCreating) return;
     // Priority 1: If components are parsed but not added, warn about data loss
     if (parsedComponentCount > 0 && !componentsAdded) {
       setShowDataLossWarning(true);
@@ -298,6 +301,7 @@ const LabResultQuickImportModal = ({
       onClose();
     }
   }, [
+    isCreating,
     createdLabResultId,
     componentsAdded,
     parsedComponentCount,
@@ -389,6 +393,8 @@ const LabResultQuickImportModal = ({
         zIndex={3000}
         closeOnClickOutside={false}
         closeOnEscape={false}
+        // The loading overlay covers the body, so it covers the whole form when scrolled
+        styles={{ body: { position: 'relative' } }}
       >
         <Stack gap="md">
           {/* Stepper */}
@@ -464,6 +470,7 @@ const LabResultQuickImportModal = ({
                   'This is the only required field - you can add more details later'
                 )}
                 value={testName}
+                disabled={isCreating}
                 onChange={e => {
                   setTestName(e.target.value);
                   // Clear error when user starts typing
@@ -479,7 +486,9 @@ const LabResultQuickImportModal = ({
               />
 
               <Group justify="flex-end" mt="md">
-                <Button variant="subtle" onClick={onClose}>
+                {/* The overlay stops clicks, not the keyboard, so Cancel
+                    goes through the same guard as the header close button */}
+                <Button variant="subtle" onClick={handleClose}>
                   {t('shared:fields.cancel', 'Cancel')}
                 </Button>
                 <Button

@@ -34,7 +34,6 @@ import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
 import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFormWrapper';
 import InsuranceViewModal from '../../components/medical/insurance/InsuranceViewModal';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
@@ -739,15 +738,7 @@ const Insurance = () => {
           }
         }}
         practitioners={practitioners}
-      >
-        {/* Form Loading Overlay */}
-        <FormLoadingOverlay
-          visible={isBlocking}
-          message={statusMessage?.title || 'Processing...'}
-          submessage={statusMessage?.message}
-          type={statusMessage?.type || 'loading'}
-        />
-      </InsuranceFormWrapper>
+      />
 
       {/* View Modal */}
       <InsuranceViewModal

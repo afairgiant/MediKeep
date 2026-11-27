@@ -84,12 +84,10 @@ const MantineProcedureForm = ({
       {/* Loading Overlay */}
       <UploadProgressErrorBoundary>
         <FormLoadingOverlay
-          visible={isLoading && statusMessage}
+          visible={Boolean(isLoading && statusMessage)}
           message={statusMessage?.title || 'Processing...'}
           submessage={statusMessage?.message || ''}
           type={statusMessage?.type || 'loading'}
-          blur={3}
-          opacity={0.85}
         />
       </UploadProgressErrorBoundary>
     </BaseMedicalForm>

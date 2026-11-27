@@ -271,6 +271,8 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       closeOnEscape={!isSubmitting}
       zIndex={subDialog?.zIndex ?? 2000}
       scrollAreaComponent="div"
+      // The loading overlay covers the body, so it covers the whole form when scrolled
+      styles={{ body: { position: 'relative' } }}
     >
       <FormLoadingOverlay
         visible={isSubmitting}

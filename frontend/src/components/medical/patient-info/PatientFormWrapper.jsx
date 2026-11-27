@@ -60,12 +60,19 @@ const PatientFormWrapper = ({
             borderBottom: '1px solid var(--mantine-color-default-border)',
             paddingBottom: 12,
           },
+          // The loading overlay covers the body, so it covers the whole form when scrolled
           body: {
             paddingTop: 16,
+            position: 'relative',
           },
         }}
       >
-        <FormLoadingOverlay visible={isLoading} statusMessage={statusMessage} />
+        <FormLoadingOverlay
+          visible={isLoading}
+          message={statusMessage?.title}
+          submessage={statusMessage?.message}
+          type={statusMessage?.type}
+        />
 
         <Stack gap="md">
           {error && (

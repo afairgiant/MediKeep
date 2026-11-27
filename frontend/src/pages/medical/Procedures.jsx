@@ -19,7 +19,6 @@ import logger from '../../services/logger';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
@@ -577,17 +576,7 @@ const Procedures = () => {
             refreshFileCount(editingProcedure.id);
           }
         }}
-      >
-        {/* Form Loading Overlay */}
-        <FormLoadingOverlay
-          visible={isBlocking}
-          message={
-            statusMessage?.title || t('procedures.processing', 'Processing...')
-          }
-          submessage={statusMessage?.message}
-          type={statusMessage?.type || 'loading'}
-        />
-      </ProcedureFormWrapper>
+      />
 
       <ProcedureViewModal
         isOpen={showViewModal}
