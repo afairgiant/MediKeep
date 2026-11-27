@@ -11,6 +11,7 @@ import aiohttp
 
 from app.core.http.integration_errors import (
     PAPRA_AUTH_FAILED_MESSAGE,
+    PAPRA_DELETE_PERMISSION_MESSAGE,
     IntegrationErrorCode,
     IntegrationFailureInfo,
 )
@@ -237,9 +238,18 @@ class PapraClient:
                         f"Papra document {document_id} not found for deletion"
                     )
                     return True  # Already gone
+                if response.status == 403:
+                    raise PapraClientError(
+                        "Papra refused the delete (HTTP 403)",
+                        integration_message=PAPRA_DELETE_PERMISSION_MESSAGE,
+                        integration_code=IntegrationErrorCode.DELETE_PERMISSION_DENIED,
+                        upstream_status=403,
+                    )
+                _raise_if_token_rejected(response.status)
                 if response.status not in [200, 204]:
                     raise PapraClientError(
-                        f"Delete failed with status {response.status}"
+                        f"Delete failed with status {response.status}",
+                        upstream_status=response.status,
                     )
 
                 logger.info(f"Papra document {document_id} deleted successfully")
@@ -247,7 +257,7 @@ class PapraClient:
 
         except aiohttp.ClientError as e:
             logger.error(f"Papra delete connection error: {e}")
-            raise PapraConnectionError(f"Connection error during delete: {e}")
+            raise PapraConnectionError(f"Connection error during delete: {e}") from e
 
     async def search_documents(
         self, query: str = "", page: int = 0, page_size: int = 20

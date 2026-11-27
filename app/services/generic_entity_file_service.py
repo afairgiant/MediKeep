@@ -54,12 +54,6 @@ from app.services.paperless_auth_methods import (
 
 # New simplified architecture
 from app.services.paperless_client import (
-    PaperlessClientError,
-)
-from app.services.paperless_client import (
-    PaperlessConnectionError as NewPaperlessConnectionError,
-)
-from app.services.paperless_client import (
     create_paperless_client,
 )
 from app.services.paperless_service import log_task_permission_denied
@@ -899,18 +893,32 @@ class GenericEntityFileService:
                 f"Attempting to delete uploaded document {document_id} "
                 f"from {backend_name} (sync_status: {file_record.sync_status})"
             )
-            deleted = await delete_fn(db, file_record, current_user_id)
+            # The record is kept on failure, so the message must say why
+            not_deleted = IntegrationFailure(
+                IntegrationErrorCode.GENERIC,
+                f"Failed to delete file from {backend_name}. "
+                f"The document may still exist on the {backend_name} server.",
+            )
+            try:
+                deleted = await delete_fn(db, file_record, current_user_id)
+            except Exception as e:
+                _log_file_event(
+                    logging.ERROR,
+                    "remote_file_delete_failed",
+                    f"{backend_name} did not delete the document",
+                    file_record,
+                    error=f"{type(e).__name__}: {e}",
+                )
+                raise_if_integration_failure(e, backend_name)
+                raise integration_http_exception(not_deleted, status_code=500) from e
             if not deleted:
-                logger.error(
-                    f"{backend_name} deletion failed for document {document_id}"
+                _log_file_event(
+                    logging.ERROR,
+                    "remote_file_delete_skipped",
+                    f"{backend_name} is not set up for this user; the document was not deleted",
+                    file_record,
                 )
-                raise HTTPException(
-                    status_code=500,
-                    detail=(
-                        f"Failed to delete file from {backend_name}. "
-                        f"The document may still exist on the {backend_name} server."
-                    ),
-                )
+                raise integration_http_exception(not_deleted, status_code=500)
 
         return False
 
@@ -1711,48 +1719,43 @@ class GenericEntityFileService:
     async def _delete_from_papra(
         self, db: Session, file_record, current_user_id: Optional[int] = None
     ) -> bool:
-        """Delete a file from Papra."""
-        try:
-            from app.services.papra_client import create_papra_client
+        """Delete a file from Papra.
 
-            if not file_record.papra_document_id:
-                logger.warning("No Papra document ID found, skipping remote deletion")
-                return True
+        Raises the client's error when Papra does not delete the document, so the
+        caller can say why.
+        """
+        from app.services.papra_client import create_papra_client
 
-            user_prefs = (
-                db.query(UserPreferences)
-                .filter(UserPreferences.user_id == current_user_id)
-                .first()
-            )
+        if not file_record.papra_document_id:
+            logger.warning("No Papra document ID found, skipping remote deletion")
+            return True
 
-            if not user_prefs or not user_prefs.papra_enabled:
-                logger.warning("Papra not enabled, skipping remote deletion")
-                return True
+        user_prefs = (
+            db.query(UserPreferences)
+            .filter(UserPreferences.user_id == current_user_id)
+            .first()
+        )
 
-            org_id = effective_papra_organization(
-                file_record.papra_organization_id, user_prefs.papra_organization_id
-            )
+        if not user_prefs or not user_prefs.papra_enabled:
+            logger.warning("Papra not enabled, skipping remote deletion")
+            return True
 
-            papra_client = create_papra_client(
-                url=user_prefs.papra_url,
-                encrypted_token=user_prefs.papra_api_token_encrypted,
-                organization_id=org_id,
-                user_id=current_user_id,
-            )
+        org_id = effective_papra_organization(
+            file_record.papra_organization_id, user_prefs.papra_organization_id
+        )
 
-            async with papra_client:
-                result = await papra_client.delete_document(
-                    file_record.papra_document_id
-                )
+        papra_client = create_papra_client(
+            url=user_prefs.papra_url,
+            encrypted_token=user_prefs.papra_api_token_encrypted,
+            organization_id=org_id,
+            user_id=current_user_id,
+        )
 
-            logger.info(
-                f"Papra document {file_record.papra_document_id} deleted: {result}"
-            )
-            return result
+        async with papra_client:
+            await papra_client.delete_document(file_record.papra_document_id)
 
-        except Exception as e:
-            logger.error(f"Error deleting from Papra: {str(e)}")
-            return False
+        logger.info(f"Papra document {file_record.papra_document_id} deleted")
+        return True
 
     def update_file_metadata(
         self,
@@ -1847,7 +1850,7 @@ class GenericEntityFileService:
         current_user_id: Optional[int] = None,
     ) -> bool:
         """
-        Delete file from paperless-ngx storage and verify deletion.
+        Delete file from paperless-ngx storage.
 
         Args:
             db: Database session
@@ -1855,7 +1858,12 @@ class GenericEntityFileService:
             current_user_id: User ID for paperless service
 
         Returns:
-            True if successfully deleted and verified, False otherwise
+            True if deleted (or already gone), False if Paperless is not set up
+            for this user
+
+        Raises:
+            The client's error when Paperless does not delete the document, so
+            the caller can say why
         """
         if not file_record.paperless_document_id:
             logger.warning(
@@ -1882,56 +1890,15 @@ class GenericEntityFileService:
             )
             return False
 
-        try:
-            logger.info(
-                f"Starting deletion process for document {file_record.paperless_document_id} for user {current_user_id}"
-            )
+        async with await self._create_paperless_client(
+            user_prefs, current_user_id
+        ) as paperless_client:
+            await paperless_client.delete_document(file_record.paperless_document_id)
 
-            # Create paperless client using new simplified architecture
-            logger.debug("Creating paperless client...")
-            async with await self._create_paperless_client(
-                user_prefs, current_user_id
-            ) as paperless_client:
-                logger.info(
-                    "Paperless client created successfully, attempting deletion"
-                )
-
-                # Delete from paperless - the new client handles errors internally
-                logger.info(
-                    f"Calling paperless_client.delete_document for document {file_record.paperless_document_id}"
-                )
-                success = await paperless_client.delete_document(
-                    file_record.paperless_document_id
-                )
-
-                logger.info(f"Paperless client delete_document returned: {success}")
-
-                if success:
-                    logger.info(
-                        f"File successfully deleted from paperless: document_id={file_record.paperless_document_id}"
-                    )
-                    return True
-                logger.error(
-                    f"Paperless client reported deletion failed for document {file_record.paperless_document_id}"
-                )
-                return False
-
-        except (PaperlessClientError, NewPaperlessConnectionError) as e:
-            logger.error(
-                f"Paperless client error during deletion: {type(e).__name__}: {str(e)}"
-            )
-            import traceback
-
-            logger.error(f"Exception traceback: {traceback.format_exc()}")
-            return False
-        except Exception as e:
-            logger.error(
-                f"Unexpected error during paperless deletion: {type(e).__name__}: {str(e)}"
-            )
-            import traceback
-
-            logger.error(f"Exception traceback: {traceback.format_exc()}")
-            return False
+        logger.info(
+            f"File deleted from paperless: document_id={file_record.paperless_document_id}"
+        )
+        return True
 
     async def _get_paperless_download_info(
         self,

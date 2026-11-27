@@ -5025,6 +5025,7 @@ Before deleting any other Paperless document, MediKeep reads it through the call
 - **Authentication**: Yes
 - **Permission**: `edit` on the owning patient
 - **Success Response** (200): File operation result. A linked document or a file stored elsewhere is only unlinked from MediKeep
+- **Errors**: when Paperless or Papra does not delete the document, the file is kept and the response carries an `integration_` error code ([13.2](#132-integration-error-responses-paperless-ngx-and-papra)): `400` for a known cause (for example `integration_delete_permission_denied` for a refused delete, `integration_timeout`, `integration_http_error`), `500` with `integration_error` otherwise or when Paperless is turned off for the caller (a Papra file is then removed from MediKeep only and the document stays in Papra). A document the integration no longer has (HTTP 404) counts as deleted
 - A `lab-result` file copied from `lab_result_files` also removes the `lab_result_files` row it was copied from (same lab result, same stored file), so the copy is not recreated at the next start
 
 ### Deleting the Parent Record
@@ -5864,10 +5865,10 @@ Base path: `/api/v1/paperless`
 
 ### 13.2 Integration Error Responses (Paperless-ngx and Papra)
 
-Linking, uploading and searching documents in Paperless-ngx or Papra
+Linking, uploading, deleting and searching documents in Paperless-ngx or Papra
 (`POST /entity-files/{type}/{id}/files`, `.../link-paperless`, `.../link-papra`,
-`GET /papra/documents/search`) answer a failure with a message that says what went
-wrong and an `error_code` that identifies it:
+`DELETE /entity-files/files/{file_id}`, `GET /papra/documents/search`) answer a failure
+with a message that says what went wrong and an `error_code` that identifies it:
 
 ```json
 {
@@ -5882,7 +5883,8 @@ wrong and an `error_code` that identifies it:
 
 - **Status**: `400`. These are never `401`: the frontend treats any `401` from this
   API as an expired MediKeep session and signs the user out. An unrecognised
-  failure is still a generic `500` (for example `Failed to upload to paperless`).
+  failure is still a generic `500` (for example `Failed to upload to paperless`). A
+  delete answers an unrecognised failure with `500` and `integration_error`.
 - **`POST /papra/test-connection` is the exception.** It reports a rejected API token, a
   blocked redirect, or an unreachable server as HTTP `200` with
   `{"status": "error", "message": "..."}` and no `error_code`, because the settings page
@@ -5900,7 +5902,7 @@ wrong and an `error_code` that identifies it:
 
 | `error_code` | Meaning |
 | --- | --- |
-| `integration_auth_failed` | The token or credentials were rejected (HTTP 401/403 from the integration) |
+| `integration_auth_failed` | The token or credentials were rejected (HTTP 401/403 from the integration; for a delete, HTTP 401 only) |
 | `integration_credentials_unusable` | No usable credentials: the saved ones cannot be decrypted (for example after `SECRET_KEY` changed) or none were provided. Raised before any request is made; HTTP `400` |
 | `integration_connection_refused` | Nothing is listening at that address and port |
 | `integration_host_unreachable` | No route to the host |
@@ -5915,6 +5917,7 @@ wrong and an `error_code` that identifies it:
 | `integration_unsupported_format` | Upload rejected: file type not supported |
 | `integration_file_too_large` | Upload rejected: file too large |
 | `integration_permission_denied` | Upload rejected: no permission |
+| `integration_delete_permission_denied` | `DELETE /entity-files/files/{file_id}`: the integration refused the delete with HTTP 403 (Paperless: the account needs the Delete permission on Documents; Papra: the API key needs permission to delete documents). The file is kept |
 | `integration_task_permission_denied` | `GET /paperless/tasks/{task_uuid}/status`: the Paperless account may not read upload tasks (it needs the View permission on PaperlessTask) |
 | `integration_stored_elsewhere` | View or download (`409`): the file is in another member's Paperless or Papra, which the caller's connection cannot reach |
 | `integration_storage_full` | Upload rejected: the integration is out of storage |

@@ -11,6 +11,7 @@ import aiohttp
 
 from app.core.http.integration_errors import (
     PAPERLESS_AUTH_FAILED_MESSAGE,
+    PAPERLESS_DELETE_PERMISSION_MESSAGE,
     IntegrationErrorCode,
     IntegrationFailureInfo,
 )
@@ -232,9 +233,21 @@ class PaperlessClient:
                 if response.status == 404:
                     logger.warning(f"Document {document_id} not found for deletion")
                     return True  # Already gone
+                if response.status == 401:
+                    raise PaperlessClientAuthError(
+                        "Paperless rejected the credentials (HTTP 401)"
+                    )
+                if response.status == 403:
+                    raise PaperlessClientError(
+                        "Paperless refused the delete (HTTP 403)",
+                        integration_message=PAPERLESS_DELETE_PERMISSION_MESSAGE,
+                        integration_code=IntegrationErrorCode.DELETE_PERMISSION_DENIED,
+                        upstream_status=403,
+                    )
                 if response.status not in [200, 204]:
                     raise PaperlessClientError(
-                        f"Delete failed with status {response.status}"
+                        f"Delete failed with status {response.status}",
+                        upstream_status=response.status,
                     )
 
                 logger.info(f"Document {document_id} deleted successfully")
@@ -242,7 +255,9 @@ class PaperlessClient:
 
         except aiohttp.ClientError as e:
             logger.error(f"Delete connection error: {e}")
-            raise PaperlessConnectionError(f"Connection error during delete: {e}")
+            raise PaperlessConnectionError(
+                f"Connection error during delete: {e}"
+            ) from e
 
     async def get_document_info(self, document_id: str) -> Optional[dict]:
         """
