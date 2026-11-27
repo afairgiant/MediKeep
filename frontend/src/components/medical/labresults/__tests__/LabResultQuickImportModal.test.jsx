@@ -51,8 +51,11 @@ describe('LabResultQuickImportModal', () => {
     expect(apiService.createLabResult).toHaveBeenCalledTimes(1);
 
     clickHeaderClose();
+    // Enter on a focused Cancel fires the same click
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByLabelText(/Lab Test Name/)).toBeDisabled();
   });
 
   it('closes when nothing is in progress', () => {

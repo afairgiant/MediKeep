@@ -470,6 +470,7 @@ const LabResultQuickImportModal = ({
                   'This is the only required field - you can add more details later'
                 )}
                 value={testName}
+                disabled={isCreating}
                 onChange={e => {
                   setTestName(e.target.value);
                   // Clear error when user starts typing
@@ -485,7 +486,9 @@ const LabResultQuickImportModal = ({
               />
 
               <Group justify="flex-end" mt="md">
-                <Button variant="subtle" onClick={onClose}>
+                {/* The overlay stops clicks, not the keyboard, so Cancel
+                    goes through the same guard as the header close button */}
+                <Button variant="subtle" onClick={handleClose}>
                   {t('shared:fields.cancel', 'Cancel')}
                 </Button>
                 <Button
