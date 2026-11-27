@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi import HTTPException
 
+from app.core.http.integration_errors import IntegrationErrorCode
 from app.models.models import EntityFile, UserPreferences, get_utc_now
 from app.services.generic_entity_file_service import GenericEntityFileService
 
@@ -137,6 +138,8 @@ class TestDeleteFileWithRemoteDocumentId:
                 )
 
         assert exc_info.value.status_code == 500
+        # Coded, so the frontend shows the message instead of "service unavailable"
+        assert exc_info.value.headers["X-Error-Code"] == IntegrationErrorCode.GENERIC
         assert db_session.get(EntityFile, file_id) is not None
 
     @pytest.mark.asyncio

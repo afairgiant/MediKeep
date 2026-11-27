@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from app.core.http.integration_errors import IntegrationErrorCode
 from app.crud.user_preferences import user_preferences
-from app.models.models import EntityFile, Medication, get_utc_now
+from app.models.models import EntityFile
 from app.services.generic_entity_file_service import (
     GenericEntityFileService,
     RemoteStorageAccess,
@@ -20,6 +20,7 @@ from app.services.generic_entity_file_service import (
 from tests.utils.paperless_uploads import (
     member,
     patient_for,
+    remote_file,
     share,
     use_paperless,
     use_papra,
@@ -28,36 +29,6 @@ from tests.utils.user import create_user_token_headers
 
 PAPRA_URL = "https://papra.home"
 PDF = (b"%PDF-1.4 test", "scan.pdf", "application/pdf")
-
-
-def _remote_file(db_session, patient_id, backend, uploaded_by_user_id, org="org-1"):
-    medication = Medication(patient_id=patient_id, medication_name="Med")
-    db_session.add(medication)
-    db_session.commit()
-    fields = (
-        {"paperless_document_id": "42", "file_path": "paperless://"}
-        if backend == "paperless"
-        else {
-            "papra_document_id": "doc-42",
-            "papra_organization_id": org,
-            "file_path": "papra://",
-        }
-    )
-    record = EntityFile(
-        entity_type="medication",
-        entity_id=medication.id,
-        file_name="scan.pdf",
-        file_type="application/pdf",
-        file_size=10,
-        uploaded_at=get_utc_now(),
-        storage_backend=backend,
-        sync_status="synced",
-        uploaded_by_user_id=uploaded_by_user_id,
-        **fields,
-    )
-    db_session.add(record)
-    db_session.commit()
-    return record
 
 
 def _async_client(**methods):
@@ -177,7 +148,7 @@ class TestViewAndDownload:
         backend,
         action,
     ):
-        record = _remote_file(db_session, shared_patient.id, backend, editor.id)
+        record = remote_file(db_session, shared_patient.id, backend, editor.id)
 
         with (
             patch(
@@ -203,7 +174,7 @@ class TestViewAndDownload:
         use_paperless(db_session, editor.id, "https://paperless.home")
         use_papra(db_session, owner.id, PAPRA_URL)
         use_papra(db_session, editor.id, PAPRA_URL)
-        record = _remote_file(db_session, shared_patient.id, backend, editor.id)
+        record = remote_file(db_session, shared_patient.id, backend, editor.id)
         fetch = AsyncMock(return_value=PDF)
 
         with patch.object(
@@ -228,7 +199,7 @@ class TestDelete:
     def test_file_stored_elsewhere_is_only_unlinked(
         self, client: TestClient, db_session, owner, editor, shared_patient, backend
     ):
-        record = _remote_file(db_session, shared_patient.id, backend, editor.id)
+        record = remote_file(db_session, shared_patient.id, backend, editor.id)
         record_id = record.id
         remote_delete = AsyncMock(return_value=True)
 
@@ -266,7 +237,7 @@ class TestDelete:
         self, client: TestClient, db_session, owner, shared_patient, uploader
     ):
         uploaded_by = owner.id if uploader == "owner" else None
-        record = _remote_file(db_session, shared_patient.id, "paperless", uploaded_by)
+        record = remote_file(db_session, shared_patient.id, "paperless", uploaded_by)
 
         _, remote_delete = self._delete_with_remote(
             client, owner, record, {"original_file_name": "scan.pdf"}
@@ -280,7 +251,7 @@ class TestDelete:
     ):
         # An unknown uploader, or a changed Paperless URL, can point the ID at another document
         uploaded_by = owner.id if uploader == "owner" else None
-        record = _remote_file(db_session, shared_patient.id, "paperless", uploaded_by)
+        record = remote_file(db_session, shared_patient.id, "paperless", uploaded_by)
 
         response, remote_delete = self._delete_with_remote(
             client,
@@ -295,7 +266,7 @@ class TestDelete:
     def test_document_that_cannot_be_read_is_deleted_as_before(
         self, client: TestClient, db_session, owner, shared_patient
     ):
-        record = _remote_file(db_session, shared_patient.id, "paperless", owner.id)
+        record = remote_file(db_session, shared_patient.id, "paperless", owner.id)
 
         _, remote_delete = self._delete_with_remote(client, owner, record, None)
 
@@ -306,7 +277,7 @@ class TestFileResponses:
     def test_list_flags_files_stored_elsewhere(
         self, client: TestClient, db_session, owner, editor, shared_patient
     ):
-        theirs = _remote_file(db_session, shared_patient.id, "paperless", editor.id)
+        theirs = remote_file(db_session, shared_patient.id, "paperless", editor.id)
 
         response = client.get(
             f"/api/v1/entity-files/medication/{theirs.entity_id}/files",
@@ -325,7 +296,7 @@ class TestFileResponses:
     def test_single_file_and_metadata_update_flag_it_too(
         self, client: TestClient, db_session, owner, editor, shared_patient
     ):
-        record = _remote_file(db_session, shared_patient.id, "papra", editor.id)
+        record = remote_file(db_session, shared_patient.id, "papra", editor.id)
 
         single = client.get(
             f"/api/v1/entity-files/files/{record.id}", headers=_headers(owner)
@@ -350,7 +321,7 @@ class TestPaperlessSyncEndpoint:
         patient_for(
             db_session, editor.id
         )  # The endpoint needs the caller's own patient
-        theirs = _remote_file(db_session, shared_patient.id, "paperless", owner.id)
+        theirs = remote_file(db_session, shared_patient.id, "paperless", owner.id)
         paperless = _async_client(check_document_exists=AsyncMock(return_value=False))
         paperless.get_auth_type = lambda: "token"
 
@@ -381,8 +352,8 @@ class TestPapraSyncCheck:
     async def test_file_stored_elsewhere_is_skipped(
         self, db_session, owner, editor, shared_patient
     ):
-        theirs = _remote_file(db_session, shared_patient.id, "papra", editor.id)
-        mine = _remote_file(db_session, shared_patient.id, "papra", owner.id)
+        theirs = remote_file(db_session, shared_patient.id, "papra", editor.id)
+        mine = remote_file(db_session, shared_patient.id, "papra", owner.id)
         client = _async_client(get_document_info=AsyncMock(return_value=None))
 
         with patch(
@@ -400,8 +371,8 @@ class TestPapraSyncCheck:
     async def test_each_file_is_read_in_its_own_organisation(
         self, db_session, owner, shared_patient
     ):
-        _remote_file(db_session, shared_patient.id, "papra", owner.id, org="org-old")
-        _remote_file(db_session, shared_patient.id, "papra", owner.id, org="org-1")
+        remote_file(db_session, shared_patient.id, "papra", owner.id, org="org-old")
+        remote_file(db_session, shared_patient.id, "papra", owner.id, org="org-1")
         client = _async_client(
             get_document_info=AsyncMock(return_value={"id": "doc-42"})
         )
@@ -424,8 +395,8 @@ class TestPaperlessOrphanCheck:
     async def test_file_stored_elsewhere_is_not_marked_missing(
         self, db_session, owner, editor, shared_patient
     ):
-        theirs = _remote_file(db_session, shared_patient.id, "paperless", editor.id)
-        mine = _remote_file(db_session, shared_patient.id, "paperless", owner.id)
+        theirs = remote_file(db_session, shared_patient.id, "paperless", editor.id)
+        mine = remote_file(db_session, shared_patient.id, "paperless", owner.id)
         for record in (theirs, mine):
             record.paperless_document_id = None
             record.sync_status = "failed"

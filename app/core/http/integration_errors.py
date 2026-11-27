@@ -61,6 +61,7 @@ class IntegrationErrorCode:
     FILE_TOO_LARGE = "integration_file_too_large"
     PERMISSION_DENIED = "integration_permission_denied"
     TASK_PERMISSION_DENIED = "integration_task_permission_denied"
+    DELETE_PERMISSION_DENIED = "integration_delete_permission_denied"
     STORED_ELSEWHERE = "integration_stored_elsewhere"
     STORAGE_FULL = "integration_storage_full"
     PROCESSING_FAILED = "integration_processing_failed"
@@ -91,6 +92,15 @@ PAPERLESS_TASK_PERMISSION_MESSAGE = (
     "Paperless did not let this account read upload tasks, so MediKeep cannot "
     "confirm uploads. In Paperless, give the account the View permission on "
     "PaperlessTask (Settings > Users & Groups > edit the user > Permissions)."
+)
+PAPERLESS_DELETE_PERMISSION_MESSAGE = (
+    "Paperless refused to delete the document, so the file was kept. Check that the "
+    "Paperless account MediKeep uses has the Delete permission on Documents "
+    "(Settings > Users & Groups > edit the user > Permissions)."
+)
+PAPRA_DELETE_PERMISSION_MESSAGE = (
+    "Papra refused to delete the document, so the file was kept. Check that the "
+    "Papra API key MediKeep uses has permission to delete documents."
 )
 PAPERLESS_CREDENTIALS_UNUSABLE_MESSAGE = (
     "The saved Paperless credentials could not be read. "

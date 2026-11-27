@@ -102,6 +102,37 @@ def patient_for(db_session, user_id):
     )
 
 
+def remote_file(db_session, patient_id, backend, uploaded_by_user_id, org="org-1"):
+    """A synced Paperless or Papra file on a new medication of ``patient_id``."""
+    medication = Medication(patient_id=patient_id, medication_name="Med")
+    db_session.add(medication)
+    db_session.commit()
+    fields = (
+        {"paperless_document_id": "42", "file_path": "paperless://"}
+        if backend == "paperless"
+        else {
+            "papra_document_id": "doc-42",
+            "papra_organization_id": org,
+            "file_path": "papra://",
+        }
+    )
+    record = EntityFile(
+        entity_type="medication",
+        entity_id=medication.id,
+        file_name="scan.pdf",
+        file_type="application/pdf",
+        file_size=10,
+        uploaded_at=get_utc_now(),
+        storage_backend=backend,
+        sync_status="synced",
+        uploaded_by_user_id=uploaded_by_user_id,
+        **fields,
+    )
+    db_session.add(record)
+    db_session.commit()
+    return record
+
+
 def processing_upload(db_session, patient_id, task_uuid, uploaded_by_user_id=None):
     """A medication file still processing in Paperless under ``task_uuid``."""
     medication = Medication(patient_id=patient_id, medication_name="Test med")
