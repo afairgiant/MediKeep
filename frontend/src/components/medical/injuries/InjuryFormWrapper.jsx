@@ -154,8 +154,11 @@ const InjuryFormWrapper = ({
       zIndex={subDialog?.zIndex ?? 2000}
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
+      // The loading overlay covers the body, so it covers the whole form when scrolled
+      styles={{ body: { position: 'relative' } }}
     >
       <FormLoadingOverlay
+        variant="frosted"
         visible={isSubmitting || isLoading}
         message={
           statusMessage?.title ||
@@ -604,7 +607,7 @@ const InjuryFormWrapper = ({
             <Button variant="subtle" onClick={onClose} disabled={isSubmitting}>
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
-            <SubmitButton isLoading={isSubmitting}>
+            <SubmitButton loading={isLoading || isSubmitting}>
               {editingInjury
                 ? t('common:buttons.saveChanges', 'Save Changes')
                 : t('common:buttons.create', 'Create')}

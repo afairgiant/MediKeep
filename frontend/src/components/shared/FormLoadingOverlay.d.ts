@@ -9,6 +9,7 @@ export interface FormLoadingOverlayProps {
   blur?: number;
   opacity?: number;
   zIndex?: number;
+  variant?: 'default' | 'frosted';
 }
 
 declare const FormLoadingOverlay: FC<FormLoadingOverlayProps>;
