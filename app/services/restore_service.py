@@ -19,6 +19,7 @@ from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import (
     Any,
+    Awaitable,
     Callable,
     Dict,
     FrozenSet,
@@ -95,13 +96,21 @@ def _restore_lock() -> Iterator[None]:
 
 
 async def _run_to_completion(func: Callable[..., _T], *args: Any) -> _T:
-    """Run func in a worker thread.
+    """Run func in a worker thread, finishing it even if the caller is cancelled.
 
-    If the caller is cancelled, waits for the worker to finish before re-raising
-    the cancellation, so locks held by the caller outlive the work. A worker error
-    raised meanwhile is attached to the cancellation as restore_step_error.
+    Cancellation is handled as in _finish_before_cancelling.
     """
-    task = asyncio.ensure_future(asyncio.to_thread(func, *args))
+    return await _finish_before_cancelling(asyncio.to_thread(func, *args))
+
+
+async def _finish_before_cancelling(work: Awaitable[_T]) -> _T:
+    """Await work to its end even if the caller is cancelled.
+
+    If the caller is cancelled, waits for the work to finish before re-raising the
+    cancellation, so locks held by the caller outlive it. An error the work raised
+    meanwhile is attached to the cancellation as restore_step_error.
+    """
+    task = asyncio.ensure_future(work)
     try:
         return await asyncio.shield(task)
     except asyncio.CancelledError as cancel:
@@ -876,8 +885,9 @@ class RestoreService:
             )
         except subprocess.CalledProcessError as e:
             error_details = f"psql could not connect (exit code {e.returncode})"
-            if e.stderr:
-                error_details += f". Error output: {redact_client_output(e.stderr)}"
+            output = redact_client_output(e.stderr)
+            if output:
+                error_details += f". Error output: {output}"
             logger.error(error_details)
             raise Exception(
                 f"Database restore aborted before any changes: {error_details}"
@@ -929,8 +939,9 @@ class RestoreService:
 
         except subprocess.CalledProcessError as e:
             error_details = f"psql failed with exit code {e.returncode}"
-            if e.stderr:
-                error_details += f". Error output: {redact_client_output(e.stderr)}"
+            output = redact_client_output(e.stderr)
+            if output:
+                error_details += f". Error output: {output}"
             if e.stdout:
                 error_details += f". Standard output: {e.stdout}"
             logger.error(error_details)
@@ -1005,20 +1016,20 @@ class RestoreService:
                     staging = self._new_staging_dir()
 
                 # Staged before the database restore, so an unreadable archive changes nothing.
-                try:
-                    if staging is not None:
+                if staging is not None:
+                    try:
                         files_restored, files_size = await _run_to_completion(
                             self._stage_uploads, zipf, members, staging
                         )
-                    db_result = await self._restore_database_member(zipf, db_member)
-                except BaseException:
-                    if staging is not None:
+                    except BaseException:
                         shutil.rmtree(staging, ignore_errors=True)
-                    raise
+                        raise
+                # Once the database is replaced, its uploads must follow even if cancelled.
+                db_result = await _finish_before_cancelling(
+                    self._restore_database_then_uploads(zipf, db_member, staging)
+                )
 
             if staging is not None:
-                logger.info("Restoring files from full backup...")
-                await _run_to_completion(self._swap_in_staged_uploads, staging)
                 logger.info(f"Restored {files_restored} files ({files_size} bytes)")
 
             return {
@@ -1035,6 +1046,24 @@ class RestoreService:
             error_msg = f"Full backup restore failed: {str(e)}"
             logger.error(error_msg)
             raise Exception(error_msg)
+
+    async def _restore_database_then_uploads(
+        self, zipf: zipfile.ZipFile, db_member: str, staging: Optional[Path]
+    ) -> Dict[str, Any]:
+        """Restore the database member, then swap in staged uploads.
+
+        Removes staging if the database restore fails; returns the database result.
+        """
+        try:
+            db_result = await self._restore_database_member(zipf, db_member)
+        except BaseException:
+            if staging is not None:
+                shutil.rmtree(staging, ignore_errors=True)
+            raise
+        if staging is not None:
+            logger.info("Restoring files from full backup...")
+            await _run_to_completion(self._swap_in_staged_uploads, staging)
+        return db_result
 
     async def _restore_database_member(
         self, zipf: zipfile.ZipFile, member: str

@@ -53,7 +53,9 @@ class TestNativePsqlRestore:
 
     @pytest.mark.asyncio
     async def test_restore_failure_surfaces_stderr(self, run_restore):
-        error = subprocess.CalledProcessError(1, ["psql"], stderr="syntax error")
+        error = subprocess.CalledProcessError(
+            1, ["psql"], stderr="psql:dump.sql:1: ERROR:  syntax error"
+        )
 
         with pytest.raises(Exception) as exc:
             await run_restore(side_effect=error)
@@ -85,7 +87,7 @@ class TestPsqlConnectionPreflight:
         self, service, backup_file
     ):
         error = subprocess.CalledProcessError(
-            2, ["psql"], stderr="password authentication failed"
+            2, ["psql"], stderr="psql: error: password authentication failed"
         )
 
         with patch("subprocess.run", side_effect=error):

@@ -24,6 +24,10 @@ PG_BIN_ROOT = Path("/usr/lib/postgresql")
 _DATA_BEARING_LINE = re.compile(
     r"\b(?:DETAIL|CONTEXT|STATEMENT|LINE \d+):|^\s*Command was:"
 )
+# Only lines a client or the server starts itself; continuation lines can be dump text.
+_DIAGNOSTIC_LINE = re.compile(r"^(?:pg_restore|psql)\b|^(?:ERROR|FATAL|WARNING):")
+# Error messages quote the rejected value, so every quoted span is masked.
+_QUOTED_SPAN = re.compile(r'"[^"\n]*"|\'[^\'\n]*\'')
 
 
 class PostgresClientError(Exception):
@@ -132,11 +136,17 @@ def pg_restore_binary() -> str:
 
 
 def redact_client_output(output: Optional[str]) -> str:
-    """psql or pg_restore output without the lines that can quote row data."""
-    lines = (output or "").splitlines()
-    return "\n".join(
-        line for line in lines if not _DATA_BEARING_LINE.search(line)
-    ).strip()
+    """psql or pg_restore diagnostics with row data removed.
+
+    Keeps only client and server message lines, drops detail and context lines, and
+    masks quoted spans, so names and values in quotes read as "...".
+    """
+    kept = (
+        _QUOTED_SPAN.sub('"..."', line)
+        for line in (output or "").splitlines()
+        if _DIAGNOSTIC_LINE.match(line) and not _DATA_BEARING_LINE.search(line)
+    )
+    return "\n".join(kept).strip()
 
 
 def archive_version_error(stderr: str) -> Optional[PostgresClientError]:

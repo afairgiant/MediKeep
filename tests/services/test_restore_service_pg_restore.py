@@ -100,7 +100,7 @@ class TestPgRestoreCommand:
     @pytest.mark.asyncio
     async def test_failure_surfaces_stderr(self, run_restore):
         error = subprocess.CalledProcessError(
-            1, ["pg_restore"], stderr="relation exists"
+            1, ["pg_restore"], stderr="pg_restore: error: relation exists"
         )
 
         with pytest.raises(Exception, match="relation exists"):
@@ -185,7 +185,9 @@ class TestDatabaseRestoreDispatch:
         self, service, dump_file
     ):
         error = subprocess.CalledProcessError(
-            1, ["pg_restore"], stderr="input file does not appear to be a valid archive"
+            1,
+            ["pg_restore"],
+            stderr="pg_restore: error: input file does not appear to be a valid archive",
         )
 
         with patch("subprocess.run", side_effect=error):
@@ -232,7 +234,9 @@ class TestDumpPreview:
 
     @pytest.mark.asyncio
     async def test_unreadable_dump_reports_an_error(self, service, dump_file):
-        error = subprocess.CalledProcessError(1, ["pg_restore"], stderr="bad archive")
+        error = subprocess.CalledProcessError(
+            1, ["pg_restore"], stderr="pg_restore: error: bad archive"
+        )
 
         with patch("subprocess.run", side_effect=error):
             stats = await service._analyze_dump_backup(dump_file)
@@ -296,7 +300,9 @@ class TestFullArchiveWithDump:
         assert Path(cmd[-1]).name == "database.dump"
 
     def test_unreadable_dump_member_fails_the_check(self, full_backup):
-        error = subprocess.CalledProcessError(1, ["pg_restore"], stderr="bad archive")
+        error = subprocess.CalledProcessError(
+            1, ["pg_restore"], stderr="pg_restore: error: bad archive"
+        )
 
         with patch("subprocess.run", side_effect=error):
             with pytest.raises(Exception, match="bad archive"):
@@ -352,7 +358,9 @@ class TestDatabaseBackupReadable:
         ]
 
     def test_unreadable_dump_fails_the_check(self, dump_file):
-        error = subprocess.CalledProcessError(1, ["pg_restore"], stderr="bad archive")
+        error = subprocess.CalledProcessError(
+            1, ["pg_restore"], stderr="pg_restore: error: bad archive"
+        )
 
         with patch("subprocess.run", side_effect=error):
             with pytest.raises(Exception, match="bad archive"):

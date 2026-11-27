@@ -169,6 +169,7 @@
     "country": "Страна",
     "countDatabaseObjects": "{{count}} объектов базы данных",
     "countDatabaseObjects_one": "{{count}} объект базы данных",
+    "countDatabaseObjects_few": "{{count}} объекта базы данных",
     "countDatabaseObjects_other": "{{count}} объектов базы данных",
     "countTest": "{{count}} тестов",
     "countTest_one": "{{count}} тест",

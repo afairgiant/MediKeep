@@ -183,6 +183,28 @@ class TestRedactClientOutput:
         assert "Jane" not in redacted
         assert "jane@example.com" not in redacted
 
+    def test_masks_quoted_values_in_the_error_line(self):
+        stderr = (
+            "pg_restore: error: could not execute query: ERROR:  invalid input "
+            'syntax for type date: "1970-02-31"'
+        )
+
+        redacted = redact_client_output(stderr)
+
+        assert "invalid input syntax for type date" in redacted
+        assert "1970-02-31" not in redacted
+
+    def test_drops_continuation_lines(self):
+        stderr = (
+            "psql:dump.sql:12: ERROR:  syntax error at end of input\n"
+            "    Jane Doe, 1970-01-01, 555-0100\n"
+        )
+
+        redacted = redact_client_output(stderr)
+
+        assert "syntax error at end of input" in redacted
+        assert "Jane" not in redacted
+
     @pytest.mark.parametrize("output", [None, ""])
     def test_empty_output_is_empty(self, output):
         assert redact_client_output(output) == ""

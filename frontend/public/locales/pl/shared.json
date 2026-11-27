@@ -169,6 +169,7 @@
     "country": "Kraj",
     "countDatabaseObjects": "{{count}} obiektów bazy danych",
     "countDatabaseObjects_one": "{{count}} obiekt bazy danych",
+    "countDatabaseObjects_few": "{{count}} obiekty bazy danych",
     "countDatabaseObjects_other": "{{count}} obiektów bazy danych",
     "countTest": "{{count}} badań",
     "countTest_one": "{{count}} badanie",
