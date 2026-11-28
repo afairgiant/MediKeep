@@ -147,11 +147,11 @@
       "fullBackup": "การสำรองข้อมูลระบบเต็มรูปแบบ",
       "fullBackupDesc": "การสำรองข้อมูลที่สมบูรณ์ (ฐานข้อมูล + ไฟล์)",
       "invalidFileType": "ประเภทไฟล์ไม่ถูกต้อง",
-      "invalidFileTypeDesc": "กรุณาเลือกไฟล์สำรองข้อมูล .sql หรือ .zip",
+      "invalidFileTypeDesc": "กรุณาเลือกไฟล์สำรองข้อมูล .dump, .sql หรือ .zip",
       "moreOptions": "ตัวเลือกเพิ่มเติม",
       "title": "การดำเนินการสำรองข้อมูล",
       "uploadBackup": "อัปโหลดการสำรองข้อมูล",
-      "uploadBackupDesc": "อัปโหลดไฟล์สำรองข้อมูลจากภายนอก (.sql หรือ .zip)"
+      "uploadBackupDesc": "อัปโหลดไฟล์สำรองข้อมูลจากภายนอก (.dump, .sql หรือ .zip)"
     },
     "preview": {
       "affectedData": "ข้อมูลที่ได้รับผลกระทบ",

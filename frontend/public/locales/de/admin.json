@@ -147,11 +147,11 @@
       "fullBackup": "Vollständige Systemsicherung",
       "fullBackupDesc": "Komplette Sicherung (Datenbank + Dateien)",
       "invalidFileType": "Ungültiger Dateityp",
-      "invalidFileTypeDesc": "Bitte wählen Sie eine .sql- oder .zip-Sicherungsdatei aus.",
+      "invalidFileTypeDesc": "Bitte wählen Sie eine .dump-, .sql- oder .zip-Sicherungsdatei aus.",
       "moreOptions": "Weitere Optionen",
       "title": "Sicherungsoperationen",
       "uploadBackup": "Sicherung hochladen",
-      "uploadBackupDesc": "Eine externe Sicherungsdatei hochladen (.sql oder .zip)"
+      "uploadBackupDesc": "Eine externe Sicherungsdatei hochladen (.dump, .sql oder .zip)"
     },
     "preview": {
       "affectedData": "Betroffene Daten",

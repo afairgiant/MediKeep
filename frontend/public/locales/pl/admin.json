@@ -147,11 +147,11 @@
       "fullBackup": "Pełna kopia zapasowa systemu",
       "fullBackupDesc": "Kompletna kopia zapasowa (baza danych + pliki)",
       "invalidFileType": "Nieprawidłowy typ pliku",
-      "invalidFileTypeDesc": "Proszę wybrać plik kopii zapasowej .sql lub .zip.",
+      "invalidFileTypeDesc": "Proszę wybrać plik kopii zapasowej .dump, .sql lub .zip.",
       "moreOptions": "Więcej opcji",
       "title": "Operacje kopii zapasowych",
       "uploadBackup": "Prześlij kopię zapasową",
-      "uploadBackupDesc": "Prześlij zewnętrzny plik kopii zapasowej (.sql lub .zip)"
+      "uploadBackupDesc": "Prześlij zewnętrzny plik kopii zapasowej (.dump, .sql lub .zip)"
     },
     "preview": {
       "affectedData": "Dane, których dotyczy przywrócenie",

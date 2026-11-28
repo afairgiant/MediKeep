@@ -147,11 +147,11 @@
       "fullBackup": "Copia de seguridad completa del sistema",
       "fullBackupDesc": "Copia de seguridad completa (base de datos + archivos)",
       "invalidFileType": "Tipo de archivo no válido",
-      "invalidFileTypeDesc": "Por favor seleccione un archivo de respaldo .sql o .zip.",
+      "invalidFileTypeDesc": "Por favor seleccione un archivo de respaldo .dump, .sql o .zip.",
       "moreOptions": "Más opciones",
       "title": "Operaciones de copia de seguridad",
       "uploadBackup": "Subir copia de seguridad",
-      "uploadBackupDesc": "Subir un archivo de copia de seguridad externo (.sql o .zip)"
+      "uploadBackupDesc": "Subir un archivo de copia de seguridad externo (.dump, .sql o .zip)"
     },
     "preview": {
       "affectedData": "Datos afectados",

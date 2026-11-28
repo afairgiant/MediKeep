@@ -61,6 +61,8 @@ import {
 } from '@tabler/icons-react';
 import './BackupManagement.css';
 
+const BACKUP_UPLOAD_EXTENSIONS = ['.dump', '.sql', '.zip'];
+
 const getTypeColor = type =>
   ({ database: 'blue', files: 'orange', full: 'cyan' })[type] || 'gray';
 const getStatusColor = status =>
@@ -226,12 +228,12 @@ const BackupManagement = () => {
     if (!file) return;
 
     const filename = file.name.toLowerCase();
-    if (!filename.endsWith('.sql') && !filename.endsWith('.zip')) {
+    if (!BACKUP_UPLOAD_EXTENSIONS.some(ext => filename.endsWith(ext))) {
       showWarning(
         t('backup.operations.invalidFileType', 'Invalid File Type'),
         t(
           'backup.operations.invalidFileTypeDesc',
-          'Please select a .sql or .zip backup file.'
+          'Please select a .dump, .sql or .zip backup file.'
         )
       );
       return;
@@ -567,13 +569,13 @@ const BackupManagement = () => {
                 <Text size="sm" c="dimmed" ta="center">
                   {t(
                     'backup.operations.uploadBackupDesc',
-                    'Upload an external backup file (.sql or .zip)'
+                    'Upload an external backup file (.dump, .sql or .zip)'
                   )}
                 </Text>
                 <FileButton
                   resetRef={uploadResetRef}
                   onChange={handleUploadBackup}
-                  accept=".sql,.zip"
+                  accept={BACKUP_UPLOAD_EXTENSIONS.join(',')}
                 >
                   {props => (
                     <Button
@@ -1288,11 +1290,11 @@ const RestorePreviewAffectedData = ({
               {t('backup.preview.backupContent', 'Backup Content')}
             </Text>
             <Text size="sm">
-              {affectedData.backup_content.total_statements != null
+              {affectedData.backup_content.total_objects != null
                 ? t(
-                    'shared:labels.countSqlStatements',
-                    '{{count}} SQL statements',
-                    { count: affectedData.backup_content.total_statements }
+                    'shared:labels.countDatabaseObjects',
+                    '{{count}} database objects',
+                    { count: affectedData.backup_content.total_objects }
                   )
                 : t(
                     'backup.preview.analysisNotAvailable',

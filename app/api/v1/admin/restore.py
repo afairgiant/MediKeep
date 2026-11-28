@@ -22,6 +22,7 @@ from app.core.logging.helpers import (
     log_validation_error,
 )
 from app.models.models import User
+from app.services.backup_service import DATABASE_DUMP_SUFFIX
 from app.services.restore_service import (
     RESTORE_BUSY_MESSAGE,
     RestoreInProgressError,
@@ -75,7 +76,7 @@ async def upload_backup_file(
 ) -> UploadBackupResponse:
     """
     Upload an external backup file for restore.
-    Supports .sql (database), .zip (files or full backup) files.
+    Supports .dump and legacy .sql (database), .zip (files or full backup) files.
     """
     try:
         if not file.filename:
@@ -83,14 +84,16 @@ async def upload_backup_file(
 
         # Validate file type
         filename = file.filename.lower()
-        if not (filename.endswith(".sql") or filename.endswith(".zip")):
+        if not filename.endswith((DATABASE_DUMP_SUFFIX, ".sql", ".zip")):
             raise HTTPException(
-                status_code=400, detail="Only .sql and .zip backup files are supported"
+                status_code=400,
+                detail="Only .dump, .sql and .zip backup files are supported",
             )
 
         # Create temporary file to store upload
         temp_dir = Path(tempfile.mkdtemp(prefix="backup_upload_"))
-        temp_file = temp_dir / file.filename
+        # The client names the file, so keep only its base name inside the temp dir.
+        temp_file = temp_dir / Path(file.filename).name
 
         try:
             # Save uploaded file

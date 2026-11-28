@@ -97,3 +97,32 @@ test('a failed backup shows an error notification with the server message', asyn
     })
   );
 });
+
+const uploadInput = () => document.querySelector('input[type="file"]');
+
+test.each(['backup.dump', 'backup.sql', 'backup.zip'])(
+  'uploads a %s backup',
+  async name => {
+    mockExecuteAction.mockResolvedValueOnce(null);
+    render(<BackupManagement />);
+    await screen.findByText('Upload Backup');
+    const file = new File(['x'], name);
+
+    await userEvent.upload(uploadInput(), file);
+
+    expect(mockExecuteAction).toHaveBeenCalledWith('uploadBackup', file);
+  }
+);
+
+test('refuses a file that is not a backup without uploading it', async () => {
+  render(<BackupManagement />);
+  await screen.findByText('Upload Backup');
+  const user = userEvent.setup({ applyAccept: false });
+
+  await user.upload(uploadInput(), new File(['x'], 'notes.txt'));
+
+  expect(mockExecuteAction).not.toHaveBeenCalledWith(
+    'uploadBackup',
+    expect.anything()
+  );
+});

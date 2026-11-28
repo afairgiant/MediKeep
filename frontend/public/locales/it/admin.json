@@ -147,11 +147,11 @@
       "fullBackup": "Backup completo del sistema",
       "fullBackupDesc": "Backup completo (database + file)",
       "invalidFileType": "Tipo di file non valido",
-      "invalidFileTypeDesc": "Selezionare un file di backup .sql o .zip.",
+      "invalidFileTypeDesc": "Selezionare un file di backup .dump, .sql o .zip.",
       "moreOptions": "Altre opzioni",
       "title": "Operazioni di backup",
       "uploadBackup": "Carica backup",
-      "uploadBackupDesc": "Carica un file di backup esterno (.sql o .zip)"
+      "uploadBackupDesc": "Carica un file di backup esterno (.dump, .sql o .zip)"
     },
     "preview": {
       "affectedData": "Dati interessati",

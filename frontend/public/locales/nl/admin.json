@@ -147,11 +147,11 @@
       "fullBackup": "Volledige systeemback-up",
       "fullBackupDesc": "Volledige back-up (database + bestanden)",
       "invalidFileType": "Ongeldig bestandstype",
-      "invalidFileTypeDesc": "Selecteer een .sql of .zip back-upbestand.",
+      "invalidFileTypeDesc": "Selecteer een .dump, .sql of .zip back-upbestand.",
       "moreOptions": "Meer opties",
       "title": "Back-upbewerkingen",
       "uploadBackup": "Back-up uploaden",
-      "uploadBackupDesc": "Een extern back-upbestand uploaden (.sql of .zip)"
+      "uploadBackupDesc": "Een extern back-upbestand uploaden (.dump, .sql of .zip)"
     },
     "preview": {
       "affectedData": "Beïnvloede gegevens",

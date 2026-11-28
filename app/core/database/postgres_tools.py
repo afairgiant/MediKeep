@@ -1,9 +1,10 @@
-"""Resolve the PostgreSQL client binary that matches the connected server.
+"""Resolve the PostgreSQL client binaries used by backup and restore.
 
 pg_dump refuses to dump a server newer than itself, so the container bundles one
 client per supported major and callers pick the matching one at runtime.
 """
 
+import re
 from pathlib import Path
 from typing import List, Optional
 
@@ -18,6 +19,15 @@ logger = get_logger(__name__, "app")
 
 # Debian/PGDG layout: <root>/<major>/bin/<tool>
 PG_BIN_ROOT = Path("/usr/lib/postgresql")
+
+# Server and client lines that quote row values or statement text from the dump.
+_DATA_BEARING_LINE = re.compile(
+    r"\b(?:DETAIL|CONTEXT|STATEMENT|LINE \d+):|^\s*Command was:"
+)
+# Only lines a client or the server starts itself; continuation lines can be dump text.
+_DIAGNOSTIC_LINE = re.compile(r"^(?:pg_restore|psql)\b|^(?:ERROR|FATAL|WARNING):")
+# Error messages quote the rejected value, so every quoted span is masked.
+_QUOTED_SPAN = re.compile(r'"[^"\n]*"|\'[^\'\n]*\'')
 
 
 class PostgresClientError(Exception):
@@ -110,7 +120,43 @@ def pg_dump_binary(db: Session) -> str:
     return _client_path("pg_dump", chosen)
 
 
+def _newest_client(tool: str) -> str:
+    installed = installed_client_majors()
+    return _client_path(tool, installed[-1]) if installed else tool
+
+
 def psql_binary() -> str:
     """Newest bundled psql, which reads dumps from every supported server."""
+    return _newest_client("psql")
+
+
+def pg_restore_binary() -> str:
+    """Newest bundled pg_restore, which reads archives from every supported server."""
+    return _newest_client("pg_restore")
+
+
+def redact_client_output(output: Optional[str]) -> str:
+    """psql or pg_restore diagnostics with row data removed.
+
+    Keeps only client and server message lines, drops detail and context lines, and
+    masks quoted spans, so names and values in quotes read as "...".
+    """
+    kept = (
+        _QUOTED_SPAN.sub('"..."', line)
+        for line in (output or "").splitlines()
+        if _DIAGNOSTIC_LINE.match(line) and not _DATA_BEARING_LINE.search(line)
+    )
+    return "\n".join(kept).strip()
+
+
+def archive_version_error(stderr: str) -> Optional[PostgresClientError]:
+    """The named-version error when pg_restore rejected an archive as too new, else None."""
+    if "unsupported version" not in (stderr or ""):
+        return None
     installed = installed_client_majors()
-    return _client_path("psql", installed[-1]) if installed else "psql"
+    client = f"PostgreSQL {installed[-1]}" if installed else "the installed PostgreSQL"
+    return PostgresClientError(
+        f"This backup was written by a newer pg_dump than the bundled pg_restore "
+        f"({client}) can read. Upgrade MediKeep to a build that includes a newer "
+        f"PostgreSQL client."
+    )

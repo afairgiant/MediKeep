@@ -31,6 +31,8 @@ logger = get_logger(__name__, "app")
 
 # A restore's in-progress extraction, removed when it ends; a backup walking it can fail.
 RESTORE_STAGING_PREFIX = ".restore-staging-"
+DATABASE_DUMP_SUFFIX = ".dump"
+DATABASE_DUMP_MEMBER = f"database{DATABASE_DUMP_SUFFIX}"
 
 
 def backup_excluded_paths(upload_dir: Path) -> List[Path]:
@@ -115,7 +117,7 @@ class BackupService:
         try:
             # Generate backup filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_filename = f"database_backup_{timestamp}.sql"
+            backup_filename = f"database_backup_{timestamp}{DATABASE_DUMP_SUFFIX}"
             backup_path = self.backup_dir / backup_filename
 
             # Ensure backup directory exists
@@ -145,6 +147,7 @@ class BackupService:
                 size_bytes=file_size,
                 description=description
                 or f"Database backup created on {datetime.now()}",
+                compression_used=True,
                 checksum=checksum,
             )
 
@@ -202,6 +205,7 @@ class BackupService:
 
         cmd = [
             pg_dump_binary(self.db),
+            "--format=custom",
             "--file",
             str(backup_path),
             "--host",
@@ -627,6 +631,7 @@ class BackupService:
                     # Scan backup directory for all backup files
                     backup_patterns = [
                         "*.sql",
+                        "*.dump",
                         "*.zip",
                         "*backup*",
                         "database_*",
@@ -777,6 +782,7 @@ class BackupService:
                 # Scan backup directory for all backup files
                 backup_patterns = [
                     "*.sql",
+                    "*.dump",
                     "*.zip",
                     "*backup*",
                     "database_*",
@@ -842,7 +848,7 @@ class BackupService:
                 temp_path = Path(temp_dir)
 
                 # Create database backup
-                db_backup_path = temp_path / "database.sql"
+                db_backup_path = temp_path / DATABASE_DUMP_MEMBER
                 await self._create_database_dump(db_backup_path)
 
                 # Create manifest file
@@ -851,8 +857,11 @@ class BackupService:
                     "created_at": datetime.now().isoformat(),
                     "description": description
                     or f"Full system backup created on {datetime.now()}",
-                    "components": {"database": "database.sql", "files": "uploads/"},
-                    "version": "1.0",
+                    "components": {
+                        "database": DATABASE_DUMP_MEMBER,
+                        "files": "uploads/",
+                    },
+                    "version": "1.1",
                 }
 
                 manifest_path = temp_path / "backup_manifest.json"
@@ -862,7 +871,12 @@ class BackupService:
                 # Create ZIP archive with all components
                 with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                     # Add database dump
-                    zipf.write(db_backup_path, "database.sql")
+                    # Custom-format dumps are already compressed.
+                    zipf.write(
+                        db_backup_path,
+                        DATABASE_DUMP_MEMBER,
+                        compress_type=zipfile.ZIP_STORED,
+                    )
 
                     # Add manifest
                     zipf.write(manifest_path, "backup_manifest.json")

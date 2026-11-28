@@ -147,11 +147,11 @@
       "fullBackup": "Fullständig systemsäkerhetskopia",
       "fullBackupDesc": "Komplett säkerhetskopia (databas + filer)",
       "invalidFileType": "Ogiltig filtyp",
-      "invalidFileTypeDesc": "Välj en .sql- eller .zip-säkerhetskopieringsfil.",
+      "invalidFileTypeDesc": "Välj en .dump-, .sql- eller .zip-säkerhetskopieringsfil.",
       "moreOptions": "Fler alternativ",
       "title": "Säkerhetskopieringsåtgärder",
       "uploadBackup": "Ladda upp säkerhetskopia",
-      "uploadBackupDesc": "Ladda upp en extern säkerhetskopieringsfil (.sql eller .zip)"
+      "uploadBackupDesc": "Ladda upp en extern säkerhetskopieringsfil (.dump, .sql eller .zip)"
     },
     "preview": {
       "affectedData": "Påverkad data",

@@ -147,11 +147,11 @@
       "fullBackup": "Полная резервная копия системы",
       "fullBackupDesc": "Полная резервная копия (база данных + файлы)",
       "invalidFileType": "Неверный тип файла",
-      "invalidFileTypeDesc": "Пожалуйста, выберите файл резервной копии .sql или .zip.",
+      "invalidFileTypeDesc": "Пожалуйста, выберите файл резервной копии .dump, .sql или .zip.",
       "moreOptions": "Ещё параметры",
       "title": "Операции резервного копирования",
       "uploadBackup": "Загрузить резервную копию",
-      "uploadBackupDesc": "Загрузить внешний файл резервной копии (.sql или .zip)"
+      "uploadBackupDesc": "Загрузить внешний файл резервной копии (.dump, .sql или .zip)"
     },
     "preview": {
       "affectedData": "Затронутые данные",

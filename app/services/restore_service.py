@@ -17,7 +17,18 @@ import zlib
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path, PurePosixPath
-from typing import Any, Callable, Dict, FrozenSet, Iterator, List, Tuple, TypeVar
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    FrozenSet,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+)
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -25,12 +36,19 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database.advisory_lock import UPLOADS_RESTORE_LOCK_KEY, try_advisory_lock
 from app.core.database.database import engine
-from app.core.database.postgres_tools import psql_binary
+from app.core.database.postgres_tools import (
+    archive_version_error,
+    pg_restore_binary,
+    psql_binary,
+    redact_client_output,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
 from app.services.backup_service import (
+    DATABASE_DUMP_MEMBER,
+    DATABASE_DUMP_SUFFIX,
     RESTORE_STAGING_PREFIX,
     BackupService,
     backup_excluded_paths,
@@ -40,7 +58,10 @@ from app.services.backup_service import (
 logger = get_logger(__name__, "app")
 
 _UPLOADS_PREFIX = "uploads/"
-_DB_MEMBER = "database.sql"
+_LEGACY_DB_MEMBER = "database.sql"
+# Preferred first, so an archive holding both restores the custom-format dump.
+_DB_MEMBERS = (DATABASE_DUMP_MEMBER, _LEGACY_DB_MEMBER)
+_DUMP_MAGIC = b"PGDMP"
 RESTORE_WORK_DIR_PREFIX = ".restore-"
 _STAGING_PREFIX = RESTORE_STAGING_PREFIX
 _PREVIOUS_PREFIX = f"{RESTORE_WORK_DIR_PREFIX}previous-"
@@ -75,13 +96,21 @@ def _restore_lock() -> Iterator[None]:
 
 
 async def _run_to_completion(func: Callable[..., _T], *args: Any) -> _T:
-    """Run func in a worker thread.
+    """Run func in a worker thread, finishing it even if the caller is cancelled.
 
-    If the caller is cancelled, waits for the worker to finish before re-raising
-    the cancellation, so locks held by the caller outlive the work. A worker error
-    raised meanwhile is attached to the cancellation as restore_step_error.
+    Cancellation is handled as in _finish_before_cancelling.
     """
-    task = asyncio.ensure_future(asyncio.to_thread(func, *args))
+    return await _finish_before_cancelling(asyncio.to_thread(func, *args))
+
+
+async def _finish_before_cancelling(work: Awaitable[_T]) -> _T:
+    """Await work to its end even if the caller is cancelled.
+
+    If the caller is cancelled, waits for the work to finish before re-raising the
+    cancellation, so locks held by the caller outlive it. An error the work raised
+    meanwhile is attached to the cancellation as restore_step_error.
+    """
+    task = asyncio.ensure_future(work)
     try:
         return await asyncio.shield(task)
     except asyncio.CancelledError as cancel:
@@ -130,6 +159,76 @@ def _move_contents(source: Path, destination: Path, keep: FrozenSet[Path]) -> No
             child.rename(target)
 
 
+def _database_member(names: Any) -> Optional[str]:
+    """The archive's database dump member, or None when it has neither format."""
+    return next((name for name in _DB_MEMBERS if name in names), None)
+
+
+def _is_custom_dump(path: Path) -> bool:
+    """True for a .dump name or a custom-format header, so a renamed archive never reaches psql."""
+    if path.suffix.lower() == DATABASE_DUMP_SUFFIX:
+        return True
+    try:
+        with open(path, "rb") as f:
+            return f.read(len(_DUMP_MAGIC)) == _DUMP_MAGIC
+    except OSError:
+        return False
+
+
+def _run_pg_restore(
+    args: List[str], timeout: int, env: Optional[Dict[str, str]] = None
+) -> str:
+    """Run pg_restore with args and return its stdout.
+
+    Raises:
+        PostgresClientError: the archive was written by a newer pg_dump.
+        Exception: pg_restore failed or timed out.
+    """
+    try:
+        result = subprocess.run(
+            [pg_restore_binary(), *args],
+            env=env,
+            check=True,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.CalledProcessError as e:
+        version_error = archive_version_error(e.stderr)
+        if version_error is not None:
+            raise version_error
+        error_details = f"pg_restore failed with exit code {e.returncode}"
+        output = redact_client_output(e.stderr)
+        if output:
+            error_details += f". Error output: {output}"
+        logger.error(error_details)
+        raise Exception(error_details)
+    except subprocess.TimeoutExpired:
+        logger.error("pg_restore timed out")
+        raise Exception("pg_restore timed out")
+    output = redact_client_output(result.stderr)
+    if output:
+        logger.info(f"pg_restore messages: {output}")
+    return result.stdout
+
+
+def _verify_dump_archive(path: Path) -> None:
+    """Read and decompress every block of a custom-format archive without touching a database.
+
+    Raises as _run_pg_restore does when the archive is truncated, corrupt or too new.
+    """
+    _run_pg_restore(["--file", os.devnull, str(path)], timeout=3600)
+
+
+def _extract_member(zipf: zipfile.ZipFile, member: str, dest_dir: Path) -> Path:
+    """Copy one archive member into dest_dir and return the copy's path."""
+    copy = dest_dir / member
+    with zipf.open(member) as source, open(copy, "wb") as target:
+        shutil.copyfileobj(source, target)
+    return copy
+
+
 def _manifest_lists_files(manifest: Any) -> bool:
     """True if a full backup's manifest declares a files component, even an empty one."""
     components = manifest.get("components") if isinstance(manifest, dict) else None
@@ -137,8 +236,17 @@ def _manifest_lists_files(manifest: Any) -> bool:
 
 
 def _check_backup_readable(path: Path, backup_type: str) -> None:
-    """Raise ValueError unless a ZIP backup reads intact and has what its type needs."""
+    """Raise unless a backup reads intact and has what its type needs.
+
+    Custom-format dumps, bare or inside a full backup, are read in full by pg_restore.
+
+    Raises:
+        ValueError: the ZIP cannot be opened, is damaged, or lacks a database dump.
+        Exception: pg_restore could not read a dump, as _verify_dump_archive.
+    """
     if backup_type == "database":
+        if _is_custom_dump(path):
+            _verify_dump_archive(path)
         return
     try:
         with zipfile.ZipFile(path, "r") as zipf:
@@ -148,8 +256,14 @@ def _check_backup_readable(path: Path, backup_type: str) -> None:
         raise ValueError(f"Backup archive cannot be opened: {e}") from e
     if damaged is not None:
         raise ValueError(f"Backup archive member {damaged} is damaged")
-    if backup_type == "full" and _DB_MEMBER not in names:
-        raise ValueError(f"Backup archive has no {_DB_MEMBER}")
+    if backup_type != "full":
+        return
+    member = _database_member(names)
+    if member is None:
+        raise ValueError("Backup archive has no database dump")
+    if member == DATABASE_DUMP_MEMBER:
+        with tempfile.TemporaryDirectory() as work_dir, zipfile.ZipFile(path) as zipf:
+            _verify_dump_archive(_extract_member(zipf, member, Path(work_dir)))
 
 
 class RestoreService:
@@ -222,8 +336,10 @@ class RestoreService:
             # Get current database statistics
             current_stats = await self._get_database_stats()
 
-            # Analyze backup file (basic analysis)
-            backup_stats = await self._analyze_sql_backup(backup_path)
+            if _is_custom_dump(backup_path):
+                backup_stats = await self._analyze_dump_backup(backup_path)
+            else:
+                backup_stats = await self._analyze_sql_backup(backup_path)
 
             warnings = []
 
@@ -339,7 +455,7 @@ class RestoreService:
                         manifest_data = json.loads(f.read().decode("utf-8"))
 
                 # Check components
-                if _DB_MEMBER in file_list:
+                if _database_member(file_list) is not None:
                     components.append("Database")
 
                 # Count files in uploads directory
@@ -579,12 +695,16 @@ class RestoreService:
             raise Exception(f"Failed to create safety backup: {str(e)}")
 
     async def _restore_database(self, backup_path: Path) -> Dict[str, Any]:
-        """Restore database using PostgreSQL's native psql tool with single transaction."""
+        """Replace the database with a dump in one transaction.
+
+        A custom-format archive restores through pg_restore; anything else is legacy SQL run
+        by psql.
+        """
         try:
             self._debug_print(
                 f"RESTORE DEBUG: Starting native database restore for backup: {backup_path}"
             )
-            logger.info("Starting native database restore using psql")
+            logger.info("Starting native database restore")
 
             # Validate backup path
             allowed_dirs = [self.backup_dir, self.upload_dir]
@@ -596,8 +716,11 @@ class RestoreService:
                 settings.DATABASE_URL
             )
 
-            # Dropping tables is irreversible, so prove psql can log in first
+            # Dropping tables is irreversible, so prove the login and the archive first
             await self._check_psql_connection(conn_params)
+            custom_dump = _is_custom_dump(backup_path)
+            if custom_dump:
+                await _run_to_completion(_verify_dump_archive, backup_path)
 
             # Step 1: Drop existing tables to allow restore to recreate them
             self._debug_print("RESTORE DEBUG: Step 1 - Dropping tables with CASCADE...")
@@ -605,9 +728,10 @@ class RestoreService:
             self._data_changed = True
             await self._drop_all_tables()
 
-            # Use native psql from within container
-            logger.info("Using native psql for database restore")
-            await self._restore_with_native_psql(backup_path, conn_params)
+            if custom_dump:
+                await self._restore_with_pg_restore(backup_path, conn_params)
+            else:
+                await self._restore_with_native_psql(backup_path, conn_params)
 
             self._debug_print("RESTORE DEBUG: Database restore completed successfully!")
             logger.info("Database restore completed successfully")
@@ -619,11 +743,6 @@ class RestoreService:
                 "warnings": None,
             }
 
-        except subprocess.CalledProcessError as e:
-            error_msg = f"Database restore failed: {e.stderr if e.stderr else str(e)}"
-            self._debug_print(f"RESTORE DEBUG: {error_msg}")
-            logger.error(error_msg)
-            raise Exception(error_msg)
         except Exception as e:
             error_msg = f"Database restore failed: {str(e)}"
             self._debug_print(f"RESTORE DEBUG: {error_msg}")
@@ -720,8 +839,11 @@ class RestoreService:
 
     @staticmethod
     def _psql_connection_args(conn_params: Dict[str, str]) -> list:
+        return [psql_binary(), *RestoreService._connection_flags(conn_params)]
+
+    @staticmethod
+    def _connection_flags(conn_params: Dict[str, str]) -> list:
         return [
-            psql_binary(),
             "--host",
             conn_params["hostname"],
             "--port",
@@ -763,8 +885,9 @@ class RestoreService:
             )
         except subprocess.CalledProcessError as e:
             error_details = f"psql could not connect (exit code {e.returncode})"
-            if e.stderr:
-                error_details += f". Error output: {e.stderr}"
+            output = redact_client_output(e.stderr)
+            if output:
+                error_details += f". Error output: {output}"
             logger.error(error_details)
             raise Exception(
                 f"Database restore aborted before any changes: {error_details}"
@@ -808,19 +931,39 @@ class RestoreService:
                 timeout=3600,  # 1 hour timeout for large restores
             )
 
-            if result.stderr:
-                logger.info(f"psql messages: {result.stderr}")
+            messages = redact_client_output(result.stderr)
+            if messages:
+                logger.info(f"psql messages: {messages}")
             if result.stdout:
                 logger.debug(f"psql output: {result.stdout}")
 
         except subprocess.CalledProcessError as e:
             error_details = f"psql failed with exit code {e.returncode}"
-            if e.stderr:
-                error_details += f". Error output: {e.stderr}"
+            output = redact_client_output(e.stderr)
+            if output:
+                error_details += f". Error output: {output}"
             if e.stdout:
                 error_details += f". Standard output: {e.stdout}"
             logger.error(error_details)
             raise Exception(f"Database restore failed: {error_details}")
+
+    async def _restore_with_pg_restore(
+        self, backup_path: Path, conn_params: Dict[str, str]
+    ) -> None:
+        """Load a custom-format archive into the emptied database in one transaction."""
+        args = [
+            *self._connection_flags(conn_params),
+            "--single-transaction",
+            "--exit-on-error",
+            "--no-owner",
+            "--no-privileges",
+            str(backup_path),
+        ]
+
+        logger.debug("Executing pg_restore command")
+        await _run_to_completion(
+            _run_pg_restore, args, 3600, self._psql_env(conn_params)
+        )
 
     async def _restore_files(self, backup_path: Path) -> Dict[str, Any]:
         """Replace the contents of the uploads directory with a files backup."""
@@ -860,7 +1003,8 @@ class RestoreService:
             with zipfile.ZipFile(backup_path, "r") as zipf:
                 members = self._upload_members(zipf, prefix_required=True)
                 names = set(zipf.namelist())
-                if _DB_MEMBER not in names:
+                db_member = _database_member(names)
+                if db_member is None:
                     raise Exception("Database backup not found in full backup archive")
 
                 manifest_data = None
@@ -872,20 +1016,20 @@ class RestoreService:
                     staging = self._new_staging_dir()
 
                 # Staged before the database restore, so an unreadable archive changes nothing.
-                try:
-                    if staging is not None:
+                if staging is not None:
+                    try:
                         files_restored, files_size = await _run_to_completion(
                             self._stage_uploads, zipf, members, staging
                         )
-                    db_result = await self._restore_database_member(zipf)
-                except BaseException:
-                    if staging is not None:
+                    except BaseException:
                         shutil.rmtree(staging, ignore_errors=True)
-                    raise
+                        raise
+                # Once the database is replaced, its uploads must follow even if cancelled.
+                db_result = await _finish_before_cancelling(
+                    self._restore_database_then_uploads(zipf, db_member, staging)
+                )
 
             if staging is not None:
-                logger.info("Restoring files from full backup...")
-                await _run_to_completion(self._swap_in_staged_uploads, staging)
                 logger.info(f"Restored {files_restored} files ({files_size} bytes)")
 
             return {
@@ -903,16 +1047,36 @@ class RestoreService:
             logger.error(error_msg)
             raise Exception(error_msg)
 
-    async def _restore_database_member(self, zipf: zipfile.ZipFile) -> Dict[str, Any]:
-        """Restore the database from the archive's dump, removing the temporary copy."""
+    async def _restore_database_then_uploads(
+        self, zipf: zipfile.ZipFile, db_member: str, staging: Optional[Path]
+    ) -> Dict[str, Any]:
+        """Restore the database member, then swap in staged uploads.
+
+        Removes staging if the database restore fails; returns the database result.
+        """
+        try:
+            db_result = await self._restore_database_member(zipf, db_member)
+        except BaseException:
+            if staging is not None:
+                shutil.rmtree(staging, ignore_errors=True)
+            raise
+        if staging is not None:
+            logger.info("Restoring files from full backup...")
+            await _run_to_completion(self._swap_in_staged_uploads, staging)
+        return db_result
+
+    async def _restore_database_member(
+        self, zipf: zipfile.ZipFile, member: str
+    ) -> Dict[str, Any]:
+        """Restore the database from the archive's dump member, removing the temporary copy."""
         self.backup_dir.mkdir(parents=True, exist_ok=True)
         # Under backup_dir, the only place _restore_database accepts; nested so orphan cleanup skips it.
         with tempfile.TemporaryDirectory(
             dir=self.backup_dir, prefix="restore-work-"
         ) as work_dir:
-            dump = Path(work_dir) / _DB_MEMBER
-            with zipf.open(_DB_MEMBER) as source, open(dump, "wb") as target:
-                shutil.copyfileobj(source, target)
+            dump = await _run_to_completion(
+                _extract_member, zipf, member, Path(work_dir)
+            )
             logger.info("Restoring database from full backup...")
             return await self._restore_database(dump)
 
@@ -1082,6 +1246,27 @@ class RestoreService:
             logger.error(f"Failed to analyze SQL backup: {str(e)}")
             return {"error": "Could not analyze the SQL backup"}
 
+    async def _analyze_dump_backup(self, backup_path: Path) -> Dict[str, Any]:
+        """Object counts from a custom-format archive's table of contents."""
+        try:
+            toc = await _run_to_completion(
+                _run_pg_restore, ["--list", str(backup_path)], 300
+            )
+            entries = [
+                line
+                for line in toc.splitlines()
+                if line.strip() and not line.startswith(";")
+            ]
+            return {
+                "file_size": backup_path.stat().st_size,
+                "total_objects": len(entries),
+                "table_count": sum(1 for line in entries if " TABLE public " in line),
+                "analysis_method": "pg_restore --list",
+            }
+        except Exception as e:
+            logger.error(f"Failed to analyze dump backup: {str(e)}")
+            return {"error": "Could not analyze the backup archive"}
+
     def generate_confirmation_token(self, backup_id: int) -> str:
         """Generate confirmation token for restore operation."""
         return f"restore_{backup_id}_{datetime.now().strftime('%Y%m%d')}"
@@ -1124,8 +1309,8 @@ class RestoreService:
                 file_path=str(permanent_path),
                 size_bytes=file_size,
                 description=f"Uploaded by {uploaded_by} - {uploaded_file.name}",
-                compression_used=backup_type
-                in ["files", "full"],  # ZIP files are compressed
+                compression_used=backup_type in ["files", "full"]
+                or _is_custom_dump(uploaded_file),
                 checksum=await self._calculate_checksum(permanent_path),
             )
 
@@ -1156,7 +1341,7 @@ class RestoreService:
         try:
             filename = file_path.name.lower()
 
-            if filename.endswith(".sql"):
+            if filename.endswith((".sql", DATABASE_DUMP_SUFFIX)):
                 return "database"
             if filename.endswith(".zip"):
                 # Check ZIP contents to determine if it's files or full backup
@@ -1164,7 +1349,7 @@ class RestoreService:
                     file_list = zipf.namelist()
 
                     # Check for full backup indicators
-                    has_database = _DB_MEMBER in file_list
+                    has_database = _database_member(file_list) is not None
                     has_manifest = any(
                         name == "backup_manifest.json" for name in file_list
                     )

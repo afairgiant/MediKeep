@@ -147,11 +147,11 @@
       "fullBackup": "Backup Completo do Sistema",
       "fullBackupDesc": "Backup completo (banco de dados + arquivos)",
       "invalidFileType": "Tipo de Arquivo Inválido",
-      "invalidFileTypeDesc": "Por favor, selecione um arquivo de backup .sql ou .zip.",
+      "invalidFileTypeDesc": "Por favor, selecione um arquivo de backup .dump, .sql ou .zip.",
       "moreOptions": "Mais Opções",
       "title": "Operações de Backup",
       "uploadBackup": "Enviar Backup",
-      "uploadBackupDesc": "Enviar um arquivo de backup externo (.sql ou .zip)"
+      "uploadBackupDesc": "Enviar um arquivo de backup externo (.dump, .sql ou .zip)"
     },
     "preview": {
       "affectedData": "Dados Afetados",

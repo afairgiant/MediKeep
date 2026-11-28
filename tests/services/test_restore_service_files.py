@@ -399,6 +399,33 @@ class TestFullRestore:
         assert not list(service.backup_dir.iterdir())
 
 
+class TestFullRestoreCancellation:
+    @pytest.mark.asyncio
+    async def test_cancel_during_database_restore_still_swaps_uploads(
+        self, service, uploads, tmp_path
+    ):
+        started, release = asyncio.Event(), asyncio.Event()
+
+        async def slow_database_restore(_dump):
+            started.set()
+            await release.wait()
+            return {"restored_size": 0}
+
+        service._restore_database = slow_database_restore
+        backup = _backup(tmp_path, "full", {"restored.pdf": "new"})
+
+        task = asyncio.create_task(service._restore_full_backup(backup))
+        await started.wait()
+        task.cancel()
+        await asyncio.sleep(0)
+        release.set()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+        assert _contents(uploads)["restored.pdf"] == b"new"
+        assert not _working_dirs(uploads)
+
+
 class TestFullRestorePreview:
     @pytest.fixture(autouse=True)
     def _no_database(self, service):
@@ -747,7 +774,7 @@ class TestExecuteRestore:
     ):
         safety = _zip(tmp_path / "safety.zip", {"uploads/a.pdf": "x"})
 
-        with pytest.raises(Exception, match="no database.sql"):
+        with pytest.raises(Exception, match="no database dump"):
             await run_execute(safety)
 
         _assert_untouched(uploads)
